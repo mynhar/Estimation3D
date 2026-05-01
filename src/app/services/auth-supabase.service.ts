@@ -20,6 +20,13 @@ export class AuthSupabaseService {
     this.supabase = createClient(
       environment.supabase.url,
       environment.supabase.anonKey,
+      {
+        auth: {
+          // Evita NavigatorLockAcquireTimeoutError en entornos con múltiples
+          // pestañas o iframes que compiten por el mismo lock del navegador.
+          lock: <R>(_name: string, _timeout: number, fn: () => Promise<R>): Promise<R> => fn(),
+        },
+      }
     );
 
     this.supabase.auth.onAuthStateChange((event, session) => {
@@ -142,7 +149,7 @@ export class AuthSupabaseService {
   // ----------------------------------------------------------
   async signOut(): Promise<void> {
     await this.supabase.auth.signOut();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   // ----------------------------------------------------------
