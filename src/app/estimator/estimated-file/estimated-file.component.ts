@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 
 interface ExpedienteDetalle {
@@ -16,6 +16,13 @@ interface ExpedienteDetalle {
   distrito: string;
 }
 
+interface EstimacionDetalle {
+  fecha_visita_real: string;
+  descripcion_problemas: string;
+  costo_estimado: number | null;
+  notas_internas: string;
+}
+
 interface ArchivoRow {
   id: string;
   nombre_archivo: string;
@@ -27,9 +34,9 @@ interface ArchivoRow {
 const BUCKET = 'archivos';
 
 @Component({
-  selector: 'app-file-under-estimation',
+  selector: 'app-estimated-file',
   standalone: true,
-  imports: [FormsModule],
+  imports: [DecimalPipe],
   template: `
     <div class="container py-4" style="max-width: 720px">
 
@@ -44,11 +51,19 @@ const BUCKET = 'archivos';
         </div>
       } @else {
 
-        <div class="mb-4 d-flex align-items-center gap-3">
-          <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
-            ← Volver
+        <div class="mb-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+              ← Volver
+            </button>
+            <h4 class="fw-semibold mb-0">Estimación completa. Expediente estimado.</h4>
+          </div>
+          <button class="btn btn-outline-danger btn-sm" title="Imprimir PDF" (click)="imprimir()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+              <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+            </svg>
           </button>
-          <h4 class="fw-semibold mb-0">Estimar Expediente</h4>
         </div>
 
         <!-- Detalles del expediente -->
@@ -121,84 +136,51 @@ const BUCKET = 'archivos';
           </div>
         </div>
 
-        <!-- Formulario de estimación -->
+        <!-- Documentación de la visita (read-only) -->
         <div class="card border-0 shadow-sm mt-4">
           <div class="card-body p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-              <h5 class="fw-semibold mb-0">Documentación de la visita</h5>
-              <button
-                class="btn btn-secondary btn-sm px-3"
-                (click)="guardarVisita()"
-                [disabled]="guardandoVisita()"
-              >
-                {{ guardandoVisita() ? 'Guardando…' : 'Guardar visita' }}
-              </button>
-            </div>
+            <h5 class="fw-semibold mb-4">Documentación de la visita</h5>
 
-            <div class="row g-3">
+            @if (!estimacion()) {
+              <p class="text-muted">Sin documentación registrada aún.</p>
+            } @else {
+              <div class="row g-4">
 
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Fecha de visita</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  [(ngModel)]="fechaVisita"
-                />
-              </div>
-
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Hora de visita</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  [(ngModel)]="horaVisita"
-                />
-              </div>
-
-              <div class="col-12">
-                <label class="form-label small fw-medium">Problemas observados</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="Describa los problemas observados durante la visita…"
-                  [(ngModel)]="descripcionProblema"
-                ></textarea>
-              </div>
-
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Costo Estimado ($)</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input
-                    type="number"
-                    class="form-control"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    [(ngModel)]="costoEstimado"
-                  />
+                <div class="col-sm-6">
+                  <p class="text-muted small mb-1">Fecha de visita</p>
+                  <p class="fw-semibold mb-0">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
                 </div>
+
+                <div class="col-sm-6">
+                  <p class="text-muted small mb-1">Hora de visita</p>
+                  <p class="fw-semibold mb-0">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
+                </div>
+
+                <div class="col-12"><hr class="my-0" /></div>
+
+                <div class="col-12">
+                  <p class="text-muted small mb-1">Problemas observados</p>
+                  <p class="mb-0" style="white-space: pre-wrap">{{ estimacion()!.descripcion_problemas || '—' }}</p>
+                </div>
+
+                <div class="col-sm-6">
+                  <p class="text-muted small mb-1">Costo Estimado ($)</p>
+                  <p class="fw-semibold mb-0">
+                    @if (estimacion()!.costo_estimado !== null) {
+                      $ {{ estimacion()!.costo_estimado | number:'1.2-2' }}
+                    } @else {
+                      —
+                    }
+                  </p>
+                </div>
+
+                <div class="col-12">
+                  <p class="text-muted small mb-1">Notas internas</p>
+                  <p class="mb-0" style="white-space: pre-wrap">{{ estimacion()!.notas_internas || '—' }}</p>
+                </div>
+
               </div>
-
-              <div class="col-12">
-                <label class="form-label small fw-medium">Notas internas</label>
-                <textarea
-                  class="form-control"
-                  rows="3"
-                  placeholder="Notas solo visibles para el estimador y administrador…"
-                  [(ngModel)]="notasInternas"
-                ></textarea>
-              </div>
-
-            </div>
-
-            @if (errorVisitaMsg()) {
-              <div class="alert alert-danger mt-3 mb-0">{{ errorVisitaMsg() }}</div>
             }
-            @if (exitoVisitaMsg()) {
-              <div class="alert alert-success mt-3 mb-0">{{ exitoVisitaMsg() }}</div>
-            }
-
           </div>
         </div>
 
@@ -341,24 +323,9 @@ const BUCKET = 'archivos';
           </div>
         </div>
 
-        <!-- Alertas y acciones -->
-        @if (errorGuardado()) {
-          <div class="alert alert-danger mt-4">{{ errorGuardado() }}</div>
-        }
-        @if (exitoMsg()) {
-          <div class="alert alert-success mt-4">{{ exitoMsg() }}</div>
-        }
-
-        <div class="mt-4 d-flex gap-3">
-          <button
-            class="btn btn-primary px-4"
-            (click)="guardarEstimacion()"
-            [disabled]="guardando()"
-          >
-            {{ guardando() ? 'Enviando…' : 'Enviar estimación' }}
-          </button>
-          <button class="btn btn-outline-secondary px-4" (click)="volver()">
-            Volver
+        <div class="mt-4">
+          <button class="btn btn-outline-secondary" (click)="volver()">
+            ← Volver
           </button>
         </div>
 
@@ -367,28 +334,15 @@ const BUCKET = 'archivos';
     </div>
   `,
 })
-export class FileUnderEstimationComponent implements OnInit {
+export class EstimatedFileComponent implements OnInit {
   private auth   = inject(AuthSupabaseService);
   private route  = inject(ActivatedRoute);
   private router = inject(Router);
 
-  detalle  = signal<ExpedienteDetalle | null>(null);
-  cargando = signal(true);
-  errorMsg = signal<string>('');
-
-  fechaVisita         = '';
-  horaVisita          = '';
-  descripcionProblema = '';
-  notasInternas       = '';
-  costoEstimado: number | null = null;
-
-  guardando     = signal(false);
-  exitoMsg      = signal('');
-  errorGuardado = signal('');
-
-  guardandoVisita  = signal(false);
-  exitoVisitaMsg   = signal('');
-  errorVisitaMsg   = signal('');
+  detalle    = signal<ExpedienteDetalle | null>(null);
+  estimacion = signal<EstimacionDetalle | null>(null);
+  cargando   = signal(true);
+  errorMsg   = signal('');
 
   fotos      = signal<ArchivoRow[]>([]);
   videos     = signal<ArchivoRow[]>([]);
@@ -402,7 +356,8 @@ export class FileUnderEstimationComponent implements OnInit {
   errorVideos     = signal('');
   errorDocumentos = signal('');
 
-  private expedienteId = '';
+  private expedienteId  = '';
+  private estimadorNombre = '';
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -412,14 +367,14 @@ export class FileUnderEstimationComponent implements OnInit {
     try {
       const { data: exp, error: expError } = await this.auth.client
         .from('expediente')
-        .select('numero, fecha_visita, cliente_id, servicio_id')
+        .select('numero, fecha_visita, cliente_id, servicio_id, estimador_id')
         .eq('id', id)
         .maybeSingle();
 
       if (expError) throw new Error(`expediente: ${expError.message}`);
-      if (!exp) throw new Error('Expediente no encontrado. Verifica RLS en la tabla expediente.');
+      if (!exp) throw new Error('Expediente no encontrado.');
 
-      const [servicioRes, perfilRes, locRes, estimacionRes] = await Promise.all([
+      const [servicioRes, perfilRes, locRes, estimacionRes, estimadorRes] = await Promise.all([
         this.auth.client.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
         this.auth.client.from('perfil').select('nombre, apellido, telefono').eq('id', exp.cliente_id).single(),
         this.auth.client.from('localizacion').select('direccion, referencia, provincia, canton, distrito').eq('expediente_id', id).single(),
@@ -428,6 +383,9 @@ export class FileUnderEstimationComponent implements OnInit {
           .select('fecha_visita_real, descripcion_problemas, costo_estimado, notas_internas')
           .eq('expediente_id', id)
           .maybeSingle(),
+        exp.estimador_id
+          ? this.auth.client.from('perfil').select('nombre, apellido').eq('id', exp.estimador_id).single()
+          : Promise.resolve({ data: null }),
       ]);
 
       this.detalle.set({
@@ -445,114 +403,27 @@ export class FileUnderEstimationComponent implements OnInit {
         distrito:   locRes.data?.distrito   ?? '—',
       });
 
+      const estimador = estimadorRes.data as { nombre: string; apellido: string } | null;
+      this.estimadorNombre = estimador ? `${estimador.nombre} ${estimador.apellido}` : '—';
+
       const est = estimacionRes.data;
       if (est) {
-        if (est.fecha_visita_real) {
-          this.fechaVisita = est.fecha_visita_real.slice(0, 10);
-          this.horaVisita  = est.fecha_visita_real.slice(11, 16);
-        }
-        this.descripcionProblema = est.descripcion_problemas ?? '';
-        this.costoEstimado       = est.costo_estimado        ?? null;
-        this.notasInternas       = est.notas_internas        ?? '';
+        this.estimacion.set({
+          fecha_visita_real:     est.fecha_visita_real     ?? '',
+          descripcion_problemas: est.descripcion_problemas ?? '',
+          costo_estimado:        est.costo_estimado        ?? null,
+          notas_internas:        est.notas_internas        ?? '',
+        });
       }
 
     } catch (e: any) {
-      console.error('[FileUnderEstimation]', e.message);
+      console.error('[EstimatedFile]', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
     }
 
     this.cargarArchivos();
-  }
-
-  async guardarEstimacion() {
-    this.errorGuardado.set('');
-    this.exitoMsg.set('');
-
-    if (!this.fechaVisita || !this.horaVisita) {
-      this.errorGuardado.set('La fecha y hora de visita son obligatorias.');
-      return;
-    }
-    if (!this.descripcionProblema.trim()) {
-      this.errorGuardado.set('Los problemas observados son obligatorios.');
-      return;
-    }
-    if (this.costoEstimado === null || this.costoEstimado < 0) {
-      this.errorGuardado.set('El costo estimado es obligatorio y debe ser mayor o igual a 0.');
-      return;
-    }
-
-    this.guardando.set(true);
-
-    try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-
-      const fechaVisitaReal = `${this.fechaVisita}T${this.horaVisita}:00`;
-
-      const { error } = await this.auth.client
-        .from('estimacion')
-        .upsert({
-          expediente_id:         this.expedienteId,
-          estimador_id:          user.id,
-          fecha_visita_real:     fechaVisitaReal,
-          descripcion_problemas: this.descripcionProblema.trim(),
-          costo_estimado:        this.costoEstimado,
-          notas_internas:        this.notasInternas.trim() || null,
-        }, { onConflict: 'expediente_id' });
-
-      if (error) throw new Error(error.message);
-
-      const { error: expError } = await this.auth.client
-        .from('expediente')
-        .update({ estado: 'estimado' })
-        .eq('id', this.expedienteId);
-
-      if (expError) throw new Error(expError.message);
-
-      this.exitoMsg.set('Estimación guardada correctamente.');
-    } catch (e: any) {
-      console.error('[FileUnderEstimation] guardar:', e.message);
-      this.errorGuardado.set(e.message);
-    } finally {
-      this.guardando.set(false);
-    }
-  }
-
-  async guardarVisita() {
-    this.errorVisitaMsg.set('');
-    this.exitoVisitaMsg.set('');
-
-    if (!this.fechaVisita || !this.horaVisita) {
-      this.errorVisitaMsg.set('La fecha y hora de visita son obligatorias.');
-      return;
-    }
-
-    this.guardandoVisita.set(true);
-    try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-
-      const { error } = await this.auth.client
-        .from('estimacion')
-        .upsert({
-          expediente_id:         this.expedienteId,
-          estimador_id:          user.id,
-          fecha_visita_real:     `${this.fechaVisita}T${this.horaVisita}:00`,
-          descripcion_problemas: this.descripcionProblema.trim(),
-          costo_estimado:        this.costoEstimado ?? 0,
-          notas_internas:        this.notasInternas.trim() || null,
-        }, { onConflict: 'expediente_id' });
-
-      if (error) throw new Error(error.message);
-      this.exitoVisitaMsg.set('Visita guardada correctamente.');
-    } catch (e: any) {
-      console.error('[FileUnderEstimation] guardarVisita:', e.message);
-      this.errorVisitaMsg.set(e.message);
-    } finally {
-      this.guardandoVisita.set(false);
-    }
   }
 
   // ----------------------------------------------------------------
@@ -681,9 +552,9 @@ export class FileUnderEstimationComponent implements OnInit {
   }
 
   async eliminarArchivo(archivo: ArchivoRow, tipo: 'foto' | 'video' | 'documento') {
-    const setError = tipo === 'foto'      ? this.errorFotos
-                   : tipo === 'video'     ? this.errorVideos
-                   :                        this.errorDocumentos;
+    const setError = tipo === 'foto'  ? this.errorFotos
+                   : tipo === 'video' ? this.errorVideos
+                   :                    this.errorDocumentos;
     setError.set('');
     try {
       await this.auth.client.storage.from(BUCKET).remove([archivo.url_storage]);
@@ -704,8 +575,8 @@ export class FileUnderEstimationComponent implements OnInit {
   }
 
   formatTamano(bytes: number): string {
-    if (bytes < 1_024)       return `${bytes} B`;
-    if (bytes < 1_048_576)   return `${(bytes / 1_024).toFixed(1)} KB`;
+    if (bytes < 1_024)     return `${bytes} B`;
+    if (bytes < 1_048_576) return `${(bytes / 1_024).toFixed(1)} KB`;
     return `${(bytes / 1_048_576).toFixed(1)} MB`;
   }
 
@@ -727,7 +598,79 @@ export class FileUnderEstimationComponent implements OnInit {
     });
   }
 
+  imprimir() {
+    const d   = this.detalle();
+    const est = this.estimacion();
+    if (!d) return;
+
+    const costoStr = est?.costo_estimado != null
+      ? `$ ${est.costo_estimado.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : '—';
+
+    const docEstimacion = est ? `
+      <div class="row g-4">
+        <div class="col-6"><p class="text-muted small mb-1">Fecha de visita</p><p class="fw-semibold mb-0">${this.formatFecha(est.fecha_visita_real)}</p></div>
+        <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(est.fecha_visita_real)}</p></div>
+        <div class="col-12"><hr class="my-0"/></div>
+        <div class="col-12"><p class="text-muted small mb-1">Problemas observados</p><p class="mb-0" style="white-space:pre-wrap">${est.descripcion_problemas || '—'}</p></div>
+        <div class="col-6"><p class="text-muted small mb-1">Costo Estimado ($)</p><p class="fw-semibold mb-0">${costoStr}</p></div>
+        <div class="col-12"><p class="text-muted small mb-1">Notas internas</p><p class="mb-0" style="white-space:pre-wrap">${est.notas_internas || '—'}</p></div>
+      </div>` : '<p class="text-muted">Sin documentación registrada aún.</p>';
+
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Expediente ${d.numero}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+  <style>
+    body { padding: 2rem; }
+    @page { margin: 1.5cm; }
+    .card { border: 1px solid #dee2e6 !important; }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width:720px">
+    <h4 class="fw-semibold mb-4">Estimación completa — Expediente ${d.numero}</h4>
+    <p class="text-muted mb-4">Estimador: <strong>${this.estimadorNombre}</strong></p>
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <div class="row g-4">
+          <div class="col-6"><p class="text-muted small mb-1">Número</p><p class="fw-semibold mb-0">${d.numero}</p></div>
+          <div class="col-6"><p class="text-muted small mb-1">Servicio</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
+          <div class="col-12"><hr class="my-0"/></div>
+          <div class="col-6"><p class="text-muted small mb-1">Cliente</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
+          <div class="col-6"><p class="text-muted small mb-1">Teléfono</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
+          <div class="col-12"><hr class="my-0"/></div>
+          <div class="col-6"><p class="text-muted small mb-1">Dirección</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
+          <div class="col-6"><p class="text-muted small mb-1">Referencia</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
+          <div class="col-4"><p class="text-muted small mb-1">Provincia</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
+          <div class="col-4"><p class="text-muted small mb-1">Cantón</p><p class="fw-semibold mb-0">${d.canton}</p></div>
+          <div class="col-4"><p class="text-muted small mb-1">Distrito</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
+          <div class="col-12"><hr class="my-0"/></div>
+          <div class="col-6"><p class="text-muted small mb-1">Fecha de visita</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
+          <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <h5 class="fw-semibold mb-4">Documentación de la visita</h5>
+        ${docEstimacion}
+      </div>
+    </div>
+  </div>
+  <script>window.addEventListener('load', () => { window.print(); });</script>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank', 'width=900,height=700');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+  }
+
   volver() {
-    this.router.navigate(['/estimator/files-under-estimation']);
+    this.router.navigate(['/estimator/estimated-files']);
   }
 }

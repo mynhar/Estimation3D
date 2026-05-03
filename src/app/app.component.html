@@ -1,93 +1,88 @@
 @if (user()) {
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" routerLink="/client/dashboard">Estimation3D</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto align-items-center">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/client/dashboard">Estimation3D</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto align-items-center">
 
-          <!-- Menú Estimador (solo estimador / administrador) -->
-          @if (esEstimador()) {
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button"
-                 data-bs-toggle="dropdown" aria-expanded="false">
-                Estimador
+        <!-- Menú Expediente -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Expediente
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/client/file/create">
+                Nuevo expediente
               </a>
-              <ul class="dropdown-menu">
-                <li>
-                  <a class="dropdown-item" routerLink="/estimator/files-to-be-estimated">
-                    Expedientes a estimar
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" routerLink="/estimator/files-under-estimation">
-                    Expedientes en estimación
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" routerLink="/estimator/estimated-files">
-                    Expedientes estimados
-                  </a>
-                </li>
-              </ul>
             </li>
-          }
+            <li>
+              <a class="dropdown-item" routerLink="/client/file/my-files">
+                Mis Expedientes
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/client/file/received-offers">
+                Ofertas recibidas
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/client/perfil">
+                Perfil
+              </a>
+            </li>
+          </ul>
+        </li>
 
-          <!-- Menú Expediente -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-              Expediente
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" routerLink="/client/file/create">
-                  Nuevo expediente
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/client/file/my-files">
-                  Mis Expedientes
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" routerLink="/client/file/received-offers">
-                  Ofertas recibidas
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <a class="dropdown-item" routerLink="/client/perfil">
-                  Perfil
-                </a>
-              </li>
-            </ul>
-          </li>
+        <!-- Menú Estimador (solo estimador / administrador) -->
+        @if (esEstimador()) {
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Estimador
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/estimator/files-to-be-estimated">
+                Expedientes a estimar
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/estimator/files-under-estimation">
+                Expedientes en estimación
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/estimator/estimated-files">
+                Estimaciones completadas.
+              </a>
+            </li>
+          </ul>
+        </li>
+        }
 
-        </ul>
+      </ul>
 
-        <!-- Usuario y cerrar sesión -->
-        <ul class="navbar-nav ms-auto align-items-center gap-2">
-          <li class="nav-item d-flex align-items-center gap-2">
-            <img
-              [src]="user()?.user_metadata?.['avatar_url']"
-              [alt]="user()?.user_metadata?.['full_name']"
-              class="rounded-circle"
-              width="32"
-              height="32"
-              referrerpolicy="no-referrer"
-            />
-            <span class="navbar-text">{{ user()?.user_metadata?.['full_name'] || user()?.email }}</span>
-          </li>
-          <li class="nav-item">
-            <button class="btn btn-outline-danger btn-sm" (click)="logout()">Cerrar sesión</button>
-          </li>
-        </ul>
-      </div>
+      <!-- Usuario y cerrar sesión -->
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item d-flex align-items-center gap-2">
+          <img [src]="user()?.user_metadata?.['avatar_url'] || 'assets/avatar-fallback.jpg'"
+            [alt]="user()?.user_metadata?.['full_name']" class="rounded-circle" width="32" height="32"
+            referrerpolicy="no-referrer" (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
+          <span class="navbar-text">{{ user()?.user_metadata?.['full_name'] || user()?.email }}</span>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-outline-danger btn-sm" (click)="logout()">Cerrar sesión</button>
+        </li>
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 }
 
 <router-outlet />

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 
 interface ExpedienteRow {
@@ -9,12 +9,15 @@ interface ExpedienteRow {
   servicio_nombre: string;
   cliente_nombre: string;
   direccion: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
 }
 
 @Component({
   selector: 'app-files-to-be-estimated',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="container py-4">
 
@@ -51,8 +54,14 @@ interface ExpedienteRow {
                     <td class="ps-4 fw-semibold">{{ exp.numero }}</td>
                     <td>{{ exp.servicio_nombre }}</td>
                     <td>{{ exp.cliente_nombre }}</td>
-                    <td class="text-muted small">{{ exp.direccion }}</td>
-                    <td>{{ formatFecha(exp.fecha_visita) }}</td>
+                    <td class="text-muted small">
+                      <div>{{ exp.direccion }}</div>
+                      <div>{{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}</div>
+                    </td>
+                    <td>
+                      <div>{{ formatFecha(exp.fecha_visita) }}</div>
+                      <div class="text-muted small">{{ formatHora(exp.fecha_visita) }}</div>
+                    </td>
                     <td class="pe-4 text-end">
                       <button class="btn btn-primary btn-sm" (click)="estimar(exp.id)">
                         Estimar
@@ -105,7 +114,7 @@ export class FilesToBeEstimatedComponent implements OnInit {
           .in('id', servicioIds),
         this.auth.client
           .from('localizacion')
-          .select('expediente_id, direccion')
+          .select('expediente_id, direccion, provincia, canton, distrito')
           .in('expediente_id', expedienteIds),
       ]);
 
@@ -113,8 +122,6 @@ export class FilesToBeEstimatedComponent implements OnInit {
       const servicios = serviciosRes.data ?? [];
       const locs      = locRes.data       ?? [];
 
-      console.log('[FilesToBeEstimated] cliente_ids:', clienteIds);
-      console.log('[FilesToBeEstimated] perfiles result:', perfiles, perfilesRes.error?.message);
 
       // Unir todo en memoria (String() evita mismatch número vs UUID)
       const rows: ExpedienteRow[] = exps.map(e => {
@@ -128,7 +135,10 @@ export class FilesToBeEstimatedComponent implements OnInit {
           fecha_visita:    e.fecha_visita,
           servicio_nombre: servicio?.nombre_es ?? '—',
           cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-          direccion:       loc?.direccion ?? '—',
+          direccion:       loc?.direccion  ?? '—',
+          provincia:       loc?.provincia  ?? '—',
+          canton:          loc?.canton     ?? '—',
+          distrito:        loc?.distrito   ?? '—',
         };
       });
 
@@ -147,13 +157,25 @@ export class FilesToBeEstimatedComponent implements OnInit {
     });
   }
 
+  formatHora(valor: string): string {
+    if (!valor) return '—';
+    return new Date(valor).toLocaleTimeString('es-CR', {
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
   async estimar(id: string) {
     const { data: { user } } = await this.auth.client.auth.getUser();
 
-    await this.auth.client
+    const { error } = await this.auth.client
       .from('expediente')
       .update({ estado: 'en_estimacion', estimador_id: user?.id })
       .eq('id', id);
+
+    if (error) {
+      console.error('[FilesToBeEstimated] estimar:', error.message);
+      return;
+    }
 
     this.router.navigate(['/estimator/file-to-be-estimated', id]);
   }

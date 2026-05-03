@@ -8,6 +8,7 @@ import { FilesToBeEstimatedComponent } from './estimator/files-to-be-estimated/f
 import { FilesUnderEstimationComponent } from './estimator/files-under-estimation/files-under-estimation.component';
 import { FileUnderEstimationComponent } from './estimator/file-under-estimation/file-under-estimation.component';
 import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-files.component';
+import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
 import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
 import { authGuard, estimatorGuard, guestGuard } from './auth.guard';
 
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'estimator/files-under-estimation', component: FilesUnderEstimationComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/file-under-estimation/:id', component: FileUnderEstimationComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/estimated-files', component: EstimatedFilesComponent, canActivate: [estimatorGuard] },
+  { path: 'estimator/estimated-file/:id', component: EstimatedFileComponent, canActivate: [estimatorGuard] },
   
   { path: '**', redirectTo: '' },
 ];

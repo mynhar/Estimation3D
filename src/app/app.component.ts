@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 
 const ROLES_ESTIMADOR = ['estimador', 'administrador'];
@@ -61,7 +60,6 @@ export class AppComponent {
   async logout() {
     try {
       await this.authService.signOut();
-      this.router.navigate(['/']);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }

@@ -6,9 +6,13 @@ interface ExpedienteRow {
   id: string;
   numero: string;
   fecha_visita: string;
+  estado: string;
   servicio_nombre: string;
   cliente_nombre: string;
   direccion: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
 }
 
 @Component({
@@ -51,12 +55,25 @@ interface ExpedienteRow {
                     <td class="ps-4 fw-semibold">{{ exp.numero }}</td>
                     <td>{{ exp.servicio_nombre }}</td>
                     <td>{{ exp.cliente_nombre }}</td>
-                    <td class="text-muted small">{{ exp.direccion }}</td>
-                    <td>{{ formatFecha(exp.fecha_visita) }}</td>
+                    <td class="text-muted small">
+                      <div>{{ exp.direccion }}</div>
+                      <div>{{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}</div>
+                    </td>
+                    <td>
+                      <div>{{ formatFecha(exp.fecha_visita) }}</div>
+                      <div class="text-muted small">{{ formatHora(exp.fecha_visita) }}</div>
+                    </td>
                     <td class="pe-4 text-end">
-                      <button class="btn btn-primary btn-sm" (click)="estimar(exp.id)">
-                        Estimar
-                      </button>
+                      <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-primary btn-sm" (click)="estimar(exp.id)">
+                          Estimar
+                        </button>
+                        @if (exp.estado === 'en_estimacion') {
+                          <button class="btn btn-outline-danger btn-sm" (click)="liberar(exp.id)">
+                            Eliminar
+                          </button>
+                        }
+                      </div>
                     </td>
                   </tr>
                 }
@@ -83,7 +100,7 @@ export class FilesUnderEstimationComponent implements OnInit {
 
       const { data: exps, error: expError } = await this.auth.client
         .from('expediente')
-        .select('id, numero, fecha_visita, cliente_id, servicio_id')
+        .select('id, numero, fecha_visita, estado, cliente_id, servicio_id')
         .eq('estado', 'en_estimacion')
         .eq('estimador_id', user.id)
         .order('id', { ascending: false });
@@ -106,7 +123,7 @@ export class FilesUnderEstimationComponent implements OnInit {
           .in('id', servicioIds),
         this.auth.client
           .from('localizacion')
-          .select('expediente_id, direccion')
+          .select('expediente_id, direccion, provincia, canton, distrito')
           .in('expediente_id', expedienteIds),
       ]);
 
@@ -123,9 +140,13 @@ export class FilesUnderEstimationComponent implements OnInit {
           id:              e.id,
           numero:          e.numero,
           fecha_visita:    e.fecha_visita,
+          estado:          e.estado,
           servicio_nombre: servicio?.nombre_es ?? '—',
           cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
           direccion:       loc?.direccion ?? '—',
+          provincia:       loc?.provincia  ?? '—',
+          canton:          loc?.canton     ?? '—',
+          distrito:        loc?.distrito   ?? '—',
         };
       });
 
@@ -144,7 +165,28 @@ export class FilesUnderEstimationComponent implements OnInit {
     });
   }
 
+  formatHora(valor: string): string {
+    if (!valor) return '—';
+    return new Date(valor).toLocaleTimeString('es-CR', {
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
   estimar(id: string) {
     this.router.navigate(['/estimator/file-under-estimation', id]);
+  }
+
+  async liberar(id: string) {
+    const { error } = await this.auth.client
+      .from('expediente')
+      .update({ estado: 'nuevo', estimador_id: null })
+      .eq('id', id);
+
+    if (error) {
+      console.error('[FilesUnderEstimation] liberar:', error.message);
+      return;
+    }
+
+    this.expedientes.update(rows => rows.filter(e => e.id !== id));
   }
 }

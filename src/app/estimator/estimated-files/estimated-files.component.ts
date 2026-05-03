@@ -10,6 +10,9 @@ interface ExpedienteRow {
   servicio_nombre: string;
   cliente_nombre: string;
   direccion: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
 }
 
 const ESTADOS_ESTIMADO = ['estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado'];
@@ -38,7 +41,7 @@ const ESTADO_LABEL: Record<string, string> = {
     <div class="container py-4">
 
       <div class="mb-4">
-        <h4 class="fw-semibold mb-1">Expedientes estimados</h4>
+        <h4 class="fw-semibold mb-1">Estimaciones completadas. Expedientes estimados.</h4>
         <p class="text-muted mb-0">Seleccione un expediente. Revise su información.</p>
       </div>
 
@@ -71,8 +74,14 @@ const ESTADO_LABEL: Record<string, string> = {
                     <td class="ps-4 fw-semibold">{{ exp.numero }}</td>
                     <td>{{ exp.servicio_nombre }}</td>
                     <td>{{ exp.cliente_nombre }}</td>
-                    <td class="text-muted small">{{ exp.direccion }}</td>
-                    <td>{{ formatFecha(exp.fecha_visita) }}</td>
+                    <td class="text-muted small">
+                      <div>{{ exp.direccion }}</div>
+                      <div>{{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}</div>
+                    </td>
+                    <td>
+                      <div>{{ formatFecha(exp.fecha_visita) }}</div>
+                      <div class="text-muted small">{{ formatHora(exp.fecha_visita) }}</div>
+                    </td>
                     <td>
                       <span class="badge rounded-pill px-3 py-2 {{ badgeClass(exp.estado) }}">
                         {{ estadoLabel(exp.estado) }}
@@ -131,7 +140,7 @@ export class EstimatedFilesComponent implements OnInit {
           .in('id', servicioIds),
         this.auth.client
           .from('localizacion')
-          .select('expediente_id, direccion')
+          .select('expediente_id, direccion, provincia, canton, distrito')
           .in('expediente_id', expedienteIds),
       ]);
 
@@ -151,7 +160,10 @@ export class EstimatedFilesComponent implements OnInit {
           estado:          e.estado,
           servicio_nombre: servicio?.nombre_es ?? '—',
           cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-          direccion:       loc?.direccion ?? '—',
+          direccion:  loc?.direccion  ?? '—',
+          provincia:  loc?.provincia  ?? '—',
+          canton:     loc?.canton     ?? '—',
+          distrito:   loc?.distrito   ?? '—',
         };
       });
 
@@ -178,7 +190,14 @@ export class EstimatedFilesComponent implements OnInit {
     });
   }
 
+  formatHora(valor: string): string {
+    if (!valor) return '—';
+    return new Date(valor).toLocaleTimeString('es-CR', {
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
   ver(id: string) {
-    this.router.navigate(['/estimator/file-to-be-estimated', id]);
+    this.router.navigate(['/estimator/estimated-file', id]);
   }
 }
