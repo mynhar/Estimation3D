@@ -3,27 +3,8 @@ import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
-
-interface Servicio {
-  id: number;
-  codigo: string;
-  nombre_es: string;
-  descripcion_es: string;
-}
-
-const PROVINCIAS = [
-  'San José', 'Alajuela', 'Cartago', 'Heredia',
-  'Guanacaste', 'Puntarenas', 'Limón',
-];
-
-const SERVICIOS_FALLBACK: Servicio[] = [
-  { id: 1, codigo: 'descontaminacion_moho',      nombre_es: 'Descontaminación de moho',        descripcion_es: 'Confinamiento, presión negativa, HEPA, biocidas, test de aire final, certificación.' },
-  { id: 2, codigo: 'desamiantado',               nombre_es: 'Desamiantado',                    descripcion_es: 'Plan CNESST, Ley R-20, manifiesto transporte, conservación 10 años.' },
-  { id: 3, codigo: 'danos_agua',                 nombre_es: 'Daños por agua',                  descripcion_es: 'Categorías 1-2-3, extracción, secado LGR, certificación IICRC.' },
-  { id: 4, codigo: 'demolicion_interior',        nombre_es: 'Demolición interior controlada',  descripcion_es: 'Verificación amianto/plomo, muros portantes, gestión escombros.' },
-  { id: 5, codigo: 'aislamiento',                nombre_es: 'Aislamiento (retiro e instalación)', descripcion_es: 'Valor R, test amianto vermiculita, certificación ÉcoRénov.' },
-  { id: 6, codigo: 'fundacion_dren_frances',     nombre_es: 'Fundación + dren francés',        descripcion_es: 'Inyección epoxi/poliuretano, Info-Excavation, garantía 10 años.' },
-];
+import { ExpedienteService } from '../../../services/expediente.service';
+import { Servicio, PROVINCIAS, SERVICIOS_FALLBACK } from '../../../models';
 
 @Component({
   selector: 'app-file-create',
@@ -237,9 +218,10 @@ const SERVICIOS_FALLBACK: Servicio[] = [
   `,
 })
 export class FileCreateComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private router = inject(Router);
-  private fb     = inject(FormBuilder);
+  private auth              = inject(AuthSupabaseService);
+  private expedienteService = inject(ExpedienteService);
+  private router            = inject(Router);
+  private fb                = inject(FormBuilder);
 
   user = toSignal(this.auth.user$);
 
@@ -344,53 +326,31 @@ export class FileCreateComponent implements OnInit {
       const ev = this.expedienteForm.value;
       const lv = this.localizacionForm.value;
 
-      // Paso 1 · Actualizar perfil
+      // Paso 1 · Actualizar perfil (directo — operación de auth propia del usuario)
       const { error: perfilError } = await this.auth.client
         .from('perfil')
-        .update({
-          nombre:   pv.nombre,
-          apellido: pv.apellido,
-          telefono: pv.telefono,
-        })
+        .update({ nombre: pv.nombre, apellido: pv.apellido, telefono: pv.telefono })
         .eq('id', userId);
-
       if (perfilError) throw new Error(`Error al actualizar perfil: ${perfilError.message}`);
 
-      // Paso 2 · Insertar expediente y obtener su ID
-      const fechaVisita = `${ev.fecha_visita}T${ev.hora_visita}`;
-      const numero = this.generarNumeroExpediente();
-      const { data: expData, error: expError } = await this.auth.client
-        .from('expediente')
-        .insert({
-          numero,
-          cliente_id:   userId,
-          servicio_id:  this.servicioId(),
-          estado:       'nuevo',
-          fecha_visita: fechaVisita,
-          descripcion:  ev.descripcion || null,
-        })
-        .select('id')
-        .single();
-
-      if (expError) throw new Error(`Error al crear expediente: ${expError.message}`);
-      if (!expData?.id) throw new Error('No se recibió el ID del expediente creado.');
-
-      // Paso 3 · Insertar localización con el ID del expediente
-      const { error: locError } = await this.auth.client
-        .from('localizacion')
-        .insert({
-          expediente_id: expData.id,
-          tipo_inmueble: lv.tipo_inmueble,
-          direccion:     lv.direccion,
-          provincia:     lv.provincia,
-          canton:        lv.canton,
-          distrito:      lv.distrito,
-          referencia:    lv.referencia || null,
-          latitud:       lv.latitud    ?? null,
-          longitud:      lv.longitud   ?? null,
-        });
-
-      if (locError) throw new Error(`Error al guardar localización: ${locError.message}`);
+      // Paso 2 · Crear expediente + localización vía servicio
+      await this.expedienteService.crear({
+        clienteId:   userId,
+        servicioId:  this.servicioId()!,
+        numero:      this.generarNumeroExpediente(),
+        fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
+        descripcion: ev.descripcion || null,
+        localizacion: {
+          tipo_inmueble: lv.tipo_inmueble ?? '',
+          direccion:     lv.direccion     ?? '',
+          provincia:     lv.provincia     ?? '',
+          canton:        lv.canton        ?? '',
+          distrito:      lv.distrito      ?? '',
+          referencia:    lv.referencia    || null,
+          latitud:       lv.latitud       ?? null,
+          longitud:      lv.longitud      ?? null,
+        },
+      });
 
       this.router.navigate(['/client/dashboard']);
     } catch (e: any) {

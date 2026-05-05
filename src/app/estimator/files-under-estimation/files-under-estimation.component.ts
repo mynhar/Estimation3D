@@ -1,19 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
-
-interface ExpedienteRow {
-  id: string;
-  numero: string;
-  fecha_visita: string;
-  estado: string;
-  servicio_nombre: string;
-  cliente_nombre: string;
-  direccion: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-}
+import { ExpedienteService } from '../../services/expediente.service';
+import { ExpedienteRow } from '../../models';
 
 @Component({
   selector: 'app-files-under-estimation',
@@ -87,70 +77,22 @@ interface ExpedienteRow {
   `,
 })
 export class FilesUnderEstimationComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private router = inject(Router);
+  private auth              = inject(AuthSupabaseService);
+  private expedienteService = inject(ExpedienteService);
+  private router            = inject(Router);
 
+  user        = toSignal(this.auth.user$);
   expedientes = signal<ExpedienteRow[]>([]);
   cargando    = signal(true);
 
   async ngOnInit() {
+    const userId = this.user()?.id;
+    if (!userId) { this.cargando.set(false); return; }
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) return;
-
-      const { data: exps, error: expError } = await this.auth.client
-        .from('expediente')
-        .select('id, numero, fecha_visita, estado, cliente_id, servicio_id')
-        .eq('estado', 'en_estimacion')
-        .eq('estimador_id', user.id)
-        .order('id', { ascending: false });
-
-      if (expError) throw expError;
-      if (!exps?.length) { this.cargando.set(false); return; }
-
-      const clienteIds   = [...new Set(exps.map(e => e.cliente_id))];
-      const servicioIds  = [...new Set(exps.map(e => e.servicio_id))];
-      const expedienteIds = exps.map(e => e.id);
-
-      const [perfilesRes, serviciosRes, locRes] = await Promise.all([
-        this.auth.client
-          .from('perfil')
-          .select('id, nombre, apellido')
-          .in('id', clienteIds),
-        this.auth.client
-          .from('servicio')
-          .select('id, nombre_es')
-          .in('id', servicioIds),
-        this.auth.client
-          .from('localizacion')
-          .select('expediente_id, direccion, provincia, canton, distrito')
-          .in('expediente_id', expedienteIds),
-      ]);
-
-      const perfiles  = perfilesRes.data  ?? [];
-      const servicios = serviciosRes.data ?? [];
-      const locs      = locRes.data       ?? [];
-
-      const rows: ExpedienteRow[] = exps.map(e => {
-        const perfil   = perfiles.find((p: any) => String(p.id) === String(e.cliente_id));
-        const servicio = servicios.find((s: any) => String(s.id) === String(e.servicio_id));
-        const loc      = locs.find((l: any) => String(l.expediente_id) === String(e.id));
-
-        return {
-          id:              e.id,
-          numero:          e.numero,
-          fecha_visita:    e.fecha_visita,
-          estado:          e.estado,
-          servicio_nombre: servicio?.nombre_es ?? '—',
-          cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-          direccion:       loc?.direccion ?? '—',
-          provincia:       loc?.provincia  ?? '—',
-          canton:          loc?.canton     ?? '—',
-          distrito:        loc?.distrito   ?? '—',
-        };
-      });
-
-      this.expedientes.set(rows);
+      this.expedientes.set(await this.expedienteService.getExpedienteRows({
+        estado:       'en_estimacion',
+        estimadorId:  userId,
+      }));
     } catch (e: any) {
       console.error('[FilesUnderEstimation]', e.message);
     } finally {
@@ -160,16 +102,12 @@ export class FilesUnderEstimationComponent implements OnInit {
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    });
+    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
   }
 
   estimar(id: string) {
@@ -177,16 +115,11 @@ export class FilesUnderEstimationComponent implements OnInit {
   }
 
   async liberar(id: string) {
-    const { error } = await this.auth.client
-      .from('expediente')
-      .update({ estado: 'nuevo', estimador_id: null })
-      .eq('id', id);
-
-    if (error) {
-      console.error('[FilesUnderEstimation] liberar:', error.message);
-      return;
+    try {
+      await this.expedienteService.liberar(id);
+      this.expedientes.update(rows => rows.filter(e => e.id !== id));
+    } catch (e: any) {
+      console.error('[FilesUnderEstimation] liberar:', e.message);
     }
-
-    this.expedientes.update(rows => rows.filter(e => e.id !== id));
   }
 }

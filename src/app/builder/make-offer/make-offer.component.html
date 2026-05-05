@@ -1,0 +1,342 @@
+<div class="container py-4" style="max-width: 760px">
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">Cargando expediente…</div>
+  } @else if (!detalle()) {
+    <div class="alert alert-warning">
+      No se encontró el expediente.
+      @if (errorMsg()) {
+        <br /><small class="text-danger">{{ errorMsg() }}</small>
+      }
+    </div>
+  } @else {
+
+    <!-- Encabezado -->
+    <div class="mb-4 d-flex align-items-center gap-3">
+      <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+        ← Volver
+      </button>
+      <div>
+        <h4 class="fw-semibold mb-0">Hacer Oferta — #{{ detalle()!.numero }}</h4>
+        <p class="text-muted mb-0 small">
+          {{ detalle()!.servicio_nombre }}
+          @if (detalle()!.servicio_descripcion) {
+            — {{ detalle()!.servicio_descripcion }}
+          }
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Tarjeta 1: Información del expediente ── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h5 class="fw-semibold mb-0">Información del expediente</h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Servicio</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.servicio_nombre }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Fecha de visita</p>
+            <p class="fw-semibold mb-0">
+              {{ formatFecha(detalle()!.fecha_visita) }}
+              <span class="text-muted small ms-1">{{ formatHora(detalle()!.fecha_visita) }}</span>
+            </p>
+          </div>
+
+          <div class="col-12"><hr class="my-1" /></div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Dirección</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.direccion }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Referencia</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.referencia || '—' }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Provincia</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.provincia }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Cantón</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.canton }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Distrito</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.distrito }}</p>
+          </div>
+
+          <div class="col-12"><hr class="my-1" /></div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Ofertas activas</p>
+            <p class="fw-semibold mb-0">
+              @if (detalle()!.total_ofertas === 0) {
+                <span class="text-muted">Sin ofertas aún</span>
+              } @else {
+                {{ detalle()!.total_ofertas }}
+              }
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tarjeta 2: Informe del estimador ── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h5 class="fw-semibold mb-0">Informe del estimador</h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Fecha de visita real</p>
+            <p class="fw-semibold mb-0">
+              @if (detalle()!.fecha_visita_real) {
+                {{ formatFecha(detalle()!.fecha_visita_real) }}
+                <span class="text-muted small ms-1">{{ formatHora(detalle()!.fecha_visita_real) }}</span>
+              } @else {
+                —
+              }
+            </p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Costo estimado</p>
+            <p class="fw-semibold mb-0 text-success">{{ formatCosto(detalle()!.costo_estimado) }}</p>
+          </div>
+
+          <div class="col-12">
+            <p class="text-muted small mb-1">Descripción del problema</p>
+            <p class="mb-0" style="white-space: pre-wrap">
+              {{ detalle()!.descripcion_problemas || '—' }}
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Fotos del sitio -->
+        @if (fotos().length > 0) {
+          <hr class="my-4" />
+          <h6 class="fw-medium mb-3">Fotos del sitio</h6>
+          <div class="d-flex flex-wrap gap-2">
+            @for (f of fotos(); track f.id) {
+              <img
+                [src]="publicUrl(f.url_storage)"
+                class="rounded border"
+                style="width:96px;height:96px;object-fit:cover;cursor:pointer"
+                [title]="f.nombre_archivo"
+                (click)="verArchivo(f)"
+              />
+            }
+          </div>
+        }
+
+        <!-- Videos -->
+        @if (videos().length > 0) {
+          <hr class="my-4" />
+          <h6 class="fw-medium mb-3">Videos</h6>
+          <ul class="list-group list-group-flush">
+            @for (v of videos(); track v.id) {
+              <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="fw-medium small">{{ v.nombre_archivo }}</span>
+                  <span class="text-muted small ms-2">{{ formatTamano(v.tamano_bytes) }}</span>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm flex-shrink-0 ms-2"
+                        (click)="verArchivo(v)">Ver</button>
+              </li>
+            }
+          </ul>
+        }
+
+        <!-- Documentos técnicos -->
+        @if (documentos().length > 0) {
+          <hr class="my-4" />
+          <h6 class="fw-medium mb-3">Documentos técnicos</h6>
+          <ul class="list-group list-group-flush">
+            @for (d of documentos(); track d.id) {
+              <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="fw-medium small">{{ d.nombre_archivo }}</span>
+                  <span class="text-muted small ms-2">{{ formatTamano(d.tamano_bytes) }}</span>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm flex-shrink-0 ms-2"
+                        (click)="verArchivo(d)">Ver</button>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (fotos().length === 0 && videos().length === 0 && documentos().length === 0) {
+          <hr class="my-4" />
+          <p class="text-muted small mb-0">No hay archivos adjuntos en este expediente.</p>
+        }
+
+      </div>
+    </div>
+
+    <!-- ── Tarjeta 3: Su oferta ── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h5 class="fw-semibold mb-0">Su oferta</h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <label class="form-label small fw-medium">Precio total ($) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input
+                type="number"
+                class="form-control"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                [(ngModel)]="precio"
+              />
+            </div>
+          </div>
+
+          <div class="col-sm-3">
+            <label class="form-label small fw-medium">Plazo mín. (semanas) <span class="text-danger">*</span></label>
+            <input
+              type="number"
+              class="form-control"
+              placeholder="1"
+              min="1"
+              step="1"
+              [(ngModel)]="plazoMin"
+            />
+          </div>
+
+          <div class="col-sm-3">
+            <label class="form-label small fw-medium">Plazo máx. (semanas) <span class="text-danger">*</span></label>
+            <input
+              type="number"
+              class="form-control"
+              placeholder="4"
+              min="1"
+              step="1"
+              [(ngModel)]="plazoMax"
+            />
+          </div>
+
+          <div class="col-sm-4">
+            <label class="form-label small fw-medium">Garantía ofrecida (años)</label>
+            <input
+              type="number"
+              class="form-control"
+              placeholder="1"
+              min="0"
+              step="1"
+              [(ngModel)]="garantiaAnos"
+            />
+          </div>
+
+          <div class="col-sm-4">
+            <label class="form-label small fw-medium">Fecha de inicio <span class="text-danger">*</span></label>
+            <input
+              type="date"
+              class="form-control"
+              [(ngModel)]="fechaInicio"
+            />
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-medium">Descripción de su enfoque <span class="text-danger">*</span></label>
+            <textarea
+              class="form-control"
+              rows="5"
+              placeholder="Describa su plan de trabajo, metodología y experiencia relevante…"
+              [(ngModel)]="descripcion"
+            ></textarea>
+          </div>
+
+          <div class="col-12"><hr class="my-1" /></div>
+
+          <!-- Documento de oferta (PDF) -->
+          <div class="col-sm-6">
+            <label class="form-label small fw-medium">Documento de oferta (PDF) <span class="text-danger">*</span></label>
+            <div>
+              <label class="btn btn-outline-secondary btn-sm mb-0">
+                {{ documentoOferta() ? 'Cambiar archivo' : '+ Adjuntar PDF' }}
+                <input
+                  type="file"
+                  accept=".pdf"
+                  class="d-none"
+                  (change)="onDocumento($event)"
+                />
+              </label>
+              @if (documentoOferta()) {
+                <div class="text-muted small mt-1">
+                  {{ documentoOferta()!.name }}
+                  <span class="ms-1">({{ formatTamano(documentoOferta()!.size) }})</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Video de presentación -->
+          <div class="col-sm-6">
+            <label class="form-label small fw-medium">Video de presentación</label>
+            <div>
+              <label class="btn btn-outline-secondary btn-sm mb-0">
+                {{ videoOferta() ? 'Cambiar video' : '+ Adjuntar video' }}
+                <input
+                  type="file"
+                  accept="video/*"
+                  class="d-none"
+                  (change)="onVideo($event)"
+                />
+              </label>
+              @if (videoOferta()) {
+                <div class="text-muted small mt-1">
+                  {{ videoOferta()!.name }}
+                  <span class="ms-1">({{ formatTamano(videoOferta()!.size) }})</span>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        @if (errorEnvio()) {
+          <div class="alert alert-danger mt-4 mb-0">{{ errorEnvio() }}</div>
+        }
+        @if (exitoMsg()) {
+          <div class="alert alert-success mt-4 mb-0">{{ exitoMsg() }}</div>
+        }
+
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="d-flex gap-3">
+      <button
+        class="btn btn-primary px-4"
+        (click)="enviarOferta()"
+        [disabled]="enviando() || !!exitoMsg()"
+      >
+        {{ enviando() ? 'Enviando…' : 'Enviar oferta' }}
+      </button>
+      <button class="btn btn-outline-secondary px-4" (click)="volver()">
+        Volver
+      </button>
+    </div>
+
+  }
+
+</div>

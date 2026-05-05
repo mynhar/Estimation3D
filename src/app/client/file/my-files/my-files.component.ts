@@ -2,23 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
-
-interface Expediente {
-  id: number;
-  numero: string;
-  estado: string;
-  fecha_visita: string;
-  descripcion: string;
-  servicio: { nombre_es: string };
-}
-
-const ESTADO_LABEL: Record<string, { texto: string; clase: string }> = {
-  nuevo:     { texto: 'Nuevo',     clase: 'bg-primary' },
-  asignado:  { texto: 'Asignado',  clase: 'bg-warning text-dark' },
-  en_proceso:{ texto: 'En proceso',clase: 'bg-info text-dark' },
-  completado:{ texto: 'Completado',clase: 'bg-success' },
-  cancelado: { texto: 'Cancelado', clase: 'bg-secondary' },
-};
+import { ExpedienteService } from '../../../services/expediente.service';
+import { ExpedienteCliente, ESTADO_BADGE_CLIENTE } from '../../../models';
 
 @Component({
   selector: 'app-my-files',
@@ -87,27 +72,26 @@ const ESTADO_LABEL: Record<string, { texto: string; clase: string }> = {
   `,
 })
 export class MyFilesComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private router = inject(Router);
+  private auth               = inject(AuthSupabaseService);
+  private expedienteService  = inject(ExpedienteService);
+  private router             = inject(Router);
 
   user = toSignal(this.auth.user$);
 
-  expedientes = signal<Expediente[]>([]);
+  expedientes = signal<ExpedienteCliente[]>([]);
   cargando    = signal(true);
 
   async ngOnInit() {
     const userId = this.user()?.id;
     if (!userId) { this.router.navigate(['/login']); return; }
 
-    const { data, error } = await this.auth.client
-      .from('expediente')
-      .select('id, numero, estado, fecha_visita, descripcion, servicio:servicio_id(nombre_es)')
-      .eq('cliente_id', userId)
-      .order('id', { ascending: false });
-
-    if (error) console.error('[MyFiles] error:', error.message);
-    this.expedientes.set((data ?? []) as unknown as Expediente[]);
-    this.cargando.set(false);
+    try {
+      this.expedientes.set(await this.expedienteService.getMisExpedientes(userId));
+    } catch (e: any) {
+      console.error('[MyFiles]', e.message);
+    } finally {
+      this.cargando.set(false);
+    }
   }
 
   formatFecha(valor: string): string {
@@ -118,10 +102,10 @@ export class MyFilesComponent implements OnInit {
   }
 
   estadoTexto(estado: string): string {
-    return ESTADO_LABEL[estado]?.texto ?? estado;
+    return ESTADO_BADGE_CLIENTE[estado]?.texto ?? estado;
   }
 
   estadoClase(estado: string): string {
-    return ESTADO_LABEL[estado]?.clase ?? 'bg-secondary';
+    return ESTADO_BADGE_CLIENTE[estado]?.clase ?? 'bg-secondary';
   }
 }

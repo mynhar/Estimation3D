@@ -40,6 +40,27 @@
           </ul>
         </li>
 
+        <!-- Menú Constructor (solo constructor / administrador) -->
+        @if (esConstructor()) {
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Constructor
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/builder/available-files">
+                Expedientes disponibles
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/builder/my-offers">
+                Mis ofertas
+              </a>
+            </li>
+          </ul>
+        </li>
+        }
+
         <!-- Menú Estimador (solo estimador / administrador) -->
         @if (esEstimador()) {
         <li class="nav-item dropdown">

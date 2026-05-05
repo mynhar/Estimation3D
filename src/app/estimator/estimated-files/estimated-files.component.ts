@@ -1,37 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
-
-interface ExpedienteRow {
-  id: string;
-  numero: string;
-  fecha_visita: string;
-  estado: string;
-  servicio_nombre: string;
-  cliente_nombre: string;
-  direccion: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-}
-
-const ESTADOS_ESTIMADO = ['estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado'];
-
-const ESTADO_BADGE: Record<string, string> = {
-  estimado:   'bg-success-subtle text-success',
-  en_oferta:  'bg-primary-subtle text-primary',
-  adjudicado: 'bg-warning-subtle text-warning-emphasis',
-  contratado: 'bg-info-subtle text-info-emphasis',
-  cancelado:  'bg-secondary-subtle text-secondary',
-};
-
-const ESTADO_LABEL: Record<string, string> = {
-  estimado:   'Estimado',
-  en_oferta:  'En oferta',
-  adjudicado: 'Adjudicado',
-  contratado: 'Contratado',
-  cancelado:  'Cancelado',
-};
+import { ExpedienteService } from '../../services/expediente.service';
+import { ExpedienteRow, ESTADOS_ESTIMADO, ESTADO_BADGE_ESTIMADOR, ESTADO_LABEL_ESTIMADOR } from '../../models';
 
 @Component({
   selector: 'app-estimated-files',
@@ -104,70 +76,22 @@ const ESTADO_LABEL: Record<string, string> = {
   `,
 })
 export class EstimatedFilesComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private router = inject(Router);
+  private auth              = inject(AuthSupabaseService);
+  private expedienteService = inject(ExpedienteService);
+  private router            = inject(Router);
 
+  user        = toSignal(this.auth.user$);
   expedientes = signal<ExpedienteRow[]>([]);
   cargando    = signal(true);
 
   async ngOnInit() {
+    const userId = this.user()?.id;
+    if (!userId) { this.cargando.set(false); return; }
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) return;
-
-      const { data: exps, error: expError } = await this.auth.client
-        .from('expediente')
-        .select('id, numero, fecha_visita, estado, cliente_id, servicio_id')
-        .in('estado', ESTADOS_ESTIMADO)
-        .eq('estimador_id', user.id)
-        .order('id', { ascending: false });
-
-      if (expError) throw expError;
-      if (!exps?.length) { this.cargando.set(false); return; }
-
-      const clienteIds    = [...new Set(exps.map(e => e.cliente_id))];
-      const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
-      const expedienteIds = exps.map(e => e.id);
-
-      const [perfilesRes, serviciosRes, locRes] = await Promise.all([
-        this.auth.client
-          .from('perfil')
-          .select('id, nombre, apellido')
-          .in('id', clienteIds),
-        this.auth.client
-          .from('servicio')
-          .select('id, nombre_es')
-          .in('id', servicioIds),
-        this.auth.client
-          .from('localizacion')
-          .select('expediente_id, direccion, provincia, canton, distrito')
-          .in('expediente_id', expedienteIds),
-      ]);
-
-      const perfiles  = perfilesRes.data  ?? [];
-      const servicios = serviciosRes.data ?? [];
-      const locs      = locRes.data       ?? [];
-
-      const rows: ExpedienteRow[] = exps.map(e => {
-        const perfil   = perfiles.find((p: any) => String(p.id) === String(e.cliente_id));
-        const servicio = servicios.find((s: any) => String(s.id) === String(e.servicio_id));
-        const loc      = locs.find((l: any) => String(l.expediente_id) === String(e.id));
-
-        return {
-          id:              e.id,
-          numero:          e.numero,
-          fecha_visita:    e.fecha_visita,
-          estado:          e.estado,
-          servicio_nombre: servicio?.nombre_es ?? '—',
-          cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-          direccion:  loc?.direccion  ?? '—',
-          provincia:  loc?.provincia  ?? '—',
-          canton:     loc?.canton     ?? '—',
-          distrito:   loc?.distrito   ?? '—',
-        };
-      });
-
-      this.expedientes.set(rows);
+      this.expedientes.set(await this.expedienteService.getExpedienteRows({
+        estados:     ESTADOS_ESTIMADO,
+        estimadorId: userId,
+      }));
     } catch (e: any) {
       console.error('[EstimatedFiles]', e.message);
     } finally {
@@ -175,26 +99,22 @@ export class EstimatedFilesComponent implements OnInit {
     }
   }
 
-  badgeClass(estado: string): string {
-    return ESTADO_BADGE[estado] ?? 'bg-light text-dark';
+  badgeClass(estado: string | undefined): string {
+    return ESTADO_BADGE_ESTIMADOR[estado ?? ''] ?? 'bg-light text-dark';
   }
 
-  estadoLabel(estado: string): string {
-    return ESTADO_LABEL[estado] ?? estado;
+  estadoLabel(estado: string | undefined): string {
+    return ESTADO_LABEL_ESTIMADOR[estado ?? ''] ?? estado ?? '';
   }
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    });
+    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
   }
 
   ver(id: string) {

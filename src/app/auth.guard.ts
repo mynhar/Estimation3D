@@ -14,7 +14,8 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-const ROLES_ESTIMADOR = ['estimador', 'administrador'];
+const ROLES_ESTIMADOR    = ['estimador',    'administrador'];
+const ROLES_CONSTRUCTOR  = ['constructor',  'administrador'];
 
 export const estimatorGuard: CanActivateFn = async () => {
   const auth   = inject(AuthSupabaseService);
@@ -38,6 +39,32 @@ export const estimatorGuard: CanActivateFn = async () => {
   if (error) return router.createUrlTree(['/login']);
 
   return data?.rol && ROLES_ESTIMADOR.includes(data.rol)
+    ? true
+    : router.createUrlTree(['/client/dashboard']);
+};
+
+export const constructorGuard: CanActivateFn = async () => {
+  const auth   = inject(AuthSupabaseService);
+  const router = inject(Router);
+
+  const [, user] = await firstValueFrom(
+    combineLatest([auth.initialized$, auth.user$]).pipe(
+      filter(([initialized]) => initialized),
+      take(1)
+    )
+  );
+
+  if (!user) return router.createUrlTree(['/login']);
+
+  const { data, error } = await auth.client
+    .from('perfil')
+    .select('rol')
+    .eq('id', user.id)
+    .single();
+
+  if (error) return router.createUrlTree(['/login']);
+
+  return data?.rol && ROLES_CONSTRUCTOR.includes(data.rol)
     ? true
     : router.createUrlTree(['/client/dashboard']);
 };

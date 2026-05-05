@@ -2,36 +2,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
-
-interface ExpedienteDetalle {
-  numero: string;
-  fecha_visita: string;
-  servicio_nombre: string;
-  cliente_nombre: string;
-  cliente_telefono: string;
-  direccion: string;
-  referencia: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-}
-
-interface EstimacionDetalle {
-  fecha_visita_real: string;
-  descripcion_problemas: string;
-  costo_estimado: number | null;
-  notas_internas: string;
-}
-
-interface ArchivoRow {
-  id: string;
-  nombre_archivo: string;
-  url_storage: string;
-  mime_type: string;
-  tamano_bytes: number;
-}
-
-const BUCKET = 'archivos';
+import { ExpedienteService } from '../../services/expediente.service';
+import { EstimacionService } from '../../services/estimacion.service';
+import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
+import { ExpedienteDetalle, EstimacionDetalle, ArchivoRow } from '../../models';
 
 @Component({
   selector: 'app-estimated-file',
@@ -335,9 +309,11 @@ const BUCKET = 'archivos';
   `,
 })
 export class EstimatedFileComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private route  = inject(ActivatedRoute);
-  private router = inject(Router);
+  private expedienteService = inject(ExpedienteService);
+  private estimacionService = inject(EstimacionService);
+  private archivoService    = inject(ArchivoService);
+  private route             = inject(ActivatedRoute);
+  private router            = inject(Router);
 
   detalle    = signal<ExpedienteDetalle | null>(null);
   estimacion = signal<EstimacionDetalle | null>(null);
@@ -351,13 +327,11 @@ export class EstimatedFileComponent implements OnInit {
   subiendoFoto      = signal(false);
   subiendoVideo     = signal(false);
   subiendoDocumento = signal(false);
+  errorFotos        = signal('');
+  errorVideos       = signal('');
+  errorDocumentos   = signal('');
 
-  errorFotos      = signal('');
-  errorVideos     = signal('');
-  errorDocumentos = signal('');
-
-  private expedienteId  = '';
-  private estimadorNombre = '';
+  private expedienteId = '';
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -365,57 +339,12 @@ export class EstimatedFileComponent implements OnInit {
     this.expedienteId = id;
 
     try {
-      const { data: exp, error: expError } = await this.auth.client
-        .from('expediente')
-        .select('numero, fecha_visita, cliente_id, servicio_id, estimador_id')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (expError) throw new Error(`expediente: ${expError.message}`);
-      if (!exp) throw new Error('Expediente no encontrado.');
-
-      const [servicioRes, perfilRes, locRes, estimacionRes, estimadorRes] = await Promise.all([
-        this.auth.client.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
-        this.auth.client.from('perfil').select('nombre, apellido, telefono').eq('id', exp.cliente_id).single(),
-        this.auth.client.from('localizacion').select('direccion, referencia, provincia, canton, distrito').eq('expediente_id', id).single(),
-        this.auth.client
-          .from('estimacion')
-          .select('fecha_visita_real, descripcion_problemas, costo_estimado, notas_internas')
-          .eq('expediente_id', id)
-          .maybeSingle(),
-        exp.estimador_id
-          ? this.auth.client.from('perfil').select('nombre, apellido').eq('id', exp.estimador_id).single()
-          : Promise.resolve({ data: null }),
+      const [detalle, estimacion] = await Promise.all([
+        this.expedienteService.getDetalle(id),
+        this.estimacionService.get(id),
       ]);
-
-      this.detalle.set({
-        numero:           exp.numero,
-        fecha_visita:     exp.fecha_visita,
-        servicio_nombre:  servicioRes.data?.nombre_es ?? '—',
-        cliente_nombre:   perfilRes.data
-          ? `${perfilRes.data.nombre} ${perfilRes.data.apellido}`
-          : '—',
-        cliente_telefono: perfilRes.data?.telefono ?? '',
-        direccion:  locRes.data?.direccion  ?? '—',
-        referencia: locRes.data?.referencia ?? '—',
-        provincia:  locRes.data?.provincia  ?? '—',
-        canton:     locRes.data?.canton     ?? '—',
-        distrito:   locRes.data?.distrito   ?? '—',
-      });
-
-      const estimador = estimadorRes.data as { nombre: string; apellido: string } | null;
-      this.estimadorNombre = estimador ? `${estimador.nombre} ${estimador.apellido}` : '—';
-
-      const est = estimacionRes.data;
-      if (est) {
-        this.estimacion.set({
-          fecha_visita_real:     est.fecha_visita_real     ?? '',
-          descripcion_problemas: est.descripcion_problemas ?? '',
-          costo_estimado:        est.costo_estimado        ?? null,
-          notas_internas:        est.notas_internas        ?? '',
-        });
-      }
-
+      this.detalle.set(detalle);
+      this.estimacion.set(estimacion);
     } catch (e: any) {
       console.error('[EstimatedFile]', e.message);
       this.errorMsg.set(e.message);
@@ -426,67 +355,20 @@ export class EstimatedFileComponent implements OnInit {
     this.cargarArchivos();
   }
 
-  // ----------------------------------------------------------------
-  // Archivos
-  // ----------------------------------------------------------------
+  // ── Archivos ──────────────────────────────────────────────────────────────
 
   private async cargarArchivos() {
-    const [fotosRes, videosRes, docsRes] = await Promise.all([
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'foto')
-        .order('creado_en', { ascending: false }),
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'video')
-        .order('creado_en', { ascending: false }),
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'documento')
-        .order('creado_en', { ascending: false }),
-    ]);
-    this.fotos.set(fotosRes.data ?? []);
-    this.videos.set(videosRes.data ?? []);
-    this.documentos.set(docsRes.data ?? []);
+    const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
+    this.fotos.set(fotos);
+    this.videos.set(videos);
+    this.documentos.set(documentos);
   }
 
-  private async recargarTipo(tipo: 'foto' | 'video' | 'documento') {
-    const { data } = await this.auth.client.from('archivo')
-      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-      .eq('expediente_id', this.expedienteId).eq('tipo', tipo)
-      .order('creado_en', { ascending: false });
-    if (tipo === 'foto')      this.fotos.set(data ?? []);
-    if (tipo === 'video')     this.videos.set(data ?? []);
-    if (tipo === 'documento') this.documentos.set(data ?? []);
-  }
-
-  private async uploadOne(
-    tipo: 'foto' | 'video' | 'documento',
-    file: File,
-    userId: string
-  ): Promise<void> {
-    const storagePath = `expedientes/${this.expedienteId}/${tipo}/${Date.now()}_${file.name}`;
-
-    const { error: upErr } = await this.auth.client.storage
-      .from(BUCKET)
-      .upload(storagePath, file, { contentType: file.type, upsert: false });
-
-    if (upErr) throw new Error(upErr.message);
-
-    const { error: dbErr } = await this.auth.client.from('archivo').insert({
-      tipo,
-      nombre_archivo: file.name,
-      url_storage:    storagePath,
-      mime_type:      file.type || 'application/octet-stream',
-      tamano_bytes:   file.size,
-      subido_por:     userId,
-      expediente_id:  this.expedienteId,
-    });
-
-    if (dbErr) {
-      await this.auth.client.storage.from(BUCKET).remove([storagePath]);
-      throw new Error(dbErr.message);
-    }
+  private async recargar(tipo: TipoArchivo) {
+    const data = await this.archivoService.cargarPorTipo(this.expedienteId, tipo);
+    if (tipo === 'foto')      this.fotos.set(data);
+    if (tipo === 'video')     this.videos.set(data);
+    if (tipo === 'documento') this.documentos.set(data);
   }
 
   async subirFotos(event: Event) {
@@ -498,17 +380,10 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoFoto.set(true);
     this.errorFotos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      for (const file of files) {
-        await this.uploadOne('foto', file, user.id);
-      }
-      await this.recargarTipo('foto');
-    } catch (e: any) {
-      this.errorFotos.set(e.message);
-    } finally {
-      this.subiendoFoto.set(false);
-    }
+      for (const file of files) await this.archivoService.subir(this.expedienteId, 'foto', file, '');
+      await this.recargar('foto');
+    } catch (e: any) { this.errorFotos.set(e.message); }
+    finally { this.subiendoFoto.set(false); }
   }
 
   async subirVideo(event: Event) {
@@ -520,15 +395,10 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoVideo.set(true);
     this.errorVideos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      await this.uploadOne('video', file, user.id);
-      await this.recargarTipo('video');
-    } catch (e: any) {
-      this.errorVideos.set(e.message);
-    } finally {
-      this.subiendoVideo.set(false);
-    }
+      await this.archivoService.subir(this.expedienteId, 'video', file, '');
+      await this.recargar('video');
+    } catch (e: any) { this.errorVideos.set(e.message); }
+    finally { this.subiendoVideo.set(false); }
   }
 
   async subirDocumento(event: Event) {
@@ -540,34 +410,25 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoDocumento.set(true);
     this.errorDocumentos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      await this.uploadOne('documento', file, user.id);
-      await this.recargarTipo('documento');
-    } catch (e: any) {
-      this.errorDocumentos.set(e.message);
-    } finally {
-      this.subiendoDocumento.set(false);
-    }
+      await this.archivoService.subir(this.expedienteId, 'documento', file, '');
+      await this.recargar('documento');
+    } catch (e: any) { this.errorDocumentos.set(e.message); }
+    finally { this.subiendoDocumento.set(false); }
   }
 
-  async eliminarArchivo(archivo: ArchivoRow, tipo: 'foto' | 'video' | 'documento') {
+  async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
     const setError = tipo === 'foto'  ? this.errorFotos
                    : tipo === 'video' ? this.errorVideos
                    :                    this.errorDocumentos;
     setError.set('');
     try {
-      await this.auth.client.storage.from(BUCKET).remove([archivo.url_storage]);
-      const { error } = await this.auth.client.from('archivo').delete().eq('id', archivo.id);
-      if (error) throw new Error(error.message);
-      await this.recargarTipo(tipo);
-    } catch (e: any) {
-      setError.set(e.message);
-    }
+      await this.archivoService.eliminar(archivo);
+      await this.recargar(tipo);
+    } catch (e: any) { setError.set(e.message); }
   }
 
   publicUrl(storagePath: string): string {
-    return this.auth.client.storage.from(BUCKET).getPublicUrl(storagePath).data.publicUrl;
+    return this.archivoService.publicUrl(storagePath);
   }
 
   verArchivo(archivo: ArchivoRow) {
@@ -580,22 +441,14 @@ export class EstimatedFileComponent implements OnInit {
     return `${(bytes / 1_048_576).toFixed(1)} MB`;
   }
 
-  // ----------------------------------------------------------------
-  // Formato
-  // ----------------------------------------------------------------
-
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'long', year: 'numeric',
-    });
+    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
   }
 
   imprimir() {
@@ -623,46 +476,35 @@ export class EstimatedFileComponent implements OnInit {
   <meta charset="UTF-8">
   <title>Expediente ${d.numero}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
-  <style>
-    body { padding: 2rem; }
-    @page { margin: 1.5cm; }
-    .card { border: 1px solid #dee2e6 !important; }
-  </style>
+  <style>body{padding:2rem} @page{margin:1.5cm} .card{border:1px solid #dee2e6!important}</style>
 </head>
 <body>
   <div class="container" style="max-width:720px">
     <h4 class="fw-semibold mb-4">Estimación completa — Expediente ${d.numero}</h4>
-    <p class="text-muted mb-4">Estimador: <strong>${this.estimadorNombre}</strong></p>
-    <div class="card mb-4">
-      <div class="card-body p-4">
-        <div class="row g-4">
-          <div class="col-6"><p class="text-muted small mb-1">Número</p><p class="fw-semibold mb-0">${d.numero}</p></div>
-          <div class="col-6"><p class="text-muted small mb-1">Servicio</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
-          <div class="col-12"><hr class="my-0"/></div>
-          <div class="col-6"><p class="text-muted small mb-1">Cliente</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
-          <div class="col-6"><p class="text-muted small mb-1">Teléfono</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
-          <div class="col-12"><hr class="my-0"/></div>
-          <div class="col-6"><p class="text-muted small mb-1">Dirección</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
-          <div class="col-6"><p class="text-muted small mb-1">Referencia</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
-          <div class="col-4"><p class="text-muted small mb-1">Provincia</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
-          <div class="col-4"><p class="text-muted small mb-1">Cantón</p><p class="fw-semibold mb-0">${d.canton}</p></div>
-          <div class="col-4"><p class="text-muted small mb-1">Distrito</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
-          <div class="col-12"><hr class="my-0"/></div>
-          <div class="col-6"><p class="text-muted small mb-1">Fecha de visita</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
-          <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-body p-4">
-        <h5 class="fw-semibold mb-4">Documentación de la visita</h5>
-        ${docEstimacion}
-      </div>
-    </div>
+    <p class="text-muted mb-4">Estimador: <strong>${d.estimador_nombre}</strong></p>
+    <div class="card mb-4"><div class="card-body p-4"><div class="row g-4">
+      <div class="col-6"><p class="text-muted small mb-1">Número</p><p class="fw-semibold mb-0">${d.numero}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">Servicio</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
+      <div class="col-12"><hr class="my-0"/></div>
+      <div class="col-6"><p class="text-muted small mb-1">Cliente</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">Teléfono</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
+      <div class="col-12"><hr class="my-0"/></div>
+      <div class="col-6"><p class="text-muted small mb-1">Dirección</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">Referencia</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">Provincia</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">Cantón</p><p class="fw-semibold mb-0">${d.canton}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">Distrito</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
+      <div class="col-12"><hr class="my-0"/></div>
+      <div class="col-6"><p class="text-muted small mb-1">Fecha de visita</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
+    </div></div></div>
+    <div class="card"><div class="card-body p-4">
+      <h5 class="fw-semibold mb-4">Documentación de la visita</h5>
+      ${docEstimacion}
+    </div></div>
   </div>
-  <script>window.addEventListener('load', () => { window.print(); });</script>
-</body>
-</html>`;
+  <script>window.addEventListener('load',()=>window.print())</script>
+</body></html>`;
 
     const win = window.open('', '_blank', 'width=900,height=700');
     if (!win) return;
@@ -670,7 +512,5 @@ export class EstimatedFileComponent implements OnInit {
     win.document.close();
   }
 
-  volver() {
-    this.router.navigate(['/estimator/estimated-files']);
-  }
+  volver() { this.router.navigate(['/estimator/estimated-files']); }
 }

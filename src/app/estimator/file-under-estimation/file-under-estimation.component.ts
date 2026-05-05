@@ -1,30 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
-
-interface ExpedienteDetalle {
-  numero: string;
-  fecha_visita: string;
-  servicio_nombre: string;
-  cliente_nombre: string;
-  cliente_telefono: string;
-  direccion: string;
-  referencia: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-}
-
-interface ArchivoRow {
-  id: string;
-  nombre_archivo: string;
-  url_storage: string;
-  mime_type: string;
-  tamano_bytes: number;
-}
-
-const BUCKET = 'archivos';
+import { ExpedienteService } from '../../services/expediente.service';
+import { EstimacionService } from '../../services/estimacion.service';
+import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
+import { ExpedienteDetalle, ArchivoRow } from '../../models';
 
 @Component({
   selector: 'app-file-under-estimation',
@@ -368,27 +350,30 @@ const BUCKET = 'archivos';
   `,
 })
 export class FileUnderEstimationComponent implements OnInit {
-  private auth   = inject(AuthSupabaseService);
-  private route  = inject(ActivatedRoute);
-  private router = inject(Router);
+  private auth              = inject(AuthSupabaseService);
+  private expedienteService = inject(ExpedienteService);
+  private estimacionService = inject(EstimacionService);
+  private archivoService    = inject(ArchivoService);
+  private route             = inject(ActivatedRoute);
+  private router            = inject(Router);
 
+  user     = toSignal(this.auth.user$);
   detalle  = signal<ExpedienteDetalle | null>(null);
   cargando = signal(true);
   errorMsg = signal<string>('');
 
   fechaVisita         = '';
   horaVisita          = '';
-  descripcionProblema = '';
+  descripcionProblema = '';   // nombre original conservado (sin 's')
   notasInternas       = '';
   costoEstimado: number | null = null;
 
-  guardando     = signal(false);
-  exitoMsg      = signal('');
-  errorGuardado = signal('');
-
-  guardandoVisita  = signal(false);
-  exitoVisitaMsg   = signal('');
-  errorVisitaMsg   = signal('');
+  guardando       = signal(false);
+  exitoMsg        = signal('');
+  errorGuardado   = signal('');
+  guardandoVisita = signal(false);
+  exitoVisitaMsg  = signal('');
+  errorVisitaMsg  = signal('');
 
   fotos      = signal<ArchivoRow[]>([]);
   videos     = signal<ArchivoRow[]>([]);
@@ -397,10 +382,9 @@ export class FileUnderEstimationComponent implements OnInit {
   subiendoFoto      = signal(false);
   subiendoVideo     = signal(false);
   subiendoDocumento = signal(false);
-
-  errorFotos      = signal('');
-  errorVideos     = signal('');
-  errorDocumentos = signal('');
+  errorFotos        = signal('');
+  errorVideos       = signal('');
+  errorDocumentos   = signal('');
 
   private expedienteId = '';
 
@@ -410,52 +394,21 @@ export class FileUnderEstimationComponent implements OnInit {
     this.expedienteId = id;
 
     try {
-      const { data: exp, error: expError } = await this.auth.client
-        .from('expediente')
-        .select('numero, fecha_visita, cliente_id, servicio_id')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (expError) throw new Error(`expediente: ${expError.message}`);
-      if (!exp) throw new Error('Expediente no encontrado. Verifica RLS en la tabla expediente.');
-
-      const [servicioRes, perfilRes, locRes, estimacionRes] = await Promise.all([
-        this.auth.client.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
-        this.auth.client.from('perfil').select('nombre, apellido, telefono').eq('id', exp.cliente_id).single(),
-        this.auth.client.from('localizacion').select('direccion, referencia, provincia, canton, distrito').eq('expediente_id', id).single(),
-        this.auth.client
-          .from('estimacion')
-          .select('fecha_visita_real, descripcion_problemas, costo_estimado, notas_internas')
-          .eq('expediente_id', id)
-          .maybeSingle(),
+      const [detalle, estimacion] = await Promise.all([
+        this.expedienteService.getDetalle(id),
+        this.estimacionService.get(id),
       ]);
+      this.detalle.set(detalle);
 
-      this.detalle.set({
-        numero:           exp.numero,
-        fecha_visita:     exp.fecha_visita,
-        servicio_nombre:  servicioRes.data?.nombre_es ?? '—',
-        cliente_nombre:   perfilRes.data
-          ? `${perfilRes.data.nombre} ${perfilRes.data.apellido}`
-          : '—',
-        cliente_telefono: perfilRes.data?.telefono ?? '',
-        direccion:  locRes.data?.direccion  ?? '—',
-        referencia: locRes.data?.referencia ?? '—',
-        provincia:  locRes.data?.provincia  ?? '—',
-        canton:     locRes.data?.canton     ?? '—',
-        distrito:   locRes.data?.distrito   ?? '—',
-      });
-
-      const est = estimacionRes.data;
-      if (est) {
-        if (est.fecha_visita_real) {
-          this.fechaVisita = est.fecha_visita_real.slice(0, 10);
-          this.horaVisita  = est.fecha_visita_real.slice(11, 16);
+      if (estimacion) {
+        if (estimacion.fecha_visita_real) {
+          this.fechaVisita = estimacion.fecha_visita_real.slice(0, 10);
+          this.horaVisita  = estimacion.fecha_visita_real.slice(11, 16);
         }
-        this.descripcionProblema = est.descripcion_problemas ?? '';
-        this.costoEstimado       = est.costo_estimado        ?? null;
-        this.notasInternas       = est.notas_internas        ?? '';
+        this.descripcionProblema = estimacion.descripcion_problemas;
+        this.costoEstimado       = estimacion.costo_estimado;
+        this.notasInternas       = estimacion.notas_internas;
       }
-
     } catch (e: any) {
       console.error('[FileUnderEstimation]', e.message);
       this.errorMsg.set(e.message);
@@ -483,34 +436,19 @@ export class FileUnderEstimationComponent implements OnInit {
       return;
     }
 
+    const userId = this.user()?.id;
+    if (!userId) { this.errorGuardado.set('No hay sesión activa.'); return; }
+
     this.guardando.set(true);
-
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-
-      const fechaVisitaReal = `${this.fechaVisita}T${this.horaVisita}:00`;
-
-      const { error } = await this.auth.client
-        .from('estimacion')
-        .upsert({
-          expediente_id:         this.expedienteId,
-          estimador_id:          user.id,
-          fecha_visita_real:     fechaVisitaReal,
-          descripcion_problemas: this.descripcionProblema.trim(),
-          costo_estimado:        this.costoEstimado,
-          notas_internas:        this.notasInternas.trim() || null,
-        }, { onConflict: 'expediente_id' });
-
-      if (error) throw new Error(error.message);
-
-      const { error: expError } = await this.auth.client
-        .from('expediente')
-        .update({ estado: 'estimado' })
-        .eq('id', this.expedienteId);
-
-      if (expError) throw new Error(expError.message);
-
+      await this.estimacionService.guardar(this.expedienteId, userId, {
+        fechaVisita:          this.fechaVisita,
+        horaVisita:           this.horaVisita,
+        descripcionProblemas: this.descripcionProblema.trim(),
+        costoEstimado:        this.costoEstimado,
+        notasInternas:        this.notasInternas.trim(),
+      });
+      await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
       this.exitoMsg.set('Estimación guardada correctamente.');
     } catch (e: any) {
       console.error('[FileUnderEstimation] guardar:', e.message);
@@ -529,23 +467,18 @@ export class FileUnderEstimationComponent implements OnInit {
       return;
     }
 
+    const userId = this.user()?.id;
+    if (!userId) { this.errorVisitaMsg.set('No hay sesión activa.'); return; }
+
     this.guardandoVisita.set(true);
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-
-      const { error } = await this.auth.client
-        .from('estimacion')
-        .upsert({
-          expediente_id:         this.expedienteId,
-          estimador_id:          user.id,
-          fecha_visita_real:     `${this.fechaVisita}T${this.horaVisita}:00`,
-          descripcion_problemas: this.descripcionProblema.trim(),
-          costo_estimado:        this.costoEstimado ?? 0,
-          notas_internas:        this.notasInternas.trim() || null,
-        }, { onConflict: 'expediente_id' });
-
-      if (error) throw new Error(error.message);
+      await this.estimacionService.guardar(this.expedienteId, userId, {
+        fechaVisita:          this.fechaVisita,
+        horaVisita:           this.horaVisita,
+        descripcionProblemas: this.descripcionProblema.trim(),
+        costoEstimado:        this.costoEstimado ?? 0,
+        notasInternas:        this.notasInternas.trim(),
+      });
       this.exitoVisitaMsg.set('Visita guardada correctamente.');
     } catch (e: any) {
       console.error('[FileUnderEstimation] guardarVisita:', e.message);
@@ -555,67 +488,20 @@ export class FileUnderEstimationComponent implements OnInit {
     }
   }
 
-  // ----------------------------------------------------------------
-  // Archivos
-  // ----------------------------------------------------------------
+  // ── Archivos ──────────────────────────────────────────────────────────────
 
   private async cargarArchivos() {
-    const [fotosRes, videosRes, docsRes] = await Promise.all([
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'foto')
-        .order('creado_en', { ascending: false }),
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'video')
-        .order('creado_en', { ascending: false }),
-      this.auth.client.from('archivo')
-        .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-        .eq('expediente_id', this.expedienteId).eq('tipo', 'documento')
-        .order('creado_en', { ascending: false }),
-    ]);
-    this.fotos.set(fotosRes.data ?? []);
-    this.videos.set(videosRes.data ?? []);
-    this.documentos.set(docsRes.data ?? []);
+    const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
+    this.fotos.set(fotos);
+    this.videos.set(videos);
+    this.documentos.set(documentos);
   }
 
-  private async recargarTipo(tipo: 'foto' | 'video' | 'documento') {
-    const { data } = await this.auth.client.from('archivo')
-      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
-      .eq('expediente_id', this.expedienteId).eq('tipo', tipo)
-      .order('creado_en', { ascending: false });
-    if (tipo === 'foto')      this.fotos.set(data ?? []);
-    if (tipo === 'video')     this.videos.set(data ?? []);
-    if (tipo === 'documento') this.documentos.set(data ?? []);
-  }
-
-  private async uploadOne(
-    tipo: 'foto' | 'video' | 'documento',
-    file: File,
-    userId: string
-  ): Promise<void> {
-    const storagePath = `expedientes/${this.expedienteId}/${tipo}/${Date.now()}_${file.name}`;
-
-    const { error: upErr } = await this.auth.client.storage
-      .from(BUCKET)
-      .upload(storagePath, file, { contentType: file.type, upsert: false });
-
-    if (upErr) throw new Error(upErr.message);
-
-    const { error: dbErr } = await this.auth.client.from('archivo').insert({
-      tipo,
-      nombre_archivo: file.name,
-      url_storage:    storagePath,
-      mime_type:      file.type || 'application/octet-stream',
-      tamano_bytes:   file.size,
-      subido_por:     userId,
-      expediente_id:  this.expedienteId,
-    });
-
-    if (dbErr) {
-      await this.auth.client.storage.from(BUCKET).remove([storagePath]);
-      throw new Error(dbErr.message);
-    }
+  private async recargar(tipo: TipoArchivo) {
+    const data = await this.archivoService.cargarPorTipo(this.expedienteId, tipo);
+    if (tipo === 'foto')      this.fotos.set(data);
+    if (tipo === 'video')     this.videos.set(data);
+    if (tipo === 'documento') this.documentos.set(data);
   }
 
   async subirFotos(event: Event) {
@@ -624,20 +510,16 @@ export class FileUnderEstimationComponent implements OnInit {
     input.value = '';
     if (!files.length) return;
 
+    const userId = this.user()?.id;
+    if (!userId) return;
+
     this.subiendoFoto.set(true);
     this.errorFotos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      for (const file of files) {
-        await this.uploadOne('foto', file, user.id);
-      }
-      await this.recargarTipo('foto');
-    } catch (e: any) {
-      this.errorFotos.set(e.message);
-    } finally {
-      this.subiendoFoto.set(false);
-    }
+      for (const file of files) await this.archivoService.subir(this.expedienteId, 'foto', file, userId);
+      await this.recargar('foto');
+    } catch (e: any) { this.errorFotos.set(e.message); }
+    finally { this.subiendoFoto.set(false); }
   }
 
   async subirVideo(event: Event) {
@@ -646,18 +528,16 @@ export class FileUnderEstimationComponent implements OnInit {
     input.value = '';
     if (!file) return;
 
+    const userId = this.user()?.id;
+    if (!userId) return;
+
     this.subiendoVideo.set(true);
     this.errorVideos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      await this.uploadOne('video', file, user.id);
-      await this.recargarTipo('video');
-    } catch (e: any) {
-      this.errorVideos.set(e.message);
-    } finally {
-      this.subiendoVideo.set(false);
-    }
+      await this.archivoService.subir(this.expedienteId, 'video', file, userId);
+      await this.recargar('video');
+    } catch (e: any) { this.errorVideos.set(e.message); }
+    finally { this.subiendoVideo.set(false); }
   }
 
   async subirDocumento(event: Event) {
@@ -666,37 +546,31 @@ export class FileUnderEstimationComponent implements OnInit {
     input.value = '';
     if (!file) return;
 
+    const userId = this.user()?.id;
+    if (!userId) return;
+
     this.subiendoDocumento.set(true);
     this.errorDocumentos.set('');
     try {
-      const { data: { user } } = await this.auth.client.auth.getUser();
-      if (!user) throw new Error('No hay sesión activa.');
-      await this.uploadOne('documento', file, user.id);
-      await this.recargarTipo('documento');
-    } catch (e: any) {
-      this.errorDocumentos.set(e.message);
-    } finally {
-      this.subiendoDocumento.set(false);
-    }
+      await this.archivoService.subir(this.expedienteId, 'documento', file, userId);
+      await this.recargar('documento');
+    } catch (e: any) { this.errorDocumentos.set(e.message); }
+    finally { this.subiendoDocumento.set(false); }
   }
 
-  async eliminarArchivo(archivo: ArchivoRow, tipo: 'foto' | 'video' | 'documento') {
-    const setError = tipo === 'foto'      ? this.errorFotos
-                   : tipo === 'video'     ? this.errorVideos
-                   :                        this.errorDocumentos;
+  async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
+    const setError = tipo === 'foto'  ? this.errorFotos
+                   : tipo === 'video' ? this.errorVideos
+                   :                    this.errorDocumentos;
     setError.set('');
     try {
-      await this.auth.client.storage.from(BUCKET).remove([archivo.url_storage]);
-      const { error } = await this.auth.client.from('archivo').delete().eq('id', archivo.id);
-      if (error) throw new Error(error.message);
-      await this.recargarTipo(tipo);
-    } catch (e: any) {
-      setError.set(e.message);
-    }
+      await this.archivoService.eliminar(archivo);
+      await this.recargar(tipo);
+    } catch (e: any) { setError.set(e.message); }
   }
 
   publicUrl(storagePath: string): string {
-    return this.auth.client.storage.from(BUCKET).getPublicUrl(storagePath).data.publicUrl;
+    return this.archivoService.publicUrl(storagePath);
   }
 
   verArchivo(archivo: ArchivoRow) {
@@ -704,30 +578,20 @@ export class FileUnderEstimationComponent implements OnInit {
   }
 
   formatTamano(bytes: number): string {
-    if (bytes < 1_024)       return `${bytes} B`;
-    if (bytes < 1_048_576)   return `${(bytes / 1_024).toFixed(1)} KB`;
+    if (bytes < 1_024)     return `${bytes} B`;
+    if (bytes < 1_048_576) return `${(bytes / 1_024).toFixed(1)} KB`;
     return `${(bytes / 1_048_576).toFixed(1)} MB`;
   }
 
-  // ----------------------------------------------------------------
-  // Formato
-  // ----------------------------------------------------------------
-
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'long', year: 'numeric',
-    });
+    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
   }
 
-  volver() {
-    this.router.navigate(['/estimator/files-under-estimation']);
-  }
+  volver() { this.router.navigate(['/estimator/files-under-estimation']); }
 }

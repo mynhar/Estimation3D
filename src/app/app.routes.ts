@@ -10,7 +10,10 @@ import { FileUnderEstimationComponent } from './estimator/file-under-estimation/
 import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-files.component';
 import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
 import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
-import { authGuard, estimatorGuard, guestGuard } from './auth.guard';
+import { authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.guard';
+import { AvailableFilesComponent } from './builder/available-files/available-files.component';
+import { MakeOfferComponent } from './builder/make-offer/make-offer.component';
+import { MyOffersComponent } from './builder/my-offers/my-offers.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -25,5 +28,9 @@ export const routes: Routes = [
   { path: 'estimator/estimated-files', component: EstimatedFilesComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/estimated-file/:id', component: EstimatedFileComponent, canActivate: [estimatorGuard] },
   
+  { path: 'builder/available-files', component: AvailableFilesComponent, canActivate: [constructorGuard] },
+  { path: 'builder/make-offer/:id', component: MakeOfferComponent, canActivate: [constructorGuard] },
+  { path: 'builder/my-offers', component: MyOffersComponent, canActivate: [constructorGuard] },
+
   { path: '**', redirectTo: '' },
 ];

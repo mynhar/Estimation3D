@@ -3,7 +3,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 
-const ROLES_ESTIMADOR = ['estimador', 'administrador'];
+const ROLES_ESTIMADOR   = ['estimador',   'administrador'];
+const ROLES_CONSTRUCTOR = ['constructor', 'administrador'];
 
 @Component({
   selector: 'app-root',
@@ -20,9 +21,8 @@ export class AppComponent {
 
   user        = toSignal(this.authService.user$);
   rolPerfil   = signal<string | null>(null);
-  esEstimador = computed(() =>
-    ROLES_ESTIMADOR.includes(this.rolPerfil() ?? '')
-  );
+  esEstimador  = computed(() => ROLES_ESTIMADOR.includes(this.rolPerfil()   ?? ''));
+  esConstructor = computed(() => ROLES_CONSTRUCTOR.includes(this.rolPerfil() ?? ''));
 
   constructor() {
     // Suscripción directa: BehaviorSubject emite el valor actual inmediatamente

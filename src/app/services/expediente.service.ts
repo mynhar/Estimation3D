@@ -1,0 +1,296 @@
+import { Injectable, inject } from '@angular/core';
+import { AuthSupabaseService } from './auth-supabase.service';
+import {
+  ExpedienteCliente,
+  ExpedienteRow,
+  ExpedienteDetalle,
+  ExpedienteDisponible,
+  ExpedienteParaOferta,
+} from '../models';
+
+@Injectable({ providedIn: 'root' })
+export class ExpedienteService {
+  private auth = inject(AuthSupabaseService);
+  private get db() { return this.auth.client; }
+
+  // ── Módulo cliente ────────────────────────────────────────────────────────
+
+  async getMisExpedientes(clienteId: string): Promise<ExpedienteCliente[]> {
+    const { data, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, fecha_visita, descripcion, servicio:servicio_id(nombre_es)')
+      .eq('cliente_id', clienteId)
+      .order('id', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as unknown as ExpedienteCliente[];
+  }
+
+  async crear(payload: {
+    clienteId: string;
+    servicioId: number;
+    numero: string;
+    fechaVisita: string;
+    descripcion?: string | null;
+    localizacion: {
+      tipo_inmueble: string;
+      direccion: string;
+      provincia: string;
+      canton: string;
+      distrito: string;
+      referencia?: string | null;
+      latitud?: number | null;
+      longitud?: number | null;
+    };
+  }): Promise<string> {
+    const { data: exp, error: expError } = await this.db
+      .from('expediente')
+      .insert({
+        numero:       payload.numero,
+        cliente_id:   payload.clienteId,
+        servicio_id:  payload.servicioId,
+        estado:       'nuevo',
+        fecha_visita: payload.fechaVisita,
+        descripcion:  payload.descripcion ?? null,
+      })
+      .select('id')
+      .single();
+
+    if (expError) throw new Error(`Error al crear expediente: ${expError.message}`);
+    if (!exp?.id)  throw new Error('No se recibió el ID del expediente creado.');
+
+    const { error: locError } = await this.db
+      .from('localizacion')
+      .insert({ expediente_id: exp.id, ...payload.localizacion });
+    if (locError) throw new Error(`Error al guardar localización: ${locError.message}`);
+
+    return exp.id;
+  }
+
+  // ── Módulo estimador — listas ─────────────────────────────────────────────
+
+  async getExpedienteRows(options: {
+    estado?: string;
+    estados?: string[];
+    estimadorId?: string;
+  }): Promise<ExpedienteRow[]> {
+    let query = this.db
+      .from('expediente')
+      .select('id, numero, fecha_visita, estado, cliente_id, servicio_id')
+      .order('id', { ascending: false });
+
+    if (options.estado)      query = query.eq('estado', options.estado);
+    if (options.estados)     query = query.in('estado', options.estados);
+    if (options.estimadorId) query = query.eq('estimador_id', options.estimadorId);
+
+    const { data: exps, error } = await query;
+    if (error) throw error;
+    if (!exps?.length) return [];
+
+    const clienteIds    = [...new Set(exps.map((e: any) => e.cliente_id))];
+    const servicioIds   = [...new Set(exps.map((e: any) => e.servicio_id))];
+    const expedienteIds = exps.map((e: any) => e.id);
+
+    const [perfilesRes, serviciosRes, locRes] = await Promise.all([
+      this.db.from('perfil').select('id, nombre, apellido').in('id', clienteIds),
+      this.db.from('servicio').select('id, nombre_es').in('id', servicioIds),
+      this.db.from('localizacion')
+        .select('expediente_id, direccion, provincia, canton, distrito')
+        .in('expediente_id', expedienteIds),
+    ]);
+
+    const perfiles  = perfilesRes.data  ?? [];
+    const servicios = serviciosRes.data ?? [];
+    const locs      = locRes.data       ?? [];
+
+    return exps.map((e: any) => {
+      const perfil   = perfiles.find((p: any) => String(p.id) === String(e.cliente_id));
+      const servicio = servicios.find((s: any) => String(s.id) === String(e.servicio_id));
+      const loc      = locs.find((l: any) => String(l.expediente_id) === String(e.id));
+
+      return {
+        id:              e.id,
+        numero:          e.numero,
+        fecha_visita:    e.fecha_visita,
+        estado:          e.estado,
+        servicio_nombre: servicio?.nombre_es ?? '—',
+        cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
+        direccion:       loc?.direccion ?? '—',
+        provincia:       loc?.provincia ?? '—',
+        canton:          loc?.canton    ?? '—',
+        distrito:        loc?.distrito  ?? '—',
+      } as ExpedienteRow;
+    });
+  }
+
+  // ── Módulo estimador — detalle ────────────────────────────────────────────
+
+  async getDetalle(id: string): Promise<ExpedienteDetalle> {
+    const { data: exp, error: expError } = await this.db
+      .from('expediente')
+      .select('numero, fecha_visita, descripcion, cliente_id, servicio_id, estimador_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (expError) throw new Error(`expediente: ${expError.message}`);
+    if (!exp)     throw new Error('Expediente no encontrado. Verifica RLS en la tabla expediente.');
+
+    const [servicioRes, perfilRes, locRes, estimadorRes] = await Promise.all([
+      this.db.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
+      this.db.from('perfil').select('nombre, apellido, telefono').eq('id', exp.cliente_id).single(),
+      this.db.from('localizacion')
+        .select('direccion, referencia, provincia, canton, distrito')
+        .eq('expediente_id', id)
+        .single(),
+      exp.estimador_id
+        ? this.db.from('perfil').select('nombre, apellido').eq('id', exp.estimador_id).single()
+        : Promise.resolve({ data: null }),
+    ]);
+
+    const estimador = estimadorRes.data as { nombre: string; apellido: string } | null;
+
+    return {
+      numero:           exp.numero,
+      fecha_visita:     exp.fecha_visita,
+      descripcion:      exp.descripcion ?? '',
+      servicio_nombre:  servicioRes.data?.nombre_es ?? '—',
+      cliente_nombre:   perfilRes.data
+        ? `${perfilRes.data.nombre} ${perfilRes.data.apellido}`
+        : '—',
+      cliente_telefono: perfilRes.data?.telefono ?? '',
+      direccion:  locRes.data?.direccion  ?? '—',
+      referencia: locRes.data?.referencia ?? '—',
+      provincia:  locRes.data?.provincia  ?? '—',
+      canton:     locRes.data?.canton     ?? '—',
+      distrito:   locRes.data?.distrito   ?? '—',
+      estimador_nombre: estimador
+        ? `${estimador.nombre} ${estimador.apellido}`
+        : '—',
+    };
+  }
+
+  // ── Módulo constructor ────────────────────────────────────────────────────
+
+  async getExpedientesDisponibles(): Promise<ExpedienteDisponible[]> {
+    const { data: exps, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, servicio_id')
+      .in('estado', ['estimado', 'en_oferta'])
+      .order('id', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    if (!exps?.length) return [];
+
+    const servicioIds   = [...new Set(exps.map((e: any) => e.servicio_id))];
+    const expedienteIds = exps.map((e: any) => e.id);
+
+    const [serviciosRes, locRes, estimacionRes, ofertasCountRes] = await Promise.all([
+      this.db.from('servicio').select('id, nombre_es').in('id', servicioIds),
+      this.db.from('localizacion')
+        .select('expediente_id, direccion, provincia, canton, distrito')
+        .in('expediente_id', expedienteIds),
+      this.db.from('estimacion')
+        .select('expediente_id, costo_estimado')
+        .in('expediente_id', expedienteIds),
+      this.db.rpc('contar_ofertas_expedientes', { p_ids: expedienteIds }),
+    ]);
+
+    const servicios      = serviciosRes.data    ?? [];
+    const locs           = locRes.data          ?? [];
+    const estimaciones   = estimacionRes.data   ?? [];
+    const ofertasCounts  = ofertasCountRes.data ?? [];
+
+    return exps.map((e: any) => {
+      const servicio   = servicios.find((s: any) => String(s.id) === String(e.servicio_id));
+      const loc        = locs.find((l: any) => String(l.expediente_id) === String(e.id));
+      const estimacion = estimaciones.find((est: any) => String(est.expediente_id) === String(e.id));
+      const total      = ofertasCounts.find((c: any) => String(c.expediente_id) === String(e.id))?.total ?? 0;
+
+      return {
+        id:              e.id,
+        numero:          e.numero,
+        estado:          e.estado,
+        servicio_nombre: servicio?.nombre_es ?? '—',
+        direccion:       loc?.direccion ?? '—',
+        provincia:       loc?.provincia ?? '—',
+        canton:          loc?.canton    ?? '—',
+        distrito:        loc?.distrito  ?? '—',
+        costo_estimado:  estimacion?.costo_estimado ?? null,
+        total_ofertas:   total,
+      } as ExpedienteDisponible;
+    }).filter((r) =>
+      r.estado === 'estimado' ||
+      (r.estado === 'en_oferta' && r.total_ofertas < 4)
+    );
+  }
+
+  async getExpedienteParaOferta(id: string): Promise<ExpedienteParaOferta> {
+    const { data: exp, error: expError } = await this.db
+      .from('expediente')
+      .select('numero, fecha_visita, servicio_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (expError) throw new Error(expError.message);
+    if (!exp)     throw new Error('Expediente no encontrado.');
+
+    const [servicioRes, locRes, estimacionRes, ofertasRes] = await Promise.all([
+      this.db.from('servicio').select('nombre_es, descripcion_es').eq('id', exp.servicio_id).single(),
+      this.db.from('localizacion')
+        .select('direccion, referencia, provincia, canton, distrito')
+        .eq('expediente_id', id).single(),
+      this.db.from('estimacion')
+        .select('descripcion_problemas, costo_estimado, fecha_visita_real')
+        .eq('expediente_id', id).maybeSingle(),
+      this.db.from('oferta')
+        .select('id', { count: 'exact', head: true })
+        .eq('expediente_id', id),
+    ]);
+
+    const servicio   = servicioRes.data;
+    const loc        = locRes.data;
+    const estimacion = estimacionRes.data;
+
+    return {
+      id,
+      numero:               exp.numero,
+      fecha_visita:         exp.fecha_visita,
+      servicio_nombre:      servicio?.nombre_es      ?? '—',
+      servicio_descripcion: servicio?.descripcion_es ?? '',
+      direccion:            loc?.direccion  ?? '—',
+      referencia:           loc?.referencia ?? '—',
+      provincia:            loc?.provincia  ?? '—',
+      canton:               loc?.canton     ?? '—',
+      distrito:             loc?.distrito   ?? '—',
+      descripcion_problemas: estimacion?.descripcion_problemas ?? '',
+      costo_estimado:        estimacion?.costo_estimado        ?? null,
+      fecha_visita_real:     estimacion?.fecha_visita_real     ?? '',
+      total_ofertas:         ofertasRes.count                  ?? 0,
+    };
+  }
+
+  // ── Transiciones de estado ────────────────────────────────────────────────
+
+  async asignarEstimador(expedienteId: string, estimadorId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente')
+      .update({ estado: 'en_estimacion', estimador_id: estimadorId })
+      .eq('id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  async actualizarEstado(expedienteId: string, estado: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente')
+      .update({ estado })
+      .eq('id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  async liberar(expedienteId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente')
+      .update({ estado: 'nuevo', estimador_id: null })
+      .eq('id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+}
