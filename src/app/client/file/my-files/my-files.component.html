@@ -1,0 +1,165 @@
+<div class="container py-4 my-files-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-start mb-4 gap-3 flex-wrap">
+    <div>
+      <h4 class="page-title mb-1">Mis expedientes</h4>
+      <p class="page-subtitle mb-0">
+        @if (cargando()) {
+          &nbsp;
+        } @else if (expedientes().length === 0) {
+          Aún no has creado ningún expediente.
+        } @else {
+          {{ countTodos() }} expediente{{ countTodos() > 1 ? 's' : '' }}
+          @if (countActivos() > 0) {
+            &nbsp;·&nbsp;
+            <span class="text-primary fw-semibold">
+              {{ countActivos() }} activo{{ countActivos() > 1 ? 's' : '' }}
+            </span>
+          }
+        }
+      </p>
+    </div>
+    <a routerLink="/client/file/create" class="btn btn-primary d-flex align-items-center gap-2 flex-shrink-0">
+      <i class="bi bi-plus-lg"></i><span class="d-none d-sm-inline">Nuevo expediente</span><span class="d-sm-none">Nuevo</span>
+    </a>
+  </div>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando expedientes…
+    </div>
+
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  } @else if (expedientes().length === 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="empty-state">
+        <div class="empty-state__icon-wrap">
+          <i class="bi bi-folder2-open"></i>
+        </div>
+        <p class="empty-state__title">Sin expedientes todavía</p>
+        <p class="empty-state__text">
+          Crea tu primer expediente para solicitar una estimación 3D de tu proyecto.
+        </p>
+        <a routerLink="/client/file/create" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-2"></i>Crear primer expediente
+        </a>
+      </div>
+    </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Filtros ──────────────────────────────────────────────────────────── -->
+    <div class="filter-bar mb-4" role="group" aria-label="Filtrar expedientes">
+      <button class="chip-btn" [class.chip-btn--active]="filtro() === 'todos'"
+              (click)="filtro.set('todos')">
+        Todos
+        <span class="chip-count">{{ countTodos() }}</span>
+      </button>
+      <button class="chip-btn chip-btn--blue" [class.chip-btn--active]="filtro() === 'activos'"
+              (click)="filtro.set('activos')">
+        <i class="bi bi-lightning-charge"></i> Activos
+        <span class="chip-count">{{ countActivos() }}</span>
+      </button>
+      <button class="chip-btn chip-btn--green" [class.chip-btn--active]="filtro() === 'finalizados'"
+              (click)="filtro.set('finalizados')">
+        <i class="bi bi-check2-circle"></i> Finalizados
+        <span class="chip-count">{{ countFinalizados() }}</span>
+      </button>
+    </div>
+
+    <!-- Lista ────────────────────────────────────────────────────────────── -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="empty-filter text-center py-5 text-muted">
+        <i class="bi bi-funnel fs-3 d-block mb-2 text-muted opacity-50"></i>
+        <p class="mb-2">No hay expedientes en este filtro.</p>
+        <button class="btn btn-link btn-sm p-0" (click)="filtro.set('todos')">
+          Ver todos los expedientes
+        </button>
+      </div>
+    } @else {
+      <div class="file-list">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <div class="file-card mb-3" [class.file-card--cancelado]="exp.estado === 'cancelado'">
+
+            <!-- Barra de acento lateral -->
+            <div class="file-card__accent" [style.background]="estadoCfg(exp.estado).color"></div>
+
+            <div class="file-card__body">
+
+              <!-- ── Fila 1: número · badge ─────────────────────────────── -->
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="file-num">{{ exp.numero }}</span>
+                <span class="badge {{ estadoCfg(exp.estado).clase }}">
+                  <i class="bi {{ estadoCfg(exp.estado).icono }} me-1"></i>
+                  {{ estadoCfg(exp.estado).texto }}
+                </span>
+              </div>
+
+              <!-- ── Fila 2: nombre del servicio ────────────────────────── -->
+              <p class="file-servicio mb-1">{{ exp.servicio?.nombre_es ?? '—' }}</p>
+
+              <!-- ── Fila 3: fecha de visita ────────────────────────────── -->
+              <p class="file-fecha mb-0">
+                <i class="bi bi-calendar3 me-1"></i>
+                Visita solicitada: {{ formatFecha(exp.fecha_visita) }}
+              </p>
+
+              <hr class="file-divider my-3" />
+
+              <!-- ── Pipeline de progreso ───────────────────────────────── -->
+              @if (exp.estado !== 'cancelado') {
+                <div class="pipeline">
+                  @for (step of PIPELINE; let i = $index; track step.label) {
+                    @if (i > 0) {
+                      <div class="pipeline__connector"
+                           [class.pipeline__connector--blue]="connectorBlue(exp.estado, i)"></div>
+                    }
+                    <div class="pipeline__dot-wrap"
+                         [class.pipeline__dot-wrap--done]="dotActive(exp.estado, i) && !dotCurrent(exp.estado, i)"
+                         [class.pipeline__dot-wrap--current]="dotCurrent(exp.estado, i)">
+                      <div class="pipeline__dot"></div>
+                      <span class="pipeline__lbl">{{ step.label }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- ── Hint de estado + acción contextual ─────────────────── -->
+              <div class="file-hint mt-3 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                <span class="file-hint__text">
+                  <i class="bi {{ estadoCfg(exp.estado).icono }} me-1"></i>
+                  {{ estadoHint(exp.estado) }}
+                </span>
+                @if (exp.estado === 'en_oferta') {
+                  <a routerLink="/client/offers-received"
+                     class="btn btn-sm btn-warning d-flex align-items-center gap-1 flex-shrink-0">
+                    <i class="bi bi-eye"></i>
+                    <span>Ver ofertas</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </a>
+                }
+                @if (exp.estado === 'contratado') {
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-check-circle-fill me-1"></i>Completado
+                  </span>
+                }
+              </div>
+
+              <!-- ── Descripción (preview 2 líneas) ─────────────────────── -->
+              @if (exp.descripcion) {
+                <p class="file-desc mt-2 mb-0">{{ exp.descripcion }}</p>
+              }
+
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+</div>

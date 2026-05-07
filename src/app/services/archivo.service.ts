@@ -19,6 +19,49 @@ export class ArchivoService {
     return (data ?? []) as ArchivoRow[];
   }
 
+  async listarPorExpediente(expedienteId: string): Promise<{
+    fotos: ArchivoRow[];
+    videos: ArchivoRow[];
+    documentos: ArchivoRow[];
+  }> {
+    const [fotosRes, videosRes, documentosRes] = await Promise.all([
+      this.db.storage.from(BUCKET).list(`expedientes/${expedienteId}/foto`,      { sortBy: { column: 'created_at', order: 'desc' } }),
+      this.db.storage.from(BUCKET).list(`expedientes/${expedienteId}/video`,     { sortBy: { column: 'created_at', order: 'desc' } }),
+      this.db.storage.from(BUCKET).list(`expedientes/${expedienteId}/documento`, { sortBy: { column: 'created_at', order: 'desc' } }),
+    ]);
+
+    const toRows = (tipo: string, files: any[]): ArchivoRow[] =>
+      (files ?? [])
+        .filter(f => f.name && f.name !== '.emptyFolderPlaceholder')
+        .map(f => ({
+          id:             f.id   ?? f.name,
+          nombre_archivo: f.name.replace(/^\d+_/, ''),
+          url_storage:    `expedientes/${expedienteId}/${tipo}/${f.name}`,
+          mime_type:      f.metadata?.mimetype ?? '',
+          tamano_bytes:   f.metadata?.size     ?? 0,
+        }));
+
+    return {
+      fotos:      toRows('foto',      fotosRes.data     ?? []),
+      videos:     toRows('video',     videosRes.data    ?? []),
+      documentos: toRows('documento', documentosRes.data ?? []),
+    };
+  }
+
+  async cargarPorOferta(ofertaId: string): Promise<{ documentos: ArchivoRow[]; videos: ArchivoRow[] }> {
+    const { data } = await this.db
+      .from('archivo')
+      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes, tipo')
+      .eq('oferta_id', ofertaId)
+      .order('creado_en', { ascending: false });
+
+    const rows = (data ?? []) as any[];
+    return {
+      documentos: rows.filter(a => a.tipo === 'documento') as ArchivoRow[],
+      videos:     rows.filter(a => a.tipo === 'video')     as ArchivoRow[],
+    };
+  }
+
   async cargarTodos(expedienteId: string): Promise<{ fotos: ArchivoRow[]; videos: ArchivoRow[]; documentos: ArchivoRow[] }> {
     const [fotos, videos, documentos] = await Promise.all([
       this.cargarPorTipo(expedienteId, 'foto'),

@@ -1,49 +1,294 @@
-<div class="container py-4">
+<div class="container py-4 dash-wrap">
 
-  <div class="mb-4">
-    <h4 class="fw-semibold mb-1">Dashboard</h4>
-    <p class="text-muted mb-0">Bienvenido a Estimation 3D</p>
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-semibold mb-0">Mi Panel</h4>
+      <p class="text-muted mb-0 small">
+        Bienvenido{{ bienvenida ? ', ' + bienvenida : '' }}
+      </p>
+    </div>
+    <a routerLink="/client/file/create" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Nuevo expediente
+    </a>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-body">
-          <p class="text-muted small mb-1">Proyectos activos</p>
-          <h3 class="fw-bold mb-0">0</h3>
-        </div>
-      </div>
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div>Cargando…
     </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-body">
-          <p class="text-muted small mb-1">Estimaciones</p>
-          <h3 class="fw-bold mb-0">0</h3>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-body">
-          <p class="text-muted small mb-1">Materiales</p>
-          <h3 class="fw-bold mb-0">0</h3>
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-body">
-          <p class="text-muted small mb-1">Horas estimadas</p>
-          <h3 class="fw-bold mb-0">0 h</h3>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="card border-0 shadow-sm">
-    <div class="card-body text-center py-5 text-muted">
-      <p class="mb-0">No hay proyectos aún. Crea tu primera estimación.</p>
+  <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
+  } @else if (total() === 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-folder2-open display-4 text-muted d-block mb-3"></i>
+        <p class="fw-semibold mb-1">Todavía no tienes expedientes</p>
+        <p class="text-muted small mb-4">Crea tu primer expediente para comenzar el proceso de estimación.</p>
+        <a routerLink="/client/file/create" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>Crear primer expediente
+        </a>
+      </div>
     </div>
-  </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- ── Banner de alertas ─────────────────────────────────────────────── -->
+    @if (conOfertasPendientes() > 0) {
+      <div class="alert-oferta d-flex align-items-center gap-3 mb-4 p-3 rounded-3 shadow-sm">
+        <div class="alert-oferta__icon">
+          <i class="bi bi-bell-fill"></i>
+        </div>
+        <div class="flex-grow-1">
+          <p class="fw-semibold mb-0 text-dark">
+            Tienes {{ conOfertasPendientes() }}
+            {{ conOfertasPendientes() === 1 ? 'expediente con ofertas' : 'expedientes con ofertas' }}
+            para revisar
+          </p>
+          <p class="small mb-0 text-warning-emphasis">
+            Los constructores han enviado sus propuestas — ¡échales un vistazo!
+          </p>
+        </div>
+        <a routerLink="/client/offers-received"
+           class="btn btn-warning btn-sm fw-semibold flex-shrink-0">
+          Ver ofertas <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    }
+
+    <!-- ── KPI cards ─────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--total h-100"
+             ngbTooltip="Total de expedientes registrados" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--total">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Total</p>
+              <p class="kpi-num fw-bold mb-0">{{ total() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--proceso h-100"
+             ngbTooltip="Expedientes activos en el flujo de trabajo" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--proceso">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">En proceso</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#0d6efd">{{ enProceso() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--adj h-100"
+             ngbTooltip="Con oferta seleccionada, pendiente de contrato" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--adj">
+              <i class="bi bi-award"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Adjudicados</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#fd7e14">{{ adjudicados() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--ok h-100"
+             ngbTooltip="Expedientes con contrato finalizado" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--ok">
+              <i class="bi bi-trophy"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Completados</p>
+              <p class="kpi-num fw-bold mb-0 text-success">{{ completados() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Contenido principal ─────────────────────────────────────────────── -->
+    <div class="row g-4">
+
+      <!-- ── Lista de expedientes ──────────────────────────────────────────── -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+
+          <div class="card-header bg-white border-bottom px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Mis expedientes</span>
+              <a routerLink="/client/file/my-files" class="btn btn-outline-secondary btn-sm">
+                Ver todos <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body p-0 exp-list">
+            <ul class="list-group list-group-flush">
+              @for (exp of expedientes(); track exp.id) {
+                <li class="list-group-item px-4 py-3">
+
+                  <!-- Estado + Número + Servicio + Badge -->
+                  <div class="d-flex justify-content-between align-items-center mb-1 gap-2">
+                    <div class="d-flex align-items-center gap-2 text-truncate">
+                      <i class="bi {{ cfg(exp.estado).icon }} flex-shrink-0"
+                         [style.color]="cfg(exp.estado).color"></i>
+                      <span class="fw-semibold small">Exp. {{ exp.numero }}</span>
+                      <span class="text-muted small text-truncate">
+                        {{ exp.servicio?.nombre_es ?? '—' }}
+                      </span>
+                    </div>
+                    <span class="badge flex-shrink-0"
+                          [style.background-color]="cfg(exp.estado).color"
+                          [style.color]="cfg(exp.estado).textColor">
+                      {{ cfg(exp.estado).label }}
+                    </span>
+                  </div>
+
+                  <!-- Descripción de próximo paso -->
+                  <p class="step-desc small mb-2">
+                    <i class="bi bi-arrow-right-circle me-1"></i>{{ cfg(exp.estado).desc }}
+                  </p>
+
+                  <!-- Barra de progreso -->
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <div class="progress flex-grow-1 progress-thin">
+                      <div class="progress-bar"
+                           role="progressbar"
+                           [style.width.%]="cfg(exp.estado).progressPct"
+                           [style.background-color]="cfg(exp.estado).color"
+                           [attr.aria-valuenow]="cfg(exp.estado).progressPct"
+                           aria-valuemin="0" aria-valuemax="100">
+                      </div>
+                    </div>
+                    <small class="text-muted fw-medium pct-lbl">
+                      {{ cfg(exp.estado).progressPct }}%
+                    </small>
+                  </div>
+
+                  <!-- Fecha visita + acción contextual -->
+                  <div class="d-flex align-items-center justify-content-between">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar3 me-1"></i>
+                      Visita: {{ formatFecha(exp.fecha_visita) }}
+                    </small>
+                    @if (exp.estado === 'en_oferta') {
+                      <a routerLink="/client/offers-received"
+                         class="btn btn-warning btn-sm py-0 px-2 fw-semibold">
+                        <i class="bi bi-eye me-1"></i>Ver ofertas
+                      </a>
+                    }
+                  </div>
+
+                </li>
+              }
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Columna derecha: gráfico + acciones ────────────────────────────── -->
+      <div class="col-lg-4 d-flex flex-column gap-4">
+
+        <!-- Donut -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom px-4 py-3">
+            <span class="fw-semibold">
+              <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+            </span>
+          </div>
+          <div class="card-body d-flex flex-column align-items-center py-4 px-3">
+
+            <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+              @for (seg of donutSegments(); track seg.label) {
+                <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                        [attr.stroke]="seg.color" stroke-width="18"
+                        [attr.stroke-dasharray]="seg.dasharray"
+                        [attr.stroke-dashoffset]="seg.dashoffset"
+                        transform="rotate(-90 70 70)"/>
+              }
+              <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
+              <text x="70" y="83" text-anchor="middle" class="donut-sub">expedientes</text>
+            </svg>
+
+            <div class="w-100 mt-3">
+              @for (e of estadoBreakdown(); track e.key) {
+                <div class="d-flex align-items-center justify-content-between legend-row">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi {{ e.icon }}" [style.color]="e.color"></i>
+                    <span class="small">{{ e.label }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress legend-bar">
+                      <div class="progress-bar" [style.width.%]="e.pct"
+                           [style.background-color]="e.color"></div>
+                    </div>
+                    <span class="small fw-semibold" style="min-width:18px">{{ e.count }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-bottom px-4 py-3">
+            <span class="fw-semibold">
+              <i class="bi bi-lightning-charge me-2 text-primary"></i>Acciones rápidas
+            </span>
+          </div>
+          <div class="card-body d-flex flex-column gap-2 py-3 px-3">
+
+            <a routerLink="/client/file/create"
+               class="btn btn-outline-primary d-flex align-items-center gap-2 text-start">
+              <i class="bi bi-plus-circle flex-shrink-0"></i>
+              <span>Nuevo expediente</span>
+            </a>
+
+            <a routerLink="/client/offers-received"
+               class="btn d-flex align-items-center gap-2 text-start"
+               [class.btn-warning]="conOfertasPendientes() > 0"
+               [class.btn-outline-secondary]="conOfertasPendientes() === 0">
+              <i class="bi bi-envelope-open flex-shrink-0"></i>
+              <span class="flex-grow-1">Ofertas recibidas</span>
+              @if (conOfertasPendientes() > 0) {
+                <span class="badge bg-dark">{{ conOfertasPendientes() }}</span>
+              }
+            </a>
+
+            <a routerLink="/client/file/my-files"
+               class="btn btn-outline-secondary d-flex align-items-center gap-2 text-start">
+              <i class="bi bi-folder2 flex-shrink-0"></i>
+              <span>Mis expedientes</span>
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  }
 
 </div>

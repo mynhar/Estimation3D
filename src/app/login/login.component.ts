@@ -194,7 +194,7 @@ export class LoginComponent {
     try {
       const { email, password } = this.loginForm.value;
       await this.auth.signInWithEmail(email!, password!);
-      this.router.navigate(['/client/dashboard']);
+      this.router.navigate([await this.auth.getHomeRoute()]);
     } catch (error: any) {
       this.errorLogin.set(
         error?.message?.includes('Invalid login credentials')

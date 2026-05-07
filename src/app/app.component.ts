@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 
 const ROLES_ESTIMADOR   = ['estimador',   'administrador'];
@@ -9,7 +9,7 @@ const ROLES_CONSTRUCTOR = ['constructor', 'administrador'];
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

@@ -1,0 +1,345 @@
+/* ── Layout ──────────────────────────────────────────────────── */
+.create-wrap {
+  max-width: 860px;
+}
+
+/* ── Page heading ────────────────────────────────────────────── */
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #212529;
+}
+.page-subtitle {
+  font-size: .9rem;
+  color: #6c757d;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  PROGRESS STEPPER                                           */
+/* ════════════════════════════════════════════════════════════ */
+.form-stepper {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem 1.5rem;
+}
+
+.stepper__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  flex-shrink: 0;
+}
+
+.stepper__circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #6c757d;
+  font-weight: 700;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .25s, color .25s;
+}
+.stepper__step--done .stepper__circle {
+  background: #16a34a;
+  color: #fff;
+}
+
+.stepper__label {
+  font-size: .68rem;
+  color: #adb5bd;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.stepper__step--done .stepper__label {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* Connector: offset so it aligns with circle center (16px from top) */
+.stepper__connector {
+  flex: 1;
+  height: 2px;
+  background: #e9ecef;
+  margin-top: 15px; /* (32px circle / 2) - (2px line / 2) */
+  margin-left: .25rem;
+  margin-right: .25rem;
+  min-width: 12px;
+  transition: background-color .25s;
+}
+.stepper__connector--done {
+  background: #16a34a;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  SECTION HEADERS                                            */
+/* ════════════════════════════════════════════════════════════ */
+.section-header {
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background-color .25s;
+}
+.section-num--done {
+  background: #16a34a;
+}
+
+.section-title {
+  font-size: .95rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  LOADING STATE                                              */
+/* ════════════════════════════════════════════════════════════ */
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: 2rem 0;
+  color: #6c757d;
+  font-size: .9rem;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  SERVICE CARDS                                              */
+/* ════════════════════════════════════════════════════════════ */
+.service-card {
+  display: block;
+  padding: .875rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: .75rem;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color .15s, background-color .15s, box-shadow .15s;
+}
+.service-card:hover {
+  border-color: #9ec5fe;
+  background: #f8f9ff;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, .08);
+}
+.service-card--selected {
+  border-color: #0d6efd;
+  background: #f0f5ff;
+  box-shadow: 0 2px 12px rgba(13, 110, 253, .15);
+}
+
+.service-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #6c757d;
+  transition: background-color .15s, color .15s;
+  flex-shrink: 0;
+}
+.service-icon--selected {
+  background: #cfe2ff;
+  color: #0d6efd;
+}
+
+.service-code {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #6c757d;
+  font-weight: 600;
+}
+.service-name {
+  font-size: .9rem;
+  font-weight: 600;
+  color: #212529;
+  line-height: 1.3;
+}
+.service-desc {
+  font-size: .8rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  TIPO DE INMUEBLE BUTTONS                                   */
+/* ════════════════════════════════════════════════════════════ */
+.tipo-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.tipo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: .6rem .875rem;
+  min-width: 72px;
+  border-radius: .625rem !important;
+  gap: .25rem;
+  transition: all .15s;
+}
+
+.tipo-btn__icon {
+  font-size: 1.3rem;
+  display: block;
+}
+
+.tipo-btn__label {
+  font-size: .72rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Bootstrap btn-check checked state */
+.btn-check:checked + .tipo-btn {
+  background: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, .3);
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  VISIT INFO NOTE                                            */
+/* ════════════════════════════════════════════════════════════ */
+.visit-note {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: .84rem;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  CHARACTER COUNTER                                          */
+/* ════════════════════════════════════════════════════════════ */
+.char-counter {
+  font-size: .75rem;
+  color: #adb5bd;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-left: .5rem;
+}
+.char-counter--warn {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  GPS SECTION                                                */
+/* ════════════════════════════════════════════════════════════ */
+.gps-toggle {
+  background: none;
+  border: 1.5px dashed #dee2e6;
+  border-radius: .625rem;
+  padding: .625rem 1rem;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: .9rem;
+  transition: background-color .15s, border-color .15s, color .15s;
+  text-align: left;
+}
+.gps-toggle:hover {
+  background: #f0f5ff;
+  border-color: #9ec5fe;
+  color: #0d6efd;
+}
+.gps-toggle:hover .gps-chevron {
+  color: #0d6efd;
+}
+.gps-chevron {
+  font-size: .8rem;
+  color: #adb5bd;
+  transition: color .15s;
+}
+
+.gps-panel {
+  animation: slideDown .18s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  VALIDATION MESSAGES                                        */
+/* ════════════════════════════════════════════════════════════ */
+.invalid-msg {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  font-size: .8rem;
+  color: #dc3545;
+  margin-top: .3rem;
+}
+
+/* ════════════════════════════════════════════════════════════ */
+/*  STICKY ACTION BAR                                          */
+/* ════════════════════════════════════════════════════════════ */
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid #e9ecef;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, .07);
+  z-index: 40;
+  padding: .875rem 0;
+  margin-top: 1rem;
+}
+
+/* On desktop the sticky bar is unnecessary — show it as plain footer */
+@media (min-width: 768px) {
+  .form-actions {
+    position: static;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-top: none;
+    box-shadow: none;
+    padding: 1.25rem 0 .5rem;
+  }
+}
+
+/* ── Mobile tweaks ───────────────────────────────────────────── */
+@media (max-width: 575px) {
+  .form-stepper {
+    padding: .875rem 1rem;
+  }
+  .card-body {
+    padding: 1rem !important;
+  }
+  .card-header.section-header {
+    padding: .75rem 1rem !important;
+  }
+  .tipo-btn {
+    min-width: 60px;
+    padding: .5rem .625rem;
+  }
+  .tipo-btn__label {
+    font-size: .65rem;
+  }
+}

@@ -1,0 +1,183 @@
+<div class="container py-4 detail-wrap">
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando oferta…
+    </div>
+
+  } @else if (!detalle()) {
+    <div class="alert alert-warning d-flex align-items-center gap-2">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      No se encontró la oferta.
+      @if (errorMsg()) {
+        <small class="text-danger ms-1">{{ errorMsg() }}</small>
+      }
+    </div>
+
+  } @else {
+
+    <!-- ── Encabezado ──────────────────────────────────────────────────────── -->
+    <div class="mb-4 d-flex align-items-center gap-3 flex-wrap">
+      <button class="btn btn-outline-secondary btn-sm btn-back" (click)="volver()">
+        <i class="bi bi-arrow-left"></i> Volver
+      </button>
+      <div class="flex-grow-1">
+        <h4 class="page-title mb-0">Oferta — Exp. {{ detalle()!.expediente_numero }}</h4>
+        <p class="page-subtitle">{{ detalle()!.servicio_nombre }}</p>
+      </div>
+      <span class="badge rounded-pill px-3 py-2 {{ badgeClass(detalle()!.estado) }}">
+        {{ estadoLabel(detalle()!.estado) }}
+      </span>
+    </div>
+
+    <!-- ── Información del expediente ─────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom px-4 py-3">
+        <span class="fw-semibold">
+          <i class="bi bi-folder2 me-2 text-primary"></i>Expediente
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <p class="text-label mb-1">N° Expediente</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.expediente_numero }}</p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Servicio</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.servicio_nombre }}</p>
+          </div>
+
+          <div class="col-12"><hr class="my-0" /></div>
+
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Dirección</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.direccion }}</p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Referencia</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.referencia || '—' }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-label mb-1">Provincia</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.provincia }}</p>
+          </div>
+          <div class="col-sm-4">
+            <p class="text-label mb-1">Cantón</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.canton }}</p>
+          </div>
+          <div class="col-sm-4">
+            <p class="text-label mb-1">Distrito</p>
+            <p class="fw-semibold mb-0">{{ detalle()!.distrito }}</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Detalles de mi oferta ───────────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom px-4 py-3">
+        <span class="fw-semibold">
+          <i class="bi bi-file-earmark-text me-2 text-primary"></i>Mi oferta
+        </span>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Precio total</p>
+            <p class="fw-bold mb-0 fs-5 text-success">{{ formatCosto(detalle()!.precio) }}</p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Plazo estimado</p>
+            <p class="fw-semibold mb-0">
+              {{ formatPlazo(detalle()!.plazo_semanas_min, detalle()!.plazo_semanas_max) }}
+            </p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Fecha de inicio propuesta</p>
+            <p class="fw-semibold mb-0">{{ formatFecha(detalle()!.fecha_inicio) }}</p>
+          </div>
+          <div class="col-sm-6">
+            <p class="text-label mb-1">Garantía</p>
+            <p class="fw-semibold mb-0">
+              {{ detalle()!.garantia_anos ? detalle()!.garantia_anos + ' año(s)' : '—' }}
+            </p>
+          </div>
+
+          <div class="col-12"><hr class="my-0" /></div>
+
+          <div class="col-12">
+            <p class="text-label mb-1">Descripción del enfoque</p>
+            <p class="mb-0" style="white-space: pre-wrap">
+              {{ detalle()!.descripcion || '—' }}
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Archivos adjuntos ───────────────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom px-4 py-3">
+        <span class="fw-semibold">
+          <i class="bi bi-paperclip me-2 text-primary"></i>Archivos adjuntos
+        </span>
+      </div>
+      <div class="card-body p-4">
+
+        <p class="text-label mb-2">Documento de oferta</p>
+        @if (documentos().length === 0) {
+          <p class="text-muted small mb-4">Sin documentos adjuntos.</p>
+        } @else {
+          <ul class="list-group list-group-flush mb-4">
+            @for (d of documentos(); track d.id) {
+              <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-file-earmark-pdf text-danger"></i>
+                  <span class="small fw-medium">{{ d.nombre_archivo }}</span>
+                  <span class="text-muted small">{{ formatTamano(d.tamano_bytes) }}</span>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" (click)="verArchivo(d)">
+                  <i class="bi bi-eye me-1"></i>Ver
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        <p class="text-label mb-2">Video complementario</p>
+        @if (videos().length === 0) {
+          <p class="text-muted small mb-0">Sin videos adjuntos.</p>
+        } @else {
+          <ul class="list-group list-group-flush">
+            @for (v of videos(); track v.id) {
+              <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-camera-video text-primary"></i>
+                  <span class="small fw-medium">{{ v.nombre_archivo }}</span>
+                  <span class="text-muted small">{{ formatTamano(v.tamano_bytes) }}</span>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" (click)="verArchivo(v)">
+                  <i class="bi bi-play-circle me-1"></i>Ver
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+      </div>
+    </div>
+
+    <button class="btn btn-outline-secondary btn-back" (click)="volver()">
+      <i class="bi bi-arrow-left"></i> Volver a mis ofertas
+    </button>
+
+  }
+
+</div>

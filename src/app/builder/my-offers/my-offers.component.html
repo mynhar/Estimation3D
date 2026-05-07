@@ -1,30 +1,47 @@
-<div class="container py-4">
+<div class="container py-4 page-wrap">
 
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
   <div class="mb-4">
-    <h4 class="fw-semibold mb-1">Mis ofertas</h4>
-    <p class="text-muted mb-0">Ofertas enviadas sobre expedientes estimados.</p>
+    <h4 class="page-title">Mis ofertas</h4>
+    <p class="page-subtitle">Historial de propuestas enviadas a expedientes estimados.</p>
   </div>
 
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="text-center py-5 text-muted">Cargando ofertas…</div>
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando ofertas…
+    </div>
+
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
   } @else if (ofertas().length === 0) {
     <div class="card border-0 shadow-sm">
-      <div class="card-body text-center py-5 text-muted">
-        No ha enviado ninguna oferta aún.
+      <div class="empty-state">
+        <i class="bi bi-file-earmark-x empty-state__icon"></i>
+        <p class="empty-state__title">Aún no has enviado ofertas</p>
+        <p class="empty-state__text">
+          Encuentra proyectos disponibles y envía tu primera propuesta.
+        </p>
+        <a routerLink="/builder/available-files" class="btn btn-primary btn-sm">
+          <i class="bi bi-search me-1"></i>Ver expedientes disponibles
+        </a>
       </div>
     </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
-    <div class="card border-0 shadow-sm">
+
+    <div class="card table-card">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
               <th class="ps-4">N°</th>
               <th>Servicio</th>
-              <th>Dirección</th>
-              <th class="text-end">Mi Precio</th>
-              <th>Fecha inicio</th>
-              <th>Plazo</th>
+              <th class="d-none d-lg-table-cell">Dirección</th>
+              <th class="text-end">Mi precio</th>
+              <th class="d-none d-sm-table-cell">Inicio</th>
+              <th class="d-none d-md-table-cell text-center">Plazo</th>
               <th>Estado</th>
               <th></th>
             </tr>
@@ -32,15 +49,21 @@
           <tbody>
             @for (oferta of ofertas(); track oferta.id) {
               <tr>
-                <td class="ps-4 fw-semibold">{{ oferta.expediente_numero }}</td>
-                <td>{{ oferta.servicio_nombre }}</td>
-                <td class="text-muted small">
+                <td class="ps-4 fw-semibold text-nowrap">{{ oferta.expediente_numero }}</td>
+                <td class="small">{{ oferta.servicio_nombre }}</td>
+                <td class="text-muted small d-none d-lg-table-cell">
                   <div>{{ oferta.direccion }}{{ oferta.referencia ? ' — ' + oferta.referencia : '' }}</div>
-                  <div>{{ oferta.provincia }}, {{ oferta.canton }}, {{ oferta.distrito }}</div>
+                  <div class="text-label mt-1">{{ oferta.provincia }}, {{ oferta.canton }}</div>
                 </td>
-                <td class="text-end fw-semibold">{{ formatCosto(oferta.precio) }}</td>
-                <td>{{ formatFecha(oferta.fecha_inicio) }}</td>
-                <td class="text-nowrap">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</td>
+                <td class="text-end fw-semibold text-nowrap small">
+                  {{ formatCosto(oferta.precio) }}
+                </td>
+                <td class="small d-none d-sm-table-cell text-nowrap">
+                  {{ formatFecha(oferta.fecha_inicio) }}
+                </td>
+                <td class="d-none d-md-table-cell text-center text-nowrap small">
+                  {{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}
+                </td>
                 <td>
                   <span class="badge rounded-pill px-3 py-2 {{ badgeClass(oferta.estado) }}">
                     {{ estadoLabel(oferta.estado) }}
@@ -57,6 +80,7 @@
         </table>
       </div>
     </div>
+
   }
 
 </div>

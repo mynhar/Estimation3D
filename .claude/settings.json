@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Recurse -Directory)",
+      "Bash(supabase migration *)",
+      "Bash(Remove-Item \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\public\\\\avatar-fallback.svg\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\models\" -Name)",
+      "Bash(npx ng *)"
+    ]
+  }
+}

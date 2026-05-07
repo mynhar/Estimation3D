@@ -14,6 +14,11 @@ import { authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.
 import { AvailableFilesComponent } from './builder/available-files/available-files.component';
 import { MakeOfferComponent } from './builder/make-offer/make-offer.component';
 import { MyOffersComponent } from './builder/my-offers/my-offers.component';
+import { MyOfferComponent } from './builder/my-offer/my-offer.component';
+import { BuilderDashboardComponent } from './builder/dashboard/dashboard.component';
+import { OffersReceivedComponent } from './client/offers-received/offers-received.component';
+import { BuilderOfferComponent } from './client/builder-offer/builder-offer.component';
+import { PerfilComponent } from './client/perfil/perfil.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -21,6 +26,9 @@ export const routes: Routes = [
   { path: 'client/dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'client/file/create', component: FileCreateComponent, canActivate: [authGuard] },
   { path: 'client/file/my-files', component: MyFilesComponent, canActivate: [authGuard] },
+  { path: 'client/offers-received', component: OffersReceivedComponent, canActivate: [authGuard] },
+  { path: 'client/builder-offer/:id', component: BuilderOfferComponent, canActivate: [authGuard] },
+  { path: 'client/perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'estimator/files-to-be-estimated', component: FilesToBeEstimatedComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/file-to-be-estimated/:id', component: FileToBeEstimatedComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/files-under-estimation', component: FilesUnderEstimationComponent, canActivate: [estimatorGuard] },
@@ -28,9 +36,11 @@ export const routes: Routes = [
   { path: 'estimator/estimated-files', component: EstimatedFilesComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/estimated-file/:id', component: EstimatedFileComponent, canActivate: [estimatorGuard] },
   
+  { path: 'builder/dashboard', component: BuilderDashboardComponent, canActivate: [constructorGuard] },
   { path: 'builder/available-files', component: AvailableFilesComponent, canActivate: [constructorGuard] },
   { path: 'builder/make-offer/:id', component: MakeOfferComponent, canActivate: [constructorGuard] },
   { path: 'builder/my-offers', component: MyOffersComponent, canActivate: [constructorGuard] },
+  { path: 'builder/my-offer/:id', component: MyOfferComponent, canActivate: [constructorGuard] },
 
   { path: '**', redirectTo: '' },
 ];

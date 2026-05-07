@@ -1,0 +1,306 @@
+<div class="container py-4 builder-dash-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h4 class="fw-semibold mb-0">
+        <i class="bi bi-building me-2 text-primary"></i>Dashboard Constructor
+      </h4>
+      <p class="text-muted mb-0 small">
+        Bienvenido{{ bienvenida ? ', ' + bienvenida : '' }}
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a routerLink="/builder/my-offers" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-list-ul me-1"></i>Mis ofertas
+      </a>
+      <a routerLink="/builder/available-files" class="btn btn-primary btn-sm">
+        <i class="bi bi-search me-1"></i>Ver expedientes
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">
+      <div class="spinner-border spinner-border-sm me-2"></div>Cargando…
+    </div>
+
+  <!-- ── Sin ofertas ───────────────────────────────────────────────────────── -->
+  } @else if (total() === 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-clipboard2-x display-4 text-muted d-block mb-3"></i>
+        <p class="text-muted mb-3">No tienes ofertas enviadas aún.</p>
+        <a routerLink="/builder/available-files" class="btn btn-primary">
+          <i class="bi bi-search me-1"></i>Ver expedientes disponibles
+        </a>
+      </div>
+    </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- ── KPI row 1: Volumen de negocio ─────────────────────────────────── -->
+    <div class="row g-3 mb-3">
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--total h-100"
+             ngbTooltip="Total de ofertas enviadas" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--total">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Total ofertas</p>
+              <p class="kpi-num fw-bold mb-0">{{ total() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--pendiente h-100"
+             ngbTooltip="Ofertas esperando decisión del cliente" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--pendiente">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Pendientes</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#ffc107">{{ pendientes() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--ok h-100"
+             ngbTooltip="Ofertas seleccionadas por el cliente" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--ok">
+              <i class="bi bi-trophy"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Aceptadas</p>
+              <p class="kpi-num fw-bold mb-0 text-success">{{ aceptadas() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--rechazada h-100"
+             ngbTooltip="Ofertas no seleccionadas" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--rechazada">
+              <i class="bi bi-x-circle"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Rechazadas</p>
+              <p class="kpi-num fw-bold mb-0 text-danger">{{ rechazadas() }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── KPI row 2: Valor y rendimiento ───────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+      <div class="col-12 col-md-7">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--monto h-100"
+             ngbTooltip="Suma del valor de las ofertas aceptadas" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--monto">
+              <i class="bi bi-cash-coin"></i>
+            </div>
+            <div>
+              <p class="text-muted small mb-0">Monto adjudicado</p>
+              <p class="kpi-num-lg fw-bold mb-0" style="color:#0dcaf0">
+                {{ formatPrecio(montoAdjudicado()) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-5">
+        <div class="card border-0 shadow-sm kpi-card kpi-card--tasa h-100"
+             ngbTooltip="Porcentaje de ofertas ganadas sobre el total enviado" placement="bottom">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--tasa">
+              <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="flex-grow-1">
+              <p class="text-muted small mb-1">Tasa de éxito</p>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1 progress-thin">
+                  <div class="progress-bar bg-success" [style.width.%]="tasaExito()"></div>
+                </div>
+                <span class="fw-bold text-success" style="min-width:42px">{{ tasaExito() }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Contenido principal ─────────────────────────────────────────────── -->
+    <div class="row g-4">
+
+      <!-- ── Lista de ofertas ──────────────────────────────────────────────── -->
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+
+          <div class="card-header bg-white border-bottom px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Progreso de mis ofertas</span>
+              <a routerLink="/builder/my-offers" class="btn btn-outline-secondary btn-sm">
+                Ver todas <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body p-0 offer-list">
+            <ul class="list-group list-group-flush">
+              @for (oferta of ofertas(); track oferta.id) {
+                <li class="list-group-item px-4 py-3"
+                    [class.oferta-rechazada]="oferta.estado === 'rechazada'">
+
+                  <!-- Exp # + Servicio + Badge -->
+                  <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                    <div class="d-flex align-items-center gap-2 text-truncate">
+                      <i class="bi {{ cfg(oferta.estado).icon }} flex-shrink-0"
+                         [style.color]="cfg(oferta.estado).color"></i>
+                      <span class="fw-semibold small">Exp. {{ oferta.expediente_numero }}</span>
+                      <span class="text-muted small text-truncate">{{ oferta.servicio_nombre }}</span>
+                    </div>
+                    <span class="badge flex-shrink-0"
+                          [style.background-color]="cfg(oferta.estado).color"
+                          [style.color]="cfg(oferta.estado).textColor">
+                      {{ cfg(oferta.estado).label }}
+                    </span>
+                  </div>
+
+                  <!-- Ubicación + Precio -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">
+                      <i class="bi bi-geo-alt me-1"></i>{{ oferta.provincia }}, {{ oferta.canton }}
+                    </small>
+                    <small class="fw-semibold">{{ formatPrecio(oferta.precio) }}</small>
+                  </div>
+
+                  <!-- Barra de progreso o mensaje de rechazo -->
+                  @if (oferta.estado !== 'rechazada') {
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <div class="progress flex-grow-1 progress-thin">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             [style.width.%]="progress(oferta)"
+                             [style.background-color]="cfg(oferta.estado).color"
+                             [attr.aria-valuenow]="progress(oferta)"
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                      </div>
+                      <small class="text-muted fw-medium pct-lbl">{{ progress(oferta) }}%</small>
+                    </div>
+                  } @else {
+                    <small class="text-danger">
+                      <i class="bi bi-info-circle me-1"></i>Oferta no seleccionada por el cliente
+                    </small>
+                  }
+
+                  <!-- Fecha inicio + plazo -->
+                  <div class="mt-1">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar3 me-1"></i>Inicio: {{ formatFecha(oferta.fecha_inicio) }}
+                      @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
+                        &nbsp;·&nbsp;<i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} sem
+                      }
+                    </small>
+                  </div>
+
+                </li>
+              }
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Gráfico distribución ──────────────────────────────────────────── -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white border-bottom px-4 py-3">
+            <span class="fw-semibold">
+              <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución de ofertas
+            </span>
+          </div>
+          <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 px-3">
+
+            <!-- Donut SVG -->
+            <svg width="160" height="160" viewBox="0 0 140 140" aria-hidden="true">
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+              @for (seg of donutSegments(); track seg.label) {
+                <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                        [attr.stroke]="seg.color" stroke-width="18"
+                        [attr.stroke-dasharray]="seg.dasharray"
+                        [attr.stroke-dashoffset]="seg.dashoffset"
+                        transform="rotate(-90 70 70)"/>
+              }
+              <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
+              <text x="70" y="83" text-anchor="middle" class="donut-sub">ofertas</text>
+            </svg>
+
+            <!-- Leyenda -->
+            <div class="w-100 mt-2">
+              @for (e of estadoBreakdown(); track e.key) {
+                <div class="d-flex align-items-center justify-content-between legend-row">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi {{ e.icon }}" [style.color]="e.color"></i>
+                    <span class="small">{{ e.label }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress legend-bar">
+                      <div class="progress-bar" [style.width.%]="e.pct"
+                           [style.background-color]="e.color"></div>
+                    </div>
+                    <span class="small fw-semibold" style="min-width:18px">{{ e.count }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Referencia de progreso -->
+            <div class="w-100 mt-4 pt-3 border-top">
+              <p class="small text-muted fw-semibold mb-2">
+                <i class="bi bi-info-circle me-1"></i>¿Qué significa el progreso?
+              </p>
+              <div class="d-flex flex-column gap-1">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="ref-bar" style="background:#ffc107; width:35%"></div>
+                  <small class="text-muted">35% — Oferta enviada</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="ref-bar" style="background:#198754; width:80%"></div>
+                  <small class="text-muted">80% — Adjudicado</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="ref-bar" style="background:#198754; width:100%"></div>
+                  <small class="text-muted">100% — Contratado</small>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  }
+
+</div>

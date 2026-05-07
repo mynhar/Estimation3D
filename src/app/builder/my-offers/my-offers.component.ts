@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { OfertaService } from '../../services/oferta.service';
@@ -8,7 +8,7 @@ import { OfertaRow, ESTADO_BADGE_OFERTA, ESTADO_LABEL_OFERTA } from '../../model
 @Component({
   selector: 'app-my-offers',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './my-offers.component.html',
   styleUrl: './my-offers.component.css',
 })

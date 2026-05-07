@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from './auth-supabase.service';
 import {
   ExpedienteCliente,
+  ExpedienteConOfertas,
+  ExpedienteDetalleCliente,
   ExpedienteRow,
   ExpedienteDetalle,
   ExpedienteDisponible,
@@ -23,6 +25,99 @@ export class ExpedienteService {
       .order('id', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as unknown as ExpedienteCliente[];
+  }
+
+  async getDetalleParaCliente(expedienteId: string): Promise<ExpedienteDetalleCliente> {
+    const { data: exp, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, fecha_visita, creado_en, servicio_id, cliente_id')
+      .eq('id', expedienteId)
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const [servicioRes, locRes, perfilRes] = await Promise.all([
+      this.db.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
+      this.db.from('localizacion')
+        .select('direccion, referencia, provincia, canton, distrito')
+        .eq('expediente_id', expedienteId).single(),
+      this.db.from('perfil').select('nombre, apellido').eq('id', exp.cliente_id).single(),
+    ]);
+
+    const servicio = servicioRes.data;
+    const loc      = locRes.data;
+    const perfil   = perfilRes.data;
+
+    return {
+      id:              exp.id,
+      numero:          exp.numero,
+      estado:          exp.estado,
+      fecha_visita:    exp.fecha_visita    ?? '',
+      creado_en:       exp.creado_en       ?? '',
+      servicio_nombre: servicio?.nombre_es ?? '—',
+      cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
+      direccion:       loc?.direccion  ?? '—',
+      referencia:      loc?.referencia ?? '',
+      provincia:       loc?.provincia  ?? '—',
+      canton:          loc?.canton     ?? '—',
+      distrito:        loc?.distrito   ?? '—',
+    };
+  }
+
+  async getExpedientesConOfertas(clienteId: string): Promise<ExpedienteConOfertas[]> {
+    const { data: exps, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, fecha_visita, servicio_id')
+      .eq('cliente_id', clienteId)
+      .in('estado', ['en_oferta', 'adjudicado', 'contratado'])
+      .order('id', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    if (!exps?.length) return [];
+
+    const servicioIds   = [...new Set(exps.map((e: any) => e.servicio_id))];
+    const expedienteIds = exps.map((e: any) => e.id);
+
+    const [serviciosRes, locRes, ofertasRes] = await Promise.all([
+      this.db.from('servicio').select('id, nombre_es').in('id', servicioIds),
+      this.db.from('localizacion')
+        .select('expediente_id, direccion, referencia, provincia, canton, distrito')
+        .in('expediente_id', expedienteIds),
+      this.db.from('oferta')
+        .select('expediente_id')
+        .in('expediente_id', expedienteIds),
+    ]);
+
+    if (serviciosRes.error) throw new Error(serviciosRes.error.message);
+    if (locRes.error)       throw new Error(locRes.error.message);
+    if (ofertasRes.error)   throw new Error(ofertasRes.error.message);
+
+    const servicios = serviciosRes.data ?? [];
+    const locs      = locRes.data       ?? [];
+
+    const countMap = new Map<string, number>();
+    for (const o of ofertasRes.data ?? []) {
+      const key = String(o.expediente_id);
+      countMap.set(key, (countMap.get(key) ?? 0) + 1);
+    }
+
+    return exps.map((e: any) => {
+      const servicio = servicios.find((s: any) => String(s.id) === String(e.servicio_id));
+      const loc      = locs.find((l: any) => String(l.expediente_id) === String(e.id));
+      return {
+        id:              e.id,
+        numero:          e.numero,
+        estado:          e.estado,
+        fecha_visita:    e.fecha_visita,
+        servicio_nombre: servicio?.nombre_es ?? '—',
+        direccion:       loc?.direccion  ?? '—',
+        referencia:      loc?.referencia ?? '',
+        provincia:       loc?.provincia  ?? '—',
+        canton:          loc?.canton     ?? '—',
+        distrito:        loc?.distrito   ?? '—',
+        total_ofertas:   countMap.get(String(e.id)) ?? 0,
+      } as ExpedienteConOfertas;
+    });
   }
 
   async crear(payload: {
@@ -219,7 +314,7 @@ export class ExpedienteService {
       } as ExpedienteDisponible;
     }).filter((r) =>
       r.estado === 'estimado' ||
-      (r.estado === 'en_oferta' && r.total_ofertas < 4)
+      (r.estado === 'en_oferta' && r.total_ofertas < 5)
     );
   }
 

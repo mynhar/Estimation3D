@@ -45,9 +45,16 @@ export class MakeOfferComponent implements OnInit {
   documentoOferta = signal<File | null>(null);
   videoOferta     = signal<File | null>(null);
 
-  enviando    = signal(false);
-  exitoMsg    = signal('');
-  errorEnvio  = signal('');
+  // Archivos ya guardados (modo edición)
+  documentoActual = signal<ArchivoRow | null>(null);
+  videoActual     = signal<ArchivoRow | null>(null);
+
+  ofertaId = signal<string | null>(null);
+  enviada  = signal(false);
+
+  enviando   = signal(false);
+  exitoMsg   = signal('');
+  errorEnvio = signal('');
 
   private expedienteId = '';
 
@@ -56,15 +63,32 @@ export class MakeOfferComponent implements OnInit {
     if (!id) { this.cargando.set(false); return; }
     this.expedienteId = id;
 
+    const userId = this.user()?.id;
+
     try {
-      const [detalle, archivos] = await Promise.all([
+      const [detalle, archivosExpediente, ofertaExistente] = await Promise.all([
         this.expedienteService.getExpedienteParaOferta(id),
         this.archivoService.cargarTodos(id),
+        userId ? this.ofertaService.getOfertaPorExpediente(id, userId) : Promise.resolve(null),
       ]);
       this.detalle.set(detalle);
-      this.fotos.set(archivos.fotos);
-      this.videos.set(archivos.videos);
-      this.documentos.set(archivos.documentos);
+      this.fotos.set(archivosExpediente.fotos);
+      this.videos.set(archivosExpediente.videos);
+      this.documentos.set(archivosExpediente.documentos);
+
+      if (ofertaExistente) {
+        this.ofertaId.set(ofertaExistente.id);
+        this.precio       = ofertaExistente.precio;
+        this.plazoMin     = ofertaExistente.plazo_semanas_min;
+        this.plazoMax     = ofertaExistente.plazo_semanas_max;
+        this.garantiaAnos = ofertaExistente.garantia_anos;
+        this.fechaInicio  = ofertaExistente.fecha_inicio;
+        this.descripcion  = ofertaExistente.descripcion;
+
+        const ofertaArchivos = await this.archivoService.cargarPorOferta(ofertaExistente.id);
+        this.documentoActual.set(ofertaArchivos.documentos[0] ?? null);
+        this.videoActual.set(ofertaArchivos.videos[0] ?? null);
+      }
     } catch (e: any) {
       console.error('[MakeOffer]', e.message);
       this.errorMsg.set(e.message);
@@ -107,7 +131,9 @@ export class MakeOfferComponent implements OnInit {
       this.errorEnvio.set('La descripción de su enfoque es obligatoria.');
       return;
     }
-    if (!this.documentoOferta()) {
+
+    const esNueva = !this.ofertaId();
+    if (esNueva && !this.documentoOferta()) {
       this.errorEnvio.set('El documento de oferta (PDF) es obligatorio.');
       return;
     }
@@ -126,16 +152,35 @@ export class MakeOfferComponent implements OnInit {
 
     this.enviando.set(true);
     try {
-      await this.ofertaService.enviar(
-        this.expedienteId,
-        userId,
-        form,
-        this.documentoOferta(),
-        this.videoOferta(),
-      );
-      this.exitoMsg.set('Oferta enviada correctamente.');
+      if (esNueva) {
+        await this.ofertaService.enviar(
+          this.expedienteId,
+          userId,
+          form,
+          this.documentoOferta(),
+          this.videoOferta(),
+        );
+        this.enviada.set(true);
+        this.exitoMsg.set('Oferta enviada correctamente.');
+      } else {
+        await this.ofertaService.actualizar(
+          this.ofertaId()!,
+          userId,
+          form,
+          this.documentoOferta(),
+          this.videoOferta(),
+        );
+        if (this.documentoOferta() || this.videoOferta()) {
+          const ofertaArchivos = await this.archivoService.cargarPorOferta(this.ofertaId()!);
+          this.documentoActual.set(ofertaArchivos.documentos[0] ?? null);
+          this.videoActual.set(ofertaArchivos.videos[0] ?? null);
+          this.documentoOferta.set(null);
+          this.videoOferta.set(null);
+        }
+        this.exitoMsg.set('Oferta actualizada correctamente.');
+      }
     } catch (e: any) {
-      console.error('[MakeOffer] enviar:', e.message);
+      console.error('[MakeOffer] guardar:', e.message);
       this.errorEnvio.set(e.message);
     } finally {
       this.enviando.set(false);

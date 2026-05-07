@@ -1,0 +1,51 @@
+.builder-dash-wrap { max-width: 960px; }
+
+/* ── KPI cards ──────────────────────────────────────────────────────────── */
+.kpi-num    { font-size: 1.8rem; line-height: 1; }
+.kpi-num-lg { font-size: 1.4rem; line-height: 1; }
+
+.kpi-card {
+  border-top: 3px solid transparent !important;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+}
+
+.kpi-card--total     { border-top-color: #adb5bd !important; }
+.kpi-card--pendiente { border-top-color: #ffc107 !important; }
+.kpi-card--ok        { border-top-color: #198754 !important; }
+.kpi-card--rechazada { border-top-color: #dc3545 !important; }
+.kpi-card--monto     { border-top-color: #0dcaf0 !important; }
+.kpi-card--tasa      { border-top-color: #6f42c1 !important; }
+
+/* ── Íconos en círculo ──────────────────────────────────────────────────── */
+.kpi-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+.kpi-icon--total     { background: rgba(173,181,189,.15); color: #6c757d; }
+.kpi-icon--pendiente { background: rgba(255,193,7,.15);   color: #ffc107; }
+.kpi-icon--ok        { background: rgba(25,135,84,.12);   color: #198754; }
+.kpi-icon--rechazada { background: rgba(220,53,69,.12);   color: #dc3545; }
+.kpi-icon--monto     { background: rgba(13,202,240,.12);  color: #0dcaf0; }
+.kpi-icon--tasa      { background: rgba(111,66,193,.12);  color: #6f42c1; }
+
+/* ── Lista de ofertas ───────────────────────────────────────────────────── */
+.offer-list       { max-height: 500px; overflow-y: auto; }
+.progress-thin    { height: 8px; border-radius: 4px; }
+.pct-lbl          { min-width: 34px; text-align: right; }
+.oferta-rechazada { opacity: 0.6; }
+
+/* ── Donut SVG ──────────────────────────────────────────────────────────── */
+.donut-num { font-size: 26px; font-weight: 700; fill: #212529; }
+.donut-sub { font-size: 11px; fill: #6c757d; }
+
+/* ── Leyenda ────────────────────────────────────────────────────────────── */
+.legend-row { padding: 4px 0; }
+.legend-bar { width: 64px; height: 6px; border-radius: 3px; flex-shrink: 0; }
+
+/* ── Referencia de progreso ─────────────────────────────────────────────── */
+.ref-bar { height: 6px; border-radius: 3px; flex-shrink: 0; min-width: 8px; }

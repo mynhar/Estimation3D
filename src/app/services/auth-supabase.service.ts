@@ -40,7 +40,7 @@ export class AuthSupabaseService {
       // Google OAuth: sincronizar perfil y redirigir
       if (event === 'SIGNED_IN' && user?.app_metadata?.['provider'] === 'google') {
         this.syncGoogleProfile(user);
-        this.router.navigate(['/client/dashboard']);
+        this.getHomeRoute().then(route => this.router.navigate([route]));
       }
     });
   }
@@ -142,6 +142,17 @@ export class AuthSupabaseService {
         .insert({ id: userId, ...campos });
       if (error) throw error;
     }
+  }
+
+  // ----------------------------------------------------------
+  // Ruta de inicio según rol del usuario
+  // ----------------------------------------------------------
+  async getHomeRoute(): Promise<string> {
+    const { data: { user } } = await this.supabase.auth.getUser();
+    if (!user) return '/login';
+    const { data } = await this.supabase
+      .from('perfil').select('rol').eq('id', user.id).single();
+    return data?.rol === 'constructor' ? '/builder/dashboard' : '/client/dashboard';
   }
 
   // ----------------------------------------------------------

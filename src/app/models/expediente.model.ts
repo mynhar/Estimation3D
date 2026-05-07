@@ -60,6 +60,22 @@ export interface ExpedienteParaOferta {
   total_ofertas: number;
 }
 
+/** Forma completa para la vista detalle del cliente (builder-offer). */
+export interface ExpedienteDetalleCliente {
+  id: string;
+  numero: string;
+  estado: string;
+  fecha_visita: string;
+  creado_en: string;
+  servicio_nombre: string;
+  cliente_nombre: string;
+  direccion: string;
+  referencia: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
+}
+
 /** Forma usada en la vista del cliente (resultado de join anidado de Supabase). */
 export interface ExpedienteCliente {
   id: number;
@@ -83,6 +99,29 @@ export const ESTADO_BADGE_CLIENTE: Record<string, { texto: string; clase: string
   asignado:   { texto: 'Asignado',   clase: 'bg-warning text-dark' },
   en_proceso: { texto: 'En proceso', clase: 'bg-info text-dark' },
   completado: { texto: 'Completado', clase: 'bg-success' },
+  cancelado:  { texto: 'Cancelado',  clase: 'bg-secondary' },
+};
+
+/** Forma aplanada para la vista de ofertas recibidas (módulo cliente). */
+export interface ExpedienteConOfertas {
+  id: string;
+  numero: string;
+  estado: string;
+  fecha_visita: string;
+  servicio_nombre: string;
+  direccion: string;
+  referencia: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
+  total_ofertas: number;
+}
+
+/** Mapa estado → { texto, clase } para la vista de ofertas recibidas (cliente). */
+export const ESTADO_BADGE_OFERTA_RECIBIDA: Record<string, { texto: string; clase: string }> = {
+  en_oferta:  { texto: 'En oferta',  clase: 'bg-primary' },
+  adjudicado: { texto: 'Adjudicado', clase: 'bg-warning text-dark' },
+  contratado: { texto: 'Contratado', clase: 'bg-success' },
   cancelado:  { texto: 'Cancelado',  clase: 'bg-secondary' },
 };
 

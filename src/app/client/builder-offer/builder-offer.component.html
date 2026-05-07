@@ -1,0 +1,365 @@
+<div class="container py-4" style="max-width: 900px">
+
+  <!-- ── Lightbox de fotos ──────────────────────────────────────────────── -->
+  @if (fotoAmpliada()) {
+    <div class="lightbox-overlay" (click)="cerrarFoto()">
+      <div class="lightbox-container" (click)="$event.stopPropagation()">
+        <img [src]="fotoAmpliada()!" class="lightbox-img" alt="Foto ampliada" />
+        <button class="lightbox-close" (click)="cerrarFoto()">×</button>
+      </div>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="text-center py-5 text-muted">Cargando…</div>
+
+  } @else if (!expediente()) {
+    <div class="alert alert-warning">
+      No se encontró el expediente.
+      @if (errorMsg()) {
+        <br /><small class="text-danger">{{ errorMsg() }}</small>
+      }
+    </div>
+
+  } @else {
+
+    <!-- ── Encabezado ────────────────────────────────────────────────────── -->
+    <div class="mb-4 d-flex align-items-start gap-3 flex-wrap">
+      <button class="btn btn-outline-secondary btn-sm mt-1" (click)="volver()">← Volver</button>
+      <div class="flex-grow-1">
+        <h4 class="fw-semibold mb-0">
+          Exp. {{ expediente()!.numero }} — Ofertas de constructores
+        </h4>
+        <p class="text-muted mb-0 small">{{ expediente()!.servicio_nombre }}</p>
+      </div>
+      <span class="badge rounded-pill px-3 py-2 mt-1
+        {{ expediente()!.estado === 'adjudicado' ? 'bg-warning text-dark' :
+           expediente()!.estado === 'contratado' ? 'bg-success' : 'bg-primary' }}">
+        {{ expediente()!.estado | titlecase }}
+      </span>
+    </div>
+
+    <!-- ── Tarjeta: Información del expediente ───────────────────────────── -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="fw-semibold mb-4">Información del expediente</h5>
+        <div class="row g-3">
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Cliente</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.cliente_nombre }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Servicio</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.servicio_nombre }}</p>
+          </div>
+
+          <div class="col-12"><hr class="my-1" /></div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Dirección</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.direccion }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Referencia</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.referencia || '—' }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Provincia</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.provincia }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Cantón</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.canton }}</p>
+          </div>
+
+          <div class="col-sm-4">
+            <p class="text-muted small mb-1">Distrito</p>
+            <p class="fw-semibold mb-0">{{ expediente()!.distrito }}</p>
+          </div>
+
+          <div class="col-12"><hr class="my-1" /></div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Fecha de visita</p>
+            <p class="fw-semibold mb-0">{{ formatFecha(expediente()!.fecha_visita) }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Hora de visita</p>
+            <p class="fw-semibold mb-0">{{ formatHora(expediente()!.fecha_visita) }}</p>
+          </div>
+
+          <div class="col-sm-6">
+            <p class="text-muted small mb-1">Creado el</p>
+            <p class="fw-semibold mb-0">{{ formatFecha(expediente()!.creado_en) }}</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tarjeta: Informe del estimador ───────────────────────────────── -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-body p-4">
+        <h5 class="fw-semibold mb-4">Informe del estimador</h5>
+
+        @if (!estimacion()) {
+          <p class="text-muted">Sin informe de estimación registrado aún.</p>
+        } @else {
+          <div class="row g-3 mb-4">
+
+            <div class="col-sm-6">
+              <p class="text-muted small mb-1">Fecha de visita</p>
+              <p class="fw-semibold mb-0">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
+            </div>
+
+            <div class="col-sm-6">
+              <p class="text-muted small mb-1">Hora de visita</p>
+              <p class="fw-semibold mb-0">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
+            </div>
+
+            <div class="col-12"><hr class="my-1" /></div>
+
+            <div class="col-12">
+              <p class="text-muted small mb-1">Problemas observados</p>
+              <p class="mb-0" style="white-space: pre-wrap">{{ estimacion()!.descripcion_problemas || '—' }}</p>
+            </div>
+
+            <div class="col-sm-6">
+              <p class="text-muted small mb-1">Costo Estimado ($)</p>
+              <p class="fw-semibold fs-5 text-success mb-0">
+                @if (estimacion()!.costo_estimado !== null) {
+                  $ {{ estimacion()!.costo_estimado | number:'1.2-2' }}
+                } @else {
+                  —
+                }
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Fotos -->
+          @if (fotosExp().length > 0) {
+            <h6 class="fw-medium mb-2">Fotos</h6>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              @for (f of fotosExp(); track f.id) {
+                <div class="foto-thumb-wrap" (click)="abrirFoto(f)" title="{{ f.nombre_archivo }}">
+                  <img [src]="publicUrl(f.url_storage)"
+                       class="foto-thumb rounded border"
+                       [alt]="f.nombre_archivo" />
+                  <div class="foto-thumb-overlay">
+                    <span>🔍</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Videos del estimador -->
+          @if (videosExp().length > 0) {
+            <h6 class="fw-medium mb-2">Videos</h6>
+            <ul class="list-group list-group-flush mb-4">
+              @for (v of videosExp(); track v.id) {
+                <li class="list-group-item px-0">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <div>
+                      <span class="fw-medium small">{{ v.nombre_archivo }}</span>
+                      <span class="text-muted small ms-2">{{ formatTamano(v.tamano_bytes) }}</span>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm"
+                            (click)="toggleVideoExp(v)">
+                      {{ videoExpUrl() === publicUrl(v.url_storage) ? '⏹ Cerrar' : '▶ Ver video' }}
+                    </button>
+                  </div>
+                  @if (videoExpUrl() === publicUrl(v.url_storage)) {
+                    <div class="ratio ratio-16x9 mt-2">
+                      <video [src]="videoExpUrl()!" controls autoplay class="rounded"></video>
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
+          <!-- Documentos técnicos -->
+          @if (documentosExp().length > 0) {
+            <h6 class="fw-medium mb-2">Documentos técnicos</h6>
+            <ul class="list-group list-group-flush">
+              @for (d of documentosExp(); track d.id) {
+                <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="fw-medium small">{{ d.nombre_archivo }}</span>
+                    <span class="text-muted small ms-2">{{ formatTamano(d.tamano_bytes) }}</span>
+                  </div>
+                  <button class="btn btn-outline-secondary btn-sm" (click)="verDocumento(d)">
+                    Ver
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+        }
+      </div>
+    </div>
+
+    <!-- ── Tarjeta: Ofertas recibidas ────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white border-bottom py-3 px-4">
+        <h5 class="fw-semibold mb-0">
+          Ofertas recibidas
+          <span class="badge bg-primary rounded-pill ms-2">{{ ofertas().length }}</span>
+        </h5>
+      </div>
+
+      <div class="card-body p-4">
+
+        @if (exitoMsg()) {
+          <div class="alert alert-success mb-4">{{ exitoMsg() }}</div>
+        }
+        @if (errorMsg() && !cargando()) {
+          <div class="alert alert-danger mb-4">{{ errorMsg() }}</div>
+        }
+
+        @if (yaAdjudicado()) {
+          <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+            <span>✔</span>
+            <span>Ya seleccionó una oferta. Puede cambiar la selección haciendo clic en otra oferta.</span>
+          </div>
+        }
+
+        @if (ofertas().length === 0) {
+          <p class="text-muted text-center py-3">Aún no hay ofertas para este expediente.</p>
+
+        } @else {
+
+          <div class="d-flex flex-column gap-3 mb-4">
+            @for (oferta of ofertas(); track oferta.id) {
+
+              <div class="offer-card rounded-3 p-4"
+                   [class.offer-card--selected]="esSeleccionada(oferta.id)"
+                   (click)="seleccionar(oferta.id)">
+
+                <!-- Fila superior: precio + badge + indicador -->
+                <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+                  <div>
+                    <p class="text-muted small mb-1">Precio total</p>
+                    <p class="precio-destacado mb-0">{{ formatCosto(oferta.precio) }}</p>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge rounded-pill px-3 {{ ofertaBadgeClass(oferta.estado) }}">
+                      {{ ofertaLabel(oferta.estado) }}
+                    </span>
+                    @if (esSeleccionada(oferta.id)) {
+                      <span class="badge rounded-pill bg-primary px-3">✔ Seleccionada</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Detalles de la oferta -->
+                <div class="row g-3 mb-3">
+
+                  <div class="col-sm-6">
+                    <p class="fw-semibold mb-0">{{ oferta.constructor_nombre }}</p>
+                    <p class="text-muted small mb-0">{{ oferta.constructor_telefono }}</p>
+                    <p class="text-muted small mb-0">{{ oferta.constructor_email }}</p>
+                  </div>
+
+                  <div class="col-sm-6">
+                    <p class="text-muted small mb-1">Plazo estimado</p>
+                    <p class="fw-semibold mb-0">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</p>
+                  </div>
+
+                  <div class="col-sm-6">
+                    <p class="text-muted small mb-1">Fecha de inicio propuesta</p>
+                    <p class="fw-semibold mb-0">{{ formatFecha(oferta.fecha_inicio) }}</p>
+                  </div>
+
+                  <div class="col-sm-6">
+                    <p class="text-muted small mb-1">Garantía</p>
+                    <p class="fw-semibold mb-0">
+                      {{ oferta.garantia_anos ? oferta.garantia_anos + ' año(s)' : '—' }}
+                    </p>
+                  </div>
+
+                  @if (oferta.descripcion) {
+                    <div class="col-12">
+                      <p class="text-muted small mb-1">Descripción del enfoque</p>
+                      <p class="mb-0 small" style="white-space: pre-wrap">{{ oferta.descripcion }}</p>
+                    </div>
+                  }
+
+                </div>
+
+                <!-- Documento de oferta -->
+                @if (oferta.documentos.length > 0) {
+                  <div class="mb-3" (click)="$event.stopPropagation()">
+                    <p class="text-muted small mb-2">Documento de oferta</p>
+                    @for (d of oferta.documentos; track d.id) {
+                      <button class="btn btn-outline-secondary btn-sm me-2"
+                              (click)="verDocumento(d)">
+                        📄 {{ d.nombre_archivo }}
+                        <span class="text-muted ms-1">{{ formatTamano(d.tamano_bytes) }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <!-- Video complementario -->
+                @if (oferta.videos.length > 0) {
+                  <div (click)="$event.stopPropagation()">
+                    <p class="text-muted small mb-2">Video complementario</p>
+                    @for (v of oferta.videos; track v.id) {
+                      <div>
+                        <button class="btn btn-outline-secondary btn-sm mb-2"
+                                (click)="toggleVideoOferta(oferta.id, v)">
+                          {{ videoOfertaUrl(oferta.id) ? '⏹ Cerrar video' : '▶ Ver video' }}
+                          <span class="text-muted ms-1 small">{{ v.nombre_archivo }}</span>
+                        </button>
+                        @if (videoOfertaUrl(oferta.id)) {
+                          <div class="ratio ratio-16x9 mt-1 mb-2">
+                            <video [src]="videoOfertaUrl(oferta.id)!" controls autoplay class="rounded"></video>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+
+              </div>
+            }
+          </div>
+
+          <!-- Botón aceptar -->
+          <div class="d-flex align-items-center gap-3 pt-2 border-top">
+            <button class="btn btn-success btn-lg px-5"
+                    [disabled]="!puedeAceptar()"
+                    (click)="aceptarOferta()">
+              @if (aceptando()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>Procesando…
+              } @else {
+                Aceptar oferta
+              }
+            </button>
+            @if (!ofertaSeleccionadaId()) {
+              <small class="text-muted">Seleccione una oferta haciendo clic en ella.</small>
+            }
+          </div>
+
+        }
+      </div>
+    </div>
+
+    <!-- ── Volver ─────────────────────────────────────────────────────────── -->
+    <div class="mt-4">
+      <button class="btn btn-outline-secondary" (click)="volver()">← Volver</button>
+    </div>
+
+  }
+
+</div>

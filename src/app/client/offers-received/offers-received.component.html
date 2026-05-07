@@ -1,0 +1,89 @@
+<div class="container py-4 page-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <div class="mb-4">
+    <h4 class="page-title">Ofertas recibidas</h4>
+    <p class="page-subtitle">
+      Expedientes con propuestas de constructores. Revisa, compara y selecciona la mejor.
+    </p>
+  </div>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando expedientes…
+    </div>
+
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  } @else if (expedientes().length === 0) {
+    <div class="card border-0 shadow-sm">
+      <div class="empty-state">
+        <i class="bi bi-envelope-open empty-state__icon"></i>
+        <p class="empty-state__title">Sin ofertas por ahora</p>
+        <p class="empty-state__text">
+          Cuando los constructores envíen propuestas sobre tus expedientes, aparecerán aquí.
+        </p>
+      </div>
+    </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- contador -->
+    <p class="text-muted small mb-3">
+      <i class="bi bi-info-circle me-1"></i>
+      {{ expedientes().length }}
+      {{ expedientes().length === 1 ? 'expediente tiene' : 'expedientes tienen' }}
+      ofertas para revisar.
+    </p>
+
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">N°</th>
+              <th>Servicio</th>
+              <th class="d-none d-md-table-cell">Dirección</th>
+              <th class="d-none d-sm-table-cell">Fecha visita</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientes(); track exp.id) {
+              <tr>
+                <td class="ps-4 fw-semibold text-nowrap">{{ exp.numero }}</td>
+                <td>{{ exp.servicio_nombre }}</td>
+                <td class="text-muted small d-none d-md-table-cell">
+                  <div>{{ exp.direccion }}{{ exp.referencia ? ', ' + exp.referencia : '' }}</div>
+                  <div class="text-label mt-1">{{ exp.provincia }}, {{ exp.canton }}</div>
+                </td>
+                <td class="small d-none d-sm-table-cell">
+                  {{ formatFecha(exp.fecha_visita) }}
+                </td>
+                <td>
+                  <span class="badge {{ estadoClase(exp.estado) }}">
+                    {{ estadoTexto(exp.estado) }}
+                  </span>
+                  <div class="text-muted small mt-1">
+                    <i class="bi bi-people me-1"></i>
+                    {{ exp.total_ofertas }} {{ exp.total_ofertas === 1 ? 'oferta' : 'ofertas' }}
+                  </div>
+                </td>
+                <td class="pe-4 text-end">
+                  <button class="btn btn-primary btn-sm" (click)="ver(exp.id)">
+                    <i class="bi bi-eye me-1"></i>Revisar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  }
+
+</div>

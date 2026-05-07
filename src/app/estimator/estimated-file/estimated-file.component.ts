@@ -309,6 +309,7 @@ import { ExpedienteDetalle, EstimacionDetalle, ArchivoRow } from '../../models';
   `,
 })
 export class EstimatedFileComponent implements OnInit {
+  private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -332,11 +333,15 @@ export class EstimatedFileComponent implements OnInit {
   errorDocumentos   = signal('');
 
   private expedienteId = '';
+  private userId       = '';
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando.set(false); return; }
     this.expedienteId = id;
+
+    const { data: { user } } = await this.auth.client.auth.getUser();
+    this.userId = user?.id ?? '';
 
     try {
       const [detalle, estimacion] = await Promise.all([
@@ -380,7 +385,7 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoFoto.set(true);
     this.errorFotos.set('');
     try {
-      for (const file of files) await this.archivoService.subir(this.expedienteId, 'foto', file, '');
+      for (const file of files) await this.archivoService.subir(this.expedienteId, 'foto', file, this.userId);
       await this.recargar('foto');
     } catch (e: any) { this.errorFotos.set(e.message); }
     finally { this.subiendoFoto.set(false); }
@@ -395,7 +400,7 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoVideo.set(true);
     this.errorVideos.set('');
     try {
-      await this.archivoService.subir(this.expedienteId, 'video', file, '');
+      await this.archivoService.subir(this.expedienteId, 'video', file, this.userId);
       await this.recargar('video');
     } catch (e: any) { this.errorVideos.set(e.message); }
     finally { this.subiendoVideo.set(false); }
@@ -410,7 +415,7 @@ export class EstimatedFileComponent implements OnInit {
     this.subiendoDocumento.set(true);
     this.errorDocumentos.set('');
     try {
-      await this.archivoService.subir(this.expedienteId, 'documento', file, '');
+      await this.archivoService.subir(this.expedienteId, 'documento', file, this.userId);
       await this.recargar('documento');
     } catch (e: any) { this.errorDocumentos.set(e.message); }
     finally { this.subiendoDocumento.set(false); }
