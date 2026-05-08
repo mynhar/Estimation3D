@@ -1,38 +1,51 @@
-<div class="container py-4 builder-dash-wrap">
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
 
   <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-      <h4 class="fw-semibold mb-0">
-        <i class="bi bi-building me-2 text-primary"></i>Dashboard Constructor
-      </h4>
-      <p class="text-muted mb-0 small">
-        Bienvenido{{ bienvenida ? ', ' + bienvenida : '' }}
-      </p>
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">
+          <i class="bi bi-building me-2 text-primary"></i>
+          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard Constructor' }}
+        </h4>
+        <p class="text-muted small mb-0">
+          Resumen de tus ofertas y el estado de tus proyectos.
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a routerLink="/builder/my-offers"
+           class="btn btn-outline-primary btn-sm fw-semibold">
+          <i class="bi bi-list-ul me-1"></i>Mis ofertas
+        </a>
+        <a routerLink="/builder/available-files"
+           class="btn btn-primary btn-sm fw-semibold">
+          <i class="bi bi-search me-1"></i>Ver expedientes
+        </a>
+      </div>
     </div>
-    <div class="d-flex gap-2">
-      <a routerLink="/builder/my-offers" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-list-ul me-1"></i>Mis ofertas
-      </a>
-      <a routerLink="/builder/available-files" class="btn btn-primary btn-sm">
-        <i class="bi bi-search me-1"></i>Ver expedientes
-      </a>
-    </div>
-  </div>
+  </header>
 
   <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="text-center py-5 text-muted">
-      <div class="spinner-border spinner-border-sm me-2"></div>Cargando…
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando dashboard…
     </div>
 
-  <!-- ── Sin ofertas ───────────────────────────────────────────────────────── -->
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
   } @else if (total() === 0) {
-    <div class="card border-0 shadow-sm">
-      <div class="card-body text-center py-5">
-        <i class="bi bi-clipboard2-x display-4 text-muted d-block mb-3"></i>
-        <p class="text-muted mb-3">No tienes ofertas enviadas aún.</p>
-        <a routerLink="/builder/available-files" class="btn btn-primary">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard2-x"></i>
+        </div>
+        <p class="empty-title">Sin ofertas enviadas</p>
+        <p class="empty-text">
+          Explora los expedientes disponibles y envía tu primera propuesta
+          para comenzar a construir tu historial.
+        </p>
+        <a routerLink="/builder/available-files"
+           class="btn btn-primary fw-semibold">
           <i class="bi bi-search me-1"></i>Ver expedientes disponibles
         </a>
       </div>
@@ -41,12 +54,11 @@
   <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── KPI row 1: Volumen de negocio ─────────────────────────────────── -->
+    <!-- ── KPI fila 1: Volumen ─────────────────────────────────────────────── -->
     <div class="row g-3 mb-3">
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--total h-100"
-             ngbTooltip="Total de ofertas enviadas" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--total h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--total">
               <i class="bi bi-file-earmark-text"></i>
@@ -60,25 +72,24 @@
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--pendiente h-100"
-             ngbTooltip="Ofertas esperando decisión del cliente" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--pendiente h-100"
+             [class.kpi-card--pendiente-activa]="pendientes() > 0">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--pendiente">
               <i class="bi bi-hourglass-split"></i>
             </div>
             <div>
               <p class="text-muted small mb-0">Pendientes</p>
-              <p class="kpi-num fw-bold mb-0" style="color:#ffc107">{{ pendientes() }}</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#b45309">{{ pendientes() }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--ok h-100"
-             ngbTooltip="Ofertas seleccionadas por el cliente" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--aceptada h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--ok">
+            <div class="kpi-icon kpi-icon--aceptada">
               <i class="bi bi-trophy"></i>
             </div>
             <div>
@@ -90,8 +101,7 @@
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--rechazada h-100"
-             ngbTooltip="Ofertas no seleccionadas" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--rechazada h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--rechazada">
               <i class="bi bi-x-circle"></i>
@@ -106,19 +116,18 @@
 
     </div>
 
-    <!-- ── KPI row 2: Valor y rendimiento ───────────────────────────────── -->
+    <!-- ── KPI fila 2: Valor y rendimiento ───────────────────────────────── -->
     <div class="row g-3 mb-4">
 
       <div class="col-12 col-md-7">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--monto h-100"
-             ngbTooltip="Suma del valor de las ofertas aceptadas" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--monto h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--monto">
               <i class="bi bi-cash-coin"></i>
             </div>
             <div>
               <p class="text-muted small mb-0">Monto adjudicado</p>
-              <p class="kpi-num-lg fw-bold mb-0" style="color:#0dcaf0">
+              <p class="kpi-num-lg fw-bold mb-0" style="color:#0284c7">
                 {{ formatPrecio(montoAdjudicado()) }}
               </p>
             </div>
@@ -127,19 +136,19 @@
       </div>
 
       <div class="col-12 col-md-5">
-        <div class="card border-0 shadow-sm kpi-card kpi-card--tasa h-100"
-             ngbTooltip="Porcentaje de ofertas ganadas sobre el total enviado" placement="bottom">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--tasa h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--tasa">
               <i class="bi bi-graph-up-arrow"></i>
             </div>
             <div class="flex-grow-1">
-              <p class="text-muted small mb-1">Tasa de éxito</p>
-              <div class="d-flex align-items-center gap-2">
-                <div class="progress flex-grow-1 progress-thin">
-                  <div class="progress-bar bg-success" [style.width.%]="tasaExito()"></div>
-                </div>
-                <span class="fw-bold text-success" style="min-width:42px">{{ tasaExito() }}%</span>
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <p class="text-muted small mb-0">Tasa de éxito</p>
+                <span class="fw-bold text-success">{{ tasaExito() }}%</span>
+              </div>
+              <div class="progress progress-thin">
+                <div class="progress-bar bg-success tasa-bar"
+                     [style.width.%]="tasaExito()"></div>
               </div>
             </div>
           </div>
@@ -149,158 +158,206 @@
     </div>
 
     <!-- ── Contenido principal ─────────────────────────────────────────────── -->
-    <div class="row g-4">
+    <div class="row g-4 align-items-start">
 
-      <!-- ── Lista de ofertas ──────────────────────────────────────────────── -->
-      <div class="col-lg-7">
-        <div class="card border-0 shadow-sm">
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- COLUMNA IZQUIERDA · Lista de ofertas                              -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
 
-          <div class="card-header bg-white border-bottom px-4 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-              <span class="fw-semibold">Progreso de mis ofertas</span>
-              <a routerLink="/builder/my-offers" class="btn btn-outline-secondary btn-sm">
-                Ver todas <i class="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
+          <div class="card-header bg-transparent border-bottom px-4 py-3
+                      d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">
+              <i class="bi bi-list-check me-2 text-primary"></i>Progreso de mis ofertas
+            </span>
+            <a routerLink="/builder/my-offers"
+               class="btn btn-outline-secondary btn-sm">
+              Ver todas <i class="bi bi-arrow-right ms-1"></i>
+            </a>
           </div>
 
-          <div class="card-body p-0 offer-list">
-            <ul class="list-group list-group-flush">
+          <div class="card-body p-0">
+            <div class="offer-list">
               @for (oferta of ofertas(); track oferta.id) {
-                <li class="list-group-item px-4 py-3"
-                    [class.oferta-rechazada]="oferta.estado === 'rechazada'">
+                <div class="oferta-item"
+                     [class.oferta-item--aceptada]="oferta.estado === 'aceptada'"
+                     [class.oferta-item--rechazada]="oferta.estado === 'rechazada'"
+                     [style.--estado-color]="cfg(oferta.estado).color">
+                  <div class="oferta-accent"></div>
+                  <div class="oferta-body">
 
-                  <!-- Exp # + Servicio + Badge -->
-                  <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
-                    <div class="d-flex align-items-center gap-2 text-truncate">
-                      <i class="bi {{ cfg(oferta.estado).icon }} flex-shrink-0"
-                         [style.color]="cfg(oferta.estado).color"></i>
-                      <span class="fw-semibold small">Exp. {{ oferta.expediente_numero }}</span>
-                      <span class="text-muted small text-truncate">{{ oferta.servicio_nombre }}</span>
-                    </div>
-                    <span class="badge flex-shrink-0"
-                          [style.background-color]="cfg(oferta.estado).color"
-                          [style.color]="cfg(oferta.estado).textColor">
-                      {{ cfg(oferta.estado).label }}
-                    </span>
-                  </div>
-
-                  <!-- Ubicación + Precio -->
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <small class="text-muted">
-                      <i class="bi bi-geo-alt me-1"></i>{{ oferta.provincia }}, {{ oferta.canton }}
-                    </small>
-                    <small class="fw-semibold">{{ formatPrecio(oferta.precio) }}</small>
-                  </div>
-
-                  <!-- Barra de progreso o mensaje de rechazo -->
-                  @if (oferta.estado !== 'rechazada') {
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                      <div class="progress flex-grow-1 progress-thin">
-                        <div class="progress-bar"
-                             role="progressbar"
-                             [style.width.%]="progress(oferta)"
-                             [style.background-color]="cfg(oferta.estado).color"
-                             [attr.aria-valuenow]="progress(oferta)"
-                             aria-valuemin="0" aria-valuemax="100">
-                        </div>
+                    <!-- Fila 1: número + servicio + badge estado -->
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2 flex-wrap">
+                      <div class="d-flex align-items-center gap-2 min-w-0">
+                        <span class="oferta-num">{{ oferta.expediente_numero }}</span>
+                        <span class="oferta-servicio text-truncate">{{ oferta.servicio_nombre }}</span>
                       </div>
-                      <small class="text-muted fw-medium pct-lbl">{{ progress(oferta) }}%</small>
+                      <span class="badge flex-shrink-0 oferta-badge"
+                            [style.background-color]="cfg(oferta.estado).color"
+                            [style.color]="cfg(oferta.estado).textColor">
+                        <i class="bi {{ cfg(oferta.estado).icon }} me-1"></i>
+                        {{ cfg(oferta.estado).label }}
+                      </span>
                     </div>
-                  } @else {
-                    <small class="text-danger">
-                      <i class="bi bi-info-circle me-1"></i>Oferta no seleccionada por el cliente
-                    </small>
-                  }
 
-                  <!-- Fecha inicio + plazo -->
-                  <div class="mt-1">
-                    <small class="text-muted">
-                      <i class="bi bi-calendar3 me-1"></i>Inicio: {{ formatFecha(oferta.fecha_inicio) }}
+                    <!-- Fila 2: ubicación + precio -->
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+                      <span class="oferta-meta">
+                        <i class="bi bi-geo-alt me-1"></i>{{ oferta.provincia }}, {{ oferta.canton }}
+                      </span>
+                      <span class="oferta-precio fw-semibold">{{ formatPrecio(oferta.precio) }}</span>
+                    </div>
+
+                    <!-- Fila 3: barra de progreso o nota de rechazo -->
+                    @if (oferta.estado !== 'rechazada') {
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="progress progress-thin flex-grow-1">
+                          <div class="progress-bar"
+                               role="progressbar"
+                               [style.width.%]="progress(oferta)"
+                               [style.background-color]="cfg(oferta.estado).color"
+                               [attr.aria-valuenow]="progress(oferta)"
+                               aria-valuemin="0" aria-valuemax="100">
+                          </div>
+                        </div>
+                        <span class="pct-lbl">{{ progress(oferta) }}%</span>
+                      </div>
+                    } @else {
+                      <p class="oferta-rejected mb-0">
+                        <i class="bi bi-info-circle me-1"></i>No seleccionada por el cliente
+                      </p>
+                    }
+
+                    <!-- Fila 4: fecha + plazo -->
+                    <div class="oferta-footer mt-2">
+                      <i class="bi bi-calendar3 me-1"></i>
+                      Inicio: {{ formatFecha(oferta.fecha_inicio) }}
                       @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
-                        &nbsp;·&nbsp;<i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} sem
+                        <span class="ms-2">
+                          <i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} sem
+                        </span>
                       }
-                    </small>
-                  </div>
+                    </div>
 
-                </li>
+                  </div>
+                </div>
               }
-            </ul>
+            </div>
           </div>
 
         </div>
       </div>
 
-      <!-- ── Gráfico distribución ──────────────────────────────────────────── -->
-      <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-header bg-white border-bottom px-4 py-3">
-            <span class="fw-semibold">
-              <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución de ofertas
-            </span>
-          </div>
-          <div class="card-body d-flex flex-column align-items-center justify-content-center py-4 px-3">
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- COLUMNA DERECHA · Sidebar                                         -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-4">
+        <div class="sidebar-sticky">
 
-            <!-- Donut SVG -->
-            <svg width="160" height="160" viewBox="0 0 140 140" aria-hidden="true">
-              <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-              @for (seg of donutSegments(); track seg.label) {
-                <circle cx="70" cy="70" [attr.r]="R" fill="none"
-                        [attr.stroke]="seg.color" stroke-width="18"
-                        [attr.stroke-dasharray]="seg.dasharray"
-                        [attr.stroke-dashoffset]="seg.dashoffset"
-                        transform="rotate(-90 70 70)"/>
-              }
-              <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
-              <text x="70" y="83" text-anchor="middle" class="donut-sub">ofertas</text>
-            </svg>
-
-            <!-- Leyenda -->
-            <div class="w-100 mt-2">
-              @for (e of estadoBreakdown(); track e.key) {
-                <div class="d-flex align-items-center justify-content-between legend-row">
-                  <div class="d-flex align-items-center gap-2">
-                    <i class="bi {{ e.icon }}" [style.color]="e.color"></i>
-                    <span class="small">{{ e.label }}</span>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="progress legend-bar">
-                      <div class="progress-bar" [style.width.%]="e.pct"
-                           [style.background-color]="e.color"></div>
-                    </div>
-                    <span class="small fw-semibold" style="min-width:18px">{{ e.count }}</span>
-                  </div>
-                </div>
-              }
+          <!-- Distribución (donut) -->
+          <div class="card border-0 shadow-sm rounded-4 mb-3">
+            <div class="card-header bg-transparent border-bottom px-4 py-3">
+              <span class="fw-semibold">
+                <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+              </span>
             </div>
+            <div class="card-body d-flex flex-column align-items-center py-3 px-3">
 
-            <!-- Referencia de progreso -->
-            <div class="w-100 mt-4 pt-3 border-top">
-              <p class="small text-muted fw-semibold mb-2">
+              <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+                @for (seg of donutSegments(); track seg.label) {
+                  <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                          [attr.stroke]="seg.color" stroke-width="18"
+                          [attr.stroke-dasharray]="seg.dasharray"
+                          [attr.stroke-dashoffset]="seg.dashoffset"
+                          transform="rotate(-90 70 70)"/>
+                }
+                <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
+                <text x="70" y="83" text-anchor="middle" class="donut-sub">ofertas</text>
+              </svg>
+
+              <div class="w-100 mt-1">
+                @for (e of estadoBreakdown(); track e.key) {
+                  <div class="d-flex align-items-center justify-content-between legend-row">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="legend-dot" [style.background]="e.color"></span>
+                      <span class="small">{{ e.label }}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress legend-bar">
+                        <div class="progress-bar" [style.width.%]="e.pct"
+                             [style.background-color]="e.color"></div>
+                      </div>
+                      <span class="small fw-semibold legend-count">{{ e.count }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Referencia de progreso -->
+          <div class="card border-0 shadow-sm rounded-4 mb-3">
+            <div class="card-body px-4 py-3">
+              <p class="small fw-semibold text-muted mb-2">
                 <i class="bi bi-info-circle me-1"></i>¿Qué significa el progreso?
               </p>
-              <div class="d-flex flex-column gap-1">
-                <div class="d-flex align-items-center gap-2">
-                  <div class="ref-bar" style="background:#ffc107; width:35%"></div>
-                  <small class="text-muted">35% — Oferta enviada</small>
+              <div class="d-flex flex-column gap-2">
+                <div class="ref-row">
+                  <div class="ref-bar-wrap">
+                    <div class="ref-bar" style="background:#ffc107; width:35%"></div>
+                  </div>
+                  <span class="ref-label">35% · Oferta enviada</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="ref-bar" style="background:#198754; width:80%"></div>
-                  <small class="text-muted">80% — Adjudicado</small>
+                <div class="ref-row">
+                  <div class="ref-bar-wrap">
+                    <div class="ref-bar" style="background:#198754; width:60%"></div>
+                  </div>
+                  <span class="ref-label">60% · Aceptada</span>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="ref-bar" style="background:#198754; width:100%"></div>
-                  <small class="text-muted">100% — Contratado</small>
+                <div class="ref-row">
+                  <div class="ref-bar-wrap">
+                    <div class="ref-bar" style="background:#198754; width:80%"></div>
+                  </div>
+                  <span class="ref-label">80% · Adjudicado</span>
+                </div>
+                <div class="ref-row">
+                  <div class="ref-bar-wrap">
+                    <div class="ref-bar" style="background:#198754; width:100%"></div>
+                  </div>
+                  <span class="ref-label">100% · Contratado</span>
                 </div>
               </div>
             </div>
-
           </div>
+
+          <!-- Acciones rápidas -->
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body px-4 py-3">
+              <p class="small fw-semibold text-muted mb-2">
+                <i class="bi bi-lightning me-1"></i>Acciones rápidas
+              </p>
+              <div class="d-flex flex-column gap-2">
+                <a routerLink="/builder/available-files"
+                   class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
+                  <i class="bi bi-search"></i>
+                  <span>Ver expedientes disponibles</span>
+                </a>
+                <a routerLink="/builder/my-offers"
+                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                  <i class="bi bi-list-ul"></i>
+                  <span>Ver todas mis ofertas</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
     </div>
-
   }
 
 </div>

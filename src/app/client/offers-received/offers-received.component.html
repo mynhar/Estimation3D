@@ -1,28 +1,40 @@
-<div class="container py-4 page-wrap">
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
 
   <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <div class="mb-4">
-    <h4 class="page-title">Ofertas recibidas</h4>
-    <p class="page-subtitle">
-      Expedientes con propuestas de constructores. Revisa, compara y selecciona la mejor.
-    </p>
-  </div>
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">Ofertas recibidas</h4>
+        <p class="text-muted small mb-0">
+          Revisa las propuestas de constructores para tus proyectos y elige la mejor.
+        </p>
+      </div>
+      @if (!cargando() && pendientes().length > 0) {
+        <span class="pending-pill flex-shrink-0">
+          <i class="bi bi-bell-fill me-1"></i>
+          {{ pendientes().length }} pendiente{{ pendientes().length !== 1 ? 's' : '' }}
+        </span>
+      }
+    </div>
+  </header>
 
   <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando expedientes…
+      Cargando ofertas…
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
-        <i class="bi bi-envelope-open empty-state__icon"></i>
-        <p class="empty-state__title">Sin ofertas por ahora</p>
-        <p class="empty-state__text">
-          Cuando los constructores envíen propuestas sobre tus expedientes, aparecerán aquí.
+        <div class="empty-icon">
+          <i class="bi bi-envelope-open"></i>
+        </div>
+        <p class="empty-title">Sin ofertas por ahora</p>
+        <p class="empty-text">
+          Cuando los constructores envíen propuestas sobre tus expedientes, aparecerán aquí para que puedas revisarlas y compararlas.
         </p>
       </div>
     </div>
@@ -30,59 +42,167 @@
   <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- contador -->
-    <p class="text-muted small mb-3">
-      <i class="bi bi-info-circle me-1"></i>
-      {{ expedientes().length }}
-      {{ expedientes().length === 1 ? 'expediente tiene' : 'expedientes tienen' }}
-      ofertas para revisar.
-    </p>
-
-    <div class="card table-card">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-4">N°</th>
-              <th>Servicio</th>
-              <th class="d-none d-md-table-cell">Dirección</th>
-              <th class="d-none d-sm-table-cell">Fecha visita</th>
-              <th>Estado</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (exp of expedientes(); track exp.id) {
-              <tr>
-                <td class="ps-4 fw-semibold text-nowrap">{{ exp.numero }}</td>
-                <td>{{ exp.servicio_nombre }}</td>
-                <td class="text-muted small d-none d-md-table-cell">
-                  <div>{{ exp.direccion }}{{ exp.referencia ? ', ' + exp.referencia : '' }}</div>
-                  <div class="text-label mt-1">{{ exp.provincia }}, {{ exp.canton }}</div>
-                </td>
-                <td class="small d-none d-sm-table-cell">
-                  {{ formatFecha(exp.fecha_visita) }}
-                </td>
-                <td>
-                  <span class="badge {{ estadoClase(exp.estado) }}">
-                    {{ estadoTexto(exp.estado) }}
-                  </span>
-                  <div class="text-muted small mt-1">
-                    <i class="bi bi-people me-1"></i>
-                    {{ exp.total_ofertas }} {{ exp.total_ofertas === 1 ? 'oferta' : 'ofertas' }}
-                  </div>
-                </td>
-                <td class="pe-4 text-end">
-                  <button class="btn btn-primary btn-sm" (click)="ver(exp.id)">
-                    <i class="bi bi-eye me-1"></i>Revisar
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    <!-- ── Banner de urgencia ─────────────────────────────────────────────── -->
+    @if (pendientes().length > 0) {
+      <div class="urgency-banner d-flex flex-wrap align-items-center gap-3 mb-4 p-3 rounded-4">
+        <div class="urgency-banner__icon">
+          <i class="bi bi-bell-fill"></i>
+        </div>
+        <div class="flex-grow-1">
+          <p class="fw-semibold mb-0 text-dark">
+            Tienes
+            {{ pendientes().length === 1 ? 'un expediente' : pendientes().length + ' expedientes' }}
+            con ofertas esperando tu decisión
+          </p>
+          <p class="small mb-0 text-warning-emphasis">
+            Compara las propuestas y selecciona la que mejor se adapte a tu proyecto.
+          </p>
+        </div>
       </div>
-    </div>
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓN 1 · Pendientes de revisión (en_oferta)                        -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    @if (pendientes().length > 0) {
+      <div class="section-label mb-3">
+        <span class="section-dot section-dot--amber"></span>
+        Pendientes de revisión
+        <span class="section-count">{{ pendientes().length }}</span>
+      </div>
+
+      <div class="row g-3 row-cols-1 row-cols-md-2 mb-5">
+        @for (exp of pendientes(); track exp.id) {
+          <div class="col">
+            <div class="offer-card offer-card--pending h-100"
+                 [style.--acento]="estadoColor(exp.estado)">
+              <div class="offer-accent"></div>
+              <div class="offer-body d-flex flex-column">
+
+                <!-- Fila 1: número + conteo ofertas + badge estado -->
+                <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
+                  <span class="exp-num">{{ exp.numero }}</span>
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="offers-pill">
+                      <i class="bi bi-people-fill me-1"></i>
+                      {{ ofertasTip(exp.total_ofertas) }}
+                    </span>
+                    <span class="estado-badge badge"
+                          [class]="estadoClase(exp.estado)">
+                      {{ estadoTexto(exp.estado) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Servicio -->
+                <p class="exp-servicio mb-2">{{ exp.servicio_nombre }}</p>
+
+                <!-- Ubicación -->
+                <p class="exp-meta mb-1">
+                  <i class="bi bi-geo-alt me-1"></i>
+                  <span>{{ exp.direccion }}{{ exp.referencia ? ' · ' + exp.referencia : '' }}</span>
+                </p>
+                <p class="exp-meta mb-0">
+                  <i class="bi bi-map me-1"></i>
+                  {{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
+                </p>
+
+                <hr class="offer-divider my-3" />
+
+                <!-- Fecha de visita -->
+                <p class="exp-fecha mb-0">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  Visita: {{ formatFecha(exp.fecha_visita) }}
+                  @if (formatHora(exp.fecha_visita)) {
+                    <span class="ms-1 text-muted">· {{ formatHora(exp.fecha_visita) }}</span>
+                  }
+                </p>
+
+                <!-- CTA principal -->
+                <button class="btn btn-warning fw-semibold mt-auto pt-3 d-flex align-items-center
+                               justify-content-center gap-2 w-100"
+                        style="margin-top: 1rem !important"
+                        (click)="ver(exp.id)">
+                  <i class="bi bi-eye"></i>
+                  Ver y comparar {{ ofertasLabel(exp.total_ofertas) }}
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓN 2 · Ya gestionados (adjudicado / contratado / cancelado)       -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    @if (gestionados().length > 0) {
+
+      @if (pendientes().length > 0) {
+        <div class="section-separator mb-4"></div>
+      }
+
+      <div class="section-label mb-3">
+        <span class="section-dot section-dot--green"></span>
+        Ya gestionados
+        <span class="section-count">{{ gestionados().length }}</span>
+      </div>
+
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        @for (exp of gestionados(); track exp.id) {
+          <div class="col">
+            <div class="offer-card offer-card--managed h-100"
+                 [style.--acento]="estadoColor(exp.estado)">
+              <div class="offer-accent"></div>
+              <div class="offer-body d-flex flex-column">
+
+                <!-- Fila 1: número + estado -->
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+                  <span class="exp-num">{{ exp.numero }}</span>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="offers-pill offers-pill--muted">
+                      <i class="bi bi-people me-1"></i>
+                      {{ ofertasLabel(exp.total_ofertas) }}
+                    </span>
+                    <span class="estado-badge badge"
+                          [class]="estadoClase(exp.estado)">
+                      {{ estadoTexto(exp.estado) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Servicio -->
+                <p class="exp-servicio exp-servicio--sm mb-2">{{ exp.servicio_nombre }}</p>
+
+                <!-- Ubicación compacta -->
+                <p class="exp-meta mb-0">
+                  <i class="bi bi-geo-alt me-1"></i>
+                  {{ exp.provincia }}, {{ exp.canton }}
+                </p>
+
+                <!-- Fecha -->
+                <p class="exp-fecha mt-1 mb-0">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ formatFecha(exp.fecha_visita) }}
+                </p>
+
+                <!-- CTA secundario -->
+                <button class="btn btn-outline-secondary btn-sm mt-auto d-flex align-items-center
+                               justify-content-center gap-2 w-100"
+                        style="margin-top: 0.85rem !important"
+                        (click)="ver(exp.id)">
+                  <i class="bi bi-eye"></i>
+                  Ver detalle
+                </button>
+
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
 
   }
 

@@ -10,6 +10,7 @@ import { FileUnderEstimationComponent } from './estimator/file-under-estimation/
 import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-files.component';
 import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
 import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
+import { EstimatorDashboardComponent } from './estimator/dashboard/dashboard.component';
 import { authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.guard';
 import { AvailableFilesComponent } from './builder/available-files/available-files.component';
 import { MakeOfferComponent } from './builder/make-offer/make-offer.component';
@@ -21,7 +22,7 @@ import { BuilderOfferComponent } from './client/builder-offer/builder-offer.comp
 import { PerfilComponent } from './client/perfil/perfil.component';
 
 export const routes: Routes = [
-  { path: '', component: LandingPageComponent },
+  { path: '', component: LandingPageComponent, canActivate: [guestGuard] },
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'client/dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'client/file/create', component: FileCreateComponent, canActivate: [authGuard] },
@@ -29,6 +30,7 @@ export const routes: Routes = [
   { path: 'client/offers-received', component: OffersReceivedComponent, canActivate: [authGuard] },
   { path: 'client/builder-offer/:id', component: BuilderOfferComponent, canActivate: [authGuard] },
   { path: 'client/perfil', component: PerfilComponent, canActivate: [authGuard] },
+  { path: 'estimator/dashboard', component: EstimatorDashboardComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/files-to-be-estimated', component: FilesToBeEstimatedComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/file-to-be-estimated/:id', component: FileToBeEstimatedComponent, canActivate: [estimatorGuard] },
   { path: 'estimator/files-under-estimation', component: FilesUnderEstimationComponent, canActivate: [estimatorGuard] },

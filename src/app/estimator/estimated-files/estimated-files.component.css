@@ -1,0 +1,196 @@
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.page-wrap { max-width: 1280px; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 60%, #d1fae5 100%);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+}
+.page-header h4 { font-size: 1.35rem; color: #1a1a2e; }
+
+/* KPI pills */
+.kpi-pill {
+  display: inline-flex; align-items: center;
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.3em 0.8em; border-radius: 20px;
+}
+.kpi-pill--total {
+  background: rgba(22,163,74,.1); color: #15803d;
+  border: 1px solid rgba(22,163,74,.2);
+}
+.kpi-pill--contratado {
+  background: rgba(8,145,178,.1); color: #0e7490;
+  border: 1px solid rgba(8,145,178,.2);
+}
+.kpi-pill--oferta {
+  background: rgba(37,99,235,.1); color: #1d4ed8;
+  border: 1px solid rgba(37,99,235,.2);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+.loading-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 4rem 1rem;
+  color: #6c757d; font-size: 0.9rem;
+}
+
+/* ── Empty states ────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 4rem 2rem; gap: 0.5rem;
+}
+.empty-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(22,163,74,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.25rem; color: #16a34a; margin-bottom: 0.5rem;
+}
+.empty-title { font-size: 1.1rem; font-weight: 700; color: #212529; margin: 0; }
+.empty-text  {
+  font-size: 0.9rem; color: #6c757d;
+  max-width: 380px; margin: 0 0 0.5rem; line-height: 1.6;
+}
+.empty-inline {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 2.5rem 1.5rem; color: #475569;
+}
+
+/* ── Estado filter chips ─────────────────────────────────────────────────── */
+.estado-filter {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.estado-chip {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.35em 0.85em;
+  font-size: 0.8rem; font-weight: 500;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc; color: #475569;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.estado-chip:hover {
+  background: #f1f5f9; color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+/* Active "Todos" chip */
+.estado-chip--active {
+  background: rgba(22,163,74,.1);
+  border-color: rgba(22,163,74,.35);
+  color: #15803d;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(22,163,74,.12);
+}
+
+/* Active state-specific chips */
+.estado-chip--active.estado-chip--estimado   { background: rgba(22,163,74,.1);  border-color: rgba(22,163,74,.35);  color: #15803d;  }
+.estado-chip--active.estado-chip--en_oferta  { background: rgba(37,99,235,.1);  border-color: rgba(37,99,235,.35);  color: #1d4ed8;  }
+.estado-chip--active.estado-chip--adjudicado { background: rgba(217,119,6,.1);  border-color: rgba(217,119,6,.35);  color: #b45309;  }
+.estado-chip--active.estado-chip--contratado { background: rgba(8,145,178,.1);  border-color: rgba(8,145,178,.35);  color: #0e7490;  }
+.estado-chip--active.estado-chip--cancelado  { background: rgba(107,114,128,.1); border-color: rgba(107,114,128,.35); color: #4b5563; }
+
+/* Colored dots */
+.estado-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.dot--todos      { background: #16a34a; }
+.dot--estimado   { background: #16a34a; }
+.dot--en_oferta  { background: #2563eb; }
+.dot--adjudicado { background: #d97706; }
+.dot--contratado { background: #0891b2; }
+.dot--cancelado  { background: #9ca3af; }
+
+/* Count bubble inside chip */
+.chip-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px;
+  font-size: 0.68rem; font-weight: 700;
+  background: rgba(0,0,0,.08);
+  border-radius: 9px; padding: 0 5px;
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.filter-bar {
+  background: #fff;
+  border: 1px solid #e9ecef;
+}
+
+.search-wrap { position: relative; min-width: 200px; }
+.search-icon {
+  position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+  color: #94a3b8; pointer-events: none; font-size: 0.9rem;
+}
+.search-input { border-color: #e2e8f0; }
+.search-input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22,163,74,.12);
+}
+
+/* ── Expedition cards ────────────────────────────────────────────────────── */
+.exp-card {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid #e9ecef;
+  border-radius: 0.875rem;
+  padding: 1.25rem;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.exp-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,.08);
+}
+
+/* Left-border state colors */
+.exp-card--estimado   { border-left-color: #16a34a; }
+.exp-card--en_oferta  { border-left-color: #2563eb; }
+.exp-card--adjudicado { border-left-color: #d97706; }
+.exp-card--contratado {
+  border-left-color: #0891b2;
+  background: linear-gradient(to right, rgba(8,145,178,.03) 0%, #fff 60%);
+}
+.exp-card--cancelado  { border-left-color: #9ca3af; opacity: 0.75; }
+
+/* Number chip */
+.exp-num {
+  font-family: monospace; font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #15803d;
+  background: rgba(22,163,74,.1);
+  padding: 0.15em 0.55em; border-radius: 4px;
+}
+.exp-card--en_oferta  .exp-num { color: #1d4ed8; background: rgba(37,99,235,.1);  }
+.exp-card--adjudicado .exp-num { color: #b45309; background: rgba(217,119,6,.1);  }
+.exp-card--contratado .exp-num { color: #0e7490; background: rgba(8,145,178,.1);  }
+.exp-card--cancelado  .exp-num { color: #6b7280; background: rgba(107,114,128,.1);}
+
+/* Servicio */
+.exp-servicio {
+  font-size: 1rem; font-weight: 700; color: #1e293b;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Metadata */
+.exp-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.exp-meta { font-size: 0.82rem; color: #64748b; }
+
+/* Fecha row */
+.exp-fecha-row {
+  font-size: 0.83rem; color: #64748b;
+  padding: 0.4rem 0.65rem;
+  background: #f8fafc;
+  border-radius: 0.4rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 575px) {
+  .page-header { padding: 1rem !important; }
+  .page-header h4 { font-size: 1.15rem; }
+  .exp-card { padding: 1rem; }
+}

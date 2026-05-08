@@ -1,7 +1,7 @@
 @if (user()) {
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
   <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/client/dashboard">
+    <a class="navbar-brand" [routerLink]="dashboardRoute()">
       <i class="bi bi-box-seam me-1 text-primary"></i>Estimation3D
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -12,7 +12,7 @@
 
         <!-- Menú Cliente -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button"
+          <a class="nav-link dropdown-toggle" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
             Cliente
           </a>
@@ -48,7 +48,7 @@
         <!-- Menú Constructor (solo constructor / administrador) -->
         @if (esConstructor()) {
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button"
+          <a class="nav-link dropdown-toggle" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
             Constructor
           </a>
@@ -79,11 +79,18 @@
         <!-- Menú Estimador (solo estimador / administrador) -->
         @if (esEstimador()) {
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button"
+          <a class="nav-link dropdown-toggle" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
             Estimador
           </a>
           <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/estimator/dashboard"
+                 routerLinkActive="active-link">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item" routerLink="/estimator/files-to-be-estimated"
                  routerLinkActive="active-link">
@@ -111,7 +118,7 @@
       <!-- Menú de perfil (derecha) -->
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item dropdown">
-          <a class="nav-link p-0" href="#" role="button"
+          <a class="nav-link p-0" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
             <img [src]="user()?.user_metadata?.['avatar_url'] || 'assets/avatar-fallback.jpg'"
                  [alt]="user()?.user_metadata?.['full_name']"
@@ -147,3 +154,4 @@
 }
 
 <router-outlet />
+<app-toast />

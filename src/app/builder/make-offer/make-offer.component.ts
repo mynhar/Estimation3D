@@ -56,7 +56,22 @@ export class MakeOfferComponent implements OnInit {
   exitoMsg   = signal('');
   errorEnvio = signal('');
 
+  videoActivo  = signal<ArchivoRow | null>(null);
+  fotoAmpliada = signal<string | null>(null);
+
   private expedienteId = '';
+
+  get formularioCompleto(): boolean {
+    const esNueva = !this.ofertaId();
+    return !!(
+      this.precio && this.precio > 0 &&
+      this.plazoMin && this.plazoMin > 0 &&
+      this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
+      this.fechaInicio &&
+      this.descripcion.trim() &&
+      (!esNueva || this.documentoOferta())
+    );
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -195,14 +210,30 @@ export class MakeOfferComponent implements OnInit {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
   }
 
+  toggleVideo(video: ArchivoRow) {
+    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
+  }
+
+  abrirFoto(archivo: ArchivoRow) {
+    this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
+  }
+
+  cerrarFoto() {
+    this.fotoAmpliada.set(null);
+  }
+
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
+    const d   = new Date(`${raw}T00:00:00`);
+    return isNaN(d.getTime()) ? '—'
+      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
-    if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+    if (!valor || !valor.includes('T')) return '—';
+    const time = valor.split('T')[1]?.slice(0, 5);
+    return time ?? '—';
   }
 
   formatCosto(valor: number | null): string {
@@ -214,6 +245,10 @@ export class MakeOfferComponent implements OnInit {
     if (bytes < 1_024)     return `${bytes} B`;
     if (bytes < 1_048_576) return `${(bytes / 1_024).toFixed(1)} KB`;
     return `${(bytes / 1_048_576).toFixed(1)} MB`;
+  }
+
+  verMisOfertas() {
+    this.router.navigate(['/builder/my-offers']);
   }
 
   volver() {

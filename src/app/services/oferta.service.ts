@@ -163,7 +163,7 @@ export class OfertaService {
     const { data, error } = await this.db
       .from('oferta')
       .select(`
-        id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos,
+        id, expediente_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos,
         fecha_inicio, descripcion, estado, creado_en,
         expediente:expediente_id (
           numero,
@@ -181,6 +181,7 @@ export class OfertaService {
 
     return {
       id:                data.id,
+      expediente_id:     (data as any).expediente_id ?? '',
       precio:            data.precio,
       plazo_semanas_min: data.plazo_semanas_min,
       plazo_semanas_max: data.plazo_semanas_max,

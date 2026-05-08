@@ -1,0 +1,181 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Header ────────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">Mis estimaciones completadas</h4>
+        <p class="text-muted small mb-0">
+          Expedientes que has estimado y su progreso actual en el proceso.
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="kpi-pill kpi-pill--total">
+          <i class="bi bi-clipboard-check me-1"></i>
+          {{ expedientes().length }} total{{ expedientes().length !== 1 ? 'es' : '' }}
+        </span>
+        @if (contarEstado('contratado') > 0) {
+          <span class="kpi-pill kpi-pill--contratado">
+            <i class="bi bi-trophy me-1"></i>
+            {{ contarEstado('contratado') }} contratado{{ contarEstado('contratado') !== 1 ? 's' : '' }}
+          </span>
+        }
+        @if (contarEstado('en_oferta') > 0) {
+          <span class="kpi-pill kpi-pill--oferta">
+            <i class="bi bi-tags me-1"></i>
+            {{ contarEstado('en_oferta') }} en oferta
+          </span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+      Cargando estimaciones…
+    </div>
+
+  } @else if (expedientes().length === 0) {
+
+    <!-- ── Empty ─────────────────────────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard-check"></i>
+        </div>
+        <h5 class="empty-title">Sin estimaciones completadas</h5>
+        <p class="empty-text">
+          Aquí aparecerán los expedientes que hayas estimado y enviado.
+          Ve a <strong>Expedientes en estimación</strong> para continuar.
+        </p>
+      </div>
+    </div>
+
+  } @else {
+
+    <!-- ── Chips de filtro por estado ────────────────────────────────────── -->
+    <div class="estado-filter mb-3">
+      <!-- Chip "Todos" -->
+      <button class="estado-chip"
+              [class.estado-chip--active]="filtroEstado() === null"
+              (click)="filtroEstado.set(null)">
+        <span class="estado-dot dot--todos"></span>
+        Todos
+        <span class="chip-count">{{ expedientes().length }}</span>
+      </button>
+
+      <!-- Chips por estado -->
+      @for (chip of estadoChips; track chip.value) {
+        @if (contarEstado(chip.value) > 0) {
+          <button class="estado-chip"
+                  [class.estado-chip--active]="filtroEstado() === chip.value"
+                  [class.estado-chip--estimado]="chip.value === 'estimado'"
+                  [class.estado-chip--en_oferta]="chip.value === 'en_oferta'"
+                  [class.estado-chip--adjudicado]="chip.value === 'adjudicado'"
+                  [class.estado-chip--contratado]="chip.value === 'contratado'"
+                  [class.estado-chip--cancelado]="chip.value === 'cancelado'"
+                  (click)="filtroEstado.set(filtroEstado() === chip.value ? null : chip.value)">
+            <span class="estado-dot"
+                  [class.dot--estimado]="chip.value === 'estimado'"
+                  [class.dot--en_oferta]="chip.value === 'en_oferta'"
+                  [class.dot--adjudicado]="chip.value === 'adjudicado'"
+                  [class.dot--contratado]="chip.value === 'contratado'"
+                  [class.dot--cancelado]="chip.value === 'cancelado'"></span>
+            {{ chip.label }}
+            <span class="chip-count">{{ contarEstado(chip.value) }}</span>
+          </button>
+        }
+      }
+    </div>
+
+    <!-- ── Barra de búsqueda ──────────────────────────────────────────────── -->
+    <div class="filter-bar rounded-3 p-3 mb-4 d-flex align-items-center gap-3 flex-wrap">
+      <div class="search-wrap flex-grow-1">
+        <i class="bi bi-search search-icon"></i>
+        <input class="form-control search-input ps-5"
+               type="search"
+               placeholder="Buscar por número, servicio, cliente o ubicación…"
+               [ngModel]="busqueda()"
+               (ngModelChange)="busqueda.set($event)" />
+      </div>
+      @if (hayFiltros()) {
+        <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
+          <i class="bi bi-x me-1"></i>Limpiar
+        </button>
+      }
+    </div>
+
+    <!-- ── Sin resultados ─────────────────────────────────────────────────── -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="empty-inline">
+          <i class="bi bi-search fs-2 mb-2 text-muted"></i>
+          <p class="mb-1 fw-medium">Sin resultados</p>
+          <p class="text-muted small mb-0">Ningún expediente coincide con los filtros actuales.</p>
+        </div>
+      </div>
+
+    } @else {
+
+      <!-- ── Grid de tarjetas ───────────────────────────────────────────── -->
+      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <div class="col">
+            <div class="exp-card d-flex flex-column h-100"
+                 [class.exp-card--estimado]="exp.estado === 'estimado'"
+                 [class.exp-card--en_oferta]="exp.estado === 'en_oferta'"
+                 [class.exp-card--adjudicado]="exp.estado === 'adjudicado'"
+                 [class.exp-card--contratado]="exp.estado === 'contratado'"
+                 [class.exp-card--cancelado]="exp.estado === 'cancelado'">
+
+              <!-- Número + badge estado -->
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="exp-num">{{ exp.numero }}</span>
+                <span class="badge rounded-pill px-3 py-1 {{ badgeClass(exp.estado) }}">
+                  @if (exp.estado === 'contratado') {
+                    <i class="bi bi-trophy-fill me-1"></i>
+                  }
+                  {{ estadoLabel(exp.estado) }}
+                </span>
+              </div>
+
+              <!-- Servicio -->
+              <p class="exp-servicio mb-2">{{ exp.servicio_nombre }}</p>
+
+              <!-- Cliente + ubicación -->
+              <div class="exp-info mb-3">
+                <div class="exp-meta">
+                  <i class="bi bi-person text-muted me-1"></i>{{ exp.cliente_nombre }}
+                </div>
+                <div class="exp-meta">
+                  <i class="bi bi-geo-alt text-muted me-1"></i>
+                  {{ exp.provincia }}, {{ exp.canton }}
+                </div>
+              </div>
+
+              <!-- Fecha + hora visita -->
+              <div class="exp-fecha-row d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-calendar3 flex-shrink-0"></i>
+                <span>{{ formatFecha(exp.fecha_visita) }}</span>
+                @if (formatHora(exp.fecha_visita) !== '—') {
+                  <span class="ms-auto fw-semibold">{{ formatHora(exp.fecha_visita) }}</span>
+                }
+              </div>
+
+              <!-- CTA -->
+              <button class="btn btn-outline-success btn-sm mt-auto d-flex align-items-center justify-content-center gap-1"
+                      (click)="ver(exp.id)">
+                <i class="bi bi-eye"></i>Ver detalle
+              </button>
+
+            </div>
+          </div>
+        }
+      </div>
+
+    }
+  }
+
+</div>

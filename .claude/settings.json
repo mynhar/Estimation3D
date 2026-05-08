@@ -5,7 +5,14 @@
       "Bash(supabase migration *)",
       "Bash(Remove-Item \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\public\\\\avatar-fallback.svg\")",
       "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\models\" -Name)",
-      "Bash(npx ng *)"
+      "Bash(npx ng *)",
+      "Bash(npm uninstall *)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\models\" | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\services\" | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "PowerShell($f = \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\files-to-be-estimated\\\\files-to-be-estimated.component.ts\"; \\(Get-Content $f -Raw\\) | Set-Content $f -NoNewline -Encoding utf8)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npx supabase *)",
+      "Bash(supabase status *)"
     ]
   }
 }

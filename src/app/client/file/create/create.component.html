@@ -1,443 +1,610 @@
-<div class="container py-4 create-wrap">
+<div class="container-xl py-4 px-3 px-md-4 create-wrap">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <div class="mb-4">
-    <div class="d-flex align-items-center gap-2 mb-1">
-      <button class="btn btn-link p-0 text-secondary" (click)="onCancel()" title="Volver">
-        <i class="bi bi-arrow-left fs-5"></i>
+  <!-- ── Encabezado con barra de progreso ──────────────────────────────────── -->
+  <header class="create-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <button class="btn btn-outline-secondary btn-sm flex-shrink-0"
+              (click)="onCancel()" title="Volver al panel">
+        <i class="bi bi-arrow-left"></i>
       </button>
-      <h4 class="page-title mb-0">Nuevo expediente</h4>
+      <div class="flex-grow-1 min-w-0">
+        <h4 class="fw-bold mb-0">Nuevo expediente</h4>
+        <p class="text-muted small mb-0">
+          Completa los 4 pasos para solicitar tu estimación de proyecto
+        </p>
+      </div>
+      <span class="progress-pill flex-shrink-0">
+        {{ completedSteps() }} de 4
+      </span>
     </div>
-    <p class="page-subtitle ms-4 ps-1">
-      Completa los 4 pasos para solicitar una estimación 3D de tu proyecto.
-    </p>
-  </div>
+    <div class="progress create-progress">
+      <div class="progress-bar bg-success"
+           role="progressbar"
+           [style.width.%]="progressPct()"
+           [attr.aria-valuenow]="progressPct()"
+           aria-valuemin="0" aria-valuemax="100">
+      </div>
+    </div>
+  </header>
 
-  <!-- ── Progreso ───────────────────────────────────────────────────────────── -->
-  <div class="form-stepper card border-0 shadow-sm mb-4">
-    @for (step of STEPS; let i = $index; track step) {
-      @if (i > 0) {
-        <div class="stepper__connector"
-             [class.stepper__connector--done]="stepDone(i - 1)"></div>
+  <!-- ── Layout principal ──────────────────────────────────────────────────── -->
+  <div class="row g-4 align-items-start">
+
+    <!-- ── Columna de formulario ─────────────────────────────────────────────── -->
+    <div class="col-lg-8">
+
+      <!-- ── Error global (solo móvil — en desktop lo muestra el sidebar) ─── -->
+      @if (error()) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4 d-lg-none">
+          <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+          <span>{{ error() }}</span>
+        </div>
       }
-      <div class="stepper__step" [class.stepper__step--done]="stepDone(i)">
-        <div class="stepper__circle">
-          @if (stepDone(i)) {
-            <i class="bi bi-check-lg"></i>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASO 1 · Servicio                                                   -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="card border-0 shadow-sm rounded-4 section-card mb-3"
+           [class.section-card--done]="step1Complete()">
+        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
+          <span class="section-num" [class.section-num--done]="step1Complete()">
+            @if (step1Complete()) { <i class="bi bi-check-lg"></i> } @else { 1 }
+          </span>
+          <div class="flex-grow-1 min-w-0">
+            <span class="section-title d-block">¿Qué tipo de servicio necesitas?</span>
+            <small class="text-muted">Selecciona el servicio que mejor describe tu situación.</small>
+          </div>
+          @if (step1Complete()) {
+            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+              <i class="bi bi-check me-1"></i>Listo
+            </span>
+          }
+        </div>
+        <div class="card-body p-4">
+
+          @if (cargandoServicios()) {
+            <div class="loading-state">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              Cargando servicios disponibles…
+            </div>
           } @else {
-            {{ i + 1 }}
-          }
-        </div>
-        <span class="stepper__label d-none d-sm-inline">{{ step }}</span>
-      </div>
-    }
-  </div>
-
-  <!-- ── Error global ───────────────────────────────────────────────────────── -->
-  @if (error()) {
-    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
-      <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-      <span>{{ error() }}</span>
-    </div>
-  }
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- PASO 1 · Servicio                                                     -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-      <span class="section-num" [class.section-num--done]="step1Complete()">
-        @if (step1Complete()) { <i class="bi bi-check-lg"></i> } @else { 1 }
-      </span>
-      <div class="flex-grow-1 min-w-0">
-        <span class="section-title d-block">¿Qué tipo de servicio necesitas?</span>
-        <small class="text-muted">Selecciona el servicio que mejor describe tu situación.</small>
-      </div>
-    </div>
-    <div class="card-body p-4">
-
-      @if (cargandoServicios()) {
-        <div class="loading-state">
-          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-          Cargando servicios disponibles…
-        </div>
-      } @else {
-        <div class="row g-3">
-          @for (s of servicios(); track s.id) {
-            <div class="col-sm-6">
-              <label class="service-card h-100"
-                     [class.service-card--selected]="servicioId() === s.id">
-                <input type="radio" class="visually-hidden"
-                       [value]="s.id" [checked]="servicioId() === s.id"
-                       (change)="servicioId.set(s.id)" />
-                <div class="d-flex align-items-start gap-3">
-                  <div class="service-icon flex-shrink-0"
-                       [class.service-icon--selected]="servicioId() === s.id">
-                    <i class="bi {{ serviceIcon(s.nombre_es) }}"></i>
-                  </div>
-                  <div class="flex-grow-1 min-w-0">
-                    <p class="service-code mb-1">{{ s.codigo }}</p>
-                    <p class="service-name mb-1">{{ s.nombre_es }}</p>
-                    <p class="service-desc mb-0">{{ s.descripcion_es }}</p>
-                  </div>
-                  @if (servicioId() === s.id) {
-                    <i class="bi bi-check-circle-fill text-primary flex-shrink-0 mt-1"></i>
-                  }
-                </div>
-              </label>
-            </div>
-          }
-        </div>
-
-        @if (servicioRequerido()) {
-          <div class="invalid-msg mt-3">
-            <i class="bi bi-exclamation-circle"></i>
-            Debes seleccionar un servicio para continuar.
-          </div>
-        }
-      }
-
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- PASO 2 · Datos de contacto                                            -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-      <span class="section-num" [class.section-num--done]="step2Complete()">
-        @if (step2Complete()) { <i class="bi bi-check-lg"></i> } @else { 2 }
-      </span>
-      <div class="flex-grow-1 min-w-0">
-        <span class="section-title d-block">Datos de contacto</span>
-        <small class="text-muted">Pre-llenados desde tu perfil — modifícalos si es necesario.</small>
-      </div>
-    </div>
-    <div class="card-body p-4">
-      <form [formGroup]="perfilForm">
-        <div class="row g-3">
-
-          <div class="col-sm-6">
-            <label class="form-label fw-medium">
-              Nombre <span class="text-danger">*</span>
-            </label>
-            <input type="text" class="form-control"
-                   formControlName="nombre" placeholder="Juan"
-                   autocomplete="given-name" />
-            @if (invalid(perfilForm, 'nombre')) {
-              <div class="invalid-msg"><i class="bi bi-exclamation-circle"></i> Nombre requerido.</div>
-            }
-          </div>
-
-          <div class="col-sm-6">
-            <label class="form-label fw-medium">
-              Apellido <span class="text-danger">*</span>
-            </label>
-            <input type="text" class="form-control"
-                   formControlName="apellido" placeholder="Pérez"
-                   autocomplete="family-name" />
-            @if (invalid(perfilForm, 'apellido')) {
-              <div class="invalid-msg"><i class="bi bi-exclamation-circle"></i> Apellido requerido.</div>
-            }
-          </div>
-
-          <div class="col-sm-6">
-            <label class="form-label fw-medium">
-              Teléfono <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-              <input type="tel" class="form-control"
-                     formControlName="telefono" placeholder="8888-8888"
-                     autocomplete="tel" />
-            </div>
-            @if (invalid(perfilForm, 'telefono')) {
-              <div class="invalid-msg"><i class="bi bi-exclamation-circle"></i> Teléfono requerido.</div>
-            }
-          </div>
-
-          <div class="col-sm-6">
-            <label class="form-label fw-medium">Correo electrónico</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-              <input type="email" class="form-control bg-light"
-                     formControlName="email" readonly tabindex="-1"
-                     autocomplete="email" />
-            </div>
-            <div class="form-text">
-              <i class="bi bi-lock me-1"></i>No se puede modificar aquí.
-            </div>
-          </div>
-
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- PASO 3 · Fecha de visita                                              -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-      <span class="section-num" [class.section-num--done]="step3Complete()">
-        @if (step3Complete()) { <i class="bi bi-check-lg"></i> } @else { 3 }
-      </span>
-      <div class="flex-grow-1 min-w-0">
-        <span class="section-title d-block">Fecha de visita</span>
-        <small class="text-muted">¿Cuándo estás disponible para recibir al estimador?</small>
-      </div>
-    </div>
-    <div class="card-body p-4">
-      <form [formGroup]="expedienteForm">
-        <div class="row g-3">
-
-          <div class="col-6">
-            <label class="form-label fw-medium">
-              Fecha deseada <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-              <input type="date" class="form-control" formControlName="fecha_visita" />
-            </div>
-            @if (invalid(expedienteForm, 'fecha_visita')) {
-              <div class="invalid-msg"><i class="bi bi-exclamation-circle"></i> Requerido.</div>
-            }
-          </div>
-
-          <div class="col-6">
-            <label class="form-label fw-medium">
-              Hora preferida <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-clock"></i></span>
-              <input type="time" class="form-control" formControlName="hora_visita" />
-            </div>
-            @if (invalid(expedienteForm, 'hora_visita')) {
-              <div class="invalid-msg"><i class="bi bi-exclamation-circle"></i> Requerido.</div>
-            }
-          </div>
-
-          <div class="col-12">
-            <div class="visit-note d-flex align-items-center gap-2 py-2 px-3 rounded-2 small">
-              <i class="bi bi-info-circle-fill text-primary flex-shrink-0"></i>
-              <span>Atendemos <strong>lunes a viernes, 8:00 a.m. – 5:00 p.m.</strong>
-                El estimador confirmará la disponibilidad contigo.</span>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <label class="form-label fw-medium">
-              Descripción del problema
-              <span class="text-muted fw-normal">(opcional)</span>
-            </label>
-            <textarea class="form-control" rows="4"
-                      formControlName="descripcion"
-                      maxlength="500"
-                      placeholder="Tipo de daño, tiempo que lleva presentándose, área aproximada afectada…"></textarea>
-            <div class="d-flex justify-content-between align-items-center mt-1">
-              <div class="form-text">
-                Una buena descripción ayuda al estimador a prepararse mejor.
-              </div>
-              <span class="char-counter" [class.char-counter--warn]="descripcionLen() > 450">
-                {{ descripcionLen() }}/500
-              </span>
-            </div>
-          </div>
-
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- PASO 4 · Localización                                                 -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <div class="card border-0 shadow-sm mb-3">
-    <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-      <span class="section-num" [class.section-num--done]="step4Complete()">
-        @if (step4Complete()) { <i class="bi bi-check-lg"></i> } @else { 4 }
-      </span>
-      <div class="flex-grow-1 min-w-0">
-        <span class="section-title d-block">Localización del inmueble</span>
-        <small class="text-muted">¿Dónde se realizará la visita de estimación?</small>
-      </div>
-    </div>
-    <div class="card-body p-4">
-      <form [formGroup]="localizacionForm">
-        <div class="row g-4">
-
-          <!-- Tipo de inmueble -->
-          <div class="col-12">
-            <label class="form-label fw-medium mb-2">
-              Tipo de inmueble <span class="text-danger">*</span>
-            </label>
-            <div class="tipo-group" role="radiogroup">
-              @for (tipo of tiposInmueble; track tipo.value) {
-                <div>
-                  <input type="radio" class="btn-check"
-                         [id]="'tipo-' + tipo.value"
-                         autocomplete="off"
-                         [value]="tipo.value"
-                         [checked]="localizacionForm.get('tipo_inmueble')?.value === tipo.value"
-                         (change)="localizacionForm.get('tipo_inmueble')?.setValue(tipo.value)" />
-                  <label class="tipo-btn btn btn-outline-secondary"
-                         [for]="'tipo-' + tipo.value">
-                    <i class="bi {{ tipo.icon }} tipo-btn__icon"></i>
-                    <span class="tipo-btn__label">{{ tipo.label }}</span>
+            <div class="row g-3">
+              @for (s of servicios(); track s.id) {
+                <div class="col-sm-6 col-xl-4">
+                  <label class="service-card h-100"
+                         [class.service-card--selected]="servicioId() === s.id">
+                    <input type="radio" class="visually-hidden"
+                           [value]="s.id" [checked]="servicioId() === s.id"
+                           (change)="servicioId.set(s.id)" />
+                    <div class="d-flex align-items-start gap-3">
+                      <div class="service-icon flex-shrink-0"
+                           [class.service-icon--selected]="servicioId() === s.id">
+                        <i class="bi {{ serviceIcon(s.nombre_es) }}"></i>
+                      </div>
+                      <div class="flex-grow-1 min-w-0">
+                        <p class="service-code mb-1">{{ s.codigo }}</p>
+                        <p class="service-name mb-1">{{ s.nombre_es }}</p>
+                        <p class="service-desc mb-0">{{ s.descripcion_es }}</p>
+                      </div>
+                      @if (servicioId() === s.id) {
+                        <i class="bi bi-check-circle-fill text-primary flex-shrink-0 mt-1"></i>
+                      }
+                    </div>
                   </label>
                 </div>
               }
             </div>
-            @if (invalid(localizacionForm, 'tipo_inmueble')) {
-              <div class="invalid-msg mt-1">
-                <i class="bi bi-exclamation-circle"></i> Selecciona el tipo de inmueble.
+
+            @if (servicioRequerido()) {
+              <div class="invalid-msg mt-3">
+                <i class="bi bi-exclamation-circle"></i>
+                Debes seleccionar un servicio para continuar.
               </div>
             }
-          </div>
-
-          <!-- Dirección -->
-          <div class="col-12">
-            <label class="form-label fw-medium">
-              Dirección completa <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-              <input type="text" class="form-control"
-                     formControlName="direccion"
-                     placeholder="Av. Central, 200 m norte del parque…"
-                     autocomplete="street-address" />
-            </div>
-            @if (invalid(localizacionForm, 'direccion')) {
-              <div class="invalid-msg">
-                <i class="bi bi-exclamation-circle"></i> Dirección requerida.
-              </div>
-            }
-          </div>
-
-          <!-- Provincia / Cantón / Distrito -->
-          <div class="col-md-4 col-sm-12">
-            <label class="form-label fw-medium">
-              Provincia <span class="text-danger">*</span>
-            </label>
-            <select class="form-select" formControlName="provincia"
-                    autocomplete="address-level1">
-              <option value="">Seleccionar…</option>
-              @for (p of provincias; track p) {
-                <option [value]="p">{{ p }}</option>
-              }
-            </select>
-            @if (invalid(localizacionForm, 'provincia')) {
-              <div class="invalid-msg">
-                <i class="bi bi-exclamation-circle"></i> Requerido.
-              </div>
-            }
-          </div>
-
-          <div class="col-md-4 col-sm-6">
-            <label class="form-label fw-medium">
-              Cantón <span class="text-danger">*</span>
-            </label>
-            <input type="text" class="form-control"
-                   formControlName="canton" placeholder="San José"
-                   autocomplete="address-level2" />
-            @if (invalid(localizacionForm, 'canton')) {
-              <div class="invalid-msg">
-                <i class="bi bi-exclamation-circle"></i> Requerido.
-              </div>
-            }
-          </div>
-
-          <div class="col-md-4 col-sm-6">
-            <label class="form-label fw-medium">
-              Distrito <span class="text-danger">*</span>
-            </label>
-            <input type="text" class="form-control"
-                   formControlName="distrito" placeholder="Carmen"
-                   autocomplete="address-level3" />
-            @if (invalid(localizacionForm, 'distrito')) {
-              <div class="invalid-msg">
-                <i class="bi bi-exclamation-circle"></i> Requerido.
-              </div>
-            }
-          </div>
-
-          <!-- Otras señas -->
-          <div class="col-12">
-            <label class="form-label fw-medium">
-              Otras señas
-              <span class="text-muted fw-normal">(opcional)</span>
-            </label>
-            <input type="text" class="form-control"
-                   formControlName="referencia"
-                   placeholder="Frente al parque, portón azul, entre calles 3 y 5…" />
-            <div class="form-text">
-              Ayuda al estimador a ubicar el inmueble con mayor precisión.
-            </div>
-          </div>
-
-          <!-- GPS (colapsable) -->
-          <div class="col-12">
-            <button type="button" class="gps-toggle w-100 d-flex align-items-center gap-2"
-                    (click)="gpsVisible.set(!gpsVisible())">
-              <i class="bi bi-compass text-primary"></i>
-              <span class="fw-medium">Coordenadas GPS</span>
-              <span class="text-muted fw-normal small">(opcional)</span>
-              <i class="bi ms-auto gps-chevron"
-                 [class.bi-chevron-down]="!gpsVisible()"
-                 [class.bi-chevron-up]="gpsVisible()"></i>
-            </button>
-
-            @if (gpsVisible()) {
-              <div class="gps-panel mt-2 p-3 rounded-2 border bg-light">
-                <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
-                  <p class="text-muted small mb-0 flex-grow-1">
-                    Abre Google Maps, mantén presionado tu ubicación y copia las coordenadas,
-                    o usa el botón para detectarlas automáticamente.
-                  </p>
-                  <button type="button"
-                          class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0"
-                          (click)="usarUbicacion()" [disabled]="ubicacionCargando()">
-                    @if (ubicacionCargando()) {
-                      <span class="spinner-border spinner-border-sm"></span> Obteniendo…
-                    } @else {
-                      <i class="bi bi-crosshair2"></i> Usar mi ubicación
-                    }
-                  </button>
-                </div>
-                @if (ubicacionError()) {
-                  <div class="alert alert-warning py-2 small mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-exclamation-triangle flex-shrink-0"></i>
-                    {{ ubicacionError() }}
-                  </div>
-                }
-                <div class="row g-2">
-                  <div class="col-6">
-                    <label class="form-label small mb-1">Latitud</label>
-                    <input type="number" class="form-control form-control-sm"
-                           formControlName="latitud" step="any" placeholder="9.9341" />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small mb-1">Longitud</label>
-                    <input type="number" class="form-control form-control-sm"
-                           formControlName="longitud" step="any" placeholder="-84.0877" />
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+          }
 
         </div>
-      </form>
-    </div>
-  </div>
+      </div>
 
-  <!-- ── Barra de acciones (sticky en móvil) ──────────────────────────────── -->
-  <div class="form-actions d-flex align-items-center justify-content-between gap-3">
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASO 2 · Datos de contacto                                          -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="card border-0 shadow-sm rounded-4 section-card mb-3"
+           [class.section-card--done]="step2Complete()">
+        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
+          <span class="section-num" [class.section-num--done]="step2Complete()">
+            @if (step2Complete()) { <i class="bi bi-check-lg"></i> } @else { 2 }
+          </span>
+          <div class="flex-grow-1 min-w-0">
+            <span class="section-title d-block">Datos de contacto</span>
+            <small class="text-muted">Pre-llenados desde tu perfil — modifícalos si es necesario.</small>
+          </div>
+          @if (step2Complete()) {
+            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+              <i class="bi bi-check me-1"></i>Listo
+            </span>
+          }
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="perfilForm">
+            <div class="row g-3">
+
+              <div class="col-sm-6">
+                <label class="form-label fw-medium">
+                  Nombre <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control"
+                       formControlName="nombre" placeholder="Juan"
+                       autocomplete="given-name" />
+                @if (invalid(perfilForm, 'nombre')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Nombre requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-sm-6">
+                <label class="form-label fw-medium">
+                  Apellido <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control"
+                       formControlName="apellido" placeholder="Pérez"
+                       autocomplete="family-name" />
+                @if (invalid(perfilForm, 'apellido')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Apellido requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-sm-6">
+                <label class="form-label fw-medium">
+                  Teléfono <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" class="form-control"
+                         formControlName="telefono" placeholder="8888-8888"
+                         autocomplete="tel" />
+                </div>
+                @if (invalid(perfilForm, 'telefono')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Teléfono requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-sm-6">
+                <label class="form-label fw-medium">Correo electrónico</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input type="email" class="form-control bg-light"
+                         formControlName="email" readonly tabindex="-1"
+                         autocomplete="email" />
+                </div>
+                <div class="form-text">
+                  <i class="bi bi-lock me-1"></i>No se puede modificar aquí.
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASO 3 · Fecha de visita                                            -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="card border-0 shadow-sm rounded-4 section-card mb-3"
+           [class.section-card--done]="step3Complete()">
+        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
+          <span class="section-num" [class.section-num--done]="step3Complete()">
+            @if (step3Complete()) { <i class="bi bi-check-lg"></i> } @else { 3 }
+          </span>
+          <div class="flex-grow-1 min-w-0">
+            <span class="section-title d-block">Fecha de visita</span>
+            <small class="text-muted">¿Cuándo estás disponible para recibir al estimador?</small>
+          </div>
+          @if (step3Complete()) {
+            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+              <i class="bi bi-check me-1"></i>Listo
+            </span>
+          }
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="expedienteForm">
+            <div class="row g-3">
+
+              <div class="col-6">
+                <label class="form-label fw-medium">
+                  Fecha deseada <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                  <input type="date" class="form-control" formControlName="fecha_visita" />
+                </div>
+                @if (invalid(expedienteForm, 'fecha_visita')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-6">
+                <label class="form-label fw-medium">
+                  Hora preferida <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                  <input type="time" class="form-control" formControlName="hora_visita" />
+                </div>
+                @if (invalid(expedienteForm, 'hora_visita')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-12">
+                <div class="visit-note d-flex align-items-center gap-2 py-2 px-3 rounded-3 small">
+                  <i class="bi bi-info-circle-fill text-primary flex-shrink-0"></i>
+                  <span>Atendemos <strong>lunes a viernes, 8:00 a.m. – 5:00 p.m.</strong>
+                    El estimador confirmará la disponibilidad contigo.</span>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-medium">
+                  Descripción del problema
+                  <span class="text-muted fw-normal">(opcional)</span>
+                </label>
+                <textarea class="form-control" rows="3"
+                          formControlName="descripcion"
+                          maxlength="500"
+                          placeholder="Tipo de daño, tiempo que lleva presentándose, área aproximada afectada…">
+                </textarea>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                  <div class="form-text">
+                    Una buena descripción ayuda al estimador a prepararse mejor.
+                  </div>
+                  <span class="char-counter" [class.char-counter--warn]="descripcionLen() > 450">
+                    {{ descripcionLen() }}/500
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASO 4 · Localización                                               -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <div class="card border-0 shadow-sm rounded-4 section-card mb-3"
+           [class.section-card--done]="step4Complete()">
+        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
+          <span class="section-num" [class.section-num--done]="step4Complete()">
+            @if (step4Complete()) { <i class="bi bi-check-lg"></i> } @else { 4 }
+          </span>
+          <div class="flex-grow-1 min-w-0">
+            <span class="section-title d-block">Localización del inmueble</span>
+            <small class="text-muted">¿Dónde se realizará la visita de estimación?</small>
+          </div>
+          @if (step4Complete()) {
+            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+              <i class="bi bi-check me-1"></i>Listo
+            </span>
+          }
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="localizacionForm">
+            <div class="row g-4">
+
+              <!-- Tipo de inmueble -->
+              <div class="col-12">
+                <label class="form-label fw-medium mb-2">
+                  Tipo de inmueble <span class="text-danger">*</span>
+                </label>
+                <div class="tipo-group" role="radiogroup">
+                  @for (tipo of tiposInmueble; track tipo.value) {
+                    <div>
+                      <input type="radio" class="btn-check"
+                             [id]="'tipo-' + tipo.value"
+                             autocomplete="off"
+                             [value]="tipo.value"
+                             [checked]="localizacionForm.get('tipo_inmueble')?.value === tipo.value"
+                             (change)="localizacionForm.get('tipo_inmueble')?.setValue(tipo.value)" />
+                      <label class="tipo-btn btn btn-outline-secondary"
+                             [for]="'tipo-' + tipo.value">
+                        <i class="bi {{ tipo.icon }} tipo-btn__icon"></i>
+                        <span class="tipo-btn__label">{{ tipo.label }}</span>
+                      </label>
+                    </div>
+                  }
+                </div>
+                @if (invalid(localizacionForm, 'tipo_inmueble')) {
+                  <div class="invalid-msg mt-1">
+                    <i class="bi bi-exclamation-circle"></i> Selecciona el tipo de inmueble.
+                  </div>
+                }
+              </div>
+
+              <!-- Dirección -->
+              <div class="col-12">
+                <label class="form-label fw-medium">
+                  Dirección completa <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                  <input type="text" class="form-control"
+                         formControlName="direccion"
+                         placeholder="Av. Central, 200 m norte del parque…"
+                         autocomplete="street-address" />
+                </div>
+                @if (invalid(localizacionForm, 'direccion')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Dirección requerida.
+                  </div>
+                }
+              </div>
+
+              <!-- Provincia / Cantón / Distrito -->
+              <div class="col-md-4 col-sm-12">
+                <label class="form-label fw-medium">
+                  Provincia <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" formControlName="provincia"
+                        autocomplete="address-level1">
+                  <option value="">Seleccionar…</option>
+                  @for (p of provincias; track p) {
+                    <option [value]="p">{{ p }}</option>
+                  }
+                </select>
+                @if (invalid(localizacionForm, 'provincia')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-4 col-sm-6">
+                <label class="form-label fw-medium">
+                  Cantón <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control"
+                       formControlName="canton" placeholder="San José"
+                       autocomplete="address-level2" />
+                @if (invalid(localizacionForm, 'canton')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Requerido.
+                  </div>
+                }
+              </div>
+
+              <div class="col-md-4 col-sm-6">
+                <label class="form-label fw-medium">
+                  Distrito <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control"
+                       formControlName="distrito" placeholder="Carmen"
+                       autocomplete="address-level3" />
+                @if (invalid(localizacionForm, 'distrito')) {
+                  <div class="invalid-msg">
+                    <i class="bi bi-exclamation-circle"></i> Requerido.
+                  </div>
+                }
+              </div>
+
+              <!-- Otras señas -->
+              <div class="col-12">
+                <label class="form-label fw-medium">
+                  Otras señas
+                  <span class="text-muted fw-normal">(opcional)</span>
+                </label>
+                <input type="text" class="form-control"
+                       formControlName="referencia"
+                       placeholder="Frente al parque, portón azul, entre calles 3 y 5…" />
+                <div class="form-text">
+                  Ayuda al estimador a ubicar el inmueble con mayor precisión.
+                </div>
+              </div>
+
+              <!-- GPS colapsable -->
+              <div class="col-12">
+                <button type="button"
+                        class="gps-toggle w-100 d-flex align-items-center gap-2"
+                        (click)="gpsVisible.set(!gpsVisible())">
+                  <i class="bi bi-compass text-primary"></i>
+                  <span class="fw-medium">Coordenadas GPS</span>
+                  <span class="text-muted fw-normal small">(opcional)</span>
+                  <i class="bi ms-auto gps-chevron"
+                     [class.bi-chevron-down]="!gpsVisible()"
+                     [class.bi-chevron-up]="gpsVisible()"></i>
+                </button>
+
+                @if (gpsVisible()) {
+                  <div class="gps-panel mt-2 p-3 rounded-3 border bg-light">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
+                      <p class="text-muted small mb-0 flex-grow-1">
+                        Abre Google Maps, mantén presionado tu ubicación y copia las coordenadas,
+                        o usa el botón para detectarlas automáticamente.
+                      </p>
+                      <button type="button"
+                              class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 flex-shrink-0"
+                              (click)="usarUbicacion()" [disabled]="ubicacionCargando()">
+                        @if (ubicacionCargando()) {
+                          <span class="spinner-border spinner-border-sm"></span> Obteniendo…
+                        } @else {
+                          <i class="bi bi-crosshair2"></i> Usar mi ubicación
+                        }
+                      </button>
+                    </div>
+                    @if (ubicacionError()) {
+                      <div class="alert alert-warning py-2 small mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle flex-shrink-0"></i>
+                        {{ ubicacionError() }}
+                      </div>
+                    }
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <label class="form-label small mb-1">Latitud</label>
+                        <input type="number" class="form-control form-control-sm"
+                               formControlName="latitud" step="any" placeholder="9.9341" />
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label small mb-1">Longitud</label>
+                        <input type="number" class="form-control form-control-sm"
+                               formControlName="longitud" step="any" placeholder="-84.0877" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Padding inferior para el sticky bar en móvil -->
+      <div class="pb-mobile-bar d-lg-none"></div>
+
+    </div><!-- /col-lg-8 -->
+
+    <!-- ── Sidebar (solo desktop lg+) ────────────────────────────────────────── -->
+    <div class="col-lg-4 d-none d-lg-flex flex-column">
+      <div class="sidebar-sticky">
+
+        <!-- Progreso -->
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fw-semibold">Progreso</span>
+              <span class="badge rounded-pill"
+                    [class.bg-success]="allComplete()"
+                    [class.bg-primary]="!allComplete()">
+                {{ completedSteps() }}/4 pasos
+              </span>
+            </div>
+
+            <div class="progress mb-4" style="height: 8px; border-radius: 4px;">
+              <div class="progress-bar bg-success"
+                   [style.width.%]="progressPct()"
+                   style="transition: width .4s ease;">
+              </div>
+            </div>
+
+            @for (step of STEPS; let i = $index; track step) {
+              <div class="sidebar-step d-flex align-items-center gap-3 py-2"
+                   [class.border-bottom]="i < STEPS.length - 1">
+                <div class="sidebar-step__circle"
+                     [class.sidebar-step__circle--done]="stepDone(i)">
+                  @if (stepDone(i)) {
+                    <i class="bi bi-check-lg"></i>
+                  } @else {
+                    {{ i + 1 }}
+                  }
+                </div>
+                <span class="small flex-grow-1"
+                      [class.fw-semibold]="stepDone(i)"
+                      [class.text-muted]="!stepDone(i)">
+                  {{ step }}
+                </span>
+                @if (stepDone(i)) {
+                  <i class="bi bi-check-circle-fill text-success small"></i>
+                }
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- ¿Qué pasa después? -->
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-body p-4">
+            <p class="fw-semibold mb-3">
+              <i class="bi bi-signpost-split me-2 text-primary"></i>¿Qué pasa después?
+            </p>
+            <ol class="process-list mb-0">
+              <li class="process-list__item">
+                <div class="process-list__dot"></div>
+                <div>
+                  <p class="fw-medium small mb-0">Recibimos tu solicitud</p>
+                  <p class="text-muted small mb-0">En minutos confirmamos la recepción.</p>
+                </div>
+              </li>
+              <li class="process-list__item">
+                <div class="process-list__dot"></div>
+                <div>
+                  <p class="fw-medium small mb-0">Asignamos un estimador</p>
+                  <p class="text-muted small mb-0">Un profesional visitará tu propiedad.</p>
+                </div>
+              </li>
+              <li class="process-list__item">
+                <div class="process-list__dot"></div>
+                <div>
+                  <p class="fw-medium small mb-0">Recibes la estimación</p>
+                  <p class="text-muted small mb-0">Detalle de materiales, tiempo y costo.</p>
+                </div>
+              </li>
+              <li class="process-list__item process-list__item--last">
+                <div class="process-list__dot process-list__dot--last"></div>
+                <div>
+                  <p class="fw-medium small mb-0">Constructores envían ofertas</p>
+                  <p class="text-muted small mb-0">Tú eliges la mejor propuesta.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Error + Acciones -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+
+            @if (error()) {
+              <div class="alert alert-danger py-2 small mb-3 d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                <span>{{ error() }}</span>
+              </div>
+            }
+
+            <button type="button" class="btn btn-primary w-100 fw-semibold mb-2 py-2"
+                    (click)="onSubmit()" [disabled]="enviando()">
+              @if (enviando()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>Enviando…
+              } @else {
+                <i class="bi bi-send me-2"></i>Enviar expediente
+              }
+            </button>
+
+            <button type="button" class="btn btn-outline-secondary w-100"
+                    (click)="onCancel()" [disabled]="enviando()">
+              <i class="bi bi-arrow-left me-1"></i>Cancelar
+            </button>
+
+            <p class="text-center text-muted small mt-3 mb-0">
+              <i class="bi bi-shield-check me-1 text-success"></i>
+              Tus datos están protegidos y son confidenciales.
+            </p>
+
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /col-lg-4 -->
+
+  </div><!-- /row -->
+
+  <!-- ── Barra de acciones sticky (solo móvil) ─────────────────────────────── -->
+  <div class="form-actions-mobile d-lg-none">
     <button type="button" class="btn btn-outline-secondary"
             (click)="onCancel()" [disabled]="enviando()">
       <i class="bi bi-arrow-left me-1"></i>Cancelar
     </button>
-    <button type="button" class="btn btn-primary px-4"
+    <button type="button" class="btn btn-primary fw-semibold px-4"
             (click)="onSubmit()" [disabled]="enviando()">
       @if (enviando()) {
         <span class="spinner-border spinner-border-sm me-2"></span>Enviando…

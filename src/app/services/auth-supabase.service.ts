@@ -37,10 +37,14 @@ export class AuthSupabaseService {
         this.initializedSubject.next(true);
       }
 
-      // Google OAuth: sincronizar perfil y redirigir
+      // Google OAuth: sincronizar perfil y redirigir solo desde login/landing
       if (event === 'SIGNED_IN' && user?.app_metadata?.['provider'] === 'google') {
         this.syncGoogleProfile(user);
-        this.getHomeRoute().then(route => this.router.navigate([route]));
+        const url = this.router.url;
+        const esRutaPublica = url === '/' || url === '/login' || url.startsWith('/?') || url.startsWith('/login?');
+        if (esRutaPublica) {
+          this.getHomeRoute().then(route => this.router.navigate([route]));
+        }
       }
     });
   }
@@ -152,7 +156,10 @@ export class AuthSupabaseService {
     if (!user) return '/login';
     const { data } = await this.supabase
       .from('perfil').select('rol').eq('id', user.id).single();
-    return data?.rol === 'constructor' ? '/builder/dashboard' : '/client/dashboard';
+    const rol = data?.rol;
+    if (rol === 'constructor') return '/builder/dashboard';
+    if (rol === 'estimador')   return '/estimator/dashboard';
+    return '/client/dashboard';
   }
 
   // ----------------------------------------------------------

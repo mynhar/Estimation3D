@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
@@ -20,6 +20,30 @@ export class OffersReceivedComponent implements OnInit {
   user        = toSignal(this.auth.user$);
   expedientes = signal<ExpedienteConOfertas[]>([]);
   cargando    = signal(true);
+
+  pendientes  = computed(() => this.expedientes().filter(e => e.estado === 'en_oferta'));
+  gestionados = computed(() => this.expedientes().filter(e => e.estado !== 'en_oferta'));
+
+  private readonly ESTADO_COLOR: Record<string, string> = {
+    en_oferta:  '#d97706',
+    adjudicado: '#ea580c',
+    contratado: '#16a34a',
+    cancelado:  '#94a3b8',
+  };
+
+  estadoColor(estado: string): string {
+    return this.ESTADO_COLOR[estado] ?? '#94a3b8';
+  }
+
+  ofertasLabel(n: number): string {
+    return n === 1 ? '1 oferta' : `${n} ofertas`;
+  }
+
+  ofertasTip(n: number): string {
+    if (n >= 5) return `${n} ofertas · Cupo lleno`;
+    if (n >= 3) return `${n} ofertas disponibles`;
+    return `${n} oferta${n !== 1 ? 's' : ''} disponible${n !== 1 ? 's' : ''}`;
+  }
 
   async ngOnInit() {
     const userId = this.user()?.id;

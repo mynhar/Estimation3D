@@ -1,12 +1,38 @@
-<div class="container py-4 page-wrap">
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
 
   <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <div class="mb-4">
-    <h4 class="page-title">Expedientes disponibles</h4>
-    <p class="page-subtitle">
-      Proyectos con estimación aprobada que aún aceptan ofertas. Envía tu propuesta.
-    </p>
-  </div>
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">
+          <i class="bi bi-search me-2 text-primary"></i>Expedientes disponibles
+        </h4>
+        <p class="text-muted small mb-0">
+          Proyectos con estimación aprobada que aún aceptan ofertas. Envía tu propuesta.
+        </p>
+      </div>
+      @if (!cargando() && expedientes().length > 0) {
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <span class="kpi-pill kpi-pill--available">
+            <i class="bi bi-clipboard2-check me-1"></i>
+            {{ expedientes().length }} disponible{{ expedientes().length !== 1 ? 's' : '' }}
+          </span>
+          @if (totalConOferta() > 0) {
+            <span class="kpi-pill kpi-pill--offered">
+              <i class="bi bi-check-circle-fill me-1"></i>
+              {{ totalConOferta() }} ofertado{{ totalConOferta() !== 1 ? 's' : '' }}
+            </span>
+          }
+          @if (totalSinOferta() > 0) {
+            <span class="kpi-pill kpi-pill--pending">
+              <i class="bi bi-hourglass me-1"></i>
+              {{ totalSinOferta() }} sin oferta
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </header>
 
   <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
   @if (cargando()) {
@@ -17,11 +43,13 @@
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
-        <i class="bi bi-clipboard2-x empty-state__icon"></i>
-        <p class="empty-state__title">Sin expedientes disponibles</p>
-        <p class="empty-state__text">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard2-x"></i>
+        </div>
+        <p class="empty-title">Sin expedientes disponibles</p>
+        <p class="empty-text">
           No hay proyectos listos para recibir ofertas en este momento. Vuelve pronto.
         </p>
       </div>
@@ -30,64 +58,200 @@
   <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <div class="card table-card">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-4">N° Exp.</th>
-              <th>Servicio</th>
-              <th class="d-none d-md-table-cell">Dirección</th>
-              <th class="text-end">Costo estimado</th>
-              <th class="text-center">Ofertas</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (exp of expedientes(); track exp.id) {
-              <tr [class.row-offered]="tieneOferta(exp.id)">
-                <td class="ps-4 fw-semibold text-nowrap">{{ exp.numero }}</td>
-                <td>{{ exp.servicio_nombre }}</td>
-                <td class="text-muted small d-none d-md-table-cell">
-                  <div>{{ exp.direccion }}</div>
-                  <div class="text-label mt-1">{{ exp.provincia }}, {{ exp.canton }}</div>
-                </td>
-                <td class="text-end fw-semibold text-nowrap">
-                  {{ formatCosto(exp.costo_estimado) }}
-                </td>
-                <td class="text-center">
-                  <span class="badge rounded-pill px-2"
-                    [class.badge-competition-low]="exp.total_ofertas <= 1"
-                    [class.badge-competition-mid]="exp.total_ofertas === 2 || exp.total_ofertas === 3"
-                    [class.badge-competition-high]="exp.total_ofertas >= 4">
-                    {{ exp.total_ofertas }} / 5
-                  </span>
-                </td>
-                <td class="pe-4 text-end">
-                  @if (tieneOferta(exp.id)) {
-                    <button class="btn btn-success btn-sm" (click)="hacerOferta(exp.id)">
-                      <i class="bi bi-check-circle me-1"></i>Ver mi oferta
-                    </button>
-                  } @else {
-                    <button class="btn btn-primary btn-sm" (click)="hacerOferta(exp.id)">
-                      <i class="bi bi-send me-1"></i>Hacer oferta
-                    </button>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+    <!-- ── Barra de filtros ───────────────────────────────────────────────── -->
+    <div class="filter-bar rounded-4 mb-3 p-3">
+
+      <!-- Búsqueda -->
+      <div class="filter-search">
+        <span class="filter-search__icon"><i class="bi bi-search"></i></span>
+        <input
+          type="search"
+          class="form-control filter-search__input"
+          [ngModel]="busqueda()"
+          (ngModelChange)="busqueda.set($event)"
+          placeholder="Buscar por servicio, provincia, cantón…"
+          autocomplete="off"
+        />
       </div>
+
+      <!-- Competencia -->
+      <div class="filter-group">
+        <span class="filter-group__label">Competencia</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de competencia">
+          <button type="button" class="btn"
+                  [class.btn-secondary]="filtroCompetencia() === 'todos'"
+                  [class.btn-outline-secondary]="filtroCompetencia() !== 'todos'"
+                  (click)="filtroCompetencia.set('todos')">Todos</button>
+          <button type="button" class="btn"
+                  [class.btn-success]="filtroCompetencia() === 'baja'"
+                  [class.btn-outline-success]="filtroCompetencia() !== 'baja'"
+                  (click)="filtroCompetencia.set('baja')">Baja</button>
+          <button type="button" class="btn"
+                  [class.btn-warning]="filtroCompetencia() === 'media'"
+                  [class.btn-outline-warning]="filtroCompetencia() !== 'media'"
+                  (click)="filtroCompetencia.set('media')">Media</button>
+          <button type="button" class="btn"
+                  [class.btn-danger]="filtroCompetencia() === 'alta'"
+                  [class.btn-outline-danger]="filtroCompetencia() !== 'alta'"
+                  (click)="filtroCompetencia.set('alta')">Alta</button>
+        </div>
+      </div>
+
+      <!-- Mi oferta -->
+      <div class="filter-group">
+        <span class="filter-group__label">Mi oferta</span>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de oferta propia">
+          <button type="button" class="btn"
+                  [class.btn-secondary]="filtroOferta() === 'todos'"
+                  [class.btn-outline-secondary]="filtroOferta() !== 'todos'"
+                  (click)="filtroOferta.set('todos')">Todos</button>
+          <button type="button" class="btn"
+                  [class.btn-primary]="filtroOferta() === 'sin'"
+                  [class.btn-outline-primary]="filtroOferta() !== 'sin'"
+                  (click)="filtroOferta.set('sin')">Sin oferta</button>
+          <button type="button" class="btn"
+                  [class.btn-success]="filtroOferta() === 'con'"
+                  [class.btn-outline-success]="filtroOferta() !== 'con'"
+                  (click)="filtroOferta.set('con')">Ofertados</button>
+        </div>
+      </div>
+
+      <!-- Limpiar -->
+      @if (hayFiltros()) {
+        <button type="button" class="btn btn-link btn-sm text-muted filter-clear"
+                (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle me-1"></i>Limpiar
+        </button>
+      }
+
     </div>
 
-    <p class="text-muted small mt-2">
-      <i class="bi bi-info-circle me-1"></i>
-      El contador <strong>Ofertas</strong> muestra cuántas propuestas ha recibido cada expediente (máximo 5).
-      <span class="badge-competition-low badge rounded-pill px-2 ms-1">Baja</span>
-      <span class="badge-competition-mid badge rounded-pill px-2 ms-1">Media</span>
-      <span class="badge-competition-high badge rounded-pill px-2 ms-1">Alta</span> competencia.
-    </p>
+    <!-- Hint de resultados -->
+    @if (hayFiltros()) {
+      <p class="results-hint mb-3">
+        <i class="bi bi-funnel me-1"></i>
+        Mostrando <strong>{{ expedientesFiltrados().length }}</strong>
+        de {{ expedientes().length }} expedientes
+      </p>
+    }
+
+    <!-- ── Sin resultados tras filtro ────────────────────────────────────── -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="bi bi-funnel-x"></i>
+          </div>
+          <p class="empty-title">Sin resultados</p>
+          <p class="empty-text">
+            Ningún expediente coincide con los filtros aplicados.
+          </p>
+          <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+    <!-- ── Cuadrícula de tarjetas ─────────────────────────────────────────── -->
+    } @else {
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <div class="col">
+            <div class="file-card h-100"
+                 [class.file-card--offered]="tieneOferta(exp.id)"
+                 [style.--comp-color]="tieneOferta(exp.id) ? '#16a34a' : competenciaColor(exp.total_ofertas)">
+              <div class="file-accent"></div>
+              <div class="file-body d-flex flex-column">
+
+                <!-- Fila 1: número + badge -->
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                  <span class="file-num">{{ exp.numero }}</span>
+                  @if (tieneOferta(exp.id)) {
+                    <span class="badge text-bg-success file-badge">
+                      <i class="bi bi-check-circle-fill me-1"></i>Oferta enviada
+                    </span>
+                  } @else {
+                    <span class="badge file-badge" [class]="competenciaBadge(exp.total_ofertas)">
+                      <i class="bi bi-bar-chart-fill me-1"></i>{{ competenciaLabel(exp.total_ofertas) }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Servicio -->
+                <p class="file-servicio mb-2">{{ exp.servicio_nombre }}</p>
+
+                <!-- Ubicación -->
+                <p class="file-meta mb-1">
+                  <i class="bi bi-geo-alt me-1"></i>{{ exp.direccion }}
+                </p>
+                <p class="file-meta mb-0">
+                  <i class="bi bi-map me-1"></i>{{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
+                </p>
+
+                <hr class="file-divider my-3" />
+
+                <!-- Costo estimado -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="file-cost-label">
+                    <i class="bi bi-calculator me-1"></i>Costo estimado
+                  </span>
+                  <span class="file-cost fw-bold">{{ formatCosto(exp.costo_estimado) }}</span>
+                </div>
+
+                <!-- Slots de competencia -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <div class="offer-slots">
+                    @for (i of slots; track i) {
+                      <span class="offer-slot"
+                            [class.offer-slot--filled]="i <= exp.total_ofertas"
+                            [style.background]="i <= exp.total_ofertas ? competenciaColor(exp.total_ofertas) : undefined">
+                      </span>
+                    }
+                  </div>
+                  <span class="offer-slots-label">{{ exp.total_ofertas }}/5 ofertas</span>
+                </div>
+
+                <!-- CTA -->
+                @if (tieneOferta(exp.id)) {
+                  <button class="btn btn-outline-success btn-sm fw-semibold mt-auto
+                                 d-flex align-items-center justify-content-center gap-2 w-100"
+                          (click)="hacerOferta(exp.id)">
+                    <i class="bi bi-eye"></i>Ver mi oferta
+                  </button>
+                } @else {
+                  <button class="btn btn-primary btn-sm fw-semibold mt-auto
+                                 d-flex align-items-center justify-content-center gap-2 w-100"
+                          (click)="hacerOferta(exp.id)"
+                          [disabled]="exp.total_ofertas >= 5">
+                    @if (exp.total_ofertas >= 5) {
+                      <i class="bi bi-x-circle"></i>Cupo completo
+                    } @else {
+                      <i class="bi bi-send"></i>Hacer oferta
+                    }
+                  </button>
+                }
+
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Leyenda de competencia -->
+      <div class="competition-legend mt-4">
+        <span class="competition-legend__title">Nivel de competencia:</span>
+        <span class="comp-badge comp-badge--low">
+          <span class="comp-dot"></span>Baja (0–1 ofertas)
+        </span>
+        <span class="comp-badge comp-badge--mid">
+          <span class="comp-dot"></span>Media (2–3 ofertas)
+        </span>
+        <span class="comp-badge comp-badge--high">
+          <span class="comp-dot"></span>Alta (4–5 ofertas)
+        </span>
+      </div>
+
+    }
 
   }
 

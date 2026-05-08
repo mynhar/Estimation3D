@@ -61,8 +61,12 @@ export class BuilderOfferComponent implements OnInit {
   videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
 
   // ── Computed ──────────────────────────────────────────────────────────────
-  yaAdjudicado = computed(() => this.expediente()?.estado === 'adjudicado');
-  puedeAceptar = computed(() => this.ofertaSeleccionadaId() !== null && !this.aceptando());
+  yaAdjudicado       = computed(() => this.expediente()?.estado === 'adjudicado');
+  puedeAceptar       = computed(() => this.ofertaSeleccionadaId() !== null && !this.aceptando());
+  ofertaSeleccionada = computed(() => {
+    const id = this.ofertaSeleccionadaId();
+    return id ? (this.ofertas().find(o => o.id === id) ?? null) : null;
+  });
 
   private expedienteId = '';
 
@@ -220,6 +224,16 @@ export class BuilderOfferComponent implements OnInit {
 
   ofertaLabel(estado: string): string {
     return ESTADO_LABEL_OFERTA[estado] ?? estado;
+  }
+
+  expedienteBadgeClass(estado: string): string {
+    const map: Record<string, string> = {
+      'en_oferta':  'bg-primary',
+      'adjudicado': 'bg-warning text-dark',
+      'contratado': 'bg-success',
+      'cancelado':  'bg-secondary',
+    };
+    return map[estado] ?? 'bg-primary';
   }
 
   volver() {

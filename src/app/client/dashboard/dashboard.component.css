@@ -1,56 +1,171 @@
-.dash-wrap { max-width: 1000px; }
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.dash-wrap { max-width: 1280px; }
 
-/* ── KPI cards ─────────────────────────────────────────────────────────── */
-.kpi-num { font-size: 1.8rem; line-height: 1; }
+/* ── Encabezado ──────────────────────────────────────────────────────────── */
+.dash-header {
+  background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 60%, #e8f4fd 100%);
+  border: 1px solid rgba(13, 110, 253, 0.1);
+}
+.dash-header h3 { font-size: 1.5rem; color: #1a1a2e; }
 
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-icon {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: rgba(13, 110, 253, 0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; color: #0d6efd;
+}
+
+/* ── KPI cards ───────────────────────────────────────────────────────────── */
 .kpi-card {
-  border-top: 3px solid transparent !important;
-  transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 4px solid transparent !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 .kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12) !important;
 }
-.kpi-card--total   { border-top-color: #adb5bd !important; }
-.kpi-card--proceso { border-top-color: #0d6efd !important; }
-.kpi-card--adj     { border-top-color: #fd7e14 !important; }
-.kpi-card--ok      { border-top-color: #198754 !important; }
 
-/* Ícono en círculo */
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+.kpi-num {
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
 .kpi-icon {
-  width: 42px; height: 42px; border-radius: 50%;
+  width: 50px; height: 50px;
+  border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; flex-shrink: 0;
+  font-size: 1.35rem; flex-shrink: 0;
 }
-.kpi-icon--total   { background: rgba(173,181,189,.15); color: #6c757d; }
-.kpi-icon--proceso { background: rgba(13,110,253,.12);  color: #0d6efd; }
-.kpi-icon--adj     { background: rgba(253,126,20,.12);  color: #fd7e14; }
-.kpi-icon--ok      { background: rgba(25,135,84,.12);   color: #198754; }
 
-/* ── Banner de alerta ───────────────────────────────────────────────────── */
-.alert-oferta {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+/* Total */
+.kpi-total                { border-left-color: #adb5bd !important; }
+.kpi-icon--total          { background: rgba(173,181,189,.15); color: #6c757d; }
+.kpi-num--total           { color: #495057; }
+
+/* En proceso */
+.kpi-proceso              { border-left-color: #0d6efd !important; }
+.kpi-icon--proceso        { background: rgba(13,110,253,.12); color: #0d6efd; }
+.kpi-num--proceso         { color: #0d6efd; }
+
+/* Ofertas — estado sin pendientes */
+.kpi-oferta               { border-left-color: #adb5bd !important; }
+.kpi-icon--oferta         { background: rgba(108,117,125,.12); color: #6c757d; }
+.kpi-num--oferta          { color: #6c757d; }
+
+/* Ofertas — con pendientes (pulso) */
+.kpi-oferta--activa       { border-left-color: #ffc107 !important; }
+.kpi-oferta--activa .kpi-icon--oferta {
+  background: rgba(255, 193, 7, 0.2);
+  color: #b8860b;
+}
+.kpi-oferta--activa .kpi-num--oferta { color: #cc9a00; }
+.kpi-oferta--activa {
+  animation: pulse-card 2.4s ease-in-out infinite;
+}
+@keyframes pulse-card {
+  0%, 100% { box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,.08); }
+  50%       { box-shadow: 0 0.25rem 1rem rgba(255,193,7,.35); }
+}
+
+/* Completados */
+.kpi-ok                   { border-left-color: #198754 !important; }
+.kpi-icon--ok             { background: rgba(25,135,84,.12); color: #198754; }
+.kpi-num--ok              { color: #198754; }
+
+/* ── Banner de alertas ───────────────────────────────────────────────────── */
+.alert-banner {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
   border: 1px solid #ffc107;
 }
-.alert-oferta__icon {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(255,193,7,.25);
+.alert-banner__icon {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: rgba(255, 193, 7, 0.25);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.3rem; color: #856404; flex-shrink: 0;
 }
 
-/* ── Lista de expedientes ───────────────────────────────────────────────── */
-.exp-list         { max-height: 520px; overflow-y: auto; }
-.progress-thin    { height: 8px; border-radius: 4px; }
-.pct-lbl          { min-width: 34px; text-align: right; }
+/* ── Lista de expedientes ────────────────────────────────────────────────── */
+.exp-list {
+  max-height: 560px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #dee2e6 transparent;
+}
+.exp-list::-webkit-scrollbar       { width: 4px; }
+.exp-list::-webkit-scrollbar-track { background: transparent; }
+.exp-list::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 2px; }
 
-/* Descripción del paso actual */
-.step-desc { color: #6c757d; margin-left: 1.4rem; }
+.exp-item {
+  padding: 1rem 1.25rem;
+  border-left: 4px solid var(--estado-color, #adb5bd);
+  border-bottom: 1px solid #f1f3f5;
+  transition: background 0.12s ease;
+}
+.exp-item:last-child { border-bottom: none; }
+.exp-item:hover      { background: rgba(13, 110, 253, 0.03); }
 
-/* ── Donut SVG ──────────────────────────────────────────────────────────── */
-.donut-num { font-size: 24px; font-weight: 700; fill: #212529; }
+.exp-next-step {
+  font-size: 0.8rem;
+  color: #868e96;
+  margin-left: 1.55rem;
+}
+
+.exp-progress {
+  height: 5px;
+  border-radius: 3px;
+  background: #f1f3f5;
+}
+
+.est-badge {
+  font-size: 0.7rem;
+  padding: 0.3em 0.65em;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.pct-lbl { min-width: 32px; text-align: right; font-size: 0.75rem; }
+
+/* ── Donut ───────────────────────────────────────────────────────────────── */
+.donut-num { font-size: 24px; font-weight: 800; fill: #212529; }
 .donut-sub { font-size: 11px; fill: #6c757d; }
 
-/* ── Leyenda ────────────────────────────────────────────────────────────── */
-.legend-row { padding: 4px 0; }
-.legend-bar { width: 56px; height: 6px; border-radius: 3px; flex-shrink: 0; }
+/* ── Leyenda ─────────────────────────────────────────────────────────────── */
+.legend-row { padding: 5px 0; }
+.legend-bar { width: 60px; height: 6px; border-radius: 3px; flex-shrink: 0; }
+
+/* ── Acciones rápidas ────────────────────────────────────────────────────── */
+.quick-btn {
+  border-radius: 10px !important;
+  padding: 0.6rem 0.9rem;
+  transition: transform 0.14s ease;
+}
+.quick-btn:hover { transform: translateX(3px); }
+.quick-icon { width: 26px; text-align: center; flex-shrink: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .dash-header h3 { font-size: 1.25rem; }
+  .kpi-num { font-size: 1.75rem; }
+  .kpi-icon { width: 42px; height: 42px; font-size: 1.1rem; border-radius: 12px; }
+}
+
+@media (max-width: 575px) {
+  .kpi-card .card-body { padding-inline: 0.9rem; }
+  .kpi-num { font-size: 1.55rem; }
+  .kpi-label { font-size: 0.65rem; }
+  .kpi-icon { width: 38px; height: 38px; font-size: 1rem; border-radius: 10px; }
+  .exp-item { padding: 0.85rem 0.9rem; }
+  .exp-next-step { margin-left: 0; }
+}

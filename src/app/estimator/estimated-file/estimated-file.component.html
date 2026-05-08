@@ -1,0 +1,391 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+      Cargando expediente…
+    </div>
+
+  } @else if (!detalle()) {
+
+    <!-- ── Error ──────────────────────────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon empty-icon--warn">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h5 class="empty-title">Expediente no encontrado</h5>
+        @if (errorMsg()) {
+          <p class="empty-text text-danger">{{ errorMsg() }}</p>
+        }
+        <button class="btn btn-outline-secondary btn-sm mt-2" (click)="volver()">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </button>
+      </div>
+    </div>
+
+  } @else {
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header class="page-header rounded-4 p-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn-back" (click)="volver()" title="Volver">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="exp-num">{{ detalle()!.numero }}</span>
+              <span class="badge rounded-pill px-3 py-1 bg-success-subtle text-success">
+                <i class="bi bi-clipboard-check me-1"></i>Estimado
+              </span>
+            </div>
+            <p class="text-muted small mb-0 mt-1">
+              {{ detalle()!.servicio_nombre }}
+            </p>
+          </div>
+        </div>
+        <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
+                (click)="imprimir()" title="Imprimir PDF">
+          <i class="bi bi-printer"></i>
+          <span class="d-none d-sm-inline">Imprimir</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Main grid ──────────────────────────────────────────────────────── -->
+    <div class="row g-4">
+
+      <!-- ── LEFT: expedition info + files ──────────────────────────────── -->
+      <div class="col-lg-7">
+
+        <!-- Datos del expediente -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <p class="section-label">Datos del expediente</p>
+
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <p class="info-label">Cliente</p>
+                <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Teléfono</p>
+                <p class="info-value">
+                  @if (detalle()!.cliente_telefono) {
+                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="text-decoration-none text-success">
+                      <i class="bi bi-telephone me-1"></i>{{ detalle()!.cliente_telefono }}
+                    </a>
+                  } @else { — }
+                </p>
+              </div>
+              <div class="col-12"><hr class="divider" /></div>
+              <div class="col-sm-8">
+                <p class="info-label">Dirección</p>
+                <p class="info-value">{{ detalle()!.direccion }}</p>
+              </div>
+              <div class="col-sm-4">
+                <p class="info-label">Referencia</p>
+                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Provincia</p>
+                <p class="info-value">{{ detalle()!.provincia }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Cantón</p>
+                <p class="info-value">{{ detalle()!.canton }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Distrito</p>
+                <p class="info-value">{{ detalle()!.distrito }}</p>
+              </div>
+              <div class="col-12"><hr class="divider" /></div>
+              <div class="col-sm-6">
+                <p class="info-label">Fecha de visita programada</p>
+                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Hora</p>
+                <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
+              </div>
+              @if (detalle()!.estimador_nombre) {
+                <div class="col-12"><hr class="divider" /></div>
+                <div class="col-12">
+                  <p class="info-label">Estimador</p>
+                  <p class="info-value">
+                    <i class="bi bi-person-check text-success me-1"></i>
+                    {{ detalle()!.estimador_nombre }}
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Archivos ──────────────────────────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <p class="section-label">Archivos del expediente</p>
+
+            <!-- Fotos -->
+            <div class="mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="file-section-title mb-0">
+                  <i class="bi bi-images me-2 text-success"></i>Fotos del sitio
+                  @if (fotos().length > 0) {
+                    <span class="file-count">{{ fotos().length }}</span>
+                  }
+                </h6>
+                <label class="btn btn-outline-success btn-sm mb-0"
+                       [class.disabled]="subiendoFoto()">
+                  <i class="bi bi-cloud-upload me-1"></i>
+                  {{ subiendoFoto() ? 'Subiendo…' : 'Subir fotos' }}
+                  <input type="file" accept="image/*" multiple class="d-none"
+                         (change)="subirFotos($event)" [disabled]="subiendoFoto()" />
+                </label>
+              </div>
+              @if (errorFotos()) {
+                <div class="alert alert-danger py-2 small mb-2">{{ errorFotos() }}</div>
+              }
+              @if (fotos().length === 0) {
+                <div class="upload-empty">
+                  <i class="bi bi-image fs-2 mb-1 d-block"></i>Sin fotos aún
+                </div>
+              } @else {
+                <div class="photos-grid">
+                  @for (f of fotos(); track f.id) {
+                    <div class="photo-thumb">
+                      <img [src]="publicUrl(f.url_storage)"
+                           class="photo-thumb__img"
+                           [title]="f.nombre_archivo"
+                           (click)="verArchivo(f)" />
+                      <button class="photo-thumb__delete"
+                              title="Eliminar"
+                              (click)="eliminarArchivo(f, 'foto')">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <hr class="my-3" />
+
+            <!-- Videos -->
+            <div class="mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="file-section-title mb-0">
+                  <i class="bi bi-camera-video me-2 text-success"></i>Videos de la visita
+                  @if (videos().length > 0) {
+                    <span class="file-count">{{ videos().length }}</span>
+                  }
+                </h6>
+                <label class="btn btn-outline-success btn-sm mb-0"
+                       [class.disabled]="subiendoVideo()">
+                  <i class="bi bi-cloud-upload me-1"></i>
+                  {{ subiendoVideo() ? 'Subiendo…' : 'Subir video' }}
+                  <input type="file" accept="video/*" class="d-none"
+                         (change)="subirVideo($event)" [disabled]="subiendoVideo()" />
+                </label>
+              </div>
+              @if (errorVideos()) {
+                <div class="alert alert-danger py-2 small mb-2">{{ errorVideos() }}</div>
+              }
+              @if (videos().length === 0) {
+                <div class="upload-empty">
+                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>Sin videos aún
+                </div>
+              } @else {
+                <div class="file-list">
+                  @for (v of videos(); track v.id) {
+                    <div class="file-row" [class.file-row--playing]="videoActivo()?.id === v.id">
+                      <div class="file-row__icon file-row__icon--video">
+                        <i class="bi bi-play-circle-fill"></i>
+                      </div>
+                      <div class="file-row__info">
+                        <p class="file-row__name">{{ v.nombre_archivo }}</p>
+                        <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                      </div>
+                      <div class="file-row__actions">
+                        <button class="btn btn-sm"
+                                [class.btn-success]="videoActivo()?.id === v.id"
+                                [class.btn-outline-success]="videoActivo()?.id !== v.id"
+                                (click)="toggleVideo(v)">
+                          <i class="bi" [class.bi-stop-fill]="videoActivo()?.id === v.id"
+                                        [class.bi-play-fill]="videoActivo()?.id !== v.id"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" (click)="verArchivo(v)" title="Abrir en nueva pestaña">
+                          <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" (click)="eliminarArchivo(v, 'video')">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    @if (videoActivo()?.id === v.id) {
+                      <div class="video-player">
+                        <video controls autoplay class="video-player__el"
+                               [src]="publicUrl(v.url_storage)">
+                          Tu navegador no soporta reproducción de video.
+                        </video>
+                        <button class="btn btn-sm btn-outline-secondary w-100 mt-2"
+                                (click)="toggleVideo(v)">
+                          <i class="bi bi-x me-1"></i>Cerrar reproductor
+                        </button>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <hr class="my-3" />
+
+            <!-- Documentos -->
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="file-section-title mb-0">
+                  <i class="bi bi-file-earmark-text me-2 text-success"></i>Documentos técnicos
+                  @if (documentos().length > 0) {
+                    <span class="file-count">{{ documentos().length }}</span>
+                  }
+                </h6>
+                <label class="btn btn-outline-success btn-sm mb-0"
+                       [class.disabled]="subiendoDocumento()">
+                  <i class="bi bi-cloud-upload me-1"></i>
+                  {{ subiendoDocumento() ? 'Subiendo…' : 'Subir documento' }}
+                  <input type="file"
+                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                         class="d-none"
+                         (change)="subirDocumento($event)"
+                         [disabled]="subiendoDocumento()" />
+                </label>
+              </div>
+              @if (errorDocumentos()) {
+                <div class="alert alert-danger py-2 small mb-2">{{ errorDocumentos() }}</div>
+              }
+              @if (documentos().length === 0) {
+                <div class="upload-empty">
+                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>Sin documentos aún
+                </div>
+              } @else {
+                <div class="file-list">
+                  @for (d of documentos(); track d.id) {
+                    <div class="file-row">
+                      <div class="file-row__icon file-row__icon--doc">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                      </div>
+                      <div class="file-row__info">
+                        <p class="file-row__name">{{ d.nombre_archivo }}</p>
+                        <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                      </div>
+                      <div class="file-row__actions">
+                        <button class="btn btn-sm btn-outline-secondary" (click)="verArchivo(d)">
+                          <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" (click)="eliminarArchivo(d, 'documento')">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /col-lg-7 -->
+
+      <!-- ── RIGHT: estimation sidebar ──────────────────────────────────── -->
+      <div class="col-lg-5">
+        <div class="sidebar-sticky">
+
+          <!-- Cost card -->
+          @if (estimacion()?.costo_estimado !== null && estimacion()?.costo_estimado !== undefined) {
+            <div class="cost-card rounded-4 p-4 mb-4">
+              <p class="cost-label">Costo estimado</p>
+              <p class="cost-value">
+                ₡ {{ estimacion()!.costo_estimado | number:'1.2-2' }}
+              </p>
+              <p class="cost-sub text-muted small mb-0">
+                <i class="bi bi-calendar-check me-1"></i>
+                Visita real: {{ formatFecha(estimacion()!.fecha_visita_real) }}
+                @if (formatHora(estimacion()!.fecha_visita_real) !== '—') {
+                  &nbsp;·&nbsp;{{ formatHora(estimacion()!.fecha_visita_real) }}
+                }
+              </p>
+            </div>
+          }
+
+          <!-- Estimation documentation -->
+          <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+              <p class="section-label">Documentación de la estimación</p>
+
+              @if (!estimacion()) {
+                <div class="upload-empty">
+                  <i class="bi bi-clipboard fs-2 mb-1 d-block"></i>
+                  Sin documentación registrada
+                </div>
+              } @else {
+                @if (!estimacion()!.fecha_visita_real) {} @else {
+                  <div class="row g-3 mb-3">
+                    <div class="col-6">
+                      <p class="info-label">Fecha real de visita</p>
+                      <p class="info-value">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
+                    </div>
+                    <div class="col-6">
+                      <p class="info-label">Hora</p>
+                      <p class="info-value">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
+                    </div>
+                  </div>
+                  <hr class="divider mb-3" />
+                }
+
+                @if (estimacion()!.descripcion_problemas) {
+                  <div class="mb-3">
+                    <p class="info-label">Problemas observados</p>
+                    <p class="descripcion-block">{{ estimacion()!.descripcion_problemas }}</p>
+                  </div>
+                  <hr class="divider mb-3" />
+                }
+
+                @if (estimacion()!.notas_internas) {
+                  <div>
+                    <p class="info-label">Notas internas</p>
+                    <p class="descripcion-block">{{ estimacion()!.notas_internas }}</p>
+                  </div>
+                } @else {
+                  <p class="info-label mb-0">Notas internas</p>
+                  <p class="text-muted small mb-0">—</p>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Print / back actions -->
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2"
+                    (click)="imprimir()">
+              <i class="bi bi-printer"></i>Imprimir / Exportar PDF
+            </button>
+            <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
+                    (click)="volver()">
+              <i class="bi bi-arrow-left"></i>Volver a mis estimaciones
+            </button>
+          </div>
+
+        </div>
+      </div><!-- /col-lg-5 -->
+
+    </div><!-- /row -->
+
+  }
+
+</div>

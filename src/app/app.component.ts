@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthSupabaseService } from './services/auth-supabase.service';
+import { ToastComponent } from './components/toast/toast.component';
 
 const ROLES_ESTIMADOR   = ['estimador',   'administrador'];
 const ROLES_CONSTRUCTOR = ['constructor', 'administrador'];
@@ -9,7 +10,7 @@ const ROLES_CONSTRUCTOR = ['constructor', 'administrador'];
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -19,10 +20,17 @@ export class AppComponent {
   private authService = inject(AuthSupabaseService);
   private router      = inject(Router);
 
-  user        = toSignal(this.authService.user$);
-  rolPerfil   = signal<string | null>(null);
-  esEstimador  = computed(() => ROLES_ESTIMADOR.includes(this.rolPerfil()   ?? ''));
+  user          = toSignal(this.authService.user$);
+  rolPerfil     = signal<string | null>(null);
+  esEstimador   = computed(() => ROLES_ESTIMADOR.includes(this.rolPerfil()   ?? ''));
   esConstructor = computed(() => ROLES_CONSTRUCTOR.includes(this.rolPerfil() ?? ''));
+
+  dashboardRoute = computed(() => {
+    const rol = this.rolPerfil();
+    if (rol === 'constructor') return '/builder/dashboard';
+    if (rol === 'estimador')   return '/estimator/dashboard';
+    return '/client/dashboard';
+  });
 
   constructor() {
     // Suscripción directa: BehaviorSubject emite el valor actual inmediatamente

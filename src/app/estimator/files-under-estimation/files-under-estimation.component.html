@@ -1,0 +1,199 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Header ────────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">Mis expedientes en estimación</h4>
+        <p class="text-muted small mb-0">
+          Expedientes asignados a ti — completa y envía la estimación antes de la visita.
+        </p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="kpi-pill kpi-pill--total">
+          <i class="bi bi-clipboard-data me-1"></i>
+          {{ expedientes().length }} asignado{{ expedientes().length !== 1 ? 's' : '' }}
+        </span>
+        @if (urgentesCount() > 0) {
+          <span class="kpi-pill kpi-pill--urgente">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            {{ urgentesCount() }} urgente{{ urgentesCount() !== 1 ? 's' : '' }}
+          </span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+      Cargando expedientes asignados…
+    </div>
+
+  } @else if (expedientes().length === 0) {
+
+    <!-- ── Empty: ningún expediente asignado ─────────────────────────────── -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-clipboard-check"></i>
+        </div>
+        <h5 class="empty-title">Sin expedientes asignados</h5>
+        <p class="empty-text">
+          No tienes expedientes en proceso de estimación en este momento.
+          Ve a <strong>Expedientes por estimar</strong> para tomar uno nuevo.
+        </p>
+      </div>
+    </div>
+
+  } @else {
+
+    <!-- ── Filter bar ─────────────────────────────────────────────────────── -->
+    <div class="filter-bar rounded-3 p-3 mb-4 d-flex align-items-center gap-3 flex-wrap">
+      <div class="search-wrap flex-grow-1">
+        <i class="bi bi-search search-icon"></i>
+        <input class="form-control search-input ps-5"
+               type="search"
+               placeholder="Buscar por número, servicio, cliente o ubicación…"
+               [ngModel]="busqueda()"
+               (ngModelChange)="busqueda.set($event)" />
+      </div>
+
+      <button class="btn filter-btn d-flex align-items-center gap-2"
+              [class.filter-btn--active]="soloUrgentes()"
+              (click)="soloUrgentes.set(!soloUrgentes())">
+        <i class="bi bi-exclamation-triangle"></i>
+        Solo urgentes
+        @if (urgentesCount() > 0) {
+          <span class="badge rounded-pill"
+                [class.bg-danger]="soloUrgentes()"
+                [class.bg-secondary]="!soloUrgentes()">
+            {{ urgentesCount() }}
+          </span>
+        }
+      </button>
+
+      @if (hayFiltros()) {
+        <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
+          <i class="bi bi-x me-1"></i>Limpiar
+        </button>
+      }
+    </div>
+
+    <!-- ── Sin resultados de búsqueda ────────────────────────────────────── -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="empty-inline">
+          <i class="bi bi-search fs-2 mb-2 text-muted"></i>
+          <p class="mb-1 fw-medium">Sin resultados</p>
+          <p class="text-muted small mb-0">
+            Ningún expediente coincide con los filtros actuales.
+          </p>
+        </div>
+      </div>
+
+    } @else {
+
+      <!-- ── Card grid ──────────────────────────────────────────────────── -->
+      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <div class="col">
+            <div class="work-card d-flex flex-column h-100"
+                 [class.work-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                 [class.work-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
+                 [class.work-card--confirming]="confirmandoId() === exp.id">
+
+              <!-- Número + badge urgencia -->
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="work-num">{{ exp.numero }}</span>
+
+                @if (urgencia(exp.fecha_visita) === 'vencida') {
+                  <span class="badge bg-danger-subtle text-danger urg-badge">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Vencida
+                  </span>
+                } @else if (urgencia(exp.fecha_visita) === 'hoy') {
+                  <span class="badge bg-warning-subtle text-warning-emphasis urg-badge">
+                    <i class="bi bi-clock-fill me-1"></i>Hoy
+                  </span>
+                } @else if (urgencia(exp.fecha_visita) === 'proxima') {
+                  <span class="badge urg-badge--proxima urg-badge">
+                    <i class="bi bi-calendar-event me-1"></i>Próxima
+                  </span>
+                } @else {
+                  <span class="badge bg-success-subtle text-success urg-badge">
+                    <i class="bi bi-person-workspace me-1"></i>En curso
+                  </span>
+                }
+              </div>
+
+              <!-- Servicio -->
+              <p class="work-servicio mb-2">{{ exp.servicio_nombre }}</p>
+
+              <!-- Cliente + ubicación -->
+              <div class="work-info mb-3">
+                <div class="work-meta">
+                  <i class="bi bi-person text-muted me-1"></i>{{ exp.cliente_nombre }}
+                </div>
+                <div class="work-meta">
+                  <i class="bi bi-geo-alt text-muted me-1"></i>
+                  {{ exp.provincia }}, {{ exp.canton }}
+                </div>
+              </div>
+
+              <!-- Fecha visita planificada -->
+              <div class="work-fecha-row d-flex align-items-center gap-2 mb-3"
+                   [class.work-fecha-row--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                   [class.work-fecha-row--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+                <i class="bi bi-calendar3 flex-shrink-0"></i>
+                <span>{{ formatFecha(exp.fecha_visita) }}</span>
+                @if (formatHora(exp.fecha_visita) !== '—') {
+                  <span class="ms-auto fw-semibold">{{ formatHora(exp.fecha_visita) }}</span>
+                }
+              </div>
+
+              <!-- Acciones -->
+              <div class="d-flex gap-2 mt-auto">
+                <button class="btn btn-primary btn-sm flex-grow-1"
+                        (click)="estimar(exp.id)">
+                  <i class="bi bi-pencil-square me-1"></i>Continuar estimación
+                </button>
+
+                @if (confirmandoId() === exp.id) {
+                  <button class="btn btn-danger btn-sm liberar-confirm-btn flex-shrink-0"
+                          (click)="confirmarLiberar(exp.id)"
+                          [disabled]="liberandoId() === exp.id"
+                          title="Confirmar liberación">
+                    @if (liberandoId() === exp.id) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                      <i class="bi bi-check2-circle"></i>
+                    }
+                  </button>
+                } @else {
+                  <button class="btn btn-outline-secondary btn-sm liberar-btn flex-shrink-0"
+                          (click)="confirmarLiberar(exp.id)"
+                          title="Liberar expediente">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                }
+              </div>
+
+              <!-- Aviso de confirmación de liberar -->
+              @if (confirmandoId() === exp.id) {
+                <div class="confirm-msg mt-2">
+                  <i class="bi bi-exclamation-diamond me-1"></i>
+                  Pulsa <i class="bi bi-check2-circle"></i> para confirmar.
+                  El expediente vuelve al grupo disponible.
+                </div>
+              }
+
+            </div>
+          </div>
+        }
+      </div>
+
+    }
+  }
+
+</div>

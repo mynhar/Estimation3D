@@ -1,0 +1,497 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+      Cargando expediente…
+    </div>
+
+  <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
+  } @else if (!detalle()) {
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon empty-icon--warn"><i class="bi bi-exclamation-triangle"></i></div>
+        <p class="empty-title">Expediente no encontrado</p>
+        @if (errorMsg()) {
+          <p class="text-danger small mb-2">{{ errorMsg() }}</p>
+        }
+        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </button>
+      </div>
+    </div>
+
+  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Encabezado -->
+    <header class="page-header rounded-4 p-4 mb-4">
+      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <button class="btn-back" (click)="volver()" title="Volver">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+            <span class="text-muted small">Mis expedientes en estimación</span>
+          </div>
+          <h4 class="fw-bold mb-1">
+            <span class="exp-num me-2">{{ detalle()!.numero }}</span>
+            {{ detalle()!.servicio_nombre }}
+          </h4>
+          <p class="text-muted small mb-0">
+            <i class="bi bi-person me-1"></i>{{ detalle()!.cliente_nombre }}
+            <span class="mx-2">·</span>
+            <i class="bi bi-geo-alt me-1"></i>{{ detalle()!.provincia }}, {{ detalle()!.canton }}, {{ detalle()!.distrito }}
+          </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          @if (formularioCompleto) {
+            <span class="kpi-pill kpi-pill--listo">
+              <i class="bi bi-check-circle-fill me-1"></i>Listo para enviar
+            </span>
+          } @else {
+            <span class="kpi-pill kpi-pill--progreso">
+              <i class="bi bi-hourglass-split me-1"></i>En estimación
+            </span>
+          }
+          @if (fotos().length > 0) {
+            <span class="kpi-pill kpi-pill--fotos">
+              <i class="bi bi-images me-1"></i>{{ fotos().length }} foto{{ fotos().length !== 1 ? 's' : '' }}
+            </span>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout principal -->
+    <div class="row g-4 align-items-start">
+
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- COLUMNA IZQUIERDA: Info + Archivos                                -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-7 d-flex flex-column gap-4">
+
+        <!-- Detalles del expediente -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-bottom px-4 py-3">
+            <span class="fw-semibold">
+              <i class="bi bi-info-circle me-2 text-warning"></i>Detalles del expediente
+            </span>
+          </div>
+          <div class="card-body p-4">
+
+            <!-- Cliente -->
+            <p class="info-section-label">Cliente</p>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-7">
+                <p class="info-label">Nombre</p>
+                <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
+              </div>
+              <div class="col-sm-5">
+                <p class="info-label">Teléfono</p>
+                <p class="info-value">
+                  @if (detalle()!.cliente_telefono) {
+                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="text-decoration-none">
+                      <i class="bi bi-telephone me-1 text-warning"></i>{{ detalle()!.cliente_telefono }}
+                    </a>
+                  } @else { — }
+                </p>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- Ubicación -->
+            <p class="info-section-label">Ubicación</p>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-8">
+                <p class="info-label">Dirección</p>
+                <p class="info-value">{{ detalle()!.direccion }}</p>
+              </div>
+              <div class="col-sm-4">
+                <p class="info-label">Referencia</p>
+                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Provincia</p>
+                <p class="info-value">{{ detalle()!.provincia }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Cantón</p>
+                <p class="info-value">{{ detalle()!.canton }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Distrito</p>
+                <p class="info-value">{{ detalle()!.distrito }}</p>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- Visita planificada -->
+            <p class="info-section-label">Visita planificada por el cliente</p>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <p class="info-label">Fecha</p>
+                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Hora</p>
+                <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
+              </div>
+              @if (detalle()!.descripcion) {
+                <div class="col-12">
+                  <p class="info-label">Descripción del cliente</p>
+                  <p class="info-value descripcion-cliente">{{ detalle()!.descripcion }}</p>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Fotos del sitio ──────────────────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-bottom px-4 py-3
+                      d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">
+              <i class="bi bi-images me-2 text-warning"></i>Fotos del sitio
+              @if (fotos().length > 0) {
+                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
+                  {{ fotos().length }}
+                </span>
+              }
+            </span>
+            <label class="btn btn-outline-warning btn-sm mb-0 d-flex align-items-center gap-1"
+                   [class.disabled]="subiendoFoto()">
+              @if (subiendoFoto()) {
+                <span class="spinner-border spinner-border-sm"></span>Subiendo…
+              } @else {
+                <i class="bi bi-cloud-upload"></i>Subir fotos
+              }
+              <input type="file" accept="image/*" multiple class="d-none"
+                     (change)="subirFotos($event)" [disabled]="subiendoFoto()"/>
+            </label>
+          </div>
+          <div class="card-body p-4">
+            @if (errorFotos()) {
+              <div class="alert alert-danger py-2 small mb-3">{{ errorFotos() }}</div>
+            }
+            @if (fotos().length === 0) {
+              <div class="upload-empty">
+                <i class="bi bi-camera fs-2 mb-2 d-block"></i>
+                <p class="mb-0">Sin fotos aún. Sube imágenes del sitio de la visita.</p>
+              </div>
+            } @else {
+              <div class="photos-grid">
+                @for (f of fotos(); track f.id) {
+                  <div class="photo-thumb">
+                    <img [src]="publicUrl(f.url_storage)"
+                         class="photo-thumb__img"
+                         [title]="f.nombre_archivo"
+                         (click)="verArchivo(f)" />
+                    <button class="photo-thumb__delete"
+                            title="Eliminar foto"
+                            (click)="eliminarArchivo(f, 'foto')">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ── Videos de la visita ─────────────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-bottom px-4 py-3
+                      d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">
+              <i class="bi bi-camera-video me-2 text-warning"></i>Videos de la visita
+              @if (videos().length > 0) {
+                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
+                  {{ videos().length }}
+                </span>
+              }
+            </span>
+            <label class="btn btn-outline-warning btn-sm mb-0 d-flex align-items-center gap-1"
+                   [class.disabled]="subiendoVideo()">
+              @if (subiendoVideo()) {
+                <span class="spinner-border spinner-border-sm"></span>Subiendo…
+              } @else {
+                <i class="bi bi-cloud-upload"></i>Subir video
+              }
+              <input type="file" accept="video/*" class="d-none"
+                     (change)="subirVideo($event)" [disabled]="subiendoVideo()"/>
+            </label>
+          </div>
+          <div class="card-body p-3">
+            @if (errorVideos()) {
+              <div class="alert alert-danger py-2 small mb-3">{{ errorVideos() }}</div>
+            }
+            @if (videos().length === 0) {
+              <div class="upload-empty">
+                <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
+                <p class="mb-0">Sin videos. Puedes subir grabaciones de la visita.</p>
+              </div>
+            } @else {
+              @for (v of videos(); track v.id) {
+                <div class="file-row" [class.file-row--playing]="videoActivo()?.id === v.id">
+                  <div class="file-row__icon file-row__icon--video">
+                    <i class="bi"
+                       [class.bi-play-circle-fill]="videoActivo()?.id !== v.id"
+                       [class.bi-pause-circle-fill]="videoActivo()?.id === v.id"></i>
+                  </div>
+                  <div class="file-row__info min-w-0">
+                    <p class="file-row__name">{{ v.nombre_archivo }}</p>
+                    <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                  </div>
+                  <div class="file-row__actions">
+                    <button class="btn btn-sm"
+                            [class.btn-warning]="videoActivo()?.id === v.id"
+                            [class.btn-outline-secondary]="videoActivo()?.id !== v.id"
+                            (click)="toggleVideo(v)"
+                            [title]="videoActivo()?.id === v.id ? 'Cerrar' : 'Reproducir'">
+                      <i class="bi"
+                         [class.bi-stop-fill]="videoActivo()?.id === v.id"
+                         [class.bi-play-fill]="videoActivo()?.id !== v.id"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm"
+                            (click)="verArchivo(v)" title="Abrir en nueva pestaña">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                            (click)="eliminarArchivo(v, 'video')" title="Eliminar">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </div>
+
+                @if (videoActivo()?.id === v.id) {
+                  <div class="video-player">
+                    <video controls autoplay class="video-player__el"
+                           [src]="publicUrl(v.url_storage)">
+                      Tu navegador no soporta reproducción de video.
+                    </video>
+                    <button class="btn btn-sm btn-outline-secondary w-100 mt-2"
+                            (click)="toggleVideo(v)">
+                      <i class="bi bi-x me-1"></i>Cerrar reproductor
+                    </button>
+                  </div>
+                }
+              }
+            }
+          </div>
+        </div>
+
+        <!-- ── Documentos técnicos ─────────────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-transparent border-bottom px-4 py-3
+                      d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">
+              <i class="bi bi-file-earmark-text me-2 text-warning"></i>Documentos técnicos
+              @if (documentos().length > 0) {
+                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
+                  {{ documentos().length }}
+                </span>
+              }
+            </span>
+            <label class="btn btn-outline-warning btn-sm mb-0 d-flex align-items-center gap-1"
+                   [class.disabled]="subiendoDocumento()">
+              @if (subiendoDocumento()) {
+                <span class="spinner-border spinner-border-sm"></span>Subiendo…
+              } @else {
+                <i class="bi bi-cloud-upload"></i>Subir documento
+              }
+              <input type="file"
+                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                     class="d-none"
+                     (change)="subirDocumento($event)" [disabled]="subiendoDocumento()"/>
+            </label>
+          </div>
+          <div class="card-body p-3">
+            @if (errorDocumentos()) {
+              <div class="alert alert-danger py-2 small mb-3">{{ errorDocumentos() }}</div>
+            }
+            @if (documentos().length === 0) {
+              <div class="upload-empty">
+                <i class="bi bi-file-earmark fs-2 mb-2 d-block"></i>
+                <p class="mb-0">Sin documentos. Sube PDFs, planos u otros archivos técnicos.</p>
+              </div>
+            } @else {
+              @for (d of documentos(); track d.id) {
+                <div class="file-row">
+                  <div class="file-row__icon file-row__icon--doc">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </div>
+                  <div class="file-row__info min-w-0">
+                    <p class="file-row__name">{{ d.nombre_archivo }}</p>
+                    <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                  </div>
+                  <div class="file-row__actions">
+                    <button class="btn btn-outline-secondary btn-sm"
+                            (click)="verArchivo(d)" title="Ver">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                            (click)="eliminarArchivo(d, 'documento')" title="Eliminar">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- COLUMNA DERECHA: Formulario (sticky)                              -->
+      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-5">
+        <div class="sidebar-sticky">
+          <div class="card border-0 shadow-sm rounded-4">
+
+            <div class="card-header bg-transparent border-bottom px-4 py-3">
+              <span class="fw-semibold">
+                <i class="bi bi-clipboard2-check me-2 text-warning"></i>Documentación de la visita
+              </span>
+            </div>
+
+            <div class="card-body p-4">
+
+              <!-- Fecha + Hora real de visita -->
+              <div class="row g-3 mb-3">
+                <div class="col-7">
+                  <label class="form-label small fw-semibold">
+                    <i class="bi bi-calendar3 me-1 text-muted"></i>Fecha real
+                    <span class="req-mark">*</span>
+                  </label>
+                  <input type="date" class="form-control" [(ngModel)]="fechaVisita" />
+                </div>
+                <div class="col-5">
+                  <label class="form-label small fw-semibold">
+                    <i class="bi bi-clock me-1 text-muted"></i>Hora
+                    <span class="req-mark">*</span>
+                  </label>
+                  <input type="time" class="form-control" [(ngModel)]="horaVisita" />
+                </div>
+              </div>
+
+              <!-- Problemas observados -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">
+                  <i class="bi bi-card-text me-1 text-muted"></i>Problemas observados
+                  <span class="req-mark">*</span>
+                </label>
+                <textarea class="form-control" rows="4"
+                          placeholder="Describe los problemas observados durante la visita…"
+                          [(ngModel)]="descripcionProblema"></textarea>
+              </div>
+
+              <!-- Costo estimado -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">
+                  <i class="bi bi-cash-coin me-1 text-muted"></i>Costo estimado
+                  <span class="req-mark">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text fw-semibold">₡</span>
+                  <input type="number" class="form-control"
+                         placeholder="0" min="0" step="1000"
+                         [(ngModel)]="costoEstimado" />
+                </div>
+              </div>
+
+              <!-- Notas internas -->
+              <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted">
+                  <i class="bi bi-lock me-1"></i>Notas internas
+                  <span class="opt-mark">(opcional)</span>
+                </label>
+                <textarea class="form-control form-control-sm" rows="3"
+                          placeholder="Visible solo para el estimador y administrador…"
+                          [(ngModel)]="notasInternas"></textarea>
+              </div>
+
+              <!-- Checklist de completado -->
+              <div class="completion-list mb-4">
+                <div class="completion-item" [class.completion-item--done]="!!fechaVisita">
+                  <i class="bi"
+                     [class.bi-check-circle-fill]="!!fechaVisita"
+                     [class.bi-circle]="!fechaVisita"></i>
+                  Fecha de visita
+                </div>
+                <div class="completion-item" [class.completion-item--done]="!!horaVisita">
+                  <i class="bi"
+                     [class.bi-check-circle-fill]="!!horaVisita"
+                     [class.bi-circle]="!horaVisita"></i>
+                  Hora de visita
+                </div>
+                <div class="completion-item"
+                     [class.completion-item--done]="!!descripcionProblema.trim()">
+                  <i class="bi"
+                     [class.bi-check-circle-fill]="!!descripcionProblema.trim()"
+                     [class.bi-circle]="!descripcionProblema.trim()"></i>
+                  Problemas observados
+                </div>
+                <div class="completion-item"
+                     [class.completion-item--done]="costoEstimado !== null && costoEstimado >= 0">
+                  <i class="bi"
+                     [class.bi-check-circle-fill]="costoEstimado !== null && costoEstimado >= 0"
+                     [class.bi-circle]="costoEstimado === null || costoEstimado < 0"></i>
+                  Costo estimado
+                </div>
+              </div>
+
+              <!-- Mensajes borrador -->
+              @if (errorVisitaMsg()) {
+                <div class="alert alert-danger py-2 small mb-3">{{ errorVisitaMsg() }}</div>
+              }
+              @if (exitoVisitaMsg()) {
+                <div class="alert alert-success py-2 small mb-3">{{ exitoVisitaMsg() }}</div>
+              }
+
+              <!-- Acciones -->
+              <div class="d-flex flex-column gap-2">
+                <button class="btn btn-outline-secondary fw-semibold
+                               d-flex align-items-center justify-content-center gap-2"
+                        (click)="guardarVisita()"
+                        [disabled]="guardandoVisita()">
+                  @if (guardandoVisita()) {
+                    <span class="spinner-border spinner-border-sm"></span>Guardando…
+                  } @else {
+                    <i class="bi bi-floppy"></i>Guardar borrador
+                  }
+                </button>
+                <button class="btn btn-warning fw-semibold text-white
+                               d-flex align-items-center justify-content-center gap-2"
+                        (click)="guardarEstimacion()"
+                        [disabled]="guardando() || !formularioCompleto">
+                  @if (guardando()) {
+                    <span class="spinner-border spinner-border-sm"></span>Enviando…
+                  } @else {
+                    <i class="bi bi-send-check"></i>Enviar estimación
+                  }
+                </button>
+              </div>
+
+              <!-- Mensajes envío -->
+              @if (errorGuardado()) {
+                <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardado() }}</div>
+              }
+              @if (exitoMsg()) {
+                <div class="alert alert-success py-2 small mt-3 mb-0">{{ exitoMsg() }}</div>
+              }
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

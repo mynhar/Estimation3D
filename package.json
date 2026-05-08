@@ -22,7 +22,6 @@
     "@ng-bootstrap/ng-bootstrap": "^17.0.1",
     "@popperjs/core": "^2.11.8",
     "@supabase/supabase-js": "^2.104.1",
-    "@swimlane/ngx-charts": "^20.5.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "rxjs": "~7.8.0",

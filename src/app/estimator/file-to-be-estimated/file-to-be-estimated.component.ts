@@ -12,341 +12,8 @@ import { ExpedienteDetalle, ArchivoRow } from '../../models';
   selector: 'app-file-to-be-estimated',
   standalone: true,
   imports: [FormsModule],
-  template: `
-    <div class="container py-4" style="max-width: 720px">
-
-      @if (cargando()) {
-        <div class="text-center py-5 text-muted">Cargando expediente…</div>
-      } @else if (!detalle()) {
-        <div class="alert alert-warning">
-          No se encontró el expediente.
-          @if (errorMsg()) {
-            <br/><small class="text-danger">{{ errorMsg() }}</small>
-          }
-        </div>
-      } @else {
-
-        <div class="mb-4 d-flex align-items-center gap-3">
-          <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
-            ← Volver
-          </button>
-          <h4 class="fw-semibold mb-0">Estimar Expediente</h4>
-        </div>
-
-        <!-- Detalles del expediente -->
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4">
-            <div class="row g-4">
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Número</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.numero }}</p>
-              </div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Servicio</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.servicio_nombre }}</p>
-              </div>
-
-              <div class="col-12"><hr class="my-0" /></div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Cliente</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.cliente_nombre }}</p>
-              </div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Teléfono</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.cliente_telefono || '—' }}</p>
-              </div>
-
-              <div class="col-12"><hr class="my-0" /></div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Dirección</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.direccion }}</p>
-              </div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Referencia</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.referencia }}</p>
-              </div>
-
-              <div class="col-sm-4">
-                <p class="text-muted small mb-1">Provincia</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.provincia }}</p>
-              </div>
-
-              <div class="col-sm-4">
-                <p class="text-muted small mb-1">Cantón</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.canton }}</p>
-              </div>
-
-              <div class="col-sm-4">
-                <p class="text-muted small mb-1">Distrito</p>
-                <p class="fw-semibold mb-0">{{ detalle()!.distrito }}</p>
-              </div>
-
-              <div class="col-12"><hr class="my-0" /></div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Fecha de visita</p>
-                <p class="fw-semibold mb-0">{{ formatFecha(detalle()!.fecha_visita) }}</p>
-              </div>
-
-              <div class="col-sm-6">
-                <p class="text-muted small mb-1">Hora de visita</p>
-                <p class="fw-semibold mb-0">{{ formatHora(detalle()!.fecha_visita) }}</p>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Formulario de estimación -->
-        <div class="card border-0 shadow-sm mt-4">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-              <h5 class="fw-semibold mb-0">Documentación de la visita</h5>
-              <button
-                class="btn btn-secondary btn-sm px-3"
-                (click)="guardarVisita()"
-                [disabled]="guardandoVisita()"
-              >
-                {{ guardandoVisita() ? 'Guardando…' : 'Guardar visita' }}
-              </button>
-            </div>
-
-            <div class="row g-3">
-
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Fecha de visita</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  [(ngModel)]="fechaVisita"
-                />
-              </div>
-
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Hora de visita</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  [(ngModel)]="horaVisita"
-                />
-              </div>
-
-              <div class="col-12">
-                <label class="form-label small fw-medium">Problemas observados</label>
-                <textarea
-                  class="form-control"
-                  rows="4"
-                  placeholder="Describa los problemas observados durante la visita…"
-                  [(ngModel)]="descripcionProblemas"
-                ></textarea>
-              </div>
-
-              <div class="col-sm-6">
-                <label class="form-label small fw-medium">Costo Estimado</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input
-                    type="number"
-                    class="form-control"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    [(ngModel)]="costoEstimado"
-                  />
-                </div>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label small fw-medium">Notas internas</label>
-                <textarea
-                  class="form-control"
-                  rows="3"
-                  placeholder="Notas solo visibles para el estimador y administrador…"
-                  [(ngModel)]="notasInternas"
-                ></textarea>
-              </div>
-
-            </div>
-
-            @if (errorVisitaMsg()) {
-              <div class="alert alert-danger mt-3 mb-0">{{ errorVisitaMsg() }}</div>
-            }
-            @if (exitoVisitaMsg()) {
-              <div class="alert alert-success mt-3 mb-0">{{ exitoVisitaMsg() }}</div>
-            }
-
-          </div>
-        </div>
-
-        <!-- Sección: Subir archivos -->
-        <div class="card border-0 shadow-sm mt-4">
-          <div class="card-body p-4">
-            <h5 class="fw-semibold mb-4">Subir archivos</h5>
-
-            <!-- Fotos del sitio -->
-            <div class="mb-2">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <h6 class="fw-medium mb-0">Fotos del sitio</h6>
-                <label class="btn btn-outline-primary btn-sm mb-0"
-                       [class.disabled]="subiendoFoto()">
-                  {{ subiendoFoto() ? 'Subiendo…' : '+ Subir fotos' }}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    class="d-none"
-                    (change)="subirFotos($event)"
-                    [disabled]="subiendoFoto()"
-                  />
-                </label>
-              </div>
-              @if (errorFotos()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorFotos() }}</div>
-              }
-              @if (fotos().length === 0) {
-                <p class="text-muted small mb-0">Sin fotos aún.</p>
-              } @else {
-                <div class="d-flex flex-wrap gap-2">
-                  @for (f of fotos(); track f.id) {
-                    <div class="position-relative" style="width:96px">
-                      <img
-                        [src]="publicUrl(f.url_storage)"
-                        class="rounded border"
-                        style="width:96px;height:96px;object-fit:cover;cursor:pointer"
-                        [title]="f.nombre_archivo"
-                        (click)="verArchivo(f)"
-                      />
-                      <button
-                        class="btn btn-danger position-absolute top-0 end-0 p-0 lh-1 border-0"
-                        style="width:20px;height:20px;font-size:12px;border-radius:50%"
-                        title="Eliminar"
-                        (click)="eliminarArchivo(f, 'foto')"
-                      >×</button>
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-
-            <hr class="my-4" />
-
-            <!-- Videos de la visita -->
-            <div class="mb-2">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <h6 class="fw-medium mb-0">Videos de la visita</h6>
-                <label class="btn btn-outline-primary btn-sm mb-0"
-                       [class.disabled]="subiendoVideo()">
-                  {{ subiendoVideo() ? 'Subiendo…' : '+ Subir video' }}
-                  <input
-                    type="file"
-                    accept="video/*"
-                    class="d-none"
-                    (change)="subirVideo($event)"
-                    [disabled]="subiendoVideo()"
-                  />
-                </label>
-              </div>
-              @if (errorVideos()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorVideos() }}</div>
-              }
-              @if (videos().length === 0) {
-                <p class="text-muted small mb-0">Sin videos aún.</p>
-              } @else {
-                <ul class="list-group list-group-flush">
-                  @for (v of videos(); track v.id) {
-                    <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
-                      <div>
-                        <span class="fw-medium small">{{ v.nombre_archivo }}</span>
-                        <span class="text-muted small ms-2">{{ formatTamano(v.tamano_bytes) }}</span>
-                      </div>
-                      <div class="d-flex gap-2 flex-shrink-0 ms-2">
-                        <button class="btn btn-outline-secondary btn-sm"
-                                (click)="verArchivo(v)">Ver</button>
-                        <button class="btn btn-outline-danger btn-sm"
-                                (click)="eliminarArchivo(v, 'video')">Eliminar</button>
-                      </div>
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-
-            <hr class="my-4" />
-
-            <!-- Documentos técnicos -->
-            <div>
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <h6 class="fw-medium mb-0">Documentos técnicos</h6>
-                <label class="btn btn-outline-primary btn-sm mb-0"
-                       [class.disabled]="subiendoDocumento()">
-                  {{ subiendoDocumento() ? 'Subiendo…' : '+ Subir documento' }}
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                    class="d-none"
-                    (change)="subirDocumento($event)"
-                    [disabled]="subiendoDocumento()"
-                  />
-                </label>
-              </div>
-              @if (errorDocumentos()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorDocumentos() }}</div>
-              }
-              @if (documentos().length === 0) {
-                <p class="text-muted small mb-0">Sin documentos aún.</p>
-              } @else {
-                <ul class="list-group list-group-flush">
-                  @for (d of documentos(); track d.id) {
-                    <li class="list-group-item px-0 d-flex align-items-center justify-content-between">
-                      <div>
-                        <span class="fw-medium small">{{ d.nombre_archivo }}</span>
-                        <span class="text-muted small ms-2">{{ formatTamano(d.tamano_bytes) }}</span>
-                      </div>
-                      <div class="d-flex gap-2 flex-shrink-0 ms-2">
-                        <button class="btn btn-outline-secondary btn-sm"
-                                (click)="verArchivo(d)">Ver</button>
-                        <button class="btn btn-outline-danger btn-sm"
-                                (click)="eliminarArchivo(d, 'documento')">Eliminar</button>
-                      </div>
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-
-          </div>
-        </div>
-
-        @if (errorGuardado()) {
-          <div class="alert alert-danger mt-4">{{ errorGuardado() }}</div>
-        }
-        @if (exitoMsg()) {
-          <div class="alert alert-success mt-4">{{ exitoMsg() }}</div>
-        }
-
-        <div class="mt-4 d-flex gap-3">
-          <button
-            class="btn btn-primary px-4"
-            (click)="guardarEstimacion()"
-            [disabled]="guardando()"
-          >
-            {{ guardando() ? 'Enviando…' : 'Enviar estimación' }}
-          </button>
-          <button class="btn btn-outline-secondary px-4" (click)="volver()">
-            Volver
-          </button>
-        </div>
-
-      }
-
-    </div>
-  `,
+  templateUrl: './file-to-be-estimated.component.html',
+  styleUrl:    './file-to-be-estimated.component.css',
 })
 export class FileToBeEstimatedComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
@@ -385,7 +52,19 @@ export class FileToBeEstimatedComponent implements OnInit {
   errorVideos       = signal('');
   errorDocumentos   = signal('');
 
+  videoActivo = signal<ArchivoRow | null>(null);
+
   private expedienteId = '';
+
+  get formularioCompleto(): boolean {
+    return !!(
+      this.fechaVisita &&
+      this.horaVisita &&
+      this.descripcionProblemas.trim() &&
+      this.costoEstimado !== null &&
+      this.costoEstimado >= 0
+    );
+  }
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -450,7 +129,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         notasInternas:        this.notasInternas.trim(),
       });
       await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
-      this.exitoMsg.set('Estimación guardada correctamente.');
+      this.exitoMsg.set('Estimación enviada correctamente.');
     } catch (e: any) {
       console.error('[FileToBeEstimated] guardar:', e.message);
       this.errorGuardado.set(e.message);
@@ -480,7 +159,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         costoEstimado:        this.costoEstimado ?? 0,
         notasInternas:        this.notasInternas.trim(),
       });
-      this.exitoVisitaMsg.set('Visita guardada correctamente.');
+      this.exitoVisitaMsg.set('Borrador guardado correctamente.');
     } catch (e: any) {
       console.error('[FileToBeEstimated] guardarVisita:', e.message);
       this.errorVisitaMsg.set(e.message);
@@ -510,10 +189,8 @@ export class FileToBeEstimatedComponent implements OnInit {
     const files = Array.from(input.files ?? []);
     input.value = '';
     if (!files.length) return;
-
     const userId = this.user()?.id;
     if (!userId) return;
-
     this.subiendoFoto.set(true);
     this.errorFotos.set('');
     try {
@@ -528,10 +205,8 @@ export class FileToBeEstimatedComponent implements OnInit {
     const file  = input.files?.[0];
     input.value = '';
     if (!file) return;
-
     const userId = this.user()?.id;
     if (!userId) return;
-
     this.subiendoVideo.set(true);
     this.errorVideos.set('');
     try {
@@ -546,10 +221,8 @@ export class FileToBeEstimatedComponent implements OnInit {
     const file  = input.files?.[0];
     input.value = '';
     if (!file) return;
-
     const userId = this.user()?.id;
     if (!userId) return;
-
     this.subiendoDocumento.set(true);
     this.errorDocumentos.set('');
     try {
@@ -564,10 +237,17 @@ export class FileToBeEstimatedComponent implements OnInit {
                    : tipo === 'video' ? this.errorVideos
                    :                    this.errorDocumentos;
     setError.set('');
+    if (tipo === 'video' && this.videoActivo()?.id === archivo.id) {
+      this.videoActivo.set(null);
+    }
     try {
       await this.archivoService.eliminar(archivo);
       await this.recargar(tipo);
     } catch (e: any) { setError.set(e.message); }
+  }
+
+  toggleVideo(video: ArchivoRow) {
+    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
   }
 
   publicUrl(storagePath: string): string {
@@ -586,12 +266,17 @@ export class FileToBeEstimatedComponent implements OnInit {
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
+    const d   = new Date(`${raw}T00:00:00`);
+    return isNaN(d.getTime()) ? '—'
+      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+    const d = new Date(valor);
+    return isNaN(d.getTime()) ? '—'
+      : d.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
   }
 
   volver() { this.router.navigate(['/estimator/files-to-be-estimated']); }

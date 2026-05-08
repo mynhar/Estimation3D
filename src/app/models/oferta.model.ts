@@ -19,6 +19,7 @@ export interface OfertaConConstructor {
 
 export interface OfertaDetalle {
   id: string;
+  expediente_id: string;
   expediente_numero: string;
   servicio_nombre: string;
   direccion: string;

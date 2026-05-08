@@ -70,19 +70,35 @@ export class FileCreateComponent implements OnInit {
     longitud:      [null as number | null],
   });
 
+  // Convertir el estado de validez de cada FormGroup a signals reactivos.
+  // computed(() => this.form.valid) NO funciona: form.valid no es un signal,
+  // por lo que computed lo calcula una sola vez y nunca se actualiza.
+  private perfilStatus       = toSignal(this.perfilForm.statusChanges,       { initialValue: this.perfilForm.status });
+  private expedienteStatus   = toSignal(this.expedienteForm.statusChanges,   { initialValue: this.expedienteForm.status });
+  private localizacionStatus = toSignal(this.localizacionForm.statusChanges, { initialValue: this.localizacionForm.status });
+  private descripcionValue   = toSignal(
+    this.expedienteForm.get('descripcion')!.valueChanges,
+    { initialValue: '' as string }
+  );
+
   // ── Computed: per-step completion ──────────────────────────────────────────
   step1Complete = computed(() => !!this.servicioId());
-  step2Complete = computed(() => this.perfilForm.valid);
-  step3Complete = computed(() => this.expedienteForm.valid);
-  step4Complete = computed(() => this.localizacionForm.valid);
+  step2Complete = computed(() => this.perfilStatus()       === 'VALID');
+  step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
+  step4Complete = computed(() => this.localizacionStatus() === 'VALID');
 
   allComplete = computed(() =>
     this.step1Complete() && this.step2Complete() && this.step3Complete() && this.step4Complete()
   );
 
-  descripcionLen = computed(
-    () => (this.expedienteForm.get('descripcion')?.value as string | null)?.length ?? 0
+  completedSteps = computed(() =>
+    [this.step1Complete(), this.step2Complete(), this.step3Complete(), this.step4Complete()]
+      .filter(Boolean).length
   );
+
+  progressPct = computed(() => (this.completedSteps() / 4) * 100);
+
+  descripcionLen = computed(() => (this.descripcionValue() as string | null)?.length ?? 0);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   stepDone(idx: number): boolean {
@@ -220,7 +236,7 @@ export class FileCreateComponent implements OnInit {
         },
       });
 
-      this.router.navigate(['/client/dashboard']);
+      this.router.navigate(['/client/file/my-files']);
     } catch (e: any) {
       console.error('[FileCreate] onSubmit error:', e);
       this.error.set(e?.message ?? 'Error desconocido al guardar. Intenta de nuevo.');
@@ -241,6 +257,6 @@ export class FileCreateComponent implements OnInit {
     this.expedienteForm.reset();
     this.localizacionForm.reset();
     this.servicioId.set(null);
-    this.router.navigate(['/client/dashboard']);
+    this.router.navigate(['/client/file/my-files']);
   }
 }

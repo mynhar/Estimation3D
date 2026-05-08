@@ -23,9 +23,14 @@ export class MyOfferComponent implements OnInit {
   cargando   = signal(true);
   errorMsg   = signal('');
 
+  videoActivo = signal<ArchivoRow | null>(null);
+
+  private ofertaId = '';
+
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando.set(false); return; }
+    this.ofertaId = id;
 
     try {
       const [detalle, archivos] = await Promise.all([
@@ -51,8 +56,21 @@ export class MyOfferComponent implements OnInit {
     return ESTADO_LABEL_OFERTA[estado] ?? estado;
   }
 
+  toggleVideo(video: ArchivoRow) {
+    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
+  }
+
+  publicUrl(path: string): string {
+    return this.archivoService.publicUrl(path);
+  }
+
   verArchivo(archivo: ArchivoRow) {
     window.open(this.archivoService.publicUrl(archivo.url_storage), '_blank');
+  }
+
+  editarOferta() {
+    const expedienteId = this.detalle()?.expediente_id;
+    if (expedienteId) this.router.navigate(['/builder/make-offer', expedienteId]);
   }
 
   formatCosto(valor: number): string {
@@ -61,15 +79,21 @@ export class MyOfferComponent implements OnInit {
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor + 'T00:00:00').toLocaleDateString('es-CR', {
+    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
+    return new Date(`${raw}T00:00:00`).toLocaleDateString('es-CR', {
       day: '2-digit', month: 'long', year: 'numeric',
     });
   }
 
+  formatHora(valor: string): string {
+    if (!valor || !valor.includes('T')) return '—';
+    return valor.split('T')[1]?.slice(0, 5) ?? '—';
+  }
+
   formatPlazo(min: number | null, max: number | null): string {
     if (!min && !max) return '—';
-    if (min === max)  return `${min} sem.`;
-    return `${min ?? '?'} – ${max ?? '?'} sem.`;
+    if (min === max)  return `${min} semana(s)`;
+    return `${min ?? '?'} – ${max ?? '?'} semanas`;
   }
 
   formatTamano(bytes: number): string {

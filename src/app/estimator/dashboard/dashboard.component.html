@@ -1,0 +1,475 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">
+          <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>
+          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard Estimador' }}
+        </h4>
+        <p class="text-muted small mb-0">
+          Progreso de estimaciones y seguimiento de expedientes.
+        </p>
+      </div>
+      @if (!cargando()) {
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          @if (activos().length > 0) {
+            <span class="kpi-pill kpi-pill--active">
+              <i class="bi bi-pencil-square me-1"></i>
+              {{ activos().length }} en progreso
+            </span>
+          }
+          @if (disponibles() > 0) {
+            <span class="kpi-pill kpi-pill--available">
+              <i class="bi bi-inbox me-1"></i>
+              {{ disponibles() }} disponible{{ disponibles() !== 1 ? 's' : '' }}
+            </span>
+          }
+          @if (contratados().length > 0) {
+            <span class="kpi-pill kpi-pill--contratado">
+              <i class="bi bi-check-circle-fill me-1"></i>
+              {{ contratados().length }} contratado{{ contratados().length !== 1 ? 's' : '' }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando dashboard…
+    </div>
+
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  } @else if (expedientes().length === 0 && disponibles() === 0) {
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-clipboard2-x"></i></div>
+        <p class="empty-title">Sin expedientes asignados</p>
+        <p class="empty-text">
+          No tienes estimaciones activas ni hay expedientes disponibles en este momento.
+          Vuelve pronto.
+        </p>
+        <a routerLink="/estimator/files-to-be-estimated"
+           class="btn btn-outline-primary btn-sm fw-semibold">
+          <i class="bi bi-inbox me-1"></i>Ver expedientes a estimar
+        </a>
+      </div>
+    </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- KPI ROW                                                               -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+
+      <!-- En estimación -->
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--active h-100"
+             [class.kpi-card--active-pulso]="activos().length > 0">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--active"><i class="bi bi-pencil-square"></i></div>
+            <div class="min-w-0">
+              <p class="text-muted small mb-0">En estimación</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#4f46e5">{{ activos().length }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- En mercado -->
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--mercado h-100">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--mercado"><i class="bi bi-people"></i></div>
+            <div class="min-w-0">
+              <p class="text-muted small mb-0">En mercado</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#d97706">{{ enMercado().length }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contratados -->
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--contratado h-100">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--contratado"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="min-w-0">
+              <p class="text-muted small mb-0">Contratados</p>
+              <p class="kpi-num fw-bold mb-0" style="color:#16a34a">{{ contratados().length }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Valor estimado -->
+      <div class="col-6 col-xl-3">
+        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--monto h-100">
+          <div class="card-body d-flex align-items-center gap-3 py-3">
+            <div class="kpi-icon kpi-icon--monto"><i class="bi bi-cash-coin"></i></div>
+            <div class="min-w-0">
+              <p class="text-muted small mb-0">Valor estimado</p>
+              <p class="kpi-num-sm fw-bold mb-0" style="color:#0284c7">
+                {{ formatPrecio(montoTotal()) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- CONTENIDO PRINCIPAL: trabajo activo + sidebar                         -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="row g-4 align-items-start mb-4">
+
+      <!-- ── Estimaciones activas (cards grid) ─────────────────────────── -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4">
+
+          <div class="card-header bg-transparent border-bottom px-4 py-3
+                      d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">
+              <i class="bi bi-pencil-square me-2 text-primary"></i>Estimaciones activas
+              @if (activos().length > 0) {
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
+                  {{ activos().length }}
+                </span>
+              }
+            </span>
+            <a routerLink="/estimator/files-under-estimation"
+               class="btn btn-outline-secondary btn-sm">
+              Ver todas <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+
+          <div class="card-body p-3">
+            @if (activos().length === 0) {
+              <div class="empty-inline">
+                <i class="bi bi-check-circle text-success fs-3 mb-2"></i>
+                <p class="mb-1 fw-semibold">Sin estimaciones pendientes</p>
+                <p class="text-muted small mb-3">
+                  Puedes tomar nuevos expedientes disponibles para estimar.
+                </p>
+                <a routerLink="/estimator/files-to-be-estimated"
+                   class="btn btn-primary btn-sm fw-semibold">
+                  <i class="bi bi-inbox me-1"></i>Ver disponibles
+                  @if (disponibles() > 0) {
+                    <span class="badge bg-white text-primary ms-1">{{ disponibles() }}</span>
+                  }
+                </a>
+              </div>
+            } @else {
+              <div class="row g-3">
+                @for (exp of activos(); track exp.id) {
+                  <div class="col-md-6">
+                    <div class="work-card h-100"
+                         [style.--estado-color]="cfg(exp.estado ?? '').color">
+
+                      <div class="work-card__accent"></div>
+                      <div class="work-card__body">
+
+                        <!-- Número + urgencia -->
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                          <span class="work-num">{{ exp.numero }}</span>
+                          @if (urgencia(exp.fecha_visita) === 'vencida') {
+                            <span class="badge text-bg-danger urgencia-badge">
+                              <i class="bi bi-exclamation-triangle-fill me-1"></i>Vencida
+                            </span>
+                          } @else if (urgencia(exp.fecha_visita) === 'hoy') {
+                            <span class="badge text-bg-warning urgencia-badge">
+                              <i class="bi bi-clock-fill me-1"></i>Hoy
+                            </span>
+                          } @else if (urgencia(exp.fecha_visita) === 'proxima') {
+                            <span class="badge urgencia-badge urgencia-badge--proxima">
+                              <i class="bi bi-calendar-event me-1"></i>Próxima
+                            </span>
+                          }
+                        </div>
+
+                        <!-- Servicio + meta -->
+                        <p class="work-servicio mb-1">{{ exp.servicio_nombre }}</p>
+                        <p class="work-meta mb-0">
+                          <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
+                        </p>
+                        <p class="work-meta mb-3">
+                          <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
+                        </p>
+
+                        <!-- Barra de progreso -->
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                          <div class="progress work-progress flex-grow-1">
+                            <div class="progress-bar work-progress__fill"
+                                 role="progressbar"
+                                 [style.width.%]="cfg(exp.estado ?? '').pct"
+                                 [style.background-color]="cfg(exp.estado ?? '').color">
+                            </div>
+                          </div>
+                          <span class="work-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
+                        </div>
+
+                        <!-- Fecha visita + CTA -->
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                          <span class="work-fecha"
+                                [class.work-fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                                [class.work-fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {{ formatFecha(exp.fecha_visita) }}
+                          </span>
+                          <button class="btn btn-continuar btn-sm fw-semibold"
+                                  (click)="irAEstimar(exp.id)">
+                            <i class="bi bi-pencil-square me-1"></i>Continuar
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Sidebar ────────────────────────────────────────────────────── -->
+      <div class="col-lg-4">
+        <div class="sidebar-sticky d-flex flex-column gap-3">
+
+          <!-- Distribución (donut) -->
+          @if (expedientes().length > 0) {
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-header bg-transparent border-bottom px-4 py-3">
+                <span class="fw-semibold">
+                  <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+                </span>
+              </div>
+              <div class="card-body d-flex flex-column align-items-center py-3 px-3">
+
+                <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+                  <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+                  @for (seg of donutSegments(); track seg.label) {
+                    <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                            [attr.stroke]="seg.color" stroke-width="18"
+                            [attr.stroke-dasharray]="seg.dasharray"
+                            [attr.stroke-dashoffset]="seg.dashoffset"
+                            transform="rotate(-90 70 70)"/>
+                  }
+                  <text x="70" y="66" text-anchor="middle" class="donut-num">{{ expedientes().length }}</text>
+                  <text x="70" y="83" text-anchor="middle" class="donut-sub">total</text>
+                </svg>
+
+                <div class="w-100 mt-1">
+                  @for (e of estadoBreakdown(); track e.key) {
+                    <div class="d-flex align-items-center justify-content-between legend-row">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="legend-dot" [style.background]="e.color"></span>
+                        <span class="small">{{ e.label }}</span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="progress legend-bar">
+                          <div class="progress-bar" [style.width.%]="e.pct"
+                               [style.background-color]="e.color"></div>
+                        </div>
+                        <span class="small fw-semibold legend-count">{{ e.count }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+              </div>
+            </div>
+          }
+
+          <!-- Tasa de éxito -->
+          @if (totalCompletados() > 0) {
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body px-4 py-3">
+                <p class="small fw-semibold text-muted mb-3">
+                  <i class="bi bi-trophy me-1 text-warning"></i>Tasa de éxito
+                </p>
+                <div class="d-flex align-items-center gap-3">
+                  <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" class="flex-shrink-0">
+                    <circle cx="36" cy="36" r="28" fill="none" stroke="#e9ecef" stroke-width="8"/>
+                    <circle cx="36" cy="36" r="28" fill="none"
+                            stroke="#16a34a" stroke-width="8"
+                            [attr.stroke-dasharray]="(tasaExito() / 100 * 175.93) + ' 175.93'"
+                            stroke-dashoffset="0"
+                            transform="rotate(-90 36 36)"/>
+                    <text x="36" y="40" text-anchor="middle"
+                          font-size="14" font-weight="700" fill="#212529">{{ tasaExito() }}%</text>
+                  </svg>
+                  <div>
+                    <p class="mb-0 fw-bold fs-5" style="color:#16a34a">{{ contratados().length }}</p>
+                    <p class="text-muted small mb-0">contratado{{ contratados().length !== 1 ? 's' : '' }}</p>
+                    <p class="text-muted small mb-0">de {{ totalCompletados() }} estimado{{ totalCompletados() !== 1 ? 's' : '' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Acciones rápidas -->
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body px-4 py-3">
+              <p class="small fw-semibold text-muted mb-2">
+                <i class="bi bi-lightning me-1"></i>Acciones rápidas
+              </p>
+              <div class="d-flex flex-column gap-2">
+
+                <a routerLink="/estimator/files-to-be-estimated"
+                   class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
+                  <i class="bi bi-inbox"></i>
+                  <span>Expedientes a estimar</span>
+                  @if (disponibles() > 0) {
+                    <span class="badge bg-white text-primary ms-auto">{{ disponibles() }}</span>
+                  }
+                </a>
+
+                <a routerLink="/estimator/files-under-estimation"
+                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                  <i class="bi bi-pencil-square"></i>
+                  <span>Mis estimaciones activas</span>
+                  @if (activos().length > 0) {
+                    <span class="badge bg-secondary ms-auto">{{ activos().length }}</span>
+                  }
+                </a>
+
+                <a routerLink="/estimator/estimated-files"
+                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                  <i class="bi bi-clipboard-check"></i>
+                  <span>Estimaciones completadas</span>
+                  @if (totalCompletados() > 0) {
+                    <span class="badge bg-secondary ms-auto">{{ totalCompletados() }}</span>
+                  }
+                </a>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SEGUIMIENTO POST-ESTIMACIÓN                                            -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    @if (postEstimacion().length > 0) {
+      <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-header bg-transparent border-bottom px-4 py-3">
+          <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+            <div>
+              <span class="fw-semibold">
+                <i class="bi bi-diagram-3 me-2 text-primary"></i>Seguimiento post-estimación
+              </span>
+              <p class="text-muted small mb-0 mt-1">
+                Progreso de tus expedientes una vez completada la estimación.
+              </p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              @if (enMercado().length > 0) {
+                <span class="pipe-summary-badge pipe-summary-badge--mercado">
+                  <i class="bi bi-people me-1"></i>{{ enMercado().length }} en mercado
+                </span>
+              }
+              @if (contratados().length > 0) {
+                <span class="pipe-summary-badge pipe-summary-badge--contratado">
+                  <i class="bi bi-trophy-fill me-1"></i>{{ contratados().length }} contratado{{ contratados().length !== 1 ? 's' : '' }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Leyenda del pipeline (oculta en móvil) -->
+        <div class="pipeline-legend px-4 py-2 border-bottom d-none d-md-flex">
+          @for (step of pipelineSteps; track step; let last = $last) {
+            <div class="d-flex align-items-center gap-1">
+              <span class="legend-step-dot" [style.background]="cfg(step).color"></span>
+              <span class="legend-step-label">{{ cfg(step).label }}</span>
+            </div>
+            @if (!last) {
+              <i class="bi bi-arrow-right legend-step-arrow mx-1"></i>
+            }
+          }
+        </div>
+
+        <!-- Filas de expedientes -->
+        @for (exp of postEstimacion(); track exp.id) {
+          <div class="pipeline-row"
+               [class.pipeline-row--contratado]="exp.estado === 'contratado'"
+               [class.pipeline-row--cancelado]="exp.estado === 'cancelado'">
+
+            <!-- Información -->
+            <div class="pipeline-info">
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <span class="pipe-num">{{ exp.numero }}</span>
+                @if (exp.estado === 'contratado') {
+                  <i class="bi bi-trophy-fill text-warning" title="¡Contratado!"></i>
+                }
+              </div>
+              <p class="pipe-servicio mb-1">{{ exp.servicio_nombre }}</p>
+              <p class="pipe-meta mb-0">
+                <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
+                <span class="mx-1 text-muted">·</span>
+                <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
+              </p>
+            </div>
+
+            <!-- Pipeline visual -->
+            <div class="pipeline-track">
+              @if (exp.estado !== 'cancelado') {
+                <div class="p-dots">
+                  @for (step of pipelineSteps; track step; let last = $last) {
+                    <span class="p-dot"
+                          [class.p-dot--done]="stepDone(exp.estado ?? '', step)"
+                          [class.p-dot--active]="stepActive(exp.estado ?? '', step)"
+                          [style.--step-color]="cfg(step).color"
+                          [title]="cfg(step).label">
+                    </span>
+                    @if (!last) {
+                      <span class="p-line"
+                            [class.p-line--done]="stepDone(exp.estado ?? '', step)">
+                      </span>
+                    }
+                  }
+                </div>
+                <span class="pipe-estado-badge"
+                      [style.background-color]="cfg(exp.estado ?? '').color + '18'"
+                      [style.color]="cfg(exp.estado ?? '').color"
+                      [style.border-color]="cfg(exp.estado ?? '').color + '40'">
+                  <i class="bi {{ cfg(exp.estado ?? '').icon }} me-1"></i>
+                  {{ cfg(exp.estado ?? '').label }}
+                </span>
+              } @else {
+                <span class="badge bg-secondary-subtle text-secondary">Cancelado</span>
+              }
+            </div>
+
+            <!-- Ver -->
+            <button class="btn btn-outline-secondary btn-sm pipeline-cta"
+                    (click)="irAVer(exp.id)" title="Ver detalle">
+              <i class="bi bi-eye"></i>
+            </button>
+
+          </div>
+        }
+
+      </div>
+    }
+
+  }
+
+</div>

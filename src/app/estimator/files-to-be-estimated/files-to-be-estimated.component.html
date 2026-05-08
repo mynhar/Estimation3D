@@ -1,0 +1,170 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <h4 class="fw-bold mb-1">
+          <i class="bi bi-inbox me-2 text-primary"></i>Expedientes a estimar
+        </h4>
+        <p class="text-muted small mb-0">
+          Expedientes nuevos sin asignar, listos para ser tomados y estimados.
+        </p>
+      </div>
+      @if (!cargando() && expedientes().length > 0) {
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <span class="kpi-pill kpi-pill--total">
+            <i class="bi bi-files me-1"></i>
+            {{ expedientes().length }} disponible{{ expedientes().length !== 1 ? 's' : '' }}
+          </span>
+          @if (urgentesCount() > 0) {
+            <span class="kpi-pill kpi-pill--urgente">
+              <i class="bi bi-clock me-1"></i>
+              {{ urgentesCount() }} urgente{{ urgentesCount() !== 1 ? 's' : '' }}
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando expedientes…
+    </div>
+
+  <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
+  } @else if (expedientes().length === 0) {
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+        <p class="empty-title">Sin expedientes disponibles</p>
+        <p class="empty-text">
+          No hay expedientes nuevos pendientes de estimación en este momento. Vuelve pronto.
+        </p>
+      </div>
+    </div>
+
+  <!-- ── Con expedientes ───────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Barra de filtros -->
+    <div class="filter-bar rounded-4 p-3 mb-4 d-flex gap-3 flex-wrap align-items-center">
+
+      <div class="search-wrap flex-grow-1">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="form-control search-input ps-5"
+               placeholder="Buscar por número, servicio, cliente, provincia…"
+               [ngModel]="busqueda()"
+               (ngModelChange)="busqueda.set($event)" />
+      </div>
+
+      <button class="btn btn-sm fw-semibold filter-btn"
+              [class.filter-btn--active]="soloUrgentes()"
+              (click)="soloUrgentes.set(!soloUrgentes())">
+        <i class="bi bi-clock me-1"></i>Solo urgentes
+        @if (urgentesCount() > 0) {
+          <span class="badge ms-1"
+                [class.bg-danger]="soloUrgentes()"
+                [class.bg-secondary]="!soloUrgentes()">
+            {{ urgentesCount() }}
+          </span>
+        }
+      </button>
+
+      @if (hayFiltros()) {
+        <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none"
+                (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle me-1"></i>Limpiar
+        </button>
+      }
+
+    </div>
+
+    <!-- Sin resultados -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="empty-inline">
+          <i class="bi bi-search text-muted fs-3 mb-2"></i>
+          <p class="fw-semibold mb-1">Sin resultados</p>
+          <p class="text-muted small mb-3">Ningún expediente coincide con los filtros aplicados.</p>
+          <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+    } @else {
+
+      <!-- Grid de tarjetas -->
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <div class="col">
+            <div class="file-card h-100"
+                 [class.file-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                 [class.file-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+
+              <!-- Número + badge urgencia -->
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <span class="file-num">{{ exp.numero }}</span>
+                @if (urgencia(exp.fecha_visita) === 'vencida') {
+                  <span class="badge text-bg-danger urg-badge">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Visita vencida
+                  </span>
+                } @else if (urgencia(exp.fecha_visita) === 'hoy') {
+                  <span class="badge text-bg-warning urg-badge">
+                    <i class="bi bi-clock-fill me-1"></i>Visita hoy
+                  </span>
+                } @else if (urgencia(exp.fecha_visita) === 'proxima') {
+                  <span class="badge urg-badge urg-badge--proxima">
+                    <i class="bi bi-calendar-event me-1"></i>Próxima
+                  </span>
+                }
+              </div>
+
+              <!-- Servicio -->
+              <p class="file-servicio mb-2">{{ exp.servicio_nombre }}</p>
+
+              <!-- Meta: cliente + ubicación -->
+              <div class="d-flex flex-column gap-1 mb-3">
+                <span class="file-meta">
+                  <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
+                </span>
+                <span class="file-meta">
+                  <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
+                </span>
+              </div>
+
+              <!-- Fecha de visita -->
+              <div class="file-fecha-row mb-3"
+                   [class.file-fecha-row--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                   [class.file-fecha-row--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+                <i class="bi bi-calendar3 me-1"></i>
+                Visita: <strong>{{ formatFecha(exp.fecha_visita) }}</strong>
+              </div>
+
+              <!-- CTA -->
+              <button class="btn btn-primary w-100 fw-semibold btn-estimar mt-auto"
+                      (click)="estimar(exp.id)">
+                <i class="bi bi-pencil-square me-2"></i>Tomar y estimar
+              </button>
+
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Contador de resultados -->
+      @if (hayFiltros()) {
+        <p class="text-muted small text-center mt-4 mb-0">
+          Mostrando {{ expedientesFiltrados().length }}
+          de {{ expedientes().length }} expedientes
+        </p>
+      }
+
+    }
+  }
+
+</div>
