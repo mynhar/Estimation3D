@@ -10,7 +10,7 @@ export class EstimacionService {
   async get(expedienteId: string): Promise<EstimacionDetalle | null> {
     const { data, error } = await this.db
       .from('estimacion')
-      .select('fecha_visita_real, descripcion_problemas, costo_estimado, notas_internas')
+      .select('fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour')
       .eq('expediente_id', expedienteId)
       .maybeSingle();
 
@@ -21,8 +21,26 @@ export class EstimacionService {
       fecha_visita_real:     data.fecha_visita_real     ?? '',
       descripcion_problemas: data.descripcion_problemas ?? '',
       costo_estimado:        data.costo_estimado        ?? null,
+      costo_estimado_max:    data.costo_estimado_max    ?? null,
       notas_internas:        data.notas_internas        ?? '',
+      url_tour:              data.url_tour              ?? null,
     };
+  }
+
+  async eliminar(expedienteId: string): Promise<void> {
+    const { error } = await this.db
+      .from('estimacion')
+      .delete()
+      .eq('expediente_id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  async actualizarUrlTour(expedienteId: string, urlTour: string | null): Promise<void> {
+    const { error } = await this.db
+      .from('estimacion')
+      .update({ url_tour: urlTour })
+      .eq('expediente_id', expedienteId);
+    if (error) throw new Error(error.message);
   }
 
   async guardar(
@@ -32,8 +50,10 @@ export class EstimacionService {
       fechaVisita: string;
       horaVisita: string;
       descripcionProblemas: string;
-      costoEstimado: number;
+      costoMin: number | null;
+      costoMax: number | null;
       notasInternas: string;
+      urlTour: string | null;
     }
   ): Promise<void> {
     const { error } = await this.db
@@ -43,8 +63,10 @@ export class EstimacionService {
         estimador_id:          estimadorId,
         fecha_visita_real:     `${data.fechaVisita}T${data.horaVisita}:00`,
         descripcion_problemas: data.descripcionProblemas,
-        costo_estimado:        data.costoEstimado,
+        costo_estimado:        data.costoMin,
+        costo_estimado_max:    data.costoMax,
         notas_internas:        data.notasInternas || null,
+        url_tour:              data.urlTour       || null,
       }, { onConflict: 'expediente_id' });
 
     if (error) throw new Error(error.message);

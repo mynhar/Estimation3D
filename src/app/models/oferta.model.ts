@@ -27,6 +27,10 @@ export interface OfertaDetalle {
   provincia: string;
   canton: string;
   distrito: string;
+  fecha_visita: string;
+  fecha_visita_real: string;
+  descripcion_problemas: string;
+  url_tour: string | null;
   precio: number;
   plazo_semanas_min: number | null;
   plazo_semanas_max: number | null;

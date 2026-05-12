@@ -1,0 +1,413 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Cargando ──────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Cargando expediente…
+    </div>
+
+  <!-- ── Error / no encontrado ─────────────────────────────────────────────── -->
+  } @else if (!detalle()) {
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon empty-icon--warn">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h5 class="empty-title">Expediente no encontrado</h5>
+        @if (errorMsg()) {
+          <p class="empty-text text-danger">{{ errorMsg() }}</p>
+        }
+        <button class="btn btn-outline-secondary btn-sm mt-2" (click)="volver()">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </button>
+      </div>
+    </div>
+
+  } @else {
+
+    <!-- ── Header ────────────────────────────────────────────────────────────── -->
+    <header class="page-header rounded-4 p-4 mb-4">
+      <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn-back" (click)="volver()" title="Volver a mis expedientes">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="exp-num">{{ detalle()!.numero }}</span>
+              <span class="badge rounded-pill px-3 py-1 {{ estadoCfg(detalle()!.estado).clase }}">
+                <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-1"></i>
+                {{ estadoCfg(detalle()!.estado).texto }}
+              </span>
+            </div>
+            <p class="text-muted small mb-0 mt-1">{{ detalle()!.servicio_nombre }}</p>
+          </div>
+        </div>
+        <!-- Estado hint chip -->
+        <div class="hint-chip">
+          <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-2"></i>
+          {{ ESTADO_HINT[detalle()!.estado] }}
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Tour virtual hero (full-width, resaltado) ────────────────────────── -->
+    @if (urlTourSafe) {
+      <section class="tour-hero rounded-4 mb-4 overflow-hidden">
+        <div class="tour-hero__bar">
+          <div class="d-flex align-items-center gap-2">
+            <span class="tour-hero__dot"></span>
+            <span class="tour-hero__dot"></span>
+            <span class="tour-hero__dot"></span>
+          </div>
+          <div class="tour-hero__title">
+            <i class="bi bi-badge-3d-fill me-2"></i>Tour virtual 3D del sitio
+          </div>
+          <span class="tour-hero__badge">Vista inmersiva</span>
+        </div>
+        <div class="ratio ratio-16x9">
+          <iframe [src]="urlTourSafe"
+                  allowfullscreen
+                  allow="xr-spatial-tracking"
+                  title="Tour virtual Matterport">
+          </iframe>
+        </div>
+      </section>
+    }
+
+    <!-- ── Main grid ─────────────────────────────────────────────────────────── -->
+    <div class="row g-4 align-items-start">
+
+      <!-- ══ LEFT: Datos + Estimación ═══════════════════════════════════════ -->
+      <div class="col-lg-7 d-flex flex-column gap-4">
+
+        <!-- ── Datos del expediente ──────────────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <p class="section-label">Datos del expediente</p>
+
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <p class="info-label">Servicio</p>
+                <p class="info-value">{{ detalle()!.servicio_nombre }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Número de expediente</p>
+                <p class="info-value font-monospace">{{ detalle()!.numero }}</p>
+              </div>
+
+              <div class="col-12"><hr class="divider" /></div>
+
+              <div class="col-sm-8">
+                <p class="info-label">Dirección</p>
+                <p class="info-value">{{ detalle()!.direccion }}</p>
+              </div>
+              <div class="col-sm-4">
+                <p class="info-label">Referencia</p>
+                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Provincia</p>
+                <p class="info-value">{{ detalle()!.provincia }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Cantón</p>
+                <p class="info-value">{{ detalle()!.canton }}</p>
+              </div>
+              <div class="col-4">
+                <p class="info-label">Distrito</p>
+                <p class="info-value">{{ detalle()!.distrito }}</p>
+              </div>
+
+              <div class="col-12"><hr class="divider" /></div>
+
+              <div class="col-sm-6">
+                <p class="info-label">Visita programada</p>
+                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Fecha de solicitud</p>
+                <p class="info-value">{{ formatFecha(detalle()!.creado_en) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Informe del estimador ─────────────────────────────────────── -->
+        @if (detalle()!.estimador_nombre) {
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+              <p class="section-label">Informe del estimador</p>
+
+              <!-- Estimador asignado -->
+              <div class="estimador-chip mb-4">
+                <div class="estimador-avatar">
+                  <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div>
+                  <p class="estimador-nombre mb-0">{{ detalle()!.estimador_nombre }}</p>
+                  <p class="estimador-rol mb-0">Estimador asignado</p>
+                </div>
+              </div>
+
+              @if (detalle()!.fecha_visita_real) {
+                <div class="row g-3 mb-3">
+                  <div class="col-sm-6">
+                    <p class="info-label">Fecha real de visita</p>
+                    <p class="info-value">{{ formatFecha(detalle()!.fecha_visita_real) }}</p>
+                  </div>
+                  <div class="col-sm-6">
+                    <p class="info-label">Hora</p>
+                    <p class="info-value">{{ formatHora(detalle()!.fecha_visita_real) }}</p>
+                  </div>
+                </div>
+                <hr class="divider mb-3" />
+              }
+
+              @if (detalle()!.descripcion_problemas) {
+                <div class="mb-3">
+                  <p class="info-label">Situación observada</p>
+                  <p class="descripcion-block">{{ detalle()!.descripcion_problemas }}</p>
+                </div>
+              }
+
+              <!-- Costo aproximado -->
+              @if (detalle()!.costo_estimado !== null) {
+                <div class="costo-range-card rounded-3 p-3">
+                  <p class="info-label mb-2">Costo aproximado de la obra</p>
+                  <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div>
+                      <p class="costo-tag mb-0">Mínimo</p>
+                      <p class="costo-valor mb-0">{{ formatCosto(detalle()!.costo_estimado) }}</p>
+                    </div>
+                    @if (detalle()!.costo_estimado_max !== null) {
+                      <i class="bi bi-arrow-right text-muted"></i>
+                      <div>
+                        <p class="costo-tag mb-0">Máximo</p>
+                        <p class="costo-valor mb-0">{{ formatCosto(detalle()!.costo_estimado_max) }}</p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else if (!detalle()!.fecha_visita_real) {
+                <div class="pending-notice">
+                  <i class="bi bi-hourglass-split me-2"></i>
+                  La visita de evaluación aún no se ha realizado.
+                </div>
+              } @else {
+                <div class="pending-notice">
+                  <i class="bi bi-calculator me-2"></i>
+                  El costo estimado aún no ha sido definido.
+                </div>
+              }
+
+              <!-- ── Fotos del sitio ──────────────────────────────────── -->
+              @if (fotos().length > 0) {
+                <hr class="divider my-4" />
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <p class="section-label mb-0">
+                    <i class="bi bi-images me-1 text-primary"></i>Fotos del sitio
+                    <span class="archivo-count">{{ fotos().length }}</span>
+                  </p>
+                </div>
+                <div class="photos-grid">
+                  @for (foto of fotos(); track foto.id) {
+                    <div class="photo-thumb" (click)="abrirFoto(foto)" title="{{ foto.nombre_archivo }}">
+                      <img [src]="publicUrl(foto.url_storage)"
+                           [alt]="foto.nombre_archivo"
+                           class="photo-thumb__img" />
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- ── Documentos técnicos ──────────────────────────────── -->
+              @if (documentos().length > 0) {
+                <hr class="divider my-4" />
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <p class="section-label mb-0">
+                    <i class="bi bi-file-earmark-text me-1 text-primary"></i>Documentos técnicos
+                    <span class="archivo-count">{{ documentos().length }}</span>
+                  </p>
+                </div>
+                <div class="doc-list">
+                  @for (doc of documentos(); track doc.id) {
+                    <div class="file-row">
+                      <div class="file-row__icon file-row__icon--doc">
+                        <i class="bi bi-file-earmark-text"></i>
+                      </div>
+                      <div class="file-row__info">
+                        <p class="file-row__name">{{ doc.nombre_archivo }}</p>
+                        <p class="file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                      </div>
+                      <div class="file-row__actions">
+                        <a [href]="publicUrl(doc.url_storage)" target="_blank"
+                           class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+                          <i class="bi bi-box-arrow-up-right"></i>Abrir
+                        </a>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+            </div>
+          </div>
+        } @else {
+          <!-- Sin estimador aún -->
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+              <p class="section-label">Informe del estimador</p>
+              <div class="pending-notice">
+                <i class="bi bi-hourglass-split me-2"></i>
+                Aún no se ha asignado un estimador a tu expediente.
+              </div>
+            </div>
+          </div>
+        }
+
+      </div><!-- /col-lg-7 -->
+
+      <!-- ══ RIGHT: Constructor + Acciones ══════════════════════════════════ -->
+      <div class="col-lg-5">
+        <div class="sidebar-sticky d-flex flex-column gap-4">
+
+          <!-- ── Constructor seleccionado ──────────────────────────────── -->
+          @if (ofertaAceptada()) {
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4">
+                <p class="section-label">Constructor seleccionado</p>
+
+                <!-- Perfil del constructor -->
+                <div class="constructor-chip mb-4">
+                  <div class="constructor-avatar">
+                    <i class="bi bi-person-badge-fill"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="constructor-nombre mb-0">{{ ofertaAceptada()!.constructor_nombre }}</p>
+                    @if (ofertaAceptada()!.constructor_telefono) {
+                      <a href="tel:{{ ofertaAceptada()!.constructor_telefono }}"
+                         class="constructor-contacto text-decoration-none">
+                        <i class="bi bi-telephone me-1"></i>{{ ofertaAceptada()!.constructor_telefono }}
+                      </a>
+                    }
+                  </div>
+                </div>
+
+                <hr class="divider mb-3" />
+
+                <!-- Detalles de la oferta -->
+                <div class="row g-3">
+                  <div class="col-12">
+                    <p class="info-label">Precio acordado</p>
+                    <p class="precio-valor mb-0">{{ formatCosto(ofertaAceptada()!.precio) }}</p>
+                  </div>
+
+                  <div class="col-6">
+                    <p class="info-label">Plazo estimado</p>
+                    <p class="info-value">
+                      @if (ofertaAceptada()!.plazo_semanas_min !== null && ofertaAceptada()!.plazo_semanas_max !== null) {
+                        {{ ofertaAceptada()!.plazo_semanas_min }}–{{ ofertaAceptada()!.plazo_semanas_max }} semanas
+                      } @else if (ofertaAceptada()!.plazo_semanas_min !== null) {
+                        {{ ofertaAceptada()!.plazo_semanas_min }} semanas
+                      } @else { — }
+                    </p>
+                  </div>
+
+                  <div class="col-6">
+                    <p class="info-label">Garantía</p>
+                    <p class="info-value">
+                      @if (ofertaAceptada()!.garantia_anos !== null) {
+                        {{ ofertaAceptada()!.garantia_anos }} año{{ ofertaAceptada()!.garantia_anos !== 1 ? 's' : '' }}
+                      } @else { — }
+                    </p>
+                  </div>
+
+                  <div class="col-12">
+                    <p class="info-label">Fecha de inicio propuesta</p>
+                    <p class="info-value">{{ formatFecha(ofertaAceptada()!.fecha_inicio) }}</p>
+                  </div>
+
+                  @if (ofertaAceptada()!.descripcion) {
+                    <div class="col-12">
+                      <hr class="divider" />
+                      <p class="info-label mt-3">Descripción del enfoque</p>
+                      <p class="descripcion-block">{{ ofertaAceptada()!.descripcion }}</p>
+                    </div>
+                  }
+
+                  <!-- Email del constructor -->
+                  @if (ofertaAceptada()!.constructor_email) {
+                    <div class="col-12">
+                      <p class="info-label">Correo</p>
+                      <a href="mailto:{{ ofertaAceptada()!.constructor_email }}"
+                         class="text-decoration-none text-primary small">
+                        <i class="bi bi-envelope me-1"></i>{{ ofertaAceptada()!.constructor_email }}
+                      </a>
+                    </div>
+                  }
+                </div>
+
+              </div>
+            </div>
+
+          } @else if (detalle()!.estado === 'en_oferta') {
+            <!-- Hay ofertas, todavía no se ha adjudicado -->
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4 text-center">
+                <div class="pending-icon mb-3">
+                  <i class="bi bi-people fs-2"></i>
+                </div>
+                <p class="fw-semibold mb-1">Propuestas disponibles</p>
+                <p class="text-muted small mb-3">
+                  Hay constructores interesados en tu proyecto. Revisa las propuestas y selecciona la que mejor se adapte.
+                </p>
+                <a routerLink="/client/offers-received"
+                   class="btn btn-warning w-100 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                  <i class="bi bi-eye"></i>Ver propuestas
+                </a>
+              </div>
+            </div>
+
+          } @else if (detalle()!.estado !== 'cancelado') {
+            <!-- Esperando ofertas -->
+            <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-body p-4 text-center">
+                <div class="pending-icon mb-3">
+                  <i class="bi bi-building fs-2"></i>
+                </div>
+                <p class="fw-semibold mb-1">Sin constructor asignado</p>
+                <p class="text-muted small mb-0">
+                  Una vez que la estimación esté completa, los constructores podrán enviar propuestas para tu proyecto.
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- ── Acciones ───────────────────────────────────────────────── -->
+          <div class="d-grid">
+            <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
+                    (click)="volver()">
+              <i class="bi bi-arrow-left"></i>Volver a mis expedientes
+            </button>
+          </div>
+
+        </div>
+      </div><!-- /col-lg-5 -->
+
+    </div><!-- /row -->
+
+  }
+
+</div>
+
+<!-- ── Lightbox ──────────────────────────────────────────────────────────── -->
+@if (fotoAmpliada()) {
+  <div class="lightbox-overlay" (click)="cerrarFoto()">
+    <button class="lightbox-close" (click)="cerrarFoto()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <img [src]="fotoAmpliada()!" class="lightbox-img" (click)="$event.stopPropagation()" alt="Foto ampliada" />
+  </div>
+}

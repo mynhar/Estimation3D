@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
+import { EstimacionService } from '../../services/estimacion.service';
 import {
   ExpedienteRow,
   ESTADOS_ESTIMADO,
@@ -19,15 +20,20 @@ import {
   styleUrl:    './estimated-files.component.css',
 })
 export class EstimatedFilesComponent implements OnInit {
-  private auth              = inject(AuthSupabaseService);
-  private expedienteService = inject(ExpedienteService);
-  private router            = inject(Router);
+  private auth               = inject(AuthSupabaseService);
+  private expedienteService  = inject(ExpedienteService);
+  private estimacionService  = inject(EstimacionService);
+  private router             = inject(Router);
 
   user         = toSignal(this.auth.user$);
   expedientes  = signal<ExpedienteRow[]>([]);
   cargando     = signal(true);
   busqueda     = signal('');
   filtroEstado = signal<string | null>(null);
+
+  confirmandoId  = signal<string | null>(null);
+  eliminando     = signal(false);
+  errorEliminar  = signal('');
 
   readonly estadoChips: { value: string; label: string }[] = [
     { value: 'estimado',   label: 'Estimado'   },
@@ -106,5 +112,33 @@ export class EstimatedFilesComponent implements OnInit {
 
   ver(id: string) {
     this.router.navigate(['/estimator/estimated-file', id]);
+  }
+
+  pedirConfirmacion(id: string) {
+    const exp = this.expedientes().find(e => e.id === id);
+    if (exp?.estado === 'adjudicado' || exp?.estado === 'contratado') return;
+    this.errorEliminar.set('');
+    this.confirmandoId.set(id);
+  }
+
+  cancelarConfirmacion() {
+    this.confirmandoId.set(null);
+    this.errorEliminar.set('');
+  }
+
+  async eliminarEstimacion(exp: ExpedienteRow) {
+    this.errorEliminar.set('');
+    this.eliminando.set(true);
+    try {
+      await this.estimacionService.eliminar(exp.id);
+      await this.expedienteService.actualizarEstado(exp.id, 'nuevo');
+      this.expedientes.update(list => list.filter(e => e.id !== exp.id));
+      this.confirmandoId.set(null);
+    } catch (e: any) {
+      console.error('[EstimatedFiles] eliminar:', e.message);
+      this.errorEliminar.set(e.message);
+    } finally {
+      this.eliminando.set(false);
+    }
   }
 }

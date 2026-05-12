@@ -1,3 +1,15 @@
+<!-- ── Lightbox ─────────────────────────────────────────────────────────────── -->
+@if (fotoAmpliada()) {
+  <div class="lightbox-overlay" (click)="cerrarFoto()">
+    <div class="lightbox-container" (click)="$event.stopPropagation()">
+      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="Foto ampliada" />
+      <button class="lightbox-close" type="button" (click)="cerrarFoto()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  </div>
+}
+
 <div class="container-xl py-4 px-3 px-md-4 page-wrap">
 
   <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
@@ -26,8 +38,9 @@
   } @else {
 
     <!-- Header ──────────────────────────────────────────────────────────────── -->
-    <header class="page-header rounded-4 p-4 mb-4" [class.page-header--aceptada]="detalle()!.estado === 'aceptada'"
-                                                    [class.page-header--rechazada]="detalle()!.estado === 'rechazada'">
+    <header class="page-header rounded-4 p-4 mb-4"
+            [class.page-header--aceptada]="detalle()!.estado === 'aceptada'"
+            [class.page-header--rechazada]="detalle()!.estado === 'rechazada'">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
           <button class="btn-back" type="button" (click)="volver()" title="Volver a mis ofertas">
@@ -62,7 +75,7 @@
     <!-- ── Main grid ─────────────────────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
-      <!-- ══ LEFT: Expediente + Descripción + Archivos ══════════════════════════ -->
+      <!-- ══ LEFT: Expediente + Media + Descripción + Archivos oferta ══════════ -->
       <div class="col-lg-7 d-flex flex-column gap-4">
 
         <!-- Expediente ──────────────────────────────────────────────────────── -->
@@ -73,8 +86,10 @@
             </span>
           </div>
           <div class="card-body p-4">
+
+            <!-- Servicio y ubicación -->
             <p class="section-label">Servicio y ubicación</p>
-            <div class="row g-3">
+            <div class="row g-3 mb-3">
               <div class="col-sm-6">
                 <p class="info-label">Servicio</p>
                 <p class="info-value">{{ detalle()!.servicio_nombre }}</p>
@@ -99,7 +114,136 @@
                 <p class="info-value">{{ detalle()!.distrito }}</p>
               </div>
             </div>
+
+            <hr class="divider" />
+
+            <!-- Visitas -->
+            <p class="section-label">Visitas</p>
+            <div class="row g-3 mb-0">
+              <div class="col-sm-6">
+                <p class="info-label">Visita programada</p>
+                <p class="info-value">
+                  {{ formatFecha(detalle()!.fecha_visita) }}
+                  @if (formatHora(detalle()!.fecha_visita) !== '—') {
+                    <span class="info-time">· {{ formatHora(detalle()!.fecha_visita) }}</span>
+                  }
+                </p>
+              </div>
+              <div class="col-sm-6">
+                <p class="info-label">Visita del estimador</p>
+                <p class="info-value">
+                  {{ formatFecha(detalle()!.fecha_visita_real) }}
+                  @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
+                    <span class="info-time">· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
+                  }
+                </p>
+              </div>
+
+              @if (detalle()!.descripcion_problemas) {
+                <div class="col-12">
+                  <hr class="divider" />
+                  <p class="info-label">Problemas observados</p>
+                  <p class="descripcion-block mb-0">{{ detalle()!.descripcion_problemas }}</p>
+                </div>
+              }
+            </div>
+
           </div>
+        </div>
+
+        <!-- Archivos del expediente (tabulados) ─────────────────────────────── -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="card-header bg-transparent border-bottom px-4 py-3">
+            <span class="fw-semibold">
+              <i class="bi bi-folder-symlink me-2 text-cyan"></i>Archivos del expediente
+            </span>
+          </div>
+
+          <div class="media-tabs">
+            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'tour'"
+                    type="button" (click)="tabMedia.set('tour')">
+              <i class="bi bi-camera-video me-1"></i>Tour 3D
+            </button>
+            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'fotos'"
+                    type="button" (click)="tabMedia.set('fotos')">
+              <i class="bi bi-images me-1"></i>Fotos
+              @if (fotosExp().length > 0) {
+                <span class="media-tab__count">{{ fotosExp().length }}</span>
+              }
+            </button>
+            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'docs'"
+                    type="button" (click)="tabMedia.set('docs')">
+              <i class="bi bi-file-earmark-text me-1"></i>Docs
+              @if (documentosExp().length > 0) {
+                <span class="media-tab__count">{{ documentosExp().length }}</span>
+              }
+            </button>
+          </div>
+
+          @if (tabMedia() === 'tour') {
+            <div class="card-body p-3">
+              @if (urlTourSafe) {
+                <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                  <iframe [src]="urlTourSafe" allowfullscreen allow="xr-spatial-tracking"
+                          title="Tour virtual Matterport"></iframe>
+                </div>
+              } @else {
+                <div class="media-empty">
+                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>Sin tour registrado
+                </div>
+              }
+            </div>
+          }
+
+          @if (tabMedia() === 'fotos') {
+            <div class="card-body p-3">
+              @if (fotosExp().length === 0) {
+                <div class="media-empty">
+                  <i class="bi bi-image fs-2 mb-1 d-block"></i>Sin fotos registradas
+                </div>
+              } @else {
+                <div class="photos-grid">
+                  @for (f of fotosExp(); track f.id) {
+                    <div class="photo-thumb" (click)="abrirFoto(f)" [title]="f.nombre_archivo">
+                      <img [src]="publicUrl(f.url_storage)" class="photo-thumb__img" [alt]="f.nombre_archivo" />
+                      <div class="photo-thumb__overlay"><i class="bi bi-zoom-in"></i></div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (tabMedia() === 'docs') {
+            <div class="card-body p-2">
+              @if (documentosExp().length === 0) {
+                <div class="media-empty">
+                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>Sin documentos
+                </div>
+              } @else {
+                <div class="file-list">
+                  @for (d of documentosExp(); track d.id) {
+                    <div class="file-row">
+                      <div class="file-row__icon file-row__icon--doc">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                      </div>
+                      <div class="file-row__info">
+                        <p class="file-row__name">{{ d.nombre_archivo }}</p>
+                        <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                      </div>
+                      <div class="file-row__actions">
+                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                                (click)="verArchivo(d)" title="Abrir">
+                          <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
         </div>
 
         <!-- Descripción del enfoque ─────────────────────────────────────────── -->
@@ -114,7 +258,7 @@
           </div>
         </div>
 
-        <!-- Archivos adjuntos ───────────────────────────────────────────────── -->
+        <!-- Archivos adjuntos de la oferta ──────────────────────────────────── -->
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
@@ -123,7 +267,6 @@
           </div>
           <div class="card-body p-3">
 
-            <!-- Documentos -->
             <p class="section-label px-2 pt-1">Documento de oferta</p>
             @if (documentos().length === 0) {
               <p class="text-muted small px-2 mb-3">Sin documentos adjuntos.</p>
@@ -149,7 +292,6 @@
               </div>
             }
 
-            <!-- Videos -->
             <p class="section-label px-2">Video complementario</p>
             @if (videos().length === 0) {
               <p class="text-muted small px-2 mb-1">Sin videos adjuntos.</p>
@@ -216,7 +358,6 @@
             </div>
             <div class="card-body p-4">
 
-              <!-- Precio prominente -->
               <div class="price-display mb-4">
                 <p class="price-label">Precio total ofertado</p>
                 <p class="price-value">{{ formatCosto(detalle()!.precio) }}</p>
@@ -224,7 +365,6 @@
 
               <hr class="divider" />
 
-              <!-- Métricas en grid -->
               <div class="row g-3 mb-3">
                 <div class="col-6">
                   <p class="info-label">Plazo estimado</p>
@@ -250,7 +390,6 @@
 
               <hr class="divider" />
 
-              <!-- Estado visual -->
               @if (detalle()!.estado === 'aceptada') {
                 <div class="estado-banner estado-banner--aceptada">
                   <i class="bi bi-trophy-fill"></i>

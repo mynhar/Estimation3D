@@ -165,10 +165,54 @@
               </div>
 
               <!-- CTA -->
-              <button class="btn btn-outline-success btn-sm mt-auto d-flex align-items-center justify-content-center gap-1"
-                      (click)="ver(exp.id)">
-                <i class="bi bi-eye"></i>Ver detalle
-              </button>
+              @if (confirmandoId() === exp.id) {
+
+                <!-- ── Confirmación de eliminación ── -->
+                <div class="confirm-panel mt-auto">
+                  <p class="confirm-msg">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    ¿Eliminar la estimación? El expediente volverá a estado
+                    <strong>Nuevo</strong> y perderá todos los datos registrados.
+                  </p>
+                  @if (errorEliminar()) {
+                    <p class="text-danger small mb-2">{{ errorEliminar() }}</p>
+                  }
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-danger btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+                            (click)="eliminarEstimacion(exp)"
+                            [disabled]="eliminando()">
+                      @if (eliminando()) {
+                        <span class="spinner-border spinner-border-sm"></span>Eliminando…
+                      } @else {
+                        <i class="bi bi-trash3"></i>Sí, eliminar
+                      }
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm"
+                            (click)="cancelarConfirmacion()"
+                            [disabled]="eliminando()">
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+
+              } @else {
+
+                <!-- ── Acciones normales ── -->
+                <div class="d-flex gap-2 mt-auto">
+                  <button class="btn btn-outline-success btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+                          (click)="ver(exp.id)">
+                    <i class="bi bi-eye"></i>Ver detalle
+                  </button>
+                  @if (exp.estado !== 'adjudicado' && exp.estado !== 'contratado') {
+                    <button class="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center"
+                            (click)="pedirConfirmacion(exp.id)"
+                            title="Eliminar estimación">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  }
+                </div>
+
+              }
 
             </div>
           </div>

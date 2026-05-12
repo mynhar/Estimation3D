@@ -71,6 +71,14 @@
   color: #94a3b8; font-size: 0.85rem;
 }
 
+/* ── Tour edit wrapper ───────────────────────────────────────────────────── */
+.tour-edit-wrap {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.85rem;
+}
+
 /* ── Photos grid ─────────────────────────────────────────────────────────── */
 .photos-grid {
   display: flex; flex-wrap: wrap; gap: 0.5rem;

@@ -190,16 +190,21 @@
                 }
 
                 <!-- ── CTA contextual ────────────────────────────────────── -->
+                <a [routerLink]="['/client/file/my-file', exp.id]"
+                   class="btn btn-outline-primary btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
+                  <i class="bi bi-folder2-open"></i>Ver expediente
+                </a>
+
                 @if (exp.estado === 'en_oferta') {
                   <a routerLink="/client/offers-received"
-                     class="btn btn-warning w-100 mt-3 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                     class="btn btn-warning w-100 mt-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
                     <i class="bi bi-eye"></i>
                     Revisar ofertas recibidas
                     <i class="bi bi-arrow-right"></i>
                   </a>
                 }
                 @if (exp.estado === 'contratado') {
-                  <div class="mt-3 d-flex align-items-center justify-content-center gap-2
+                  <div class="mt-2 d-flex align-items-center justify-content-center gap-2
                               py-2 rounded-3 contratado-tag">
                     <i class="bi bi-check-circle-fill"></i>
                     Proyecto contratado y en marcha

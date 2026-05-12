@@ -1,3 +1,5 @@
+import { EstadoExpediente } from '../types/supabase';
+
 /** Forma aplanada usada en las listas del módulo estimador. */
 export interface ExpedienteRow {
   id: string;
@@ -15,6 +17,7 @@ export interface ExpedienteRow {
 /** Vista de detalle de un expediente (join completo). */
 export interface ExpedienteDetalle {
   numero: string;
+  estado: string;
   fecha_visita: string;
   descripcion?: string;
   servicio_nombre: string;
@@ -39,7 +42,30 @@ export interface ExpedienteDisponible {
   canton: string;
   distrito: string;
   costo_estimado: number | null;
+  costo_estimado_max: number | null;
   total_ofertas: number;
+}
+
+/** Vista completa del expediente para el cliente (detalle propio). */
+export interface ExpedienteVistaCliente {
+  id: string;
+  numero: string;
+  estado: string;
+  fecha_visita: string;
+  creado_en: string;
+  servicio_nombre: string;
+  cliente_nombre: string;
+  direccion: string;
+  referencia: string;
+  provincia: string;
+  canton: string;
+  distrito: string;
+  estimador_nombre: string | null;
+  fecha_visita_real: string | null;
+  descripcion_problemas: string | null;
+  costo_estimado: number | null;
+  costo_estimado_max: number | null;
+  url_tour: string | null;
 }
 
 /** Forma completa para la vista de oferta del constructor. */
@@ -56,7 +82,9 @@ export interface ExpedienteParaOferta {
   distrito: string;
   descripcion_problemas: string;
   costo_estimado: number | null;
+  costo_estimado_max: number | null;
   fecha_visita_real: string;
+  url_tour: string | null;
   total_ofertas: number;
 }
 
@@ -89,7 +117,7 @@ export interface ExpedienteCliente {
 // ── Constantes de estado ──────────────────────────────────────────────────────
 
 /** Estados post-estimación que maneja el módulo estimador. */
-export const ESTADOS_ESTIMADO: string[] = [
+export const ESTADOS_ESTIMADO: EstadoExpediente[] = [
   'estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado',
 ];
 

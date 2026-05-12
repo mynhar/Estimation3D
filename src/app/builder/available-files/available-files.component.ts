@@ -93,11 +93,6 @@ export class AvailableFilesComponent implements OnInit {
     return this.ofertasHechas().has(expedienteId);
   }
 
-  formatCosto(valor: number | null): string {
-    if (valor === null) return '—';
-    return `₡ ${valor.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  }
-
   competenciaLabel(n: number): string {
     if (n <= 1) return 'Baja';
     if (n <= 3) return 'Media';

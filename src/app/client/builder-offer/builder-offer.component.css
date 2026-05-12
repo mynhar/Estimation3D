@@ -77,6 +77,14 @@
 }
 .section-divider { border-color: #f1f5f9; margin: 1rem 0; }
 
+/* ── Costo aproximado ────────────────────────────────────────────────────── */
+.costo-range-card {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid rgba(22,163,74,.18);
+}
+.costo-tag   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #15803d; }
+.costo-valor { font-size: 1.25rem; font-weight: 800; color: #14532d; letter-spacing: -0.02em; }
+
 /* ── Photos grid ─────────────────────────────────────────────────────────── */
 .photos-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 

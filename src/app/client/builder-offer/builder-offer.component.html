@@ -90,19 +90,13 @@
             <div class="card-body p-4">
 
               <div class="row g-3">
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <p class="info-label">Fecha real de visita</p>
                   <p class="info-value">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-6">
                   <p class="info-label">Hora</p>
                   <p class="info-value">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
-                </div>
-                <div class="col-sm-4">
-                  <p class="info-label">Costo estimado</p>
-                  <p class="info-value text-success fw-bold">
-                    {{ estimacion()!.costo_estimado != null ? formatCosto(estimacion()!.costo_estimado!) : '—' }}
-                  </p>
                 </div>
                 @if (estimacion()!.descripcion_problemas) {
                   <div class="col-12">
@@ -111,6 +105,42 @@
                   </div>
                 }
               </div>
+
+              <!-- Costo aproximado -->
+              @if (estimacion()!.costo_estimado !== null) {
+                <hr class="section-divider" />
+                <p class="info-label mb-2">Costo aproximado de la obra</p>
+                <div class="costo-range-card rounded-3 p-3">
+                  <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div>
+                      <p class="costo-tag mb-0">Mínimo</p>
+                      <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado!) }}</p>
+                    </div>
+                    @if (estimacion()!.costo_estimado_max !== null) {
+                      <i class="bi bi-arrow-right text-muted"></i>
+                      <div>
+                        <p class="costo-tag mb-0">Máximo</p>
+                        <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado_max!) }}</p>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Tour virtual del sitio -->
+              @if (urlTourSafe) {
+                <hr class="section-divider" />
+                <p class="info-label mb-2">
+                  <i class="bi bi-badge-3d-fill me-1"></i>Tour virtual del sitio
+                </p>
+                <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                  <iframe [src]="urlTourSafe"
+                          allowfullscreen
+                          allow="xr-spatial-tracking"
+                          title="Tour virtual Matterport">
+                  </iframe>
+                </div>
+              }
 
               <!-- Fotos del sitio -->
               @if (fotosExp().length > 0) {

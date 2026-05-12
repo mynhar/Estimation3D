@@ -191,80 +191,101 @@
           </div>
         </div>
 
-        <!-- ── Videos de la visita ─────────────────────────────────────── -->
+        <!-- ── Tour virtual (Matterport) ──────────────────────────────── -->
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-camera-video me-2 text-primary"></i>Videos de la visita
-              @if (videos().length > 0) {
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
-                  {{ videos().length }}
-                </span>
-              }
+              <i class="bi bi-camera-video me-2 text-primary"></i>Tour virtual de la visita
             </span>
-            <label class="btn btn-outline-primary btn-sm mb-0 d-flex align-items-center gap-1"
-                   [class.disabled]="subiendoVideo()">
-              @if (subiendoVideo()) {
-                <span class="spinner-border spinner-border-sm"></span>Subiendo…
-              } @else {
-                <i class="bi bi-cloud-upload"></i>Subir video
-              }
-              <input type="file" accept="video/*" class="d-none"
-                     (change)="subirVideo($event)" [disabled]="subiendoVideo()"/>
-            </label>
-          </div>
-          <div class="card-body p-3">
-            @if (errorVideos()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorVideos() }}</div>
-            }
-            @if (videos().length === 0) {
-              <div class="upload-empty">
-                <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
-                <p class="mb-0">Sin videos. Puedes subir grabaciones de la visita.</p>
-              </div>
-            } @else {
-              @for (v of videos(); track v.id) {
-                <div class="file-row" [class.file-row--playing]="videoActivo()?.id === v.id">
-                  <div class="file-row__icon file-row__icon--video">
-                    <i class="bi bi-play-circle-fill"></i>
-                  </div>
-                  <div class="file-row__info min-w-0">
-                    <p class="file-row__name">{{ v.nombre_archivo }}</p>
-                    <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
-                  </div>
-                  <div class="file-row__actions">
-                    <button class="btn btn-sm"
-                            [class.btn-warning]="videoActivo()?.id === v.id"
-                            [class.btn-outline-secondary]="videoActivo()?.id !== v.id"
-                            (click)="toggleVideo(v)"
-                            [title]="videoActivo()?.id === v.id ? 'Cerrar' : 'Reproducir'">
-                      <i class="bi"
-                         [class.bi-stop-fill]="videoActivo()?.id === v.id"
-                         [class.bi-play-fill]="videoActivo()?.id !== v.id"></i>
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm"
-                            (click)="verArchivo(v)" title="Abrir en nueva pestaña">
-                      <i class="bi bi-box-arrow-up-right"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm"
-                            (click)="eliminarArchivo(v, 'video')" title="Eliminar">
+            @if (!editandoTour()) {
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm"
+                        (click)="iniciarEdicionTour()"
+                        [disabled]="guardandoTour()">
+                  <i class="bi {{ urlTour ? 'bi-pencil' : 'bi-plus-lg' }} me-1"></i>
+                  {{ urlTour ? 'Editar' : 'Agregar' }}
+                </button>
+                @if (urlTour) {
+                  <button class="btn btn-outline-danger btn-sm"
+                          (click)="eliminarTour()"
+                          [disabled]="guardandoTour()"
+                          title="Eliminar tour">
+                    @if (guardandoTour()) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
                       <i class="bi bi-trash3"></i>
-                    </button>
-                  </div>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="card-body p-4">
+            @if (errorTour()) {
+              <div class="alert alert-danger py-2 small mb-3">{{ errorTour() }}</div>
+            }
+
+            @if (editandoTour()) {
+              <!-- ── Modo edición ── -->
+              @if (!hasDraft()) {
+                <div class="alert alert-warning py-2 small mb-3">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Guarda un borrador primero para que el tour quede registrado de forma independiente.
                 </div>
-                @if (videoActivo()?.id === v.id) {
-                  <div class="video-player">
-                    <video controls autoplay class="video-player__el"
-                           [src]="publicUrl(v.url_storage)">
-                      Tu navegador no soporta reproducción de video.
-                    </video>
-                    <button class="btn btn-sm btn-outline-secondary w-100 mt-2"
-                            (click)="toggleVideo(v)">
-                      <i class="bi bi-x me-1"></i>Cerrar reproductor
-                    </button>
+              }
+              <div class="tour-edit-wrap">
+                <div class="input-group input-group-sm mb-2">
+                  <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                  <input type="url" class="form-control"
+                         placeholder="https://my.matterport.com/show/?m=…"
+                         [(ngModel)]="urlTourInput"
+                         [disabled]="guardandoTour()" />
+                </div>
+                <div class="d-flex gap-2 mb-3">
+                  <button class="btn btn-primary btn-sm flex-grow-1"
+                          (click)="guardarTour()"
+                          [disabled]="guardandoTour()">
+                    @if (guardandoTour()) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
+                    } @else {
+                      <i class="bi bi-check-lg me-1"></i>Guardar
+                    }
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm"
+                          (click)="cancelarEdicionTour()"
+                          [disabled]="guardandoTour()">
+                    Cancelar
+                  </button>
+                </div>
+                @if (urlTourPreviewSafe) {
+                  <p class="text-muted small mb-1">Vista previa:</p>
+                  <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                    <iframe [src]="urlTourPreviewSafe"
+                            allowfullscreen
+                            allow="xr-spatial-tracking"
+                            title="Vista previa del tour">
+                    </iframe>
                   </div>
                 }
+              </div>
+
+            } @else {
+              <!-- ── Modo vista ── -->
+              @if (urlTourSafe) {
+                <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                  <iframe [src]="urlTourSafe"
+                          allowfullscreen
+                          allow="xr-spatial-tracking"
+                          title="Tour virtual Matterport">
+                  </iframe>
+                </div>
+              } @else {
+                <div class="upload-empty">
+                  <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
+                  <p class="mb-0">Sin tour registrado. Usa el botón Agregar para vincular un tour Matterport.</p>
+                </div>
               }
             }
           </div>
@@ -376,18 +397,38 @@
                           [(ngModel)]="descripcionProblemas"></textarea>
               </div>
 
-              <!-- Costo estimado -->
+              <!-- Costo estimado (rango opcional) -->
               <div class="mb-3">
                 <label class="form-label small fw-semibold">
-                  <i class="bi bi-cash-coin me-1 text-muted"></i>Costo estimado
-                  <span class="req-mark">*</span>
+                  <i class="bi bi-cash-coin me-1 text-muted"></i>Costo aproximado
+                  <span class="opt-mark">(opcional)</span>
                 </label>
-                <div class="input-group">
-                  <span class="input-group-text fw-semibold">₡</span>
-                  <input type="number" class="form-control"
-                         placeholder="0" min="0" step="1000"
-                         [(ngModel)]="costoEstimado" />
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label small text-muted mb-1">Mínimo</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">₡</span>
+                      <input type="number" class="form-control"
+                             placeholder="0" min="0" step="1000"
+                             [(ngModel)]="costoMin" />
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small text-muted mb-1">Máximo</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text">₡</span>
+                      <input type="number" class="form-control"
+                             placeholder="0" min="0" step="1000"
+                             [(ngModel)]="costoMax" />
+                    </div>
+                  </div>
                 </div>
+                @if (!costoValido) {
+                  <div class="form-text text-danger mt-1">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Ingrese ambos valores y el máximo debe ser ≥ al mínimo.
+                  </div>
+                }
               </div>
 
               <!-- Notas internas -->
@@ -423,11 +464,11 @@
                   Problemas observados
                 </div>
                 <div class="completion-item"
-                     [class.completion-item--done]="costoEstimado !== null && costoEstimado >= 0">
+                     [class.completion-item--done]="costoMin !== null && costoMax !== null && costoValido">
                   <i class="bi"
-                     [class.bi-check-circle-fill]="costoEstimado !== null && costoEstimado >= 0"
-                     [class.bi-circle]="costoEstimado === null || costoEstimado < 0"></i>
-                  Costo estimado
+                     [class.bi-check-circle-fill]="costoMin !== null && costoMax !== null && costoValido"
+                     [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
+                  Costo aproximado <span class="opt-mark">(opcional)</span>
                 </div>
               </div>
 

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
@@ -17,6 +18,7 @@ import { ExpedienteDetalle, ArchivoRow } from '../../models';
 })
 export class FileUnderEstimationComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
+  private sanitizer         = inject(DomSanitizer);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -32,7 +34,9 @@ export class FileUnderEstimationComponent implements OnInit {
   horaVisita          = '';
   descripcionProblema = '';
   notasInternas       = '';
-  costoEstimado: number | null = null;
+  costoMin: number | null = null;
+  costoMax: number | null = null;
+  urlTour  = '';
 
   guardando       = signal(false);
   exitoMsg        = signal('');
@@ -42,16 +46,19 @@ export class FileUnderEstimationComponent implements OnInit {
   errorVisitaMsg  = signal('');
 
   fotos      = signal<ArchivoRow[]>([]);
-  videos     = signal<ArchivoRow[]>([]);
   documentos = signal<ArchivoRow[]>([]);
 
   subiendoFoto      = signal(false);
-  subiendoVideo     = signal(false);
   subiendoDocumento = signal(false);
   errorFotos        = signal('');
-  errorVideos       = signal('');
   errorDocumentos   = signal('');
-  videoActivo       = signal<ArchivoRow | null>(null);
+
+  // Tour CRUD
+  hasDraft      = signal(false);
+  editandoTour  = signal(false);
+  guardandoTour = signal(false);
+  errorTour     = signal('');
+  urlTourInput  = '';
 
   private expedienteId = '';
 
@@ -59,10 +66,24 @@ export class FileUnderEstimationComponent implements OnInit {
     return !!(
       this.fechaVisita &&
       this.horaVisita &&
-      this.descripcionProblema.trim() &&
-      this.costoEstimado !== null &&
-      this.costoEstimado >= 0
+      this.descripcionProblema.trim()
     );
+  }
+
+  get costoValido(): boolean {
+    if (this.costoMin === null && this.costoMax === null) return true;
+    if (this.costoMin === null || this.costoMax === null) return false;
+    return this.costoMin >= 0 && this.costoMax >= this.costoMin;
+  }
+
+  get urlTourSafe(): SafeResourceUrl | null {
+    const url = this.urlTour.trim();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  }
+
+  get urlTourPreviewSafe(): SafeResourceUrl | null {
+    const url = this.urlTourInput.trim();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
   async ngOnInit() {
@@ -83,8 +104,11 @@ export class FileUnderEstimationComponent implements OnInit {
           this.horaVisita  = estimacion.fecha_visita_real.slice(11, 16);
         }
         this.descripcionProblema = estimacion.descripcion_problemas;
-        this.costoEstimado       = estimacion.costo_estimado;
+        this.costoMin            = estimacion.costo_estimado;
+        this.costoMax            = estimacion.costo_estimado_max;
         this.notasInternas       = estimacion.notas_internas;
+        this.urlTour             = estimacion.url_tour ?? '';
+        this.hasDraft.set(true);
       }
     } catch (e: any) {
       console.error('[FileUnderEstimation]', e.message);
@@ -108,8 +132,8 @@ export class FileUnderEstimationComponent implements OnInit {
       this.errorGuardado.set('Los problemas observados son obligatorios.');
       return;
     }
-    if (this.costoEstimado === null || this.costoEstimado < 0) {
-      this.errorGuardado.set('El costo estimado es obligatorio y debe ser mayor o igual a 0.');
+    if (!this.costoValido) {
+      this.errorGuardado.set('Si ingresa un costo, el mínimo y máximo son obligatorios y el máximo debe ser ≥ al mínimo.');
       return;
     }
 
@@ -122,10 +146,13 @@ export class FileUnderEstimationComponent implements OnInit {
         fechaVisita:          this.fechaVisita,
         horaVisita:           this.horaVisita,
         descripcionProblemas: this.descripcionProblema.trim(),
-        costoEstimado:        this.costoEstimado,
+        costoMin:             this.costoMin,
+        costoMax:             this.costoMax,
         notasInternas:        this.notasInternas.trim(),
+        urlTour:              this.urlTour.trim() || null,
       });
       await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
+      this.hasDraft.set(true);
       this.exitoMsg.set('Estimación enviada correctamente.');
     } catch (e: any) {
       console.error('[FileUnderEstimation] guardar:', e.message);
@@ -153,9 +180,12 @@ export class FileUnderEstimationComponent implements OnInit {
         fechaVisita:          this.fechaVisita,
         horaVisita:           this.horaVisita,
         descripcionProblemas: this.descripcionProblema.trim(),
-        costoEstimado:        this.costoEstimado ?? 0,
+        costoMin:             this.costoMin,
+        costoMax:             this.costoMax,
         notasInternas:        this.notasInternas.trim(),
+        urlTour:              this.urlTour.trim() || null,
       });
+      this.hasDraft.set(true);
       this.exitoVisitaMsg.set('Borrador guardado correctamente.');
     } catch (e: any) {
       console.error('[FileUnderEstimation] guardarVisita:', e.message);
@@ -168,16 +198,14 @@ export class FileUnderEstimationComponent implements OnInit {
   // ── Archivos ──────────────────────────────────────────────────────────────
 
   private async cargarArchivos() {
-    const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
+    const { fotos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
     this.fotos.set(fotos);
-    this.videos.set(videos);
     this.documentos.set(documentos);
   }
 
   private async recargar(tipo: TipoArchivo) {
     const data = await this.archivoService.cargarPorTipo(this.expedienteId, tipo);
     if (tipo === 'foto')      this.fotos.set(data);
-    if (tipo === 'video')     this.videos.set(data);
     if (tipo === 'documento') this.documentos.set(data);
   }
 
@@ -197,22 +225,6 @@ export class FileUnderEstimationComponent implements OnInit {
     finally { this.subiendoFoto.set(false); }
   }
 
-  async subirVideo(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    const userId = this.user()?.id;
-    if (!userId) return;
-    this.subiendoVideo.set(true);
-    this.errorVideos.set('');
-    try {
-      await this.archivoService.subir(this.expedienteId, 'video', file, userId);
-      await this.recargar('video');
-    } catch (e: any) { this.errorVideos.set(e.message); }
-    finally { this.subiendoVideo.set(false); }
-  }
-
   async subirDocumento(event: Event) {
     const input = event.target as HTMLInputElement;
     const file  = input.files?.[0];
@@ -230,9 +242,7 @@ export class FileUnderEstimationComponent implements OnInit {
   }
 
   async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
-    const setError = tipo === 'foto'  ? this.errorFotos
-                   : tipo === 'video' ? this.errorVideos
-                   :                    this.errorDocumentos;
+    const setError = tipo === 'foto' ? this.errorFotos : this.errorDocumentos;
     setError.set('');
     try {
       await this.archivoService.eliminar(archivo);
@@ -246,10 +256,6 @@ export class FileUnderEstimationComponent implements OnInit {
 
   verArchivo(archivo: ArchivoRow) {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
-  }
-
-  toggleVideo(video: ArchivoRow) {
-    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
   }
 
   formatTamano(bytes: number): string {
@@ -271,6 +277,51 @@ export class FileUnderEstimationComponent implements OnInit {
     const d = new Date(valor);
     return isNaN(d.getTime()) ? '—'
       : d.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── Tour CRUD ─────────────────────────────────────────────────────────────
+
+  iniciarEdicionTour() {
+    this.urlTourInput = this.urlTour;
+    this.errorTour.set('');
+    this.editandoTour.set(true);
+  }
+
+  cancelarEdicionTour() {
+    this.editandoTour.set(false);
+    this.errorTour.set('');
+  }
+
+  async guardarTour() {
+    const url = this.urlTourInput.trim() || null;
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      if (this.hasDraft()) {
+        await this.estimacionService.actualizarUrlTour(this.expedienteId, url);
+      }
+      this.urlTour = url ?? '';
+      this.editandoTour.set(false);
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
+  }
+
+  async eliminarTour() {
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      if (this.hasDraft()) {
+        await this.estimacionService.actualizarUrlTour(this.expedienteId, null);
+      }
+      this.urlTour = '';
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
   }
 
   volver() { this.router.navigate(['/estimator/files-under-estimation']); }

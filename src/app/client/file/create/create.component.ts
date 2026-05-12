@@ -214,7 +214,7 @@ export class FileCreateComponent implements OnInit {
 
       const { error: perfilError } = await this.auth.client
         .from('perfil')
-        .update({ nombre: pv.nombre, apellido: pv.apellido, telefono: pv.telefono })
+        .update({ nombre: pv.nombre ?? undefined, apellido: pv.apellido ?? undefined, telefono: pv.telefono ?? undefined })
         .eq('id', userId);
       if (perfilError) throw new Error(`Error al actualizar perfil: ${perfilError.message}`);
 
@@ -225,7 +225,7 @@ export class FileCreateComponent implements OnInit {
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
         localizacion: {
-          tipo_inmueble: lv.tipo_inmueble ?? '',
+          tipo_inmueble: (lv.tipo_inmueble ?? 'otro') as import('../../../types/supabase').TipoInmueble,
           direccion:     lv.direccion     ?? '',
           provincia:     lv.provincia     ?? '',
           canton:        lv.canton        ?? '',

@@ -20,6 +20,7 @@ import { BuilderDashboardComponent } from './builder/dashboard/dashboard.compone
 import { OffersReceivedComponent } from './client/offers-received/offers-received.component';
 import { BuilderOfferComponent } from './client/builder-offer/builder-offer.component';
 import { PerfilComponent } from './client/perfil/perfil.component';
+import { MyFileComponent } from './client/file/my-file/my-file.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [guestGuard] },
@@ -27,6 +28,7 @@ export const routes: Routes = [
   { path: 'client/dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'client/file/create', component: FileCreateComponent, canActivate: [authGuard] },
   { path: 'client/file/my-files', component: MyFilesComponent, canActivate: [authGuard] },
+  { path: 'client/file/my-file/:id', component: MyFileComponent, canActivate: [authGuard] },
   { path: 'client/offers-received', component: OffersReceivedComponent, canActivate: [authGuard] },
   { path: 'client/builder-offer/:id', component: BuilderOfferComponent, canActivate: [authGuard] },
   { path: 'client/perfil', component: PerfilComponent, canActivate: [authGuard] },

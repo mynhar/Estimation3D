@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
 import { ArchivoRow, OfertaDetalle, ESTADO_BADGE_OFERTA, ESTADO_LABEL_OFERTA } from '../../models';
@@ -14,6 +15,7 @@ import { ArchivoRow, OfertaDetalle, ESTADO_BADGE_OFERTA, ESTADO_LABEL_OFERTA } f
 export class MyOfferComponent implements OnInit {
   private ofertaService  = inject(OfertaService);
   private archivoService = inject(ArchivoService);
+  private sanitizer      = inject(DomSanitizer);
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
 
@@ -22,6 +24,14 @@ export class MyOfferComponent implements OnInit {
   videos     = signal<ArchivoRow[]>([]);
   cargando   = signal(true);
   errorMsg   = signal('');
+
+  // Archivos del expediente
+  fotosExp      = signal<ArchivoRow[]>([]);
+  documentosExp = signal<ArchivoRow[]>([]);
+  tabMedia      = signal<'tour' | 'fotos' | 'docs'>('tour');
+
+  // Lightbox
+  fotoAmpliada = signal<string | null>(null);
 
   videoActivo = signal<ArchivoRow | null>(null);
 
@@ -33,19 +43,29 @@ export class MyOfferComponent implements OnInit {
     this.ofertaId = id;
 
     try {
-      const [detalle, archivos] = await Promise.all([
+      const [detalle, archivosOferta] = await Promise.all([
         this.ofertaService.getOferta(id),
         this.archivoService.cargarPorOferta(id),
       ]);
       this.detalle.set(detalle);
-      this.documentos.set(archivos.documentos);
-      this.videos.set(archivos.videos);
+      this.documentos.set(archivosOferta.documentos);
+      this.videos.set(archivosOferta.videos);
+
+      // Archivos del expediente — leer desde Storage para evitar RLS de la tabla
+      const archivosExp = await this.archivoService.listarPorExpediente(detalle.expediente_id);
+      this.fotosExp.set(archivosExp.fotos);
+      this.documentosExp.set(archivosExp.documentos);
     } catch (e: any) {
       console.error('[MyOffer]', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  get urlTourSafe(): SafeResourceUrl | null {
+    const url = this.detalle()?.url_tour;
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
   badgeClass(estado: string): string {
@@ -66,6 +86,14 @@ export class MyOfferComponent implements OnInit {
 
   verArchivo(archivo: ArchivoRow) {
     window.open(this.archivoService.publicUrl(archivo.url_storage), '_blank');
+  }
+
+  abrirFoto(archivo: ArchivoRow) {
+    this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
+  }
+
+  cerrarFoto() {
+    this.fotoAmpliada.set(null);
   }
 
   editarOferta() {

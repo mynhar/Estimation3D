@@ -109,7 +109,7 @@ export class OfertaService {
     const { error: updErr } = await this.db
       .from('oferta')
       .update({
-        precio:            form.precio,
+        precio:            form.precio!,
         plazo_semanas_min: form.plazo_semanas_min,
         plazo_semanas_max: form.plazo_semanas_max,
         garantia_anos:     form.garantia_anos ?? null,
@@ -166,7 +166,7 @@ export class OfertaService {
         id, expediente_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos,
         fecha_inicio, descripcion, estado, creado_en,
         expediente:expediente_id (
-          numero,
+          numero, fecha_visita,
           servicio:servicio_id ( nombre_es ),
           localizacion ( direccion, referencia, provincia, canton, distrito )
         )
@@ -176,27 +176,38 @@ export class OfertaService {
 
     if (error) throw new Error(error.message);
 
-    const exp = (data as any).expediente;
-    const loc = Array.isArray(exp?.localizacion) ? exp.localizacion[0] : exp?.localizacion;
+    const exp         = (data as any).expediente;
+    const loc         = Array.isArray(exp?.localizacion) ? exp.localizacion[0] : exp?.localizacion;
+    const expedienteId = (data as any).expediente_id ?? '';
+
+    const { data: est } = await this.db
+      .from('estimacion')
+      .select('fecha_visita_real, descripcion_problemas, url_tour')
+      .eq('expediente_id', expedienteId)
+      .maybeSingle();
 
     return {
-      id:                data.id,
-      expediente_id:     (data as any).expediente_id ?? '',
-      precio:            data.precio,
-      plazo_semanas_min: data.plazo_semanas_min,
-      plazo_semanas_max: data.plazo_semanas_max,
-      garantia_anos:     data.garantia_anos     ?? null,
-      fecha_inicio:      data.fecha_inicio      ?? '',
-      descripcion:       data.descripcion       ?? '',
-      estado:            data.estado,
-      creado_en:         data.creado_en         ?? '',
-      expediente_numero: exp?.numero              ?? '—',
-      servicio_nombre:   exp?.servicio?.nombre_es ?? '—',
-      direccion:         loc?.direccion  ?? '—',
-      referencia:        loc?.referencia ?? '',
-      provincia:         loc?.provincia  ?? '—',
-      canton:            loc?.canton     ?? '—',
-      distrito:          loc?.distrito   ?? '—',
+      id:                    data.id,
+      expediente_id:         expedienteId,
+      precio:                data.precio,
+      plazo_semanas_min:     data.plazo_semanas_min,
+      plazo_semanas_max:     data.plazo_semanas_max,
+      garantia_anos:         data.garantia_anos     ?? null,
+      fecha_inicio:          data.fecha_inicio      ?? '',
+      descripcion:           data.descripcion       ?? '',
+      estado:                data.estado,
+      creado_en:             data.creado_en         ?? '',
+      expediente_numero:     exp?.numero              ?? '—',
+      servicio_nombre:       exp?.servicio?.nombre_es ?? '—',
+      direccion:             loc?.direccion  ?? '—',
+      referencia:            loc?.referencia ?? '',
+      provincia:             loc?.provincia  ?? '—',
+      canton:                loc?.canton     ?? '—',
+      distrito:              loc?.distrito   ?? '—',
+      fecha_visita:          exp?.fecha_visita               ?? '',
+      fecha_visita_real:     est?.fecha_visita_real          ?? '',
+      descripcion_problemas: est?.descripcion_problemas      ?? '',
+      url_tour:              est?.url_tour                   ?? null,
     };
   }
 
@@ -289,7 +300,7 @@ export class OfertaService {
       .insert({
         expediente_id:     expedienteId,
         constructor_id:    constructorId,
-        precio:            form.precio,
+        precio:            form.precio!,
         plazo_semanas_min: form.plazo_semanas_min,
         plazo_semanas_max: form.plazo_semanas_max,
         garantia_anos:     form.garantia_anos ?? null,

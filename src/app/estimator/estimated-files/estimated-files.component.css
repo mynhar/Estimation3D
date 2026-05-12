@@ -188,6 +188,18 @@
   border-radius: 0.4rem;
 }
 
+/* ── Inline confirmation panel ───────────────────────────────────────────── */
+.confirm-panel {
+  background: rgba(220, 53, 69, 0.05);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+.confirm-msg {
+  font-size: 0.8rem; color: #b91c1c;
+  margin-bottom: 0.6rem; line-height: 1.45;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 575px) {
   .page-header { padding: 1rem !important; }

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
@@ -9,17 +10,20 @@ import {
   ExpedienteDetalle,
   EstimacionDetalle,
   ArchivoRow,
+  ESTADO_BADGE_ESTIMADOR,
+  ESTADO_LABEL_ESTIMADOR,
 } from '../../models';
 
 @Component({
   selector: 'app-estimated-file',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [FormsModule],
   templateUrl: './estimated-file.component.html',
   styleUrl:    './estimated-file.component.css',
 })
 export class EstimatedFileComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
+  private sanitizer         = inject(DomSanitizer);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -32,17 +36,23 @@ export class EstimatedFileComponent implements OnInit {
   errorMsg   = signal('');
 
   fotos      = signal<ArchivoRow[]>([]);
-  videos     = signal<ArchivoRow[]>([]);
   documentos = signal<ArchivoRow[]>([]);
 
   subiendoFoto      = signal(false);
-  subiendoVideo     = signal(false);
   subiendoDocumento = signal(false);
   errorFotos        = signal('');
-  errorVideos       = signal('');
   errorDocumentos   = signal('');
 
-  videoActivo = signal<ArchivoRow | null>(null);
+  // Tour CRUD
+  editandoTour  = signal(false);
+  guardandoTour = signal(false);
+  errorTour     = signal('');
+  urlTourInput  = '';
+
+  // Eliminar estimación
+  confirmandoEliminar = signal(false);
+  eliminando          = signal(false);
+  errorEliminar       = signal('');
 
   private expedienteId = '';
   private userId       = '';
@@ -75,16 +85,14 @@ export class EstimatedFileComponent implements OnInit {
   // ── Archivos ──────────────────────────────────────────────────────────────
 
   private async cargarArchivos() {
-    const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
+    const { fotos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
     this.fotos.set(fotos);
-    this.videos.set(videos);
     this.documentos.set(documentos);
   }
 
   private async recargar(tipo: TipoArchivo) {
     const data = await this.archivoService.cargarPorTipo(this.expedienteId, tipo);
     if (tipo === 'foto')      this.fotos.set(data);
-    if (tipo === 'video')     this.videos.set(data);
     if (tipo === 'documento') this.documentos.set(data);
   }
 
@@ -103,21 +111,6 @@ export class EstimatedFileComponent implements OnInit {
     finally { this.subiendoFoto.set(false); }
   }
 
-  async subirVideo(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-
-    this.subiendoVideo.set(true);
-    this.errorVideos.set('');
-    try {
-      await this.archivoService.subir(this.expedienteId, 'video', file, this.userId);
-      await this.recargar('video');
-    } catch (e: any) { this.errorVideos.set(e.message); }
-    finally { this.subiendoVideo.set(false); }
-  }
-
   async subirDocumento(event: Event) {
     const input = event.target as HTMLInputElement;
     const file  = input.files?.[0];
@@ -134,17 +127,73 @@ export class EstimatedFileComponent implements OnInit {
   }
 
   async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
-    const setError = tipo === 'foto'  ? this.errorFotos
-                   : tipo === 'video' ? this.errorVideos
-                   :                    this.errorDocumentos;
+    const setError = tipo === 'foto' ? this.errorFotos : this.errorDocumentos;
     setError.set('');
-    if (tipo === 'video' && this.videoActivo()?.id === archivo.id) {
-      this.videoActivo.set(null);
-    }
     try {
       await this.archivoService.eliminar(archivo);
       await this.recargar(tipo);
     } catch (e: any) { setError.set(e.message); }
+  }
+
+  get urlTourSafe(): SafeResourceUrl | null {
+    const url = this.estimacion()?.url_tour;
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  }
+
+  get urlTourPreviewSafe(): SafeResourceUrl | null {
+    const url = this.urlTourInput.trim();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  }
+
+  // ── Tour CRUD ─────────────────────────────────────────────────────────────
+
+  iniciarEdicionTour() {
+    this.urlTourInput = this.estimacion()?.url_tour ?? '';
+    this.errorTour.set('');
+    this.editandoTour.set(true);
+  }
+
+  cancelarEdicionTour() {
+    this.editandoTour.set(false);
+    this.errorTour.set('');
+  }
+
+  async guardarTour() {
+    const url = this.urlTourInput.trim() || null;
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      await this.estimacionService.actualizarUrlTour(this.expedienteId, url);
+      const est = this.estimacion();
+      if (est) this.estimacion.set({ ...est, url_tour: url });
+      this.editandoTour.set(false);
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
+  }
+
+  async eliminarTour() {
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      await this.estimacionService.actualizarUrlTour(this.expedienteId, null);
+      const est = this.estimacion();
+      if (est) this.estimacion.set({ ...est, url_tour: null });
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
+  }
+
+  badgeClass(estado: string | undefined): string {
+    return ESTADO_BADGE_ESTIMADOR[estado ?? ''] ?? 'bg-light text-dark';
+  }
+
+  estadoLabel(estado: string | undefined): string {
+    return ESTADO_LABEL_ESTIMADOR[estado ?? ''] ?? estado ?? '—';
   }
 
   publicUrl(storagePath: string): string {
@@ -155,8 +204,9 @@ export class EstimatedFileComponent implements OnInit {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
   }
 
-  toggleVideo(video: ArchivoRow) {
-    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
+  formatCosto(valor: number | null): string {
+    if (valor === null) return '—';
+    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
   }
 
   formatTamano(bytes: number): string {
@@ -241,6 +291,23 @@ export class EstimatedFileComponent implements OnInit {
     if (!win) return;
     win.document.write(html);
     win.document.close();
+  }
+
+  async eliminarEstimacion() {
+    const estado = this.detalle()?.estado;
+    if (estado === 'adjudicado' || estado === 'contratado') return;
+    this.errorEliminar.set('');
+    this.eliminando.set(true);
+    try {
+      await this.estimacionService.eliminar(this.expedienteId);
+      await this.expedienteService.actualizarEstado(this.expedienteId, 'nuevo');
+      this.router.navigate(['/estimator/estimated-files']);
+    } catch (e: any) {
+      console.error('[EstimatedFile] eliminar:', e.message);
+      this.errorEliminar.set(e.message);
+    } finally {
+      this.eliminando.set(false);
+    }
   }
 
   volver() { this.router.navigate(['/estimator/estimated-files']); }

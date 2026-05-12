@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
@@ -17,6 +18,7 @@ import { ExpedienteParaOferta, ArchivoRow, OfertaForm } from '../../models';
 })
 export class MakeOfferComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
+  private sanitizer         = inject(DomSanitizer);
   private expedienteService = inject(ExpedienteService);
   private archivoService    = inject(ArchivoService);
   private ofertaService     = inject(OfertaService);
@@ -30,7 +32,6 @@ export class MakeOfferComponent implements OnInit {
 
   // Archivos del expediente (solo lectura)
   fotos      = signal<ArchivoRow[]>([]);
-  videos     = signal<ArchivoRow[]>([]);
   documentos = signal<ArchivoRow[]>([]);
 
   // Formulario de oferta
@@ -56,10 +57,20 @@ export class MakeOfferComponent implements OnInit {
   exitoMsg   = signal('');
   errorEnvio = signal('');
 
-  videoActivo  = signal<ArchivoRow | null>(null);
   fotoAmpliada = signal<string | null>(null);
+  tabMedia     = signal<'fotos' | 'tour' | 'docs'>('tour');
 
   private expedienteId = '';
+
+  get completedSteps(): number {
+    let n = 0;
+    if (this.precio && this.precio > 0) n++;
+    if (this.plazoMin && this.plazoMin > 0 && this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0)) n++;
+    if (this.fechaInicio) n++;
+    if (this.descripcion.trim()) n++;
+    if (this.documentoActual() || this.documentoOferta()) n++;
+    return n;
+  }
 
   get formularioCompleto(): boolean {
     const esNueva = !this.ofertaId();
@@ -83,12 +94,11 @@ export class MakeOfferComponent implements OnInit {
     try {
       const [detalle, archivosExpediente, ofertaExistente] = await Promise.all([
         this.expedienteService.getExpedienteParaOferta(id),
-        this.archivoService.cargarTodos(id),
+        this.archivoService.listarPorExpediente(id),
         userId ? this.ofertaService.getOfertaPorExpediente(id, userId) : Promise.resolve(null),
       ]);
       this.detalle.set(detalle);
       this.fotos.set(archivosExpediente.fotos);
-      this.videos.set(archivosExpediente.videos);
       this.documentos.set(archivosExpediente.documentos);
 
       if (ofertaExistente) {
@@ -210,8 +220,9 @@ export class MakeOfferComponent implements OnInit {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
   }
 
-  toggleVideo(video: ArchivoRow) {
-    this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
+  get urlTourSafe(): SafeResourceUrl | null {
+    const url = this.detalle()?.url_tour;
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
   abrirFoto(archivo: ArchivoRow) {
@@ -234,11 +245,6 @@ export class MakeOfferComponent implements OnInit {
     if (!valor || !valor.includes('T')) return '—';
     const time = valor.split('T')[1]?.slice(0, 5);
     return time ?? '—';
-  }
-
-  formatCosto(valor: number | null): string {
-    if (valor === null) return '—';
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
   }
 
   formatTamano(bytes: number): string {

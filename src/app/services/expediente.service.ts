@@ -8,7 +8,9 @@ import {
   ExpedienteDetalle,
   ExpedienteDisponible,
   ExpedienteParaOferta,
+  ExpedienteVistaCliente,
 } from '../models';
+import { EstadoExpediente, TipoInmueble } from '../types/supabase';
 
 @Injectable({ providedIn: 'root' })
 export class ExpedienteService {
@@ -61,6 +63,63 @@ export class ExpedienteService {
       provincia:       loc?.provincia  ?? '—',
       canton:          loc?.canton     ?? '—',
       distrito:        loc?.distrito   ?? '—',
+    };
+  }
+
+  async getVistaParaCliente(expedienteId: string): Promise<ExpedienteVistaCliente> {
+    const { data: exp, error: expError } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, fecha_visita, creado_en, servicio_id, cliente_id, estimador_id')
+      .eq('id', expedienteId)
+      .single();
+
+    if (expError) throw new Error(expError.message);
+    if (!exp)     throw new Error('Expediente no encontrado.');
+
+    const expAny = exp as any;
+
+    const [servicioRes, locRes, clienteRes, estimacionRes] = await Promise.all([
+      this.db.from('servicio').select('nombre_es').eq('id', expAny.servicio_id).single(),
+      this.db.from('localizacion')
+        .select('direccion, referencia, provincia, canton, distrito')
+        .eq('expediente_id', expedienteId).single(),
+      this.db.from('perfil').select('nombre, apellido').eq('id', expAny.cliente_id).single(),
+      this.db.from('estimacion')
+        .select('fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, url_tour')
+        .eq('expediente_id', expedienteId).maybeSingle(),
+    ]);
+
+    let estimadorNombre: string | null = null;
+    if (expAny.estimador_id) {
+      const { data: est } = await this.db
+        .from('perfil').select('nombre, apellido').eq('id', expAny.estimador_id).single();
+      if (est) estimadorNombre = `${est.nombre} ${est.apellido}`;
+    }
+
+    const servicio   = servicioRes.data;
+    const loc        = locRes.data;
+    const cliente    = clienteRes.data;
+    const estimacion = estimacionRes.data;
+
+    return {
+      id:              expedienteId,
+      numero:          expAny.numero,
+      estado:          expAny.estado   ?? '',
+      fecha_visita:    expAny.fecha_visita ?? '',
+      creado_en:       expAny.creado_en    ?? '',
+      servicio_nombre: servicio?.nombre_es ?? '—',
+      cliente_nombre:  cliente ? `${cliente.nombre} ${cliente.apellido}` : '—',
+      direccion:       loc?.direccion  ?? '—',
+      referencia:      loc?.referencia ?? '',
+      provincia:       loc?.provincia  ?? '—',
+      canton:          loc?.canton     ?? '—',
+      distrito:        loc?.distrito   ?? '—',
+      estimador_nombre:     estimadorNombre,
+      fecha_visita_real:    estimacion?.fecha_visita_real     ?? null,
+      descripcion_problemas: estimacion?.descripcion_problemas ?? null,
+      costo_estimado:        estimacion?.costo_estimado        ?? null,
+      costo_estimado_max:    estimacion?.costo_estimado_max    ?? null,
+      url_tour:              (estimacion as any)?.url_tour     ?? null,
     };
   }
 
@@ -127,7 +186,7 @@ export class ExpedienteService {
     fechaVisita: string;
     descripcion?: string | null;
     localizacion: {
-      tipo_inmueble: string;
+      tipo_inmueble: TipoInmueble;
       direccion: string;
       provincia: string;
       canton: string;
@@ -164,8 +223,8 @@ export class ExpedienteService {
   // ── Módulo estimador — listas ─────────────────────────────────────────────
 
   async getExpedienteRows(options: {
-    estado?: string;
-    estados?: string[];
+    estado?: EstadoExpediente;
+    estados?: EstadoExpediente[];
     estimadorId?: string;
   }): Promise<ExpedienteRow[]> {
     let query = this.db
@@ -222,7 +281,7 @@ export class ExpedienteService {
   async getDetalle(id: string): Promise<ExpedienteDetalle> {
     const { data: exp, error: expError } = await this.db
       .from('expediente')
-      .select('numero, fecha_visita, descripcion, cliente_id, servicio_id, estimador_id')
+      .select('numero, estado, fecha_visita, descripcion, cliente_id, servicio_id, estimador_id')
       .eq('id', id)
       .maybeSingle();
 
@@ -245,6 +304,7 @@ export class ExpedienteService {
 
     return {
       numero:           exp.numero,
+      estado:           exp.estado,
       fecha_visita:     exp.fecha_visita,
       descripcion:      exp.descripcion ?? '',
       servicio_nombre:  servicioRes.data?.nombre_es ?? '—',
@@ -284,7 +344,7 @@ export class ExpedienteService {
         .select('expediente_id, direccion, provincia, canton, distrito')
         .in('expediente_id', expedienteIds),
       this.db.from('estimacion')
-        .select('expediente_id, costo_estimado')
+        .select('expediente_id, costo_estimado, costo_estimado_max')
         .in('expediente_id', expedienteIds),
       this.db.rpc('contar_ofertas_expedientes', { p_ids: expedienteIds }),
     ]);
@@ -309,8 +369,9 @@ export class ExpedienteService {
         provincia:       loc?.provincia ?? '—',
         canton:          loc?.canton    ?? '—',
         distrito:        loc?.distrito  ?? '—',
-        costo_estimado:  estimacion?.costo_estimado ?? null,
-        total_ofertas:   total,
+        costo_estimado:     estimacion?.costo_estimado     ?? null,
+        costo_estimado_max: estimacion?.costo_estimado_max ?? null,
+        total_ofertas:      total,
       } as ExpedienteDisponible;
     }).filter((r) =>
       r.estado === 'estimado' ||
@@ -334,7 +395,7 @@ export class ExpedienteService {
         .select('direccion, referencia, provincia, canton, distrito')
         .eq('expediente_id', id).single(),
       this.db.from('estimacion')
-        .select('descripcion_problemas, costo_estimado, fecha_visita_real')
+        .select('descripcion_problemas, costo_estimado, costo_estimado_max, fecha_visita_real, url_tour')
         .eq('expediente_id', id).maybeSingle(),
       this.db.from('oferta')
         .select('id', { count: 'exact', head: true })
@@ -358,7 +419,9 @@ export class ExpedienteService {
       distrito:             loc?.distrito   ?? '—',
       descripcion_problemas: estimacion?.descripcion_problemas ?? '',
       costo_estimado:        estimacion?.costo_estimado        ?? null,
+      costo_estimado_max:    estimacion?.costo_estimado_max    ?? null,
       fecha_visita_real:     estimacion?.fecha_visita_real     ?? '',
+      url_tour:              estimacion?.url_tour              ?? null,
       total_ofertas:         ofertasRes.count                  ?? 0,
     };
   }
@@ -373,7 +436,7 @@ export class ExpedienteService {
     if (error) throw new Error(error.message);
   }
 
-  async actualizarEstado(expedienteId: string, estado: string): Promise<void> {
+  async actualizarEstado(expedienteId: string, estado: EstadoExpediente): Promise<void> {
     const { error } = await this.db
       .from('expediente')
       .update({ estado })

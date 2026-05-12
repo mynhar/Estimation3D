@@ -6,7 +6,7 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 interface PerfilRow {
   nombre:    string;
   apellido:  string;
-  telefono:  string;
+  telefono:  string | null;
   rol:       string;
   avatar_url: string | null;
   proveedor: string | null;

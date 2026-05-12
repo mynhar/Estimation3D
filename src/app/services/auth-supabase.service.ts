@@ -3,21 +3,22 @@ import { Router } from '@angular/router';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject } from 'rxjs';
+import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthSupabaseService {
-  private supabase: SupabaseClient;
+  private supabase: SupabaseClient<Database>;
   private userSubject = new BehaviorSubject<User | null>(null);
   private initializedSubject = new BehaviorSubject<boolean>(false);
   user$ = this.userSubject.asObservable();
   initialized$ = this.initializedSubject.asObservable();
 
-  get client(): SupabaseClient { return this.supabase; }
+  get client(): SupabaseClient<Database> { return this.supabase; }
 
   constructor(private router: Router) {
-    this.supabase = createClient(
+    this.supabase = createClient<Database>(
       environment.supabase.url,
       environment.supabase.anonKey,
       {
@@ -124,11 +125,11 @@ export class AuthSupabaseService {
     // Si ya existe y está completo, el trigger funcionó — no hacer nada
     if (existente?.perfil_completo === true) return;
 
-    const campos = {
+    const campos: TablesUpdate<'perfil'> = {
       nombre:           perfil.nombre,
       apellido:         perfil.apellido,
       telefono:         perfil.telefono,
-      rol:              'cliente',
+      rol:              'cliente' as RolUsuario,
       perfil_completo:  true,
     };
 
@@ -190,7 +191,7 @@ export class AuthSupabaseService {
 
     if (existente?.perfil_completo === true) return; // ya está completo
 
-    const campos: Record<string, unknown> = {
+    const campos: TablesUpdate<'perfil'> = {
       avatar_url: avatarUrl || null,
     };
 

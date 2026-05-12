@@ -12,7 +12,10 @@
       "PowerShell($f = \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\files-to-be-estimated\\\\files-to-be-estimated.component.ts\"; \\(Get-Content $f -Raw\\) | Set-Content $f -NoNewline -Encoding utf8)",
       "Bash(echo \"EXIT:$?\")",
       "Bash(npx supabase *)",
-      "Bash(supabase status *)"
+      "Bash(supabase status *)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\client\" -Recurse -File)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

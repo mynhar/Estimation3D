@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe, TitleCasePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
@@ -25,6 +26,7 @@ import {
 })
 export class BuilderOfferComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
+  private sanitizer         = inject(DomSanitizer);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -183,6 +185,13 @@ export class BuilderOfferComponent implements OnInit {
 
   verDocumento(archivo: ArchivoRow) {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
+  }
+
+  // ── Tour virtual ──────────────────────────────────────────────────────────
+
+  get urlTourSafe(): SafeResourceUrl | null {
+    const url = this.estimacion()?.url_tour;
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
   // ── Formatters ────────────────────────────────────────────────────────────

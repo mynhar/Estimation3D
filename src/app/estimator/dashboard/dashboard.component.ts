@@ -52,7 +52,7 @@ export class EstimatorDashboardComponent implements OnInit {
   );
 
   postEstimacion = computed(() =>
-    this.expedientes().filter(e => ESTADOS_ESTIMADO.includes(e.estado ?? ''))
+    this.expedientes().filter(e => e.estado != null && ESTADOS_ESTIMADO.includes(e.estado as import('../../types/supabase').EstadoExpediente))
   );
 
   enMercado = computed(() =>
@@ -128,7 +128,7 @@ export class EstimatorDashboardComponent implements OnInit {
     try {
       const [allMine, nuevos, estimacionesRes] = await Promise.all([
         this.expedienteService.getExpedienteRows({
-          estados:     ['en_estimacion', ...ESTADOS_ESTIMADO],
+          estados:     (['en_estimacion', ...ESTADOS_ESTIMADO] as import('../../types/supabase').EstadoExpediente[]),
           estimadorId: userId,
         }),
         this.expedienteService.getExpedienteRows({ estado: 'nuevo' }),
