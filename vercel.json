@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/estimation3d-a18-v01/browser",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
