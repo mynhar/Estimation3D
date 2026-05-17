@@ -1,0 +1,202 @@
+<div class="container-fluid py-4">
+
+  <!-- Encabezado -->
+  <div class="d-flex align-items-center mb-3">
+    <i class="bi bi-people-fill fs-4 text-danger me-2"></i>
+    <h4 class="mb-0">Usuarios</h4>
+    <span class="badge bg-secondary ms-2">
+      {{ usuariosFiltrados().length }}
+      <ng-container *ngIf="hayFiltros()"> / {{ totalUsuarios }}</ng-container>
+    </span>
+    <a routerLink="/admin/user/create" class="btn btn-danger btn-sm ms-auto">
+      <i class="bi bi-person-plus me-1"></i>Crear usuario
+    </a>
+  </div>
+
+  <!-- Cargando -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-danger" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !cargando" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+  </div>
+
+  <ng-container *ngIf="!cargando && !error">
+
+    <!-- ── Filtros ── -->
+    <div class="card border-0 shadow-sm mb-3 p-3">
+
+      <!-- Búsqueda de texto -->
+      <div class="mb-3">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 ps-0"
+                 placeholder="Buscar por nombre, apellido o email…"
+                 [value]="busqueda()"
+                 (input)="setBusqueda($event)">
+          <button *ngIf="busqueda()" class="btn btn-outline-secondary"
+                  type="button" (click)="busqueda.set('')">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="row g-2 align-items-center">
+
+        <!-- Filtro Rol -->
+        <div class="col-auto">
+          <span class="text-muted small me-1">Rol</span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button *ngFor="let r of roles" type="button"
+                    class="btn"
+                    [class.btn-danger]="filtroRol() === r && r !== 'todos'"
+                    [class.btn-dark]="filtroRol() === r && r === 'todos'"
+                    [class.btn-outline-secondary]="filtroRol() !== r"
+                    (click)="filtroRol.set(r)">
+              {{ r === 'todos' ? 'Todos' : r }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtro Proveedor -->
+        <div class="col-auto">
+          <span class="text-muted small me-1">Proveedor</span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button *ngFor="let p of proveedores" type="button"
+                    class="btn"
+                    [class.btn-dark]="filtroProveedor() === p"
+                    [class.btn-outline-secondary]="filtroProveedor() !== p"
+                    (click)="filtroProveedor.set(p)">
+              <i *ngIf="p === 'google'" class="bi bi-google me-1"></i>
+              <i *ngIf="p === 'email'"  class="bi bi-envelope-fill me-1"></i>
+              {{ p === 'todos' ? 'Todos' : p }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtro Activo -->
+        <div class="col-auto">
+          <span class="text-muted small me-1">Estado</span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button *ngFor="let a of estadosActivo" type="button"
+                    class="btn"
+                    [class.btn-success]="filtroActivo() === a && a === 'activo'"
+                    [class.btn-danger]="filtroActivo() === a && a === 'inactivo'"
+                    [class.btn-dark]="filtroActivo() === a && a === 'todos'"
+                    [class.btn-outline-secondary]="filtroActivo() !== a"
+                    (click)="filtroActivo.set(a)">
+              {{ a === 'todos' ? 'Todos' : a === 'activo' ? 'Activo' : 'Inactivo' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Limpiar -->
+        <div class="col-auto ms-auto">
+          <button *ngIf="hayFiltros()" class="btn btn-sm btn-link text-danger p-0"
+                  (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Tabla ── -->
+    <div class="card shadow-sm border-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th style="width:48px"></th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Proveedor</th>
+              <th class="text-center">Activo</th>
+              <th style="width:56px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuariosFiltrados()">
+
+              <!-- Avatar -->
+              <td>
+                <ng-container *ngIf="u.avatar_url; else initiales">
+                  <img [src]="u.avatar_url" alt="avatar"
+                       class="avatar-img rounded-circle"
+                       width="36" height="36">
+                </ng-container>
+                <ng-template #initiales>
+                  <div class="avatar-fallback rounded-circle d-flex align-items-center
+                              justify-content-center fw-semibold"
+                       style="width:36px;height:36px;font-size:13px;">
+                    {{ avatarFallback(u) }}
+                  </div>
+                </ng-template>
+              </td>
+
+              <td>{{ u.nombre }}</td>
+              <td>{{ u.apellido }}</td>
+              <td>{{ u.telefono ?? '—' }}</td>
+              <td class="text-truncate" style="max-width:200px;">{{ u.email ?? '—' }}</td>
+
+              <!-- Rol -->
+              <td>
+                <span class="badge rounded-pill" [class]="rolClass(u.rol)">
+                  {{ u.rol }}
+                </span>
+              </td>
+
+              <!-- Proveedor -->
+              <td>
+                <span class="d-flex align-items-center gap-1">
+                  <i class="bi" [class]="proveedorIcon(u.proveedor)"></i>
+                  {{ u.proveedor }}
+                </span>
+              </td>
+
+              <!-- Activo -->
+              <td class="text-center">
+                <i class="bi"
+                   [class]="u.activo ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'">
+                </i>
+              </td>
+
+              <!-- Acciones -->
+              <td class="text-center">
+                <a [routerLink]="['/admin/user/edit', u.id]"
+                   class="btn btn-sm btn-outline-secondary" title="Editar usuario">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+              </td>
+
+            </tr>
+
+            <!-- Sin resultados -->
+            <tr *ngIf="usuariosFiltrados().length === 0">
+              <td colspan="9" class="text-center text-muted py-4">
+                <ng-container *ngIf="hayFiltros(); else sinDatos">
+                  <i class="bi bi-funnel me-1"></i>
+                  Ningún usuario coincide con los filtros aplicados.
+                </ng-container>
+                <ng-template #sinDatos>
+                  No hay usuarios registrados.
+                </ng-template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

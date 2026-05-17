@@ -33,6 +33,9 @@ const ROL_RING: Record<string, string> = {
   administrador: '#dc3545',
 };
 
+const FALLBACK = 'assets/avatar-fallback.jpg';
+const BUCKET   = 'archivos';
+
 @Component({
   selector: 'app-perfil',
   standalone: true,
@@ -45,18 +48,18 @@ export class PerfilComponent implements OnInit {
 
   user = toSignal(this.auth.user$);
 
-  perfil    = signal<PerfilRow | null>(null);
-  cargando  = signal(true);
-  guardando = signal(false);
-  exitoMsg  = signal('');
-  errorMsg  = signal('');
+  perfil          = signal<PerfilRow | null>(null);
+  cargando        = signal(true);
+  guardando       = signal(false);
+  subiendoAvatar  = signal(false);
+  previewUrl      = signal<string | null>(null);
+  exitoMsg        = signal('');
+  errorMsg        = signal('');
 
-  // Campos como signals para detectar cambios
   nombre   = signal('');
   apellido = signal('');
   telefono = signal('');
 
-  // Habilitado solo cuando hay cambios respecto a los datos guardados
   hasCambios = computed(() => {
     const p = this.perfil();
     if (!p) return false;
@@ -64,6 +67,17 @@ export class PerfilComponent implements OnInit {
         || this.apellido() !== (p.apellido ?? '')
         || this.telefono() !== (p.telefono ?? '');
   });
+
+  get esProveedorEmail(): boolean {
+    return this.perfil()?.proveedor === 'email';
+  }
+
+  get avatarSrc(): string {
+    return this.previewUrl()
+        ?? this.perfil()?.avatar_url
+        ?? this.user()?.user_metadata?.['avatar_url']
+        ?? FALLBACK;
+  }
 
   async ngOnInit() {
     const userId = this.user()?.id;
@@ -86,6 +100,63 @@ export class PerfilComponent implements OnInit {
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  async onAvatarChange(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.errorMsg.set('La imagen no debe superar 2 MB.');
+      return;
+    }
+
+    const userId = this.user()?.id;
+    if (!userId) return;
+
+    // Vista previa inmediata
+    this.previewUrl.set(URL.createObjectURL(file));
+    this.subiendoAvatar.set(true);
+    this.exitoMsg.set('');
+    this.errorMsg.set('');
+
+    try {
+      const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const path = `avatares/${userId}.${ext}`;
+
+      const { error: uploadError } = await this.auth.client.storage
+        .from(BUCKET)
+        .upload(path, file, { contentType: file.type, upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const publicUrl = this.auth.client.storage
+        .from(BUCKET)
+        .getPublicUrl(path).data.publicUrl;
+
+      // Añadir timestamp para evitar caché del navegador entre subidas
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+
+      // Guardar URL con cache-buster en DB para que el refresh también funcione
+      const { error: updateError } = await this.auth.client
+        .from('perfil')
+        .update({ avatar_url: freshUrl })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+
+      this.perfil.update(p => p ? { ...p, avatar_url: freshUrl } : p);
+      this.previewUrl.set(null);
+      this.auth.notificarEdicionAvatar(freshUrl);
+
+      this.exitoMsg.set('Foto de perfil actualizada.');
+      setTimeout(() => this.exitoMsg.set(''), 4000);
+    } catch (e: any) {
+      this.previewUrl.set(null);
+      this.errorMsg.set(e.message ?? 'Error al subir la imagen.');
+    } finally {
+      this.subiendoAvatar.set(false);
     }
   }
 
@@ -116,11 +187,11 @@ export class PerfilComponent implements OnInit {
               telefono: this.telefono().trim() }
           : p
       );
-      // Sincronizar signals con los valores guardados (sin trim visual)
       this.nombre.set(this.nombre().trim());
       this.apellido.set(this.apellido().trim());
       this.telefono.set(this.telefono().trim());
 
+      this.auth.notificarEdicionPerfil(this.nombre().trim(), this.apellido().trim());
       this.exitoMsg.set('Perfil actualizado correctamente.');
       setTimeout(() => this.exitoMsg.set(''), 4000);
     } catch (e: any) {
@@ -143,10 +214,6 @@ export class PerfilComponent implements OnInit {
   rolLabel(rol: string): string { return ROL_LABEL[rol] ?? rol; }
   rolBadge(rol: string): string { return ROL_BADGE[rol] ?? 'bg-secondary'; }
   rolRing(rol: string):  string { return ROL_RING[rol]  ?? '#adb5bd'; }
-
-  get avatarUrl(): string {
-    return this.user()?.user_metadata?.['avatar_url'] || 'assets/avatar-fallback.jpg';
-  }
 
   get displayName(): string {
     const p = this.perfil();

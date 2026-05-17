@@ -31,13 +31,41 @@
             <!-- Avatar con anillo de color por rol -->
             <div class="avatar-wrap mx-auto mb-3"
                  [style.--ring-color]="perfil() ? rolRing(perfil()!.rol) : '#adb5bd'">
-              <img
-                [src]="avatarUrl"
-                alt="Avatar de {{ displayName }}"
-                class="avatar-img rounded-circle"
-                referrerpolicy="no-referrer"
-                (error)="$any($event.target).src='assets/avatar-fallback.jpg'"
-              />
+
+              <!-- Email: clicable para subir foto -->
+              @if (esProveedorEmail) {
+                <label class="avatar-label d-block position-relative" [class.uploading]="subiendoAvatar()">
+                  <img
+                    [src]="avatarSrc"
+                    alt="Avatar de {{ displayName }}"
+                    class="avatar-img rounded-circle"
+                    (error)="$any($event.target).src='assets/avatar-fallback.jpg'"
+                  />
+                  <!-- Overlay cámara -->
+                  <span class="avatar-camera-overlay rounded-circle d-flex flex-column align-items-center justify-content-center">
+                    @if (subiendoAvatar()) {
+                      <span class="spinner-border spinner-border-sm text-white" role="status"></span>
+                    } @else {
+                      <i class="bi bi-camera-fill text-white fs-5"></i>
+                      <span class="text-white" style="font-size:0.6rem;margin-top:2px">Cambiar</span>
+                    }
+                  </span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp"
+                         class="d-none" (change)="onAvatarChange($event)"
+                         [disabled]="subiendoAvatar()">
+                </label>
+
+              <!-- Google: solo muestra el avatar -->
+              } @else {
+                <img
+                  [src]="avatarSrc"
+                  alt="Avatar de {{ displayName }}"
+                  class="avatar-img rounded-circle"
+                  referrerpolicy="no-referrer"
+                  (error)="$any($event.target).src='assets/avatar-fallback.jpg'"
+                />
+              }
+
             </div>
 
             <!-- Nombre -->

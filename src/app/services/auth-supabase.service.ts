@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
 
 @Injectable({
@@ -12,8 +12,21 @@ export class AuthSupabaseService {
   private supabase: SupabaseClient<Database>;
   private userSubject = new BehaviorSubject<User | null>(null);
   private initializedSubject = new BehaviorSubject<boolean>(false);
-  user$ = this.userSubject.asObservable();
-  initialized$ = this.initializedSubject.asObservable();
+  private perfilEditadoSubject  = new Subject<{ nombre: string; apellido: string }>();
+  private avatarActualizadoSubject = new Subject<string>();
+
+  user$               = this.userSubject.asObservable();
+  initialized$        = this.initializedSubject.asObservable();
+  perfilEditado$      = this.perfilEditadoSubject.asObservable();
+  avatarActualizado$  = this.avatarActualizadoSubject.asObservable();
+
+  notificarEdicionPerfil(nombre: string, apellido: string): void {
+    this.perfilEditadoSubject.next({ nombre, apellido });
+  }
+
+  notificarEdicionAvatar(url: string): void {
+    this.avatarActualizadoSubject.next(url);
+  }
 
   get client(): SupabaseClient<Database> { return this.supabase; }
 
@@ -158,8 +171,9 @@ export class AuthSupabaseService {
     const { data } = await this.supabase
       .from('perfil').select('rol').eq('id', user.id).single();
     const rol = data?.rol;
-    if (rol === 'constructor') return '/builder/dashboard';
-    if (rol === 'estimador')   return '/estimator/dashboard';
+    if (rol === 'administrador') return '/admin/dashboard';
+    if (rol === 'constructor')   return '/builder/dashboard';
+    if (rol === 'estimador')     return '/estimator/dashboard';
     return '/client/dashboard';
   }
 

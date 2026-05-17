@@ -11,7 +11,15 @@ import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-f
 import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
 import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
 import { EstimatorDashboardComponent } from './estimator/dashboard/dashboard.component';
-import { authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.guard';
+import { adminGuard, authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.guard';
+import { AdminDashboardComponent } from './admin/dashboard/dashboard.component';
+import { AdminFileComponent } from './admin/file/file.component';
+import { AdminOfferComponent } from './admin/offer/offer.component';
+import { AdminContractComponent } from './admin/contract/contract.component';
+import { AdminServiceTypesComponent } from './admin/service-types/service-types.component';
+import { AdminUserComponent } from './admin/user/user.component';
+import { AdminUserCreateComponent } from './admin/user/create/create.component';
+import { AdminUserEditComponent } from './admin/user/edit/edit.component';
 import { AvailableFilesComponent } from './builder/available-files/available-files.component';
 import { MakeOfferComponent } from './builder/make-offer/make-offer.component';
 import { MyOffersComponent } from './builder/my-offers/my-offers.component';
@@ -45,6 +53,15 @@ export const routes: Routes = [
   { path: 'builder/make-offer/:id', component: MakeOfferComponent, canActivate: [constructorGuard] },
   { path: 'builder/my-offers', component: MyOffersComponent, canActivate: [constructorGuard] },
   { path: 'builder/my-offer/:id', component: MyOfferComponent, canActivate: [constructorGuard] },
+
+  { path: 'admin/dashboard',    component: AdminDashboardComponent,    canActivate: [adminGuard] },
+  { path: 'admin/file',         component: AdminFileComponent,         canActivate: [adminGuard] },
+  { path: 'admin/offer',        component: AdminOfferComponent,        canActivate: [adminGuard] },
+  { path: 'admin/contract',     component: AdminContractComponent,     canActivate: [adminGuard] },
+  { path: 'admin/service-type', component: AdminServiceTypesComponent, canActivate: [adminGuard] },
+  { path: 'admin/user',         component: AdminUserComponent,         canActivate: [adminGuard] },
+  { path: 'admin/user/create',  component: AdminUserCreateComponent,   canActivate: [adminGuard] },
+  { path: 'admin/user/edit/:id', component: AdminUserEditComponent,    canActivate: [adminGuard] },
 
   { path: '**', redirectTo: '' },
 ];

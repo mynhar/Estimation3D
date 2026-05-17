@@ -10,7 +10,8 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto align-items-center">
 
-        <!-- Menú Cliente -->
+        <!-- Menú Cliente (solo rol 'cliente') -->
+        @if (esCliente()) {
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
@@ -44,8 +45,9 @@
             </li>
           </ul>
         </li>
+        }
 
-        <!-- Menú Constructor (solo constructor / administrador) -->
+        <!-- Menú Constructor (solo rol 'constructor') -->
         @if (esConstructor()) {
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button"
@@ -76,7 +78,7 @@
         </li>
         }
 
-        <!-- Menú Estimador (solo estimador / administrador) -->
+        <!-- Menú Estimador (solo rol 'estimador') -->
         @if (esEstimador()) {
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" role="button"
@@ -113,6 +115,56 @@
         </li>
         }
 
+        <!-- Menú Administrador (solo rol 'administrador') -->
+        @if (esAdministrador()) {
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-shield-lock me-1"></i>Administrador
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" routerLink="/admin/dashboard"
+                 routerLinkActive="active-link">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" routerLink="/admin/file"
+                 routerLinkActive="active-link">
+                <i class="bi bi-folder2-open me-2"></i>Expedientes
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/admin/offer"
+                 routerLinkActive="active-link">
+                <i class="bi bi-tags me-2"></i>Ofertas
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/admin/contract"
+                 routerLinkActive="active-link">
+                <i class="bi bi-file-earmark-text me-2"></i>Contratos
+              </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" routerLink="/admin/service-type"
+                 routerLinkActive="active-link">
+                <i class="bi bi-grid me-2"></i>Tipos de servicio
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" routerLink="/admin/user"
+                 routerLinkActive="active-link">
+                <i class="bi bi-people me-2"></i>Usuarios
+              </a>
+            </li>
+          </ul>
+        </li>
+        }
+
       </ul>
 
       <!-- Menú de perfil (derecha) -->
@@ -120,8 +172,8 @@
         <li class="nav-item dropdown">
           <a class="nav-link p-0" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
-            <img [src]="user()?.user_metadata?.['avatar_url'] || 'assets/avatar-fallback.jpg'"
-                 [alt]="user()?.user_metadata?.['full_name']"
+            <img [src]="avatarPerfil() || 'assets/avatar-fallback.jpg'"
+                 [alt]="nombrePerfil() || user()?.email"
                  class="rounded-circle border" width="34" height="34"
                  referrerpolicy="no-referrer"
                  (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
@@ -129,7 +181,7 @@
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
               <span class="dropdown-item-text fw-semibold">
-                {{ user()?.user_metadata?.['full_name'] || user()?.email }}
+                {{ nombrePerfil() || user()?.email }}
               </span>
             </li>
             <li><hr class="dropdown-divider"></li>

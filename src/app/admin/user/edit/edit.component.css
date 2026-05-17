@@ -1,0 +1,44 @@
+.card {
+  border-radius: 0.75rem;
+}
+
+.form-check-input:disabled {
+  opacity: 0.65;
+}
+
+/* Avatar upload widget */
+.avatar-upload-wrap {
+  cursor: pointer;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.avatar-upload-wrap:hover .avatar-placeholder,
+.avatar-upload-wrap:hover .avatar-img {
+  opacity: 0.8;
+}
+
+.avatar-upload-wrap.uploading {
+  cursor: default;
+  pointer-events: none;
+}
+
+.avatar-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-placeholder {
+  width: 64px;
+  height: 64px;
+  background-color: #dee2e6;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}

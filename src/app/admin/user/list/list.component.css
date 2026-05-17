@@ -1,0 +1,22 @@
+.avatar-img {
+  object-fit: cover;
+}
+
+.avatar-fallback {
+  background-color: #dee2e6;
+  color: #495057;
+  user-select: none;
+}
+
+.btn-group .btn {
+  text-transform: capitalize;
+}
+
+.input-group-text {
+  border-right: none;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #ced4da;
+}

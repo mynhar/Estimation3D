@@ -18,7 +18,10 @@
       "Bash(Select-Object FullName)",
       "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :4200)",
+      "Bash(supabase functions *)"
     ]
   }
 }
