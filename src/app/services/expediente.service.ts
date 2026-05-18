@@ -220,6 +220,18 @@ export class ExpedienteService {
     return exp.id;
   }
 
+  async contarExpedientesCliente(clienteId: string): Promise<{ primeroId: string | null; hayMasDeUno: boolean }> {
+    const { data, error } = await this.db
+      .from('expediente')
+      .select('id')
+      .eq('cliente_id', clienteId)
+      .order('id', { ascending: false })
+      .limit(2);
+    if (error) throw new Error(error.message);
+    const rows = data ?? [];
+    return { primeroId: rows[0]?.id ?? null, hayMasDeUno: rows.length > 1 };
+  }
+
   // ── Módulo estimador — listas ─────────────────────────────────────────────
 
   async getExpedienteRows(options: {

@@ -38,19 +38,6 @@
   letter-spacing: .04em; color: #6c757d; font-weight: 600;
 }
 
-/* ── Navbar: ítem activo en dropdown ────────────────────────────────────── */
-.dropdown-item.active-link {
-  background-color: #e9ecef;
-  color: #0d6efd;
-  font-weight: 600;
-}
-
-/* ── Navbar: dropdown toggle activo ────────────────────────────────────── */
-.nav-link.menu-active {
-  color: #0d6efd !important;
-  font-weight: 600;
-}
-
 /* ── Botón Volver estándar ──────────────────────────────────────────────── */
 .btn-back { display: inline-flex; align-items: center; gap: .35rem; }
 
@@ -158,9 +145,6 @@
 /* ── Fila "ya ofertada" en tabla de expedientes disponibles ─────────────── */
 .row-offered { background-color: #f0fdf4; }
 .row-offered:hover { background-color: #dcfce7 !important; }
-
-/* ── Navbar brand ───────────────────────────────────────────────────────── */
-.navbar-brand { font-weight: 700; letter-spacing: -.01em; }
 
 /* ── Mejoras tipografía general ─────────────────────────────────────────── */
 body { color: #212529; }
