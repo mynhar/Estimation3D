@@ -38,11 +38,11 @@
 .avatar-placeholder {
   width: 64px;
   height: 64px;
-  background-color: #dee2e6;
+  background-color: #F2EFE6;
 }
 
 .avatar-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(26,20,12,.45);
 }

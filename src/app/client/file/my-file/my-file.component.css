@@ -1,170 +1,316 @@
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #f0f6ff 0%, #dbeafe 60%, #e0e7ff 100%);
-  border: 1px solid rgba(13, 110, 253, 0.12);
+  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
+  border: 1px solid #EAE7DF;
 }
 
 .btn-back {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(13,110,253,.1); color: #0d6efd;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   border: none; cursor: pointer; font-size: 0.9rem;
   transition: background 0.15s; flex-shrink: 0;
 }
-.btn-back:hover { background: rgba(13,110,253,.2); }
+.btn-back:hover { background: rgba(212,185,110,.28); }
 
 .exp-num {
   font-family: monospace; font-size: 0.8em; font-weight: 700;
   letter-spacing: 0.05em;
-  background: rgba(13,110,253,.12); color: #0d6efd;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   padding: 0.15em 0.55em; border-radius: 4px;
 }
 
 .hint-chip {
   display: inline-flex; align-items: center;
-  font-size: 0.8rem; color: #475569;
-  background: rgba(255,255,255,.7); border: 1px solid rgba(13,110,253,.12);
+  font-size: 0.8rem; color: #5C5750;
+  background: rgba(251,250,246,.8); border: 1px solid #EAE7DF;
   border-radius: 2rem; padding: 0.35rem 0.85rem; max-width: 380px;
 }
 
-/* ── Empty icon (blue variant) ───────────────────────────────────────────── */
+/* ── Icono vacío ─────────────────────────────────────────────────────────── */
 .empty-icon {
   width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(13,110,253,.08);
+  background: #FAF3E0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.25rem; color: #0d6efd; margin-bottom: 0.5rem;
+  font-size: 2.25rem; color: #D4B96E; margin-bottom: 0.5rem;
 }
-.empty-icon--warn { background: rgba(220,53,69,.08) !important; color: #dc3545 !important; }
+.empty-icon--warn { background: #FBF0EF !important; color: #A84A46 !important; }
 .empty-text { max-width: 380px; }
 
-/* ── Info fields ─────────────────────────────────────────────────────────── */
+/* ── Etiqueta de sección ─────────────────────────────────────────────────── */
 .section-label {
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #94a3b8; margin-bottom: 1rem;
+  text-transform: uppercase; color: #9A938C; margin-bottom: 1rem;
 }
-.divider { border-color: #f1f5f9; margin: 0; }
+.divider { border-color: #EAE7DF; margin: 0; }
+
 .descripcion-block {
-  font-size: 0.87rem; color: #475569;
-  background: #f8fafc; border-radius: 0.4rem;
+  font-size: 0.87rem; color: #5C5750;
+  background: #F2EFE6; border-radius: 0.5rem;
   padding: 0.6rem 0.75rem; line-height: 1.6;
   white-space: pre-wrap; margin-bottom: 0;
 }
 
-/* ── Estimador chip ──────────────────────────────────────────────────────── */
+/* ── Chip del estimador ──────────────────────────────────────────────────── */
 .estimador-chip   { display: flex; align-items: center; gap: 0.75rem; }
 .estimador-avatar {
   width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(13,110,253,.1); color: #0d6efd;
+  background: #FAF3E0; color: #C4A55A;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.15rem; flex-shrink: 0;
 }
-.estimador-nombre { font-size: 0.95rem; font-weight: 700; color: #1e293b; }
-.estimador-rol    { font-size: 0.75rem; color: #94a3b8; }
+.estimador-nombre { font-size: 0.95rem; font-weight: 700; color: #1A1A1A; }
+.estimador-rol    { font-size: 0.75rem; color: #9A938C; }
 
-/* ── Costo range card ────────────────────────────────────────────────────── */
+/* ── Card de rango de costo ──────────────────────────────────────────────── */
 .costo-range-card {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border: 1px solid rgba(22,163,74,.18);
+  background: linear-gradient(135deg, #EBF5EE, #DCF0E4);
+  border: 1px solid rgba(92,138,107,.2);
 }
-.costo-tag   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #15803d; }
-.costo-valor { font-size: 1.25rem; font-weight: 800; color: #14532d; letter-spacing: -0.02em; }
+.costo-tag   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #5C8A6B; }
+.costo-valor { font-size: 1.25rem; font-weight: 800; color: #3D6B52; letter-spacing: -0.02em; }
 
-/* ── Pending notice ──────────────────────────────────────────────────────── */
+/* ── Nota de espera ──────────────────────────────────────────────────────── */
 .pending-notice {
   display: flex; align-items: center;
-  background: #f8fafc; border-radius: 0.5rem;
-  padding: 0.75rem 1rem; font-size: 0.85rem; color: #64748b;
+  background: #F2EFE6; border-radius: 0.5rem;
+  padding: 0.75rem 1rem; font-size: 0.85rem; color: #5C5750;
 }
 
-/* ── Constructor chip ────────────────────────────────────────────────────── */
+/* ── Chip del constructor ────────────────────────────────────────────────── */
 .constructor-chip    { display: flex; align-items: center; gap: 0.75rem; }
 .constructor-avatar  {
   width: 44px; height: 44px; border-radius: 50%;
-  background: rgba(13,110,253,.1); color: #0d6efd;
+  background: #FAF3E0; color: #C4A55A;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.25rem; flex-shrink: 0;
 }
-.constructor-nombre   { font-size: 1rem; font-weight: 700; color: #1e293b; }
-.constructor-contacto { font-size: 0.8rem; color: #0d6efd; display: inline-flex; align-items: center; }
+.constructor-nombre   { font-size: 1rem; font-weight: 700; color: #1A1A1A; }
+.constructor-contacto { font-size: 0.8rem; color: #C4A55A; display: inline-flex; align-items: center; }
 
-.precio-valor {
-  font-size: 1.6rem; font-weight: 800; color: #0d6efd; letter-spacing: -0.02em;
-}
+.precio-valor { font-size: 1.6rem; font-weight: 800; color: #C4A55A; letter-spacing: -0.02em; }
 .pending-icon {
   width: 60px; height: 60px; border-radius: 50%;
-  background: rgba(13,110,253,.08); color: #0d6efd;
+  background: #FAF3E0; color: #D4B96E;
   display: flex; align-items: center; justify-content: center; margin: 0 auto;
 }
 
-/* ── Tour virtual hero ───────────────────────────────────────────────────── */
-.tour-hero {
-  background: #0c1220;
-  border: 1.5px solid rgba(99,102,241,.35);
+/* ── Sección de progreso (wrapper) ───────────────────────────────────────── */
+.exp-progress {
+  border-radius: 0.875rem;
+  overflow: hidden;
+  border: 1.5px solid rgba(212,185,110,.3);
   box-shadow:
-    0 0 0 1px rgba(99,102,241,.12),
-    0 4px 6px -1px rgba(0,0,0,.3),
-    0 16px 48px -8px rgba(0,0,0,.45),
-    0 0 60px -10px rgba(99,102,241,.18);
+    0 0 0 1px rgba(212,185,110,.08),
+    0 4px 24px rgba(26,20,12,.12);
 }
+
+/* Barra superior de porcentaje */
+.exp-progress__top {
+  background: linear-gradient(135deg, #FBFAF6 0%, #F5F0E6 100%);
+  border-bottom: 1px solid #EAE7DF;
+  padding: 0.85rem 1.25rem;
+}
+.exp-progress--cancelado .exp-progress__top {
+  background: linear-gradient(135deg, #F5F3EE 0%, #EEEBE3 100%);
+}
+
+.exp-progress__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.exp-progress__heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5C5750;
+  letter-spacing: 0.01em;
+}
+.exp-progress__pct {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: #D4B96E;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.exp-progress__pct--cancelado {
+  font-size: 0.85rem;
+  color: #9A938C;
+  font-family: inherit;
+}
+
+.exp-progress__track {
+  height: 10px;
+  background: rgba(212,185,110,.14);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.exp-progress__fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #C4A55A 0%, #D4B96E 60%, #E0CA85 100%);
+  transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  min-width: 0;
+}
+.exp-progress__fill--cancelado {
+  background: #D9D5CB;
+}
+
+/* Tour inset (sección oscura con el iframe) */
+.tour-inset { background: #1A1510; }
 .tour-hero__bar {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.6rem 1rem;
-  background: linear-gradient(90deg, rgba(99,102,241,.18) 0%, rgba(99,102,241,.06) 60%, transparent 100%);
-  border-bottom: 1px solid rgba(99,102,241,.2);
+  background: linear-gradient(90deg, rgba(212,185,110,.14) 0%, rgba(212,185,110,.04) 60%, transparent 100%);
+  border-bottom: 1px solid rgba(212,185,110,.15);
 }
 .tour-hero__dot {
   width: 10px; height: 10px; border-radius: 50%;
-  background: rgba(255,255,255,.15); flex-shrink: 0;
+  background: rgba(255,255,255,.12); flex-shrink: 0;
 }
-.tour-hero__dot:first-child  { background: rgba(255,99,99,.5); }
-.tour-hero__dot:nth-child(2) { background: rgba(255,204,0,.45); }
-.tour-hero__dot:nth-child(3) { background: rgba(52,199,89,.45); }
+.tour-hero__dot:first-child  { background: rgba(255,99,99,.45); }
+.tour-hero__dot:nth-child(2) { background: rgba(255,204,0,.4); }
+.tour-hero__dot:nth-child(3) { background: rgba(52,199,89,.4); }
 .tour-hero__title {
-  flex: 1; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.03em; color: #c7d2fe;
+  flex: 1; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.03em; color: #D4B96E;
 }
 .tour-hero__badge {
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-  background: rgba(99,102,241,.25); color: #a5b4fc;
-  border: 1px solid rgba(99,102,241,.3); border-radius: 2rem; padding: 0.2em 0.7em; flex-shrink: 0;
+  background: rgba(212,185,110,.2); color: #D4B96E;
+  border: 1px solid rgba(212,185,110,.25); border-radius: 2rem; padding: 0.2em 0.7em; flex-shrink: 0;
 }
 
-/* ── Archivo count badge ─────────────────────────────────────────────────── */
+/* Stepper de estados (debajo del video) */
+.exp-steps {
+  display: flex;
+  align-items: flex-start;
+  background: #F2EFE6;
+  border-top: 1px solid #EAE7DF;
+  padding: 0.9rem 1.25rem 0.85rem;
+  overflow-x: auto;
+  gap: 0;
+}
+.exp-steps--cancelado { background: #EEEBE3; }
+.exp-steps::-webkit-scrollbar { height: 3px; }
+.exp-steps::-webkit-scrollbar-track { background: transparent; }
+.exp-steps::-webkit-scrollbar-thumb { background: rgba(212,185,110,.3); border-radius: 2px; }
+
+.exp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 72px;
+  position: relative;
+}
+
+/* Fila horizontal: círculo + línea conectora */
+.exp-step__top {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.exp-step__circle {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #EAE7DF;
+  color: #C8C4BA;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.exp-step__line {
+  flex: 1;
+  height: 2px;
+  background: #D9D5CB;
+  transition: background 0.3s;
+}
+.exp-step__line--done { background: #D4B96E; }
+
+/* Etiqueta debajo del círculo */
+.exp-step__label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #C8C4BA;
+  text-align: center;
+  margin-top: 0.35rem;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Estado: completado */
+.exp-step--done .exp-step__circle {
+  background: rgba(212,185,110,.2);
+  color: #C4A55A;
+}
+.exp-step--done .exp-step__label { color: #C4A55A; }
+
+/* Estado: activo */
+.exp-step--active .exp-step__circle {
+  background: #D4B96E;
+  color: #1A1A1A;
+  box-shadow: 0 0 0 4px rgba(212,185,110,.22);
+}
+.exp-step--active .exp-step__label {
+  color: #C4A55A;
+  font-weight: 700;
+}
+
+/* Banner de cancelado */
+.exp-steps__cancelled {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9A938C;
+  white-space: nowrap;
+  padding-left: 1rem;
+}
+
+/* ── Badge de archivos ───────────────────────────────────────────────────── */
 .archivo-count {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 20px; height: 20px;
   font-size: 0.7rem; font-weight: 700;
-  background: rgba(13,110,253,.12); color: #0d6efd;
+  background: #FAF3E0; color: #C4A55A;
   border-radius: 10px; padding: 0 5px; margin-left: 6px;
 }
 
-/* ── Photo thumb (click to lightbox, no delete button) ───────────────────── */
+/* ── Miniaturas de foto ──────────────────────────────────────────────────── */
 .photo-thumb { cursor: pointer; }
-.photo-thumb__img { border: 1px solid #e9ecef; border-radius: 0.6rem; transition: opacity 0.15s; }
+.photo-thumb__img { border: 1px solid #EAE7DF; border-radius: 0.625rem; transition: opacity 0.15s; }
 .photo-thumb__img:hover { opacity: 0.82; }
 
-/* ── Doc list ────────────────────────────────────────────────────────────── */
+/* ── Lista de documentos ─────────────────────────────────────────────────── */
 .doc-list { display: flex; flex-direction: column; }
 
-/* ── Lightbox (close inline top-right) ───────────────────────────────────── */
+/* ── Lightbox ────────────────────────────────────────────────────────────── */
 .lightbox-overlay { z-index: 1080; }
 .lightbox-img {
   max-width: 92vw; max-height: 90vh;
-  border-radius: 0.5rem; box-shadow: 0 8px 32px rgba(0,0,0,.6); cursor: default;
+  border-radius: 0.625rem; box-shadow: 0 8px 32px rgba(0,0,0,.5); cursor: default;
 }
 .lightbox-close {
   position: absolute; top: 1rem; right: 1rem;
   width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,.15); color: #fff;
+  background: rgba(255,255,255,.14); color: #FBFAF6;
   border: none; cursor: pointer; font-size: 1rem;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
-.lightbox-close:hover { background: rgba(255,255,255,.28); }
+.lightbox-close:hover { background: rgba(255,255,255,.25); }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 991px) {
-  .hint-chip { display: none; }
-}
+@media (max-width: 991px) { .hint-chip { display: none; } }
 @media (max-width: 575px) {
   .page-header { padding: 1rem !important; }
   .precio-valor { font-size: 1.3rem; }

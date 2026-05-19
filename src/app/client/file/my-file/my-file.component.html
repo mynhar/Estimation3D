@@ -52,29 +52,85 @@
       </div>
     </header>
 
-    <!-- ── Tour virtual hero (full-width, resaltado) ────────────────────────── -->
-    @if (urlTourSafe) {
-      <section class="tour-hero rounded-4 mb-4 overflow-hidden">
-        <div class="tour-hero__bar">
-          <div class="d-flex align-items-center gap-2">
-            <span class="tour-hero__dot"></span>
-            <span class="tour-hero__dot"></span>
-            <span class="tour-hero__dot"></span>
-          </div>
-          <div class="tour-hero__title">
-            <i class="bi bi-badge-3d-fill me-2"></i>Tour virtual 3D del sitio
-          </div>
-          <span class="tour-hero__badge">Vista inmersiva</span>
+    <!-- ── Progreso del expediente + Tour virtual ───────────────────────────── -->
+    <section class="exp-progress mb-4" [class.exp-progress--cancelado]="detalle()!.estado === 'cancelado'">
+
+      <!-- Barra de avance (encima del video) ────────────────────────────── -->
+      <div class="exp-progress__top">
+        <div class="exp-progress__meta">
+          <span class="exp-progress__heading">
+            <i class="bi bi-graph-up-arrow me-2"></i>Progreso del expediente
+          </span>
+          @if (detalle()!.estado === 'cancelado') {
+            <span class="exp-progress__pct exp-progress__pct--cancelado">Cancelado</span>
+          } @else {
+            <span class="exp-progress__pct">{{ progreso(detalle()!.estado) }}%</span>
+          }
         </div>
-        <div class="ratio ratio-16x9">
-          <iframe [src]="urlTourSafe"
-                  allowfullscreen
-                  allow="xr-spatial-tracking"
-                  title="Tour virtual Matterport">
-          </iframe>
+        <div class="exp-progress__track">
+          <div class="exp-progress__fill"
+               [style.width.%]="progreso(detalle()!.estado)"
+               [class.exp-progress__fill--cancelado]="detalle()!.estado === 'cancelado'">
+          </div>
         </div>
-      </section>
-    }
+      </div>
+
+      <!-- Tour virtual 3D (entre la barra y el stepper) ─────────────────── -->
+      @if (urlTourSafe) {
+        <div class="tour-inset">
+          <div class="tour-hero__bar">
+            <div class="d-flex align-items-center gap-2">
+              <span class="tour-hero__dot"></span>
+              <span class="tour-hero__dot"></span>
+              <span class="tour-hero__dot"></span>
+            </div>
+            <div class="tour-hero__title">
+              <i class="bi bi-badge-3d-fill me-2"></i>Tour virtual 3D del sitio
+            </div>
+            <span class="tour-hero__badge">Vista inmersiva</span>
+          </div>
+          <div class="ratio ratio-16x9">
+            <iframe [src]="urlTourSafe"
+                    allowfullscreen
+                    allow="xr-spatial-tracking"
+                    title="Tour virtual Matterport">
+            </iframe>
+          </div>
+        </div>
+      }
+
+      <!-- Stepper de estados (debajo del video) ──────────────────────────── -->
+      <div class="exp-steps" [class.exp-steps--cancelado]="detalle()!.estado === 'cancelado'">
+        @for (paso of PASOS; track paso.key; let last = $last) {
+          <div class="exp-step"
+               [class.exp-step--done]="pasoActivo(paso.key, detalle()!.estado) === 'done'"
+               [class.exp-step--active]="pasoActivo(paso.key, detalle()!.estado) === 'active'">
+            <div class="exp-step__top">
+              <div class="exp-step__circle">
+                @if (pasoActivo(paso.key, detalle()!.estado) === 'done') {
+                  <i class="bi bi-check-lg"></i>
+                } @else {
+                  <i class="bi {{ paso.icon }}"></i>
+                }
+              </div>
+              @if (!last) {
+                <div class="exp-step__line"
+                     [class.exp-step__line--done]="pasoActivo(paso.key, detalle()!.estado) === 'done'">
+                </div>
+              }
+            </div>
+            <span class="exp-step__label">{{ paso.label }}</span>
+          </div>
+        }
+
+        @if (detalle()!.estado === 'cancelado') {
+          <div class="exp-steps__cancelled">
+            <i class="bi bi-x-circle me-2"></i>Expediente cancelado
+          </div>
+        }
+      </div>
+
+    </section>
 
     <!-- ── Main grid ─────────────────────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">

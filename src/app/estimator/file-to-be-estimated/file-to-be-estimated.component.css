@@ -1,22 +1,22 @@
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 60%, #e8f4fd 100%);
-  border: 1px solid rgba(13, 110, 253, 0.1);
+  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
+  border: 1px solid #EAE7DF;
 }
 
 .btn-back {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(13,110,253,.08); color: #0d6efd;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   border: none; cursor: pointer; font-size: 0.9rem;
   transition: background 0.15s; flex-shrink: 0;
 }
-.btn-back:hover { background: rgba(13,110,253,.16); }
+.btn-back:hover { background: rgba(212,185,110,.28); }
 
 .exp-num {
   font-family: monospace; font-size: 0.8em; font-weight: 700;
   letter-spacing: 0.05em;
-  background: rgba(13,110,253,.1); color: #0d6efd;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   padding: 0.15em 0.55em; border-radius: 4px;
 }
 
@@ -26,28 +26,28 @@
   font-size: 0.78rem; font-weight: 600;
   padding: 0.3em 0.8em; border-radius: 20px;
 }
-.kpi-pill--listo    { background: rgba(22,163,74,.1);  color: #15803d; border: 1px solid rgba(22,163,74,.2);  }
-.kpi-pill--progreso { background: rgba(217,119,6,.1);  color: #b45309; border: 1px solid rgba(217,119,6,.2);  }
-.kpi-pill--fotos    { background: rgba(99,102,241,.1); color: #4338ca; border: 1px solid rgba(99,102,241,.2); }
+.kpi-pill--listo    { background: #EBF5EE; color: #3D6B52; border: 1px solid #A8D4B5; }
+.kpi-pill--progreso { background: #FAF3E0; color: #C27B2E; border: 1px solid #EFE0B3; }
+.kpi-pill--fotos    { background: #EEF4FB; color: #4A7BBF; border: 1px solid #A8C5E8; }
 
 /* ── Empty icon (color variant) ──────────────────────────────────────────── */
 .empty-icon {
   width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(13,110,253,.08);
+  background: #FAF3E0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.25rem; color: #0d6efd; margin-bottom: 0.5rem;
+  font-size: 2.25rem; color: #D4B96E; margin-bottom: 0.5rem;
 }
-.empty-icon--warn { background: rgba(255,193,7,.12) !important; color: #d97706 !important; }
+.empty-icon--warn { background: #FDF3E3 !important; color: #C27B2E !important; }
 
 /* ── Info section ────────────────────────────────────────────────────────── */
 .info-section-label {
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #94a3b8; margin-bottom: 0.75rem;
+  text-transform: uppercase; color: #9A938C; margin-bottom: 0.75rem;
 }
 
 /* ── Tour edit wrapper ───────────────────────────────────────────────────── */
 .tour-edit-wrap {
-  background: #f8fafc; border: 1px solid #e2e8f0;
+  background: #F2EFE6; border: 1px solid #EAE7DF;
   border-radius: 0.5rem; padding: 0.85rem;
 }
 
@@ -56,26 +56,24 @@
 .photo-thumb__img { transition: opacity 0.15s; }
 
 /* ── File row color variants ─────────────────────────────────────────────── */
-.file-row__icon--video { background: rgba(99,102,241,.1); color: #6366f1; }
+.file-row__icon--video { background: rgba(74,123,191,.12); color: #4A7BBF; }
 .file-row--playing {
-  background: rgba(245,158,11,.06);
+  background: rgba(212,185,110,.06);
   border-radius: 0.4rem 0.4rem 0 0; border-bottom: none !important;
 }
 
 /* ── Completion checklist ────────────────────────────────────────────────── */
 .completion-list {
-  background: #f8fafc; border: 1px solid #e9ecef;
+  background: #F2EFE6; border: 1px solid #EAE7DF;
   border-radius: 0.6rem; padding: 0.75rem 1rem;
 }
 .completion-item {
   display: flex; align-items: center; gap: 0.5rem;
-  font-size: 0.82rem; color: #94a3b8; padding: 0.2rem 0;
+  font-size: 0.82rem; color: #9A938C; padding: 0.2rem 0;
 }
 .completion-item i       { font-size: 0.85rem; }
-.completion-item--done   { color: #15803d; }
-.completion-item--done i { color: #16a34a; }
+.completion-item--done   { color: #3D6B52; }
+.completion-item--done i { color: #5C8A6B; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 575px) {
-  .page-header { padding: 1rem !important; }
-}
+@media (max-width: 575px) { .page-header { padding: 1rem !important; } }

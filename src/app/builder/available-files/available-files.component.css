@@ -3,35 +3,38 @@
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 60%, #e8f4fd 100%);
-  border: 1px solid rgba(13, 110, 253, 0.1);
+  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
+  border: 1px solid #EAE7DF;
 }
-.page-header h4 { font-size: 1.35rem; color: #1a1a2e; }
+.page-header h4 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.35rem; font-weight: 400; color: #1A1A1A;
+}
 
-/* KPI pills */
+/* ── KPI pills ───────────────────────────────────────────────────────────── */
 .kpi-pill {
   display: inline-flex; align-items: center;
   font-size: 0.78rem; font-weight: 600;
   padding: 0.3em 0.8em; border-radius: 20px;
 }
 .kpi-pill--available {
-  background: rgba(13,110,253,.1); color: #1d4ed8;
-  border: 1px solid rgba(13,110,253,.2);
+  background: #EEF4FB; color: #4A7BBF;
+  border: 1px solid #A8C5E8;
 }
 .kpi-pill--offered {
-  background: rgba(22,163,74,.1); color: #15803d;
-  border: 1px solid rgba(22,163,74,.2);
+  background: #EBF5EE; color: #5C8A6B;
+  border: 1px solid #A8D4B5;
 }
 .kpi-pill--pending {
-  background: rgba(217,119,6,.1); color: #b45309;
-  border: 1px solid rgba(217,119,6,.2);
+  background: #FAF3E0; color: #C27B2E;
+  border: 1px solid #EFE0B3;
 }
 
 /* ── Loading ─────────────────────────────────────────────────────────────── */
 .loading-state {
   display: flex; align-items: center; justify-content: center;
   gap: 0.6rem; padding: 4rem 1rem;
-  color: #6c757d; font-size: 0.9rem;
+  color: #9A938C; font-size: 0.9rem;
 }
 
 /* ── Empty states ────────────────────────────────────────────────────────── */
@@ -41,22 +44,22 @@
 }
 .empty-icon {
   width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(13, 110, 253, 0.08);
+  background: #FAF3E0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.25rem; color: #0d6efd; margin-bottom: 0.5rem;
+  font-size: 2.25rem; color: #D4B96E; margin-bottom: 0.5rem;
 }
-.empty-title { font-size: 1.1rem; font-weight: 700; color: #212529; margin: 0; }
+.empty-title { font-size: 1.1rem; font-weight: 700; color: #1A1A1A; margin: 0; }
 .empty-text  {
-  font-size: 0.9rem; color: #6c757d;
+  font-size: 0.9rem; color: #5C5750;
   max-width: 380px; margin: 0 0 0.5rem; line-height: 1.6;
 }
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/*  BARRA DE FILTROS                                                       */
-/* ════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════
+   BARRA DE FILTROS
+════════════════════════════════════════════════════════════════════════ */
 .filter-bar {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: #FBFAF6;
+  border: 1px solid #EAE7DF;
   display: flex; align-items: center; flex-wrap: wrap;
   gap: 0.75rem;
 }
@@ -66,17 +69,18 @@
 }
 .filter-search__icon {
   position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
-  color: #94a3b8; pointer-events: none;
+  color: #9A938C; pointer-events: none;
 }
 .filter-search__input {
   padding-left: 2.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #D9D5CB;
   border-radius: 8px;
   font-size: 0.88rem;
+  background: #FBFAF6;
 }
 .filter-search__input:focus {
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 3px rgba(13,110,253,.1);
+  border-color: #D4B96E;
+  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
   outline: none;
 }
 
@@ -84,57 +88,54 @@
   display: flex; align-items: center; gap: 0.5rem;
 }
 .filter-group__label {
-  font-size: 0.72rem; font-weight: 700; color: #94a3b8;
+  font-size: 0.72rem; font-weight: 700; color: #9A938C;
   text-transform: uppercase; letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
-.filter-clear { text-decoration: none; padding: 0.25rem 0.5rem; }
+.filter-clear { text-decoration: none; padding: 0.25rem 0.5rem; color: #C4A55A; }
 
-/* Hint de resultados */
-.results-hint { font-size: 0.85rem; color: #64748b; }
+.results-hint { font-size: 0.85rem; color: #5C5750; }
 
-/* ════════════════════════════════════════════════════════════════════════ */
-/*  FILE CARD                                                              */
-/* ════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════
+   FILE CARD
+════════════════════════════════════════════════════════════════════════ */
 .file-card {
   display: flex;
   border-radius: 0.875rem;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
+  background: #FBFAF6;
+  box-shadow: 0 1px 3px rgba(26,20,12,.08), 0 0 0 1px rgba(26,20,12,.04);
   overflow: hidden;
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .file-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,.11);
+  box-shadow: 0 8px 24px rgba(26,20,12,.12);
   transform: translateY(-2px);
 }
 
-/* Acento lateral de competencia */
 .file-accent {
   width: 5px; flex-shrink: 0;
-  background: var(--comp-color, #adb5bd);
+  background: var(--comp-color, #9A938C);
   transition: width 0.15s;
 }
 .file-card:hover .file-accent { width: 7px; }
 
-/* Tono verde suave en tarjetas ofertadas */
-.file-card--offered             { background: rgba(22,163,74,.03); }
-.file-card--offered:hover       { background: rgba(22,163,74,.06); }
+.file-card--offered             { background: rgba(92,138,107,.04); }
+.file-card--offered:hover       { background: rgba(92,138,107,.07); }
 
 .file-body { flex: 1; padding: 1.25rem; }
 
 /* ── Tipografía ──────────────────────────────────────────────────────────── */
 .file-num {
   font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #94a3b8; font-family: monospace;
+  text-transform: uppercase; color: #9A938C; font-family: monospace;
 }
 .file-badge    { font-size: 0.72rem; }
-.file-servicio { font-size: 1rem; font-weight: 700; color: #1e293b; line-height: 1.3; }
-.file-meta     { font-size: 0.8rem; color: #64748b; line-height: 1.4; }
-.file-divider  { border-color: #f1f5f9; opacity: 1; }
-.file-cost-label { font-size: 0.78rem; color: #94a3b8; }
-.file-cost       { font-size: 1rem; color: #0f172a; }
+.file-servicio { font-size: 1rem; font-weight: 700; color: #1A1A1A; line-height: 1.3; }
+.file-meta     { font-size: 0.8rem; color: #5C5750; line-height: 1.4; }
+.file-divider  { border-color: #EAE7DF; opacity: 1; }
+.file-cost-label { font-size: 0.78rem; color: #9A938C; text-transform: uppercase; letter-spacing: 0.04em; }
+.file-cost       { font-size: 1rem; color: #1A1A1A; }
 
 /* ── Slots de ofertas ────────────────────────────────────────────────────── */
 .offer-slots {
@@ -142,37 +143,35 @@
 }
 .offer-slot {
   width: 22px; height: 8px; border-radius: 3px;
-  background: #e2e8f0;
+  background: #EAE7DF;
   transition: background 0.2s;
 }
 
 .offer-slots-label {
-  font-size: 0.78rem; color: #64748b;
+  font-size: 0.78rem; color: #5C5750;
   white-space: nowrap;
 }
 
 /* ── Leyenda de competencia ──────────────────────────────────────────────── */
 .competition-legend {
   display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem;
-  font-size: 0.8rem; color: #64748b;
+  font-size: 0.8rem; color: #5C5750;
   padding: 0.25rem 0;
 }
-.competition-legend__title { font-weight: 700; color: #475569; }
+.competition-legend__title { font-weight: 700; color: #3D3830; }
 .comp-badge {
   display: inline-flex; align-items: center; gap: 0.35rem;
 }
 .comp-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
-.comp-badge--low  .comp-dot { background: #16a34a; }
-.comp-badge--mid  .comp-dot { background: #d97706; }
-.comp-badge--high .comp-dot { background: #dc3545; }
+.comp-badge--low  .comp-dot { background: #5C8A6B; }
+.comp-badge--mid  .comp-dot { background: #C27B2E; }
+.comp-badge--high .comp-dot { background: #A84A46; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  .filter-bar {
-    flex-direction: column; align-items: stretch;
-  }
+  .filter-bar { flex-direction: column; align-items: stretch; }
   .filter-search { min-width: 100%; }
   .filter-group  { flex-wrap: wrap; }
 }

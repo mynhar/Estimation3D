@@ -22,7 +22,8 @@
       "Bash(netstat -ano)",
       "Bash(findstr :4200)",
       "Bash(supabase functions *)",
-      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Recurse -Name)"
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Recurse -Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -Filter \"*.css\")"
     ]
   }
 }

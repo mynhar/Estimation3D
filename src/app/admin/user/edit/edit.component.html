@@ -5,13 +5,13 @@
     <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" title="Volver">
       <i class="bi bi-arrow-left fs-5"></i>
     </button>
-    <i class="bi bi-person-gear fs-4 text-danger me-2"></i>
+    <i class="bi bi-person-gear fs-4 text-primary me-2"></i>
     <h4 class="mb-0">Editar usuario</h4>
   </div>
 
   <!-- Cargando -->
   <div *ngIf="cargando" class="text-center py-5">
-    <div class="spinner-border text-danger" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
@@ -211,7 +211,7 @@
                     (click)="cancelar()" [disabled]="guardando">
               <i class="bi bi-x-lg me-1"></i>Cancelar
             </button>
-            <button type="submit" class="btn btn-danger" [disabled]="guardando">
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
               <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
               <i *ngIf="!guardando" class="bi bi-floppy me-1"></i>
               {{ guardando ? 'Guardando...' : 'Guardar cambios' }}

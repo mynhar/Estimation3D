@@ -4,9 +4,11 @@
   <header class="page-header rounded-4 p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <h4 class="fw-bold mb-1">
-          <i class="bi bi-building me-2 text-primary"></i>
-          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard Constructor' }}
+        <p class="text-primary small fw-semibold mb-1">
+          <i class="bi bi-building me-1"></i>Constructor
+        </p>
+        <h4 class="mb-1">
+          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard' }}
         </h4>
         <p class="text-muted small mb-0">
           Resumen de tus ofertas y el estado de tus proyectos.
@@ -80,7 +82,7 @@
             </div>
             <div>
               <p class="text-muted small mb-0">Pendientes</p>
-              <p class="kpi-num fw-bold mb-0" style="color:#b45309">{{ pendientes() }}</p>
+              <p class="kpi-num fw-bold mb-0 text-warning">{{ pendientes() }}</p>
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@
             </div>
             <div>
               <p class="text-muted small mb-0">Monto adjudicado</p>
-              <p class="kpi-num-lg fw-bold mb-0" style="color:#0284c7">
+              <p class="kpi-num-lg fw-bold mb-0 text-primary">
                 {{ formatPrecio(montoAdjudicado()) }}
               </p>
             </div>

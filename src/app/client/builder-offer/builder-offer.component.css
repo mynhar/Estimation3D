@@ -1,22 +1,22 @@
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 60%, #bfdbfe 100%);
-  border: 1px solid rgba(37, 99, 235, 0.15);
+  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
+  border: 1px solid #EAE7DF;
 }
 
 .btn-back {
   display: inline-flex; align-items: center; justify-content: center;
   width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(37,99,235,.12); color: #1d4ed8;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   border: none; cursor: pointer; font-size: 0.9rem;
   transition: background 0.15s; flex-shrink: 0;
 }
-.btn-back:hover { background: rgba(37,99,235,.22); }
+.btn-back:hover { background: rgba(212,185,110,.28); }
 
 .exp-num {
   font-family: monospace; font-size: 0.8em; font-weight: 700;
   letter-spacing: 0.05em;
-  background: rgba(37,99,235,.15); color: #1d4ed8;
+  background: rgba(212,185,110,.14); color: #C4A55A;
   padding: 0.15em 0.55em; border-radius: 4px;
 }
 
@@ -25,44 +25,40 @@
   font-size: 0.78rem; font-weight: 600;
   padding: 0.3em 0.8em; border-radius: 20px;
 }
-.kpi-pill--ofertas {
-  background: rgba(37,99,235,.1); color: #1d4ed8; border: 1px solid rgba(37,99,235,.2);
-}
-.kpi-pill--costo {
-  background: rgba(22,163,74,.1); color: #15803d; border: 1px solid rgba(22,163,74,.2);
-}
+.kpi-pill--ofertas { background: #EEF4FB; color: #4A7BBF; border: 1px solid #A8C5E8; }
+.kpi-pill--costo   { background: #EBF5EE; color: #3D6B52; border: 1px solid #A8D4B5; }
 
-/* ── Empty icon (blue variant) ───────────────────────────────────────────── */
+/* ── Empty icon ──────────────────────────────────────────────────────────── */
 .empty-icon {
   width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(37,99,235,.1);
+  background: #FAF3E0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.25rem; color: #2563eb; margin-bottom: 0.5rem;
+  font-size: 2.25rem; color: #D4B96E; margin-bottom: 0.5rem;
 }
 .empty-inline { text-align: center; padding: 3rem 2rem; }
 
 /* ── Info fields ─────────────────────────────────────────────────────────── */
 .section-label {
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em;
-  text-transform: uppercase; color: #94a3b8; margin-bottom: 0.75rem;
+  text-transform: uppercase; color: #9A938C; margin-bottom: 0.75rem;
 }
 .descripcion-block {
-  font-size: 0.87rem; color: #475569;
-  background: #f8fafc; border-radius: 0.4rem;
+  font-size: 0.87rem; color: #5C5750;
+  background: #F2EFE6; border-radius: 0.4rem;
   padding: 0.6rem 0.75rem; line-height: 1.6;
   white-space: pre-wrap; margin-bottom: 0;
 }
-.section-divider { border-color: #f1f5f9; margin: 1rem 0; }
+.section-divider { border-color: #EAE7DF; margin: 1rem 0; }
 
 /* ── Costo aproximado ────────────────────────────────────────────────────── */
 .costo-range-card {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  border: 1px solid rgba(22,163,74,.18);
+  background: linear-gradient(135deg, #EBF5EE, #D6EDDF);
+  border: 1px solid #A8D4B5;
 }
-.costo-tag   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #15803d; }
-.costo-valor { font-size: 1.25rem; font-weight: 800; color: #14532d; letter-spacing: -0.02em; }
+.costo-tag   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #3D6B52; }
+.costo-valor { font-size: 1.25rem; font-weight: 800; color: #2A4D3A; letter-spacing: -0.02em; }
 
-/* ── Photo thumb (zoom, 100px) ───────────────────────────────────────────── */
+/* ── Photo thumb ─────────────────────────────────────────────────────────── */
 .photo-thumb { width: 100px; height: 100px; cursor: zoom-in; }
 .photo-thumb__img { border: none; border-radius: 0; transition: transform 0.2s; }
 .photo-thumb__img:hover { opacity: 1; transform: scale(1.07); }
@@ -76,9 +72,9 @@
 .photo-thumb:hover .photo-thumb__overlay { background: rgba(0,0,0,.35); opacity: 1; }
 
 /* ── File row color variants ─────────────────────────────────────────────── */
-.file-row__icon--video { background: rgba(37,99,235,.1); color: #2563eb; }
+.file-row__icon--video { background: rgba(212,185,110,.14); color: #C4A55A; }
 .file-row--playing {
-  background: rgba(37,99,235,.05);
+  background: rgba(212,185,110,.06);
   border-radius: 0.4rem 0.4rem 0 0; border-bottom: none !important;
 }
 
@@ -87,46 +83,46 @@
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 26px; height: 26px;
   font-size: 0.78rem; font-weight: 700;
-  background: rgba(37,99,235,.1); color: #1d4ed8;
+  background: rgba(74,123,191,.1); color: #4A7BBF;
   border-radius: 13px; padding: 0 7px;
 }
 
 /* ── Offer cards ─────────────────────────────────────────────────────────── */
 .offer-card {
-  border: 2px solid #e2e8f0; background: #fff; cursor: pointer;
+  border: 2px solid #EAE7DF; background: #FBFAF6; cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.offer-card:hover            { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
-.offer-card--selected        { border-color: #2563eb; background: rgba(37,99,235,.03); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
-.offer-card--aceptada        { border-color: #16a34a; background: rgba(22,163,74,.03); box-shadow: 0 0 0 3px rgba(22,163,74,.12); }
+.offer-card:hover            { border-color: #D4B96E; box-shadow: 0 0 0 3px rgba(212,185,110,.12); }
+.offer-card--selected        { border-color: #D4B96E; background: rgba(212,185,110,.04); box-shadow: 0 0 0 3px rgba(212,185,110,.18); }
+.offer-card--aceptada        { border-color: #5C8A6B; background: rgba(93,138,107,.03); box-shadow: 0 0 0 3px rgba(93,138,107,.1); }
 .offer-card--rechazada       { opacity: 0.6; }
 
-.offer-price   { font-size: 1.75rem; font-weight: 800; color: #15803d; letter-spacing: -0.03em; }
-.offer-contact { font-size: 0.82rem; color: #2563eb; text-decoration: none; }
+.offer-price   { font-size: 1.75rem; font-weight: 800; color: #3D6B52; letter-spacing: -0.03em; }
+.offer-contact { font-size: 0.82rem; color: #4A7BBF; text-decoration: none; }
 .offer-contact:hover { text-decoration: underline; }
 .offer-desc {
-  font-size: 0.85rem; color: #475569; line-height: 1.6; white-space: pre-wrap;
+  font-size: 0.85rem; color: #5C5750; line-height: 1.6; white-space: pre-wrap;
   margin-bottom: 0;
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 .offer-attachments {
   display: flex; flex-wrap: wrap; gap: 0.5rem;
-  padding-top: 0.75rem; border-top: 1px solid #f1f5f9; margin-top: 0.5rem;
+  padding-top: 0.75rem; border-top: 1px solid #EAE7DF; margin-top: 0.5rem;
 }
 
 /* ── Accept card (sidebar) ───────────────────────────────────────────────── */
 .accept-card {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid rgba(37,99,235,.2);
+  background: linear-gradient(135deg, #FAF3E0 0%, #F2EFE6 100%);
+  border: 1px solid #EAE7DF;
 }
-.accept-hint { text-align: center; padding: 1rem 0.5rem; color: #475569; }
+.accept-hint { text-align: center; padding: 1rem 0.5rem; color: #5C5750; }
 
 .selected-preview {
-  background: #fff; border-radius: 0.6rem; padding: 1rem;
-  border: 1px solid rgba(37,99,235,.15);
+  background: #FBFAF6; border-radius: 0.6rem; padding: 1rem;
+  border: 1px solid rgba(212,185,110,.2);
 }
-.selected-preview__price { font-size: 1.5rem; font-weight: 800; color: #15803d; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
-.selected-preview__name  { font-size: 0.95rem; font-weight: 600; color: #1e293b; }
+.selected-preview__price { font-size: 1.5rem; font-weight: 800; color: #3D6B52; letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+.selected-preview__name  { font-size: 0.95rem; font-weight: 600; color: #1A1A1A; }
 
 /* ── Lightbox ────────────────────────────────────────────────────────────── */
 .lightbox-container { position: relative; max-width: 90vw; max-height: 90vh; cursor: default; }
@@ -136,7 +132,7 @@
 }
 .lightbox-close {
   position: absolute; top: -14px; right: -14px;
-  background: #fff; border: none; border-radius: 50%;
+  background: #FBFAF6; border: none; border-radius: 50%;
   width: 30px; height: 30px; font-size: 14px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,.35); padding: 0;

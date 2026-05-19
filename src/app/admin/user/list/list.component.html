@@ -1,21 +1,25 @@
 <div class="container-fluid py-4">
 
   <!-- Encabezado -->
-  <div class="d-flex align-items-center mb-3">
-    <i class="bi bi-people-fill fs-4 text-danger me-2"></i>
-    <h4 class="mb-0">Usuarios</h4>
-    <span class="badge bg-secondary ms-2">
-      {{ usuariosFiltrados().length }}
-      <ng-container *ngIf="hayFiltros()"> / {{ totalUsuarios }}</ng-container>
-    </span>
-    <a routerLink="/admin/user/create" class="btn btn-danger btn-sm ms-auto">
-      <i class="bi bi-person-plus me-1"></i>Crear usuario
-    </a>
+  <div class="mb-3">
+    <p class="text-primary small fw-semibold mb-1">
+      <i class="bi bi-shield-check me-1"></i>Administrador
+    </p>
+    <div class="d-flex align-items-center gap-2">
+      <h4 class="mb-0">Usuarios</h4>
+      <span class="badge bg-secondary">
+        {{ usuariosFiltrados().length }}
+        <ng-container *ngIf="hayFiltros()"> / {{ totalUsuarios }}</ng-container>
+      </span>
+      <a routerLink="/admin/user/create" class="btn btn-primary btn-sm ms-auto fw-semibold">
+        <i class="bi bi-person-plus me-1"></i>Crear usuario
+      </a>
+    </div>
   </div>
 
   <!-- Cargando -->
   <div *ngIf="cargando" class="text-center py-5">
-    <div class="spinner-border text-danger" role="status">
+    <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
   </div>
@@ -55,8 +59,8 @@
           <div class="btn-group btn-group-sm" role="group">
             <button *ngFor="let r of roles" type="button"
                     class="btn"
-                    [class.btn-danger]="filtroRol() === r && r !== 'todos'"
-                    [class.btn-dark]="filtroRol() === r && r === 'todos'"
+                    [class.btn-primary]="filtroRol() === r && r !== 'todos'"
+                    [class.btn-primary]="filtroRol() === r && r === 'todos'"
                     [class.btn-outline-secondary]="filtroRol() !== r"
                     (click)="filtroRol.set(r)">
               {{ r === 'todos' ? 'Todos' : r }}
@@ -70,7 +74,7 @@
           <div class="btn-group btn-group-sm" role="group">
             <button *ngFor="let p of proveedores" type="button"
                     class="btn"
-                    [class.btn-dark]="filtroProveedor() === p"
+                    [class.btn-primary]="filtroProveedor() === p"
                     [class.btn-outline-secondary]="filtroProveedor() !== p"
                     (click)="filtroProveedor.set(p)">
               <i *ngIf="p === 'google'" class="bi bi-google me-1"></i>
@@ -88,7 +92,7 @@
                     class="btn"
                     [class.btn-success]="filtroActivo() === a && a === 'activo'"
                     [class.btn-danger]="filtroActivo() === a && a === 'inactivo'"
-                    [class.btn-dark]="filtroActivo() === a && a === 'todos'"
+                    [class.btn-primary]="filtroActivo() === a && a === 'todos'"
                     [class.btn-outline-secondary]="filtroActivo() !== a"
                     (click)="filtroActivo.set(a)">
               {{ a === 'todos' ? 'Todos' : a === 'activo' ? 'Activo' : 'Inactivo' }}
@@ -98,7 +102,7 @@
 
         <!-- Limpiar -->
         <div class="col-auto ms-auto">
-          <button *ngIf="hayFiltros()" class="btn btn-sm btn-link text-danger p-0"
+          <button *ngIf="hayFiltros()" class="btn btn-sm btn-link text-muted p-0"
                   (click)="limpiarFiltros()">
             <i class="bi bi-x-circle me-1"></i>Limpiar filtros
           </button>

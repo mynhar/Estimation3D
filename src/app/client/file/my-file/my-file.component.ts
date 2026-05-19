@@ -50,6 +50,39 @@ export class MyFileComponent implements OnInit {
     cancelado:     'Este expediente fue cancelado y ya no está activo.',
   };
 
+  readonly ESTADO_PROGRESO: Record<string, number> = {
+    nuevo:         15,
+    en_estimacion: 30,
+    estimado:      50,
+    en_oferta:     65,
+    adjudicado:    80,
+    contratado:    100,
+    cancelado:     0,
+  };
+
+  readonly PASOS: { key: string; icon: string; label: string }[] = [
+    { key: 'nuevo',         icon: 'bi-inbox',              label: 'Recibido'    },
+    { key: 'en_estimacion', icon: 'bi-clipboard2-pulse',   label: 'En revisión' },
+    { key: 'estimado',      icon: 'bi-check-circle',       label: 'Estimado'    },
+    { key: 'en_oferta',     icon: 'bi-cash-coin',          label: 'Con ofertas' },
+    { key: 'adjudicado',    icon: 'bi-trophy',             label: 'Adjudicado'  },
+    { key: 'contratado',    icon: 'bi-file-earmark-check', label: 'Contratado'  },
+  ];
+
+  progreso(estado: string): number {
+    return this.ESTADO_PROGRESO[estado] ?? 0;
+  }
+
+  pasoActivo(pasoKey: string, estadoActual: string): 'done' | 'active' | 'pending' {
+    if (estadoActual === 'cancelado') return 'pending';
+    const keys    = ['nuevo', 'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado'];
+    const iActual = keys.indexOf(estadoActual);
+    const iPaso   = keys.indexOf(pasoKey);
+    if (iPaso < iActual)  return 'done';
+    if (iPaso === iActual) return 'active';
+    return 'pending';
+  }
+
   get urlTourSafe(): SafeResourceUrl | null {
     const url = this.detalle()?.url_tour;
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;

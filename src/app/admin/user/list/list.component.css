@@ -3,8 +3,8 @@
 }
 
 .avatar-fallback {
-  background-color: #dee2e6;
-  color: #495057;
+  background-color: #F2EFE6;
+  color: #5C5750;
   user-select: none;
 }
 
@@ -17,6 +17,6 @@
 }
 
 .form-control:focus {
-  box-shadow: none;
-  border-color: #ced4da;
+  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
+  border-color: #D4B96E;
 }

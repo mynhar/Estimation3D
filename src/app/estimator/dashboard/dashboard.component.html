@@ -4,9 +4,11 @@
   <header class="page-header rounded-4 p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <h4 class="fw-bold mb-1">
-          <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>
-          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard Estimador' }}
+        <p class="text-primary small fw-semibold mb-1">
+          <i class="bi bi-clipboard2-pulse me-1"></i>Estimador
+        </p>
+        <h4 class="mb-1">
+          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard' }}
         </h4>
         <p class="text-muted small mb-0">
           Progreso de estimaciones y seguimiento de expedientes.
@@ -77,7 +79,7 @@
             <div class="kpi-icon kpi-icon--active"><i class="bi bi-pencil-square"></i></div>
             <div class="min-w-0">
               <p class="text-muted small mb-0">En estimación</p>
-              <p class="kpi-num fw-bold mb-0" style="color:#4f46e5">{{ activos().length }}</p>
+              <p class="kpi-num fw-bold mb-0 text-primary">{{ activos().length }}</p>
             </div>
           </div>
         </div>
@@ -90,7 +92,7 @@
             <div class="kpi-icon kpi-icon--mercado"><i class="bi bi-people"></i></div>
             <div class="min-w-0">
               <p class="text-muted small mb-0">En mercado</p>
-              <p class="kpi-num fw-bold mb-0" style="color:#d97706">{{ enMercado().length }}</p>
+              <p class="kpi-num fw-bold mb-0 text-warning">{{ enMercado().length }}</p>
             </div>
           </div>
         </div>
@@ -103,7 +105,7 @@
             <div class="kpi-icon kpi-icon--contratado"><i class="bi bi-check-circle-fill"></i></div>
             <div class="min-w-0">
               <p class="text-muted small mb-0">Contratados</p>
-              <p class="kpi-num fw-bold mb-0" style="color:#16a34a">{{ contratados().length }}</p>
+              <p class="kpi-num fw-bold mb-0 text-success">{{ contratados().length }}</p>
             </div>
           </div>
         </div>
@@ -116,7 +118,7 @@
             <div class="kpi-icon kpi-icon--monto"><i class="bi bi-cash-coin"></i></div>
             <div class="min-w-0">
               <p class="text-muted small mb-0">Valor estimado</p>
-              <p class="kpi-num-sm fw-bold mb-0" style="color:#0284c7">
+              <p class="kpi-num-sm fw-bold mb-0 text-primary">
                 {{ formatPrecio(montoTotal()) }}
               </p>
             </div>
@@ -309,7 +311,7 @@
                           font-size="14" font-weight="700" fill="#212529">{{ tasaExito() }}%</text>
                   </svg>
                   <div>
-                    <p class="mb-0 fw-bold fs-5" style="color:#16a34a">{{ contratados().length }}</p>
+                    <p class="mb-0 fw-bold fs-5 text-success">{{ contratados().length }}</p>
                     <p class="text-muted small mb-0">contratado{{ contratados().length !== 1 ? 's' : '' }}</p>
                     <p class="text-muted small mb-0">de {{ totalCompletados() }} estimado{{ totalCompletados() !== 1 ? 's' : '' }}</p>
                   </div>
