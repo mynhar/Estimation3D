@@ -110,7 +110,12 @@ export class MyOfferComponent implements OnInit {
     if (isNaN(d.getTime())) return '—';
     const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
-    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
+    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const p: Record<string, string> = {};
+    for (const part of parts) p[part.type] = part.value;
+    return this.translate.currentLang === 'en'
+      ? `${p['month']} ${p['day']}, ${p['year']}`
+      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 
   formatHora(valor: string): string {

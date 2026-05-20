@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 
 interface PerfilRow {
@@ -38,7 +38,8 @@ const BUCKET   = 'archivos';
   styleUrl: './perfil.component.css',
 })
 export class PerfilComponent implements OnInit {
-  private auth = inject(AuthSupabaseService);
+  private auth      = inject(AuthSupabaseService);
+  private translate = inject(TranslateService);
 
   user = toSignal(this.auth.user$);
 
@@ -218,8 +219,16 @@ export class PerfilComponent implements OnInit {
   get memberSince(): string {
     const created = this.user()?.created_at;
     if (!created) return '';
-    return new Date(created).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'long', year: 'numeric',
-    });
+    const raw = created.includes('T') ? created.split('T')[0] : created;
+    const d   = new Date(`${raw}T00:00:00`);
+    if (isNaN(d.getTime())) return '';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const p: Record<string, string> = {};
+    for (const part of parts) p[part.type] = part.value;
+    return this.translate.currentLang === 'en'
+      ? `${p['month']} ${p['day']}, ${p['year']}`
+      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 }

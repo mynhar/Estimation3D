@@ -737,7 +737,14 @@
     "member_since": "Membre depuis",
     "avatar_updated": "Photo de profil mise à jour.",
     "avatar_size_error": "L'image ne doit pas dépasser 2 Mo.",
-    "saved": "Profil mis à jour avec succès."
+    "saved": "Profil mis à jour avec succès.",
+    "email_readonly": "L'adresse courriel ne peut pas être modifiée.",
+    "status_active": "Actif",
+    "auth_google": "Google",
+    "info_note": "Vos informations personnelles ne sont visibles que par l'équipe d'administration.",
+    "google_account": "Compte Google",
+    "account_status": "État du compte",
+    "auth_method": "Méthode d'authentification"
   },
   "landing": {
     "title": "Estimez vos projets 3D avec précision",

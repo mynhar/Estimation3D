@@ -273,8 +273,13 @@ export class FileUnderEstimationComponent implements OnInit {
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
     const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
-    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
-    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const p: Record<string, string> = {};
+    for (const part of parts) p[part.type] = part.value;
+    return this.translate.currentLang === 'en'
+      ? `${p['month']} ${p['day']}, ${p['year']}`
+      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 
   formatHora(valor: string): string {

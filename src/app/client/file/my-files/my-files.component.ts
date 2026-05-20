@@ -138,8 +138,16 @@ export class MyFilesComponent implements OnInit {
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    return new Date(valor).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'short', year: 'numeric',
-    });
+    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
+    const d   = new Date(`${raw}T00:00:00`);
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const p: Record<string, string> = {};
+    for (const part of parts) p[part.type] = part.value;
+    return this.translate.currentLang === 'en'
+      ? `${p['month']} ${p['day']}, ${p['year']}`
+      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteRow, ESTADOS_ESTIMADO } from '../../models';
@@ -39,6 +39,7 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
 export class EstimatorDashboardComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
+  private translate         = inject(TranslateService);
   private router            = inject(Router);
 
   user        = toSignal(this.auth.user$);
@@ -186,8 +187,15 @@ export class EstimatorDashboardComponent implements OnInit {
   formatFecha(valor: string): string {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
+    const p: Record<string, string> = {};
+    for (const part of parts) p[part.type] = part.value;
+    return this.translate.currentLang === 'en'
+      ? `${p['month']} ${p['day']}, ${p['year']}`
+      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 
   get bienvenida(): string {

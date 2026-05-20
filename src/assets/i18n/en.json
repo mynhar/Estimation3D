@@ -737,7 +737,14 @@
     "member_since": "Member since",
     "avatar_updated": "Profile photo updated.",
     "avatar_size_error": "Image must not exceed 2 MB.",
-    "saved": "Profile updated successfully."
+    "saved": "Profile updated successfully.",
+    "email_readonly": "Email address cannot be changed.",
+    "status_active": "Active",
+    "auth_google": "Google",
+    "info_note": "Your personal information is only visible to the administration team.",
+    "google_account": "Google Account",
+    "account_status": "Account status",
+    "auth_method": "Authentication method"
   },
   "landing": {
     "title": "Estimate your 3D projects with precision",
