@@ -4,15 +4,15 @@
   <header class="dash-header rounded-4 p-4 mb-4 d-flex flex-wrap gap-3 align-items-center justify-content-between">
     <div>
       <h3 class="fw-bold mb-1">
-        Hola{{ bienvenida ? ', ' + bienvenida : '' }}
+        {{ 'dashboard_client.welcome' | translate }}{{ bienvenida ? ', ' + bienvenida : '' }}
       </h3>
       <p class="mb-0 text-muted small">
         <i class="bi bi-grid-1x2 me-1"></i>
-        Aquí está el resumen de tu actividad
+        {{ 'dashboard_client.activity_summary' | translate }}
       </p>
     </div>
     <a routerLink="/client/file/create" class="btn btn-primary px-4 fw-semibold">
-      <i class="bi bi-plus-lg me-1"></i>Nuevo expediente
+      <i class="bi bi-plus-lg me-1"></i>{{ 'file.new_file' | translate }}
     </a>
   </header>
 
@@ -20,7 +20,7 @@
   @if (cargando()) {
     <div class="d-flex align-items-center justify-content-center py-5 text-muted gap-2">
       <div class="spinner-border spinner-border-sm"></div>
-      <span>Cargando tu panel…</span>
+      <span>{{ 'common.loading' | translate }}</span>
     </div>
 
   <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
@@ -30,12 +30,12 @@
         <div class="empty-icon mx-auto mb-4">
           <i class="bi bi-folder2-open"></i>
         </div>
-        <h5 class="fw-bold mb-2">Todavía no tienes expedientes</h5>
+        <h5 class="fw-bold mb-2">{{ 'dashboard_client.no_files' | translate }}</h5>
         <p class="text-muted mb-4" style="max-width:380px;margin-inline:auto">
-          Crea tu primer expediente para comenzar el proceso de estimación de tu proyecto.
+          {{ 'dashboard_client.no_files_text' | translate }}
         </p>
         <a routerLink="/client/file/create" class="btn btn-primary px-4 fw-semibold">
-          <i class="bi bi-plus-lg me-1"></i>Crear primer expediente
+          <i class="bi bi-plus-lg me-1"></i>{{ 'dashboard_client.create_first' | translate }}
         </a>
       </div>
     </div>
@@ -48,13 +48,13 @@
 
       <div class="col-6 col-xl-3">
         <div class="kpi-card kpi-total card border-0 shadow-sm rounded-4 h-100"
-             ngbTooltip="Total de expedientes registrados" placement="bottom">
+             [ngbTooltip]="'dashboard_client.tooltip_total' | translate" placement="bottom">
           <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
             <div class="kpi-icon kpi-icon--total">
               <i class="bi bi-folder2-open"></i>
             </div>
             <div>
-              <p class="kpi-label">Total</p>
+              <p class="kpi-label">{{ 'common.total' | translate }}</p>
               <p class="kpi-num kpi-num--total">{{ total() }}</p>
             </div>
           </div>
@@ -63,13 +63,13 @@
 
       <div class="col-6 col-xl-3">
         <div class="kpi-card kpi-proceso card border-0 shadow-sm rounded-4 h-100"
-             ngbTooltip="Expedientes activos en el flujo de trabajo" placement="bottom">
+             [ngbTooltip]="'dashboard_client.tooltip_in_progress' | translate" placement="bottom">
           <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
             <div class="kpi-icon kpi-icon--proceso">
               <i class="bi bi-hourglass-split"></i>
             </div>
             <div>
-              <p class="kpi-label">En proceso</p>
+              <p class="kpi-label">{{ 'dashboard_client.in_progress' | translate }}</p>
               <p class="kpi-num kpi-num--proceso">{{ enProceso() }}</p>
             </div>
           </div>
@@ -80,14 +80,14 @@
         <div class="kpi-card card border-0 shadow-sm rounded-4 h-100"
              [class.kpi-oferta]="true"
              [class.kpi-oferta--activa]="conOfertasPendientes() > 0"
-             ngbTooltip="Expedientes con ofertas de constructores para revisar" placement="bottom">
+             [ngbTooltip]="'dashboard_client.tooltip_offers' | translate" placement="bottom">
           <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
             <div class="kpi-icon kpi-icon--oferta">
               <i class="bi" [class.bi-bell-fill]="conOfertasPendientes() > 0"
                             [class.bi-bell]="conOfertasPendientes() === 0"></i>
             </div>
             <div>
-              <p class="kpi-label">Ofertas pendientes</p>
+              <p class="kpi-label">{{ 'dashboard_client.pending_offers' | translate }}</p>
               <p class="kpi-num kpi-num--oferta">{{ conOfertasPendientes() }}</p>
             </div>
           </div>
@@ -96,13 +96,13 @@
 
       <div class="col-6 col-xl-3">
         <div class="kpi-card kpi-ok card border-0 shadow-sm rounded-4 h-100"
-             ngbTooltip="Expedientes con contrato finalizado" placement="bottom">
+             [ngbTooltip]="'dashboard_client.tooltip_completed' | translate" placement="bottom">
           <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
             <div class="kpi-icon kpi-icon--ok">
               <i class="bi bi-trophy"></i>
             </div>
             <div>
-              <p class="kpi-label">Completados</p>
+              <p class="kpi-label">{{ 'dashboard_client.completed' | translate }}</p>
               <p class="kpi-num kpi-num--ok">{{ completados() }}</p>
             </div>
           </div>
@@ -119,15 +119,18 @@
         </div>
         <div class="flex-grow-1">
           <p class="fw-semibold mb-0 text-dark">
-            {{ conOfertasPendientes() === 1 ? 'Un expediente tiene' : conOfertasPendientes() + ' expedientes tienen' }}
-            ofertas de constructores para revisar
+            @if (conOfertasPendientes() === 1) {
+              {{ 'dashboard_client.banner_single' | translate }}
+            } @else {
+              {{ 'dashboard_client.banner_plural' | translate: { count: conOfertasPendientes() } }}
+            }
           </p>
           <p class="small mb-0 text-warning-emphasis">
-            Compara las propuestas y selecciona la mejor para tu proyecto.
+            {{ 'dashboard_client.compare_text' | translate }}
           </p>
         </div>
         <a routerLink="/client/offers-received" class="btn btn-warning fw-semibold flex-shrink-0">
-          <i class="bi bi-eye me-1"></i>Revisar ofertas
+          <i class="bi bi-eye me-1"></i>{{ 'dashboard_client.review_offers' | translate }}
         </a>
       </div>
     }
@@ -141,10 +144,10 @@
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex justify-content-between align-items-center">
             <span class="fw-semibold">
-              <i class="bi bi-list-ul me-2 text-primary"></i>Mis expedientes
+              <i class="bi bi-list-ul me-2 text-primary"></i>{{ 'file.my_files' | translate }}
             </span>
             <a routerLink="/client/file/my-files" class="btn btn-outline-secondary btn-sm">
-              Ver todos <i class="bi bi-arrow-right ms-1"></i>
+              {{ 'common.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
             </a>
           </div>
 
@@ -157,23 +160,23 @@
                   <div class="d-flex align-items-center gap-2 flex-wrap text-truncate">
                     <i class="bi {{ cfg(exp.estado).icon }} flex-shrink-0"
                        [style.color]="cfg(exp.estado).color"></i>
-                    <span class="fw-semibold text-nowrap">Exp. {{ exp.numero }}</span>
-                    @if (exp.servicio?.nombre_es) {
+                    <span class="fw-semibold text-nowrap">{{ 'file.exp_abbr' | translate }} {{ exp.numero }}</span>
+                    @if (servicioNombre(exp.servicio)) {
                       <span class="text-muted small text-truncate">
-                        · {{ exp.servicio!.nombre_es }}
+                        · {{ servicioNombre(exp.servicio) }}
                       </span>
                     }
                   </div>
                   <span class="est-badge badge flex-shrink-0"
                         [style.background-color]="cfg(exp.estado).color"
                         [style.color]="cfg(exp.estado).textColor">
-                    {{ cfg(exp.estado).label }}
+                    {{ ('state.' + exp.estado) | translate }}
                   </span>
                 </div>
 
                 <!-- Siguiente paso -->
                 <p class="exp-next-step mb-2">
-                  <i class="bi bi-arrow-right-circle-fill me-1"></i>{{ cfg(exp.estado).desc }}
+                  <i class="bi bi-arrow-right-circle-fill me-1"></i>{{ ('state_desc.' + exp.estado) | translate }}
                 </p>
 
                 <!-- Barra de progreso + fecha + acción contextual -->
@@ -197,7 +200,7 @@
                     @if (exp.estado === 'en_oferta') {
                       <a routerLink="/client/offers-received"
                          class="btn btn-warning btn-sm py-0 px-2 fw-semibold">
-                        <i class="bi bi-eye me-1"></i>Ver
+                        <i class="bi bi-eye me-1"></i>{{ 'common.view' | translate }}
                       </a>
                     }
                   </div>
@@ -217,14 +220,14 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+              <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
             </span>
           </div>
           <div class="card-body d-flex flex-column align-items-center py-4 px-3">
 
             <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
               <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-              @for (seg of donutSegments(); track seg.label) {
+              @for (seg of donutSegments(); track seg.key) {
                 <circle cx="70" cy="70" [attr.r]="R" fill="none"
                         [attr.stroke]="seg.color" stroke-width="18"
                         [attr.stroke-dasharray]="seg.dasharray"
@@ -232,7 +235,7 @@
                         transform="rotate(-90 70 70)"/>
               }
               <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
-              <text x="70" y="83" text-anchor="middle" class="donut-sub">expedientes</text>
+              <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.files_count' | translate }}</text>
             </svg>
 
             <div class="w-100 mt-3">
@@ -240,7 +243,7 @@
                 <div class="d-flex align-items-center justify-content-between legend-row">
                   <div class="d-flex align-items-center gap-2">
                     <i class="bi {{ e.icon }}" [style.color]="e.color"></i>
-                    <span class="small">{{ e.label }}</span>
+                    <span class="small">{{ ('state.' + e.key) | translate }}</span>
                   </div>
                   <div class="d-flex align-items-center gap-2">
                     <div class="progress legend-bar">
@@ -262,7 +265,7 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-lightning-charge me-2 text-primary"></i>Acciones rápidas
+              <i class="bi bi-lightning-charge me-2 text-primary"></i>{{ 'dashboard_builder.quick_actions' | translate }}
             </span>
           </div>
           <div class="card-body d-flex flex-column gap-2 py-3 px-3">
@@ -270,7 +273,7 @@
             <a routerLink="/client/file/create"
                class="quick-btn btn btn-outline-primary d-flex align-items-center gap-2 text-start">
               <span class="quick-icon"><i class="bi bi-plus-circle"></i></span>
-              <span>Nuevo expediente</span>
+              <span>{{ 'file.new_file' | translate }}</span>
             </a>
 
             <a routerLink="/client/offers-received"
@@ -278,7 +281,7 @@
                [class.btn-warning]="conOfertasPendientes() > 0"
                [class.btn-outline-secondary]="conOfertasPendientes() === 0">
               <span class="quick-icon"><i class="bi bi-envelope-open"></i></span>
-              <span class="flex-grow-1">Ofertas recibidas</span>
+              <span class="flex-grow-1">{{ 'nav.offres_recues' | translate }}</span>
               @if (conOfertasPendientes() > 0) {
                 <span class="badge bg-dark rounded-pill">{{ conOfertasPendientes() }}</span>
               }
@@ -287,7 +290,7 @@
             <a routerLink="/client/file/my-files"
                class="quick-btn btn btn-outline-secondary d-flex align-items-center gap-2 text-start">
               <span class="quick-icon"><i class="bi bi-folder2"></i></span>
-              <span>Mis expedientes</span>
+              <span>{{ 'file.my_files' | translate }}</span>
             </a>
 
           </div>

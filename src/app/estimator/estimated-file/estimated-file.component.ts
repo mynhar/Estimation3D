@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
@@ -11,19 +12,19 @@ import {
   EstimacionDetalle,
   ArchivoRow,
   ESTADO_BADGE_ESTIMADOR,
-  ESTADO_LABEL_ESTIMADOR,
 } from '../../models';
 
 @Component({
   selector: 'app-estimated-file',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './estimated-file.component.html',
   styleUrl:    './estimated-file.component.css',
 })
 export class EstimatedFileComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private sanitizer         = inject(DomSanitizer);
+  private translate         = inject(TranslateService);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -192,10 +193,6 @@ export class EstimatedFileComponent implements OnInit {
     return ESTADO_BADGE_ESTIMADOR[estado ?? ''] ?? 'bg-light text-dark';
   }
 
-  estadoLabel(estado: string | undefined): string {
-    return ESTADO_LABEL_ESTIMADOR[estado ?? ''] ?? estado ?? '—';
-  }
-
   publicUrl(storagePath: string): string {
     return this.archivoService.publicUrl(storagePath);
   }
@@ -206,7 +203,7 @@ export class EstimatedFileComponent implements OnInit {
 
   formatCosto(valor: number | null): string {
     if (valor === null) return '—';
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
   }
 
   formatTamano(bytes: number): string {
@@ -219,8 +216,10 @@ export class EstimatedFileComponent implements OnInit {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
@@ -237,50 +236,54 @@ export class EstimatedFileComponent implements OnInit {
     const est = this.estimacion();
     if (!d) return;
 
+    const t = (key: string) => this.translate.instant(key);
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+
     const costoStr = est?.costo_estimado != null
-      ? `₡ ${est.costo_estimado.toLocaleString('es-CR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'CRC' }).format(est.costo_estimado)
       : '—';
 
     const docEstimacion = est ? `
       <div class="row g-4">
-        <div class="col-6"><p class="text-muted small mb-1">Fecha de visita real</p><p class="fw-semibold mb-0">${this.formatFecha(est.fecha_visita_real)}</p></div>
-        <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(est.fecha_visita_real)}</p></div>
+        <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.real_visit_date')}</p><p class="fw-semibold mb-0">${this.formatFecha(est.fecha_visita_real)}</p></div>
+        <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.check_visit_time')}</p><p class="fw-semibold mb-0">${this.formatHora(est.fecha_visita_real)}</p></div>
         <div class="col-12"><hr class="my-0"/></div>
-        <div class="col-12"><p class="text-muted small mb-1">Problemas observados</p><p class="mb-0" style="white-space:pre-wrap">${est.descripcion_problemas || '—'}</p></div>
-        <div class="col-6"><p class="text-muted small mb-1">Costo estimado (₡)</p><p class="fw-semibold mb-0">${costoStr}</p></div>
-        <div class="col-12"><p class="text-muted small mb-1">Notas internas</p><p class="mb-0" style="white-space:pre-wrap">${est.notas_internas || '—'}</p></div>
-      </div>` : '<p class="text-muted">Sin documentación registrada aún.</p>';
+        <div class="col-12"><p class="text-muted small mb-1">${t('estimator_file.problems_observed')}</p><p class="mb-0" style="white-space:pre-wrap">${est.descripcion_problemas || '—'}</p></div>
+        <div class="col-6"><p class="text-muted small mb-1">${t('file.estimated_cost')}</p><p class="fw-semibold mb-0">${costoStr}</p></div>
+        <div class="col-12"><p class="text-muted small mb-1">${t('estimator_file.internal_notes')}</p><p class="mb-0" style="white-space:pre-wrap">${est.notas_internas || '—'}</p></div>
+      </div>` : `<p class="text-muted">${t('estimator_file.print_no_doc')}</p>`;
 
     const html = `<!DOCTYPE html>
-<html lang="es">
+<html lang="${this.translate.currentLang}">
 <head>
   <meta charset="UTF-8">
-  <title>Expediente ${d.numero}</title>
+  <title>${t('file.exp_abbr')} ${d.numero}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
   <style>body{padding:2rem} @page{margin:1.5cm} .card{border:1px solid #dee2e6!important}</style>
 </head>
 <body>
   <div class="container" style="max-width:720px">
-    <h4 class="fw-semibold mb-1">Expediente ${d.numero} — Estimación completada</h4>
-    <p class="text-muted mb-4">Estimador: <strong>${d.estimador_nombre}</strong></p>
+    <h4 class="fw-semibold mb-1">${t('file.exp_abbr')} ${d.numero} — ${t('estimator_file.print_estimation_completed')}</h4>
+    <p class="text-muted mb-4">${t('role.estimador')}: <strong>${d.estimador_nombre}</strong></p>
     <div class="card mb-4"><div class="card-body p-4"><div class="row g-4">
-      <div class="col-6"><p class="text-muted small mb-1">Número</p><p class="fw-semibold mb-0">${d.numero}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">Servicio</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('file.number')}</p><p class="fw-semibold mb-0">${d.numero}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('file.service')}</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
       <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">Cliente</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">Teléfono</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('builder_offer.client_label')}</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('common.phone')}</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
       <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">Dirección</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">Referencia</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">Provincia</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">Cantón</p><p class="fw-semibold mb-0">${d.canton}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">Distrito</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('common.address')}</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('file.reference')}</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">${t('file.province')}</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">${t('file.canton')}</p><p class="fw-semibold mb-0">${d.canton}</p></div>
+      <div class="col-4"><p class="text-muted small mb-1">${t('file.district')}</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
       <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">Fecha de visita programada</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">Hora de visita</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.scheduled_visit')}</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
+      <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.check_visit_time')}</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
     </div></div></div>
     <div class="card"><div class="card-body p-4">
-      <h5 class="fw-semibold mb-4">Documentación de la estimación</h5>
+      <h5 class="fw-semibold mb-4">${t('estimator_file.estimation_doc_title')}</h5>
       ${docEstimacion}
     </div></div>
   </div>

@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   template: `
     <div class="container mt-5">
       <div class="row justify-content-center">
@@ -18,12 +19,12 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
               <ul class="nav nav-tabs mb-4">
                 <li class="nav-item">
                   <button class="nav-link" [class.active]="vista() === 'login'" (click)="cambiarVista('login')">
-                    Iniciar sesión
+                    {{ 'auth.sign_in' | translate }}
                   </button>
                 </li>
                 <li class="nav-item">
                   <button class="nav-link" [class.active]="vista() === 'registro'" (click)="cambiarVista('registro')">
-                    Registrarse
+                    {{ 'auth.sign_up' | translate }}
                   </button>
                 </li>
               </ul>
@@ -32,29 +33,29 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
               @if (vista() === 'login') {
                 <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
                   <div class="mb-3">
-                    <label class="form-label">Correo electrónico</label>
+                    <label class="form-label">{{ 'common.email' | translate }}</label>
                     <input type="email" class="form-control" formControlName="email"
-                      placeholder="correo@ejemplo.com" autocomplete="email" />
+                      [placeholder]="'auth.email_placeholder' | translate" autocomplete="email" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Contraseña</label>
+                    <label class="form-label">{{ 'common.password' | translate }}</label>
                     <input type="password" class="form-control" formControlName="password"
                       placeholder="••••••••" autocomplete="current-password" />
                   </div>
 
                   @if (errorLogin()) {
-                    <div class="alert alert-danger py-2 small mb-3">{{ errorLogin() }}</div>
+                    <div class="alert alert-danger py-2 small mb-3">{{ errorLogin() | translate }}</div>
                   }
 
                   <button type="submit" class="btn btn-primary w-100"
                     [disabled]="loginForm.invalid || loading()">
-                    {{ loading() ? 'Cargando...' : 'Ingresar' }}
+                    {{ loading() ? ('common.loading' | translate) : ('auth.sign_in' | translate) }}
                   </button>
                 </form>
 
                 <div class="d-flex align-items-center my-3">
                   <hr class="flex-grow-1" />
-                  <span class="px-2 text-muted small">o</span>
+                  <span class="px-2 text-muted small">{{ 'auth.or_divider' | translate }}</span>
                   <hr class="flex-grow-1" />
                 </div>
 
@@ -67,7 +68,7 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
                     <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                     <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                   </svg>
-                  Continuar con Google
+                  {{ 'auth.google_btn' | translate }}
                 </button>
               }
 
@@ -76,68 +77,68 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
 
                 @if (registroExitoso()) {
                   <div class="alert alert-success text-center">
-                    <strong>Usuario registrado correctamente. Registro completo!</strong>
+                    <strong>{{ 'auth.register_success' | translate }}</strong>
                   </div>
                 } @else {
                   <form [formGroup]="registroForm" (ngSubmit)="onRegistro()">
                     <div class="row g-3 mb-3">
                       <div class="col-6">
-                        <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ 'common.name' | translate }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" formControlName="nombre"
-                          placeholder="Juan" />
+                          [placeholder]="'common.name' | translate" />
                         @if (campoInvalido(registroForm, 'nombre')) {
-                          <div class="invalid-feedback d-block small">Nombre requerido.</div>
+                          <div class="invalid-feedback d-block small">{{ 'admin_users.name_required' | translate }}</div>
                         }
                       </div>
                       <div class="col-6">
-                        <label class="form-label">Apellido <span class="text-danger">*</span></label>
+                        <label class="form-label">{{ 'common.lastname' | translate }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" formControlName="apellido"
-                          placeholder="Pérez" />
+                          [placeholder]="'common.lastname' | translate" />
                         @if (campoInvalido(registroForm, 'apellido')) {
-                          <div class="invalid-feedback d-block small">Apellido requerido.</div>
+                          <div class="invalid-feedback d-block small">{{ 'admin_users.lastname_required' | translate }}</div>
                         }
                       </div>
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                      <label class="form-label">{{ 'common.email' | translate }} <span class="text-danger">*</span></label>
                       <input type="email" class="form-control" formControlName="email"
-                        placeholder="correo@ejemplo.com" autocomplete="email" />
+                        [placeholder]="'auth.email_placeholder' | translate" autocomplete="email" />
                       @if (campoInvalido(registroForm, 'email')) {
-                        <div class="invalid-feedback d-block small">Correo electrónico inválido.</div>
+                        <div class="invalid-feedback d-block small">{{ 'admin_users.email_invalid' | translate }}</div>
                       }
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Contraseña <span class="text-danger">*</span></label>
+                      <label class="form-label">{{ 'common.password' | translate }} <span class="text-danger">*</span></label>
                       <input type="password" class="form-control" formControlName="password"
-                        placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+                        [placeholder]="'admin_users.min_chars_hint' | translate" autocomplete="new-password" />
                       @if (campoInvalido(registroForm, 'password')) {
-                        <div class="invalid-feedback d-block small">Mínimo 8 caracteres.</div>
+                        <div class="invalid-feedback d-block small">{{ 'admin_users.min_chars' | translate }}</div>
                       }
                     </div>
 
                     <div class="mb-3">
-                      <label class="form-label">Teléfono <span class="text-danger">*</span></label>
+                      <label class="form-label">{{ 'common.phone' | translate }} <span class="text-danger">*</span></label>
                       <input type="tel" class="form-control" formControlName="telefono"
                         placeholder="+52 55 1234 5678" />
                       @if (campoInvalido(registroForm, 'telefono')) {
-                        <div class="invalid-feedback d-block small">Teléfono requerido.</div>
+                        <div class="invalid-feedback d-block small">{{ 'auth.phone_required' | translate }}</div>
                       }
                     </div>
 
                     <div class="mb-4">
-                      <label class="form-label">Rol de acceso</label>
-                      <input type="text" class="form-control" value="Cliente" disabled />
+                      <label class="form-label">{{ 'auth.role_label' | translate }}</label>
+                      <input type="text" class="form-control" [value]="'role.cliente' | translate" disabled />
                     </div>
 
                     @if (errorRegistro()) {
-                      <div class="alert alert-danger py-2 small mb-3">{{ errorRegistro() }}</div>
+                      <div class="alert alert-danger py-2 small mb-3">{{ errorRegistro() | translate }}</div>
                     }
 
                     <button type="submit" class="btn btn-success w-100"
                       [disabled]="registroForm.invalid || loading()">
-                      {{ loading() ? 'Registrando...' : 'Crear cuenta' }}
+                      {{ loading() ? ('auth.registering' | translate) : ('auth.create_account' | translate) }}
                     </button>
                   </form>
                 }
@@ -198,8 +199,8 @@ export class LoginComponent {
     } catch (error: any) {
       this.errorLogin.set(
         error?.message?.includes('Invalid login credentials')
-          ? 'Correo o contraseña incorrectos.'
-          : 'Error al iniciar sesión. Intenta de nuevo.'
+          ? 'auth.invalid_credentials'
+          : 'auth.login_error'
       );
     } finally {
       this.loading.set(false);
@@ -226,8 +227,8 @@ export class LoginComponent {
     } catch (error: any) {
       this.errorRegistro.set(
         error?.message?.includes('already registered')
-          ? 'Este correo ya está registrado.'
-          : 'Error al registrar. Intenta de nuevo.'
+          ? 'auth.email_registered'
+          : 'auth.register_error'
       );
     } finally {
       this.loading.set(false);

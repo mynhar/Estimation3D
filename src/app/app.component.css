@@ -291,12 +291,26 @@
 .mobile-topbar__brand i { color: #D4B96E; font-size: 1.05rem; }
 .mobile-topbar__brand:hover { color: #1A1A1A; text-decoration: none; }
 
+.mobile-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .mobile-topbar__avatar img {
   width: 32px; height: 32px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #EAE7DF;
   display: block;
+}
+
+/* ── Lang toggle en sidebar ──────────────────────────────────────────────── */
+.sidebar-lang {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0.75rem 0.25rem;
 }
 
 /* ── Backdrop ────────────────────────────────────────────────────────────── */

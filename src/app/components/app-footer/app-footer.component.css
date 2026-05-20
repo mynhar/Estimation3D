@@ -1,0 +1,41 @@
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.6rem;
+  padding: 1rem 1.5rem 1.25rem;
+  margin-top: 2.5rem;
+  border-top: 1px solid #EAE7DF;
+  font-size: 0.68rem;
+  color: #9A938C;
+  letter-spacing: 0.025em;
+  line-height: 1.5;
+}
+
+.app-footer__copy {
+  font-weight: 600;
+  color: #5C5750;
+}
+
+.app-footer__sep {
+  color: #C8C3BA;
+}
+
+.app-footer__rights {
+  text-align: center;
+}
+
+.app-footer__country {
+  font-weight: 600;
+  color: #5C5750;
+}
+
+@media (max-width: 480px) {
+  .app-footer {
+    flex-direction: column;
+    gap: 0.15rem;
+    text-align: center;
+  }
+  .app-footer__sep { display: none; }
+}

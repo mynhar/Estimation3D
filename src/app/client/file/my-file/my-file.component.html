@@ -4,7 +4,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando expediente…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Error / no encontrado ─────────────────────────────────────────────── -->
@@ -14,12 +14,12 @@
         <div class="empty-icon empty-icon--warn">
           <i class="bi bi-exclamation-triangle"></i>
         </div>
-        <h5 class="empty-title">Expediente no encontrado</h5>
+        <h5 class="empty-title">{{ 'file.not_found' | translate }}</h5>
         @if (errorMsg()) {
-          <p class="empty-text text-danger">{{ errorMsg() }}</p>
+          <p class="empty-text text-danger">{{ errorMsg() | translate }}</p>
         }
         <button class="btn btn-outline-secondary btn-sm mt-2" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
         </button>
       </div>
     </div>
@@ -30,7 +30,7 @@
     <header class="page-header rounded-4 p-4 mb-4">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" (click)="volver()" title="Volver a mis expedientes">
+          <button class="btn-back" (click)="volver()" [title]="'file.back_to_files' | translate">
             <i class="bi bi-arrow-left"></i>
           </button>
           <div>
@@ -38,7 +38,7 @@
               <span class="exp-num">{{ detalle()!.numero }}</span>
               <span class="badge rounded-pill px-3 py-1 {{ estadoCfg(detalle()!.estado).clase }}">
                 <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-1"></i>
-                {{ estadoCfg(detalle()!.estado).texto }}
+                {{ ('state.' + detalle()!.estado) | translate }}
               </span>
             </div>
             <p class="text-muted small mb-0 mt-1">{{ detalle()!.servicio_nombre }}</p>
@@ -47,7 +47,7 @@
         <!-- Estado hint chip -->
         <div class="hint-chip">
           <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-2"></i>
-          {{ ESTADO_HINT[detalle()!.estado] }}
+          {{ ('state_desc.' + detalle()!.estado) | translate }}
         </div>
       </div>
     </header>
@@ -55,14 +55,14 @@
     <!-- ── Progreso del expediente + Tour virtual ───────────────────────────── -->
     <section class="exp-progress mb-4" [class.exp-progress--cancelado]="detalle()!.estado === 'cancelado'">
 
-      <!-- Barra de avance (encima del video) ────────────────────────────── -->
+      <!-- Barra de avance ────────────────────────────────────────────────── -->
       <div class="exp-progress__top">
         <div class="exp-progress__meta">
           <span class="exp-progress__heading">
-            <i class="bi bi-graph-up-arrow me-2"></i>Progreso del expediente
+            <i class="bi bi-graph-up-arrow me-2"></i>{{ 'file.progress' | translate }}
           </span>
           @if (detalle()!.estado === 'cancelado') {
-            <span class="exp-progress__pct exp-progress__pct--cancelado">Cancelado</span>
+            <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'state.cancelado' | translate }}</span>
           } @else {
             <span class="exp-progress__pct">{{ progreso(detalle()!.estado) }}%</span>
           }
@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <!-- Tour virtual 3D (entre la barra y el stepper) ─────────────────── -->
+      <!-- Tour virtual 3D ─────────────────────────────────────────────────── -->
       @if (urlTourSafe) {
         <div class="tour-inset">
           <div class="tour-hero__bar">
@@ -85,9 +85,9 @@
               <span class="tour-hero__dot"></span>
             </div>
             <div class="tour-hero__title">
-              <i class="bi bi-badge-3d-fill me-2"></i>Tour virtual 3D del sitio
+              <i class="bi bi-badge-3d-fill me-2"></i>{{ 'file.tour_title' | translate }}
             </div>
-            <span class="tour-hero__badge">Vista inmersiva</span>
+            <span class="tour-hero__badge">{{ 'file.immersive_badge' | translate }}</span>
           </div>
           <div class="ratio ratio-16x9">
             <iframe [src]="urlTourSafe"
@@ -99,7 +99,7 @@
         </div>
       }
 
-      <!-- Stepper de estados (debajo del video) ──────────────────────────── -->
+      <!-- Stepper de estados ──────────────────────────────────────────────── -->
       <div class="exp-steps" [class.exp-steps--cancelado]="detalle()!.estado === 'cancelado'">
         @for (paso of PASOS; track paso.key; let last = $last) {
           <div class="exp-step"
@@ -119,13 +119,13 @@
                 </div>
               }
             </div>
-            <span class="exp-step__label">{{ paso.label }}</span>
+            <span class="exp-step__label">{{ paso.tkey | translate }}</span>
           </div>
         }
 
         @if (detalle()!.estado === 'cancelado') {
           <div class="exp-steps__cancelled">
-            <i class="bi bi-x-circle me-2"></i>Expediente cancelado
+            <i class="bi bi-x-circle me-2"></i>{{ 'file.cancelled' | translate }}
           </div>
         }
       </div>
@@ -141,49 +141,39 @@
         <!-- ── Datos del expediente ──────────────────────────────────────── -->
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-body p-4">
-            <p class="section-label">Datos del expediente</p>
+            <p class="section-label">{{ 'file.data' | translate }}</p>
 
             <div class="row g-3">
               <div class="col-sm-6">
-                <p class="info-label">Servicio</p>
+                <p class="info-label">{{ 'file.service' | translate }}</p>
                 <p class="info-value">{{ detalle()!.servicio_nombre }}</p>
               </div>
               <div class="col-sm-6">
-                <p class="info-label">Número de expediente</p>
+                <p class="info-label">{{ 'file.number' | translate }}</p>
                 <p class="info-value font-monospace">{{ detalle()!.numero }}</p>
               </div>
 
               <div class="col-12"><hr class="divider" /></div>
 
               <div class="col-sm-8">
-                <p class="info-label">Dirección</p>
-                <p class="info-value">{{ detalle()!.direccion }}</p>
+                <p class="info-label">{{ 'common.address' | translate }}</p>
+                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
+                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
+                <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
               </div>
               <div class="col-sm-4">
-                <p class="info-label">Referencia</p>
+                <p class="info-label">{{ 'file.reference' | translate }}</p>
                 <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Provincia</p>
-                <p class="info-value">{{ detalle()!.provincia }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Cantón</p>
-                <p class="info-value">{{ detalle()!.canton }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Distrito</p>
-                <p class="info-value">{{ detalle()!.distrito }}</p>
               </div>
 
               <div class="col-12"><hr class="divider" /></div>
 
               <div class="col-sm-6">
-                <p class="info-label">Visita programada</p>
+                <p class="info-label">{{ 'file.visit_date' | translate }}</p>
                 <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
               </div>
               <div class="col-sm-6">
-                <p class="info-label">Fecha de solicitud</p>
+                <p class="info-label">{{ 'file.request_date' | translate }}</p>
                 <p class="info-value">{{ formatFecha(detalle()!.creado_en) }}</p>
               </div>
             </div>
@@ -194,7 +184,7 @@
         @if (detalle()!.estimador_nombre) {
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4">
-              <p class="section-label">Informe del estimador</p>
+              <p class="section-label">{{ 'file.estimator_report' | translate }}</p>
 
               <!-- Estimador asignado -->
               <div class="estimador-chip mb-4">
@@ -203,18 +193,18 @@
                 </div>
                 <div>
                   <p class="estimador-nombre mb-0">{{ detalle()!.estimador_nombre }}</p>
-                  <p class="estimador-rol mb-0">Estimador asignado</p>
+                  <p class="estimador-rol mb-0">{{ 'dashboard_client.assigned_estimator' | translate }}</p>
                 </div>
               </div>
 
               @if (detalle()!.fecha_visita_real) {
                 <div class="row g-3 mb-3">
                   <div class="col-sm-6">
-                    <p class="info-label">Fecha real de visita</p>
+                    <p class="info-label">{{ 'file.real_visit_date' | translate }}</p>
                     <p class="info-value">{{ formatFecha(detalle()!.fecha_visita_real) }}</p>
                   </div>
                   <div class="col-sm-6">
-                    <p class="info-label">Hora</p>
+                    <p class="info-label">{{ 'file.hour' | translate }}</p>
                     <p class="info-value">{{ formatHora(detalle()!.fecha_visita_real) }}</p>
                   </div>
                 </div>
@@ -223,7 +213,7 @@
 
               @if (detalle()!.descripcion_problemas) {
                 <div class="mb-3">
-                  <p class="info-label">Situación observada</p>
+                  <p class="info-label">{{ 'file.situation' | translate }}</p>
                   <p class="descripcion-block">{{ detalle()!.descripcion_problemas }}</p>
                 </div>
               }
@@ -231,16 +221,16 @@
               <!-- Costo aproximado -->
               @if (detalle()!.costo_estimado !== null) {
                 <div class="costo-range-card rounded-3 p-3">
-                  <p class="info-label mb-2">Costo aproximado de la obra</p>
+                  <p class="info-label mb-2">{{ 'file.estimated_cost' | translate }}</p>
                   <div class="d-flex align-items-center gap-3 flex-wrap">
                     <div>
-                      <p class="costo-tag mb-0">Mínimo</p>
+                      <p class="costo-tag mb-0">{{ 'file.min' | translate }}</p>
                       <p class="costo-valor mb-0">{{ formatCosto(detalle()!.costo_estimado) }}</p>
                     </div>
                     @if (detalle()!.costo_estimado_max !== null) {
                       <i class="bi bi-arrow-right text-muted"></i>
                       <div>
-                        <p class="costo-tag mb-0">Máximo</p>
+                        <p class="costo-tag mb-0">{{ 'file.max' | translate }}</p>
                         <p class="costo-valor mb-0">{{ formatCosto(detalle()!.costo_estimado_max) }}</p>
                       </div>
                     }
@@ -249,12 +239,12 @@
               } @else if (!detalle()!.fecha_visita_real) {
                 <div class="pending-notice">
                   <i class="bi bi-hourglass-split me-2"></i>
-                  La visita de evaluación aún no se ha realizado.
+                  {{ 'file.visit_pending' | translate }}
                 </div>
               } @else {
                 <div class="pending-notice">
                   <i class="bi bi-calculator me-2"></i>
-                  El costo estimado aún no ha sido definido.
+                  {{ 'file.cost_pending' | translate }}
                 </div>
               }
 
@@ -263,13 +253,13 @@
                 <hr class="divider my-4" />
                 <div class="d-flex align-items-center justify-content-between mb-3">
                   <p class="section-label mb-0">
-                    <i class="bi bi-images me-1 text-primary"></i>Fotos del sitio
+                    <i class="bi bi-images me-1 text-primary"></i>{{ 'file.site_photos' | translate }}
                     <span class="archivo-count">{{ fotos().length }}</span>
                   </p>
                 </div>
                 <div class="photos-grid">
                   @for (foto of fotos(); track foto.id) {
-                    <div class="photo-thumb" (click)="abrirFoto(foto)" title="{{ foto.nombre_archivo }}">
+                    <div class="photo-thumb" (click)="abrirFoto(foto)" [title]="foto.nombre_archivo">
                       <img [src]="publicUrl(foto.url_storage)"
                            [alt]="foto.nombre_archivo"
                            class="photo-thumb__img" />
@@ -283,7 +273,7 @@
                 <hr class="divider my-4" />
                 <div class="d-flex align-items-center justify-content-between mb-3">
                   <p class="section-label mb-0">
-                    <i class="bi bi-file-earmark-text me-1 text-primary"></i>Documentos técnicos
+                    <i class="bi bi-file-earmark-text me-1 text-primary"></i>{{ 'file.technical_docs' | translate }}
                     <span class="archivo-count">{{ documentos().length }}</span>
                   </p>
                 </div>
@@ -300,7 +290,7 @@
                       <div class="file-row__actions">
                         <a [href]="publicUrl(doc.url_storage)" target="_blank"
                            class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
-                          <i class="bi bi-box-arrow-up-right"></i>Abrir
+                          <i class="bi bi-box-arrow-up-right"></i>{{ 'common.open' | translate }}
                         </a>
                       </div>
                     </div>
@@ -314,10 +304,10 @@
           <!-- Sin estimador aún -->
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4">
-              <p class="section-label">Informe del estimador</p>
+              <p class="section-label">{{ 'file.estimator_report' | translate }}</p>
               <div class="pending-notice">
                 <i class="bi bi-hourglass-split me-2"></i>
-                Aún no se ha asignado un estimador a tu expediente.
+                {{ 'file.no_estimator' | translate }}
               </div>
             </div>
           </div>
@@ -333,7 +323,7 @@
           @if (ofertaAceptada()) {
             <div class="card border-0 shadow-sm rounded-4">
               <div class="card-body p-4">
-                <p class="section-label">Constructor seleccionado</p>
+                <p class="section-label">{{ 'offer.selected_builder' | translate }}</p>
 
                 <!-- Perfil del constructor -->
                 <div class="constructor-chip mb-4">
@@ -356,39 +346,39 @@
                 <!-- Detalles de la oferta -->
                 <div class="row g-3">
                   <div class="col-12">
-                    <p class="info-label">Precio acordado</p>
+                    <p class="info-label">{{ 'offer.agreed_price' | translate }}</p>
                     <p class="precio-valor mb-0">{{ formatCosto(ofertaAceptada()!.precio) }}</p>
                   </div>
 
                   <div class="col-6">
-                    <p class="info-label">Plazo estimado</p>
+                    <p class="info-label">{{ 'offer.deadline' | translate }}</p>
                     <p class="info-value">
                       @if (ofertaAceptada()!.plazo_semanas_min !== null && ofertaAceptada()!.plazo_semanas_max !== null) {
-                        {{ ofertaAceptada()!.plazo_semanas_min }}–{{ ofertaAceptada()!.plazo_semanas_max }} semanas
+                        {{ ofertaAceptada()!.plazo_semanas_min }}–{{ ofertaAceptada()!.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
                       } @else if (ofertaAceptada()!.plazo_semanas_min !== null) {
-                        {{ ofertaAceptada()!.plazo_semanas_min }} semanas
+                        {{ ofertaAceptada()!.plazo_semanas_min }} {{ 'offer.weeks' | translate }}
                       } @else { — }
                     </p>
                   </div>
 
                   <div class="col-6">
-                    <p class="info-label">Garantía</p>
+                    <p class="info-label">{{ 'offer.warranty' | translate }}</p>
                     <p class="info-value">
                       @if (ofertaAceptada()!.garantia_anos !== null) {
-                        {{ ofertaAceptada()!.garantia_anos }} año{{ ofertaAceptada()!.garantia_anos !== 1 ? 's' : '' }}
+                        {{ ofertaAceptada()!.garantia_anos }} {{ 'offer.years' | translate }}
                       } @else { — }
                     </p>
                   </div>
 
                   <div class="col-12">
-                    <p class="info-label">Fecha de inicio propuesta</p>
+                    <p class="info-label">{{ 'offer.start_date' | translate }}</p>
                     <p class="info-value">{{ formatFecha(ofertaAceptada()!.fecha_inicio) }}</p>
                   </div>
 
                   @if (ofertaAceptada()!.descripcion) {
                     <div class="col-12">
                       <hr class="divider" />
-                      <p class="info-label mt-3">Descripción del enfoque</p>
+                      <p class="info-label mt-3">{{ 'offer.approach' | translate }}</p>
                       <p class="descripcion-block">{{ ofertaAceptada()!.descripcion }}</p>
                     </div>
                   }
@@ -396,7 +386,7 @@
                   <!-- Email del constructor -->
                   @if (ofertaAceptada()!.constructor_email) {
                     <div class="col-12">
-                      <p class="info-label">Correo</p>
+                      <p class="info-label">{{ 'offer.email' | translate }}</p>
                       <a href="mailto:{{ ofertaAceptada()!.constructor_email }}"
                          class="text-decoration-none text-primary small">
                         <i class="bi bi-envelope me-1"></i>{{ ofertaAceptada()!.constructor_email }}
@@ -415,13 +405,13 @@
                 <div class="pending-icon mb-3">
                   <i class="bi bi-people fs-2"></i>
                 </div>
-                <p class="fw-semibold mb-1">Propuestas disponibles</p>
+                <p class="fw-semibold mb-1">{{ 'file.offers_available' | translate }}</p>
                 <p class="text-muted small mb-3">
-                  Hay constructores interesados en tu proyecto. Revisa las propuestas y selecciona la que mejor se adapte.
+                  {{ 'file.offers_available_text' | translate }}
                 </p>
                 <a routerLink="/client/offers-received"
                    class="btn btn-warning w-100 fw-semibold d-flex align-items-center justify-content-center gap-2">
-                  <i class="bi bi-eye"></i>Ver propuestas
+                  <i class="bi bi-eye"></i>{{ 'file.review_proposals' | translate }}
                 </a>
               </div>
             </div>
@@ -433,9 +423,9 @@
                 <div class="pending-icon mb-3">
                   <i class="bi bi-building fs-2"></i>
                 </div>
-                <p class="fw-semibold mb-1">Sin constructor asignado</p>
+                <p class="fw-semibold mb-1">{{ 'file.no_builder' | translate }}</p>
                 <p class="text-muted small mb-0">
-                  Una vez que la estimación esté completa, los constructores podrán enviar propuestas para tu proyecto.
+                  {{ 'file.waiting_offers' | translate }}
                 </p>
               </div>
             </div>
@@ -445,7 +435,7 @@
           <div class="d-grid">
             <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
                     (click)="volver()">
-              <i class="bi bi-arrow-left"></i>Volver a mis expedientes
+              <i class="bi bi-arrow-left"></i>{{ 'file.back_to_files' | translate }}
             </button>
           </div>
 
@@ -464,6 +454,6 @@
     <button class="lightbox-close" (click)="cerrarFoto()">
       <i class="bi bi-x-lg"></i>
     </button>
-    <img [src]="fotoAmpliada()!" class="lightbox-img" (click)="$event.stopPropagation()" alt="Foto ampliada" />
+    <img [src]="fotoAmpliada()!" class="lightbox-img" (click)="$event.stopPropagation()" alt="" />
   </div>
 }

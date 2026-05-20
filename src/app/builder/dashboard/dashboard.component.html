@@ -5,23 +5,21 @@
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
         <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-building me-1"></i>Constructor
+          <i class="bi bi-building me-1"></i>{{ 'role.constructeur' | translate }}
         </p>
         <h4 class="mb-1">
-          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard' }}
+          {{ bienvenida ? ('dashboard_client.welcome' | translate) + ', ' + bienvenida : ('dashboard_builder.title' | translate) }}
         </h4>
-        <p class="text-muted small mb-0">
-          Resumen de tus ofertas y el estado de tus proyectos.
-        </p>
+        <p class="text-muted small mb-0">{{ 'dashboard_builder.subtitle' | translate }}</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <a routerLink="/builder/my-offers"
            class="btn btn-outline-primary btn-sm fw-semibold">
-          <i class="bi bi-list-ul me-1"></i>Mis ofertas
+          <i class="bi bi-list-ul me-1"></i>{{ 'nav.mes_offres' | translate }}
         </a>
         <a routerLink="/builder/available-files"
            class="btn btn-primary btn-sm fw-semibold">
-          <i class="bi bi-search me-1"></i>Ver expedientes
+          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
         </a>
       </div>
     </div>
@@ -31,7 +29,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando dashboard…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
@@ -41,14 +39,11 @@
         <div class="empty-icon">
           <i class="bi bi-clipboard2-x"></i>
         </div>
-        <p class="empty-title">Sin ofertas enviadas</p>
-        <p class="empty-text">
-          Explora los expedientes disponibles y envía tu primera propuesta
-          para comenzar a construir tu historial.
-        </p>
+        <p class="empty-title">{{ 'dashboard_builder.no_offers' | translate }}</p>
+        <p class="empty-text">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
         <a routerLink="/builder/available-files"
            class="btn btn-primary fw-semibold">
-          <i class="bi bi-search me-1"></i>Ver expedientes disponibles
+          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
         </a>
       </div>
     </div>
@@ -66,7 +61,7 @@
               <i class="bi bi-file-earmark-text"></i>
             </div>
             <div>
-              <p class="text-muted small mb-0">Total ofertas</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.total_offers' | translate }}</p>
               <p class="kpi-num fw-bold mb-0">{{ total() }}</p>
             </div>
           </div>
@@ -81,7 +76,7 @@
               <i class="bi bi-hourglass-split"></i>
             </div>
             <div>
-              <p class="text-muted small mb-0">Pendientes</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.pending' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-warning">{{ pendientes() }}</p>
             </div>
           </div>
@@ -95,7 +90,7 @@
               <i class="bi bi-trophy"></i>
             </div>
             <div>
-              <p class="text-muted small mb-0">Aceptadas</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.accepted' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-success">{{ aceptadas() }}</p>
             </div>
           </div>
@@ -109,7 +104,7 @@
               <i class="bi bi-x-circle"></i>
             </div>
             <div>
-              <p class="text-muted small mb-0">Rechazadas</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.rejected' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-danger">{{ rechazadas() }}</p>
             </div>
           </div>
@@ -128,7 +123,7 @@
               <i class="bi bi-cash-coin"></i>
             </div>
             <div>
-              <p class="text-muted small mb-0">Monto adjudicado</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.awarded_amount' | translate }}</p>
               <p class="kpi-num-lg fw-bold mb-0 text-primary">
                 {{ formatPrecio(montoAdjudicado()) }}
               </p>
@@ -145,7 +140,7 @@
             </div>
             <div class="flex-grow-1">
               <div class="d-flex align-items-center justify-content-between mb-1">
-                <p class="text-muted small mb-0">Tasa de éxito</p>
+                <p class="text-muted small mb-0">{{ 'dashboard_builder.success_rate' | translate }}</p>
                 <span class="fw-bold text-success">{{ tasaExito() }}%</span>
               </div>
               <div class="progress progress-thin">
@@ -162,20 +157,18 @@
     <!-- ── Contenido principal ─────────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA IZQUIERDA · Lista de ofertas                              -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- ── Lista de ofertas ────────────────────────────────────────────── -->
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm rounded-4">
 
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-list-check me-2 text-primary"></i>Progreso de mis ofertas
+              <i class="bi bi-list-check me-2 text-primary"></i>{{ 'dashboard_builder.my_offers_progress' | translate }}
             </span>
             <a routerLink="/builder/my-offers"
                class="btn btn-outline-secondary btn-sm">
-              Ver todas <i class="bi bi-arrow-right ms-1"></i>
+              {{ 'dashboard_builder.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
             </a>
           </div>
 
@@ -199,7 +192,7 @@
                             [style.background-color]="cfg(oferta.estado).color"
                             [style.color]="cfg(oferta.estado).textColor">
                         <i class="bi {{ cfg(oferta.estado).icon }} me-1"></i>
-                        {{ cfg(oferta.estado).label }}
+                        {{ ('state.' + oferta.estado) | translate }}
                       </span>
                     </div>
 
@@ -227,17 +220,17 @@
                       </div>
                     } @else {
                       <p class="oferta-rejected mb-0">
-                        <i class="bi bi-info-circle me-1"></i>No seleccionada por el cliente
+                        <i class="bi bi-info-circle me-1"></i>{{ 'offer.not_selected' | translate }}
                       </p>
                     }
 
                     <!-- Fila 4: fecha + plazo -->
                     <div class="oferta-footer mt-2">
                       <i class="bi bi-calendar3 me-1"></i>
-                      Inicio: {{ formatFecha(oferta.fecha_inicio) }}
+                      {{ 'dashboard_builder.start_label' | translate }}: {{ formatFecha(oferta.fecha_inicio) }}
                       @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
                         <span class="ms-2">
-                          <i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} sem
+                          <i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
                         </span>
                       }
                     </div>
@@ -251,9 +244,7 @@
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA DERECHA · Sidebar                                         -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
       <div class="col-lg-4">
         <div class="sidebar-sticky">
 
@@ -261,14 +252,14 @@
           <div class="card border-0 shadow-sm rounded-4 mb-3">
             <div class="card-header bg-transparent border-bottom px-4 py-3">
               <span class="fw-semibold">
-                <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+                <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
               </span>
             </div>
             <div class="card-body d-flex flex-column align-items-center py-3 px-3">
 
               <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
                 <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-                @for (seg of donutSegments(); track seg.label) {
+                @for (seg of donutSegments(); track seg.color) {
                   <circle cx="70" cy="70" [attr.r]="R" fill="none"
                           [attr.stroke]="seg.color" stroke-width="18"
                           [attr.stroke-dasharray]="seg.dasharray"
@@ -276,7 +267,7 @@
                           transform="rotate(-90 70 70)"/>
                 }
                 <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
-                <text x="70" y="83" text-anchor="middle" class="donut-sub">ofertas</text>
+                <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.offers_count' | translate }}</text>
               </svg>
 
               <div class="w-100 mt-1">
@@ -284,7 +275,7 @@
                   <div class="d-flex align-items-center justify-content-between legend-row">
                     <div class="d-flex align-items-center gap-2">
                       <span class="legend-dot" [style.background]="e.color"></span>
-                      <span class="small">{{ e.label }}</span>
+                      <span class="small">{{ ('state.' + e.key) | translate }}</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                       <div class="progress legend-bar">
@@ -304,32 +295,32 @@
           <div class="card border-0 shadow-sm rounded-4 mb-3">
             <div class="card-body px-4 py-3">
               <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-info-circle me-1"></i>¿Qué significa el progreso?
+                <i class="bi bi-info-circle me-1"></i>{{ 'dashboard_builder.progress_meaning' | translate }}
               </p>
               <div class="d-flex flex-column gap-2">
                 <div class="ref-row">
                   <div class="ref-bar-wrap">
                     <div class="ref-bar" style="background:#ffc107; width:35%"></div>
                   </div>
-                  <span class="ref-label">35% · Oferta enviada</span>
+                  <span class="ref-label">{{ 'dashboard_builder.ref_35' | translate }}</span>
                 </div>
                 <div class="ref-row">
                   <div class="ref-bar-wrap">
                     <div class="ref-bar" style="background:#198754; width:60%"></div>
                   </div>
-                  <span class="ref-label">60% · Aceptada</span>
+                  <span class="ref-label">{{ 'dashboard_builder.ref_60' | translate }}</span>
                 </div>
                 <div class="ref-row">
                   <div class="ref-bar-wrap">
                     <div class="ref-bar" style="background:#198754; width:80%"></div>
                   </div>
-                  <span class="ref-label">80% · Adjudicado</span>
+                  <span class="ref-label">{{ 'dashboard_builder.ref_80' | translate }}</span>
                 </div>
                 <div class="ref-row">
                   <div class="ref-bar-wrap">
                     <div class="ref-bar" style="background:#198754; width:100%"></div>
                   </div>
-                  <span class="ref-label">100% · Contratado</span>
+                  <span class="ref-label">{{ 'dashboard_builder.ref_100' | translate }}</span>
                 </div>
               </div>
             </div>
@@ -339,18 +330,18 @@
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body px-4 py-3">
               <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-lightning me-1"></i>Acciones rápidas
+                <i class="bi bi-lightning me-1"></i>{{ 'dashboard_builder.quick_actions' | translate }}
               </p>
               <div class="d-flex flex-column gap-2">
                 <a routerLink="/builder/available-files"
                    class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
                   <i class="bi bi-search"></i>
-                  <span>Ver expedientes disponibles</span>
+                  <span>{{ 'common.see_available' | translate }}</span>
                 </a>
                 <a routerLink="/builder/my-offers"
                    class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                   <i class="bi bi-list-ul"></i>
-                  <span>Ver todas mis ofertas</span>
+                  <span>{{ 'nav.mes_offres' | translate }}</span>
                 </a>
               </div>
             </div>

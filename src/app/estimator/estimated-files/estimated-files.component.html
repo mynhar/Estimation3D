@@ -4,26 +4,26 @@
   <header class="page-header rounded-4 p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <h4 class="fw-bold mb-1">Mis estimaciones completadas</h4>
+        <h4 class="fw-bold mb-1">{{ 'estimated_files.title' | translate }}</h4>
         <p class="text-muted small mb-0">
-          Expedientes que has estimado y su progreso actual en el proceso.
+          {{ 'estimated_files.subtitle' | translate }}
         </p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <span class="kpi-pill kpi-pill--total">
           <i class="bi bi-clipboard-check me-1"></i>
-          {{ expedientes().length }} total{{ expedientes().length !== 1 ? 'es' : '' }}
+          {{ expedientes().length }} {{ 'common.total' | translate }}
         </span>
         @if (contarEstado('contratado') > 0) {
           <span class="kpi-pill kpi-pill--contratado">
             <i class="bi bi-trophy me-1"></i>
-            {{ contarEstado('contratado') }} contratado{{ contarEstado('contratado') !== 1 ? 's' : '' }}
+            {{ contarEstado('contratado') }} {{ 'state.contratado' | translate }}
           </span>
         }
         @if (contarEstado('en_oferta') > 0) {
           <span class="kpi-pill kpi-pill--oferta">
             <i class="bi bi-tags me-1"></i>
-            {{ contarEstado('en_oferta') }} en oferta
+            {{ contarEstado('en_oferta') }} {{ 'state.en_oferta' | translate }}
           </span>
         }
       </div>
@@ -34,7 +34,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-success" role="status"></div>
-      Cargando estimaciones…
+      {{ 'estimated_files.loading' | translate }}
     </div>
 
   } @else if (expedientes().length === 0) {
@@ -45,10 +45,11 @@
         <div class="empty-icon">
           <i class="bi bi-clipboard-check"></i>
         </div>
-        <h5 class="empty-title">Sin estimaciones completadas</h5>
+        <h5 class="empty-title">{{ 'estimated_files.empty_title' | translate }}</h5>
         <p class="empty-text">
-          Aquí aparecerán los expedientes que hayas estimado y enviado.
-          Ve a <strong>Expedientes en estimación</strong> para continuar.
+          {{ 'estimated_files.empty_text' | translate }}
+          <strong>{{ 'nav.en_estimation' | translate }}</strong>
+          {{ 'estimated_files.empty_text_after' | translate }}
         </p>
       </div>
     </div>
@@ -62,7 +63,7 @@
               [class.estado-chip--active]="filtroEstado() === null"
               (click)="filtroEstado.set(null)">
         <span class="estado-dot dot--todos"></span>
-        Todos
+        {{ 'common.all' | translate }}
         <span class="chip-count">{{ expedientes().length }}</span>
       </button>
 
@@ -83,7 +84,7 @@
                   [class.dot--adjudicado]="chip.value === 'adjudicado'"
                   [class.dot--contratado]="chip.value === 'contratado'"
                   [class.dot--cancelado]="chip.value === 'cancelado'"></span>
-            {{ chip.label }}
+            {{ ('state.' + chip.value) | translate }}
             <span class="chip-count">{{ contarEstado(chip.value) }}</span>
           </button>
         }
@@ -96,13 +97,13 @@
         <i class="bi bi-search search-icon"></i>
         <input class="form-control search-input ps-5"
                type="search"
-               placeholder="Buscar por número, servicio, cliente o ubicación…"
+               [placeholder]="'estimated_files.search_placeholder' | translate"
                [ngModel]="busqueda()"
                (ngModelChange)="busqueda.set($event)" />
       </div>
       @if (hayFiltros()) {
         <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
-          <i class="bi bi-x me-1"></i>Limpiar
+          <i class="bi bi-x me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
     </div>
@@ -112,8 +113,8 @@
       <div class="card border-0 shadow-sm rounded-4">
         <div class="empty-inline">
           <i class="bi bi-search fs-2 mb-2 text-muted"></i>
-          <p class="mb-1 fw-medium">Sin resultados</p>
-          <p class="text-muted small mb-0">Ningún expediente coincide con los filtros actuales.</p>
+          <p class="mb-1 fw-medium">{{ 'common.no_results' | translate }}</p>
+          <p class="text-muted small mb-0">{{ 'estimated_files.no_filter_text' | translate }}</p>
         </div>
       </div>
 
@@ -137,7 +138,7 @@
                   @if (exp.estado === 'contratado') {
                     <i class="bi bi-trophy-fill me-1"></i>
                   }
-                  {{ estadoLabel(exp.estado) }}
+                  {{ estadoLabel(exp.estado) | translate }}
                 </span>
               </div>
 
@@ -171,8 +172,9 @@
                 <div class="confirm-panel mt-auto">
                   <p class="confirm-msg">
                     <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    ¿Eliminar la estimación? El expediente volverá a estado
-                    <strong>Nuevo</strong> y perderá todos los datos registrados.
+                    {{ 'estimated_files.confirm_before' | translate }}
+                    <strong>{{ 'state.nuevo' | translate }}</strong>
+                    {{ 'estimated_files.confirm_after' | translate }}
                   </p>
                   @if (errorEliminar()) {
                     <p class="text-danger small mb-2">{{ errorEliminar() }}</p>
@@ -182,15 +184,15 @@
                             (click)="eliminarEstimacion(exp)"
                             [disabled]="eliminando()">
                       @if (eliminando()) {
-                        <span class="spinner-border spinner-border-sm"></span>Eliminando…
+                        <span class="spinner-border spinner-border-sm"></span>{{ 'estimated_files.deleting' | translate }}
                       } @else {
-                        <i class="bi bi-trash3"></i>Sí, eliminar
+                        <i class="bi bi-trash3"></i>{{ 'estimated_files.confirm_delete' | translate }}
                       }
                     </button>
                     <button class="btn btn-outline-secondary btn-sm"
                             (click)="cancelarConfirmacion()"
                             [disabled]="eliminando()">
-                      Cancelar
+                      {{ 'common.cancel' | translate }}
                     </button>
                   </div>
                 </div>
@@ -201,12 +203,12 @@
                 <div class="d-flex gap-2 mt-auto">
                   <button class="btn btn-outline-success btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
                           (click)="ver(exp.id)">
-                    <i class="bi bi-eye"></i>Ver detalle
+                    <i class="bi bi-eye"></i>{{ 'estimated_files.view_detail' | translate }}
                   </button>
                   @if (exp.estado !== 'adjudicado' && exp.estado !== 'contratado') {
                     <button class="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center"
                             (click)="pedirConfirmacion(exp.id)"
-                            title="Eliminar estimación">
+                            [title]="'estimated_files.delete_title' | translate">
                       <i class="bi bi-trash3"></i>
                     </button>
                   }

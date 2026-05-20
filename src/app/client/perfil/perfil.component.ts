@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 
 interface PerfilRow {
@@ -11,13 +12,6 @@ interface PerfilRow {
   avatar_url: string | null;
   proveedor: string | null;
 }
-
-const ROL_LABEL: Record<string, string> = {
-  cliente:       'Cliente',
-  estimador:     'Estimador',
-  constructor:   'Constructor',
-  administrador: 'Administrador',
-};
 
 const ROL_BADGE: Record<string, string> = {
   cliente:       'bg-primary',
@@ -39,7 +33,7 @@ const BUCKET   = 'archivos';
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
 })
@@ -108,7 +102,7 @@ export class PerfilComponent implements OnInit {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      this.errorMsg.set('La imagen no debe superar 2 MB.');
+      this.errorMsg.set('profile.avatar_size_error');
       return;
     }
 
@@ -150,7 +144,7 @@ export class PerfilComponent implements OnInit {
       this.previewUrl.set(null);
       this.auth.notificarEdicionAvatar(freshUrl);
 
-      this.exitoMsg.set('Foto de perfil actualizada.');
+      this.exitoMsg.set('profile.avatar_updated');
       setTimeout(() => this.exitoMsg.set(''), 4000);
     } catch (e: any) {
       this.previewUrl.set(null);
@@ -192,7 +186,7 @@ export class PerfilComponent implements OnInit {
       this.telefono.set(this.telefono().trim());
 
       this.auth.notificarEdicionPerfil(this.nombre().trim(), this.apellido().trim());
-      this.exitoMsg.set('Perfil actualizado correctamente.');
+      this.exitoMsg.set('profile.saved');
       setTimeout(() => this.exitoMsg.set(''), 4000);
     } catch (e: any) {
       this.errorMsg.set(e.message);
@@ -211,7 +205,7 @@ export class PerfilComponent implements OnInit {
     this.errorMsg.set('');
   }
 
-  rolLabel(rol: string): string { return ROL_LABEL[rol] ?? rol; }
+  rolLabel(rol: string): string { return 'role.' + rol; }
   rolBadge(rol: string): string { return ROL_BADGE[rol] ?? 'bg-secondary'; }
   rolRing(rol: string):  string { return ROL_RING[rol]  ?? '#adb5bd'; }
 

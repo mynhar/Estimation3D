@@ -111,7 +111,7 @@ export interface ExpedienteCliente {
   estado: string;
   fecha_visita: string;
   descripcion: string;
-  servicio: { nombre_es: string } | null;
+  servicio: { nombre_fr: string; nombre_en: string; nombre_es: string } | null;
 }
 
 // ── Constantes de estado ──────────────────────────────────────────────────────

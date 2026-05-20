@@ -2,14 +2,16 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { Servicio, PROVINCIAS, SERVICIOS_FALLBACK } from '../../../models';
+import { Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 
 @Component({
   selector: 'app-file-create',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -18,11 +20,32 @@ export class FileCreateComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private router            = inject(Router);
   private fb                = inject(FormBuilder);
+  private translate         = inject(TranslateService);
 
   user = toSignal(this.auth.user$);
 
+  private currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.currentLang || 'fr' },
+  );
+
   // ── Data signals ───────────────────────────────────────────────────────────
   servicios         = signal<Servicio[]>([]);
+
+  serviciosLocalizados = computed(() => {
+    const lang = this.currentLang();
+    return this.servicios().map(s => ({
+      ...s,
+      nombre_local:
+        lang === 'en' ? (s.nombre_en || s.nombre_fr || s.nombre_es)
+      : lang === 'es' ? (s.nombre_es || s.nombre_fr)
+      :                 (s.nombre_fr || s.nombre_es),
+      descripcion_local:
+        lang === 'en' ? (s.descripcion_en || s.descripcion_fr || s.descripcion_es || '')
+      : lang === 'es' ? (s.descripcion_es || s.descripcion_fr || '')
+      :                 (s.descripcion_fr || s.descripcion_es || ''),
+    }));
+  });
   cargandoServicios = signal(true);
   servicioId        = signal<number | null>(null);
   servicioRequerido = signal(false);
@@ -33,16 +56,23 @@ export class FileCreateComponent implements OnInit {
   gpsVisible        = signal(false);
 
   // ── Static config ──────────────────────────────────────────────────────────
-  readonly provincias = PROVINCIAS;
+  readonly provincias       = PROVINCIAS;
+  readonly provinciasCanada = PROVINCIAS_CANADA;
+  readonly CA_POSTAL_RE     = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
-  readonly STEPS = ['Servicio', 'Contacto', 'Visita', 'Ubicación'];
+  readonly STEPS = [
+    'file_create.step1_name',
+    'file_create.step2_name',
+    'file_create.step3_name',
+    'file_create.step4_name',
+  ];
 
   readonly tiposInmueble = [
-    { value: 'casa',            label: 'Casa',       icon: 'bi-house-door'  },
-    { value: 'apartamento',     label: 'Apto.',      icon: 'bi-building'    },
-    { value: 'edificio',        label: 'Edificio',   icon: 'bi-buildings'   },
-    { value: 'local_comercial', label: 'Comercial',  icon: 'bi-shop'        },
-    { value: 'otro',            label: 'Otro',       icon: 'bi-three-dots'  },
+    { value: 'casa',            label: 'file_create.type_casa',           icon: 'bi-house-door'  },
+    { value: 'apartamento',     label: 'file_create.type_apartamento',    icon: 'bi-building'    },
+    { value: 'edificio',        label: 'file_create.type_edificio',       icon: 'bi-buildings'   },
+    { value: 'local_comercial', label: 'file_create.type_local_comercial',icon: 'bi-shop'        },
+    { value: 'otro',            label: 'file_create.type_otro',           icon: 'bi-three-dots'  },
   ];
 
   // ── Forms ──────────────────────────────────────────────────────────────────
@@ -61,14 +91,29 @@ export class FileCreateComponent implements OnInit {
 
   localizacionForm = this.fb.group({
     tipo_inmueble: ['', Validators.required],
+    pais:          ['canada'],
+    // ── Costa Rica ──
     direccion:     ['', Validators.required],
     provincia:     ['', Validators.required],
     canton:        ['', Validators.required],
     distrito:      ['', Validators.required],
+    // ── Canadá ──
+    numero_unidad: [''],
+    calle:         [''],
+    ciudad:        [''],
+    provincia_ca:  ['QC'],
+    codigo_postal: [''],
+    // ── Compartido ──
     referencia:    [''],
     latitud:       [null as number | null],
     longitud:      [null as number | null],
   });
+
+  private paisValue = toSignal(
+    this.localizacionForm.get('pais')!.valueChanges,
+    { initialValue: 'canada' as string },
+  );
+  paisActual = computed(() => this.paisValue() ?? 'canada');
 
   // Convertir el estado de validez de cada FormGroup a signals reactivos.
   // computed(() => this.form.valid) NO funciona: form.valid no es un signal,
@@ -105,21 +150,21 @@ export class FileCreateComponent implements OnInit {
     return [this.step1Complete(), this.step2Complete(), this.step3Complete(), this.step4Complete()][idx] ?? false;
   }
 
-  serviceIcon(nombre: string): string {
-    const n = nombre.toLowerCase();
-    if (n.includes('agua') || n.includes('plom'))    return 'bi-droplet-fill';
-    if (n.includes('elect'))                          return 'bi-lightning-charge-fill';
-    if (n.includes('pint'))                           return 'bi-brush-fill';
-    if (n.includes('techo') || n.includes('teja'))   return 'bi-house-fill';
-    if (n.includes('cer')  || n.includes('piso'))    return 'bi-grid-3x3';
-    if (n.includes('carpint') || n.includes('mad'))  return 'bi-hammer';
-    if (n.includes('alumin') || n.includes('vidri')) return 'bi-window';
-    if (n.includes('jardin') || n.includes('plant')) return 'bi-tree';
-    if (n.includes('moh'))                            return 'bi-biohazard';
-    if (n.includes('agua') || n.includes('dano'))    return 'bi-droplet-half';
-    if (n.includes('demol'))                          return 'bi-buildings';
-    if (n.includes('aisla'))                          return 'bi-layers';
-    if (n.includes('fund') || n.includes('dren'))    return 'bi-water';
+  serviceIcon(codigo: string): string {
+    const c = codigo.toLowerCase();
+    if (c.includes('moho'))                         return 'bi-biohazard';
+    if (c.includes('agua') || c.includes('dano'))   return 'bi-droplet-half';
+    if (c.includes('desamian'))                     return 'bi-layers';
+    if (c.includes('demolic'))                      return 'bi-buildings';
+    if (c.includes('aisla'))                        return 'bi-layers';
+    if (c.includes('fund') || c.includes('dren'))   return 'bi-water';
+    if (c.includes('elect'))                        return 'bi-lightning-charge-fill';
+    if (c.includes('pint'))                         return 'bi-brush-fill';
+    if (c.includes('techo') || c.includes('teja'))  return 'bi-house-fill';
+    if (c.includes('piso')  || c.includes('cer'))   return 'bi-grid-3x3';
+    if (c.includes('carpint') || c.includes('mad')) return 'bi-hammer';
+    if (c.includes('alumin') || c.includes('vidri'))return 'bi-window';
+    if (c.includes('jardin') || c.includes('plant'))return 'bi-tree';
     return 'bi-tools';
   }
 
@@ -128,9 +173,41 @@ export class FileCreateComponent implements OnInit {
     return !!(ctrl?.invalid && ctrl?.touched);
   }
 
+  setPais(pais: string) {
+    this.localizacionForm.get('pais')?.setValue(pais);
+    this.actualizarValidadoresPais(pais);
+  }
+
+  private actualizarValidadoresPais(pais: string) {
+    const crFields = ['direccion', 'provincia', 'canton', 'distrito'];
+    const caFields = ['calle', 'ciudad', 'provincia_ca', 'codigo_postal'];
+
+    if (pais === 'canada') {
+      crFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
+      this.localizacionForm.get('calle')?.setValidators([Validators.required]);
+      this.localizacionForm.get('ciudad')?.setValidators([Validators.required]);
+      this.localizacionForm.get('provincia_ca')?.setValidators([Validators.required]);
+      this.localizacionForm.get('codigo_postal')?.setValidators([
+        Validators.required,
+        Validators.pattern(this.CA_POSTAL_RE),
+      ]);
+    } else {
+      caFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
+      this.localizacionForm.get('direccion')?.setValidators([Validators.required]);
+      this.localizacionForm.get('provincia')?.setValidators([Validators.required]);
+      this.localizacionForm.get('canton')?.setValidators([Validators.required]);
+      this.localizacionForm.get('distrito')?.setValidators([Validators.required]);
+    }
+
+    [...crFields, ...caFields].forEach(f =>
+      this.localizacionForm.get(f)?.updateValueAndValidity({ emitEvent: false })
+    );
+    this.localizacionForm.updateValueAndValidity();
+  }
+
   usarUbicacion() {
     if (!navigator.geolocation) {
-      this.ubicacionError.set('Tu navegador no soporta geolocalización.');
+      this.ubicacionError.set('file_create.geo_not_supported');
       return;
     }
     this.ubicacionCargando.set(true);
@@ -145,9 +222,7 @@ export class FileCreateComponent implements OnInit {
       },
       (err) => {
         this.ubicacionError.set(
-          err.code === 1
-            ? 'Permiso de ubicación denegado. Actívalo en la configuración de tu navegador.'
-            : 'No se pudo obtener tu ubicación. Intenta de nuevo.',
+          err.code === 1 ? 'file_create.geo_denied' : 'file_create.geo_error',
         );
         this.ubicacionCargando.set(false);
       },
@@ -157,6 +232,7 @@ export class FileCreateComponent implements OnInit {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   async ngOnInit() {
+    this.actualizarValidadoresPais('canada');
     await Promise.all([this.cargarServicios(), this.cargarPerfil()]);
   }
 
@@ -164,7 +240,7 @@ export class FileCreateComponent implements OnInit {
     this.cargandoServicios.set(true);
     const { data, error } = await this.auth.client
       .from('servicio')
-      .select('id, codigo, nombre_es, descripcion_es')
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es')
       .eq('activo', true)
       .order('codigo');
 
@@ -200,7 +276,7 @@ export class FileCreateComponent implements OnInit {
 
     const userId = this.user()?.id;
     if (!userId) {
-      this.error.set('Sesión no encontrada. Por favor inicia sesión nuevamente.');
+      this.error.set('file_create.session_error');
       return;
     }
 
@@ -211,12 +287,17 @@ export class FileCreateComponent implements OnInit {
       const pv = this.perfilForm.value;
       const ev = this.expedienteForm.value;
       const lv = this.localizacionForm.value;
+      const esCanada = lv.pais === 'canada';
 
       const { error: perfilError } = await this.auth.client
         .from('perfil')
         .update({ nombre: pv.nombre ?? undefined, apellido: pv.apellido ?? undefined, telefono: pv.telefono ?? undefined })
         .eq('id', userId);
       if (perfilError) throw new Error(`Error al actualizar perfil: ${perfilError.message}`);
+
+      const direccionFinal = esCanada
+        ? (lv.numero_unidad ? `${lv.numero_unidad}-${lv.calle}` : (lv.calle ?? ''))
+        : (lv.direccion ?? '');
 
       await this.expedienteService.crear({
         clienteId:   userId,
@@ -226,20 +307,20 @@ export class FileCreateComponent implements OnInit {
         descripcion: ev.descripcion || null,
         localizacion: {
           tipo_inmueble: (lv.tipo_inmueble ?? 'otro') as import('../../../types/supabase').TipoInmueble,
-          direccion:     lv.direccion     ?? '',
-          provincia:     lv.provincia     ?? '',
-          canton:        lv.canton        ?? '',
-          distrito:      lv.distrito      ?? '',
-          referencia:    lv.referencia    || null,
-          latitud:       lv.latitud       ?? null,
-          longitud:      lv.longitud      ?? null,
+          direccion:  direccionFinal,
+          provincia:  esCanada ? (lv.provincia_ca  ?? '') : (lv.provincia ?? ''),
+          canton:     esCanada ? (lv.ciudad        ?? '') : (lv.canton    ?? ''),
+          distrito:   esCanada ? (lv.codigo_postal ?? '') : (lv.distrito  ?? ''),
+          referencia: lv.referencia || null,
+          latitud:    lv.latitud    ?? null,
+          longitud:   lv.longitud   ?? null,
         },
       });
 
       this.router.navigate(['/client/file/my-files']);
     } catch (e: any) {
       console.error('[FileCreate] onSubmit error:', e);
-      this.error.set(e?.message ?? 'Error desconocido al guardar. Intenta de nuevo.');
+      this.error.set('file_create.save_error');
     } finally {
       this.enviando.set(false);
     }

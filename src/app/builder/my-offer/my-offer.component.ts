@@ -1,14 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
-import { ArchivoRow, OfertaDetalle, ESTADO_BADGE_OFERTA, ESTADO_LABEL_OFERTA } from '../../models';
+import { ArchivoRow, OfertaDetalle, ESTADO_BADGE_OFERTA } from '../../models';
 
 @Component({
   selector: 'app-my-offer',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './my-offer.component.html',
   styleUrl: './my-offer.component.css',
 })
@@ -16,6 +17,7 @@ export class MyOfferComponent implements OnInit {
   private ofertaService  = inject(OfertaService);
   private archivoService = inject(ArchivoService);
   private sanitizer      = inject(DomSanitizer);
+  private translate      = inject(TranslateService);
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
 
@@ -72,10 +74,6 @@ export class MyOfferComponent implements OnInit {
     return ESTADO_BADGE_OFERTA[estado] ?? 'bg-light text-dark';
   }
 
-  estadoLabel(estado: string): string {
-    return ESTADO_LABEL_OFERTA[estado] ?? estado;
-  }
-
   toggleVideo(video: ArchivoRow) {
     this.videoActivo.set(this.videoActivo()?.id === video.id ? null : video);
   }
@@ -102,15 +100,17 @@ export class MyOfferComponent implements OnInit {
   }
 
   formatCosto(valor: number): string {
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
   }
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
-    return new Date(`${raw}T00:00:00`).toLocaleDateString('es-CR', {
-      day: '2-digit', month: 'long', year: 'numeric',
-    });
+    const d   = new Date(`${raw}T00:00:00`);
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
@@ -120,8 +120,9 @@ export class MyOfferComponent implements OnInit {
 
   formatPlazo(min: number | null, max: number | null): string {
     if (!min && !max) return '—';
-    if (min === max)  return `${min} semana(s)`;
-    return `${min ?? '?'} – ${max ?? '?'} semanas`;
+    const w = this.translate.instant('offer.weeks');
+    if (min === max)  return `${min} ${w}`;
+    return `${min ?? '?'} – ${max ?? '?'} ${w}`;
   }
 
   formatTamano(bytes: number): string {

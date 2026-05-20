@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DecimalPipe, TitleCasePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
@@ -13,20 +13,20 @@ import {
   EstimacionDetalle,
   ExpedienteDetalleCliente,
   ESTADO_BADGE_OFERTA,
-  ESTADO_LABEL_OFERTA,
   OfertaConConstructor,
 } from '../../models';
 
 @Component({
   selector: 'app-builder-offer',
   standalone: true,
-  imports: [DecimalPipe, TitleCasePipe],
+  imports: [TranslatePipe],
   templateUrl: './builder-offer.component.html',
   styleUrl: './builder-offer.component.css',
 })
 export class BuilderOfferComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private sanitizer         = inject(DomSanitizer);
+  private translate         = inject(TranslateService);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -135,7 +135,7 @@ export class BuilderOfferComponent implements OnInit {
         list.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }))
       );
 
-      this.exitoMsg.set('Oferta aceptada. El expediente ha sido adjudicado.');
+      this.exitoMsg.set('builder_offer.success_accepted');
     } catch (e: any) {
       this.errorMsg.set(e.message);
     } finally {
@@ -197,28 +197,33 @@ export class BuilderOfferComponent implements OnInit {
   // ── Formatters ────────────────────────────────────────────────────────────
 
   formatCosto(valor: number): string {
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
   }
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
-    // Agregar T00:00:00 evita el desplazamiento de zona horaria en fechas sin hora
-    const d = new Date(valor.includes('T') ? valor : valor + 'T00:00:00');
+    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
+    const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor || !valor.includes('T')) return '—';
     const d = new Date(valor);
     if (isNaN(d.getTime())) return '—';
-    return d.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
 
   formatPlazo(min: number | null, max: number | null): string {
     if (!min && !max) return '—';
-    if (min === max)  return `${min} semana(s)`;
-    return `${min ?? '?'} – ${max ?? '?'} semanas`;
+    const w = this.translate.instant('offer.weeks');
+    if (min === max)  return `${min} ${w}`;
+    return `${min ?? '?'} – ${max ?? '?'} ${w}`;
   }
 
   formatTamano(bytes: number): string {
@@ -232,7 +237,7 @@ export class BuilderOfferComponent implements OnInit {
   }
 
   ofertaLabel(estado: string): string {
-    return ESTADO_LABEL_OFERTA[estado] ?? estado;
+    return 'state.' + estado;
   }
 
   expedienteBadgeClass(estado: string): string {

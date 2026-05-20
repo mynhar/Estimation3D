@@ -22,7 +22,7 @@ export class ExpedienteService {
   async getMisExpedientes(clienteId: string): Promise<ExpedienteCliente[]> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, fecha_visita, descripcion, servicio:servicio_id(nombre_es)')
+      .select('id, numero, estado, fecha_visita, descripcion, servicio:servicio_id(nombre_fr, nombre_en, nombre_es)')
       .eq('cliente_id', clienteId)
       .order('id', { ascending: false });
     if (error) throw new Error(error.message);
@@ -74,7 +74,7 @@ export class ExpedienteService {
       .single();
 
     if (expError) throw new Error(expError.message);
-    if (!exp)     throw new Error('Expediente no encontrado.');
+    if (!exp)     throw new Error('file.not_found');
 
     const expAny = exp as any;
 
@@ -209,8 +209,8 @@ export class ExpedienteService {
       .select('id')
       .single();
 
-    if (expError) throw new Error(`Error al crear expediente: ${expError.message}`);
-    if (!exp?.id)  throw new Error('No se recibió el ID del expediente creado.');
+    if (expError) throw new Error(expError.message);
+    if (!exp?.id)  throw new Error('file.err_create_no_id');
 
     const { error: locError } = await this.db
       .from('localizacion')
@@ -297,8 +297,8 @@ export class ExpedienteService {
       .eq('id', id)
       .maybeSingle();
 
-    if (expError) throw new Error(`expediente: ${expError.message}`);
-    if (!exp)     throw new Error('Expediente no encontrado. Verifica RLS en la tabla expediente.');
+    if (expError) throw new Error(expError.message);
+    if (!exp)     throw new Error('file.not_found');
 
     const [servicioRes, perfilRes, locRes, estimadorRes] = await Promise.all([
       this.db.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
@@ -399,7 +399,7 @@ export class ExpedienteService {
       .maybeSingle();
 
     if (expError) throw new Error(expError.message);
-    if (!exp)     throw new Error('Expediente no encontrado.');
+    if (!exp)     throw new Error('file.not_found');
 
     const [servicioRes, locRes, estimacionRes, ofertasRes] = await Promise.all([
       this.db.from('servicio').select('nombre_es, descripcion_es').eq('id', exp.servicio_id).single(),

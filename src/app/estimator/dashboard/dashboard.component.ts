@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteRow, ESTADOS_ESTIMADO } from '../../models';
@@ -31,7 +32,7 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
 @Component({
   selector: 'app-estimator-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })

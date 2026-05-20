@@ -2,7 +2,7 @@
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" (click)="cerrarFoto()">
     <div class="lightbox-container" (click)="$event.stopPropagation()">
-      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="Foto ampliada" />
+      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="" />
       <button class="lightbox-close" type="button" (click)="cerrarFoto()">
         <i class="bi bi-x-lg"></i>
       </button>
@@ -16,7 +16,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-cyan" role="status"></div>
-      Cargando oferta…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Error / No encontrado ─────────────────────────────────────────────── -->
@@ -24,12 +24,12 @@
     <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
         <div class="empty-icon"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">Oferta no encontrada</p>
+        <p class="empty-title">{{ 'my_offer.not_found' | translate }}</p>
         @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() }}</p>
+          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
         }
         <button class="btn btn-outline-secondary btn-sm" type="button" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
         </button>
       </div>
     </div>
@@ -43,7 +43,7 @@
             [class.page-header--rechazada]="detalle()!.estado === 'rechazada'">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" type="button" (click)="volver()" title="Volver a mis ofertas">
+          <button class="btn-back" type="button" (click)="volver()" [title]="'my_offer.back_btn' | translate">
             <i class="bi bi-arrow-left"></i>
           </button>
           <div>
@@ -53,7 +53,7 @@
                 @if (detalle()!.estado === 'aceptada') { <i class="bi bi-trophy-fill me-1"></i> }
                 @if (detalle()!.estado === 'rechazada') { <i class="bi bi-x-circle me-1"></i> }
                 @if (detalle()!.estado === 'pendiente') { <i class="bi bi-hourglass-split me-1"></i> }
-                {{ estadoLabel(detalle()!.estado) }}
+                {{ ('state.' + detalle()!.estado) | translate }}
               </span>
             </div>
             <p class="text-muted small mb-0 mt-1">{{ detalle()!.servicio_nombre }}</p>
@@ -82,46 +82,34 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-folder2 me-2 text-cyan"></i>Expediente
+              <i class="bi bi-folder2 me-2 text-cyan"></i>{{ 'my_offer.section_file' | translate }}
             </span>
           </div>
           <div class="card-body p-4">
 
-            <!-- Servicio y ubicación -->
-            <p class="section-label">Servicio y ubicación</p>
+            <p class="section-label">{{ 'my_offer.service_location' | translate }}</p>
             <div class="row g-3 mb-3">
               <div class="col-sm-6">
-                <p class="info-label">Servicio</p>
+                <p class="info-label">{{ 'my_offer.service' | translate }}</p>
                 <p class="info-value">{{ detalle()!.servicio_nombre }}</p>
               </div>
               <div class="col-sm-6">
-                <p class="info-label">Dirección</p>
-                <p class="info-value">{{ detalle()!.direccion }}</p>
+                <p class="info-label">{{ 'common.address' | translate }}</p>
+                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
+                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
+                <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
                 @if (detalle()!.referencia) {
-                  <p class="text-muted small mb-0">{{ detalle()!.referencia }}</p>
+                  <p class="text-muted small mt-1 mb-0">{{ detalle()!.referencia }}</p>
                 }
-              </div>
-              <div class="col-4">
-                <p class="info-label">Provincia</p>
-                <p class="info-value">{{ detalle()!.provincia }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Cantón</p>
-                <p class="info-value">{{ detalle()!.canton }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Distrito</p>
-                <p class="info-value">{{ detalle()!.distrito }}</p>
               </div>
             </div>
 
             <hr class="divider" />
 
-            <!-- Visitas -->
-            <p class="section-label">Visitas</p>
+            <p class="section-label">{{ 'my_offer.visits' | translate }}</p>
             <div class="row g-3 mb-0">
               <div class="col-sm-6">
-                <p class="info-label">Visita programada</p>
+                <p class="info-label">{{ 'my_offer.scheduled_visit' | translate }}</p>
                 <p class="info-value">
                   {{ formatFecha(detalle()!.fecha_visita) }}
                   @if (formatHora(detalle()!.fecha_visita) !== '—') {
@@ -130,7 +118,7 @@
                 </p>
               </div>
               <div class="col-sm-6">
-                <p class="info-label">Visita del estimador</p>
+                <p class="info-label">{{ 'my_offer.estimator_visit' | translate }}</p>
                 <p class="info-value">
                   {{ formatFecha(detalle()!.fecha_visita_real) }}
                   @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
@@ -142,7 +130,7 @@
               @if (detalle()!.descripcion_problemas) {
                 <div class="col-12">
                   <hr class="divider" />
-                  <p class="info-label">Problemas observados</p>
+                  <p class="info-label">{{ 'my_offer.problems_noted' | translate }}</p>
                   <p class="descripcion-block mb-0">{{ detalle()!.descripcion_problemas }}</p>
                 </div>
               }
@@ -155,25 +143,25 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-folder-symlink me-2 text-cyan"></i>Archivos del expediente
+              <i class="bi bi-folder-symlink me-2 text-cyan"></i>{{ 'my_offer.section_exp_files' | translate }}
             </span>
           </div>
 
           <div class="media-tabs">
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'tour'"
                     type="button" (click)="tabMedia.set('tour')">
-              <i class="bi bi-camera-video me-1"></i>Tour 3D
+              <i class="bi bi-camera-video me-1"></i>{{ 'my_offer.tab_tour' | translate }}
             </button>
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'fotos'"
                     type="button" (click)="tabMedia.set('fotos')">
-              <i class="bi bi-images me-1"></i>Fotos
+              <i class="bi bi-images me-1"></i>{{ 'my_offer.tab_photos' | translate }}
               @if (fotosExp().length > 0) {
                 <span class="media-tab__count">{{ fotosExp().length }}</span>
               }
             </button>
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'docs'"
                     type="button" (click)="tabMedia.set('docs')">
-              <i class="bi bi-file-earmark-text me-1"></i>Docs
+              <i class="bi bi-file-earmark-text me-1"></i>{{ 'my_offer.tab_docs' | translate }}
               @if (documentosExp().length > 0) {
                 <span class="media-tab__count">{{ documentosExp().length }}</span>
               }
@@ -189,7 +177,7 @@
                 </div>
               } @else {
                 <div class="media-empty">
-                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>Sin tour registrado
+                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>{{ 'my_offer.no_tour' | translate }}
                 </div>
               }
             </div>
@@ -199,7 +187,7 @@
             <div class="card-body p-3">
               @if (fotosExp().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-image fs-2 mb-1 d-block"></i>Sin fotos registradas
+                  <i class="bi bi-image fs-2 mb-1 d-block"></i>{{ 'my_offer.no_photos' | translate }}
                 </div>
               } @else {
                 <div class="photos-grid">
@@ -218,7 +206,7 @@
             <div class="card-body p-2">
               @if (documentosExp().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>Sin documentos
+                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>{{ 'my_offer.no_docs' | translate }}
                 </div>
               } @else {
                 <div class="file-list">
@@ -233,7 +221,7 @@
                       </div>
                       <div class="file-row__actions">
                         <button class="btn btn-outline-secondary btn-sm" type="button"
-                                (click)="verArchivo(d)" title="Abrir">
+                                (click)="verArchivo(d)" [title]="'common.open' | translate">
                           <i class="bi bi-box-arrow-up-right"></i>
                         </button>
                       </div>
@@ -250,7 +238,7 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-chat-left-text me-2 text-cyan"></i>Descripción del enfoque
+              <i class="bi bi-chat-left-text me-2 text-cyan"></i>{{ 'my_offer.section_approach' | translate }}
             </span>
           </div>
           <div class="card-body p-4">
@@ -262,14 +250,14 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-paperclip me-2 text-cyan"></i>Archivos adjuntos
+              <i class="bi bi-paperclip me-2 text-cyan"></i>{{ 'my_offer.section_attachments' | translate }}
             </span>
           </div>
           <div class="card-body p-3">
 
-            <p class="section-label px-2 pt-1">Documento de oferta</p>
+            <p class="section-label px-2 pt-1">{{ 'my_offer.offer_docs' | translate }}</p>
             @if (documentos().length === 0) {
-              <p class="text-muted small px-2 mb-3">Sin documentos adjuntos.</p>
+              <p class="text-muted small px-2 mb-3">{{ 'my_offer.no_docs_adj' | translate }}</p>
             } @else {
               <div class="file-list mb-3">
                 @for (d of documentos(); track d.id) {
@@ -283,7 +271,7 @@
                     </div>
                     <div class="file-row__actions">
                       <button class="btn btn-outline-secondary btn-sm" type="button"
-                              (click)="verArchivo(d)" title="Abrir en nueva pestaña">
+                              (click)="verArchivo(d)" [title]="'common.open' | translate">
                         <i class="bi bi-box-arrow-up-right"></i>
                       </button>
                     </div>
@@ -292,9 +280,9 @@
               </div>
             }
 
-            <p class="section-label px-2">Video complementario</p>
+            <p class="section-label px-2">{{ 'my_offer.offer_video' | translate }}</p>
             @if (videos().length === 0) {
-              <p class="text-muted small px-2 mb-1">Sin videos adjuntos.</p>
+              <p class="text-muted small px-2 mb-1">{{ 'my_offer.no_videos' | translate }}</p>
             } @else {
               <div class="file-list">
                 @for (v of videos(); track v.id) {
@@ -311,13 +299,13 @@
                               [class.btn-warning]="videoActivo()?.id === v.id"
                               [class.btn-outline-secondary]="videoActivo()?.id !== v.id"
                               (click)="toggleVideo(v)"
-                              [title]="videoActivo()?.id === v.id ? 'Cerrar' : 'Reproducir'">
+                              [title]="videoActivo()?.id === v.id ? ('common.close' | translate) : ('common.open' | translate)">
                         <i class="bi"
                            [class.bi-stop-fill]="videoActivo()?.id === v.id"
                            [class.bi-play-fill]="videoActivo()?.id !== v.id"></i>
                       </button>
                       <button class="btn btn-outline-secondary btn-sm" type="button"
-                              (click)="verArchivo(v)" title="Abrir en nueva pestaña">
+                              (click)="verArchivo(v)" [title]="'common.open' | translate">
                         <i class="bi bi-box-arrow-up-right"></i>
                       </button>
                     </div>
@@ -326,11 +314,10 @@
                     <div class="video-player">
                       <video controls autoplay class="video-player__el"
                              [src]="publicUrl(v.url_storage)">
-                        Tu navegador no soporta reproducción de video.
                       </video>
                       <button class="btn btn-sm btn-outline-secondary w-100 mt-2" type="button"
                               (click)="toggleVideo(v)">
-                        <i class="bi bi-x me-1"></i>Cerrar reproductor
+                        <i class="bi bi-x me-1"></i>{{ 'my_offer.close_player' | translate }}
                       </button>
                     </div>
                   }
@@ -353,13 +340,13 @@
                [class.offer-card--rechazada]="detalle()!.estado === 'rechazada'">
             <div class="card-header bg-transparent border-bottom px-4 py-3">
               <span class="fw-semibold">
-                <i class="bi bi-file-earmark-check me-2 text-cyan"></i>Mi oferta
+                <i class="bi bi-file-earmark-check me-2 text-cyan"></i>{{ 'my_offer.section_summary' | translate }}
               </span>
             </div>
             <div class="card-body p-4">
 
               <div class="price-display mb-4">
-                <p class="price-label">Precio total ofertado</p>
+                <p class="price-label">{{ 'my_offer.total_price' | translate }}</p>
                 <p class="price-value">{{ formatCosto(detalle()!.precio) }}</p>
               </div>
 
@@ -367,23 +354,23 @@
 
               <div class="row g-3 mb-3">
                 <div class="col-6">
-                  <p class="info-label">Plazo estimado</p>
+                  <p class="info-label">{{ 'my_offer.estimated_deadline' | translate }}</p>
                   <p class="info-value">
                     {{ formatPlazo(detalle()!.plazo_semanas_min, detalle()!.plazo_semanas_max) }}
                   </p>
                 </div>
                 <div class="col-6">
-                  <p class="info-label">Fecha de inicio</p>
+                  <p class="info-label">{{ 'my_offer.start_date' | translate }}</p>
                   <p class="info-value">{{ formatFecha(detalle()!.fecha_inicio) }}</p>
                 </div>
                 @if (detalle()!.garantia_anos) {
                   <div class="col-6">
-                    <p class="info-label">Garantía</p>
-                    <p class="info-value">{{ detalle()!.garantia_anos }} año(s)</p>
+                    <p class="info-label">{{ 'offer.warranty' | translate }}</p>
+                    <p class="info-value">{{ detalle()!.garantia_anos }} {{ 'offer.years' | translate }}</p>
                   </div>
                 }
                 <div class="col-6">
-                  <p class="info-label">Enviada el</p>
+                  <p class="info-label">{{ 'my_offer.sent_on' | translate }}</p>
                   <p class="info-value">{{ formatFecha(detalle()!.creado_en) }}</p>
                 </div>
               </div>
@@ -394,24 +381,24 @@
                 <div class="estado-banner estado-banner--aceptada">
                   <i class="bi bi-trophy-fill"></i>
                   <div>
-                    <p class="estado-banner__title">¡Oferta aceptada!</p>
-                    <p class="estado-banner__sub">El cliente seleccionó tu propuesta.</p>
+                    <p class="estado-banner__title">{{ 'my_offer.accepted_title' | translate }}</p>
+                    <p class="estado-banner__sub">{{ 'my_offer.accepted_sub' | translate }}</p>
                   </div>
                 </div>
               } @else if (detalle()!.estado === 'rechazada') {
                 <div class="estado-banner estado-banner--rechazada">
                   <i class="bi bi-x-circle-fill"></i>
                   <div>
-                    <p class="estado-banner__title">Oferta no seleccionada</p>
-                    <p class="estado-banner__sub">El cliente eligió otra propuesta.</p>
+                    <p class="estado-banner__title">{{ 'my_offer.rejected_title' | translate }}</p>
+                    <p class="estado-banner__sub">{{ 'my_offer.rejected_sub' | translate }}</p>
                   </div>
                 </div>
               } @else {
                 <div class="estado-banner estado-banner--pendiente">
                   <i class="bi bi-hourglass-split"></i>
                   <div>
-                    <p class="estado-banner__title">En espera de decisión</p>
-                    <p class="estado-banner__sub">El cliente aún no ha seleccionado una oferta.</p>
+                    <p class="estado-banner__title">{{ 'my_offer.pending_title' | translate }}</p>
+                    <p class="estado-banner__sub">{{ 'my_offer.pending_sub' | translate }}</p>
                   </div>
                 </div>
               }
@@ -424,12 +411,12 @@
             @if (detalle()!.estado === 'pendiente') {
               <button class="btn btn-cyan fw-semibold d-flex align-items-center justify-content-center gap-2"
                       type="button" (click)="editarOferta()">
-                <i class="bi bi-pencil-square"></i>Editar oferta
+                <i class="bi bi-pencil-square"></i>{{ 'my_offer.edit_btn' | translate }}
               </button>
             }
             <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
                     type="button" (click)="volver()">
-              <i class="bi bi-arrow-left"></i>Volver a mis ofertas
+              <i class="bi bi-arrow-left"></i>{{ 'my_offer.back_btn' | translate }}
             </button>
           </div>
 

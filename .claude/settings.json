@@ -23,7 +23,22 @@
       "Bash(findstr :4200)",
       "Bash(supabase functions *)",
       "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Recurse -Name)",
-      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -Filter \"*.css\")"
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -Filter \"*.css\")",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(Get-ChildItem -Path \"src\\\\app\\\\components\\\\app-footer\\\\\" -Recurse)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\client\\\\dashboard\\\\dashboard.component.ts\")",
+      "Bash(Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\builder\\\\dashboard\\\\dashboard.component.ts\")",
+      "Bash(grep -q '\"__TRACKED_VAR__\"' 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\fr.json')",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(node -e ' *)",
+      "Bash(grep -E \"innerText|textContent|alert\\\\\\(|console\\\\.|'[A-Z][a-z]{2,}\" \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -r --include=\"*.ts\")",
+      "Bash(cd /c/desarrollo/estimation3d-A18-v01/src/assets/i18n && ls -lh)",
+      "Read(//c/c/desarrollo/estimation3d-A18-v01/src/assets/**)",
+      "Read(//c/trabajo/estimation3d-A18-v01/src/assets/i18n/**)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Directory -Recurse)"
     ]
   }
 }

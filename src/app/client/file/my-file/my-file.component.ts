@@ -4,18 +4,20 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { OfertaService } from '../../../services/oferta.service';
 import { ArchivoService } from '../../../services/archivo.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../../models';
 
 
 @Component({
   selector: 'app-my-file',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',
 })
 export class MyFileComponent implements OnInit {
   private sanitizer         = inject(DomSanitizer);
+  private translate         = inject(TranslateService);
   private expedienteService = inject(ExpedienteService);
   private ofertaService     = inject(OfertaService);
   private archivoService    = inject(ArchivoService);
@@ -30,24 +32,14 @@ export class MyFileComponent implements OnInit {
   cargando       = signal(true);
   errorMsg       = signal('');
 
-  readonly ESTADO_CFG: Record<string, { texto: string; clase: string; icono: string }> = {
-    nuevo:         { texto: 'Nuevo',       clase: 'bg-primary-subtle text-primary',            icono: 'bi-inbox' },
-    en_estimacion: { texto: 'En revisión', clase: 'bg-info-subtle text-info-emphasis',         icono: 'bi-clipboard2-pulse' },
-    estimado:      { texto: 'Estimado',    clase: 'bg-success-subtle text-success',            icono: 'bi-check-circle' },
-    en_oferta:     { texto: 'Con ofertas', clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-cash-coin' },
-    adjudicado:    { texto: 'Adjudicado',  clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-trophy' },
-    contratado:    { texto: 'Contratado',  clase: 'bg-success-subtle text-success',            icono: 'bi-file-earmark-check' },
-    cancelado:     { texto: 'Cancelado',   clase: 'bg-secondary-subtle text-secondary',        icono: 'bi-x-circle' },
-  };
-
-  readonly ESTADO_HINT: Record<string, string> = {
-    nuevo:         'Tu solicitud fue recibida. Pronto se asignará un estimador.',
-    en_estimacion: 'Un estimador está evaluando tu caso en sitio.',
-    estimado:      'La estimación está lista. Los constructores pueden enviar propuestas.',
-    en_oferta:     'Hay propuestas de constructores disponibles para revisar.',
-    adjudicado:    'Constructor seleccionado. El contrato está en proceso.',
-    contratado:    '¡Proyecto contratado! El trabajo está en marcha.',
-    cancelado:     'Este expediente fue cancelado y ya no está activo.',
+  readonly ESTADO_CFG: Record<string, { clase: string; icono: string }> = {
+    nuevo:         { clase: 'bg-primary-subtle text-primary',            icono: 'bi-inbox' },
+    en_estimacion: { clase: 'bg-info-subtle text-info-emphasis',         icono: 'bi-clipboard2-pulse' },
+    estimado:      { clase: 'bg-success-subtle text-success',            icono: 'bi-check-circle' },
+    en_oferta:     { clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-cash-coin' },
+    adjudicado:    { clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-trophy' },
+    contratado:    { clase: 'bg-success-subtle text-success',            icono: 'bi-file-earmark-check' },
+    cancelado:     { clase: 'bg-secondary-subtle text-secondary',        icono: 'bi-x-circle' },
   };
 
   readonly ESTADO_PROGRESO: Record<string, number> = {
@@ -60,13 +52,13 @@ export class MyFileComponent implements OnInit {
     cancelado:     0,
   };
 
-  readonly PASOS: { key: string; icon: string; label: string }[] = [
-    { key: 'nuevo',         icon: 'bi-inbox',              label: 'Recibido'    },
-    { key: 'en_estimacion', icon: 'bi-clipboard2-pulse',   label: 'En revisión' },
-    { key: 'estimado',      icon: 'bi-check-circle',       label: 'Estimado'    },
-    { key: 'en_oferta',     icon: 'bi-cash-coin',          label: 'Con ofertas' },
-    { key: 'adjudicado',    icon: 'bi-trophy',             label: 'Adjudicado'  },
-    { key: 'contratado',    icon: 'bi-file-earmark-check', label: 'Contratado'  },
+  readonly PASOS: { key: string; icon: string; tkey: string }[] = [
+    { key: 'nuevo',         icon: 'bi-inbox',              tkey: 'pipeline.received' },
+    { key: 'en_estimacion', icon: 'bi-clipboard2-pulse',   tkey: 'pipeline.review'   },
+    { key: 'estimado',      icon: 'bi-check-circle',       tkey: 'state.estimado'    },
+    { key: 'en_oferta',     icon: 'bi-cash-coin',          tkey: 'pipeline.offers'   },
+    { key: 'adjudicado',    icon: 'bi-trophy',             tkey: 'pipeline.chosen'   },
+    { key: 'contratado',    icon: 'bi-file-earmark-check', tkey: 'pipeline.signed'   },
   ];
 
   progreso(estado: string): number {
@@ -111,15 +103,17 @@ export class MyFileComponent implements OnInit {
   }
 
   estadoCfg(estado: string) {
-    return this.ESTADO_CFG[estado] ?? { texto: estado, clase: 'bg-secondary-subtle text-secondary', icono: 'bi-question-circle' };
+    return this.ESTADO_CFG[estado] ?? { clase: 'bg-secondary-subtle text-secondary', icono: 'bi-question-circle' };
   }
 
   formatFecha(valor: string | null): string {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string | null): string {
@@ -129,7 +123,7 @@ export class MyFileComponent implements OnInit {
 
   formatCosto(valor: number | null): string {
     if (valor === null) return '—';
-    return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(valor);
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
   }
 
   publicUrl(storagePath: string): string {

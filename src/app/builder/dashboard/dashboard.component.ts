@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { OfertaService } from '../../services/oferta.service';
 import { OfertaDashboard } from '../../models';
@@ -9,14 +10,13 @@ import { OfertaDashboard } from '../../models';
 interface EstadoCfg {
   color:     string;
   textColor: string;
-  label:     string;
   icon:      string;
 }
 
 const OFERTA_CFG: Record<string, EstadoCfg> = {
-  pendiente: { color: '#ffc107', textColor: '#000', label: 'Pendiente', icon: 'bi-hourglass-split' },
-  aceptada:  { color: '#198754', textColor: '#fff', label: 'Aceptada',  icon: 'bi-trophy'          },
-  rechazada: { color: '#dc3545', textColor: '#fff', label: 'Rechazada', icon: 'bi-x-circle'        },
+  pendiente: { color: '#ffc107', textColor: '#000', icon: 'bi-hourglass-split' },
+  aceptada:  { color: '#198754', textColor: '#fff', icon: 'bi-trophy'          },
+  rechazada: { color: '#dc3545', textColor: '#fff', icon: 'bi-x-circle'        },
 };
 
 const R             = 54;
@@ -33,13 +33,14 @@ function calcProgress(ofertaEstado: string, expEstado: string): number {
 @Component({
   selector: 'app-builder-dashboard',
   standalone: true,
-  imports: [RouterLink, NgbTooltipModule],
+  imports: [RouterLink, NgbTooltipModule, TranslatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
 export class BuilderDashboardComponent implements OnInit {
   private auth          = inject(AuthSupabaseService);
   private ofertaService = inject(OfertaService);
+  private translate     = inject(TranslateService);
 
   user     = toSignal(this.auth.user$);
   ofertas  = signal<OfertaDashboard[]>([]);
@@ -68,12 +69,12 @@ export class BuilderDashboardComponent implements OnInit {
     const total = this.total();
     if (total === 0) return [];
     let offset = 0;
-    const segs: { label: string; color: string; dasharray: string; dashoffset: number }[] = [];
+    const segs: { color: string; dasharray: string; dashoffset: number }[] = [];
     for (const key of ['pendiente', 'aceptada', 'rechazada']) {
       const count = this.ofertas().filter(o => o.estado === key).length;
       if (count === 0) continue;
       const portion = (count / total) * CIRCUMFERENCE;
-      segs.push({ label: OFERTA_CFG[key].label, color: OFERTA_CFG[key].color,
+      segs.push({ color: OFERTA_CFG[key].color,
         dasharray: `${portion} ${CIRCUMFERENCE}`, dashoffset: -offset });
       offset += portion;
     }
@@ -98,14 +99,16 @@ export class BuilderDashboardComponent implements OnInit {
   }
 
   formatPrecio(v: number): string {
-    return `₡ ${v.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(v);
   }
 
   formatFecha(valor: string): string {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'short', year: 'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   get bienvenida(): string {

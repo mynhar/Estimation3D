@@ -1,26 +1,27 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <div class="landing-wrapper d-flex flex-column min-vh-100">
 
       <nav class="navbar px-4 py-3">
         <span class="navbar-brand fw-bold fs-5">Estimation 3D</span>
-        <a routerLink="/login" class="btn btn-outline-primary btn-sm">Iniciar sesión</a>
+        <a routerLink="/login" class="btn btn-outline-primary btn-sm">{{ 'auth.sign_in' | translate }}</a>
       </nav>
 
       <main class="flex-grow-1 d-flex align-items-center justify-content-center text-center px-3">
         <div class="hero">
-          <h1 class="display-5 fw-bold mb-3">Estima tus proyectos 3D<br>con precisión</h1>
+          <h1 class="display-5 fw-bold mb-3">{{ 'landing.title' | translate }}</h1>
           <p class="lead text-muted mb-4 mx-auto" style="max-width: 480px">
-            Calcula costos, tiempos y materiales para tus impresiones y diseños 3D de forma rápida y confiable.
+            {{ 'landing.subtitle' | translate }}
           </p>
           <a routerLink="/login" class="btn btn-primary btn-lg px-5">
-            Comenzar ahora
+            {{ 'landing.cta' | translate }}
           </a>
         </div>
       </main>

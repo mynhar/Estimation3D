@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteConOfertas, ESTADO_BADGE_OFERTA_RECIBIDA } from '../../models';
@@ -8,7 +9,7 @@ import { ExpedienteConOfertas, ESTADO_BADGE_OFERTA_RECIBIDA } from '../../models
 @Component({
   selector: 'app-offers-received',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './offers-received.component.html',
   styleUrl: './offers-received.component.css',
 })

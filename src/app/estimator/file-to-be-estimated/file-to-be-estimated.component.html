@@ -4,7 +4,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando expediente…
+      {{ 'builder_offer.loading' | translate }}
     </div>
 
   <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
@@ -12,12 +12,12 @@
     <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
         <div class="empty-icon empty-icon--warn"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">Expediente no encontrado</p>
+        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
         @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() }}</p>
+          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
         }
         <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
         </button>
       </div>
     </div>
@@ -30,10 +30,10 @@
       <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
         <div>
           <div class="d-flex align-items-center gap-2 mb-2">
-            <button class="btn-back" (click)="volver()" title="Volver">
+            <button class="btn-back" (click)="volver()" [title]="'common.back' | translate">
               <i class="bi bi-arrow-left"></i>
             </button>
-            <span class="text-muted small">Expedientes a estimar</span>
+            <span class="text-muted small">{{ 'files_to_estimate.title' | translate }}</span>
           </div>
           <h4 class="fw-bold mb-1">
             <span class="exp-num me-2">{{ detalle()!.numero }}</span>
@@ -42,22 +42,23 @@
           <p class="text-muted small mb-0">
             <i class="bi bi-person me-1"></i>{{ detalle()!.cliente_nombre }}
             <span class="mx-2">·</span>
-            <i class="bi bi-geo-alt me-1"></i>{{ detalle()!.provincia }}, {{ detalle()!.canton }}, {{ detalle()!.distrito }}
+            <i class="bi bi-geo-alt me-1"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }} {{ detalle()!.distrito }}
           </p>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
           @if (formularioCompleto) {
             <span class="kpi-pill kpi-pill--listo">
-              <i class="bi bi-check-circle-fill me-1"></i>Listo para enviar
+              <i class="bi bi-check-circle-fill me-1"></i>{{ 'estimator_file.pill_ready' | translate }}
             </span>
           } @else {
             <span class="kpi-pill kpi-pill--progreso">
-              <i class="bi bi-pencil me-1"></i>En progreso
+              <i class="bi bi-pencil me-1"></i>{{ 'estimator_file.pill_in_progress' | translate }}
             </span>
           }
           @if (fotos().length > 0) {
             <span class="kpi-pill kpi-pill--fotos">
-              <i class="bi bi-images me-1"></i>{{ fotos().length }} foto{{ fotos().length !== 1 ? 's' : '' }}
+              <i class="bi bi-images me-1"></i>{{ fotos().length }}
+              {{ fotos().length !== 1 ? ('estimator_file.photos_many' | translate) : ('estimator_file.photos_one' | translate) }}
             </span>
           }
         </div>
@@ -76,20 +77,20 @@
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-transparent border-bottom px-4 py-3">
             <span class="fw-semibold">
-              <i class="bi bi-info-circle me-2 text-primary"></i>Detalles del expediente
+              <i class="bi bi-info-circle me-2 text-primary"></i>{{ 'estimator_file.details_title' | translate }}
             </span>
           </div>
           <div class="card-body p-4">
 
             <!-- Cliente -->
-            <p class="info-section-label">Cliente</p>
+            <p class="info-section-label">{{ 'builder_offer.client_label' | translate }}</p>
             <div class="row g-3 mb-3">
               <div class="col-sm-7">
-                <p class="info-label">Nombre</p>
+                <p class="info-label">{{ 'common.name' | translate }}</p>
                 <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
               </div>
               <div class="col-sm-5">
-                <p class="info-label">Teléfono</p>
+                <p class="info-label">{{ 'common.phone' | translate }}</p>
                 <p class="info-value">{{ detalle()!.cliente_telefono || '—' }}</p>
               </div>
             </div>
@@ -97,41 +98,32 @@
             <hr class="my-3">
 
             <!-- Ubicación -->
-            <p class="info-section-label">Ubicación</p>
+            <p class="info-section-label">{{ 'estimator_file.location_section' | translate }}</p>
+
             <div class="row g-3 mb-3">
               <div class="col-sm-8">
-                <p class="info-label">Dirección</p>
-                <p class="info-value">{{ detalle()!.direccion }}</p>
+                <p class="info-label">{{ 'common.address' | translate }}</p>
+                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
+                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
+                <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
               </div>
               <div class="col-sm-4">
-                <p class="info-label">Referencia</p>
+                <p class="info-label">{{ 'file.reference' | translate }}</p>
                 <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Provincia</p>
-                <p class="info-value">{{ detalle()!.provincia }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Cantón</p>
-                <p class="info-value">{{ detalle()!.canton }}</p>
-              </div>
-              <div class="col-4">
-                <p class="info-label">Distrito</p>
-                <p class="info-value">{{ detalle()!.distrito }}</p>
               </div>
             </div>
 
             <hr class="my-3">
 
             <!-- Visita planificada -->
-            <p class="info-section-label">Visita planificada</p>
+            <p class="info-section-label">{{ 'estimator_file.planned_visit' | translate }}</p>
             <div class="row g-3">
               <div class="col-sm-6">
-                <p class="info-label">Fecha</p>
+                <p class="info-label">{{ 'common.date' | translate }}</p>
                 <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
               </div>
               <div class="col-sm-6">
-                <p class="info-label">Hora</p>
+                <p class="info-label">{{ 'file.hour' | translate }}</p>
                 <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
               </div>
             </div>
@@ -144,7 +136,7 @@
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-images me-2 text-primary"></i>Fotos del sitio
+              <i class="bi bi-images me-2 text-primary"></i>{{ 'file.site_photos' | translate }}
               @if (fotos().length > 0) {
                 <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
                   {{ fotos().length }}
@@ -154,9 +146,9 @@
             <label class="btn btn-outline-primary btn-sm mb-0 d-flex align-items-center gap-1"
                    [class.disabled]="subiendoFoto()">
               @if (subiendoFoto()) {
-                <span class="spinner-border spinner-border-sm"></span>Subiendo…
+                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
-                <i class="bi bi-cloud-upload"></i>Subir fotos
+                <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_photos' | translate }}
               }
               <input type="file" accept="image/*" multiple class="d-none"
                      (change)="subirFotos($event)" [disabled]="subiendoFoto()"/>
@@ -169,7 +161,7 @@
             @if (fotos().length === 0) {
               <div class="upload-empty">
                 <i class="bi bi-camera fs-2 mb-2 d-block"></i>
-                <p class="mb-0">Sin fotos aún. Sube imágenes del sitio de la visita.</p>
+                <p class="mb-0">{{ 'estimator_file.no_photos_hint' | translate }}</p>
               </div>
             } @else {
               <div class="photos-grid">
@@ -180,7 +172,7 @@
                          [title]="f.nombre_archivo"
                          (click)="verArchivo(f)" />
                     <button class="photo-thumb__delete"
-                            title="Eliminar foto"
+                            [title]="'estimator_file.delete_photo' | translate"
                             (click)="eliminarArchivo(f, 'foto')">
                       <i class="bi bi-x-lg"></i>
                     </button>
@@ -196,7 +188,7 @@
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-camera-video me-2 text-primary"></i>Tour virtual de la visita
+              <i class="bi bi-camera-video me-2 text-primary"></i>{{ 'estimator_file.tour_title' | translate }}
             </span>
             @if (!editandoTour()) {
               <div class="d-flex gap-2">
@@ -204,13 +196,13 @@
                         (click)="iniciarEdicionTour()"
                         [disabled]="guardandoTour()">
                   <i class="bi {{ urlTour ? 'bi-pencil' : 'bi-plus-lg' }} me-1"></i>
-                  {{ urlTour ? 'Editar' : 'Agregar' }}
+                  {{ urlTour ? ('common.edit' | translate) : ('estimator_file.tour_add' | translate) }}
                 </button>
                 @if (urlTour) {
                   <button class="btn btn-outline-danger btn-sm"
                           (click)="eliminarTour()"
                           [disabled]="guardandoTour()"
-                          title="Eliminar tour">
+                          [title]="'estimator_file.delete_tour' | translate">
                     @if (guardandoTour()) {
                       <span class="spinner-border spinner-border-sm"></span>
                     } @else {
@@ -232,7 +224,7 @@
               @if (!hasDraft()) {
                 <div class="alert alert-warning py-2 small mb-3">
                   <i class="bi bi-info-circle me-1"></i>
-                  Guarda un borrador primero para que el tour quede registrado de forma independiente.
+                  {{ 'estimator_file.tour_draft_hint_alt' | translate }}
                 </div>
               }
               <div class="tour-edit-wrap">
@@ -248,19 +240,19 @@
                           (click)="guardarTour()"
                           [disabled]="guardandoTour()">
                     @if (guardandoTour()) {
-                      <span class="spinner-border spinner-border-sm me-1"></span>Guardando…
+                      <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
                     } @else {
-                      <i class="bi bi-check-lg me-1"></i>Guardar
+                      <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
                     }
                   </button>
                   <button class="btn btn-outline-secondary btn-sm"
                           (click)="cancelarEdicionTour()"
                           [disabled]="guardandoTour()">
-                    Cancelar
+                    {{ 'common.cancel' | translate }}
                   </button>
                 </div>
                 @if (urlTourPreviewSafe) {
-                  <p class="text-muted small mb-1">Vista previa:</p>
+                  <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
                   <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
                     <iframe [src]="urlTourPreviewSafe"
                             allowfullscreen
@@ -284,7 +276,7 @@
               } @else {
                 <div class="upload-empty">
                   <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
-                  <p class="mb-0">Sin tour registrado. Usa el botón Agregar para vincular un tour Matterport.</p>
+                  <p class="mb-0">{{ 'estimator_file.no_tour_use_add' | translate }}</p>
                 </div>
               }
             }
@@ -296,7 +288,7 @@
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-file-earmark-text me-2 text-primary"></i>Documentos técnicos
+              <i class="bi bi-file-earmark-text me-2 text-primary"></i>{{ 'file.technical_docs' | translate }}
               @if (documentos().length > 0) {
                 <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
                   {{ documentos().length }}
@@ -306,9 +298,9 @@
             <label class="btn btn-outline-primary btn-sm mb-0 d-flex align-items-center gap-1"
                    [class.disabled]="subiendoDocumento()">
               @if (subiendoDocumento()) {
-                <span class="spinner-border spinner-border-sm"></span>Subiendo…
+                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
-                <i class="bi bi-cloud-upload"></i>Subir documento
+                <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_doc' | translate }}
               }
               <input type="file"
                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
@@ -323,7 +315,7 @@
             @if (documentos().length === 0) {
               <div class="upload-empty">
                 <i class="bi bi-file-earmark fs-2 mb-2 d-block"></i>
-                <p class="mb-0">Sin documentos. Sube PDFs, planos u otros archivos técnicos.</p>
+                <p class="mb-0">{{ 'estimator_file.no_docs_hint' | translate }}</p>
               </div>
             } @else {
               @for (d of documentos(); track d.id) {
@@ -337,11 +329,11 @@
                   </div>
                   <div class="file-row__actions">
                     <button class="btn btn-outline-secondary btn-sm"
-                            (click)="verArchivo(d)" title="Ver">
+                            (click)="verArchivo(d)" [title]="'common.view' | translate">
                       <i class="bi bi-eye"></i>
                     </button>
                     <button class="btn btn-outline-danger btn-sm"
-                            (click)="eliminarArchivo(d, 'documento')" title="Eliminar">
+                            (click)="eliminarArchivo(d, 'documento')" [title]="'common.delete' | translate">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
@@ -362,7 +354,7 @@
 
             <div class="card-header bg-transparent border-bottom px-4 py-3">
               <span class="fw-semibold">
-                <i class="bi bi-clipboard2-check me-2 text-primary"></i>Documentación de la visita
+                <i class="bi bi-clipboard2-check me-2 text-primary"></i>{{ 'estimator_file.visit_doc_title' | translate }}
               </span>
             </div>
 
@@ -372,14 +364,14 @@
               <div class="row g-3 mb-3">
                 <div class="col-7">
                   <label class="form-label small fw-semibold">
-                    <i class="bi bi-calendar3 me-1 text-muted"></i>Fecha real
+                    <i class="bi bi-calendar3 me-1 text-muted"></i>{{ 'estimator_file.real_date' | translate }}
                     <span class="req-mark">*</span>
                   </label>
                   <input type="date" class="form-control" [(ngModel)]="fechaVisita" />
                 </div>
                 <div class="col-5">
                   <label class="form-label small fw-semibold">
-                    <i class="bi bi-clock me-1 text-muted"></i>Hora
+                    <i class="bi bi-clock me-1 text-muted"></i>{{ 'file.hour' | translate }}
                     <span class="req-mark">*</span>
                   </label>
                   <input type="time" class="form-control" [(ngModel)]="horaVisita" />
@@ -389,34 +381,34 @@
               <!-- Problemas observados -->
               <div class="mb-3">
                 <label class="form-label small fw-semibold">
-                  <i class="bi bi-card-text me-1 text-muted"></i>Problemas observados
+                  <i class="bi bi-card-text me-1 text-muted"></i>{{ 'estimator_file.problems_observed' | translate }}
                   <span class="req-mark">*</span>
                 </label>
                 <textarea class="form-control" rows="4"
-                          placeholder="Describe los problemas observados durante la visita…"
+                          [placeholder]="'estimator_file.problems_placeholder' | translate"
                           [(ngModel)]="descripcionProblemas"></textarea>
               </div>
 
               <!-- Costo estimado (rango opcional) -->
               <div class="mb-3">
                 <label class="form-label small fw-semibold">
-                  <i class="bi bi-cash-coin me-1 text-muted"></i>Costo aproximado
-                  <span class="opt-mark">(opcional)</span>
+                  <i class="bi bi-cash-coin me-1 text-muted"></i>{{ 'estimator_file.approx_cost' | translate }}
+                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
                 </label>
                 <div class="row g-2">
                   <div class="col-6">
-                    <label class="form-label small text-muted mb-1">Mínimo</label>
+                    <label class="form-label small text-muted mb-1">{{ 'file.min' | translate }}</label>
                     <div class="input-group input-group-sm">
-                      <span class="input-group-text">₡</span>
+                      <span class="input-group-text">CA$</span>
                       <input type="number" class="form-control"
                              placeholder="0" min="0" step="1000"
                              [(ngModel)]="costoMin" />
                     </div>
                   </div>
                   <div class="col-6">
-                    <label class="form-label small text-muted mb-1">Máximo</label>
+                    <label class="form-label small text-muted mb-1">{{ 'file.max' | translate }}</label>
                     <div class="input-group input-group-sm">
-                      <span class="input-group-text">₡</span>
+                      <span class="input-group-text">CA$</span>
                       <input type="number" class="form-control"
                              placeholder="0" min="0" step="1000"
                              [(ngModel)]="costoMax" />
@@ -426,7 +418,7 @@
                 @if (!costoValido) {
                   <div class="form-text text-danger mt-1">
                     <i class="bi bi-exclamation-circle me-1"></i>
-                    Ingrese ambos valores y el máximo debe ser ≥ al mínimo.
+                    {{ 'estimator_file.cost_error' | translate }}
                   </div>
                 }
               </div>
@@ -434,11 +426,11 @@
               <!-- Notas internas -->
               <div class="mb-4">
                 <label class="form-label small fw-semibold text-muted">
-                  <i class="bi bi-lock me-1"></i>Notas internas
-                  <span class="opt-mark">(opcional)</span>
+                  <i class="bi bi-lock me-1"></i>{{ 'estimator_file.internal_notes' | translate }}
+                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
                 </label>
                 <textarea class="form-control form-control-sm" rows="3"
-                          placeholder="Visible solo para el estimador y administrador…"
+                          [placeholder]="'estimator_file.notes_placeholder' | translate"
                           [(ngModel)]="notasInternas"></textarea>
               </div>
 
@@ -448,36 +440,37 @@
                   <i class="bi"
                      [class.bi-check-circle-fill]="!!fechaVisita"
                      [class.bi-circle]="!fechaVisita"></i>
-                  Fecha de visita
+                  {{ 'estimator_file.check_visit_date' | translate }}
                 </div>
                 <div class="completion-item" [class.completion-item--done]="!!horaVisita">
                   <i class="bi"
                      [class.bi-check-circle-fill]="!!horaVisita"
                      [class.bi-circle]="!horaVisita"></i>
-                  Hora de visita
+                  {{ 'estimator_file.check_visit_time' | translate }}
                 </div>
                 <div class="completion-item"
                      [class.completion-item--done]="!!descripcionProblemas.trim()">
                   <i class="bi"
                      [class.bi-check-circle-fill]="!!descripcionProblemas.trim()"
                      [class.bi-circle]="!descripcionProblemas.trim()"></i>
-                  Problemas observados
+                  {{ 'estimator_file.problems_observed' | translate }}
                 </div>
                 <div class="completion-item"
                      [class.completion-item--done]="costoMin !== null && costoMax !== null && costoValido">
                   <i class="bi"
                      [class.bi-check-circle-fill]="costoMin !== null && costoMax !== null && costoValido"
                      [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
-                  Costo aproximado <span class="opt-mark">(opcional)</span>
+                  {{ 'estimator_file.approx_cost' | translate }}
+                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
                 </div>
               </div>
 
               <!-- Mensajes de la visita -->
               @if (errorVisitaMsg()) {
-                <div class="alert alert-danger py-2 small mb-3">{{ errorVisitaMsg() }}</div>
+                <div class="alert alert-danger py-2 small mb-3">{{ errorVisitaMsg() | translate }}</div>
               }
               @if (exitoVisitaMsg()) {
-                <div class="alert alert-success py-2 small mb-3">{{ exitoVisitaMsg() }}</div>
+                <div class="alert alert-success py-2 small mb-3">{{ exitoVisitaMsg() | translate }}</div>
               }
 
               <!-- Acciones -->
@@ -486,28 +479,28 @@
                         (click)="guardarVisita()"
                         [disabled]="guardandoVisita()">
                   @if (guardandoVisita()) {
-                    <span class="spinner-border spinner-border-sm"></span>Guardando…
+                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.saving' | translate }}
                   } @else {
-                    <i class="bi bi-floppy"></i>Guardar borrador
+                    <i class="bi bi-floppy"></i>{{ 'estimator_file.save_draft' | translate }}
                   }
                 </button>
                 <button class="btn btn-primary fw-semibold d-flex align-items-center justify-content-center gap-2"
                         (click)="guardarEstimacion()"
                         [disabled]="guardando() || !formularioCompleto">
                   @if (guardando()) {
-                    <span class="spinner-border spinner-border-sm"></span>Enviando…
+                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.sending' | translate }}
                   } @else {
-                    <i class="bi bi-send-check"></i>Enviar estimación
+                    <i class="bi bi-send-check"></i>{{ 'estimator_file.send_estimation' | translate }}
                   }
                 </button>
               </div>
 
               <!-- Mensajes de envío -->
               @if (errorGuardado()) {
-                <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardado() }}</div>
+                <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardado() | translate }}</div>
               }
               @if (exitoMsg()) {
-                <div class="alert alert-success py-2 small mt-3 mb-0">{{ exitoMsg() }}</div>
+                <div class="alert alert-success py-2 small mt-3 mb-0">{{ exitoMsg() | translate }}</div>
               }
 
             </div>

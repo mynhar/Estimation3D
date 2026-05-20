@@ -5,31 +5,29 @@
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
         <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-list-ul me-1"></i>Constructor
+          <i class="bi bi-list-ul me-1"></i>{{ 'role.constructeur' | translate }}
         </p>
-        <h4 class="mb-1">Mis ofertas</h4>
-        <p class="text-muted small mb-0">
-          Historial de propuestas enviadas a expedientes estimados.
-        </p>
+        <h4 class="mb-1">{{ 'nav.mes_offres' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'my_offers.subtitle' | translate }}</p>
       </div>
       @if (!cargando() && ofertas().length > 0) {
         <div class="d-flex gap-2 flex-wrap align-items-center">
           @if (totalPendientes() > 0) {
             <span class="kpi-pill kpi-pill--pending">
               <i class="bi bi-hourglass-split me-1"></i>
-              {{ totalPendientes() }} pendiente{{ totalPendientes() !== 1 ? 's' : '' }}
+              {{ totalPendientes() }} {{ 'state.pendiente' | translate }}
             </span>
           }
           @if (totalAceptadas() > 0) {
             <span class="kpi-pill kpi-pill--accepted">
               <i class="bi bi-trophy-fill me-1"></i>
-              {{ totalAceptadas() }} aceptada{{ totalAceptadas() !== 1 ? 's' : '' }}
+              {{ totalAceptadas() }} {{ 'state.aceptada' | translate }}
             </span>
           }
           @if (totalRechazadas() > 0) {
             <span class="kpi-pill kpi-pill--rejected">
               <i class="bi bi-x-circle me-1"></i>
-              {{ totalRechazadas() }} rechazada{{ totalRechazadas() !== 1 ? 's' : '' }}
+              {{ totalRechazadas() }} {{ 'state.rechazada' | translate }}
             </span>
           }
         </div>
@@ -41,7 +39,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando ofertas…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
@@ -51,13 +49,10 @@
         <div class="empty-icon">
           <i class="bi bi-file-earmark-x"></i>
         </div>
-        <p class="empty-title">Aún no has enviado ofertas</p>
-        <p class="empty-text">
-          Encuentra proyectos disponibles y envía tu primera propuesta
-          para comenzar a construir tu historial.
-        </p>
+        <p class="empty-title">{{ 'dashboard_builder.no_offers' | translate }}</p>
+        <p class="empty-text">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
         <a routerLink="/builder/available-files" class="btn btn-primary fw-semibold">
-          <i class="bi bi-search me-1"></i>Ver expedientes disponibles
+          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
         </a>
       </div>
     </div>
@@ -73,7 +68,7 @@
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--total"><i class="bi bi-send"></i></div>
             <div>
-              <p class="text-muted small mb-0">Total enviadas</p>
+              <p class="text-muted small mb-0">{{ 'my_offers.total_sent' | translate }}</p>
               <p class="kpi-num fw-bold mb-0">{{ ofertas().length }}</p>
             </div>
           </div>
@@ -86,7 +81,7 @@
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--pending"><i class="bi bi-hourglass-split"></i></div>
             <div>
-              <p class="text-muted small mb-0">Pendientes</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.pending' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-warning">{{ totalPendientes() }}</p>
             </div>
           </div>
@@ -98,7 +93,7 @@
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--accepted"><i class="bi bi-trophy-fill"></i></div>
             <div>
-              <p class="text-muted small mb-0">Aceptadas</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.accepted' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-success">{{ totalAceptadas() }}</p>
             </div>
           </div>
@@ -110,7 +105,7 @@
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--amount"><i class="bi bi-cash-coin"></i></div>
             <div>
-              <p class="text-muted small mb-0">Monto adjudicado</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_builder.awarded_amount' | translate }}</p>
               <p class="kpi-num-sm fw-bold mb-0 text-primary">{{ formatCosto(montoAdjudicado()) }}</p>
             </div>
           </div>
@@ -122,7 +117,6 @@
     <!-- ── Barra de filtros ───────────────────────────────────────────────── -->
     <div class="filter-bar rounded-4 mb-3 p-3">
 
-      <!-- Búsqueda -->
       <div class="filter-search">
         <span class="filter-search__icon"><i class="bi bi-search"></i></span>
         <input
@@ -130,50 +124,47 @@
           class="form-control filter-search__input"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
-          placeholder="Buscar por expediente, servicio, provincia…"
+          [placeholder]="'my_offers.search_placeholder' | translate"
           autocomplete="off"
         />
       </div>
 
-      <!-- Estado -->
       <div class="filter-group">
-        <span class="filter-group__label">Estado</span>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de estado">
+        <span class="filter-group__label">{{ 'common.status' | translate }}</span>
+        <div class="btn-group btn-group-sm" role="group">
           <button type="button" class="btn"
                   [class.btn-secondary]="filtroEstado() === 'todos'"
                   [class.btn-outline-secondary]="filtroEstado() !== 'todos'"
-                  (click)="filtroEstado.set('todos')">Todos</button>
+                  (click)="filtroEstado.set('todos')">{{ 'common.all' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-warning]="filtroEstado() === 'pendiente'"
                   [class.btn-outline-warning]="filtroEstado() !== 'pendiente'"
-                  (click)="filtroEstado.set('pendiente')">Pendiente</button>
+                  (click)="filtroEstado.set('pendiente')">{{ 'state.pendiente' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-success]="filtroEstado() === 'aceptada'"
                   [class.btn-outline-success]="filtroEstado() !== 'aceptada'"
-                  (click)="filtroEstado.set('aceptada')">Aceptada</button>
+                  (click)="filtroEstado.set('aceptada')">{{ 'state.aceptada' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-danger]="filtroEstado() === 'rechazada'"
                   [class.btn-outline-danger]="filtroEstado() !== 'rechazada'"
-                  (click)="filtroEstado.set('rechazada')">Rechazada</button>
+                  (click)="filtroEstado.set('rechazada')">{{ 'state.rechazada' | translate }}</button>
         </div>
       </div>
 
-      <!-- Limpiar -->
       @if (hayFiltros()) {
         <button type="button" class="btn btn-link btn-sm text-muted filter-clear"
                 (click)="limpiarFiltros()">
-          <i class="bi bi-x-circle me-1"></i>Limpiar
+          <i class="bi bi-x-circle me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
 
     </div>
 
-    <!-- Hint de resultados -->
     @if (hayFiltros()) {
       <p class="results-hint mb-3">
         <i class="bi bi-funnel me-1"></i>
-        Mostrando <strong>{{ ofertasFiltradas().length }}</strong>
-        de {{ ofertas().length }} ofertas
+        {{ 'common.showing' | translate }} <strong>{{ ofertasFiltradas().length }}</strong>
+        {{ 'common.of' | translate }} {{ ofertas().length }} {{ 'common.offers_count' | translate }}
       </p>
     }
 
@@ -184,10 +175,10 @@
           <div class="empty-icon">
             <i class="bi bi-funnel-x"></i>
           </div>
-          <p class="empty-title">Sin resultados</p>
-          <p class="empty-text">Ninguna oferta coincide con los filtros aplicados.</p>
+          <p class="empty-title">{{ 'common.no_results' | translate }}</p>
+          <p class="empty-text">{{ 'my_offers.no_match' | translate }}</p>
           <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
           </button>
         </div>
       </div>
@@ -205,19 +196,16 @@
               <div class="oferta-accent"></div>
               <div class="oferta-body d-flex flex-column">
 
-                <!-- Fila 1: número + badge estado -->
                 <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                   <span class="oferta-num">{{ oferta.expediente_numero }}</span>
                   <span class="badge oferta-badge {{ badgeClass(oferta.estado) }}">
                     <i class="bi {{ estadoIcon(oferta.estado) }} me-1"></i>
-                    {{ estadoLabel(oferta.estado) }}
+                    {{ ('state.' + oferta.estado) | translate }}
                   </span>
                 </div>
 
-                <!-- Servicio -->
                 <p class="oferta-servicio mb-2">{{ oferta.servicio_nombre }}</p>
 
-                <!-- Ubicación -->
                 <p class="oferta-meta mb-1">
                   <i class="bi bi-geo-alt me-1"></i>
                   {{ oferta.direccion }}{{ oferta.referencia ? ' · ' + oferta.referencia : '' }}
@@ -227,27 +215,25 @@
                   {{ oferta.provincia }}, {{ oferta.canton }}, {{ oferta.distrito }}
                 </p>
 
-                <!-- Nota contextual por estado -->
                 @if (oferta.estado === 'aceptada') {
                   <div class="estado-note estado-note--success mt-2">
-                    <i class="bi bi-trophy-fill me-1"></i>¡El cliente eligió tu propuesta!
+                    <i class="bi bi-trophy-fill me-1"></i>{{ 'offer.accepted_note' | translate }}
                   </div>
                 } @else if (oferta.estado === 'rechazada') {
                   <div class="estado-note estado-note--muted mt-2">
-                    <i class="bi bi-info-circle me-1"></i>El cliente seleccionó otra propuesta.
+                    <i class="bi bi-info-circle me-1"></i>{{ 'offer.rejected_note' | translate }}
                   </div>
                 }
 
                 <hr class="oferta-divider my-3" />
 
-                <!-- Precio + fechas -->
                 <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
                   <div>
-                    <p class="oferta-price-label mb-0">Mi precio</p>
+                    <p class="oferta-price-label mb-0">{{ 'my_offers.my_price' | translate }}</p>
                     <p class="oferta-price fw-bold mb-0">{{ formatCosto(oferta.precio) }}</p>
                   </div>
                   <div class="text-end">
-                    <p class="oferta-price-label mb-0">Inicio · Plazo</p>
+                    <p class="oferta-price-label mb-0">{{ 'my_offers.start_deadline' | translate }}</p>
                     <p class="oferta-date mb-0">
                       {{ formatFecha(oferta.fecha_inicio) }}
                       @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
@@ -259,7 +245,6 @@
                   </div>
                 </div>
 
-                <!-- CTA -->
                 <button
                   class="btn btn-sm fw-semibold mt-auto w-100
                          d-flex align-items-center justify-content-center gap-2"
@@ -267,7 +252,7 @@
                   [class.btn-outline-success]="oferta.estado === 'aceptada'"
                   [class.btn-outline-secondary]="oferta.estado === 'rechazada'"
                   (click)="ver(oferta.id)">
-                  <i class="bi bi-eye"></i>Ver mi oferta
+                  <i class="bi bi-eye"></i>{{ 'offer.my_offer' | translate }}
                 </button>
 
               </div>
@@ -276,11 +261,10 @@
         }
       </div>
 
-      <!-- Enlace a expedientes disponibles -->
       <div class="mt-4 text-center">
         <a routerLink="/builder/available-files"
            class="btn btn-outline-primary btn-sm fw-semibold">
-          <i class="bi bi-search me-1"></i>Ver expedientes disponibles
+          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
         </a>
       </div>
 

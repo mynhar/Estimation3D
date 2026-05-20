@@ -4,15 +4,15 @@
   <header class="page-header rounded-4 p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <h4 class="fw-bold mb-1">Ofertas recibidas</h4>
+        <h4 class="fw-bold mb-1">{{ 'nav.offres_recues' | translate }}</h4>
         <p class="text-muted small mb-0">
-          Revisa las propuestas de constructores para tus proyectos y elige la mejor.
+          {{ 'offers_received.subtitle' | translate }}
         </p>
       </div>
       @if (!cargando() && pendientes().length > 0) {
         <span class="pending-pill flex-shrink-0">
           <i class="bi bi-bell-fill me-1"></i>
-          {{ pendientes().length }} pendiente{{ pendientes().length !== 1 ? 's' : '' }}
+          {{ pendientes().length }} {{ pendientes().length !== 1 ? ('offers_received.pending_plural' | translate) : ('offers_received.pending_singular' | translate) }}
         </span>
       }
     </div>
@@ -22,7 +22,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando ofertas…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
@@ -32,10 +32,8 @@
         <div class="empty-icon">
           <i class="bi bi-envelope-open"></i>
         </div>
-        <p class="empty-title">Sin ofertas por ahora</p>
-        <p class="empty-text">
-          Cuando los constructores envíen propuestas sobre tus expedientes, aparecerán aquí para que puedas revisarlas y compararlas.
-        </p>
+        <p class="empty-title">{{ 'offers_received.empty_title' | translate }}</p>
+        <p class="empty-text">{{ 'offers_received.empty_text' | translate }}</p>
       </div>
     </div>
 
@@ -50,12 +48,14 @@
         </div>
         <div class="flex-grow-1">
           <p class="fw-semibold mb-0 text-dark">
-            Tienes
-            {{ pendientes().length === 1 ? 'un expediente' : pendientes().length + ' expedientes' }}
-            con ofertas esperando tu decisión
+            @if (pendientes().length === 1) {
+              {{ 'offers_received.banner_single' | translate }}
+            } @else {
+              {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
+            }
           </p>
           <p class="small mb-0 text-warning-emphasis">
-            Compara las propuestas y selecciona la que mejor se adapte a tu proyecto.
+            {{ 'dashboard_client.compare_text' | translate }}
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@
     @if (pendientes().length > 0) {
       <div class="section-label mb-3">
         <span class="section-dot section-dot--amber"></span>
-        Pendientes de revisión
+        {{ 'offers_received.section_pending' | translate }}
         <span class="section-count">{{ pendientes().length }}</span>
       </div>
 
@@ -112,7 +112,7 @@
                 <!-- Fecha de visita -->
                 <p class="exp-fecha mb-0">
                   <i class="bi bi-calendar3 me-1"></i>
-                  Visita: {{ formatFecha(exp.fecha_visita) }}
+                  {{ 'file.visit_date' | translate }}: {{ formatFecha(exp.fecha_visita) }}
                   @if (formatHora(exp.fecha_visita)) {
                     <span class="ms-1 text-muted">· {{ formatHora(exp.fecha_visita) }}</span>
                   }
@@ -124,7 +124,7 @@
                         style="margin-top: 1rem !important"
                         (click)="ver(exp.id)">
                   <i class="bi bi-eye"></i>
-                  Ver y comparar {{ ofertasLabel(exp.total_ofertas) }}
+                  {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
                   <i class="bi bi-arrow-right"></i>
                 </button>
 
@@ -146,7 +146,7 @@
 
       <div class="section-label mb-3">
         <span class="section-dot section-dot--green"></span>
-        Ya gestionados
+        {{ 'offers_received.section_managed' | translate }}
         <span class="section-count">{{ gestionados().length }}</span>
       </div>
 
@@ -194,7 +194,7 @@
                         style="margin-top: 0.85rem !important"
                         (click)="ver(exp.id)">
                   <i class="bi bi-eye"></i>
-                  Ver detalle
+                  {{ 'common.see_detail' | translate }}
                 </button>
 
               </div>

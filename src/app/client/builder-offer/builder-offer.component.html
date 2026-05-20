@@ -16,7 +16,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando expediente…
+      {{ 'builder_offer.loading' | translate }}
     </div>
 
   <!-- ── No encontrado ──────────────────────────────────────────────────────── -->
@@ -26,12 +26,12 @@
         <div class="empty-icon">
           <i class="bi bi-exclamation-triangle"></i>
         </div>
-        <p class="empty-title">Expediente no encontrado</p>
+        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
         @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() }}</p>
+          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
         }
         <button class="btn btn-outline-secondary btn-sm" type="button" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
         </button>
       </div>
     </div>
@@ -43,14 +43,15 @@
     <header class="page-header rounded-4 p-4 mb-4">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" type="button" (click)="volver()" title="Volver">
+          <button class="btn-back" type="button" (click)="volver()"
+                  [title]="'common.back' | translate">
             <i class="bi bi-arrow-left"></i>
           </button>
           <div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <span class="exp-num">{{ expediente()!.numero }}</span>
               <span class="badge rounded-pill px-3 py-1 {{ expedienteBadgeClass(expediente()!.estado) }}">
-                {{ expediente()!.estado | titlecase }}
+                {{ ('state.' + expediente()!.estado) | translate }}
               </span>
             </div>
             <p class="text-muted small mb-0 mt-1">{{ expediente()!.servicio_nombre }}</p>
@@ -60,7 +61,7 @@
           @if (ofertas().length > 0) {
             <span class="kpi-pill kpi-pill--ofertas">
               <i class="bi bi-people me-1"></i>
-              {{ ofertas().length }} oferta{{ ofertas().length !== 1 ? 's' : '' }}
+              {{ ofertas().length }} {{ 'common.offers_count' | translate }}
             </span>
           }
           @if (estimacion()?.costo_estimado != null) {
@@ -84,23 +85,23 @@
           <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-header bg-transparent border-bottom px-4 py-3">
               <span class="fw-semibold">
-                <i class="bi bi-clipboard-check me-2 text-primary"></i>Informe del estimador
+                <i class="bi bi-clipboard-check me-2 text-primary"></i>{{ 'file.estimator_report' | translate }}
               </span>
             </div>
             <div class="card-body p-4">
 
               <div class="row g-3">
                 <div class="col-sm-6">
-                  <p class="info-label">Fecha real de visita</p>
+                  <p class="info-label">{{ 'file.real_visit_date' | translate }}</p>
                   <p class="info-value">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
                 </div>
                 <div class="col-sm-6">
-                  <p class="info-label">Hora</p>
+                  <p class="info-label">{{ 'file.hour' | translate }}</p>
                   <p class="info-value">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
                 </div>
                 @if (estimacion()!.descripcion_problemas) {
                   <div class="col-12">
-                    <p class="info-label">Problemas observados</p>
+                    <p class="info-label">{{ 'file.situation' | translate }}</p>
                     <p class="descripcion-block">{{ estimacion()!.descripcion_problemas }}</p>
                   </div>
                 }
@@ -109,17 +110,17 @@
               <!-- Costo aproximado -->
               @if (estimacion()!.costo_estimado !== null) {
                 <hr class="section-divider" />
-                <p class="info-label mb-2">Costo aproximado de la obra</p>
+                <p class="info-label mb-2">{{ 'file.estimated_cost' | translate }}</p>
                 <div class="costo-range-card rounded-3 p-3">
                   <div class="d-flex align-items-center gap-3 flex-wrap">
                     <div>
-                      <p class="costo-tag mb-0">Mínimo</p>
+                      <p class="costo-tag mb-0">{{ 'file.min' | translate }}</p>
                       <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado!) }}</p>
                     </div>
                     @if (estimacion()!.costo_estimado_max !== null) {
                       <i class="bi bi-arrow-right text-muted"></i>
                       <div>
-                        <p class="costo-tag mb-0">Máximo</p>
+                        <p class="costo-tag mb-0">{{ 'file.max' | translate }}</p>
                         <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado_max!) }}</p>
                       </div>
                     }
@@ -131,7 +132,7 @@
               @if (urlTourSafe) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">
-                  <i class="bi bi-badge-3d-fill me-1"></i>Tour virtual del sitio
+                  <i class="bi bi-badge-3d-fill me-1"></i>{{ 'builder_offer.virtual_tour' | translate }}
                 </p>
                 <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
                   <iframe [src]="urlTourSafe"
@@ -145,7 +146,7 @@
               <!-- Fotos del sitio -->
               @if (fotosExp().length > 0) {
                 <hr class="section-divider" />
-                <p class="info-label mb-2">Fotos del sitio</p>
+                <p class="info-label mb-2">{{ 'file.site_photos' | translate }}</p>
                 <div class="photos-grid">
                   @for (f of fotosExp(); track f.id) {
                     <div class="photo-thumb" (click)="abrirFoto(f)" [title]="f.nombre_archivo">
@@ -159,7 +160,7 @@
               <!-- Videos del estimador -->
               @if (videosExp().length > 0) {
                 <hr class="section-divider" />
-                <p class="info-label mb-2">Videos</p>
+                <p class="info-label mb-2">{{ 'builder_offer.videos' | translate }}</p>
                 <div class="file-list">
                   @for (v of videosExp(); track v.id) {
                     <div class="file-row" [class.file-row--playing]="videoExpUrl() === publicUrl(v.url_storage)">
@@ -175,13 +176,13 @@
                                 [class.btn-warning]="videoExpUrl() === publicUrl(v.url_storage)"
                                 [class.btn-outline-secondary]="videoExpUrl() !== publicUrl(v.url_storage)"
                                 (click)="toggleVideoExp(v)"
-                                [title]="videoExpUrl() === publicUrl(v.url_storage) ? 'Cerrar' : 'Reproducir'">
+                                [title]="videoExpUrl() === publicUrl(v.url_storage) ? ('common.close' | translate) : ('builder_offer.play' | translate)">
                           <i class="bi"
                              [class.bi-stop-fill]="videoExpUrl() === publicUrl(v.url_storage)"
                              [class.bi-play-fill]="videoExpUrl() !== publicUrl(v.url_storage)"></i>
                         </button>
                         <button class="btn btn-outline-secondary btn-sm" type="button"
-                                (click)="verDocumento(v)" title="Abrir en nueva pestaña">
+                                (click)="verDocumento(v)" [title]="'common.open' | translate">
                           <i class="bi bi-box-arrow-up-right"></i>
                         </button>
                       </div>
@@ -193,7 +194,7 @@
                         </video>
                         <button class="btn btn-sm btn-outline-secondary w-100 mt-2" type="button"
                                 (click)="toggleVideoExp(v)">
-                          <i class="bi bi-x me-1"></i>Cerrar reproductor
+                          <i class="bi bi-x me-1"></i>{{ 'my_offer.close_player' | translate }}
                         </button>
                       </div>
                     }
@@ -204,7 +205,7 @@
               <!-- Documentos técnicos del estimador -->
               @if (documentosExp().length > 0) {
                 <hr class="section-divider" />
-                <p class="info-label mb-2">Documentos técnicos</p>
+                <p class="info-label mb-2">{{ 'file.technical_docs' | translate }}</p>
                 <div class="file-list">
                   @for (d of documentosExp(); track d.id) {
                     <div class="file-row">
@@ -231,25 +232,25 @@
 
         <!-- Ofertas ─────────────────────────────────────────────────────────── -->
         <div class="d-flex align-items-center gap-2 mb-3">
-          <h5 class="fw-bold mb-0">Ofertas de constructores</h5>
+          <h5 class="fw-bold mb-0">{{ 'builder_offer.title' | translate }}</h5>
           <span class="offers-count-badge">{{ ofertas().length }}</span>
         </div>
 
         @if (exitoMsg()) {
           <div class="alert alert-success rounded-3 mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-check-circle-fill flex-shrink-0"></i>{{ exitoMsg() }}
+            <i class="bi bi-check-circle-fill flex-shrink-0"></i>{{ exitoMsg() | translate }}
           </div>
         }
         @if (errorMsg() && !cargando()) {
-          <div class="alert alert-danger rounded-3 mb-3">{{ errorMsg() }}</div>
+          <div class="alert alert-danger rounded-3 mb-3">{{ errorMsg() | translate }}</div>
         }
 
         @if (ofertas().length === 0) {
           <div class="card border-0 shadow-sm rounded-4">
             <div class="empty-inline">
               <i class="bi bi-inbox fs-2 mb-2 d-block text-muted"></i>
-              <p class="fw-medium mb-1">Sin ofertas aún</p>
-              <p class="text-muted small mb-0">Los constructores aún no han enviado propuestas.</p>
+              <p class="fw-medium mb-1">{{ 'builder_offer.no_offers' | translate }}</p>
+              <p class="text-muted small mb-0">{{ 'builder_offer.no_offers_text' | translate }}</p>
             </div>
           </div>
 
@@ -267,16 +268,16 @@
                 <div class="d-flex align-items-start justify-content-between gap-3 mb-3 flex-wrap">
                   <div>
                     <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
-                    <p class="text-muted small mb-0">Precio total de la obra</p>
+                    <p class="text-muted small mb-0">{{ 'builder_offer.total_price' | translate }}</p>
                   </div>
                   <div class="d-flex align-items-center gap-2 flex-wrap">
                     @if (esSeleccionada(oferta.id)) {
                       <span class="badge rounded-pill bg-primary px-3 py-2">
-                        <i class="bi bi-check2 me-1"></i>Seleccionada
+                        <i class="bi bi-check2 me-1"></i>{{ 'builder_offer.selected_badge' | translate }}
                       </span>
                     }
                     <span class="badge rounded-pill px-3 py-2 {{ ofertaBadgeClass(oferta.estado) }}">
-                      {{ ofertaLabel(oferta.estado) }}
+                      {{ ofertaLabel(oferta.estado) | translate }}
                     </span>
                   </div>
                 </div>
@@ -284,7 +285,7 @@
                 <!-- Datos del constructor + plazos -->
                 <div class="row g-3 mb-3">
                   <div class="col-sm-6">
-                    <p class="info-label">Constructor</p>
+                    <p class="info-label">{{ 'offers_received.builder' | translate }}</p>
                     <p class="info-value mb-1">{{ oferta.constructor_nombre }}</p>
                     @if (oferta.constructor_telefono) {
                       <a href="tel:{{ oferta.constructor_telefono }}"
@@ -295,24 +296,24 @@
                     }
                   </div>
                   <div class="col-sm-3">
-                    <p class="info-label">Plazo</p>
+                    <p class="info-label">{{ 'offers_received.deadline' | translate }}</p>
                     <p class="info-value">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</p>
                   </div>
                   <div class="col-sm-3">
-                    <p class="info-label">Inicio propuesto</p>
+                    <p class="info-label">{{ 'offer.start_date' | translate }}</p>
                     <p class="info-value">{{ formatFecha(oferta.fecha_inicio) }}</p>
                   </div>
                   @if (oferta.garantia_anos) {
                     <div class="col-sm-6">
-                      <p class="info-label">Garantía</p>
+                      <p class="info-label">{{ 'offer.warranty' | translate }}</p>
                       <p class="info-value">
-                        {{ oferta.garantia_anos }} año{{ oferta.garantia_anos !== 1 ? 's' : '' }}
+                        {{ oferta.garantia_anos }} {{ 'offer.years' | translate }}
                       </p>
                     </div>
                   }
                   @if (oferta.descripcion) {
                     <div class="col-12">
-                      <p class="info-label">Enfoque de trabajo</p>
+                      <p class="info-label">{{ 'builder_offer.approach' | translate }}</p>
                       <p class="offer-desc">{{ oferta.descripcion }}</p>
                     </div>
                   }
@@ -339,7 +340,7 @@
                         <i class="bi me-1"
                            [class.bi-stop-fill]="videoOfertaUrl(oferta.id) !== null"
                            [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"></i>
-                        {{ videoOfertaUrl(oferta.id) !== null ? 'Cerrar video' : 'Ver presentación' }}
+                        {{ videoOfertaUrl(oferta.id) !== null ? ('builder_offer.close_video' | translate) : ('builder_offer.view_video' | translate) }}
                       </button>
                     }
 
@@ -370,26 +371,24 @@
           <!-- Datos del expediente -->
           <div class="card border-0 shadow-sm rounded-4 mb-3">
             <div class="card-body p-4">
-              <p class="section-label">Expediente</p>
+              <p class="section-label">{{ 'my_offer.section_file' | translate }}</p>
               <div class="row g-2">
                 <div class="col-12">
-                  <p class="info-label">Servicio</p>
+                  <p class="info-label">{{ 'file.service' | translate }}</p>
                   <p class="info-value">{{ expediente()!.servicio_nombre }}</p>
                 </div>
                 <div class="col-12">
-                  <p class="info-label">Cliente</p>
+                  <p class="info-label">{{ 'builder_offer.client_label' | translate }}</p>
                   <p class="info-value">{{ expediente()!.cliente_nombre }}</p>
                 </div>
-                <div class="col-6">
-                  <p class="info-label">Provincia</p>
-                  <p class="info-value">{{ expediente()!.provincia }}</p>
-                </div>
-                <div class="col-6">
-                  <p class="info-label">Cantón</p>
-                  <p class="info-value">{{ expediente()!.canton }}</p>
+                <div class="col-12">
+                  <p class="info-label">{{ 'common.address' | translate }}</p>
+                  <p class="info-value mb-0">{{ expediente()!.direccion }}</p>
+                  <p class="info-value mb-0">{{ expediente()!.canton }} {{ expediente()!.provincia }} {{ expediente()!.distrito }}</p>
+                  <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
                 </div>
                 <div class="col-12">
-                  <p class="info-label">Fecha de visita</p>
+                  <p class="info-label">{{ 'file.visit_date' | translate }}</p>
                   <p class="info-value mb-0">{{ formatFecha(expediente()!.fecha_visita) }}</p>
                 </div>
               </div>
@@ -402,14 +401,14 @@
             @if (!ofertaSeleccionada()) {
               <div class="accept-hint">
                 <i class="bi bi-hand-index-thumb fs-2 mb-2 d-block"></i>
-                <p class="fw-semibold mb-1">Selecciona una oferta</p>
+                <p class="fw-semibold mb-1">{{ 'builder_offer.select_hint_title' | translate }}</p>
                 <p class="text-muted small mb-0">
-                  Haz clic en una oferta de la lista para seleccionarla y poder aceptarla.
+                  {{ 'builder_offer.select_hint_text' | translate }}
                 </p>
               </div>
 
             } @else {
-              <p class="section-label">Oferta seleccionada</p>
+              <p class="section-label">{{ 'builder_offer.selected_title' | translate }}</p>
 
               <!-- Preview de la oferta seleccionada -->
               <div class="selected-preview mb-4">
@@ -424,14 +423,14 @@
                   {{ formatPlazo(ofertaSeleccionada()!.plazo_semanas_min, ofertaSeleccionada()!.plazo_semanas_max) }}
                   &nbsp;·&nbsp;
                   <i class="bi bi-calendar me-1"></i>
-                  Inicio {{ formatFecha(ofertaSeleccionada()!.fecha_inicio) }}
+                  {{ 'offers_received.start' | translate }} {{ formatFecha(ofertaSeleccionada()!.fecha_inicio) }}
                 </p>
               </div>
 
               @if (yaAdjudicado() && ofertaSeleccionada()!.estado === 'aceptada') {
                 <div class="alert alert-success py-2 small mb-3 d-flex align-items-center gap-2">
                   <i class="bi bi-trophy-fill flex-shrink-0"></i>
-                  Esta oferta ha sido aceptada.
+                  {{ 'builder_offer.already_accepted' | translate }}
                 </div>
               }
 
@@ -440,16 +439,16 @@
                       [disabled]="!puedeAceptar()"
                       (click)="aceptarOferta()">
                 @if (aceptando()) {
-                  <span class="spinner-border spinner-border-sm"></span>Procesando…
+                  <span class="spinner-border spinner-border-sm"></span>{{ 'builder_offer.processing' | translate }}
                 } @else {
                   <i class="bi bi-check-circle-fill"></i>
-                  {{ yaAdjudicado() ? 'Cambiar selección' : 'Aceptar esta oferta' }}
+                  {{ yaAdjudicado() ? ('builder_offer.change_btn' | translate) : ('builder_offer.accept_btn' | translate) }}
                 }
               </button>
 
               @if (yaAdjudicado() && ofertaSeleccionada()!.estado !== 'aceptada') {
                 <p class="text-muted small mt-2 mb-0 text-center">
-                  Esto reemplazará la oferta actualmente aceptada.
+                  {{ 'builder_offer.replace_warning' | translate }}
                 </p>
               }
             }
@@ -459,7 +458,7 @@
           <!-- Volver -->
           <div class="d-grid mt-3">
             <button class="btn btn-outline-secondary" type="button" (click)="volver()">
-              <i class="bi bi-arrow-left me-1"></i>Volver a mis ofertas
+              <i class="bi bi-arrow-left me-1"></i>{{ 'my_offer.back_btn' | translate }}
             </button>
           </div>
 

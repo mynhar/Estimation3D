@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminUserService } from '../../../services/admin-user.service';
 import { ToastService } from '../../../services/toast.service';
 import { RolUsuario } from '../../../types/supabase';
@@ -9,15 +10,16 @@ import { RolUsuario } from '../../../types/supabase';
 @Component({
   selector: 'app-admin-user-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
 export class AdminUserCreateComponent {
-  private fb       = inject(FormBuilder);
-  private service  = inject(AdminUserService);
-  private toast    = inject(ToastService);
-  private router   = inject(Router);
+  private fb        = inject(FormBuilder);
+  private service   = inject(AdminUserService);
+  private toast     = inject(ToastService);
+  private router    = inject(Router);
+  private translate = inject(TranslateService);
 
   guardando       = false;
   mostrarPassword = false;
@@ -59,10 +61,10 @@ export class AdminUserCreateComponent {
         activo:     v.activo!,
       });
 
-      this.toast.show(`Usuario ${v.nombre} ${v.apellido} creado correctamente.`, 'success');
+      this.toast.show(this.translate.instant('admin_users.success_created', { nombre: v.nombre, apellido: v.apellido }), 'success');
       this.router.navigate(['/admin/user']);
     } catch (e: any) {
-      this.toast.show(e.message ?? 'Error al crear el usuario.', 'danger');
+      this.toast.show(e.message ?? this.translate.instant('admin_users.err_create'), 'danger');
     } finally {
       this.guardando = false;
     }
@@ -78,7 +80,7 @@ export class AdminUserCreateComponent {
       const url = await this.service.uploadAvatar(file);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
-      this.toast.show(e.message ?? 'Error al subir la imagen.', 'danger');
+      this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
       this.previewUrl = null;
     } finally {
       this.subiendoAvatar = false;

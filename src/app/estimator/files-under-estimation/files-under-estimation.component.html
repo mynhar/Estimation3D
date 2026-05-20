@@ -4,20 +4,20 @@
   <header class="page-header rounded-4 p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <h4 class="fw-bold mb-1">Mis expedientes en estimación</h4>
+        <h4 class="fw-bold mb-1">{{ 'files_under_estimation.title' | translate }}</h4>
         <p class="text-muted small mb-0">
-          Expedientes asignados a ti — completa y envía la estimación antes de la visita.
+          {{ 'files_under_estimation.subtitle' | translate }}
         </p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
         <span class="kpi-pill kpi-pill--total">
           <i class="bi bi-clipboard-data me-1"></i>
-          {{ expedientes().length }} asignado{{ expedientes().length !== 1 ? 's' : '' }}
+          {{ expedientes().length }} {{ 'files_under_estimation.assigned' | translate }}
         </span>
         @if (urgentesCount() > 0) {
           <span class="kpi-pill kpi-pill--urgente">
             <i class="bi bi-exclamation-triangle me-1"></i>
-            {{ urgentesCount() }} urgente{{ urgentesCount() !== 1 ? 's' : '' }}
+            {{ urgentesCount() }} {{ 'files_under_estimation.urgent' | translate }}
           </span>
         }
       </div>
@@ -28,21 +28,22 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
-      Cargando expedientes asignados…
+      {{ 'files_under_estimation.loading' | translate }}
     </div>
 
   } @else if (expedientes().length === 0) {
 
-    <!-- ── Empty: ningún expediente asignado ─────────────────────────────── -->
+    <!-- ── Empty ─────────────────────────────────────────────────────────── -->
     <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
         <div class="empty-icon">
           <i class="bi bi-clipboard-check"></i>
         </div>
-        <h5 class="empty-title">Sin expedientes asignados</h5>
+        <h5 class="empty-title">{{ 'files_under_estimation.empty_title' | translate }}</h5>
         <p class="empty-text">
-          No tienes expedientes en proceso de estimación en este momento.
-          Ve a <strong>Expedientes por estimar</strong> para tomar uno nuevo.
+          {{ 'files_under_estimation.empty_text' | translate }}
+          <strong>{{ 'nav.a_estimer' | translate }}</strong>
+          {{ 'files_under_estimation.empty_text_after' | translate }}
         </p>
       </div>
     </div>
@@ -55,7 +56,7 @@
         <i class="bi bi-search search-icon"></i>
         <input class="form-control search-input ps-5"
                type="search"
-               placeholder="Buscar por número, servicio, cliente o ubicación…"
+               [placeholder]="'files_under_estimation.search_placeholder' | translate"
                [ngModel]="busqueda()"
                (ngModelChange)="busqueda.set($event)" />
       </div>
@@ -64,7 +65,7 @@
               [class.filter-btn--active]="soloUrgentes()"
               (click)="soloUrgentes.set(!soloUrgentes())">
         <i class="bi bi-exclamation-triangle"></i>
-        Solo urgentes
+        {{ 'files_under_estimation.urgent_only' | translate }}
         @if (urgentesCount() > 0) {
           <span class="badge rounded-pill"
                 [class.bg-danger]="soloUrgentes()"
@@ -76,7 +77,7 @@
 
       @if (hayFiltros()) {
         <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
-          <i class="bi bi-x me-1"></i>Limpiar
+          <i class="bi bi-x me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
     </div>
@@ -86,9 +87,9 @@
       <div class="card border-0 shadow-sm rounded-4">
         <div class="empty-inline">
           <i class="bi bi-search fs-2 mb-2 text-muted"></i>
-          <p class="mb-1 fw-medium">Sin resultados</p>
+          <p class="mb-1 fw-medium">{{ 'common.no_results' | translate }}</p>
           <p class="text-muted small mb-0">
-            Ningún expediente coincide con los filtros actuales.
+            {{ 'files_under_estimation.no_filter_text' | translate }}
           </p>
         </div>
       </div>
@@ -110,19 +111,19 @@
 
                 @if (urgencia(exp.fecha_visita) === 'vencida') {
                   <span class="badge bg-danger-subtle text-danger urg-badge">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Vencida
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'common.urgency_expired' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'hoy') {
                   <span class="badge bg-warning-subtle text-warning-emphasis urg-badge">
-                    <i class="bi bi-clock-fill me-1"></i>Hoy
+                    <i class="bi bi-clock-fill me-1"></i>{{ 'common.urgency_today' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'proxima') {
                   <span class="badge urg-badge--proxima urg-badge">
-                    <i class="bi bi-calendar-event me-1"></i>Próxima
+                    <i class="bi bi-calendar-event me-1"></i>{{ 'common.urgency_upcoming' | translate }}
                   </span>
                 } @else {
                   <span class="badge bg-success-subtle text-success urg-badge">
-                    <i class="bi bi-person-workspace me-1"></i>En curso
+                    <i class="bi bi-person-workspace me-1"></i>{{ 'files_under_estimation.in_progress' | translate }}
                   </span>
                 }
               </div>
@@ -156,14 +157,14 @@
               <div class="d-flex gap-2 mt-auto">
                 <button class="btn btn-primary btn-sm flex-grow-1"
                         (click)="estimar(exp.id)">
-                  <i class="bi bi-pencil-square me-1"></i>Continuar estimación
+                  <i class="bi bi-pencil-square me-1"></i>{{ 'files_under_estimation.continue_btn' | translate }}
                 </button>
 
                 @if (confirmandoId() === exp.id) {
                   <button class="btn btn-danger btn-sm liberar-confirm-btn flex-shrink-0"
                           (click)="confirmarLiberar(exp.id)"
                           [disabled]="liberandoId() === exp.id"
-                          title="Confirmar liberación">
+                          [title]="'files_under_estimation.confirm_release_title' | translate">
                     @if (liberandoId() === exp.id) {
                       <span class="spinner-border spinner-border-sm"></span>
                     } @else {
@@ -173,7 +174,7 @@
                 } @else {
                   <button class="btn btn-outline-secondary btn-sm liberar-btn flex-shrink-0"
                           (click)="confirmarLiberar(exp.id)"
-                          title="Liberar expediente">
+                          [title]="'files_under_estimation.release_title' | translate">
                     <i class="bi bi-x-lg"></i>
                   </button>
                 }
@@ -183,8 +184,9 @@
               @if (confirmandoId() === exp.id) {
                 <div class="confirm-msg mt-2">
                   <i class="bi bi-exclamation-diamond me-1"></i>
-                  Pulsa <i class="bi bi-check2-circle"></i> para confirmar.
-                  El expediente vuelve al grupo disponible.
+                  {{ 'files_under_estimation.confirm_msg_before' | translate }}
+                  <i class="bi bi-check2-circle"></i>
+                  {{ 'files_under_estimation.confirm_msg_after' | translate }}
                 </div>
               }
 

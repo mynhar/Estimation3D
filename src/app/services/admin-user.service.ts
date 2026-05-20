@@ -32,7 +32,7 @@ export class AdminUserService {
   private async token(): Promise<string> {
     const { data } = await this.auth.client.auth.getSession();
     const t = data.session?.access_token;
-    if (!t) throw new Error('Sesión no válida. Inicia sesión nuevamente.');
+    if (!t) throw new Error('auth.invalid_session');
     return t;
   }
 
@@ -60,7 +60,7 @@ export class AdminUserService {
   }
 
   async uploadAvatar(file: File, id?: string): Promise<string> {
-    if (file.size > 2 * 1024 * 1024) throw new Error('El archivo no debe superar 2 MB.');
+    if (file.size > 2 * 1024 * 1024) throw new Error('admin_users.err_file_size');
 
     const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
     const name = id ?? crypto.randomUUID();

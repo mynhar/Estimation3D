@@ -2,17 +2,17 @@
 
   <!-- Encabezado -->
   <div class="d-flex align-items-center mb-4">
-    <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" title="Volver">
+    <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" [title]="'common.back' | translate">
       <i class="bi bi-arrow-left fs-5"></i>
     </button>
     <i class="bi bi-person-gear fs-4 text-primary me-2"></i>
-    <h4 class="mb-0">Editar usuario</h4>
+    <h4 class="mb-0">{{ 'admin_users.edit_title' | translate }}</h4>
   </div>
 
   <!-- Cargando -->
   <div *ngIf="cargando" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
     </div>
   </div>
 
@@ -31,7 +31,15 @@
           <ng-container *ngIf="usuario.avatar_url; else initiales">
             <img [src]="usuario.avatar_url" alt="avatar"
                  class="rounded-circle border" width="52" height="52"
-                 style="object-fit:cover">
+                 style="object-fit:cover"
+                 referrerpolicy="no-referrer"
+                 (error)="$any($event.target).style.display='none';
+                          $any($event.target).nextElementSibling.style.display='flex'">
+            <div class="rounded-circle bg-secondary-subtle d-flex align-items-center
+                        justify-content-center fw-bold text-secondary"
+                 style="width:52px;height:52px;font-size:18px;display:none;">
+              {{ (usuario.nombre | slice:0:1) + (usuario.apellido | slice:0:1) | uppercase }}
+            </div>
           </ng-container>
           <ng-template #initiales>
             <div class="rounded-circle bg-secondary-subtle d-flex align-items-center
@@ -47,7 +55,7 @@
               <i class="bi me-1" [class.bi-envelope-fill]="usuario.proveedor === 'email'"
                                  [class.bi-google]="usuario.proveedor === 'google'"></i>
               {{ usuario.proveedor }} &nbsp;·&nbsp;
-              Creado: {{ usuario.creado_en | date:'dd/MM/yyyy' }}
+              {{ 'profile.created' | translate }}: {{ usuario.creado_en | date:'dd/MM/yyyy' }}
             </div>
           </div>
         </div>
@@ -61,7 +69,7 @@
             <!-- ── Credenciales (solo proveedor email) ── -->
             <ng-container *ngIf="esProveedorEmail">
               <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-                <i class="bi bi-key me-1"></i>Credenciales de acceso
+                <i class="bi bi-key me-1"></i>{{ 'admin_users.credentials' | translate }}
               </h6>
 
               <div class="row g-3 mb-4">
@@ -69,32 +77,32 @@
                 <!-- Email -->
                 <div class="col-12 col-md-7">
                   <label class="form-label fw-semibold">
-                    Email <span class="text-danger">*</span>
+                    {{ 'common.email' | translate }} <span class="text-danger">*</span>
                   </label>
                   <input type="email" class="form-control" formControlName="email"
                          [class.is-invalid]="f['email'].invalid && f['email'].touched">
                   <div class="invalid-feedback">
-                    <ng-container *ngIf="f['email'].errors?.['required']">El email es requerido.</ng-container>
-                    <ng-container *ngIf="f['email'].errors?.['email']">Ingrese un email válido.</ng-container>
+                    <ng-container *ngIf="f['email'].errors?.['required']">{{ 'admin_users.email_required' | translate }}</ng-container>
+                    <ng-container *ngIf="f['email'].errors?.['email']">{{ 'admin_users.email_invalid' | translate }}</ng-container>
                   </div>
                 </div>
 
                 <!-- Nueva contraseña -->
                 <div class="col-12 col-md-5">
-                  <label class="form-label fw-semibold">Nueva contraseña</label>
+                  <label class="form-label fw-semibold">{{ 'admin_users.new_password' | translate }}</label>
                   <div class="input-group">
                     <input [type]="mostrarPassword ? 'text' : 'password'"
                            class="form-control" formControlName="password"
-                           placeholder="Dejar vacío para no cambiar"
+                           [placeholder]="'admin_users.new_password_placeholder' | translate"
                            [class.is-invalid]="f['password'].invalid && f['password'].touched">
                     <button class="btn btn-outline-secondary" type="button"
                             (click)="mostrarPassword = !mostrarPassword">
                       <i class="bi" [class.bi-eye]="!mostrarPassword"
                                     [class.bi-eye-slash]="mostrarPassword"></i>
                     </button>
-                    <div class="invalid-feedback">Mínimo 8 caracteres.</div>
+                    <div class="invalid-feedback">{{ 'admin_users.min_chars' | translate }}</div>
                   </div>
-                  <div class="form-text">Dejar vacío para mantener la contraseña actual.</div>
+                  <div class="form-text">{{ 'admin_users.new_password_hint' | translate }}</div>
                 </div>
 
               </div>
@@ -103,37 +111,36 @@
 
             <!-- ── Datos personales ── -->
             <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-person me-1"></i>Datos personales
+              <i class="bi bi-person me-1"></i>{{ 'admin_users.personal_data' | translate }}
             </h6>
 
             <div class="row g-3 mb-4">
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">{{ 'common.name' | translate }} <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" formControlName="nombre"
                        [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched">
-                <div class="invalid-feedback">El nombre es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.name_required' | translate }}</div>
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Apellido <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">{{ 'common.lastname' | translate }} <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" formControlName="apellido"
                        [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched">
-                <div class="invalid-feedback">El apellido es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.lastname_required' | translate }}</div>
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Teléfono</label>
+                <label class="form-label fw-semibold">{{ 'common.phone' | translate }}</label>
                 <input type="tel" class="form-control" formControlName="telefono"
                        placeholder="+506 8888-8888">
               </div>
 
               <!-- Avatar (solo proveedor email) -->
               <div class="col-12 col-md-6" *ngIf="esProveedorEmail">
-                <label class="form-label fw-semibold">Foto de perfil</label>
+                <label class="form-label fw-semibold">{{ 'profile.photo' | translate }}</label>
                 <div class="d-flex align-items-center gap-3">
 
-                  <!-- Preview clicable -->
                   <div class="avatar-upload-wrap position-relative"
                        (click)="!subiendoAvatar && fileInput.click()" [class.uploading]="subiendoAvatar">
                     <img *ngIf="previewUrl || f['avatar_url'].value"
@@ -151,9 +158,9 @@
                   <div>
                     <button type="button" class="btn btn-sm btn-outline-secondary d-block mb-1"
                             (click)="fileInput.click()" [disabled]="subiendoAvatar">
-                      <i class="bi bi-upload me-1"></i>{{ subiendoAvatar ? 'Subiendo…' : 'Cambiar foto' }}
+                      <i class="bi bi-upload me-1"></i>{{ subiendoAvatar ? ('profile.uploading' | translate) : ('profile.change_photo' | translate) }}
                     </button>
-                    <small class="text-muted">JPG, PNG o WebP · Máx. 2 MB</small>
+                    <small class="text-muted">{{ 'profile.photo_hint' | translate }}</small>
                   </div>
                 </div>
                 <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
@@ -167,25 +174,25 @@
 
             <!-- ── Configuración de cuenta ── -->
             <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-sliders me-1"></i>Configuración de cuenta
+              <i class="bi bi-sliders me-1"></i>{{ 'admin_users.account_config' | translate }}
             </h6>
 
             <div class="row g-3">
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Rol <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">{{ 'common.role' | translate }} <span class="text-danger">*</span></label>
                 <select class="form-select" formControlName="rol"
                         [class.is-invalid]="f['rol'].invalid && f['rol'].touched">
-                  <option *ngFor="let r of roles" [value]="r">{{ r | titlecase }}</option>
+                  <option *ngFor="let r of roles" [value]="r">{{ ('role.' + r) | translate }}</option>
                 </select>
-                <div class="invalid-feedback">El rol es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.role_required' | translate }}</div>
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                <label class="form-label fw-semibold">{{ 'common.status' | translate }} <span class="text-danger">*</span></label>
                 <select class="form-select" formControlName="activo">
-                  <option [ngValue]="true">Activo</option>
-                  <option [ngValue]="false">Inactivo</option>
+                  <option [ngValue]="true">{{ 'common.active' | translate }}</option>
+                  <option [ngValue]="false">{{ 'common.inactive' | translate }}</option>
                 </select>
               </div>
 
@@ -195,8 +202,8 @@
                   <input class="form-check-input" type="checkbox" disabled
                          [checked]="f['nombre'].value && f['apellido'].value && f['telefono'].value && f['avatar_url'].value">
                   <label class="form-check-label text-muted">
-                    Perfil completo
-                    <small class="d-block">Se activa automáticamente si todos los campos están llenos.</small>
+                    {{ 'admin_users.complete_profile' | translate }}
+                    <small class="d-block">{{ 'admin_users.complete_profile_hint' | translate }}</small>
                   </label>
                 </div>
               </div>
@@ -209,12 +216,12 @@
           <div class="card-footer bg-white border-0 px-4 pb-4 pt-0 d-flex gap-2 justify-content-end">
             <button type="button" class="btn btn-outline-secondary"
                     (click)="cancelar()" [disabled]="guardando">
-              <i class="bi bi-x-lg me-1"></i>Cancelar
+              <i class="bi bi-x-lg me-1"></i>{{ 'common.cancel' | translate }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="guardando">
               <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
               <i *ngIf="!guardando" class="bi bi-floppy me-1"></i>
-              {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+              {{ guardando ? ('admin_users.saving' | translate) : ('admin_users.save_changes' | translate) }}
             </button>
           </div>
 

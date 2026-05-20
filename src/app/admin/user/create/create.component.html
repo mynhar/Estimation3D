@@ -2,11 +2,11 @@
 
   <!-- Encabezado -->
   <div class="d-flex align-items-center mb-4">
-    <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" title="Volver">
+    <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" [title]="'common.back' | translate">
       <i class="bi bi-arrow-left fs-5"></i>
     </button>
     <i class="bi bi-person-plus-fill fs-4 text-primary me-2"></i>
-    <h4 class="mb-0">Crear usuario</h4>
+    <h4 class="mb-0">{{ 'admin_users.create_title' | translate }}</h4>
   </div>
 
   <div class="row justify-content-center">
@@ -17,7 +17,7 @@
 
             <!-- ── Credenciales ── -->
             <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-key me-1"></i>Credenciales de acceso
+              <i class="bi bi-key me-1"></i>{{ 'admin_users.credentials' | translate }}
             </h6>
 
             <div class="row g-3 mb-4">
@@ -25,36 +25,36 @@
               <!-- Email -->
               <div class="col-12 col-md-7">
                 <label class="form-label fw-semibold">
-                  Email <span class="text-danger">*</span>
+                  {{ 'common.email' | translate }} <span class="text-danger">*</span>
                 </label>
                 <input type="email" class="form-control"
                        formControlName="email"
                        placeholder="usuario@ejemplo.com"
                        [class.is-invalid]="f['email'].invalid && f['email'].touched">
                 <div class="invalid-feedback">
-                  <ng-container *ngIf="f['email'].errors?.['required']">El email es requerido.</ng-container>
-                  <ng-container *ngIf="f['email'].errors?.['email']">Ingrese un email válido.</ng-container>
+                  <ng-container *ngIf="f['email'].errors?.['required']">{{ 'admin_users.email_required' | translate }}</ng-container>
+                  <ng-container *ngIf="f['email'].errors?.['email']">{{ 'admin_users.email_invalid' | translate }}</ng-container>
                 </div>
               </div>
 
               <!-- Contraseña temporal -->
               <div class="col-12 col-md-5">
                 <label class="form-label fw-semibold">
-                  Contraseña temporal <span class="text-danger">*</span>
+                  {{ 'admin_users.temp_password' | translate }} <span class="text-danger">*</span>
                 </label>
                 <div class="input-group">
                   <input [type]="mostrarPassword ? 'text' : 'password'"
                          class="form-control"
                          formControlName="password"
-                         placeholder="Mínimo 8 caracteres"
+                         [placeholder]="'admin_users.min_chars_hint' | translate"
                          [class.is-invalid]="f['password'].invalid && f['password'].touched">
                   <button class="btn btn-outline-secondary" type="button"
                           (click)="mostrarPassword = !mostrarPassword">
                     <i class="bi" [class.bi-eye]="!mostrarPassword" [class.bi-eye-slash]="mostrarPassword"></i>
                   </button>
                   <div class="invalid-feedback">
-                    <ng-container *ngIf="f['password'].errors?.['required']">La contraseña es requerida.</ng-container>
-                    <ng-container *ngIf="f['password'].errors?.['minlength']">Mínimo 8 caracteres.</ng-container>
+                    <ng-container *ngIf="f['password'].errors?.['required']">{{ 'admin_users.password_required' | translate }}</ng-container>
+                    <ng-container *ngIf="f['password'].errors?.['minlength']">{{ 'admin_users.min_chars' | translate }}</ng-container>
                   </div>
                 </div>
               </div>
@@ -65,7 +65,7 @@
 
             <!-- ── Datos personales ── -->
             <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-person me-1"></i>Datos personales
+              <i class="bi bi-person me-1"></i>{{ 'admin_users.personal_data' | translate }}
             </h6>
 
             <div class="row g-3 mb-4">
@@ -73,30 +73,30 @@
               <!-- Nombre -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">
-                  Nombre <span class="text-danger">*</span>
+                  {{ 'common.name' | translate }} <span class="text-danger">*</span>
                 </label>
                 <input type="text" class="form-control"
                        formControlName="nombre"
-                       placeholder="Nombre"
+                       [placeholder]="'common.name' | translate"
                        [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched">
-                <div class="invalid-feedback">El nombre es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.name_required' | translate }}</div>
               </div>
 
               <!-- Apellido -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">
-                  Apellido <span class="text-danger">*</span>
+                  {{ 'common.lastname' | translate }} <span class="text-danger">*</span>
                 </label>
                 <input type="text" class="form-control"
                        formControlName="apellido"
-                       placeholder="Apellido"
+                       [placeholder]="'common.lastname' | translate"
                        [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched">
-                <div class="invalid-feedback">El apellido es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.lastname_required' | translate }}</div>
               </div>
 
               <!-- Teléfono -->
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Teléfono</label>
+                <label class="form-label fw-semibold">{{ 'common.phone' | translate }}</label>
                 <input type="tel" class="form-control"
                        formControlName="telefono"
                        placeholder="+506 8888-8888">
@@ -104,10 +104,9 @@
 
               <!-- Avatar -->
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Foto de perfil</label>
+                <label class="form-label fw-semibold">{{ 'profile.photo' | translate }}</label>
                 <div class="d-flex align-items-center gap-3">
 
-                  <!-- Preview clicable -->
                   <div class="avatar-upload-wrap position-relative"
                        (click)="!subiendoAvatar && fileInput.click()" [class.uploading]="subiendoAvatar">
                     <img *ngIf="previewUrl"
@@ -125,9 +124,9 @@
                   <div>
                     <button type="button" class="btn btn-sm btn-outline-secondary d-block mb-1"
                             (click)="fileInput.click()" [disabled]="subiendoAvatar">
-                      <i class="bi bi-upload me-1"></i>{{ subiendoAvatar ? 'Subiendo…' : 'Seleccionar foto' }}
+                      <i class="bi bi-upload me-1"></i>{{ subiendoAvatar ? ('profile.uploading' | translate) : ('admin_users.select_photo' | translate) }}
                     </button>
-                    <small class="text-muted">JPG, PNG o WebP · Máx. 2 MB</small>
+                    <small class="text-muted">{{ 'profile.photo_hint' | translate }}</small>
                   </div>
                 </div>
                 <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
@@ -141,7 +140,7 @@
 
             <!-- ── Configuración de cuenta ── -->
             <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-sliders me-1"></i>Configuración de cuenta
+              <i class="bi bi-sliders me-1"></i>{{ 'admin_users.account_config' | translate }}
             </h6>
 
             <div class="row g-3">
@@ -149,37 +148,37 @@
               <!-- Rol -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">
-                  Rol <span class="text-danger">*</span>
+                  {{ 'common.role' | translate }} <span class="text-danger">*</span>
                 </label>
                 <select class="form-select"
                         formControlName="rol"
                         [class.is-invalid]="f['rol'].invalid && f['rol'].touched">
                   <option *ngFor="let r of roles" [value]="r">
-                    {{ r | titlecase }}
+                    {{ ('role.' + r) | translate }}
                   </option>
                 </select>
-                <div class="invalid-feedback">El rol es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.role_required' | translate }}</div>
               </div>
 
               <!-- Activo -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">
-                  Estado <span class="text-danger">*</span>
+                  {{ 'common.status' | translate }} <span class="text-danger">*</span>
                 </label>
                 <select class="form-select"
                         formControlName="activo"
                         [class.is-invalid]="f['activo'].invalid && f['activo'].touched">
-                  <option [ngValue]="true">Activo</option>
-                  <option [ngValue]="false">Inactivo</option>
+                  <option [ngValue]="true">{{ 'common.active' | translate }}</option>
+                  <option [ngValue]="false">{{ 'common.inactive' | translate }}</option>
                 </select>
-                <div class="invalid-feedback">El estado es requerido.</div>
+                <div class="invalid-feedback">{{ 'admin_users.status_required' | translate }}</div>
               </div>
 
               <!-- Proveedor (solo lectura) -->
               <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">Proveedor</label>
+                <label class="form-label fw-semibold">{{ 'admin_users.provider_label' | translate }}</label>
                 <input type="text" class="form-control bg-light" value="email" readonly>
-                <div class="form-text">Los usuarios creados desde el panel siempre usan email + contraseña.</div>
+                <div class="form-text">{{ 'admin_users.provider_note' | translate }}</div>
               </div>
 
               <!-- perfil_completo (informativo) -->
@@ -188,8 +187,8 @@
                   <input class="form-check-input" type="checkbox" disabled
                          [checked]="f['nombre'].value && f['apellido'].value && f['telefono'].value && f['avatar_url'].value">
                   <label class="form-check-label text-muted">
-                    Perfil completo
-                    <small class="d-block">Se activa automáticamente si todos los campos están llenos.</small>
+                    {{ 'admin_users.complete_profile' | translate }}
+                    <small class="d-block">{{ 'admin_users.complete_profile_hint' | translate }}</small>
                   </label>
                 </div>
               </div>
@@ -198,16 +197,15 @@
 
           </div>
 
-          <!-- Footer del card con acciones -->
           <div class="card-footer bg-white border-0 px-4 pb-4 pt-0 d-flex gap-2 justify-content-end">
             <button type="button" class="btn btn-outline-secondary"
                     (click)="cancelar()" [disabled]="guardando">
-              <i class="bi bi-x-lg me-1"></i>Cancelar
+              <i class="bi bi-x-lg me-1"></i>{{ 'common.cancel' | translate }}
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="guardando">
               <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
               <i *ngIf="!guardando" class="bi bi-person-check me-1"></i>
-              {{ guardando ? 'Creando...' : 'Crear usuario' }}
+              {{ guardando ? ('admin_users.creating' | translate) : ('admin_users.create_user' | translate) }}
             </button>
           </div>
 

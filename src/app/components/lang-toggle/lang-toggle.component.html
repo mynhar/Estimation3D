@@ -1,0 +1,11 @@
+<div class="lang-toggle" [class.lang-toggle--compact]="compact" role="group" aria-label="Language / Langue / Idioma">
+  @for (l of langSvc.langs; track l) {
+    <button class="lang-btn"
+            [class.lang-btn--active]="langSvc.current() === l"
+            (click)="langSvc.set(l)"
+            [attr.aria-pressed]="langSvc.current() === l"
+            [attr.title]="('lang.' + l) | translate">
+      {{ l.toUpperCase() }}
+    </button>
+  }
+</div>

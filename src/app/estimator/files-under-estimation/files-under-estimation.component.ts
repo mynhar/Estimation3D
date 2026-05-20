@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteRow } from '../../models';
@@ -9,7 +10,7 @@ import { ExpedienteRow } from '../../models';
 @Component({
   selector: 'app-files-under-estimation',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './files-under-estimation.component.html',
   styleUrl:    './files-under-estimation.component.css',
 })

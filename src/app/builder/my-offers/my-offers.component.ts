@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { OfertaService } from '../../services/oferta.service';
 import { OfertaRow, ESTADO_BADGE_OFERTA, ESTADO_LABEL_OFERTA } from '../../models';
@@ -21,7 +22,7 @@ const ESTADO_ICON: Record<string, string> = {
 @Component({
   selector: 'app-my-offers',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, TranslatePipe],
   templateUrl: './my-offers.component.html',
   styleUrl: './my-offers.component.css',
 })
@@ -88,7 +89,7 @@ export class MyOffersComponent implements OnInit {
   estadoIcon(estado: string):  string { return ESTADO_ICON[estado]           ?? 'bi-circle'; }
 
   formatCosto(valor: number): string {
-    return `₡ ${valor.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(valor);
   }
 
   formatFecha(valor: string): string {

@@ -2,7 +2,7 @@
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" (click)="cerrarFoto()">
     <div class="lightbox-container" (click)="$event.stopPropagation()">
-      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="Foto ampliada" />
+      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="" />
       <button class="lightbox-close" type="button" (click)="cerrarFoto()">
         <i class="bi bi-x-lg"></i>
       </button>
@@ -16,7 +16,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-cyan" role="status"></div>
-      Cargando expediente…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── No encontrado ──────────────────────────────────────────────────────── -->
@@ -24,12 +24,12 @@
     <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
         <div class="empty-icon"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">Expediente no encontrado</p>
+        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
         @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() }}</p>
+          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
         }
         <button class="btn btn-outline-secondary btn-sm" type="button" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
         </button>
       </div>
     </div>
@@ -41,7 +41,7 @@
     <header class="page-header rounded-4 p-3 p-md-4 mb-4">
       <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
         <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" type="button" (click)="volver()" title="Volver">
+          <button class="btn-back" type="button" (click)="volver()" [title]="'common.back' | translate">
             <i class="bi bi-arrow-left"></i>
           </button>
           <div>
@@ -49,11 +49,11 @@
               <span class="exp-num">{{ detalle()!.numero }}</span>
               @if (ofertaId()) {
                 <span class="badge rounded-pill bg-warning text-dark px-3 py-1">
-                  <i class="bi bi-pencil me-1"></i>Editando oferta
+                  <i class="bi bi-pencil me-1"></i>{{ 'make_offer.editing_badge' | translate }}
                 </span>
               } @else {
                 <span class="badge rounded-pill bg-cyan-subtle text-cyan px-3 py-1">
-                  <i class="bi bi-plus-circle me-1"></i>Nueva oferta
+                  <i class="bi bi-plus-circle me-1"></i>{{ 'make_offer.new_badge' | translate }}
                 </span>
               }
             </div>
@@ -64,7 +64,7 @@
           @if (detalle()!.total_ofertas > 0) {
             <span class="kpi-pill kpi-pill--ofertas">
               <i class="bi bi-people me-1"></i>
-              {{ detalle()!.total_ofertas }} oferta{{ detalle()!.total_ofertas !== 1 ? 's' : '' }}
+              {{ detalle()!.total_ofertas }} {{ 'available_files.offers_label' | translate }}
             </span>
           }
         </div>
@@ -84,7 +84,7 @@
             <div class="context-row">
               <div class="context-icon context-icon--service"><i class="bi bi-tools"></i></div>
               <div class="context-content">
-                <p class="context-label">Servicio</p>
+                <p class="context-label">{{ 'make_offer.service_label' | translate }}</p>
                 <p class="context-value">{{ detalle()!.servicio_nombre }}</p>
                 @if (detalle()!.servicio_descripcion) {
                   <p class="context-sub">{{ detalle()!.servicio_descripcion }}</p>
@@ -97,12 +97,13 @@
             <div class="context-row">
               <div class="context-icon context-icon--location"><i class="bi bi-geo-alt-fill"></i></div>
               <div class="context-content">
-                <p class="context-label">Ubicación</p>
-                <p class="context-value">{{ detalle()!.direccion }}</p>
+                <p class="context-label">{{ 'make_offer.location_label' | translate }}</p>
+                <p class="context-value mb-0">{{ detalle()!.direccion }}</p>
+                <p class="context-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
+                <p class="context-value fw-semibold text-uppercase small mb-0">CANADA</p>
                 @if (detalle()!.referencia) {
-                  <p class="context-sub">{{ detalle()!.referencia }}</p>
+                  <p class="context-sub mt-1">{{ detalle()!.referencia }}</p>
                 }
-                <p class="context-sub">{{ detalle()!.provincia }} · {{ detalle()!.canton }} · {{ detalle()!.distrito }}</p>
               </div>
             </div>
 
@@ -111,7 +112,7 @@
             <div class="context-row">
               <div class="context-icon context-icon--date"><i class="bi bi-calendar3"></i></div>
               <div class="context-content">
-                <p class="context-label">Visita programada</p>
+                <p class="context-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
                 <p class="context-value">
                   {{ formatFecha(detalle()!.fecha_visita) }}
                   @if (formatHora(detalle()!.fecha_visita) !== '—') {
@@ -126,7 +127,7 @@
             <div class="context-row">
               <div class="context-icon context-icon--visit"><i class="bi bi-calendar-check-fill"></i></div>
               <div class="context-content">
-                <p class="context-label">Visita del estimador</p>
+                <p class="context-label">{{ 'make_offer.estimator_visit' | translate }}</p>
                 <p class="context-value">
                   {{ formatFecha(detalle()!.fecha_visita_real) }}
                   @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
@@ -141,7 +142,7 @@
               <div class="context-row context-row--last">
                 <div class="context-icon context-icon--warn"><i class="bi bi-exclamation-triangle-fill"></i></div>
                 <div class="context-content">
-                  <p class="context-label">Problemas observados</p>
+                  <p class="context-label">{{ 'make_offer.problems_noted' | translate }}</p>
                   <p class="context-sub context-sub--pre">{{ detalle()!.descripcion_problemas }}</p>
                 </div>
               </div>
@@ -156,18 +157,18 @@
           <div class="media-tabs">
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'tour'"
                     type="button" (click)="tabMedia.set('tour')">
-              <i class="bi bi-camera-video me-1"></i>Tour 3D
+              <i class="bi bi-camera-video me-1"></i>{{ 'make_offer.tab_tour' | translate }}
             </button>
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'fotos'"
                     type="button" (click)="tabMedia.set('fotos')">
-              <i class="bi bi-images me-1"></i>Fotos
+              <i class="bi bi-images me-1"></i>{{ 'make_offer.tab_photos' | translate }}
               @if (fotos().length > 0) {
                 <span class="media-tab__count">{{ fotos().length }}</span>
               }
             </button>
             <button class="media-tab" [class.media-tab--active]="tabMedia() === 'docs'"
                     type="button" (click)="tabMedia.set('docs')">
-              <i class="bi bi-file-earmark-text me-1"></i>Docs
+              <i class="bi bi-file-earmark-text me-1"></i>{{ 'make_offer.tab_docs' | translate }}
               @if (documentos().length > 0) {
                 <span class="media-tab__count">{{ documentos().length }}</span>
               }
@@ -178,7 +179,7 @@
             <div class="card-body p-3">
               @if (fotos().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-image fs-2 mb-1 d-block"></i>Sin fotos registradas
+                  <i class="bi bi-image fs-2 mb-1 d-block"></i>{{ 'make_offer.no_photos' | translate }}
                 </div>
               } @else {
                 <div class="photos-grid">
@@ -202,7 +203,7 @@
                 </div>
               } @else {
                 <div class="media-empty">
-                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>Sin tour registrado
+                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>{{ 'make_offer.no_tour' | translate }}
                 </div>
               }
             </div>
@@ -212,7 +213,7 @@
             <div class="card-body p-2">
               @if (documentos().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>Sin documentos
+                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>{{ 'make_offer.no_docs' | translate }}
                 </div>
               } @else {
                 <div class="file-list">
@@ -227,7 +228,7 @@
                       </div>
                       <div class="file-row__actions">
                         <button class="btn btn-outline-secondary btn-sm" type="button"
-                                (click)="verArchivo(d)" title="Abrir">
+                                (click)="verArchivo(d)" [title]="'common.open' | translate">
                           <i class="bi bi-box-arrow-up-right"></i>
                         </button>
                       </div>
@@ -252,9 +253,9 @@
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="fw-semibold text-dark">
                   <i class="bi bi-pencil-square me-2 text-cyan"></i>
-                  {{ ofertaId() ? 'Actualizar oferta' : 'Tu oferta' }}
+                  {{ ofertaId() ? ('make_offer.update_title' | translate) : ('make_offer.form_title' | translate) }}
                 </span>
-                <span class="progress-label">{{ completedSteps }}/5 completos</span>
+                <span class="progress-label">{{ completedSteps }}/5 {{ 'make_offer.steps_done' | translate }}</span>
               </div>
               <div class="progress-wrap">
                 <div class="progress-bar-fill" [style.width.%]="(completedSteps / 5) * 100"></div>
@@ -266,11 +267,11 @@
               <!-- Precio total -->
               <div class="form-section mb-4">
                 <p class="form-section__label">
-                  <i class="bi bi-cash-coin me-1"></i>Precio total
+                  <i class="bi bi-cash-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
                   <span class="req-mark">*</span>
                 </p>
                 <div class="price-input-wrap">
-                  <span class="price-symbol">₡</span>
+                  <span class="price-symbol">CA$</span>
                   <input type="number" class="price-input"
                          placeholder="0" min="1" step="1000"
                          [(ngModel)]="precio" />
@@ -280,12 +281,12 @@
               <!-- Plazos + Garantía -->
               <div class="form-section mb-4">
                 <p class="form-section__label">
-                  <i class="bi bi-clock me-1"></i>Tiempos del proyecto
+                  <i class="bi bi-clock me-1"></i>{{ 'make_offer.project_times' | translate }}
                 </p>
                 <div class="row g-2">
                   <div class="col-4">
                     <label class="field-label">
-                      Plazo mín. <small>(sem)</small>
+                      {{ 'make_offer.min_deadline' | translate }} <small>({{ 'offer.weeks' | translate }})</small>
                       <span class="req-mark">*</span>
                     </label>
                     <input type="number" class="form-control" placeholder="1" min="1" step="1"
@@ -293,14 +294,14 @@
                   </div>
                   <div class="col-4">
                     <label class="field-label">
-                      Plazo máx. <small>(sem)</small>
+                      {{ 'make_offer.max_deadline' | translate }} <small>({{ 'offer.weeks' | translate }})</small>
                       <span class="req-mark">*</span>
                     </label>
                     <input type="number" class="form-control" placeholder="4" min="1" step="1"
                            [(ngModel)]="plazoMax" />
                   </div>
                   <div class="col-4">
-                    <label class="field-label">Garantía <small>(años)</small></label>
+                    <label class="field-label">{{ 'offer.warranty' | translate }} <small>({{ 'offer.years' | translate }})</small></label>
                     <input type="number" class="form-control" placeholder="1" min="0" step="1"
                            [(ngModel)]="garantiaAnos" />
                   </div>
@@ -310,7 +311,7 @@
               <!-- Fecha de inicio -->
               <div class="form-section mb-4">
                 <p class="form-section__label">
-                  <i class="bi bi-calendar-event me-1"></i>Fecha de inicio
+                  <i class="bi bi-calendar-event me-1"></i>{{ 'make_offer.start_date' | translate }}
                   <span class="req-mark">*</span>
                 </p>
                 <input type="date" class="form-control" [(ngModel)]="fechaInicio" />
@@ -319,18 +320,18 @@
               <!-- Descripción del enfoque -->
               <div class="form-section mb-4">
                 <p class="form-section__label">
-                  <i class="bi bi-text-paragraph me-1"></i>Descripción del enfoque
+                  <i class="bi bi-text-paragraph me-1"></i>{{ 'make_offer.approach_desc' | translate }}
                   <span class="req-mark">*</span>
                 </p>
                 <textarea class="form-control" rows="4"
-                          placeholder="Describa su plan de trabajo, metodología y experiencia relevante…"
+                          [placeholder]="'make_offer.approach_placeholder' | translate"
                           [(ngModel)]="descripcion"></textarea>
               </div>
 
               <!-- Adjuntos -->
               <div class="form-section mb-4">
                 <p class="form-section__label">
-                  <i class="bi bi-paperclip me-1"></i>Adjuntos
+                  <i class="bi bi-paperclip me-1"></i>{{ 'make_offer.attachments' | translate }}
                 </p>
                 <div class="attachments-section">
 
@@ -340,7 +341,7 @@
                     </div>
                     <div class="attach-row__info">
                       <p class="attach-row__label">
-                        Documento PDF
+                        {{ 'make_offer.pdf_doc' | translate }}
                         @if (!ofertaId()) { <span class="req-mark">*</span> }
                       </p>
                       @if (documentoOferta()) {
@@ -352,15 +353,15 @@
                           <i class="bi bi-check-circle-fill text-success me-1"></i>
                           {{ documentoActual()!.nombre_archivo }}
                           <button class="btn btn-link btn-sm p-0 ms-1" type="button"
-                                  (click)="verArchivo(documentoActual()!)">Ver</button>
+                                  (click)="verArchivo(documentoActual()!)">{{ 'make_offer.view' | translate }}</button>
                         </p>
                       } @else {
-                        <p class="attach-row__empty">Sin documento</p>
+                        <p class="attach-row__empty">{{ 'make_offer.no_document' | translate }}</p>
                       }
                     </div>
                     <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
                       <i class="bi bi-upload me-1"></i>
-                      {{ documentoActual() && !documentoOferta() ? 'Reemplazar' : 'Adjuntar' }}
+                      {{ (documentoActual() && !documentoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
                       <input type="file" accept=".pdf" class="d-none" (change)="onDocumento($event)" />
                     </label>
                   </div>
@@ -370,7 +371,7 @@
                       <i class="bi bi-camera-video-fill"></i>
                     </div>
                     <div class="attach-row__info">
-                      <p class="attach-row__label">Video <span class="opt-mark">(opcional)</span></p>
+                      <p class="attach-row__label">{{ 'make_offer.video_opt' | translate }} <span class="opt-mark">({{ 'common.optional' | translate }})</span></p>
                       @if (videoOferta()) {
                         <p class="attach-row__name">{{ videoOferta()!.name }}
                           <span class="text-muted">· {{ formatTamano(videoOferta()!.size) }}</span>
@@ -380,15 +381,15 @@
                           <i class="bi bi-check-circle-fill text-success me-1"></i>
                           {{ videoActual()!.nombre_archivo }}
                           <button class="btn btn-link btn-sm p-0 ms-1" type="button"
-                                  (click)="verArchivo(videoActual()!)">Ver</button>
+                                  (click)="verArchivo(videoActual()!)">{{ 'make_offer.view' | translate }}</button>
                         </p>
                       } @else {
-                        <p class="attach-row__empty">Sin video</p>
+                        <p class="attach-row__empty">{{ 'make_offer.no_video' | translate }}</p>
                       }
                     </div>
                     <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
                       <i class="bi bi-upload me-1"></i>
-                      {{ videoActual() && !videoOferta() ? 'Reemplazar' : 'Adjuntar' }}
+                      {{ (videoActual() && !videoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
                       <input type="file" accept="video/*" class="d-none" (change)="onVideo($event)" />
                     </label>
                   </div>
@@ -400,21 +401,21 @@
               <div class="checklist-inline mb-4">
                 <div class="checklist-item" [class.checklist-item--done]="!!precio && precio > 0">
                   <i class="bi" [class.bi-check-circle-fill]="!!precio && precio > 0"
-                                [class.bi-circle]="!precio || precio <= 0"></i>Precio
+                                [class.bi-circle]="!precio || precio <= 0"></i>{{ 'make_offer.checklist_price' | translate }}
                 </div>
                 <div class="checklist-item"
                      [class.checklist-item--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin">
                   <i class="bi"
                      [class.bi-check-circle-fill]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
-                     [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>Plazo
+                     [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>{{ 'make_offer.checklist_deadline' | translate }}
                 </div>
                 <div class="checklist-item" [class.checklist-item--done]="!!fechaInicio">
                   <i class="bi" [class.bi-check-circle-fill]="!!fechaInicio"
-                                [class.bi-circle]="!fechaInicio"></i>Inicio
+                                [class.bi-circle]="!fechaInicio"></i>{{ 'make_offer.checklist_start' | translate }}
                 </div>
                 <div class="checklist-item" [class.checklist-item--done]="!!descripcion.trim()">
                   <i class="bi" [class.bi-check-circle-fill]="!!descripcion.trim()"
-                                [class.bi-circle]="!descripcion.trim()"></i>Descripción
+                                [class.bi-circle]="!descripcion.trim()"></i>{{ 'make_offer.checklist_desc' | translate }}
                 </div>
                 @if (!ofertaId()) {
                   <div class="checklist-item" [class.checklist-item--done]="!!documentoOferta()">
@@ -426,11 +427,11 @@
 
               <!-- Mensajes de feedback -->
               @if (errorEnvio()) {
-                <div class="alert alert-danger py-2 small mb-3">{{ errorEnvio() }}</div>
+                <div class="alert alert-danger py-2 small mb-3">{{ errorEnvio() | translate }}</div>
               }
               @if (exitoMsg()) {
                 <div class="alert alert-success py-2 small mb-3 d-flex align-items-center gap-2">
-                  <i class="bi bi-check-circle-fill flex-shrink-0"></i>{{ exitoMsg() }}
+                  <i class="bi bi-check-circle-fill flex-shrink-0"></i>{{ exitoMsg() | translate }}
                 </div>
               }
 
@@ -441,23 +442,23 @@
                         [disabled]="enviando() || (enviada() && !ofertaId())">
                   @if (enviando()) {
                     <span class="spinner-border spinner-border-sm"></span>
-                    {{ ofertaId() ? 'Actualizando…' : 'Enviando…' }}
+                    {{ ofertaId() ? ('make_offer.updating' | translate) : ('make_offer.sending' | translate) }}
                   } @else {
                     <i class="bi" [class.bi-send-check]="!ofertaId()" [class.bi-arrow-repeat]="!!ofertaId()"></i>
-                    {{ ofertaId() ? 'Actualizar oferta' : 'Enviar oferta' }}
+                    {{ ofertaId() ? ('make_offer.update_offer' | translate) : ('make_offer.send_offer' | translate) }}
                   }
                 </button>
 
                 @if (enviada() && !ofertaId()) {
                   <button class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2"
                           type="button" (click)="verMisOfertas()">
-                    <i class="bi bi-list-check"></i>Ver mis ofertas
+                    <i class="bi bi-list-check"></i>{{ 'make_offer.view_my_offers' | translate }}
                   </button>
                 }
 
                 <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
                         type="button" (click)="volver()">
-                  <i class="bi bi-arrow-left"></i>Volver a expedientes
+                  <i class="bi bi-arrow-left"></i>{{ 'make_offer.back_to_files' | translate }}
                 </button>
               </div>
 

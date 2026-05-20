@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminUserService } from '../../../services/admin-user.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ToastService } from '../../../services/toast.service';
@@ -16,17 +17,18 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-admin-user-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
 export class AdminUserEditComponent implements OnInit {
-  private fb      = inject(FormBuilder);
-  private route   = inject(ActivatedRoute);
-  private router  = inject(Router);
-  private service = inject(AdminUserService);
-  private auth    = inject(AuthSupabaseService);
-  private toast   = inject(ToastService);
+  private fb        = inject(FormBuilder);
+  private route     = inject(ActivatedRoute);
+  private router    = inject(Router);
+  private service   = inject(AdminUserService);
+  private auth      = inject(AuthSupabaseService);
+  private toast     = inject(ToastService);
+  private translate = inject(TranslateService);
 
   cargando        = true;
   guardando       = false;
@@ -64,7 +66,7 @@ export class AdminUserEditComponent implements OnInit {
         .single();
 
       if (error) throw error;
-      if (!data)  throw new Error('Usuario no encontrado');
+      if (!data)  throw new Error(this.translate.instant('admin_users.err_not_found'));
 
       this.usuario = data;
       this.form.patchValue({
@@ -83,7 +85,7 @@ export class AdminUserEditComponent implements OnInit {
         this.f['email'].updateValueAndValidity();
       }
     } catch (e: any) {
-      this.error = e.message ?? 'Error al cargar el usuario';
+      this.error = e.message ?? this.translate.instant('admin_users.err_load');
     } finally {
       this.cargando = false;
     }
@@ -112,10 +114,10 @@ export class AdminUserEditComponent implements OnInit {
       }
 
       await this.service.actualizarUsuario(this.usuario.id, params);
-      this.toast.show(`Usuario ${v.nombre} ${v.apellido} actualizado.`, 'success');
+      this.toast.show(this.translate.instant('admin_users.success_updated', { nombre: v.nombre, apellido: v.apellido }), 'success');
       this.router.navigate(['/admin/user']);
     } catch (e: any) {
-      this.toast.show(e.message ?? 'Error al actualizar el usuario.', 'danger');
+      this.toast.show(e.message ?? this.translate.instant('admin_users.err_update'), 'danger');
     } finally {
       this.guardando = false;
     }
@@ -131,7 +133,7 @@ export class AdminUserEditComponent implements OnInit {
       const url = await this.service.uploadAvatar(file, this.usuario?.id);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
-      this.toast.show(e.message ?? 'Error al subir la imagen.', 'danger');
+      this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
       this.previewUrl = null;
     } finally {
       this.subiendoAvatar = false;

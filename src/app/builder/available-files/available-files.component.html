@@ -5,29 +5,27 @@
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
         <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-search me-1"></i>Constructor
+          <i class="bi bi-search me-1"></i>{{ 'role.constructeur' | translate }}
         </p>
-        <h4 class="mb-1">Expedientes disponibles</h4>
-        <p class="text-muted small mb-0">
-          Proyectos con estimación aprobada que aún aceptan ofertas. Envía tu propuesta.
-        </p>
+        <h4 class="mb-1">{{ 'available_files.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'available_files.subtitle' | translate }}</p>
       </div>
       @if (!cargando() && expedientes().length > 0) {
         <div class="d-flex gap-2 flex-wrap align-items-center">
           <span class="kpi-pill kpi-pill--available">
             <i class="bi bi-clipboard2-check me-1"></i>
-            {{ expedientes().length }} disponible{{ expedientes().length !== 1 ? 's' : '' }}
+            {{ expedientes().length }} {{ 'available_files.available' | translate }}
           </span>
           @if (totalConOferta() > 0) {
             <span class="kpi-pill kpi-pill--offered">
               <i class="bi bi-check-circle-fill me-1"></i>
-              {{ totalConOferta() }} ofertado{{ totalConOferta() !== 1 ? 's' : '' }}
+              {{ totalConOferta() }} {{ 'available_files.offered' | translate }}
             </span>
           }
           @if (totalSinOferta() > 0) {
             <span class="kpi-pill kpi-pill--pending">
               <i class="bi bi-hourglass me-1"></i>
-              {{ totalSinOferta() }} sin oferta
+              {{ totalSinOferta() }} {{ 'available_files.no_offer_count' | translate }}
             </span>
           }
         </div>
@@ -39,7 +37,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando expedientes…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
@@ -49,10 +47,8 @@
         <div class="empty-icon">
           <i class="bi bi-clipboard2-x"></i>
         </div>
-        <p class="empty-title">Sin expedientes disponibles</p>
-        <p class="empty-text">
-          No hay proyectos listos para recibir ofertas en este momento. Vuelve pronto.
-        </p>
+        <p class="empty-title">{{ 'available_files.empty_title' | translate }}</p>
+        <p class="empty-text">{{ 'available_files.empty_text' | translate }}</p>
       </div>
     </div>
 
@@ -62,7 +58,6 @@
     <!-- ── Barra de filtros ───────────────────────────────────────────────── -->
     <div class="filter-bar rounded-4 mb-3 p-3">
 
-      <!-- Búsqueda -->
       <div class="filter-search">
         <span class="filter-search__icon"><i class="bi bi-search"></i></span>
         <input
@@ -70,69 +65,65 @@
           class="form-control filter-search__input"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
-          placeholder="Buscar por servicio, provincia, cantón…"
+          [placeholder]="'available_files.search_placeholder' | translate"
           autocomplete="off"
         />
       </div>
 
-      <!-- Competencia -->
       <div class="filter-group">
-        <span class="filter-group__label">Competencia</span>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de competencia">
+        <span class="filter-group__label">{{ 'available_files.competition_label' | translate }}</span>
+        <div class="btn-group btn-group-sm" role="group">
           <button type="button" class="btn"
                   [class.btn-secondary]="filtroCompetencia() === 'todos'"
                   [class.btn-outline-secondary]="filtroCompetencia() !== 'todos'"
-                  (click)="filtroCompetencia.set('todos')">Todos</button>
+                  (click)="filtroCompetencia.set('todos')">{{ 'common.all' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-success]="filtroCompetencia() === 'baja'"
                   [class.btn-outline-success]="filtroCompetencia() !== 'baja'"
-                  (click)="filtroCompetencia.set('baja')">Baja</button>
+                  (click)="filtroCompetencia.set('baja')">{{ 'competition.low' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-warning]="filtroCompetencia() === 'media'"
                   [class.btn-outline-warning]="filtroCompetencia() !== 'media'"
-                  (click)="filtroCompetencia.set('media')">Media</button>
+                  (click)="filtroCompetencia.set('media')">{{ 'competition.mid' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-danger]="filtroCompetencia() === 'alta'"
                   [class.btn-outline-danger]="filtroCompetencia() !== 'alta'"
-                  (click)="filtroCompetencia.set('alta')">Alta</button>
+                  (click)="filtroCompetencia.set('alta')">{{ 'competition.high' | translate }}</button>
         </div>
       </div>
 
-      <!-- Mi oferta -->
       <div class="filter-group">
-        <span class="filter-group__label">Mi oferta</span>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Filtro de oferta propia">
+        <span class="filter-group__label">{{ 'available_files.my_offer_label' | translate }}</span>
+        <div class="btn-group btn-group-sm" role="group">
           <button type="button" class="btn"
                   [class.btn-secondary]="filtroOferta() === 'todos'"
                   [class.btn-outline-secondary]="filtroOferta() !== 'todos'"
-                  (click)="filtroOferta.set('todos')">Todos</button>
+                  (click)="filtroOferta.set('todos')">{{ 'common.all' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-primary]="filtroOferta() === 'sin'"
                   [class.btn-outline-primary]="filtroOferta() !== 'sin'"
-                  (click)="filtroOferta.set('sin')">Sin oferta</button>
+                  (click)="filtroOferta.set('sin')">{{ 'available_files.no_offer_filter' | translate }}</button>
           <button type="button" class="btn"
                   [class.btn-success]="filtroOferta() === 'con'"
                   [class.btn-outline-success]="filtroOferta() !== 'con'"
-                  (click)="filtroOferta.set('con')">Ofertados</button>
+                  (click)="filtroOferta.set('con')">{{ 'available_files.offered_filter' | translate }}</button>
         </div>
       </div>
 
-      <!-- Limpiar -->
       @if (hayFiltros()) {
         <button type="button" class="btn btn-link btn-sm text-muted filter-clear"
                 (click)="limpiarFiltros()">
-          <i class="bi bi-x-circle me-1"></i>Limpiar
+          <i class="bi bi-x-circle me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
 
     </div>
 
-    <!-- Hint de resultados -->
     @if (hayFiltros()) {
       <p class="results-hint mb-3">
         <i class="bi bi-funnel me-1"></i>
-        Mostrando <strong>{{ expedientesFiltrados().length }}</strong>
-        de {{ expedientes().length }} expedientes
+        {{ 'common.showing' | translate }} <strong>{{ expedientesFiltrados().length }}</strong>
+        {{ 'common.of' | translate }} {{ expedientes().length }} {{ 'available_files.files_count' | translate }}
       </p>
     }
 
@@ -143,12 +134,10 @@
           <div class="empty-icon">
             <i class="bi bi-funnel-x"></i>
           </div>
-          <p class="empty-title">Sin resultados</p>
-          <p class="empty-text">
-            Ningún expediente coincide con los filtros aplicados.
-          </p>
+          <p class="empty-title">{{ 'common.no_results' | translate }}</p>
+          <p class="empty-text">{{ 'available_files.no_filter_text' | translate }}</p>
           <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
           </button>
         </div>
       </div>
@@ -164,24 +153,21 @@
               <div class="file-accent"></div>
               <div class="file-body d-flex flex-column">
 
-                <!-- Fila 1: número + badge -->
                 <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                   <span class="file-num">{{ exp.numero }}</span>
                   @if (tieneOferta(exp.id)) {
                     <span class="badge text-bg-success file-badge">
-                      <i class="bi bi-check-circle-fill me-1"></i>Oferta enviada
+                      <i class="bi bi-check-circle-fill me-1"></i>{{ 'available_files.offer_sent' | translate }}
                     </span>
                   } @else {
                     <span class="badge file-badge" [class]="competenciaBadge(exp.total_ofertas)">
-                      <i class="bi bi-bar-chart-fill me-1"></i>{{ competenciaLabel(exp.total_ofertas) }}
+                      <i class="bi bi-bar-chart-fill me-1"></i>{{ competenciaLabel(exp.total_ofertas) | translate }}
                     </span>
                   }
                 </div>
 
-                <!-- Servicio -->
                 <p class="file-servicio mb-2">{{ exp.servicio_nombre }}</p>
 
-                <!-- Ubicación -->
                 <p class="file-meta mb-1">
                   <i class="bi bi-geo-alt me-1"></i>{{ exp.direccion }}
                 </p>
@@ -191,7 +177,6 @@
 
                 <hr class="file-divider my-3" />
 
-                <!-- Slots de competencia -->
                 <div class="d-flex align-items-center gap-2 mb-3">
                   <div class="offer-slots">
                     @for (i of slots; track i) {
@@ -201,15 +186,14 @@
                       </span>
                     }
                   </div>
-                  <span class="offer-slots-label">{{ exp.total_ofertas }}/5 ofertas</span>
+                  <span class="offer-slots-label">{{ exp.total_ofertas }}/5 {{ 'available_files.offers_label' | translate }}</span>
                 </div>
 
-                <!-- CTA -->
                 @if (tieneOferta(exp.id)) {
                   <button class="btn btn-outline-success btn-sm fw-semibold mt-auto
                                  d-flex align-items-center justify-content-center gap-2 w-100"
                           (click)="hacerOferta(exp.id)">
-                    <i class="bi bi-eye"></i>Ver mi oferta
+                    <i class="bi bi-eye"></i>{{ 'available_files.view_offer' | translate }}
                   </button>
                 } @else {
                   <button class="btn btn-primary btn-sm fw-semibold mt-auto
@@ -217,9 +201,9 @@
                           (click)="hacerOferta(exp.id)"
                           [disabled]="exp.total_ofertas >= 5">
                     @if (exp.total_ofertas >= 5) {
-                      <i class="bi bi-x-circle"></i>Cupo completo
+                      <i class="bi bi-x-circle"></i>{{ 'available_files.full' | translate }}
                     } @else {
-                      <i class="bi bi-send"></i>Hacer oferta
+                      <i class="bi bi-send"></i>{{ 'available_files.make_offer' | translate }}
                     }
                   </button>
                 }
@@ -230,17 +214,16 @@
         }
       </div>
 
-      <!-- Leyenda de competencia -->
       <div class="competition-legend mt-4">
-        <span class="competition-legend__title">Nivel de competencia:</span>
+        <span class="competition-legend__title">{{ 'available_files.legend_title' | translate }}</span>
         <span class="comp-badge comp-badge--low">
-          <span class="comp-dot"></span>Baja (0–1 ofertas)
+          <span class="comp-dot"></span>{{ 'available_files.legend_low' | translate }}
         </span>
         <span class="comp-badge comp-badge--mid">
-          <span class="comp-dot"></span>Media (2–3 ofertas)
+          <span class="comp-dot"></span>{{ 'available_files.legend_mid' | translate }}
         </span>
         <span class="comp-badge comp-badge--high">
-          <span class="comp-dot"></span>Alta (4–5 ofertas)
+          <span class="comp-dot"></span>{{ 'available_files.legend_high' | translate }}
         </span>
       </div>
 

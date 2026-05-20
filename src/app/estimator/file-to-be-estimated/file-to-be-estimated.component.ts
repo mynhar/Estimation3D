@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
@@ -12,13 +13,14 @@ import { ExpedienteDetalle, ArchivoRow } from '../../models';
 @Component({
   selector: 'app-file-to-be-estimated',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './file-to-be-estimated.component.html',
   styleUrl:    './file-to-be-estimated.component.css',
 })
 export class FileToBeEstimatedComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private sanitizer         = inject(DomSanitizer);
+  private translate         = inject(TranslateService);
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
@@ -29,6 +31,7 @@ export class FileToBeEstimatedComponent implements OnInit {
   detalle  = signal<ExpedienteDetalle | null>(null);
   cargando = signal(true);
   errorMsg = signal<string>('');
+
 
   fechaVisita          = '';
   horaVisita           = '';
@@ -122,20 +125,20 @@ export class FileToBeEstimatedComponent implements OnInit {
     this.exitoMsg.set('');
 
     if (!this.fechaVisita || !this.horaVisita) {
-      this.errorGuardado.set('La fecha y hora de visita son obligatorias.');
+      this.errorGuardado.set('estimator_form.err_visit');
       return;
     }
     if (!this.descripcionProblemas.trim()) {
-      this.errorGuardado.set('Los problemas observados son obligatorios.');
+      this.errorGuardado.set('estimator_form.err_problems');
       return;
     }
     if (!this.costoValido) {
-      this.errorGuardado.set('Si ingresa un costo, el mínimo y máximo son obligatorios y el máximo debe ser ≥ al mínimo.');
+      this.errorGuardado.set('estimator_form.err_cost');
       return;
     }
 
     const userId = this.user()?.id;
-    if (!userId) { this.errorGuardado.set('No hay sesión activa.'); return; }
+    if (!userId) { this.errorGuardado.set('estimator_form.err_session'); return; }
 
     this.guardando.set(true);
     try {
@@ -150,7 +153,7 @@ export class FileToBeEstimatedComponent implements OnInit {
       });
       await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
       this.hasDraft.set(true);
-      this.exitoMsg.set('Estimación enviada correctamente.');
+      this.exitoMsg.set('estimator_form.success_estimation');
     } catch (e: any) {
       console.error('[FileToBeEstimated] guardar:', e.message);
       this.errorGuardado.set(e.message);
@@ -164,12 +167,12 @@ export class FileToBeEstimatedComponent implements OnInit {
     this.exitoVisitaMsg.set('');
 
     if (!this.fechaVisita || !this.horaVisita) {
-      this.errorVisitaMsg.set('La fecha y hora de visita son obligatorias.');
+      this.errorVisitaMsg.set('estimator_form.err_visit');
       return;
     }
 
     const userId = this.user()?.id;
-    if (!userId) { this.errorVisitaMsg.set('No hay sesión activa.'); return; }
+    if (!userId) { this.errorVisitaMsg.set('estimator_form.err_session'); return; }
 
     this.guardandoVisita.set(true);
     try {
@@ -183,7 +186,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         urlTour:              this.urlTour.trim() || null,
       });
       this.hasDraft.set(true);
-      this.exitoVisitaMsg.set('Borrador guardado correctamente.');
+      this.exitoVisitaMsg.set('estimator_form.success_draft');
     } catch (e: any) {
       console.error('[FileToBeEstimated] guardarVisita:', e.message);
       this.errorVisitaMsg.set(e.message);
@@ -265,15 +268,19 @@ export class FileToBeEstimatedComponent implements OnInit {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleDateString('es-CR', { day: '2-digit', month: 'long', year: 'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
   }
 
   formatHora(valor: string): string {
     if (!valor) return '—';
     const d = new Date(valor);
-    return isNaN(d.getTime()) ? '—'
-      : d.toLocaleTimeString('es-CR', { hour: '2-digit', minute: '2-digit' });
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
 
   // ── Tour CRUD ─────────────────────────────────────────────────────────────

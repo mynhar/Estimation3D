@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
@@ -12,7 +13,7 @@ import { ExpedienteParaOferta, ArchivoRow, OfertaForm } from '../../models';
 @Component({
   selector: 'app-make-offer',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './make-offer.component.html',
   styleUrl: './make-offer.component.css',
 })
@@ -137,34 +138,34 @@ export class MakeOfferComponent implements OnInit {
     this.exitoMsg.set('');
 
     if (!this.precio || this.precio <= 0) {
-      this.errorEnvio.set('El precio total es obligatorio y debe ser mayor a 0.');
+      this.errorEnvio.set('make_offer.err_price');
       return;
     }
     if (!this.plazoMin || this.plazoMin <= 0) {
-      this.errorEnvio.set('El plazo mínimo es obligatorio.');
+      this.errorEnvio.set('make_offer.err_plazo_min');
       return;
     }
     if (!this.plazoMax || this.plazoMax < this.plazoMin) {
-      this.errorEnvio.set('El plazo máximo debe ser mayor o igual al mínimo.');
+      this.errorEnvio.set('make_offer.err_plazo_max');
       return;
     }
     if (!this.fechaInicio) {
-      this.errorEnvio.set('La fecha de inicio es obligatoria.');
+      this.errorEnvio.set('make_offer.err_date');
       return;
     }
     if (!this.descripcion.trim()) {
-      this.errorEnvio.set('La descripción de su enfoque es obligatoria.');
+      this.errorEnvio.set('make_offer.err_desc');
       return;
     }
 
     const esNueva = !this.ofertaId();
     if (esNueva && !this.documentoOferta()) {
-      this.errorEnvio.set('El documento de oferta (PDF) es obligatorio.');
+      this.errorEnvio.set('make_offer.err_doc');
       return;
     }
 
     const userId = this.user()?.id;
-    if (!userId) { this.errorEnvio.set('No hay sesión activa.'); return; }
+    if (!userId) { this.errorEnvio.set('make_offer.err_session'); return; }
 
     const form: OfertaForm = {
       precio:            this.precio,
@@ -186,7 +187,7 @@ export class MakeOfferComponent implements OnInit {
           this.videoOferta(),
         );
         this.enviada.set(true);
-        this.exitoMsg.set('Oferta enviada correctamente.');
+        this.exitoMsg.set('make_offer.success_sent');
       } else {
         await this.ofertaService.actualizar(
           this.ofertaId()!,
@@ -202,7 +203,7 @@ export class MakeOfferComponent implements OnInit {
           this.documentoOferta.set(null);
           this.videoOferta.set(null);
         }
-        this.exitoMsg.set('Oferta actualizada correctamente.');
+        this.exitoMsg.set('make_offer.success_updated');
       }
     } catch (e: any) {
       console.error('[MakeOffer] guardar:', e.message);

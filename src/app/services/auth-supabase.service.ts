@@ -100,6 +100,7 @@ export class AuthSupabaseService {
       email,
       password,
       options: {
+        emailRedirectTo: window.location.origin,
         data: {                       // ← FIX 1: options.data alimenta raw_user_meta_data
           nombre:   perfil.nombre,    //   el trigger lee estas claves exactas
           apellido: perfil.apellido,

@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { OfertaService } from '../../services/oferta.service';
@@ -10,7 +11,7 @@ import { ExpedienteDisponible } from '../../models';
 @Component({
   selector: 'app-available-files',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './available-files.component.html',
   styleUrl: './available-files.component.css',
 })
@@ -94,9 +95,9 @@ export class AvailableFilesComponent implements OnInit {
   }
 
   competenciaLabel(n: number): string {
-    if (n <= 1) return 'Baja';
-    if (n <= 3) return 'Media';
-    return 'Alta';
+    if (n <= 1) return 'competition.low';
+    if (n <= 3) return 'competition.mid';
+    return 'competition.high';
   }
 
   competenciaColor(n: number): string {

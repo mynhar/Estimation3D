@@ -5,33 +5,31 @@
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
         <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-clipboard2-pulse me-1"></i>Estimador
+          <i class="bi bi-clipboard2-pulse me-1"></i>{{ 'role.estimateur' | translate }}
         </p>
         <h4 class="mb-1">
-          {{ bienvenida ? 'Hola, ' + bienvenida : 'Dashboard' }}
+          {{ bienvenida ? ('dashboard_client.welcome' | translate) + ', ' + bienvenida : ('dashboard_estimator.title' | translate) }}
         </h4>
-        <p class="text-muted small mb-0">
-          Progreso de estimaciones y seguimiento de expedientes.
-        </p>
+        <p class="text-muted small mb-0">{{ 'dashboard_estimator.subtitle' | translate }}</p>
       </div>
       @if (!cargando()) {
         <div class="d-flex gap-2 flex-wrap align-items-center">
           @if (activos().length > 0) {
             <span class="kpi-pill kpi-pill--active">
               <i class="bi bi-pencil-square me-1"></i>
-              {{ activos().length }} en progreso
+              {{ activos().length }} {{ 'dashboard_estimator.in_progress' | translate }}
             </span>
           }
           @if (disponibles() > 0) {
             <span class="kpi-pill kpi-pill--available">
               <i class="bi bi-inbox me-1"></i>
-              {{ disponibles() }} disponible{{ disponibles() !== 1 ? 's' : '' }}
+              {{ disponibles() }} {{ 'common.available' | translate }}
             </span>
           }
           @if (contratados().length > 0) {
             <span class="kpi-pill kpi-pill--contratado">
               <i class="bi bi-check-circle-fill me-1"></i>
-              {{ contratados().length }} contratado{{ contratados().length !== 1 ? 's' : '' }}
+              {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
             </span>
           }
         </div>
@@ -43,7 +41,7 @@
   @if (cargando()) {
     <div class="loading-state">
       <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      Cargando dashboard…
+      {{ 'common.loading' | translate }}
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
@@ -51,14 +49,11 @@
     <div class="card border-0 shadow-sm rounded-4">
       <div class="empty-state">
         <div class="empty-icon"><i class="bi bi-clipboard2-x"></i></div>
-        <p class="empty-title">Sin expedientes asignados</p>
-        <p class="empty-text">
-          No tienes estimaciones activas ni hay expedientes disponibles en este momento.
-          Vuelve pronto.
-        </p>
+        <p class="empty-title">{{ 'dashboard_estimator.no_files' | translate }}</p>
+        <p class="empty-text">{{ 'dashboard_estimator.no_files_text' | translate }}</p>
         <a routerLink="/estimator/files-to-be-estimated"
            class="btn btn-outline-primary btn-sm fw-semibold">
-          <i class="bi bi-inbox me-1"></i>Ver expedientes a estimar
+          <i class="bi bi-inbox me-1"></i>{{ 'nav.a_estimer' | translate }}
         </a>
       </div>
     </div>
@@ -66,61 +61,53 @@
   <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- KPI ROW                                                               -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- KPI ROW -->
     <div class="row g-3 mb-4">
 
-      <!-- En estimación -->
       <div class="col-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--active h-100"
              [class.kpi-card--active-pulso]="activos().length > 0">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--active"><i class="bi bi-pencil-square"></i></div>
             <div class="min-w-0">
-              <p class="text-muted small mb-0">En estimación</p>
+              <p class="text-muted small mb-0">{{ 'state.en_estimacion' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-primary">{{ activos().length }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- En mercado -->
       <div class="col-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--mercado h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--mercado"><i class="bi bi-people"></i></div>
             <div class="min-w-0">
-              <p class="text-muted small mb-0">En mercado</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_estimator.on_market' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-warning">{{ enMercado().length }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Contratados -->
       <div class="col-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--contratado h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--contratado"><i class="bi bi-check-circle-fill"></i></div>
             <div class="min-w-0">
-              <p class="text-muted small mb-0">Contratados</p>
+              <p class="text-muted small mb-0">{{ 'dashboard_estimator.contracted' | translate }}</p>
               <p class="kpi-num fw-bold mb-0 text-success">{{ contratados().length }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Valor estimado -->
       <div class="col-6 col-xl-3">
         <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--monto h-100">
           <div class="card-body d-flex align-items-center gap-3 py-3">
             <div class="kpi-icon kpi-icon--monto"><i class="bi bi-cash-coin"></i></div>
             <div class="min-w-0">
-              <p class="text-muted small mb-0">Valor estimado</p>
-              <p class="kpi-num-sm fw-bold mb-0 text-primary">
-                {{ formatPrecio(montoTotal()) }}
-              </p>
+              <p class="text-muted small mb-0">{{ 'dashboard_estimator.estimated_value' | translate }}</p>
+              <p class="kpi-num-sm fw-bold mb-0 text-primary">{{ formatPrecio(montoTotal()) }}</p>
             </div>
           </div>
         </div>
@@ -128,19 +115,17 @@
 
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- CONTENIDO PRINCIPAL: trabajo activo + sidebar                         -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="row g-4 align-items-start mb-4">
 
-      <!-- ── Estimaciones activas (cards grid) ─────────────────────────── -->
+      <!-- Estimaciones activas -->
       <div class="col-lg-8">
         <div class="card border-0 shadow-sm rounded-4">
 
           <div class="card-header bg-transparent border-bottom px-4 py-3
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
-              <i class="bi bi-pencil-square me-2 text-primary"></i>Estimaciones activas
+              <i class="bi bi-pencil-square me-2 text-primary"></i>{{ 'dashboard_estimator.active_estimations' | translate }}
               @if (activos().length > 0) {
                 <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
                   {{ activos().length }}
@@ -149,7 +134,7 @@
             </span>
             <a routerLink="/estimator/files-under-estimation"
                class="btn btn-outline-secondary btn-sm">
-              Ver todas <i class="bi bi-arrow-right ms-1"></i>
+              {{ 'common.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
             </a>
           </div>
 
@@ -157,13 +142,11 @@
             @if (activos().length === 0) {
               <div class="empty-inline">
                 <i class="bi bi-check-circle text-success fs-3 mb-2"></i>
-                <p class="mb-1 fw-semibold">Sin estimaciones pendientes</p>
-                <p class="text-muted small mb-3">
-                  Puedes tomar nuevos expedientes disponibles para estimar.
-                </p>
+                <p class="mb-1 fw-semibold">{{ 'dashboard_estimator.no_pending' | translate }}</p>
+                <p class="text-muted small mb-3">{{ 'dashboard_estimator.take_available_hint' | translate }}</p>
                 <a routerLink="/estimator/files-to-be-estimated"
                    class="btn btn-primary btn-sm fw-semibold">
-                  <i class="bi bi-inbox me-1"></i>Ver disponibles
+                  <i class="bi bi-inbox me-1"></i>{{ 'dashboard_estimator.see_available_btn' | translate }}
                   @if (disponibles() > 0) {
                     <span class="badge bg-white text-primary ms-1">{{ disponibles() }}</span>
                   }
@@ -179,25 +162,23 @@
                       <div class="work-card__accent"></div>
                       <div class="work-card__body">
 
-                        <!-- Número + urgencia -->
                         <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                           <span class="work-num">{{ exp.numero }}</span>
                           @if (urgencia(exp.fecha_visita) === 'vencida') {
                             <span class="badge text-bg-danger urgencia-badge">
-                              <i class="bi bi-exclamation-triangle-fill me-1"></i>Vencida
+                              <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'common.urgency_expired' | translate }}
                             </span>
                           } @else if (urgencia(exp.fecha_visita) === 'hoy') {
                             <span class="badge text-bg-warning urgencia-badge">
-                              <i class="bi bi-clock-fill me-1"></i>Hoy
+                              <i class="bi bi-clock-fill me-1"></i>{{ 'common.urgency_today' | translate }}
                             </span>
                           } @else if (urgencia(exp.fecha_visita) === 'proxima') {
                             <span class="badge urgencia-badge urgencia-badge--proxima">
-                              <i class="bi bi-calendar-event me-1"></i>Próxima
+                              <i class="bi bi-calendar-event me-1"></i>{{ 'common.urgency_upcoming' | translate }}
                             </span>
                           }
                         </div>
 
-                        <!-- Servicio + meta -->
                         <p class="work-servicio mb-1">{{ exp.servicio_nombre }}</p>
                         <p class="work-meta mb-0">
                           <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
@@ -206,7 +187,6 @@
                           <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
                         </p>
 
-                        <!-- Barra de progreso -->
                         <div class="d-flex align-items-center gap-2 mb-3">
                           <div class="progress work-progress flex-grow-1">
                             <div class="progress-bar work-progress__fill"
@@ -218,7 +198,6 @@
                           <span class="work-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
                         </div>
 
-                        <!-- Fecha visita + CTA -->
                         <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
                           <span class="work-fecha"
                                 [class.work-fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
@@ -228,7 +207,7 @@
                           </span>
                           <button class="btn btn-continuar btn-sm fw-semibold"
                                   (click)="irAEstimar(exp.id)">
-                            <i class="bi bi-pencil-square me-1"></i>Continuar
+                            <i class="bi bi-pencil-square me-1"></i>{{ 'common.continue' | translate }}
                           </button>
                         </div>
 
@@ -243,16 +222,15 @@
         </div>
       </div>
 
-      <!-- ── Sidebar ────────────────────────────────────────────────────── -->
+      <!-- Sidebar -->
       <div class="col-lg-4">
         <div class="sidebar-sticky d-flex flex-column gap-3">
 
-          <!-- Distribución (donut) -->
           @if (expedientes().length > 0) {
             <div class="card border-0 shadow-sm rounded-4">
               <div class="card-header bg-transparent border-bottom px-4 py-3">
                 <span class="fw-semibold">
-                  <i class="bi bi-pie-chart me-2 text-primary"></i>Distribución
+                  <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
                 </span>
               </div>
               <div class="card-body d-flex flex-column align-items-center py-3 px-3">
@@ -267,7 +245,7 @@
                             transform="rotate(-90 70 70)"/>
                   }
                   <text x="70" y="66" text-anchor="middle" class="donut-num">{{ expedientes().length }}</text>
-                  <text x="70" y="83" text-anchor="middle" class="donut-sub">total</text>
+                  <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.total' | translate }}</text>
                 </svg>
 
                 <div class="w-100 mt-1">
@@ -275,7 +253,7 @@
                     <div class="d-flex align-items-center justify-content-between legend-row">
                       <div class="d-flex align-items-center gap-2">
                         <span class="legend-dot" [style.background]="e.color"></span>
-                        <span class="small">{{ e.label }}</span>
+                        <span class="small">{{ ('state.' + e.key) | translate }}</span>
                       </div>
                       <div class="d-flex align-items-center gap-2">
                         <div class="progress legend-bar">
@@ -292,12 +270,11 @@
             </div>
           }
 
-          <!-- Tasa de éxito -->
           @if (totalCompletados() > 0) {
             <div class="card border-0 shadow-sm rounded-4">
               <div class="card-body px-4 py-3">
                 <p class="small fw-semibold text-muted mb-3">
-                  <i class="bi bi-trophy me-1 text-warning"></i>Tasa de éxito
+                  <i class="bi bi-trophy me-1 text-warning"></i>{{ 'dashboard_builder.success_rate' | translate }}
                 </p>
                 <div class="d-flex align-items-center gap-3">
                   <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" class="flex-shrink-0">
@@ -312,26 +289,25 @@
                   </svg>
                   <div>
                     <p class="mb-0 fw-bold fs-5 text-success">{{ contratados().length }}</p>
-                    <p class="text-muted small mb-0">contratado{{ contratados().length !== 1 ? 's' : '' }}</p>
-                    <p class="text-muted small mb-0">de {{ totalCompletados() }} estimado{{ totalCompletados() !== 1 ? 's' : '' }}</p>
+                    <p class="text-muted small mb-0">{{ 'dashboard_estimator.contracted' | translate }}</p>
+                    <p class="text-muted small mb-0">{{ 'common.of' | translate }} {{ totalCompletados() }} {{ 'dashboard_estimator.estimated_lc' | translate }}</p>
                   </div>
                 </div>
               </div>
             </div>
           }
 
-          <!-- Acciones rápidas -->
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body px-4 py-3">
               <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-lightning me-1"></i>Acciones rápidas
+                <i class="bi bi-lightning me-1"></i>{{ 'dashboard_builder.quick_actions' | translate }}
               </p>
               <div class="d-flex flex-column gap-2">
 
                 <a routerLink="/estimator/files-to-be-estimated"
                    class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
                   <i class="bi bi-inbox"></i>
-                  <span>Expedientes a estimar</span>
+                  <span>{{ 'nav.a_estimer' | translate }}</span>
                   @if (disponibles() > 0) {
                     <span class="badge bg-white text-primary ms-auto">{{ disponibles() }}</span>
                   }
@@ -340,7 +316,7 @@
                 <a routerLink="/estimator/files-under-estimation"
                    class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                   <i class="bi bi-pencil-square"></i>
-                  <span>Mis estimaciones activas</span>
+                  <span>{{ 'dashboard_estimator.active_estimations_link' | translate }}</span>
                   @if (activos().length > 0) {
                     <span class="badge bg-secondary ms-auto">{{ activos().length }}</span>
                   }
@@ -349,7 +325,7 @@
                 <a routerLink="/estimator/estimated-files"
                    class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
                   <i class="bi bi-clipboard-check"></i>
-                  <span>Estimaciones completadas</span>
+                  <span>{{ 'nav.completes' | translate }}</span>
                   @if (totalCompletados() > 0) {
                     <span class="badge bg-secondary ms-auto">{{ totalCompletados() }}</span>
                   }
@@ -364,9 +340,7 @@
 
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- SEGUIMIENTO POST-ESTIMACIÓN                                            -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SEGUIMIENTO POST-ESTIMACIÓN -->
     @if (postEstimacion().length > 0) {
       <div class="card border-0 shadow-sm rounded-4">
 
@@ -374,33 +348,30 @@
           <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
             <div>
               <span class="fw-semibold">
-                <i class="bi bi-diagram-3 me-2 text-primary"></i>Seguimiento post-estimación
+                <i class="bi bi-diagram-3 me-2 text-primary"></i>{{ 'dashboard_estimator.post_tracking' | translate }}
               </span>
-              <p class="text-muted small mb-0 mt-1">
-                Progreso de tus expedientes una vez completada la estimación.
-              </p>
+              <p class="text-muted small mb-0 mt-1">{{ 'dashboard_estimator.post_tracking_text' | translate }}</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
               @if (enMercado().length > 0) {
                 <span class="pipe-summary-badge pipe-summary-badge--mercado">
-                  <i class="bi bi-people me-1"></i>{{ enMercado().length }} en mercado
+                  <i class="bi bi-people me-1"></i>{{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
                 </span>
               }
               @if (contratados().length > 0) {
                 <span class="pipe-summary-badge pipe-summary-badge--contratado">
-                  <i class="bi bi-trophy-fill me-1"></i>{{ contratados().length }} contratado{{ contratados().length !== 1 ? 's' : '' }}
+                  <i class="bi bi-trophy-fill me-1"></i>{{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
                 </span>
               }
             </div>
           </div>
         </div>
 
-        <!-- Leyenda del pipeline (oculta en móvil) -->
         <div class="pipeline-legend px-4 py-2 border-bottom d-none d-md-flex">
           @for (step of pipelineSteps; track step; let last = $last) {
             <div class="d-flex align-items-center gap-1">
               <span class="legend-step-dot" [style.background]="cfg(step).color"></span>
-              <span class="legend-step-label">{{ cfg(step).label }}</span>
+              <span class="legend-step-label">{{ ('state.' + step) | translate }}</span>
             </div>
             @if (!last) {
               <i class="bi bi-arrow-right legend-step-arrow mx-1"></i>
@@ -408,18 +379,16 @@
           }
         </div>
 
-        <!-- Filas de expedientes -->
         @for (exp of postEstimacion(); track exp.id) {
           <div class="pipeline-row"
                [class.pipeline-row--contratado]="exp.estado === 'contratado'"
                [class.pipeline-row--cancelado]="exp.estado === 'cancelado'">
 
-            <!-- Información -->
             <div class="pipeline-info">
               <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                 <span class="pipe-num">{{ exp.numero }}</span>
                 @if (exp.estado === 'contratado') {
-                  <i class="bi bi-trophy-fill text-warning" title="¡Contratado!"></i>
+                  <i class="bi bi-trophy-fill text-warning"></i>
                 }
               </div>
               <p class="pipe-servicio mb-1">{{ exp.servicio_nombre }}</p>
@@ -430,7 +399,6 @@
               </p>
             </div>
 
-            <!-- Pipeline visual -->
             <div class="pipeline-track">
               @if (exp.estado !== 'cancelado') {
                 <div class="p-dots">
@@ -439,7 +407,7 @@
                           [class.p-dot--done]="stepDone(exp.estado ?? '', step)"
                           [class.p-dot--active]="stepActive(exp.estado ?? '', step)"
                           [style.--step-color]="cfg(step).color"
-                          [title]="cfg(step).label">
+                          [title]="('state.' + step) | translate">
                     </span>
                     @if (!last) {
                       <span class="p-line"
@@ -453,16 +421,15 @@
                       [style.color]="cfg(exp.estado ?? '').color"
                       [style.border-color]="cfg(exp.estado ?? '').color + '40'">
                   <i class="bi {{ cfg(exp.estado ?? '').icon }} me-1"></i>
-                  {{ cfg(exp.estado ?? '').label }}
+                  {{ ('state.' + (exp.estado ?? '')) | translate }}
                 </span>
               } @else {
-                <span class="badge bg-secondary-subtle text-secondary">Cancelado</span>
+                <span class="badge bg-secondary-subtle text-secondary">{{ 'state.cancelado' | translate }}</span>
               }
             </div>
 
-            <!-- Ver -->
             <button class="btn btn-outline-secondary btn-sm pipeline-cta"
-                    (click)="irAVer(exp.id)" title="Ver detalle">
+                    (click)="irAVer(exp.id)">
               <i class="bi bi-eye"></i>
             </button>
 

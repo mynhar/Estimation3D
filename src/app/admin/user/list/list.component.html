@@ -3,16 +3,16 @@
   <!-- Encabezado -->
   <div class="mb-3">
     <p class="text-primary small fw-semibold mb-1">
-      <i class="bi bi-shield-check me-1"></i>Administrador
+      <i class="bi bi-shield-check me-1"></i>{{ 'role.administrateur' | translate }}
     </p>
     <div class="d-flex align-items-center gap-2">
-      <h4 class="mb-0">Usuarios</h4>
+      <h4 class="mb-0">{{ 'admin_users.title' | translate }}</h4>
       <span class="badge bg-secondary">
         {{ usuariosFiltrados().length }}
         <ng-container *ngIf="hayFiltros()"> / {{ totalUsuarios }}</ng-container>
       </span>
       <a routerLink="/admin/user/create" class="btn btn-primary btn-sm ms-auto fw-semibold">
-        <i class="bi bi-person-plus me-1"></i>Crear usuario
+        <i class="bi bi-person-plus me-1"></i>{{ 'admin_users.create_btn' | translate }}
       </a>
     </div>
   </div>
@@ -20,7 +20,7 @@
   <!-- Cargando -->
   <div *ngIf="cargando" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Cargando...</span>
+      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
     </div>
   </div>
 
@@ -34,14 +34,13 @@
     <!-- ── Filtros ── -->
     <div class="card border-0 shadow-sm mb-3 p-3">
 
-      <!-- Búsqueda de texto -->
       <div class="mb-3">
         <div class="input-group">
           <span class="input-group-text bg-white border-end-0">
             <i class="bi bi-search text-muted"></i>
           </span>
           <input type="text" class="form-control border-start-0 ps-0"
-                 placeholder="Buscar por nombre, apellido o email…"
+                 [placeholder]="'admin_users.search_placeholder' | translate"
                  [value]="busqueda()"
                  (input)="setBusqueda($event)">
           <button *ngIf="busqueda()" class="btn btn-outline-secondary"
@@ -55,22 +54,21 @@
 
         <!-- Filtro Rol -->
         <div class="col-auto">
-          <span class="text-muted small me-1">Rol</span>
+          <span class="text-muted small me-1">{{ 'admin_users.role_filter' | translate }}</span>
           <div class="btn-group btn-group-sm" role="group">
             <button *ngFor="let r of roles" type="button"
                     class="btn"
-                    [class.btn-primary]="filtroRol() === r && r !== 'todos'"
-                    [class.btn-primary]="filtroRol() === r && r === 'todos'"
+                    [class.btn-primary]="filtroRol() === r"
                     [class.btn-outline-secondary]="filtroRol() !== r"
                     (click)="filtroRol.set(r)">
-              {{ r === 'todos' ? 'Todos' : r }}
+              {{ r === 'todos' ? ('common.all' | translate) : (('role.' + r) | translate) }}
             </button>
           </div>
         </div>
 
         <!-- Filtro Proveedor -->
         <div class="col-auto">
-          <span class="text-muted small me-1">Proveedor</span>
+          <span class="text-muted small me-1">{{ 'admin_users.provider_filter' | translate }}</span>
           <div class="btn-group btn-group-sm" role="group">
             <button *ngFor="let p of proveedores" type="button"
                     class="btn"
@@ -79,14 +77,14 @@
                     (click)="filtroProveedor.set(p)">
               <i *ngIf="p === 'google'" class="bi bi-google me-1"></i>
               <i *ngIf="p === 'email'"  class="bi bi-envelope-fill me-1"></i>
-              {{ p === 'todos' ? 'Todos' : p }}
+              {{ p === 'todos' ? ('common.all' | translate) : p }}
             </button>
           </div>
         </div>
 
         <!-- Filtro Activo -->
         <div class="col-auto">
-          <span class="text-muted small me-1">Estado</span>
+          <span class="text-muted small me-1">{{ 'admin_users.status_filter' | translate }}</span>
           <div class="btn-group btn-group-sm" role="group">
             <button *ngFor="let a of estadosActivo" type="button"
                     class="btn"
@@ -95,7 +93,7 @@
                     [class.btn-primary]="filtroActivo() === a && a === 'todos'"
                     [class.btn-outline-secondary]="filtroActivo() !== a"
                     (click)="filtroActivo.set(a)">
-              {{ a === 'todos' ? 'Todos' : a === 'activo' ? 'Activo' : 'Inactivo' }}
+              {{ a === 'todos' ? ('common.all' | translate) : a === 'activo' ? ('common.active' | translate) : ('common.inactive' | translate) }}
             </button>
           </div>
         </div>
@@ -104,7 +102,7 @@
         <div class="col-auto ms-auto">
           <button *ngIf="hayFiltros()" class="btn btn-sm btn-link text-muted p-0"
                   (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
           </button>
         </div>
 
@@ -118,13 +116,13 @@
           <thead class="table-dark">
             <tr>
               <th style="width:48px"></th>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Proveedor</th>
-              <th class="text-center">Activo</th>
+              <th>{{ 'admin_users.col_name' | translate }}</th>
+              <th>{{ 'admin_users.col_lastname' | translate }}</th>
+              <th>{{ 'admin_users.col_phone' | translate }}</th>
+              <th>{{ 'admin_users.col_email' | translate }}</th>
+              <th>{{ 'admin_users.col_role' | translate }}</th>
+              <th>{{ 'admin_users.col_provider' | translate }}</th>
+              <th class="text-center">{{ 'admin_users.col_active' | translate }}</th>
               <th style="width:56px"></th>
             </tr>
           </thead>
@@ -136,7 +134,15 @@
                 <ng-container *ngIf="u.avatar_url; else initiales">
                   <img [src]="u.avatar_url" alt="avatar"
                        class="avatar-img rounded-circle"
-                       width="36" height="36">
+                       width="36" height="36"
+                       referrerpolicy="no-referrer"
+                       (error)="$any($event.target).style.display='none';
+                                $any($event.target).nextElementSibling.style.display='flex'">
+                  <div class="avatar-fallback rounded-circle d-flex align-items-center
+                              justify-content-center fw-semibold"
+                       style="width:36px;height:36px;font-size:13px;display:none;">
+                    {{ avatarFallback(u) }}
+                  </div>
                 </ng-container>
                 <ng-template #initiales>
                   <div class="avatar-fallback rounded-circle d-flex align-items-center
@@ -155,7 +161,7 @@
               <!-- Rol -->
               <td>
                 <span class="badge rounded-pill" [class]="rolClass(u.rol)">
-                  {{ u.rol }}
+                  {{ ('role.' + u.rol) | translate }}
                 </span>
               </td>
 
@@ -177,7 +183,7 @@
               <!-- Acciones -->
               <td class="text-center">
                 <a [routerLink]="['/admin/user/edit', u.id]"
-                   class="btn btn-sm btn-outline-secondary" title="Editar usuario">
+                   class="btn btn-sm btn-outline-secondary" [title]="'admin_users.edit_user' | translate">
                   <i class="bi bi-pencil-square"></i>
                 </a>
               </td>
@@ -189,10 +195,10 @@
               <td colspan="9" class="text-center text-muted py-4">
                 <ng-container *ngIf="hayFiltros(); else sinDatos">
                   <i class="bi bi-funnel me-1"></i>
-                  Ningún usuario coincide con los filtros aplicados.
+                  {{ 'admin_users.no_results' | translate }}
                 </ng-container>
                 <ng-template #sinDatos>
-                  No hay usuarios registrados.
+                  {{ 'admin_users.no_data' | translate }}
                 </ng-template>
               </td>
             </tr>

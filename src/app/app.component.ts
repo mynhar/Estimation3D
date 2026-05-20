@@ -6,15 +6,18 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 import { ExpedienteService } from './services/expediente.service';
 import { ToastComponent } from './components/toast/toast.component';
+import { LangToggleComponent } from './components/lang-toggle/lang-toggle.component';
+import { AppFooterComponent } from './components/app-footer/app-footer.component';
 import { RolUsuario } from './types/supabase';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe, LangToggleComponent, AppFooterComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -36,13 +39,7 @@ export class AppComponent {
   esConstructor   = computed(() => !this.cargandoPerfil() && this.rolPerfil() === 'constructor');
   esAdministrador = computed(() => !this.cargandoPerfil() && this.rolPerfil() === 'administrador');
 
-  rolLabel = computed(() => {
-    const r = this.rolPerfil();
-    if (r === 'administrador') return 'Administrador';
-    if (r === 'constructor')   return 'Constructor';
-    if (r === 'estimador')     return 'Estimador';
-    return 'Cliente';
-  });
+  rolLabel = computed(() => 'role.' + (this.rolPerfil() ?? 'cliente'));
 
   // ── Sidebar state ─────────────────────────────────────────────────────────
   collapsed  = signal(localStorage.getItem('sidebar-collapsed') === 'true');

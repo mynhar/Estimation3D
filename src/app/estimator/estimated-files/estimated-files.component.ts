@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
@@ -9,13 +10,12 @@ import {
   ExpedienteRow,
   ESTADOS_ESTIMADO,
   ESTADO_BADGE_ESTIMADOR,
-  ESTADO_LABEL_ESTIMADOR,
 } from '../../models';
 
 @Component({
   selector: 'app-estimated-files',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './estimated-files.component.html',
   styleUrl:    './estimated-files.component.css',
 })
@@ -35,12 +35,12 @@ export class EstimatedFilesComponent implements OnInit {
   eliminando     = signal(false);
   errorEliminar  = signal('');
 
-  readonly estadoChips: { value: string; label: string }[] = [
-    { value: 'estimado',   label: 'Estimado'   },
-    { value: 'en_oferta',  label: 'En oferta'  },
-    { value: 'adjudicado', label: 'Adjudicado' },
-    { value: 'contratado', label: 'Contratado' },
-    { value: 'cancelado',  label: 'Cancelado'  },
+  readonly estadoChips: { value: string }[] = [
+    { value: 'estimado'   },
+    { value: 'en_oferta'  },
+    { value: 'adjudicado' },
+    { value: 'contratado' },
+    { value: 'cancelado'  },
   ];
 
   expedientesFiltrados = computed(() => {
@@ -85,7 +85,7 @@ export class EstimatedFilesComponent implements OnInit {
   }
 
   estadoLabel(estado: string | undefined): string {
-    return ESTADO_LABEL_ESTIMADOR[estado ?? ''] ?? estado ?? '—';
+    return 'state.' + (estado ?? '');
   }
 
   limpiarFiltros() {

@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { DbPerfil, RolUsuario, ProveedorAuth } from '../../../types/supabase';
 
@@ -9,7 +10,7 @@ type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 @Component({
   selector: 'app-admin-user-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -53,6 +54,8 @@ export class AdminUserListComponent implements OnInit {
 
   get totalUsuarios(): number { return this._usuarios().length; }
 
+  private translate = inject(TranslateService);
+
   constructor(private auth: AuthSupabaseService) {}
 
   async ngOnInit(): Promise<void> {
@@ -65,7 +68,7 @@ export class AdminUserListComponent implements OnInit {
       if (error) throw error;
       this._usuarios.set(data ?? []);
     } catch (e: any) {
-      this.error = e.message ?? 'Error al cargar usuarios';
+      this.error = e.message ?? this.translate.instant('admin_users.err_load_list');
     } finally {
       this.cargando = false;
     }

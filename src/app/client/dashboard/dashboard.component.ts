@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
@@ -8,8 +10,6 @@ import { ExpedienteCliente } from '../../models';
 
 export interface EstadoConfig {
   key:         string;
-  label:       string;
-  desc:        string;
   color:       string;
   textColor:   string;
   progressPct: number;
@@ -17,12 +17,12 @@ export interface EstadoConfig {
 }
 
 export const ESTADOS: EstadoConfig[] = [
-  { key: 'nuevo',         label: 'Nuevo',         color: '#adb5bd', textColor: '#fff', progressPct: 10,  icon: 'bi-inbox',           desc: 'En espera de asignación de estimador'          },
-  { key: 'en_estimacion', label: 'En estimación', color: '#0dcaf0', textColor: '#000', progressPct: 30,  icon: 'bi-pencil-square',   desc: 'Un estimador está evaluando su proyecto'       },
-  { key: 'estimado',      label: 'Estimado',      color: '#0d6efd', textColor: '#fff', progressPct: 55,  icon: 'bi-clipboard-check', desc: 'Estimación lista, esperando ofertas de constructores' },
-  { key: 'en_oferta',     label: 'En oferta',     color: '#ffc107', textColor: '#000', progressPct: 70,  icon: 'bi-cash-coin',       desc: '¡Hay ofertas de constructores para revisar!'   },
-  { key: 'adjudicado',    label: 'Adjudicado',    color: '#fd7e14', textColor: '#fff', progressPct: 85,  icon: 'bi-award',           desc: 'Oferta seleccionada, preparando contrato final' },
-  { key: 'contratado',    label: 'Contratado',    color: '#198754', textColor: '#fff', progressPct: 100, icon: 'bi-check2-circle',   desc: '¡Proyecto contratado y en marcha!'             },
+  { key: 'nuevo',         color: '#adb5bd', textColor: '#fff', progressPct: 10,  icon: 'bi-inbox'           },
+  { key: 'en_estimacion', color: '#0dcaf0', textColor: '#000', progressPct: 30,  icon: 'bi-pencil-square'   },
+  { key: 'estimado',      color: '#0d6efd', textColor: '#fff', progressPct: 55,  icon: 'bi-clipboard-check' },
+  { key: 'en_oferta',     color: '#ffc107', textColor: '#000', progressPct: 70,  icon: 'bi-cash-coin'       },
+  { key: 'adjudicado',    color: '#fd7e14', textColor: '#fff', progressPct: 85,  icon: 'bi-award'           },
+  { key: 'contratado',    color: '#198754', textColor: '#fff', progressPct: 100, icon: 'bi-check2-circle'   },
 ];
 
 const R             = 54;
@@ -31,15 +31,21 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, NgbTooltipModule],
+  imports: [RouterLink, NgbTooltipModule, TranslatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
+  private translate         = inject(TranslateService);
 
   user        = toSignal(this.auth.user$);
+
+  private currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.currentLang || 'fr' },
+  );
   expedientes = signal<ExpedienteCliente[]>([]);
   cargando    = signal(true);
 
@@ -63,12 +69,12 @@ export class DashboardComponent implements OnInit {
     const total = this.total();
     if (total === 0) return [];
     let offset = 0;
-    const segs: { label: string; count: number; color: string; dasharray: string; dashoffset: number }[] = [];
+    const segs: { key: string; count: number; color: string; dasharray: string; dashoffset: number }[] = [];
     for (const cfg of ESTADOS) {
       const count = this.expedientes().filter(e => e.estado === cfg.key).length;
       if (count === 0) continue;
       const portion = (count / total) * CIRCUMFERENCE;
-      segs.push({ label: cfg.label, count, color: cfg.color,
+      segs.push({ key: cfg.key, count, color: cfg.color,
         dasharray:  `${portion} ${CIRCUMFERENCE}`,
         dashoffset: -offset });
       offset += portion;
@@ -87,6 +93,14 @@ export class DashboardComponent implements OnInit {
   readonly CIRCUMFERENCE = CIRCUMFERENCE;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  servicioNombre(s: ExpedienteCliente['servicio']): string {
+    if (!s) return '';
+    const lang = this.currentLang();
+    if (lang === 'en') return s.nombre_en || s.nombre_fr || s.nombre_es || '';
+    if (lang === 'es') return s.nombre_es || s.nombre_fr || '';
+    return s.nombre_fr || s.nombre_es || '';
+  }
 
   cfg(estado: string): EstadoConfig {
     return ESTADOS.find(e => e.key === estado) ?? ESTADOS[0];

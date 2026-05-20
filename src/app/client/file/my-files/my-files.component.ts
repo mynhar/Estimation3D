@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteCliente } from '../../../models';
@@ -18,7 +20,7 @@ type Filtro = 'todos' | 'activos' | 'finalizados';
 @Component({
   selector: 'app-my-files',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './my-files.component.html',
   styleUrl: './my-files.component.css',
 })
@@ -26,8 +28,14 @@ export class MyFilesComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
   private router            = inject(Router);
+  private translate         = inject(TranslateService);
 
   user        = toSignal(this.auth.user$);
+
+  private currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.currentLang || 'fr' },
+  );
   expedientes = signal<ExpedienteCliente[]>([]);
   cargando    = signal(true);
 
@@ -50,11 +58,11 @@ export class MyFilesComponent implements OnInit {
 
   // ── Pipeline milestones ────────────────────────────────────────────────────
   readonly PIPELINE = [
-    { label: 'Recibido'  },
-    { label: 'Revisión'  },
-    { label: 'Ofertas'   },
-    { label: 'Elegido'   },
-    { label: 'Firmado'   },
+    { label: 'pipeline.received' },
+    { label: 'pipeline.review'   },
+    { label: 'pipeline.offers'   },
+    { label: 'pipeline.chosen'   },
+    { label: 'pipeline.signed'   },
   ];
 
   // ── State config ───────────────────────────────────────────────────────────
@@ -118,6 +126,14 @@ export class MyFilesComponent implements OnInit {
   connectorBlue(estado: string, connectorIdx: number): boolean {
     if (estado === 'cancelado') return false;
     return (this.ESTADO_CFG[estado]?.pipelineIdx ?? 0) >= connectorIdx;
+  }
+
+  servicioNombre(s: ExpedienteCliente['servicio']): string {
+    if (!s) return '—';
+    const lang = this.currentLang();
+    if (lang === 'en') return s.nombre_en || s.nombre_fr || s.nombre_es || '—';
+    if (lang === 'es') return s.nombre_es || s.nombre_fr || '—';
+    return s.nombre_fr || s.nombre_es || '—';
   }
 
   formatFecha(valor: string): string {
