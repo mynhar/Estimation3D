@@ -108,12 +108,15 @@ export class ContratoService {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, url_pdf,
+        id, precio_final, garantia_anos, estado, generado_en, url_pdf, descripcion_trabajo,
         expediente:expediente_id (
           numero,
-          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr )
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
+          localizacion ( direccion, provincia, canton, distrito )
         ),
-        constructor:constructor_id ( nombre, apellido )
+        constructor:constructor_id ( nombre, apellido, telefono, email ),
+        cliente:cliente_id ( nombre, apellido ),
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
       `)
       .eq('cliente_id', clienteId)
       .order('generado_en', { ascending: false });
@@ -122,16 +125,34 @@ export class ContratoService {
 
     return (data ?? []).map((c: any) => {
       const svc = c.expediente?.servicio;
+      const locArr = c.expediente?.localizacion;
+      const loc = Array.isArray(locArr) ? locArr[0] : locArr;
       const con = c.constructor;
+      const cli = c.cliente;
+      const ofe = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
       return {
         id:                 c.id,
-        expediente_numero:  c.expediente?.numero          ?? '—',
-        servicio_nombre:    svc?.nombre_es                ?? '—',
+        expediente_numero:  c.expediente?.numero             ?? '—',
+        servicio_nombre:    svc?.nombre_es                   ?? '—',
         servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
         servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
-        constructor_nombre: con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
-        precio_final:       c.precio_final,
-        garantia_anos:      c.garantia_anos ?? null,
+        servicio_desc:      svc?.descripcion_es              ?? '',
+        servicio_desc_en:   svc?.descripcion_en              ?? '',
+        servicio_desc_fr:   svc?.descripcion_fr              ?? '',
+        constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
+        constructor_telefono: con?.telefono ?? '—',
+        constructor_email:    con?.email    ?? '—',
+        cliente_nombre:       cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+        direccion:  loc?.direccion  ?? '—',
+        provincia:  loc?.provincia  ?? '—',
+        canton:     loc?.canton     ?? '—',
+        distrito:   loc?.distrito   ?? null,
+        precio_final:      c.precio_final,
+        garantia_anos:     c.garantia_anos        ?? null,
+        plazo_semanas_min: ofe?.plazo_semanas_min ?? null,
+        plazo_semanas_max: ofe?.plazo_semanas_max ?? null,
+        fecha_inicio:      ofe?.fecha_inicio      ?? '',
+        descripcion_trabajo: c.descripcion_trabajo ?? '',
         estado:             c.estado,
         generado_en:        c.generado_en ?? '',
         url_pdf:            c.url_pdf     ?? null,
@@ -159,6 +180,15 @@ export class ContratoService {
       .from('contrato')
       .delete()
       .eq('id', contratoId);
+    if (error) throw new Error(error.message);
+  }
+
+  async eliminarPdfStorage(pdfPath: string): Promise<void> {
+    await this.db.storage.from('contratos').remove([pdfPath]);
+  }
+
+  async cancelarContrato(expedienteId: string): Promise<void> {
+    const { error } = await (this.db.rpc as any)('cancelar_contrato', { p_expediente_id: expedienteId });
     if (error) throw new Error(error.message);
   }
 

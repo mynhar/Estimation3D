@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
+import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
@@ -125,12 +126,22 @@ export class MakeOfferComponent implements OnInit {
   }
 
   onDocumento(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0] ?? null;
+    input.value = '';
+    if (!file) { this.documentoOferta.set(null); return; }
+    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
+    if (err) { this.errorEnvio.set(err); return; }
     this.documentoOferta.set(file);
   }
 
   onVideo(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0] ?? null;
+    input.value = '';
+    if (!file) { this.videoOferta.set(null); return; }
+    const err = validateFile(file, FILE_LIMITS.VIDEO.maxBytes, FILE_LIMITS.VIDEO.types);
+    if (err) { this.errorEnvio.set(err); return; }
     this.videoOferta.set(file);
   }
 

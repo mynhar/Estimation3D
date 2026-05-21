@@ -372,7 +372,13 @@
     "change_btn": "Changer la sélection",
     "accept_btn": "Accepter cette offre",
     "replace_warning": "Cela remplacera l'offre actuellement acceptée.",
-    "success_accepted": "Offre acceptée. Le dossier a été adjugé."
+    "success_accepted": "Offre acceptée. Le dossier a été adjugé.",
+    "cancel_contract": "Annuler le contrat",
+    "cancel_confirm_title": "Annuler le contrat ?",
+    "cancel_confirm_text": "Le contrat généré sera supprimé et toutes les offres reviendront à l’état en attente.",
+    "cancel_confirm_btn": "Oui, annuler",
+    "cancelling": "Annulation…",
+    "success_cancelled": "Contrat annulé. Le dossier est à nouveau ouvert aux offres."
   },
   "make_offer": {
     "editing_badge": "Modification de l'offre",
@@ -858,5 +864,21 @@
     "rights_en": "All rights reserved",
     "rights_es": "Todos los derechos reservados",
     "country": "Canada"
+  },
+  "pagination": {
+    "of": "sur",
+    "prev": "Page précédente",
+    "next": "Page suivante"
+  },
+  "validation": {
+    "password_hint": "Min. 8 car., majuscule, chiffre et symbole",
+    "pw_min": "Au moins 8 caractères.",
+    "pw_upper": "Au moins une lettre majuscule.",
+    "pw_lower": "Au moins une lettre minuscule.",
+    "pw_digit": "Au moins un chiffre.",
+    "pw_special": "Au moins un caractère spécial (ex. @, #, !).",
+    "file_size": "Le fichier dépasse la taille maximale autorisée.",
+    "file_type": "Type de fichier non autorisé.",
+    "avatar_type": "Seules les images JPG, PNG ou WebP sont autorisées."
   }
 }

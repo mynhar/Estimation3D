@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,11 +11,12 @@ import {
   ESTADOS_ESTIMADO,
   ESTADO_BADGE_ESTIMADOR,
 } from '../../models';
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-estimated-files',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, PaginationComponent],
   templateUrl: './estimated-files.component.html',
   styleUrl:    './estimated-files.component.css',
 })
@@ -60,7 +61,24 @@ export class EstimatedFilesComponent implements OnInit {
     });
   });
 
+  // ── Paginación ─────────────────────────────────────────────────────────────
+  readonly POR_PAGINA = 9;
+  paginaActual = signal(1);
+
+  expedientesPaginados = computed(() => {
+    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
+    return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
+  });
+
   hayFiltros = computed(() => this.busqueda() !== '' || this.filtroEstado() !== null);
+
+  constructor() {
+    effect(() => {
+      this.busqueda();
+      this.filtroEstado();
+      this.paginaActual.set(1);
+    }, { allowSignalWrites: true });
+  }
 
   contarEstado(estado: string): number {
     return this.expedientes().filter(e => e.estado === estado).length;

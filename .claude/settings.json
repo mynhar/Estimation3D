@@ -43,7 +43,13 @@
       "Bash(node -e \"const fs=require\\('fs'\\); ['es','en','fr'].forEach\\(l => { try { JSON.parse\\(fs.readFileSync\\('src/assets/i18n/'+l+'.json','utf8'\\)\\); console.log\\(l+': OK'\\); } catch\\(e\\) { console.error\\(l+': ERROR '+e.message\\); } }\\)\")",
       "Bash(findstr /i \"jspdf\\\\|pdfmake\\\\|pdf\\\\|html2canvas\")",
       "mcp__claude_ai_Supabase__apply_migration",
-      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -Filter \"*.component.ts\")"
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -Filter \"*.component.ts\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\desarrollo\\\\estimation3d-A18-v01\" -Force)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\" -Recurse -Include \"*list*\", \"*index*\")",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Directory | ForEach-Object { Write-Host \"$\\($_.Name\\):\" ; Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\" -Recurse -File | Where-Object { $_.Extension -match '\\\\.\\(ts|html\\)$' })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\client\" -Recurse -Directory | Where-Object { $_.Name -match 'contract|contrato' } | Select-Object FullName)",
+      "Bash(python -c ' *)"
     ]
   }
 }

@@ -372,7 +372,13 @@
     "change_btn": "Change selection",
     "accept_btn": "Accept this offer",
     "replace_warning": "This will replace the currently accepted offer.",
-    "success_accepted": "Offer accepted. The file has been awarded."
+    "success_accepted": "Offer accepted. The file has been awarded.",
+    "cancel_contract": "Cancel contract",
+    "cancel_confirm_title": "Cancel the contract?",
+    "cancel_confirm_text": "The generated contract will be deleted and all offers will return to pending status.",
+    "cancel_confirm_btn": "Yes, cancel",
+    "cancelling": "Cancelling…",
+    "success_cancelled": "Contract cancelled. The file is open for offers again."
   },
   "make_offer": {
     "editing_badge": "Editing offer",
@@ -858,5 +864,21 @@
     "rights_en": "All rights reserved",
     "rights_es": "Todos los derechos reservados",
     "country": "Canada"
+  },
+  "pagination": {
+    "of": "of",
+    "prev": "Previous page",
+    "next": "Next page"
+  },
+  "validation": {
+    "password_hint": "Min. 8 chars, uppercase, number and symbol",
+    "pw_min": "At least 8 characters.",
+    "pw_upper": "At least one uppercase letter.",
+    "pw_lower": "At least one lowercase letter.",
+    "pw_digit": "At least one number.",
+    "pw_special": "At least one special character (e.g. @, #, !).",
+    "file_size": "The file exceeds the maximum allowed size.",
+    "file_type": "File type not allowed.",
+    "avatar_type": "Only JPG, PNG or WebP images are allowed."
   }
 }

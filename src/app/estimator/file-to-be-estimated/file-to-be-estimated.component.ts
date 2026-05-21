@@ -9,6 +9,7 @@ import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
 import { ExpedienteDetalle, ArchivoRow } from '../../models';
+import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 
 @Component({
   selector: 'app-file-to-be-estimated',
@@ -215,8 +216,12 @@ export class FileToBeEstimatedComponent implements OnInit {
     if (!files.length) return;
     const userId = this.user()?.id;
     if (!userId) return;
-    this.subiendoFoto.set(true);
     this.errorFotos.set('');
+    for (const file of files) {
+      const err = validateFile(file, FILE_LIMITS.FOTO.maxBytes, FILE_LIMITS.FOTO.types);
+      if (err) { this.errorFotos.set(err); return; }
+    }
+    this.subiendoFoto.set(true);
     try {
       for (const file of files) await this.archivoService.subir(this.expedienteId, 'foto', file, userId);
       await this.recargar('foto');
@@ -231,8 +236,10 @@ export class FileToBeEstimatedComponent implements OnInit {
     if (!file) return;
     const userId = this.user()?.id;
     if (!userId) return;
-    this.subiendoDocumento.set(true);
     this.errorDocumentos.set('');
+    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
+    if (err) { this.errorDocumentos.set(err); return; }
+    this.subiendoDocumento.set(true);
     try {
       await this.archivoService.subir(this.expedienteId, 'documento', file, userId);
       await this.recargar('documento');

@@ -127,7 +127,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of usuariosFiltrados()">
+            <tr *ngFor="let u of usuariosPaginados()">
 
               <!-- Avatar -->
               <td>
@@ -204,6 +204,14 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
+        <app-pagination
+          [total]="usuariosFiltrados().length"
+          [page]="paginaActual()"
+          [pageSize]="POR_PAGINA"
+          (pageChange)="paginaActual.set($event)">
+        </app-pagination>
       </div>
     </div>
 

@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
+import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 
 interface PerfilRow {
   nombre:    string;
@@ -102,8 +103,9 @@ export class PerfilComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      this.errorMsg.set('profile.avatar_size_error');
+    const fileErr = validateFile(file, FILE_LIMITS.AVATAR.maxBytes, FILE_LIMITS.AVATAR.types);
+    if (fileErr) {
+      this.errorMsg.set(fileErr === 'validation.file_type' ? 'validation.avatar_type' : 'profile.avatar_size_error');
       return;
     }
 

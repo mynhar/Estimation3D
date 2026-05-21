@@ -47,10 +47,12 @@ export class BuilderOfferComponent implements OnInit {
   documentosExp = signal<ArchivoRow[]>([]);
 
   // ── Estado UI ─────────────────────────────────────────────────────────────
-  cargando  = signal(true);
-  errorMsg  = signal('');
-  exitoMsg  = signal('');
-  aceptando = signal(false);
+  cargando                = signal(true);
+  errorMsg                = signal('');
+  exitoMsg                = signal('');
+  aceptando               = signal(false);
+  cancelando              = signal(false);
+  confirmandoCancelacion  = signal(false);
 
   // ── Selección de oferta ───────────────────────────────────────────────────
   ofertaSeleccionadaId = signal<string | null>(null);
@@ -65,8 +67,20 @@ export class BuilderOfferComponent implements OnInit {
   videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
 
   // ── Computed ──────────────────────────────────────────────────────────────
-  yaAdjudicado       = computed(() => this.expediente()?.estado === 'adjudicado');
-  puedeAceptar       = computed(() => this.ofertaSeleccionadaId() !== null && !this.aceptando());
+  yaContratado = computed(() => {
+    const estado = this.expediente()?.estado;
+    return estado === 'adjudicado' || estado === 'contratado';
+  });
+
+  puedeAceptar = computed(() => {
+    if (!this.ofertaSeleccionadaId() || this.aceptando()) return false;
+    if (this.yaContratado()) {
+      // En modo "cambiar selección" solo se puede seleccionar una oferta diferente
+      return this.ofertaSeleccionada()?.estado !== 'aceptada';
+    }
+    return true;
+  });
+
   ofertaSeleccionada = computed(() => {
     const id = this.ofertaSeleccionadaId();
     return id ? (this.ofertas().find(o => o.id === id) ?? null) : null;
@@ -182,12 +196,15 @@ export class BuilderOfferComponent implements OnInit {
         lang,
       });
 
-      // 5 — Subir PDF y guardar ruta
+      // 5 — Subir PDF, guardar ruta y marcar expediente como contratado
       const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoId);
-      await this.contratoService.actualizarUrlPdf(contratoId, urlPdf);
+      await Promise.all([
+        this.contratoService.actualizarUrlPdf(contratoId, urlPdf),
+        this.expedienteService.marcarContratado(this.expedienteId),
+      ]);
 
       // 6 — Actualizar estado local sin recargar
-      this.expediente.update(e => e ? { ...e, estado: 'adjudicado' } : e);
+      this.expediente.update(e => e ? { ...e, estado: 'contratado' } : e);
       this.ofertas.update(list =>
         list.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }))
       );
@@ -198,6 +215,39 @@ export class BuilderOfferComponent implements OnInit {
       this.errorMsg.set(e.message);
     } finally {
       this.aceptando.set(false);
+    }
+  }
+
+  // ── Cancelación de contrato ───────────────────────────────────────────────
+
+  async cancelarContrato() {
+    this.cancelando.set(true);
+    this.errorMsg.set('');
+    this.exitoMsg.set('');
+
+    try {
+      // 1 — Obtener ruta del PDF antes de borrarlo del storage
+      const contrato = await this.contratoService.buscarPorExpediente(this.expedienteId);
+
+      // 2 — Cancelar en BD: elimina contrato, resetea ofertas, expediente → en_oferta
+      await this.contratoService.cancelarContrato(this.expedienteId);
+
+      // 3 — Eliminar PDF del storage (best-effort: fallo no es crítico)
+      if (contrato?.url_pdf) {
+        await this.contratoService.eliminarPdfStorage(contrato.url_pdf).catch(() => {});
+      }
+
+      // 4 — Actualizar estado local sin recargar
+      this.expediente.update(e => e ? { ...e, estado: 'en_oferta' } : e);
+      this.ofertas.update(list => list.map(o => ({ ...o, estado: 'pendiente' })));
+      this.ofertaSeleccionadaId.set(null);
+      this.confirmandoCancelacion.set(false);
+      this.exitoMsg.set('builder_offer.success_cancelled');
+    } catch (e: any) {
+      console.error('[BuilderOffer] cancelarContrato:', e.message);
+      this.errorMsg.set(e.message);
+    } finally {
+      this.cancelando.set(false);
     }
   }
 

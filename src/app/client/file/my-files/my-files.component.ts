@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteCliente } from '../../../models';
+import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
 interface EstadoCfg {
   texto: string;
@@ -20,7 +21,7 @@ type Filtro = 'todos' | 'activos' | 'finalizados';
 @Component({
   selector: 'app-my-files',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './my-files.component.html',
   styleUrl: './my-files.component.css',
 })
@@ -50,6 +51,22 @@ export class MyFilesComponent implements OnInit {
       default:            return todos;
     }
   });
+
+  // ── Paginación ─────────────────────────────────────────────────────────────
+  readonly POR_PAGINA = 9;
+  paginaActual = signal(1);
+
+  expedientesPaginados = computed(() => {
+    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
+    return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
+  });
+
+  constructor() {
+    effect(() => {
+      this.filtro();
+      this.paginaActual.set(1);
+    }, { allowSignalWrites: true });
+  }
 
   // ── Counts ─────────────────────────────────────────────────────────────────
   countTodos      = computed(() => this.expedientes().length);

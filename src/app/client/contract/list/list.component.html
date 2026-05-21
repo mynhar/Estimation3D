@@ -55,14 +55,14 @@
             </div>
             <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2"
                     type="button"
-                    [disabled]="!c.url_pdf || descargando() === c.id"
+                    [disabled]="descargando() === c.id"
                     (click)="descargarPdf(c)">
               @if (descargando() === c.id) {
                 <span class="spinner-border spinner-border-sm"></span>
               } @else {
                 <i class="bi bi-file-earmark-pdf"></i>
               }
-              {{ c.url_pdf ? ('contract_list.download_pdf' | translate) : ('contract_list.no_pdf' | translate) }}
+              {{ 'contract_list.download_pdf' | translate }}
             </button>
           </div>
 

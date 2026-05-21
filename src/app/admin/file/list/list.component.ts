@@ -1,13 +1,14 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteAdmin } from '../../../models';
+import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-admin-file-list',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -27,6 +28,10 @@ export class AdminFileListComponent implements OnInit {
     'en_oferta', 'adjudicado', 'contratado', 'cancelado',
   ];
 
+  // ── Paginación ─────────────────────────────────────────────────────────────
+  readonly POR_PAGINA = 15;
+  paginaActual = signal(1);
+
   expedientesFiltrados = computed(() => {
     const q      = this.busqueda().toLowerCase().trim();
     const estado = this.filtroEstado();
@@ -39,11 +44,24 @@ export class AdminFileListComponent implements OnInit {
     });
   });
 
+  expedientesPaginados = computed(() => {
+    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
+    return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
+  });
+
   hayFiltros = computed(() =>
     this.busqueda() !== '' || this.filtroEstado() !== 'todos'
   );
 
   get total(): number { return this._expedientes().length; }
+
+  constructor() {
+    effect(() => {
+      this.busqueda();
+      this.filtroEstado();
+      this.paginaActual.set(1);
+    }, { allowSignalWrites: true });
+  }
 
   async ngOnInit() {
     try {

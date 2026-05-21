@@ -1,4 +1,5 @@
 export interface ContratoListItem {
+  // ── campos visuales ───────────────────────────────────────────────────────
   id:                 string;
   expediente_numero:  string;
   servicio_nombre:    string;
@@ -10,6 +11,22 @@ export interface ContratoListItem {
   estado:             string;
   generado_en:        string;
   url_pdf:            string | null;
+
+  // ── datos para regenerar el PDF en cualquier idioma ───────────────────────
+  cliente_nombre:       string;
+  constructor_telefono: string;
+  constructor_email:    string;
+  servicio_desc:        string;
+  servicio_desc_en:     string;
+  servicio_desc_fr:     string;
+  direccion:            string;
+  provincia:            string;
+  canton:               string;
+  distrito:             string | null;
+  plazo_semanas_min:    number | null;
+  plazo_semanas_max:    number | null;
+  fecha_inicio:         string | null;
+  descripcion_trabajo:  string;
 }
 
 export interface ContratoInput {

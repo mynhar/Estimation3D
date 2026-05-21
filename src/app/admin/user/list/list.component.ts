@@ -1,16 +1,17 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { DbPerfil, RolUsuario, ProveedorAuth } from '../../../types/supabase';
+import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 
 @Component({
   selector: 'app-admin-user-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -29,6 +30,10 @@ export class AdminUserListComponent implements OnInit {
   readonly proveedores: Array<ProveedorAuth | 'todos'> = ['todos', 'email', 'google'];
   readonly estadosActivo: FiltroActivo[]             = ['todos', 'activo', 'inactivo'];
 
+  // ── Paginación ─────────────────────────────────────────────────────────────
+  readonly POR_PAGINA = 15;
+  paginaActual = signal(1);
+
   usuariosFiltrados = computed(() => {
     const q          = this.busqueda().toLowerCase().trim();
     const rol        = this.filtroRol();
@@ -45,6 +50,11 @@ export class AdminUserListComponent implements OnInit {
     });
   });
 
+  usuariosPaginados = computed(() => {
+    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
+    return this.usuariosFiltrados().slice(desde, desde + this.POR_PAGINA);
+  });
+
   hayFiltros = computed(() =>
     this.busqueda() !== '' ||
     this.filtroRol()       !== 'todos' ||
@@ -56,7 +66,15 @@ export class AdminUserListComponent implements OnInit {
 
   private translate = inject(TranslateService);
 
-  constructor(private auth: AuthSupabaseService) {}
+  constructor(private auth: AuthSupabaseService) {
+    effect(() => {
+      this.busqueda();
+      this.filtroRol();
+      this.filtroProveedor();
+      this.filtroActivo();
+      this.paginaActual.set(1);
+    }, { allowSignalWrites: true });
+  }
 
   async ngOnInit(): Promise<void> {
     try {

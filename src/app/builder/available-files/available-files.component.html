@@ -145,7 +145,7 @@
     <!-- ── Cuadrícula de tarjetas ─────────────────────────────────────────── -->
     } @else {
       <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
-        @for (exp of expedientesFiltrados(); track exp.id) {
+        @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
             <div class="file-card h-100"
                  [class.file-card--offered]="tieneOferta(exp.id)"
@@ -213,6 +213,13 @@
           </div>
         }
       </div>
+
+      <app-pagination
+        [total]="expedientesFiltrados().length"
+        [page]="paginaActual()"
+        [pageSize]="POR_PAGINA"
+        (pageChange)="paginaActual.set($event)">
+      </app-pagination>
 
       <div class="competition-legend mt-4">
         <span class="competition-legend__title">{{ 'available_files.legend_title' | translate }}</span>

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
+import { passwordComplexityValidator } from '../shared/validators/password.validator';
 
 @Component({
   selector: 'app-login',
@@ -112,9 +113,15 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
                     <div class="mb-3">
                       <label class="form-label">{{ 'common.password' | translate }} <span class="text-danger">*</span></label>
                       <input type="password" class="form-control" formControlName="password"
-                        [placeholder]="'admin_users.min_chars_hint' | translate" autocomplete="new-password" />
+                        [placeholder]="'validation.password_hint' | translate" autocomplete="new-password" />
                       @if (campoInvalido(registroForm, 'password')) {
-                        <div class="invalid-feedback d-block small">{{ 'admin_users.min_chars' | translate }}</div>
+                        <ul class="list-unstyled invalid-feedback d-block small mb-0 ps-0">
+                          @if (registroForm.get('password')?.errors?.['pwMin'])     { <li>{{ 'validation.pw_min'     | translate }}</li> }
+                          @if (registroForm.get('password')?.errors?.['pwUpper'])   { <li>{{ 'validation.pw_upper'   | translate }}</li> }
+                          @if (registroForm.get('password')?.errors?.['pwLower'])   { <li>{{ 'validation.pw_lower'   | translate }}</li> }
+                          @if (registroForm.get('password')?.errors?.['pwDigit'])   { <li>{{ 'validation.pw_digit'   | translate }}</li> }
+                          @if (registroForm.get('password')?.errors?.['pwSpecial']) { <li>{{ 'validation.pw_special' | translate }}</li> }
+                        </ul>
                       }
                     </div>
 
@@ -171,7 +178,7 @@ export class LoginComponent {
     nombre:   ['', Validators.required],
     apellido: ['', Validators.required],
     email:    ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, passwordComplexityValidator]],
     telefono: ['', Validators.required],
   });
 

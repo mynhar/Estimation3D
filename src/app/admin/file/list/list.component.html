@@ -107,7 +107,7 @@
           </thead>
           <tbody>
 
-            @for (e of expedientesFiltrados(); track e.id) {
+            @for (e of expedientesPaginados(); track e.id) {
               <tr>
                 <td><span class="exp-num">{{ e.numero }}</span></td>
                 <td class="col-servicio">{{ servicioNombre(e) }}</td>
@@ -146,6 +146,14 @@
 
           </tbody>
         </table>
+      </div>
+      <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
+        <app-pagination
+          [total]="expedientesFiltrados().length"
+          [page]="paginaActual()"
+          [pageSize]="POR_PAGINA"
+          (pageChange)="paginaActual.set($event)">
+        </app-pagination>
       </div>
     </div>
 

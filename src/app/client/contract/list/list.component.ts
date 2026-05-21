@@ -52,12 +52,58 @@ export class ContractListComponent implements OnInit {
     return map[estado] ?? 'badge-generado';
   }
 
-  async descargarPdf(c: ContratoListItem) {
-    if (!c.url_pdf || this.descargando()) return;
+  descargarPdf(c: ContratoListItem) {
+    if (this.descargando()) return;
     this.descargando.set(c.id);
     try {
-      const url = await this.contratoService.getSignedUrl(c.url_pdf, 300);
-      window.open(url, '_blank');
+      const lang = this.translate.currentLang ?? 'fr';
+      const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-CA', fr: 'fr-CA' };
+      const fechaGenerado = new Intl.DateTimeFormat(
+        localeMap[lang] ?? 'fr-CA',
+        { day: 'numeric', month: 'long', year: 'numeric' },
+      ).format(new Date(c.generado_en || Date.now()));
+
+      const svcNombre =
+        lang === 'en' ? (c.servicio_nombre_en || c.servicio_nombre)
+      : lang === 'fr' ? (c.servicio_nombre_fr || c.servicio_nombre)
+      : c.servicio_nombre;
+
+      const svcDesc =
+        lang === 'en' ? (c.servicio_desc_en || c.servicio_desc)
+      : lang === 'fr' ? (c.servicio_desc_fr || c.servicio_desc)
+      : c.servicio_desc;
+
+      const blob = this.contratoService.generarPdfBlob({
+        contratoId:          c.id,
+        expedienteNumero:    c.expediente_numero,
+        fechaGenerado,
+        clienteNombre:       c.cliente_nombre,
+        constructorNombre:   c.constructor_nombre,
+        constructorTelefono: c.constructor_telefono,
+        constructorEmail:    c.constructor_email,
+        servicioNombre:      svcNombre,
+        servicioDescripcion: svcDesc,
+        direccion:           c.direccion,
+        canton:              c.canton,
+        provincia:           c.provincia,
+        distrito:            c.distrito ?? '',
+        precioFinal:         c.precio_final,
+        plazoMin:            c.plazo_semanas_min,
+        plazoMax:            c.plazo_semanas_max,
+        garantiaAnos:        c.garantia_anos,
+        fechaInicio:         c.fecha_inicio ?? '',
+        descripcionTrabajo:  c.descripcion_trabajo,
+        lang,
+      });
+
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href     = objUrl;
+      a.download = `contrato-${c.expediente_numero}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objUrl);
     } catch (e: any) {
       console.error('[ContractList] descargarPdf:', e.message);
     } finally {

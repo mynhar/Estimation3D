@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -7,11 +7,12 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { OfertaService } from '../../services/oferta.service';
 import { ExpedienteDisponible } from '../../models';
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
 @Component({
   selector: 'app-available-files',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, PaginationComponent],
   templateUrl: './available-files.component.html',
   styleUrl: './available-files.component.css',
 })
@@ -31,6 +32,10 @@ export class AvailableFilesComponent implements OnInit {
   busqueda          = signal('');
   filtroCompetencia = signal<'todos'|'baja'|'media'|'alta'>('todos');
   filtroOferta      = signal<'todos'|'sin'|'con'>('todos');
+
+  // ── Paginación ─────────────────────────────────────────────────────────────
+  readonly POR_PAGINA = 9;
+  paginaActual = signal(1);
 
   hayFiltros = computed(() =>
     this.busqueda()          !== ''     ||
@@ -66,12 +71,26 @@ export class AvailableFilesComponent implements OnInit {
     });
   });
 
+  expedientesPaginados = computed(() => {
+    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
+    return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
+  });
+
   totalSinOferta = computed(() =>
     this.expedientes().filter(e => !this.tieneOferta(e.id)).length
   );
   totalConOferta = computed(() =>
     this.expedientes().filter(e =>  this.tieneOferta(e.id)).length
   );
+
+  constructor() {
+    effect(() => {
+      this.busqueda();
+      this.filtroCompetencia();
+      this.filtroOferta();
+      this.paginaActual.set(1);
+    }, { allowSignalWrites: true });
+  }
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
   async ngOnInit() {
