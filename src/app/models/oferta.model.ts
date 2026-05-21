@@ -3,6 +3,7 @@ import { ArchivoRow } from './archivo.model';
 /** Oferta con nombre del constructor y archivos adjuntos (vista cliente). */
 export interface OfertaConConstructor {
   id: string;
+  constructor_id: string;
   precio: number;
   plazo_semanas_min: number | null;
   plazo_semanas_max: number | null;
@@ -22,6 +23,8 @@ export interface OfertaDetalle {
   expediente_id: string;
   expediente_numero: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   direccion: string;
   referencia: string;
   provincia: string;
@@ -54,6 +57,8 @@ export interface OfertaRow {
   id: string;
   expediente_numero: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   direccion: string;
   referencia: string;
   provincia: string;

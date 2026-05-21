@@ -222,9 +222,36 @@ export class MakeOfferComponent implements OnInit {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
   }
 
-  get urlTourSafe(): SafeResourceUrl | null {
-    const url = this.detalle()?.url_tour;
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  servicioNombre(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
+  }
+
+  servicioDescripcion(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_descripcion_en || d.servicio_descripcion;
+    if (lang === 'fr') return d.servicio_descripcion_fr || d.servicio_descripcion;
+    return d.servicio_descripcion;
+  }
+
+  get urlsTour(): string[] {
+    const raw = this.detalle()?.url_tour ?? null;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string' && !!u);
+    } catch {}
+    return [raw];
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   abrirFoto(archivo: ArchivoRow) {

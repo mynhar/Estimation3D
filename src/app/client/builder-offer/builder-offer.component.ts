@@ -8,6 +8,7 @@ import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
+import { ContratoService } from '../../services/contrato.service';
 import {
   ArchivoRow,
   EstimacionDetalle,
@@ -31,6 +32,7 @@ export class BuilderOfferComponent implements OnInit {
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
   private ofertaService     = inject(OfertaService);
+  private contratoService   = inject(ContratoService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -120,16 +122,71 @@ export class BuilderOfferComponent implements OnInit {
 
   async aceptarOferta() {
     const ofertaId = this.ofertaSeleccionadaId();
-    if (!ofertaId) return;
+    const oferta   = this.ofertaSeleccionada();
+    const exp      = this.expediente();
+    const userId   = this.user()?.id;
+    if (!ofertaId || !oferta || !exp || !userId) return;
 
     this.aceptando.set(true);
     this.errorMsg.set('');
     this.exitoMsg.set('');
 
     try {
+      // 1 — Cambiar estado expediente + oferta
       await this.ofertaService.aceptarOferta(this.expedienteId, ofertaId);
 
-      // Actualizar estado local sin recargar
+      // 2 — Eliminar contrato anterior si existe
+      const contratoExistente = await this.contratoService.buscarPorExpediente(this.expedienteId);
+      if (contratoExistente) {
+        await this.contratoService.eliminarContrato(contratoExistente.id, contratoExistente.url_pdf);
+      }
+
+      // 3 — Crear nuevo registro en tabla contrato
+      const contratoId = await this.contratoService.crearContrato({
+        expediente_id:       this.expedienteId,
+        oferta_id:           ofertaId,
+        cliente_id:          userId,
+        constructor_id:      oferta.constructor_id,
+        precio_final:        oferta.precio,
+        garantia_anos:       oferta.garantia_anos,
+        descripcion_trabajo: oferta.descripcion,
+      });
+
+      // 4 — Generar PDF
+      const lang = this.translate.currentLang ?? 'fr';
+      const fechaGenerado = new Intl.DateTimeFormat(
+        lang === 'en' ? 'en-CA' : lang === 'fr' ? 'fr-CA' : 'es-CR',
+        { day: 'numeric', month: 'long', year: 'numeric' },
+      ).format(new Date());
+
+      const pdfBlob = this.contratoService.generarPdfBlob({
+        contratoId,
+        expedienteNumero:    exp.numero,
+        fechaGenerado,
+        clienteNombre:       exp.cliente_nombre,
+        constructorNombre:   oferta.constructor_nombre,
+        constructorTelefono: oferta.constructor_telefono,
+        constructorEmail:    oferta.constructor_email,
+        servicioNombre:      this.servicioNombre(),
+        servicioDescripcion: this.servicioDescripcion(),
+        direccion:           exp.direccion,
+        canton:              exp.canton,
+        provincia:           exp.provincia,
+        distrito:            exp.distrito,
+        precioFinal:         oferta.precio,
+        plazoMin:            oferta.plazo_semanas_min,
+        plazoMax:            oferta.plazo_semanas_max,
+        garantiaAnos:        oferta.garantia_anos,
+        fechaInicio:         oferta.fecha_inicio,
+        descripcionTrabajo:  oferta.descripcion,
+        lang,
+      });
+
+      // 5 — Subir PDF y guardar ruta
+      const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoId);
+      await this.contratoService.actualizarUrlPdf(contratoId, urlPdf);
+
+      // 6 — Actualizar estado local sin recargar
       this.expediente.update(e => e ? { ...e, estado: 'adjudicado' } : e);
       this.ofertas.update(list =>
         list.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }))
@@ -137,6 +194,7 @@ export class BuilderOfferComponent implements OnInit {
 
       this.exitoMsg.set('builder_offer.success_accepted');
     } catch (e: any) {
+      console.error('[BuilderOffer] aceptarOferta:', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.aceptando.set(false);
@@ -187,11 +245,40 @@ export class BuilderOfferComponent implements OnInit {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
   }
 
+  // ── Servicio i18n ─────────────────────────────────────────────────────────
+
+  servicioNombre(): string {
+    const e = this.expediente();
+    if (!e) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return e.servicio_nombre_en || e.servicio_nombre;
+    if (lang === 'fr') return e.servicio_nombre_fr || e.servicio_nombre;
+    return e.servicio_nombre;
+  }
+
+  servicioDescripcion(): string {
+    const e = this.expediente();
+    if (!e) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return e.servicio_descripcion_en || e.servicio_descripcion;
+    if (lang === 'fr') return e.servicio_descripcion_fr || e.servicio_descripcion;
+    return e.servicio_descripcion;
+  }
+
   // ── Tour virtual ──────────────────────────────────────────────────────────
 
-  get urlTourSafe(): SafeResourceUrl | null {
-    const url = this.estimacion()?.url_tour;
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  get urlsTour(): string[] {
+    const raw = this.estimacion()?.url_tour ?? null;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string' && !!u);
+    } catch {}
+    return [raw];
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   // ── Formatters ────────────────────────────────────────────────────────────

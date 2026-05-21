@@ -131,6 +131,7 @@
 }
 .exp-servicio       { font-size: 1.02rem; font-weight: 700; color: #1A1A1A; line-height: 1.3; }
 .exp-servicio--sm   { font-size: 0.92rem; }
+.exp-servicio-desc  { font-size: 0.78rem; color: #6b7280; line-height: 1.4; margin: 0; }
 .exp-meta           { font-size: 0.8rem; color: #5C5750; line-height: 1.4; }
 .exp-fecha          { font-size: 0.8rem; color: #9A938C; }
 

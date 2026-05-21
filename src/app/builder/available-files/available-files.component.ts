@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { OfertaService } from '../../services/oferta.service';
@@ -19,6 +19,7 @@ export class AvailableFilesComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
   private ofertaService     = inject(OfertaService);
+  private translate         = inject(TranslateService);
   private router            = inject(Router);
 
   user          = toSignal(this.auth.user$);
@@ -44,10 +45,12 @@ export class AvailableFilesComponent implements OnInit {
 
     return this.expedientes().filter(exp => {
       if (q && !(
-        exp.numero.toLowerCase().includes(q)          ||
-        exp.servicio_nombre.toLowerCase().includes(q) ||
-        exp.provincia.toLowerCase().includes(q)       ||
-        exp.canton.toLowerCase().includes(q)          ||
+        exp.numero.toLowerCase().includes(q)             ||
+        exp.servicio_nombre.toLowerCase().includes(q)    ||
+        exp.servicio_nombre_en.toLowerCase().includes(q) ||
+        exp.servicio_nombre_fr.toLowerCase().includes(q) ||
+        exp.provincia.toLowerCase().includes(q)          ||
+        exp.canton.toLowerCase().includes(q)             ||
         exp.direccion.toLowerCase().includes(q)
       )) return false;
 
@@ -110,6 +113,13 @@ export class AvailableFilesComponent implements OnInit {
     if (n <= 1) return 'text-bg-success';
     if (n <= 3) return 'text-bg-warning';
     return 'text-bg-danger';
+  }
+
+  servicioNombre(exp: ExpedienteDisponible): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
+    if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
+    return exp.servicio_nombre;
   }
 
   limpiarFiltros() {

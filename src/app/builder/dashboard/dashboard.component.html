@@ -186,7 +186,7 @@
                     <div class="d-flex align-items-start justify-content-between gap-2 mb-2 flex-wrap">
                       <div class="d-flex align-items-center gap-2 min-w-0">
                         <span class="oferta-num">{{ oferta.expediente_numero }}</span>
-                        <span class="oferta-servicio text-truncate">{{ oferta.servicio_nombre }}</span>
+                        <span class="oferta-servicio text-truncate">{{ servicioNombre(oferta) }}</span>
                       </div>
                       <span class="badge flex-shrink-0 oferta-badge"
                             [style.background-color]="cfg(oferta.estado).color"

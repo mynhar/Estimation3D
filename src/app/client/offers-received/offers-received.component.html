@@ -95,7 +95,10 @@
                 </div>
 
                 <!-- Servicio -->
-                <p class="exp-servicio mb-2">{{ exp.servicio_nombre }}</p>
+                <p class="exp-servicio mb-1">{{ servicioNombre(exp) }}</p>
+                @if (servicioDescripcion(exp)) {
+                  <p class="exp-servicio-desc mb-2">{{ servicioDescripcion(exp) }}</p>
+                }
 
                 <!-- Ubicación -->
                 <p class="exp-meta mb-1">
@@ -174,7 +177,10 @@
                 </div>
 
                 <!-- Servicio -->
-                <p class="exp-servicio exp-servicio--sm mb-2">{{ exp.servicio_nombre }}</p>
+                <p class="exp-servicio exp-servicio--sm mb-1">{{ servicioNombre(exp) }}</p>
+                @if (servicioDescripcion(exp)) {
+                  <p class="exp-servicio-desc mb-2">{{ servicioDescripcion(exp) }}</p>
+                }
 
                 <!-- Ubicación compacta -->
                 <p class="exp-meta mb-0">

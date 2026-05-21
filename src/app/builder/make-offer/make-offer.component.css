@@ -91,6 +91,11 @@
 }
 .media-empty { text-align: center; padding: 2.5rem 1rem; color: #9A938C; font-size: 0.85rem; }
 
+.tour-video-label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #C4A55A; margin: 0 0 0.4rem;
+}
+
 /* ── Photo thumb ─────────────────────────────────────────────────────────── */
 .photo-thumb { width: 88px; height: 88px; cursor: zoom-in; }
 .photo-thumb__img {

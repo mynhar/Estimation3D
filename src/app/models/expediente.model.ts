@@ -1,5 +1,40 @@
 import { EstadoExpediente } from '../types/supabase';
 
+/** Datos completos de un expediente para edición admin. */
+export interface ExpedienteParaEdicion {
+  id:            string;
+  numero:        string;
+  estado:        string;
+  servicio_id:   number;
+  cliente_id:    string;
+  fecha_visita:  string;
+  descripcion:   string | null;
+  tipo_inmueble: string;
+  direccion:     string;
+  provincia:     string;
+  canton:        string;
+  distrito:      string;
+  referencia:    string | null;
+  latitud:       number | null;
+  longitud:      number | null;
+}
+
+/** Vista aplanada para la lista admin de expedientes. */
+export interface ExpedienteAdmin {
+  id:                   string;
+  numero:               string;
+  estado:               string;
+  fecha_visita:         string;
+  servicio_nombre:      string;
+  servicio_nombre_en:   string;
+  servicio_nombre_fr:   string;
+  cliente_nombre:       string;
+  estimador_nombre:     string | null;
+  fecha_visita_real:    string | null;
+  oferta_precio:        number | null;
+  oferta_fecha_inicio:  string | null;
+}
+
 /** Forma aplanada usada en las listas del módulo estimador. */
 export interface ExpedienteRow {
   id: string;
@@ -37,6 +72,8 @@ export interface ExpedienteDisponible {
   numero: string;
   estado: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   direccion: string;
   provincia: string;
   canton: string;
@@ -74,7 +111,11 @@ export interface ExpedienteParaOferta {
   numero: string;
   fecha_visita: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   servicio_descripcion: string;
+  servicio_descripcion_en: string;
+  servicio_descripcion_fr: string;
   direccion: string;
   referencia: string;
   provincia: string;
@@ -96,6 +137,11 @@ export interface ExpedienteDetalleCliente {
   fecha_visita: string;
   creado_en: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
+  servicio_descripcion: string;
+  servicio_descripcion_en: string;
+  servicio_descripcion_fr: string;
   cliente_nombre: string;
   direccion: string;
   referencia: string;
@@ -110,6 +156,7 @@ export interface ExpedienteCliente {
   numero: string;
   estado: string;
   fecha_visita: string;
+  creado_en: string;
   descripcion: string;
   servicio: { nombre_fr: string; nombre_en: string; nombre_es: string } | null;
 }
@@ -137,6 +184,11 @@ export interface ExpedienteConOfertas {
   estado: string;
   fecha_visita: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
+  servicio_descripcion: string;
+  servicio_descripcion_en: string;
+  servicio_descripcion_fr: string;
   direccion: string;
   referencia: string;
   provincia: string;

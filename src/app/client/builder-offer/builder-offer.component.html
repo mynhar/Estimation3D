@@ -54,7 +54,7 @@
                 {{ ('state.' + expediente()!.estado) | translate }}
               </span>
             </div>
-            <p class="text-muted small mb-0 mt-1">{{ expediente()!.servicio_nombre }}</p>
+            <p class="text-muted small mb-0 mt-1">{{ servicioNombre() }}</p>
           </div>
         </div>
         <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -129,17 +129,29 @@
               }
 
               <!-- Tour virtual del sitio -->
-              @if (urlTourSafe) {
+              @if (urlsTour.length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">
                   <i class="bi bi-badge-3d-fill me-1"></i>{{ 'builder_offer.virtual_tour' | translate }}
                 </p>
-                <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                  <iframe [src]="urlTourSafe"
-                          allowfullscreen
-                          allow="xr-spatial-tracking"
-                          title="Tour virtual Matterport">
-                  </iframe>
+                <div class="tour-grid">
+                  @for (url of urlsTour; track $index) {
+                    <div class="tour-grid__item">
+                      @if (urlsTour.length > 1) {
+                        <p class="tour-video-label">
+                          <i class="bi bi-camera-video-fill me-1"></i>
+                          {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                        </p>
+                      }
+                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                        <iframe [src]="getSafeUrl(url)"
+                                allowfullscreen
+                                allow="xr-spatial-tracking"
+                                title="Tour virtual Matterport">
+                        </iframe>
+                      </div>
+                    </div>
+                  }
                 </div>
               }
 
@@ -375,7 +387,10 @@
               <div class="row g-2">
                 <div class="col-12">
                   <p class="info-label">{{ 'file.service' | translate }}</p>
-                  <p class="info-value">{{ expediente()!.servicio_nombre }}</p>
+                  <p class="info-value mb-0">{{ servicioNombre() }}</p>
+                  @if (servicioDescripcion()) {
+                    <p class="servicio-desc mb-0">{{ servicioDescripcion() }}</p>
+                  }
                 </div>
                 <div class="col-12">
                   <p class="info-label">{{ 'builder_offer.client_label' | translate }}</p>

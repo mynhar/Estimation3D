@@ -1,4 +1,5 @@
 export * from './archivo.model';
+export * from './contrato.model';
 export * from './estimacion.model';
 export * from './expediente.model';
 export * from './oferta.model';

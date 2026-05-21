@@ -39,7 +39,6 @@ export class FileToBeEstimatedComponent implements OnInit {
   notasInternas        = '';
   costoMin: number | null = null;
   costoMax: number | null = null;
-  urlTour  = '';
 
   guardando       = signal(false);
   exitoMsg        = signal('');
@@ -56,12 +55,17 @@ export class FileToBeEstimatedComponent implements OnInit {
   errorFotos        = signal('');
   errorDocumentos   = signal('');
 
-  // Tour CRUD
-  hasDraft      = signal(false);
-  editandoTour  = signal(false);
-  guardandoTour = signal(false);
-  errorTour     = signal('');
-  urlTourInput  = '';
+  hasDraft         = signal(false);
+
+  // Tour multi-video
+  urlsTour         = signal<string[]>([]);
+  expandedIndex    = signal<number | null>(null);
+  editandoIndex    = signal<number | null>(null);
+  editandoUrlTemp  = '';
+  mostrandoFormAdd = signal(false);
+  nuevoUrlInput    = '';
+  guardandoTour    = signal(false);
+  errorTour        = signal('');
 
   private expedienteId = '';
 
@@ -77,11 +81,6 @@ export class FileToBeEstimatedComponent implements OnInit {
     if (this.costoMin === null && this.costoMax === null) return true;
     if (this.costoMin === null || this.costoMax === null) return false;
     return this.costoMin >= 0 && this.costoMax >= this.costoMin;
-  }
-
-  get urlTourSafe(): SafeResourceUrl | null {
-    const url = this.urlTour.trim();
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
   async ngOnInit() {
@@ -105,7 +104,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         this.costoMin             = estimacion.costo_estimado;
         this.costoMax             = estimacion.costo_estimado_max;
         this.notasInternas        = estimacion.notas_internas;
-        this.urlTour              = estimacion.url_tour ?? '';
+        this.urlsTour.set(EstimacionService.parseUrls(estimacion.url_tour));
         this.hasDraft.set(true);
       } else if (detalle.fecha_visita) {
         this.fechaVisita = detalle.fecha_visita.slice(0, 10);
@@ -149,7 +148,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         costoMin:             this.costoMin,
         costoMax:             this.costoMax,
         notasInternas:        this.notasInternas.trim(),
-        urlTour:              this.urlTour.trim() || null,
+        urlTour:              EstimacionService.serializeUrls(this.urlsTour()),
       });
       await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
       this.hasDraft.set(true);
@@ -183,7 +182,7 @@ export class FileToBeEstimatedComponent implements OnInit {
         costoMin:             this.costoMin,
         costoMax:             this.costoMax,
         notasInternas:        this.notasInternas.trim(),
-        urlTour:              this.urlTour.trim() || null,
+        urlTour:              EstimacionService.serializeUrls(this.urlsTour()),
       });
       this.hasDraft.set(true);
       this.exitoVisitaMsg.set('estimator_form.success_draft');
@@ -288,34 +287,47 @@ export class FileToBeEstimatedComponent implements OnInit {
     return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
 
-  // ── Tour CRUD ─────────────────────────────────────────────────────────────
+  // ── Tour multi-video ──────────────────────────────────────────────────────
 
-  get urlTourPreviewSafe() {
-    const url = this.urlTourInput.trim();
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  get nuevoUrlSafe(): SafeResourceUrl | null {
+    const url = this.nuevoUrlInput.trim();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
-  iniciarEdicionTour() {
-    this.urlTourInput = this.urlTour;
-    this.errorTour.set('');
-    this.editandoTour.set(true);
+  get editandoUrlSafe(): SafeResourceUrl | null {
+    const url = this.editandoUrlTemp.trim();
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
-  cancelarEdicionTour() {
-    this.editandoTour.set(false);
+  mostrarFormAgregarVideo() {
+    this.nuevoUrlInput = '';
+    this.editandoIndex.set(null);
+    this.mostrandoFormAdd.set(true);
+  }
+
+  cancelarAgregarVideo() {
+    this.mostrandoFormAdd.set(false);
+    this.nuevoUrlInput = '';
     this.errorTour.set('');
   }
 
-  async guardarTour() {
-    const url = this.urlTourInput.trim() || null;
+  async agregarVideo() {
+    const url = this.nuevoUrlInput.trim();
+    if (!url) return;
+    const nuevaLista = [...this.urlsTour(), url];
     this.errorTour.set('');
     this.guardandoTour.set(true);
     try {
       if (this.hasDraft()) {
-        await this.estimacionService.actualizarUrlTour(this.expedienteId, url);
+        await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
       }
-      this.urlTour = url ?? '';
-      this.editandoTour.set(false);
+      this.urlsTour.set(nuevaLista);
+      this.mostrandoFormAdd.set(false);
+      this.nuevoUrlInput = '';
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
@@ -323,19 +335,62 @@ export class FileToBeEstimatedComponent implements OnInit {
     }
   }
 
-  async eliminarTour() {
+  iniciarEdicionVideo(i: number) {
+    this.editandoIndex.set(i);
+    this.editandoUrlTemp = this.urlsTour()[i];
+    this.mostrandoFormAdd.set(false);
+    this.errorTour.set('');
+  }
+
+  cancelarEdicionVideo() {
+    this.editandoIndex.set(null);
+    this.editandoUrlTemp = '';
+    this.errorTour.set('');
+  }
+
+  async guardarEdicionVideo() {
+    const i = this.editandoIndex();
+    if (i === null) return;
+    const url = this.editandoUrlTemp.trim();
+    if (!url) return;
+    const nuevaLista = [...this.urlsTour()];
+    nuevaLista[i] = url;
     this.errorTour.set('');
     this.guardandoTour.set(true);
     try {
       if (this.hasDraft()) {
-        await this.estimacionService.actualizarUrlTour(this.expedienteId, null);
+        await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
       }
-      this.urlTour = '';
+      this.urlsTour.set(nuevaLista);
+      this.editandoIndex.set(null);
+      this.editandoUrlTemp = '';
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
       this.guardandoTour.set(false);
     }
+  }
+
+  async eliminarVideo(i: number) {
+    const nuevaLista = this.urlsTour().filter((_, idx) => idx !== i);
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      if (this.hasDraft()) {
+        await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      }
+      this.urlsTour.set(nuevaLista);
+      if (this.expandedIndex() === i) this.expandedIndex.set(null);
+      if (this.editandoIndex() === i) { this.editandoIndex.set(null); this.editandoUrlTemp = ''; }
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
+  }
+
+  toggleExpandVideo(i: number) {
+    this.expandedIndex.set(this.expandedIndex() === i ? null : i);
   }
 
   volver() { this.router.navigate(['/estimator/files-to-be-estimated']); }

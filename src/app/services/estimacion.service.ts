@@ -7,6 +7,20 @@ export class EstimacionService {
   private auth = inject(AuthSupabaseService);
   private get db() { return this.auth.client; }
 
+  static parseUrls(raw: string | null): string[] {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string' && !!u);
+    } catch {}
+    return [raw];
+  }
+
+  static serializeUrls(urls: string[]): string | null {
+    const filtered = urls.filter(Boolean);
+    return filtered.length ? JSON.stringify(filtered) : null;
+  }
+
   async get(expedienteId: string): Promise<EstimacionDetalle | null> {
     const { data, error } = await this.db
       .from('estimacion')
@@ -39,6 +53,14 @@ export class EstimacionService {
     const { error } = await this.db
       .from('estimacion')
       .update({ url_tour: urlTour })
+      .eq('expediente_id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  async actualizarUrlsTour(expedienteId: string, urls: string[]): Promise<void> {
+    const { error } = await this.db
+      .from('estimacion')
+      .update({ url_tour: EstimacionService.serializeUrls(urls) })
       .eq('expediente_id', expedienteId);
     if (error) throw new Error(error.message);
   }

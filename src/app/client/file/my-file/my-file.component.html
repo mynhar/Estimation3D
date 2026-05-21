@@ -76,7 +76,7 @@
       </div>
 
       <!-- Tour virtual 3D ─────────────────────────────────────────────────── -->
-      @if (urlTourSafe) {
+      @if (urlsTour.length > 0) {
         <div class="tour-inset">
           <div class="tour-hero__bar">
             <div class="d-flex align-items-center gap-2">
@@ -89,12 +89,22 @@
             </div>
             <span class="tour-hero__badge">{{ 'file.immersive_badge' | translate }}</span>
           </div>
-          <div class="ratio ratio-16x9">
-            <iframe [src]="urlTourSafe"
-                    allowfullscreen
-                    allow="xr-spatial-tracking"
-                    title="Tour virtual Matterport">
-            </iframe>
+          <div class="tour-grid">
+            @for (url of urlsTour; track $index) {
+              <div class="tour-grid__item">
+                <p class="tour-grid__label">
+                  <i class="bi bi-camera-video-fill me-1"></i>
+                  {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                </p>
+                <div class="ratio ratio-16x9">
+                  <iframe [src]="getSafeUrl(url)"
+                          allowfullscreen
+                          allow="xr-spatial-tracking"
+                          title="Tour virtual Matterport">
+                  </iframe>
+                </div>
+              </div>
+            }
           </div>
         </div>
       }

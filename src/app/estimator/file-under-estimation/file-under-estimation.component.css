@@ -80,7 +80,34 @@
 .completion-item--done      { color: #3D6B52; }
 .completion-item--done i    { color: #5C8A6B; }
 
+/* ── Tour video list ─────────────────────────────────────────────────────── */
+.tour-video-item { border-radius: 0.5rem; overflow: hidden; }
+
+.tour-video-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #F2EFE6; border: 1px solid #EAE7DF;
+  border-radius: 0.5rem; padding: 0.5rem 0.75rem;
+  transition: border-color 0.15s;
+}
+.tour-video-row--expanded {
+  border-color: #C4A55A; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+}
+
+.tour-video-row__toggle {
+  display: flex; align-items: center; gap: 0;
+  flex: 1; min-width: 0;
+  background: none; border: none; padding: 0; cursor: pointer; text-align: left;
+}
+
+.tour-video-url {
+  display: inline-block; max-width: 180px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.tour-video-row__actions { display: flex; gap: 0.25rem; flex-shrink: 0; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 575px) {
   .page-header { padding: 1rem !important; }
 }
+@media (max-width: 400px) { .tour-video-url { display: none; } }

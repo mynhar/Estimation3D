@@ -65,9 +65,27 @@ export class MyOfferComponent implements OnInit {
     }
   }
 
-  get urlTourSafe(): SafeResourceUrl | null {
-    const url = this.detalle()?.url_tour;
-    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  get urlsTour(): string[] {
+    const raw = this.detalle()?.url_tour ?? null;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string' && !!u);
+    } catch {}
+    return [raw];
+  }
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  servicioNombre(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
   }
 
   badgeClass(estado: string): string {

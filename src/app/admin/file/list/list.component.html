@@ -1,1 +1,154 @@
-<p>list works!</p>
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <p class="text-primary small fw-semibold mb-1">
+          <i class="bi bi-shield-check me-1"></i>{{ 'role.administrateur' | translate }}
+        </p>
+        <h4 class="mb-1">{{ 'admin_file.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'admin_file.subtitle' | translate }}</p>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        @if (!cargando() && !error()) {
+          <span class="kpi-pill">
+            <i class="bi bi-folder2 me-1"></i>
+            {{ expedientesFiltrados().length }}
+            @if (hayFiltros()) { / {{ total }} }
+            {{ 'admin_file.count' | translate }}
+          </span>
+        }
+        <a routerLink="/admin/file/create" class="btn btn-primary btn-sm fw-semibold">
+          <i class="bi bi-plus-circle me-1"></i>{{ 'admin_file.add_btn' | translate }}
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      {{ 'common.loading' | translate }}
+    </div>
+
+  <!-- ── Error ──────────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="alert alert-danger rounded-4">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ error() }}
+    </div>
+
+  <!-- ── Contenido ──────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Filtros -->
+    <div class="filter-bar rounded-4 p-3 mb-3">
+
+      <!-- Búsqueda -->
+      <div class="input-group mb-3">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+               [placeholder]="'admin_file.search_placeholder' | translate"
+               [value]="busqueda()"
+               (input)="setBusqueda($event)">
+        @if (busqueda()) {
+          <button class="btn btn-outline-secondary" type="button" (click)="busqueda.set('')">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+
+      <!-- Estado + limpiar -->
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="text-muted small fw-semibold">{{ 'admin_file.status_filter' | translate }}</span>
+          <select class="form-select form-select-sm filter-select"
+                  [value]="filtroEstado()"
+                  (change)="filtroEstado.set($any($event.target).value)">
+            @for (e of estados; track e) {
+              <option [value]="e">
+                {{ e === 'todos'
+                    ? ('common.all' | translate)
+                    : (('admin_file.status_' + e) | translate) }}
+              </option>
+            }
+          </select>
+        </div>
+
+        @if (hayFiltros()) {
+          <button class="btn btn-sm btn-link text-muted p-0 ms-auto" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+          </button>
+        }
+      </div>
+
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm border-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 table-admin">
+          <thead class="table-dark">
+            <tr>
+              <th>{{ 'admin_file.col_number'     | translate }}</th>
+              <th>{{ 'admin_file.col_service'    | translate }}</th>
+              <th>{{ 'admin_file.col_client'     | translate }}</th>
+              <th>{{ 'admin_file.col_visit_date' | translate }}</th>
+              <th>{{ 'admin_file.col_status'     | translate }}</th>
+              <th>{{ 'admin_file.col_estimator'  | translate }}</th>
+              <th>{{ 'admin_file.col_real_visit' | translate }}</th>
+              <th class="text-end">{{ 'admin_file.col_price'      | translate }}</th>
+              <th>{{ 'admin_file.col_start_date' | translate }}</th>
+              <th style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            @for (e of expedientesFiltrados(); track e.id) {
+              <tr>
+                <td><span class="exp-num">{{ e.numero }}</span></td>
+                <td class="col-servicio">{{ servicioNombre(e) }}</td>
+                <td class="text-nowrap">{{ e.cliente_nombre }}</td>
+                <td class="text-nowrap">{{ formatFecha(e.fecha_visita) }}</td>
+                <td>
+                  <span class="badge rounded-pill {{ estadoBadge(e.estado) }}">
+                    {{ ('admin_file.status_' + e.estado) | translate }}
+                  </span>
+                </td>
+                <td class="text-nowrap">{{ e.estimador_nombre ?? '—' }}</td>
+                <td class="text-nowrap">{{ formatFecha(e.fecha_visita_real) }}</td>
+                <td class="text-end text-nowrap precio-val">{{ formatPrecio(e.oferta_precio) }}</td>
+                <td class="text-nowrap">{{ formatFecha(e.oferta_fecha_inicio) }}</td>
+                <td class="text-center">
+                  <a [routerLink]="['/admin/file/edit', e.id]"
+                     class="btn btn-sm btn-outline-secondary"
+                     [title]="'admin_file.edit_btn' | translate">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                </td>
+              </tr>
+            }
+
+            @if (expedientesFiltrados().length === 0) {
+              <tr>
+                <td colspan="10" class="text-center text-muted py-4">
+                  @if (hayFiltros()) {
+                    <i class="bi bi-funnel me-1"></i>{{ 'admin_file.no_results' | translate }}
+                  } @else {
+                    <i class="bi bi-folder2 me-1"></i>{{ 'admin_file.no_data' | translate }}
+                  }
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  }
+
+</div>

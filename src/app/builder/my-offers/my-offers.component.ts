@@ -51,9 +51,11 @@ export class MyOffersComponent implements OnInit {
     return this.ofertas().filter(o => {
       if (fe !== 'todos' && o.estado !== fe) return false;
       if (q && !(
-        o.expediente_numero.toLowerCase().includes(q) ||
-        o.servicio_nombre.toLowerCase().includes(q)   ||
-        o.provincia.toLowerCase().includes(q)         ||
+        o.expediente_numero.toLowerCase().includes(q)  ||
+        o.servicio_nombre.toLowerCase().includes(q)    ||
+        o.servicio_nombre_en.toLowerCase().includes(q) ||
+        o.servicio_nombre_fr.toLowerCase().includes(q) ||
+        o.provincia.toLowerCase().includes(q)          ||
         o.canton.toLowerCase().includes(q)
       )) return false;
       return true;
@@ -84,6 +86,13 @@ export class MyOffersComponent implements OnInit {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  servicioNombre(o: OfertaRow): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return o.servicio_nombre_en || o.servicio_nombre;
+    if (lang === 'fr') return o.servicio_nombre_fr || o.servicio_nombre;
+    return o.servicio_nombre;
+  }
+
   badgeClass(estado: string): string  { return ESTADO_BADGE_OFERTA[estado]  ?? 'bg-light text-dark'; }
   estadoLabel(estado: string): string { return ESTADO_LABEL_OFERTA[estado]  ?? estado; }
   estadoColor(estado: string): string { return ESTADO_COLOR[estado]          ?? '#adb5bd'; }

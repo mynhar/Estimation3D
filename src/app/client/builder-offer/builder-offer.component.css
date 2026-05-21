@@ -1,3 +1,17 @@
+/* ── Tour grid ───────────────────────────────────────────────────────────── */
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1rem;
+}
+.tour-video-label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #C4A55A; margin: 0 0 0.4rem;
+}
+
+/* ── Servicio descripcion ─────────────────────────────────────────────────── */
+.servicio-desc { font-size: 0.78rem; color: #6b7280; line-height: 1.4; }
+
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
   background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);

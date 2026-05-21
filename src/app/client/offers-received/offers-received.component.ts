@@ -37,6 +37,20 @@ export class OffersReceivedComponent implements OnInit {
     return this.ESTADO_COLOR[estado] ?? '#94a3b8';
   }
 
+  servicioNombre(exp: ExpedienteConOfertas): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
+    if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
+    return exp.servicio_nombre;
+  }
+
+  servicioDescripcion(exp: ExpedienteConOfertas): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_descripcion_en || exp.servicio_descripcion;
+    if (lang === 'fr') return exp.servicio_descripcion_fr || exp.servicio_descripcion;
+    return exp.servicio_descripcion;
+  }
+
   ofertasLabel(n: number): string {
     return n === 1 ? '1 oferta' : `${n} ofertas`;
   }

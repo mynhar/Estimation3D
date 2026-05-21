@@ -40,6 +40,7 @@ export class OfertaService {
       const archivosOferta  = archivos.filter((a: any) => String(a.oferta_id) === String(o.id));
       return {
         id:                o.id,
+        constructor_id:    o.constructor_id,
         precio:            o.precio,
         plazo_semanas_min: o.plazo_semanas_min,
         plazo_semanas_max: o.plazo_semanas_max,
@@ -167,7 +168,7 @@ export class OfertaService {
         fecha_inicio, descripcion, estado, creado_en,
         expediente:expediente_id (
           numero, fecha_visita,
-          servicio:servicio_id ( nombre_es ),
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
           localizacion ( direccion, referencia, provincia, canton, distrito )
         )
       `)
@@ -197,8 +198,10 @@ export class OfertaService {
       descripcion:           data.descripcion       ?? '',
       estado:                data.estado,
       creado_en:             data.creado_en         ?? '',
-      expediente_numero:     exp?.numero              ?? '—',
-      servicio_nombre:       exp?.servicio?.nombre_es ?? '—',
+      expediente_numero:     exp?.numero                  ?? '—',
+      servicio_nombre:       exp?.servicio?.nombre_es     ?? '—',
+      servicio_nombre_en:    exp?.servicio?.nombre_en     ?? exp?.servicio?.nombre_es ?? '—',
+      servicio_nombre_fr:    exp?.servicio?.nombre_fr     ?? exp?.servicio?.nombre_es ?? '—',
       direccion:             loc?.direccion  ?? '—',
       referencia:            loc?.referencia ?? '',
       provincia:             loc?.provincia  ?? '—',
@@ -218,7 +221,7 @@ export class OfertaService {
         id, precio, fecha_inicio, plazo_semanas_min, plazo_semanas_max, estado, creado_en,
         expediente:expediente_id (
           id, numero, estado,
-          servicio:servicio_id ( nombre_es ),
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
           localizacion ( direccion, referencia, provincia, canton, distrito )
         )
       `)
@@ -238,10 +241,12 @@ export class OfertaService {
         plazo_semanas_max: o.plazo_semanas_max,
         estado:            o.estado,
         creado_en:         o.creado_en         ?? '',
-        expediente_id:     exp?.id             ?? '',
-        expediente_numero: exp?.numero         ?? '—',
-        expediente_estado: exp?.estado         ?? '',
-        servicio_nombre:   exp?.servicio?.nombre_es ?? '—',
+        expediente_id:      exp?.id              ?? '',
+        expediente_numero:  exp?.numero          ?? '—',
+        expediente_estado:  exp?.estado          ?? '',
+        servicio_nombre:    exp?.servicio?.nombre_es ?? '—',
+        servicio_nombre_en: exp?.servicio?.nombre_en ?? exp?.servicio?.nombre_es ?? '—',
+        servicio_nombre_fr: exp?.servicio?.nombre_fr ?? exp?.servicio?.nombre_es ?? '—',
         direccion:         loc?.direccion  ?? '—',
         referencia:        loc?.referencia ?? '',
         provincia:         loc?.provincia  ?? '—',
@@ -258,7 +263,7 @@ export class OfertaService {
         id, precio, fecha_inicio, plazo_semanas_min, plazo_semanas_max, estado,
         expediente:expediente_id (
           numero,
-          servicio:servicio_id ( nombre_es ),
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
           localizacion ( direccion, referencia, provincia, canton, distrito )
         )
       `)
@@ -277,8 +282,10 @@ export class OfertaService {
         plazo_semanas_min: o.plazo_semanas_min,
         plazo_semanas_max: o.plazo_semanas_max,
         estado:            o.estado,
-        expediente_numero: exp?.numero              ?? '—',
-        servicio_nombre:   exp?.servicio?.nombre_es ?? '—',
+        expediente_numero:  exp?.numero                  ?? '—',
+        servicio_nombre:    exp?.servicio?.nombre_es     ?? '—',
+        servicio_nombre_en: exp?.servicio?.nombre_en     ?? exp?.servicio?.nombre_es ?? '—',
+        servicio_nombre_fr: exp?.servicio?.nombre_fr     ?? exp?.servicio?.nombre_es ?? '—',
         direccion:         loc?.direccion  ?? '—',
         referencia:        loc?.referencia ?? '',
         provincia:         loc?.provincia  ?? '—',

@@ -44,11 +44,15 @@ export class EstimatedFileComponent implements OnInit {
   errorFotos        = signal('');
   errorDocumentos   = signal('');
 
-  // Tour CRUD
-  editandoTour  = signal(false);
-  guardandoTour = signal(false);
-  errorTour     = signal('');
-  urlTourInput  = '';
+  // Tour multi-video
+  urlsTour         = signal<string[]>([]);
+  expandedIndex    = signal<number | null>(null);
+  editandoIndex    = signal<number | null>(null);
+  editandoUrlTemp  = '';
+  mostrandoFormAdd = signal(false);
+  nuevoUrlInput    = '';
+  guardandoTour    = signal(false);
+  errorTour        = signal('');
 
   // Eliminar estimación
   confirmandoEliminar = signal(false);
@@ -73,6 +77,7 @@ export class EstimatedFileComponent implements OnInit {
       ]);
       this.detalle.set(detalle);
       this.estimacion.set(estimacion);
+      this.urlsTour.set(EstimacionService.parseUrls(estimacion?.url_tour ?? null));
     } catch (e: any) {
       console.error('[EstimatedFile]', e.message);
       this.errorMsg.set(e.message);
@@ -136,38 +141,45 @@ export class EstimatedFileComponent implements OnInit {
     } catch (e: any) { setError.set(e.message); }
   }
 
-  get urlTourSafe(): SafeResourceUrl | null {
-    const url = this.estimacion()?.url_tour;
+  // ── Tour multi-video ──────────────────────────────────────────────────────
+
+  getSafeUrl(url: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  get nuevoUrlSafe(): SafeResourceUrl | null {
+    const url = this.nuevoUrlInput.trim();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
-  get urlTourPreviewSafe(): SafeResourceUrl | null {
-    const url = this.urlTourInput.trim();
+  get editandoUrlSafe(): SafeResourceUrl | null {
+    const url = this.editandoUrlTemp.trim();
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
-  // ── Tour CRUD ─────────────────────────────────────────────────────────────
-
-  iniciarEdicionTour() {
-    this.urlTourInput = this.estimacion()?.url_tour ?? '';
-    this.errorTour.set('');
-    this.editandoTour.set(true);
+  mostrarFormAgregarVideo() {
+    this.nuevoUrlInput = '';
+    this.editandoIndex.set(null);
+    this.mostrandoFormAdd.set(true);
   }
 
-  cancelarEdicionTour() {
-    this.editandoTour.set(false);
+  cancelarAgregarVideo() {
+    this.mostrandoFormAdd.set(false);
+    this.nuevoUrlInput = '';
     this.errorTour.set('');
   }
 
-  async guardarTour() {
-    const url = this.urlTourInput.trim() || null;
+  async agregarVideo() {
+    const url = this.nuevoUrlInput.trim();
+    if (!url) return;
+    const nuevaLista = [...this.urlsTour(), url];
     this.errorTour.set('');
     this.guardandoTour.set(true);
     try {
-      await this.estimacionService.actualizarUrlTour(this.expedienteId, url);
-      const est = this.estimacion();
-      if (est) this.estimacion.set({ ...est, url_tour: url });
-      this.editandoTour.set(false);
+      await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.urlsTour.set(nuevaLista);
+      this.mostrandoFormAdd.set(false);
+      this.nuevoUrlInput = '';
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
@@ -175,18 +187,58 @@ export class EstimatedFileComponent implements OnInit {
     }
   }
 
-  async eliminarTour() {
+  iniciarEdicionVideo(i: number) {
+    this.editandoIndex.set(i);
+    this.editandoUrlTemp = this.urlsTour()[i];
+    this.mostrandoFormAdd.set(false);
+    this.errorTour.set('');
+  }
+
+  cancelarEdicionVideo() {
+    this.editandoIndex.set(null);
+    this.editandoUrlTemp = '';
+    this.errorTour.set('');
+  }
+
+  async guardarEdicionVideo() {
+    const i = this.editandoIndex();
+    if (i === null) return;
+    const url = this.editandoUrlTemp.trim();
+    if (!url) return;
+    const nuevaLista = [...this.urlsTour()];
+    nuevaLista[i] = url;
     this.errorTour.set('');
     this.guardandoTour.set(true);
     try {
-      await this.estimacionService.actualizarUrlTour(this.expedienteId, null);
-      const est = this.estimacion();
-      if (est) this.estimacion.set({ ...est, url_tour: null });
+      await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.urlsTour.set(nuevaLista);
+      this.editandoIndex.set(null);
+      this.editandoUrlTemp = '';
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
       this.guardandoTour.set(false);
     }
+  }
+
+  async eliminarVideo(i: number) {
+    const nuevaLista = this.urlsTour().filter((_, idx) => idx !== i);
+    this.errorTour.set('');
+    this.guardandoTour.set(true);
+    try {
+      await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.urlsTour.set(nuevaLista);
+      if (this.expandedIndex() === i) this.expandedIndex.set(null);
+      if (this.editandoIndex() === i) { this.editandoIndex.set(null); this.editandoUrlTemp = ''; }
+    } catch (e: any) {
+      this.errorTour.set(e.message);
+    } finally {
+      this.guardandoTour.set(false);
+    }
+  }
+
+  toggleExpandVideo(i: number) {
+    this.expandedIndex.set(this.expandedIndex() === i ? null : i);
   }
 
   badgeClass(estado: string | undefined): string {
@@ -236,6 +288,13 @@ export class EstimatedFileComponent implements OnInit {
     return '—';
   }
 
+  private formatDireccionCA(d: ExpedienteDetalle): string {
+    const country = this.translate.instant('footer.country').toUpperCase();
+    return `<p class="fw-semibold mb-0">${d.direccion}</p>`
+         + `<p class="fw-semibold mb-0">${d.canton} ${d.provincia} ${d.distrito}</p>`
+         + `<p class="fw-bold text-uppercase mb-0 small">${country}</p>`;
+  }
+
   imprimir() {
     const d   = this.detalle();
     const est = this.estimacion();
@@ -278,11 +337,8 @@ export class EstimatedFileComponent implements OnInit {
       <div class="col-6"><p class="text-muted small mb-1">${t('builder_offer.client_label')}</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
       <div class="col-6"><p class="text-muted small mb-1">${t('common.phone')}</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
       <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('common.address')}</p><p class="fw-semibold mb-0">${d.direccion}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('file.reference')}</p><p class="fw-semibold mb-0">${d.referencia}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">${t('file.province')}</p><p class="fw-semibold mb-0">${d.provincia}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">${t('file.canton')}</p><p class="fw-semibold mb-0">${d.canton}</p></div>
-      <div class="col-4"><p class="text-muted small mb-1">${t('file.district')}</p><p class="fw-semibold mb-0">${d.distrito}</p></div>
+      <div class="col-8"><p class="text-muted small mb-1">${t('common.address')}</p>${this.formatDireccionCA(d)}</div>
+      <div class="col-4"><p class="text-muted small mb-1">${t('file.reference')}</p><p class="fw-semibold mb-0">${d.referencia || '—'}</p></div>
       <div class="col-12"><hr class="my-0"/></div>
       <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.scheduled_visit')}</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
       <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.check_visit_time')}</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>

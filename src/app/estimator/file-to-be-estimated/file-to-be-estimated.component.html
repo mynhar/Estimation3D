@@ -189,28 +189,18 @@
                       d-flex align-items-center justify-content-between">
             <span class="fw-semibold">
               <i class="bi bi-camera-video me-2 text-primary"></i>{{ 'estimator_file.tour_title' | translate }}
+              @if (urlsTour().length > 0) {
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
+                  {{ urlsTour().length }}
+                </span>
+              }
             </span>
-            @if (!editandoTour()) {
-              <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm"
-                        (click)="iniciarEdicionTour()"
-                        [disabled]="guardandoTour()">
-                  <i class="bi {{ urlTour ? 'bi-pencil' : 'bi-plus-lg' }} me-1"></i>
-                  {{ urlTour ? ('common.edit' | translate) : ('estimator_file.tour_add' | translate) }}
-                </button>
-                @if (urlTour) {
-                  <button class="btn btn-outline-danger btn-sm"
-                          (click)="eliminarTour()"
-                          [disabled]="guardandoTour()"
-                          [title]="'estimator_file.delete_tour' | translate">
-                    @if (guardandoTour()) {
-                      <span class="spinner-border spinner-border-sm"></span>
-                    } @else {
-                      <i class="bi bi-trash3"></i>
-                    }
-                  </button>
-                }
-              </div>
+            @if (!mostrandoFormAdd() && editandoIndex() === null) {
+              <button class="btn btn-outline-primary btn-sm"
+                      (click)="mostrarFormAgregarVideo()"
+                      [disabled]="guardandoTour()">
+                <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+              </button>
             }
           </div>
 
@@ -219,67 +209,150 @@
               <div class="alert alert-danger py-2 small mb-3">{{ errorTour() }}</div>
             }
 
-            @if (editandoTour()) {
-              <!-- ── Modo edición ── -->
-              @if (!hasDraft()) {
-                <div class="alert alert-warning py-2 small mb-3">
-                  <i class="bi bi-info-circle me-1"></i>
-                  {{ 'estimator_file.tour_draft_hint_alt' | translate }}
-                </div>
-              }
-              <div class="tour-edit-wrap">
+            @if (!hasDraft() && (mostrandoFormAdd() || urlsTour().length === 0)) {
+              <div class="alert alert-warning py-2 small mb-3">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ 'estimator_file.tour_draft_hint_alt' | translate }}
+              </div>
+            }
+
+            <!-- Lista de videos -->
+            @for (url of urlsTour(); track $index) {
+              <div class="tour-video-item" [class.mb-3]="$index < urlsTour().length - 1 || mostrandoFormAdd()">
+
+                @if (editandoIndex() === $index) {
+                  <!-- Modo edición de este video -->
+                  <div class="tour-edit-wrap">
+                    <p class="small fw-semibold mb-2">
+                      <i class="bi bi-pencil me-1 text-primary"></i>
+                      {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                    </p>
+                    <div class="input-group input-group-sm mb-2">
+                      <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                      <input type="url" class="form-control"
+                             placeholder="https://my.matterport.com/show/?m=…"
+                             [(ngModel)]="editandoUrlTemp"
+                             [disabled]="guardandoTour()" />
+                    </div>
+                    <div class="d-flex gap-2 mb-3">
+                      <button class="btn btn-primary btn-sm flex-grow-1"
+                              (click)="guardarEdicionVideo()"
+                              [disabled]="guardandoTour() || !editandoUrlTemp.trim()">
+                        @if (guardandoTour()) {
+                          <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                        } @else {
+                          <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
+                        }
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm"
+                              (click)="cancelarEdicionVideo()"
+                              [disabled]="guardandoTour()">
+                        {{ 'common.cancel' | translate }}
+                      </button>
+                    </div>
+                    @if (editandoUrlSafe) {
+                      <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
+                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                        <iframe [src]="editandoUrlSafe"
+                                allowfullscreen allow="xr-spatial-tracking"
+                                title="Vista previa"></iframe>
+                      </div>
+                    }
+                  </div>
+
+                } @else {
+                  <!-- Fila del video (colapsada / expandida) -->
+                  <div class="tour-video-row" [class.tour-video-row--expanded]="expandedIndex() === $index">
+                    <button class="tour-video-row__toggle"
+                            (click)="toggleExpandVideo($index)"
+                            [title]="expandedIndex() === $index ? ('common.collapse' | translate) : ('common.expand' | translate)">
+                      <i class="bi bi-camera-video-fill text-primary me-2"></i>
+                      <span class="fw-semibold small">{{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}</span>
+                      <span class="text-muted small ms-2 tour-video-url">{{ url }}</span>
+                      <i class="bi ms-auto"
+                         [class.bi-chevron-down]="expandedIndex() !== $index"
+                         [class.bi-chevron-up]="expandedIndex() === $index"></i>
+                    </button>
+                    <div class="tour-video-row__actions">
+                      <button class="btn btn-outline-secondary btn-sm"
+                              (click)="iniciarEdicionVideo($index)"
+                              [disabled]="guardandoTour()"
+                              [title]="'common.edit' | translate">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm"
+                              (click)="eliminarVideo($index)"
+                              [disabled]="guardandoTour()"
+                              [title]="'estimator_file.tour_delete_video' | translate">
+                        @if (guardandoTour()) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          <i class="bi bi-trash3"></i>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                  @if (expandedIndex() === $index) {
+                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden mt-2">
+                      <iframe [src]="getSafeUrl(url)"
+                              allowfullscreen allow="xr-spatial-tracking"
+                              [title]="'Video ' + ($index + 1)"></iframe>
+                    </div>
+                  }
+                }
+
+              </div>
+            }
+
+            <!-- Estado vacío -->
+            @if (urlsTour().length === 0 && !mostrandoFormAdd()) {
+              <div class="upload-empty">
+                <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
+                <p class="mb-0">{{ 'estimator_file.no_tour_use_add' | translate }}</p>
+              </div>
+            }
+
+            <!-- Formulario agregar nuevo video -->
+            @if (mostrandoFormAdd()) {
+              <div class="tour-edit-wrap" [class.mt-3]="urlsTour().length > 0">
+                @if (urlsTour().length > 0) { <hr class="mb-3"> }
+                <p class="small fw-semibold mb-2">
+                  <i class="bi bi-plus-circle me-1 text-primary"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                </p>
                 <div class="input-group input-group-sm mb-2">
                   <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
                   <input type="url" class="form-control"
                          placeholder="https://my.matterport.com/show/?m=…"
-                         [(ngModel)]="urlTourInput"
+                         [(ngModel)]="nuevoUrlInput"
                          [disabled]="guardandoTour()" />
                 </div>
                 <div class="d-flex gap-2 mb-3">
                   <button class="btn btn-primary btn-sm flex-grow-1"
-                          (click)="guardarTour()"
-                          [disabled]="guardandoTour()">
+                          (click)="agregarVideo()"
+                          [disabled]="guardandoTour() || !nuevoUrlInput.trim()">
                     @if (guardandoTour()) {
                       <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
                     } @else {
-                      <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
+                      <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
                     }
                   </button>
                   <button class="btn btn-outline-secondary btn-sm"
-                          (click)="cancelarEdicionTour()"
+                          (click)="cancelarAgregarVideo()"
                           [disabled]="guardandoTour()">
                     {{ 'common.cancel' | translate }}
                   </button>
                 </div>
-                @if (urlTourPreviewSafe) {
+                @if (nuevoUrlSafe) {
                   <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
                   <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                    <iframe [src]="urlTourPreviewSafe"
-                            allowfullscreen
-                            allow="xr-spatial-tracking"
-                            title="Vista previa del tour">
-                    </iframe>
+                    <iframe [src]="nuevoUrlSafe"
+                            allowfullscreen allow="xr-spatial-tracking"
+                            title="Vista previa"></iframe>
                   </div>
                 }
               </div>
-
-            } @else {
-              <!-- ── Modo vista ── -->
-              @if (urlTourSafe) {
-                <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                  <iframe [src]="urlTourSafe"
-                          allowfullscreen
-                          allow="xr-spatial-tracking"
-                          title="Tour virtual Matterport">
-                  </iframe>
-                </div>
-              } @else {
-                <div class="upload-empty">
-                  <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
-                  <p class="mb-0">{{ 'estimator_file.no_tour_use_add' | translate }}</p>
-                </div>
-              }
             }
+
           </div>
         </div>
 

@@ -1,0 +1,104 @@
+<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
+  <header class="page-header rounded-4 p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <p class="text-primary small fw-semibold mb-1">
+          <i class="bi bi-file-earmark-text me-1"></i>{{ 'role.client' | translate }}
+        </p>
+        <h4 class="mb-1">{{ 'contract_list.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'contract_list.subtitle' | translate }}</p>
+      </div>
+      @if (!cargando() && contratos().length > 0) {
+        <span class="kpi-pill">
+          <i class="bi bi-file-earmark-check me-1"></i>
+          {{ contratos().length }} {{ 'contract_list.count' | translate }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      {{ 'common.loading' | translate }}
+    </div>
+
+  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  } @else if (contratos().length === 0) {
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-file-earmark-x"></i>
+        </div>
+        <p class="empty-title">{{ 'contract_list.empty_title' | translate }}</p>
+        <p class="empty-text">{{ 'contract_list.empty_text' | translate }}</p>
+      </div>
+    </div>
+
+  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (c of contratos(); track c.id) {
+
+        <div class="contrato-card rounded-4 p-4">
+
+          <!-- Fila 1: expediente + estado + PDF -->
+          <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="exp-num">{{ c.expediente_numero }}</span>
+              <span class="badge rounded-pill px-3 py-1 {{ estadoBadge(c.estado) }}">
+                {{ ('contract_list.status_' + c.estado) | translate }}
+              </span>
+            </div>
+            <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2"
+                    type="button"
+                    [disabled]="!c.url_pdf || descargando() === c.id"
+                    (click)="descargarPdf(c)">
+              @if (descargando() === c.id) {
+                <span class="spinner-border spinner-border-sm"></span>
+              } @else {
+                <i class="bi bi-file-earmark-pdf"></i>
+              }
+              {{ c.url_pdf ? ('contract_list.download_pdf' | translate) : ('contract_list.no_pdf' | translate) }}
+            </button>
+          </div>
+
+          <!-- Fila 2: servicio + constructor -->
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <p class="info-label">{{ 'contract_list.service' | translate }}</p>
+              <p class="info-value mb-0">{{ servicioNombre(c) }}</p>
+            </div>
+            <div class="col-sm-6">
+              <p class="info-label">{{ 'contract_list.contractor' | translate }}</p>
+              <p class="info-value mb-0">{{ c.constructor_nombre }}</p>
+            </div>
+          </div>
+
+          <!-- Fila 3: precio + garantia + fecha -->
+          <div class="row g-3">
+            <div class="col-sm-4">
+              <p class="info-label">{{ 'contract_list.price' | translate }}</p>
+              <p class="info-value price-val mb-0">{{ formatPrecio(c.precio_final) }}</p>
+            </div>
+            @if (c.garantia_anos != null) {
+              <div class="col-sm-4">
+                <p class="info-label">{{ 'offer.warranty' | translate }}</p>
+                <p class="info-value mb-0">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</p>
+              </div>
+            }
+            <div class="col-sm-4">
+              <p class="info-label">{{ 'contract_list.generated_on' | translate }}</p>
+              <p class="info-value mb-0">{{ formatFecha(c.generado_en) }}</p>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

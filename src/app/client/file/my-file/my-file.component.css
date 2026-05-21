@@ -158,8 +158,21 @@
   background: #D9D5CB;
 }
 
-/* Tour inset (sección oscura con el iframe) */
+/* Tour inset (sección oscura con los videos) */
 .tour-inset { background: #1A1510; }
+
+/* Tour grid: side-by-side responsive, one column on narrow screens */
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+.tour-grid__label {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em;
+  text-transform: uppercase; color: #D4B96E;
+  margin: 0 0 0.4rem; padding: 0 0.25rem;
+}
 .tour-hero__bar {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.6rem 1rem;

@@ -94,6 +94,13 @@ export class BuilderDashboardComponent implements OnInit {
   // ── Helpers ───────────────────────────────────────────────────────────────
   cfg(estado: string): EstadoCfg { return OFERTA_CFG[estado] ?? OFERTA_CFG['pendiente']; }
 
+  servicioNombre(oferta: OfertaDashboard): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return oferta.servicio_nombre_en || oferta.servicio_nombre;
+    if (lang === 'fr') return oferta.servicio_nombre_fr || oferta.servicio_nombre;
+    return oferta.servicio_nombre;
+  }
+
   progress(oferta: OfertaDashboard): number {
     return calcProgress(oferta.estado, oferta.expediente_estado);
   }
