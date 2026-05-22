@@ -32,6 +32,8 @@ import { MyFileComponent } from './client/file/my-file/my-file.component';
 import { ContractListComponent } from './client/contract/list/list.component';
 import { AdminFileCreateComponent } from './admin/file/create/create.component';
 import { AdminFileEditComponent } from './admin/file/edit/edit.component';
+import { AdminServiceTypeEditComponent }   from './admin/service-types/edit/edit.component';
+import { AdminServiceTypeCreateComponent } from './admin/service-types/create/create.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [guestGuard] },
@@ -64,7 +66,9 @@ export const routes: Routes = [
   { path: 'admin/file/edit/:id',   component: AdminFileEditComponent,     canActivate: [adminGuard] },
   { path: 'admin/offer',        component: AdminOfferComponent,        canActivate: [adminGuard] },
   { path: 'admin/contract',     component: AdminContractComponent,     canActivate: [adminGuard] },
-  { path: 'admin/service-type', component: AdminServiceTypesComponent, canActivate: [adminGuard] },
+  { path: 'admin/service-type',            component: AdminServiceTypesComponent,      canActivate: [adminGuard] },
+  { path: 'admin/service-type/create',    component: AdminServiceTypeCreateComponent, canActivate: [adminGuard] },
+  { path: 'admin/service-type/edit/:id',  component: AdminServiceTypeEditComponent,   canActivate: [adminGuard] },
   { path: 'admin/user',         component: AdminUserComponent,         canActivate: [adminGuard] },
   { path: 'admin/user/create',  component: AdminUserCreateComponent,   canActivate: [adminGuard] },
   { path: 'admin/user/edit/:id', component: AdminUserEditComponent,    canActivate: [adminGuard] },

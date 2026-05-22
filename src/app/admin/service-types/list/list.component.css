@@ -1,0 +1,59 @@
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
+  border: 1px solid #EAE7DF;
+}
+.page-header h4 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.35rem; font-weight: 400; color: #1A1A1A;
+}
+
+/* ── KPI pill ────────────────────────────────────────────────────────────── */
+.kpi-pill {
+  display: inline-flex; align-items: center;
+  background: #EEF2FF; color: #3730A3;
+  font-size: 0.78rem; font-weight: 700;
+  padding: 0.35em 0.9em; border-radius: 20px;
+  border: 1px solid #C7D2FE;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+.loading-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 3rem 1rem;
+  color: #6b7280; font-size: 0.9rem;
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.filter-bar {
+  background: #FAFAF8;
+  border: 1px solid #EAE7DF;
+}
+
+.input-group-text { border-right: none; }
+.form-control:focus {
+  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
+  border-color: #D4B96E;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.table-admin { font-size: 0.85rem; }
+.table-admin thead th { font-size: 0.75rem; letter-spacing: 0.04em; white-space: nowrap; }
+.table-admin td { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+
+/* ── Código chip ─────────────────────────────────────────────────────────── */
+.codigo-chip {
+  font-family: monospace; font-size: 0.78em; font-weight: 700;
+  letter-spacing: 0.05em;
+  background: rgba(212,185,110,.14); color: #C4A55A;
+  padding: 0.15em 0.55em; border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── Description column ──────────────────────────────────────────────────── */
+.col-descripcion {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,35 @@
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+.loading-state {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.6rem; padding: 3rem 1rem;
+  color: #6b7280; font-size: 0.9rem;
+}
+
+/* ── Ficha identificativa ────────────────────────────────────────────────── */
+.codigo-badge {
+  width: 44px; height: 44px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(212,185,110,.14);
+  color: #C4A55A;
+  font-size: 1.3rem;
+  border-radius: 10px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.card { border-radius: 0.75rem; }
+
+/* ── Flags ───────────────────────────────────────────────────────────────── */
+.flag { font-size: 0.9em; }
+
+/* ── Form focus ──────────────────────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
+  border-color: #D4B96E;
+}
+
+/* ── Form switch ─────────────────────────────────────────────────────────── */
+.form-check-input:checked {
+  background-color: #198754;
+  border-color: #198754;
+}

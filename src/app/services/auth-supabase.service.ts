@@ -67,8 +67,21 @@ export class AuthSupabaseService {
   // Login con email y contraseña
   // ----------------------------------------------------------
   async signInWithEmail(email: string, password: string): Promise<void> {
-    const { error } = await this.supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+
+    if (data.user) {
+      const { data: perfil } = await this.supabase
+        .from('perfil')
+        .select('activo')
+        .eq('id', data.user.id)
+        .single();
+
+      if (perfil?.activo === false) {
+        await this.supabase.auth.signOut();
+        throw new Error('account_inactive');
+      }
+    }
   }
 
   // ----------------------------------------------------------
@@ -94,25 +107,25 @@ export class AuthSupabaseService {
   async signUp(
     email: string,
     password: string,
-    perfil: { nombre: string; apellido: string; telefono: string }
+    perfil: { nombre: string; apellido: string; telefono: string; rol?: RolUsuario }
   ): Promise<void> {
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: {                       // ← FIX 1: options.data alimenta raw_user_meta_data
-          nombre:   perfil.nombre,    //   el trigger lee estas claves exactas
+        data: {
+          nombre:   perfil.nombre,
           apellido: perfil.apellido,
           telefono: perfil.telefono,
+          rol:      perfil.rol ?? 'cliente',
+          activo:   perfil.rol === 'constructor' ? false : true,
         },
       },
     });
 
     if (error) throw error;
 
-    // Guardia: si el trigger no creó el perfil (caso raro),
-    // lo creamos directamente desde Angular.
     if (data.user) {
       await this.savePerfilEmailFallback(data.user.id, perfil);
     }
@@ -127,23 +140,31 @@ export class AuthSupabaseService {
   // ----------------------------------------------------------
   private async savePerfilEmailFallback(
     userId: string,
-    perfil: { nombre: string; apellido: string; telefono: string }
+    perfil: { nombre: string; apellido: string; telefono: string; rol?: RolUsuario }
   ): Promise<void> {
-    // Verificar si el trigger ya creó el perfil completo
+    const rolDeseado = (perfil.rol ?? 'cliente') as RolUsuario;
+
+    const activoDeseado = rolDeseado !== 'constructor';
+
     const { data: existente } = await this.supabase
       .from('perfil')
-      .select('id, perfil_completo')
-      .eq('id', userId)             // ← FIX 2: 'id' no 'user_id'
+      .select('id, perfil_completo, rol, activo')
+      .eq('id', userId)
       .single();
 
-    // Si ya existe y está completo, el trigger funcionó — no hacer nada
-    if (existente?.perfil_completo === true) return;
+    // El trigger creó el perfil con rol y activo correctos — no hacer nada
+    if (
+      existente?.perfil_completo === true &&
+      existente?.rol === rolDeseado &&
+      existente?.activo === activoDeseado
+    ) return;
 
     const campos: TablesUpdate<'perfil'> = {
       nombre:           perfil.nombre,
       apellido:         perfil.apellido,
       telefono:         perfil.telefono,
-      rol:              'cliente' as RolUsuario,
+      rol:              rolDeseado,
+      activo:           activoDeseado,
       perfil_completo:  true,
     };
 

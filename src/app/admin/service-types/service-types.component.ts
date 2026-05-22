@@ -1,14 +1,10 @@
 import { Component } from '@angular/core';
+import { AdminServiceTypeListComponent } from './list/list.component';
 
 @Component({
   selector: 'app-admin-service-types',
   standalone: true,
-  imports: [],
-  template: `
-    <div class="container py-4">
-      <h2><i class="bi bi-grid me-2 text-danger"></i>Tipos de Servicio — Administrador</h2>
-      <p class="text-muted">Gestión de tipos de servicio — próximamente.</p>
-    </div>
-  `,
+  imports: [AdminServiceTypeListComponent],
+  template: `<app-admin-service-type-list />`,
 })
 export class AdminServiceTypesComponent {}

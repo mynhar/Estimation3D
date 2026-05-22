@@ -49,7 +49,17 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Directory | ForEach-Object { Write-Host \"$\\($_.Name\\):\" ; Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name })",
       "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\" -Recurse -File | Where-Object { $_.Extension -match '\\\\.\\(ts|html\\)$' })",
       "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\client\" -Recurse -Directory | Where-Object { $_.Name -match 'contract|contrato' } | Select-Object FullName)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Recurse -Depth 2)",
+      "Bash(Select-Object -First 30)",
+      "Bash(cat)",
+      "Bash(python3 /tmp/scan_i18n.py)",
+      "Bash(cat > *)",
+      "Bash(python3)",
+      "Bash(python3 -c ' *)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

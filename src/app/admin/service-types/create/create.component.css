@@ -1,0 +1,18 @@
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.card { border-radius: 0.75rem; }
+
+/* ── Flags ───────────────────────────────────────────────────────────────── */
+.flag { font-size: 0.9em; }
+
+/* ── Form focus ──────────────────────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
+  border-color: #D4B96E;
+}
+
+/* ── Form switch ─────────────────────────────────────────────────────────── */
+.form-check-input:checked {
+  background-color: #198754;
+  border-color: #198754;
+}

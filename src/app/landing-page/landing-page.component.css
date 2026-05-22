@@ -1,0 +1,279 @@
+/* ── Tokens de diseño ────────────────────────────────────────────────────── */
+:host {
+  --bg:          #F5F3EE;
+  --card:        #FBFAF6;
+  --border:      #E8E5DC;
+  --text:        #1A1A1A;
+  --text-muted:  #6B7280;
+  --gold:        #D4B96E;
+  --gold-hover:  #C4A55A;
+  --gold-shadow: rgba(212,185,110,.32);
+  --radius:      6px;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.landing-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 2.5rem;
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.top-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Logo */
+.logo {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* Lang toggle */
+.lang-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-btn + .lang-btn {
+  border-left: 1px solid var(--border);
+}
+
+.lang-btn--active {
+  background: var(--text);
+  color: var(--card);
+}
+
+.lang-btn:not(.lang-btn--active):hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Login link */
+.login-link {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.login-link:hover { color: var(--text); }
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem 5rem;
+  position: relative;
+}
+
+.hero__content {
+  text-align: center;
+  max-width: 620px;
+  position: relative;
+  z-index: 2;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3.5rem 3rem;
+}
+
+/* Eyebrow */
+.hero__eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-hover);
+  background: rgba(212,185,110,.1);
+  border: 1px solid rgba(212,185,110,.25);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Title */
+.hero__title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  margin-bottom: 1.25rem;
+}
+
+/* Subtitle */
+.hero__subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto 2.5rem;
+}
+
+/* CTA buttons */
+.hero__actions {
+  display: flex;
+  gap: 0.85rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-cta--primary {
+  background: var(--gold);
+  color: var(--text);
+  border: 2px solid var(--gold);
+  box-shadow: 0 3px 12px var(--gold-shadow);
+}
+
+.btn-cta--primary:hover {
+  background: var(--gold-hover);
+  border-color: var(--gold-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 18px var(--gold-shadow);
+  color: var(--text);
+}
+
+.btn-cta--outline {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--text);
+}
+
+.btn-cta--outline:hover {
+  background: var(--text);
+  color: var(--card);
+  transform: translateY(-1px);
+}
+
+/* ── Decoración geométrica ────────────────────────────────────────────────── */
+.hero__deco {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.deco-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(212,185,110,.12);
+}
+
+.deco-ring--1 {
+  width: 500px; height: 500px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.deco-ring--2 {
+  width: 720px; height: 720px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: rgba(212,185,110,.07);
+}
+
+.deco-ring--3 {
+  width: 960px; height: 960px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: rgba(212,185,110,.04);
+}
+
+.deco-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(212,185,110,.2);
+}
+
+.deco-dot--a { width: 7px;  height: 7px;  top: 20%; left: 16%; }
+.deco-dot--b { width: 5px;  height: 5px;  top: 72%; left: 78%; }
+.deco-dot--c { width: 10px; height: 10px; top: 62%; left: 14%; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.landing-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1.1rem 2rem;
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+
+.footer-brand {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.footer-sep { color: var(--border); }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .top-bar   { padding: 1rem 1.25rem; }
+  .hero      { padding: 2.5rem 1rem 3rem; }
+
+  .hero__content { padding: 2.25rem 1.5rem; }
+
+  .login-link { display: none; }
+
+  .deco-ring--2,
+  .deco-ring--3 { display: none; }
+}

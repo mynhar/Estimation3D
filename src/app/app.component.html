@@ -1,8 +1,8 @@
-@if (user()) {
+<div [class.app-shell]="!!user()"
+     [class.sidebar-collapsed]="collapsed() && !!user()"
+     [class.sidebar-open]="mobileOpen() && !!user()">
 
-  <div class="app-shell"
-       [class.sidebar-collapsed]="collapsed()"
-       [class.sidebar-open]="mobileOpen()">
+  @if (user()) {
 
     <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
     <aside class="app-sidebar">
@@ -212,16 +212,15 @@
       </div>
     </div>
 
-    <!-- Contenido de la página -->
-    <main class="app-main">
-      <router-outlet />
+  }
+
+  <!-- ── Router outlet único — nunca se destruye ──────────────────────────── -->
+  <main [class.app-main]="!!user()">
+    <router-outlet />
+    @if (user()) {
       <app-footer />
-      <app-toast />
-    </main>
+    }
+    <app-toast />
+  </main>
 
-  </div>
-
-} @else {
-  <router-outlet />
-  <app-toast />
-}
+</div>
