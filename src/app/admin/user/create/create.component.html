@@ -1,211 +1,229 @@
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 px-3 px-xl-4">
 
-  <!-- Encabezado -->
-  <div class="d-flex align-items-center mb-4">
-    <button class="btn btn-link text-secondary p-0 me-3" (click)="cancelar()" [title]="'common.back' | translate">
-      <i class="bi bi-arrow-left fs-5"></i>
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <div class="form-page-header mb-4">
+    <button class="btn-back" type="button"
+            (click)="cancelar()" [title]="'common.back' | translate">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
     </button>
-    <i class="bi bi-person-plus-fill fs-4 text-primary me-2"></i>
-    <h4 class="mb-0">{{ 'admin_users.create_title' | translate }}</h4>
+    <div>
+      <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+      <h1 class="form-page-header__title">{{ 'admin_users.create_title' | translate }}</h1>
+    </div>
   </div>
 
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-8 col-xl-7">
+    <div class="col-12 col-lg-9 col-xl-8">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-4">
+        <div class="card form-card">
+          <div class="card-body p-4 p-lg-5">
 
-            <!-- ── Credenciales ── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-key me-1"></i>{{ 'admin_users.credentials' | translate }}
-            </h6>
-
-            <div class="row g-3 mb-4">
-
-              <!-- Email -->
-              <div class="col-12 col-md-7">
-                <label class="form-label fw-semibold">
-                  {{ 'common.email' | translate }} <span class="text-danger">*</span>
-                </label>
-                <input type="email" class="form-control"
-                       formControlName="email"
-                       placeholder="usuario@ejemplo.com"
-                       [class.is-invalid]="f['email'].invalid && f['email'].touched">
-                <div class="invalid-feedback">
-                  <ng-container *ngIf="f['email'].errors?.['required']">{{ 'admin_users.email_required' | translate }}</ng-container>
-                  <ng-container *ngIf="f['email'].errors?.['email']">{{ 'admin_users.email_invalid' | translate }}</ng-container>
-                </div>
+            <!-- ── Credenciales ───────────────────────────────────────────── -->
+            <div class="form-section mb-5">
+              <div class="form-section__header">
+                <i class="bi bi-key" aria-hidden="true"></i>
+                {{ 'admin_users.credentials' | translate }}
               </div>
+              <div class="row g-3">
 
-              <!-- Contraseña temporal -->
-              <div class="col-12 col-md-5">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_users.temp_password' | translate }} <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <input [type]="mostrarPassword ? 'text' : 'password'"
-                         class="form-control"
-                         formControlName="password"
-                         [placeholder]="'admin_users.min_chars_hint' | translate"
-                         [class.is-invalid]="f['password'].invalid && f['password'].touched">
-                  <button class="btn btn-outline-secondary" type="button"
-                          (click)="mostrarPassword = !mostrarPassword">
-                    <i class="bi" [class.bi-eye]="!mostrarPassword" [class.bi-eye-slash]="mostrarPassword"></i>
-                  </button>
-                  <div class="invalid-feedback">
-                    <ng-container *ngIf="f['password'].errors?.['required']">{{ 'admin_users.password_required' | translate }}</ng-container>
-                    <ng-container *ngIf="f['password'].errors?.['minlength']">{{ 'admin_users.min_chars' | translate }}</ng-container>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <hr class="my-3">
-
-            <!-- ── Datos personales ── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-person me-1"></i>{{ 'admin_users.personal_data' | translate }}
-            </h6>
-
-            <div class="row g-3 mb-4">
-
-              <!-- Nombre -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">
-                  {{ 'common.name' | translate }} <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="nombre"
-                       [placeholder]="'common.name' | translate"
-                       [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched">
-                <div class="invalid-feedback">{{ 'admin_users.name_required' | translate }}</div>
-              </div>
-
-              <!-- Apellido -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">
-                  {{ 'common.lastname' | translate }} <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="apellido"
-                       [placeholder]="'common.lastname' | translate"
-                       [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched">
-                <div class="invalid-feedback">{{ 'admin_users.lastname_required' | translate }}</div>
-              </div>
-
-              <!-- Teléfono -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">{{ 'common.phone' | translate }}</label>
-                <input type="tel" class="form-control"
-                       formControlName="telefono"
-                       placeholder="+506 8888-8888">
-              </div>
-
-              <!-- Avatar -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">{{ 'profile.photo' | translate }}</label>
-                <div class="d-flex align-items-center gap-3">
-
-                  <div class="avatar-upload-wrap position-relative"
-                       (click)="!subiendoAvatar && fileInput.click()" [class.uploading]="subiendoAvatar">
-                    <img *ngIf="previewUrl"
-                         [src]="previewUrl"
-                         class="rounded-circle avatar-img" width="64" height="64">
-                    <div *ngIf="!previewUrl"
-                         class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-camera-fill text-muted fs-5"></i>
-                    </div>
-                    <div *ngIf="subiendoAvatar" class="avatar-overlay rounded-circle d-flex align-items-center justify-content-center">
-                      <div class="spinner-border spinner-border-sm text-white" role="status"></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary d-block mb-1"
-                            (click)="fileInput.click()" [disabled]="subiendoAvatar">
-                      <i class="bi bi-upload me-1"></i>{{ subiendoAvatar ? ('profile.uploading' | translate) : ('admin_users.select_photo' | translate) }}
-                    </button>
-                    <small class="text-muted">{{ 'profile.photo_hint' | translate }}</small>
-                  </div>
-                </div>
-                <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
-                       class="d-none" (change)="onAvatarChange($event)">
-                <input type="hidden" formControlName="avatar_url">
-              </div>
-
-            </div>
-
-            <hr class="my-3">
-
-            <!-- ── Configuración de cuenta ── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-sliders me-1"></i>{{ 'admin_users.account_config' | translate }}
-            </h6>
-
-            <div class="row g-3">
-
-              <!-- Rol -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">
-                  {{ 'common.role' | translate }} <span class="text-danger">*</span>
-                </label>
-                <select class="form-select"
-                        formControlName="rol"
-                        [class.is-invalid]="f['rol'].invalid && f['rol'].touched">
-                  <option *ngFor="let r of roles" [value]="r">
-                    {{ ('role.' + r) | translate }}
-                  </option>
-                </select>
-                <div class="invalid-feedback">{{ 'admin_users.role_required' | translate }}</div>
-              </div>
-
-              <!-- Activo -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">
-                  {{ 'common.status' | translate }} <span class="text-danger">*</span>
-                </label>
-                <select class="form-select"
-                        formControlName="activo"
-                        [class.is-invalid]="f['activo'].invalid && f['activo'].touched">
-                  <option [ngValue]="true">{{ 'common.active' | translate }}</option>
-                  <option [ngValue]="false">{{ 'common.inactive' | translate }}</option>
-                </select>
-                <div class="invalid-feedback">{{ 'admin_users.status_required' | translate }}</div>
-              </div>
-
-              <!-- Proveedor (solo lectura) -->
-              <div class="col-12 col-md-6">
-                <label class="form-label fw-semibold">{{ 'admin_users.provider_label' | translate }}</label>
-                <input type="text" class="form-control bg-light" value="email" readonly>
-                <div class="form-text">{{ 'admin_users.provider_note' | translate }}</div>
-              </div>
-
-              <!-- perfil_completo (informativo) -->
-              <div class="col-12 col-md-6 d-flex align-items-center pt-3">
-                <div class="form-check form-switch mt-2">
-                  <input class="form-check-input" type="checkbox" disabled
-                         [checked]="f['nombre'].value && f['apellido'].value && f['telefono'].value && f['avatar_url'].value">
-                  <label class="form-check-label text-muted">
-                    {{ 'admin_users.complete_profile' | translate }}
-                    <small class="d-block">{{ 'admin_users.complete_profile_hint' | translate }}</small>
+                <div class="col-12 col-md-7">
+                  <label class="form-label">
+                    {{ 'common.email' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
                   </label>
+                  <input type="email" class="form-control"
+                         formControlName="email"
+                         placeholder="usuario@ejemplo.com"
+                         [class.is-invalid]="f['email'].invalid && f['email'].touched">
+                  <div class="invalid-feedback">
+                    @if (f['email'].errors?.['required']) {
+                      {{ 'admin_users.email_required' | translate }}
+                    } @else if (f['email'].errors?.['email']) {
+                      {{ 'admin_users.email_invalid' | translate }}
+                    }
+                  </div>
                 </div>
-              </div>
 
+                <div class="col-12 col-md-5">
+                  <label class="form-label">
+                    {{ 'admin_users.temp_password' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <div class="input-group">
+                    <input [type]="mostrarPassword() ? 'text' : 'password'"
+                           class="form-control"
+                           formControlName="password"
+                           [placeholder]="'admin_users.min_chars_hint' | translate"
+                           [class.is-invalid]="f['password'].invalid && f['password'].touched">
+                    <button class="btn btn-outline-secondary" type="button"
+                            (click)="mostrarPassword.set(!mostrarPassword())">
+                      <i class="bi" aria-hidden="true"
+                         [class.bi-eye]="!mostrarPassword()"
+                         [class.bi-eye-slash]="mostrarPassword()"></i>
+                    </button>
+                    <div class="invalid-feedback">
+                      @if (f['password'].errors?.['required']) {
+                        {{ 'admin_users.password_required' | translate }}
+                      } @else if (f['password'].errors?.['minlength']) {
+                        {{ 'admin_users.min_chars' | translate }}
+                      }
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="form-section-divider"></div>
+
+            <!-- ── Datos personales ──────────────────────────────────────── -->
+            <div class="form-section mb-5">
+              <div class="form-section__header">
+                <i class="bi bi-person" aria-hidden="true"></i>
+                {{ 'admin_users.personal_data' | translate }}
+              </div>
+              <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">
+                    {{ 'common.name' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <input type="text" class="form-control"
+                         formControlName="nombre"
+                         [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched">
+                  <div class="invalid-feedback">{{ 'admin_users.name_required' | translate }}</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">
+                    {{ 'common.lastname' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <input type="text" class="form-control"
+                         formControlName="apellido"
+                         [class.is-invalid]="f['apellido'].invalid && f['apellido'].touched">
+                  <div class="invalid-feedback">{{ 'admin_users.lastname_required' | translate }}</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">{{ 'common.phone' | translate }}</label>
+                  <input type="tel" class="form-control"
+                         formControlName="telefono"
+                         placeholder="+506 8888-8888">
+                </div>
+
+                <!-- Avatar -->
+                <div class="col-12 col-md-6">
+                  <label class="form-label">{{ 'profile.photo' | translate }}</label>
+                  <div class="avatar-upload-row">
+                    <div class="avatar-upload-wrap position-relative"
+                         (click)="!subiendoAvatar() && fileInput.click()"
+                         [class.uploading]="subiendoAvatar()">
+                      @if (previewUrl()) {
+                        <img [src]="previewUrl()!" class="avatar-img rounded-circle"
+                             width="64" height="64" alt="">
+                      } @else {
+                        <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center">
+                          <i class="bi bi-camera" aria-hidden="true"></i>
+                        </div>
+                      }
+                      @if (subiendoAvatar()) {
+                        <div class="avatar-overlay rounded-circle d-flex align-items-center justify-content-center">
+                          <div class="spinner-border spinner-border-sm text-white" role="status" aria-hidden="true"></div>
+                        </div>
+                      }
+                    </div>
+                    <div>
+                      <button type="button" class="btn btn-sm btn-outline-secondary d-block mb-1"
+                              (click)="fileInput.click()" [disabled]="subiendoAvatar()">
+                        <i class="bi bi-upload me-1" aria-hidden="true"></i>
+                        {{ subiendoAvatar() ? ('profile.uploading' | translate) : ('admin_users.select_photo' | translate) }}
+                      </button>
+                      <small class="text-ink-muted">{{ 'profile.photo_hint' | translate }}</small>
+                    </div>
+                  </div>
+                  <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
+                         class="d-none" (change)="onAvatarChange($event)">
+                  <input type="hidden" formControlName="avatar_url">
+                </div>
+
+              </div>
+            </div>
+
+            <div class="form-section-divider"></div>
+
+            <!-- ── Configuración de cuenta ────────────────────────────────── -->
+            <div class="form-section">
+              <div class="form-section__header">
+                <i class="bi bi-sliders" aria-hidden="true"></i>
+                {{ 'admin_users.account_config' | translate }}
+              </div>
+              <div class="row g-3">
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">
+                    {{ 'common.role' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <select class="form-select" formControlName="rol"
+                          [class.is-invalid]="f['rol'].invalid && f['rol'].touched">
+                    @for (r of roles; track r) {
+                      <option [value]="r">{{ ('role.' + r) | translate }}</option>
+                    }
+                  </select>
+                  <div class="invalid-feedback">{{ 'admin_users.role_required' | translate }}</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">
+                    {{ 'common.status' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <select class="form-select" formControlName="activo"
+                          [class.is-invalid]="f['activo'].invalid && f['activo'].touched">
+                    <option [ngValue]="true">{{ 'common.active' | translate }}</option>
+                    <option [ngValue]="false">{{ 'common.inactive' | translate }}</option>
+                  </select>
+                  <div class="invalid-feedback">{{ 'admin_users.status_required' | translate }}</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label">{{ 'admin_users.provider_label' | translate }}</label>
+                  <input type="text" class="form-control form-control-readonly" value="email" readonly>
+                  <div class="form-text">{{ 'admin_users.provider_note' | translate }}</div>
+                </div>
+
+                <div class="col-12 col-md-6 d-flex align-items-center pt-2">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkCompleto" disabled
+                           [checked]="f['nombre'].value && f['apellido'].value && f['telefono'].value && f['avatar_url'].value">
+                    <label class="form-check-label text-ink-muted" for="chkCompleto">
+                      {{ 'admin_users.complete_profile' | translate }}
+                      <small class="d-block fw-normal">{{ 'admin_users.complete_profile_hint' | translate }}</small>
+                    </label>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
           </div>
 
-          <div class="card-footer bg-white border-0 px-4 pb-4 pt-0 d-flex gap-2 justify-content-end">
+          <!-- ── Footer acciones ─────────────────────────────────────────── -->
+          <div class="form-card__footer">
             <button type="button" class="btn btn-outline-secondary"
-                    (click)="cancelar()" [disabled]="guardando">
-              <i class="bi bi-x-lg me-1"></i>{{ 'common.cancel' | translate }}
+                    (click)="cancelar()" [disabled]="guardando()">
+              <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="guardando">
-              <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2" role="status"></span>
-              <i *ngIf="!guardando" class="bi bi-person-check me-1"></i>
-              {{ guardando ? ('admin_users.creating' | translate) : ('admin_users.create_user' | translate) }}
+            <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ 'admin_users.creating' | translate }}
+              } @else {
+                <i class="bi bi-person-check me-1" aria-hidden="true"></i>
+                {{ 'admin_users.create_user' | translate }}
+              }
             </button>
           </div>
 

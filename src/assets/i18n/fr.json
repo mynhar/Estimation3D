@@ -22,7 +22,8 @@
     "mon_profil": "Mon profil",
     "deconnexion": "Se déconnecter",
     "ouvrir_menu": "Ouvrir le menu",
-    "colapsar_menu": "Réduire le menu"
+    "colapsar_menu": "Réduire le menu",
+    "inicio": "Accueil"
   },
   "role": {
     "client": "Client",
@@ -171,7 +172,31 @@
     "banner_single": "Vous avez une nouvelle offre de constructeur à examiner.",
     "banner_plural": "Vous avez {{count}} offres de constructeurs à examiner.",
     "compare_text": "Comparez et choisissez la meilleure proposition pour votre projet.",
-    "create_first": "Créer mon premier dossier"
+    "create_first": "Créer mon premier dossier",
+    "matterport_coming": "Votre vidéo 3D arrive bientôt",
+    "matterport_pending": "Votre vidéo 3D sera disponible 24–48 h après la visite de notre estimateur certifié, prévue le {{ date }}.",
+    "matterport_step1": "Visite",
+    "matterport_step2": "Numérisation 3D",
+    "matterport_step3": "Vidéo disponible",
+    "matterport_fullscreen": "Plein écran",
+    "tour_label": "Tour 3D",
+    "video_label": "Vidéo",
+    "matterport_tooltip": "Naviguez dans votre propriété scannée. Cliquez pour vous déplacer, pincez pour zoomer.",
+    "next_step": "Prochaine étape",
+    "team_message": "Message de l'équipe",
+    "my_documents": "Mes documents",
+    "no_message": "Aucun message de l'équipe pour le moment.",
+    "no_documents": "Aucun document disponible pour le moment.",
+    "timeline_title": "Historique",
+    "timeline_empty": "Aucun événement à afficher pour le moment.",
+    "progress_label": "Progression du dossier"
+  },
+  "timeline": {
+    "created": "Dossier créé",
+    "estimator_assigned": "Estimateur assigné",
+    "visit_scheduled": "Visite programmée",
+    "visit_done": "Visite effectuée",
+    "tour_available": "Tour 3D disponible"
   },
   "dashboard_builder": {
     "title": "Tableau de bord",
@@ -734,6 +759,7 @@
   },
   "profile": {
     "title": "Mon profil",
+    "eyebrow": "Mon compte",
     "subtitle": "Gérez vos informations personnelles.",
     "name": "Prénom",
     "lastname": "Nom de famille",
@@ -839,7 +865,9 @@
     "status_filter": "État",
     "edit_btn": "Modifier",
     "no_results": "Aucun résultat avec les filtres appliqués",
+    "no_results_hint": "Essayez d'ajuster la recherche ou de supprimer les filtres actifs.",
     "no_data": "Aucun dossier enregistré",
+    "no_data_hint": "Créez le premier dossier pour commencer à gérer les demandes.",
     "col_number": "N°",
     "col_service": "Service",
     "col_client": "Client",
@@ -870,8 +898,22 @@
     "contractor": "Constructeur",
     "price": "Prix",
     "generated_on": "Généré le",
-    "status_generado": "Généré",
-    "status_firmado": "Signé"
+    "signed_on": "Signé le",
+    "status_generado": "En attente de signature",
+    "status_firmado": "Signé",
+    "status_en_ejecucion": "En cours",
+    "status_completado": "Terminé",
+    "status_cancelado": "Annulé",
+    "sign_btn": "Signer le contrat",
+    "sign_title": "Signature numérique",
+    "sign_subtitle": "Vérifiez les conditions et confirmez votre acceptation",
+    "sign_legal_text": "En signant numériquement, vous confirmez avoir lu et examiné l'intégralité du contrat et en accepter les termes et conditions.",
+    "sign_terms_label": "J'ai lu et j'accepte les termes du contrat",
+    "sign_btn_confirm": "Signer numériquement",
+    "sign_cancel": "Annuler",
+    "signing": "Signature en cours…",
+    "success_signed": "Contrat signé avec succès.",
+    "err_sign": "Impossible de signer le contrat. Veuillez réessayer."
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -894,6 +936,20 @@
     "file_size": "Le fichier dépasse la taille maximale autorisée.",
     "file_type": "Type de fichier non autorisé.",
     "avatar_type": "Seules les images JPG, PNG ou WebP sont autorisées."
+  },
+  "realtime": {
+    "exp_cambio": "Dossier {{numero}} : nouveau statut «{{estado}}»",
+    "exp_asignado": "Votre dossier {{numero}} a été assigné à un estimateur.",
+    "exp_en_estimacion": "Votre dossier {{numero}} est en cours d'évaluation par un estimateur.",
+    "exp_estimado": "Votre dossier {{numero}} a été estimé. Consultez le rapport.",
+    "exp_en_oferta": "Votre dossier {{numero}} a des propositions de constructeurs disponibles.",
+    "exp_adjudicado": "Votre dossier {{numero}} a été adjugé à un constructeur.",
+    "exp_contratado": "Le dossier {{numero}} a été contracté avec succès !",
+    "exp_cancelado": "Le dossier {{numero}} a été annulé.",
+    "exp_asignado_estimador": "Le dossier {{numero}} vous a été assigné. Consultez vos dossiers à estimer.",
+    "ofe_aceptada": "Votre offre a été acceptée ! Consultez Mes Offres pour voir les détails.",
+    "ofe_rechazada": "Votre offre n'a pas été retenue. Le client a choisi une autre proposition.",
+    "ofe_pendiente": "Votre offre est revenue au statut en attente."
   },
   "admin_service_types": {
     "title": "Types de service",
@@ -941,5 +997,73 @@
     "create_submit": "Créer le service",
     "err_create": "Erreur lors de la création du service.",
     "success_created": "Service créé avec succès."
+  },
+
+  "admin_dashboard": {
+    "eyebrow": "Vue d'ensemble",
+    "title": "Tableau de bord",
+    "subtitle": "Résumé opérationnel de tous les dossiers et processus actifs.",
+    "refresh": "Actualiser",
+    "refreshed_at": "Mis à jour à",
+    "retry": "Réessayer",
+
+    "kpi_exp": "Dossiers",
+    "kpi_est": "Estimations",
+    "kpi_con": "Entrepreneurs",
+    "kpi_ctr": "Contrats",
+
+    "kpi_sub_cancelled": "annulés",
+    "kpi_sub_unassigned": "non assignés",
+    "kpi_sub_offers_sent": "offres envoyées",
+
+    "panel_exp": "Entonnoir des dossiers",
+    "panel_est": "Estimations",
+    "panel_con": "Entrepreneurs et offres",
+    "panel_ctr": "Contrats",
+
+    "panel_total_suffix": "total",
+    "panel_completed_suffix": "complétés",
+    "panel_active_suffix": "actifs",
+
+    "mini_unassigned": "Non assignés",
+    "mini_in_progress": "En estimation",
+    "mini_completed": "Estimés",
+    "mini_builders": "Entrepreneurs actifs",
+    "mini_offers_total": "Offres totales",
+    "mini_files_on_offer": "En cours d'offre",
+    "mini_total_contracts": "Contrats totaux",
+    "mini_contract_value": "Valeur totale active",
+
+    "cost_avg": "Coût moyen estimé",
+
+    "est_label_unassigned": "Non assignés",
+    "est_label_in_estimation": "En estimation",
+    "est_label_estimated": "Estimés",
+
+    "contract_generado": "Généré",
+    "contract_firmado": "Signé",
+    "contract_en_ejecucion": "En cours",
+    "contract_completado": "Complété",
+    "contract_cancelado": "Annulé",
+
+    "tipo_expediente": "Dossier",
+    "tipo_estimacion": "Estimation",
+    "tipo_oferta": "Offre",
+    "tipo_contrato": "Contrat",
+
+    "tl_title": "Activité récente",
+    "tl_subtitle": "Derniers événements système sur tous les processus.",
+    "tl_filter_exp": "Dossiers",
+    "tl_filter_est": "Estimations",
+    "tl_filter_ofe": "Offres",
+    "tl_filter_ctr": "Contrats",
+    "tl_empty": "Aucun événement à afficher.",
+    "tl_loading": "Chargement de l'activité…",
+
+    "tl_event_exp_created": "Dossier créé",
+    "tl_event_est_created": "Estimation enregistrée",
+    "tl_event_ofe_sent": "Offre soumise",
+    "tl_event_ctr_generated": "Contrat généré",
+    "tl_event_ctr_signed": "Contrat signé"
   }
 }

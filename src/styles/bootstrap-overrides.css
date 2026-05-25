@@ -1,0 +1,464 @@
+/* ============================================================
+   BOOTSTRAP 5 OVERRIDES
+   Mapea los tokens del sistema a las variables CSS nativas de
+   Bootstrap 5.3+ para que utilidades y componentes nativos
+   respeten la identidad visual.
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     Bootstrap — Tipografía
+     ---------------------------------------------------------- */
+  --bs-body-font-family:      var(--ds-font-body);
+  --bs-body-font-size:        var(--ds-text-base);
+  --bs-body-font-weight:      var(--ds-weight-regular);
+  --bs-body-line-height:      var(--ds-leading-normal);
+  --bs-body-color:            var(--ds-ink);
+  --bs-body-bg:               var(--ds-bg);
+
+  --bs-heading-color:         var(--ds-ink);
+
+  /* ----------------------------------------------------------
+     Bootstrap — Colores principales (mapeo a paleta)
+     ---------------------------------------------------------- */
+  --bs-primary:               #D4B96E;
+  --bs-primary-rgb:           212, 185, 110;
+  --bs-primary-text-emphasis: #1A1A1A;
+  --bs-primary-bg-subtle:     #F7EFD9;
+  --bs-primary-border-subtle: #EBD9A8;
+
+  --bs-secondary:             #1A1A1A;
+  --bs-secondary-rgb:         26, 26, 26;
+  --bs-secondary-bg-subtle:   #FBFAF6;
+  --bs-secondary-border-subtle: #E8E5DC;
+
+  --bs-success:               #5B7A4F;
+  --bs-success-rgb:           91, 122, 79;
+  --bs-success-bg-subtle:     #E4ECDF;
+
+  --bs-warning:               #B8862E;
+  --bs-warning-rgb:           184, 134, 46;
+  --bs-warning-bg-subtle:     #F4E8CC;
+
+  --bs-danger:                #A14545;
+  --bs-danger-rgb:            161, 69, 69;
+  --bs-danger-bg-subtle:      #EFD9D9;
+
+  --bs-info:                  #4A6B7A;
+  --bs-info-rgb:              74, 107, 122;
+  --bs-info-bg-subtle:        #DBE5E9;
+
+  --bs-light:                 #FBFAF6;
+  --bs-light-rgb:             251, 250, 246;
+
+  --bs-dark:                  #1A1A1A;
+  --bs-dark-rgb:              26, 26, 26;
+
+  /* ----------------------------------------------------------
+     Bootstrap — Bordes y radios
+     ---------------------------------------------------------- */
+  --bs-border-color:          var(--ds-border);
+  --bs-border-color-translucent: rgba(26, 26, 26, 0.08);
+
+  --bs-border-radius:         var(--ds-radius-md);
+  --bs-border-radius-sm:      var(--ds-radius-sm);
+  --bs-border-radius-lg:      var(--ds-radius-lg);
+  --bs-border-radius-xl:      var(--ds-radius-xl);
+  --bs-border-radius-pill:    var(--ds-radius-pill);
+
+  /* ----------------------------------------------------------
+     Bootstrap — Enlaces
+     ---------------------------------------------------------- */
+  --bs-link-color:            var(--ds-ink);
+  --bs-link-color-rgb:        26, 26, 26;
+  --bs-link-hover-color:      var(--ds-gold-active);
+  --bs-link-hover-color-rgb:  176, 150, 74;
+  --bs-link-decoration:       underline;
+  --bs-link-hover-decoration: underline;
+
+  /* ----------------------------------------------------------
+     Bootstrap — Focus
+     ---------------------------------------------------------- */
+  --bs-focus-ring-color:      rgba(212, 185, 110, 0.4);
+  --bs-focus-ring-width:      3px;
+}
+
+/* ============================================================
+   HEADINGS — Fraunces serif para títulos
+   ============================================================ */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.display-1, .display-2, .display-3,
+.display-4, .display-5, .display-6 {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-regular);
+  line-height: var(--ds-leading-tight);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+}
+
+h1, .h1 { font-size: var(--ds-text-5xl); }
+h2, .h2 { font-size: var(--ds-text-4xl); }
+h3, .h3 { font-size: var(--ds-text-3xl); }
+h4, .h4 { font-size: var(--ds-text-2xl); }
+h5, .h5 { font-size: var(--ds-text-xl); }
+h6, .h6 { font-size: var(--ds-text-lg); }
+
+.display-1 { font-size: var(--ds-text-display); }
+.display-2 { font-size: var(--ds-text-5xl); }
+.display-3 { font-size: var(--ds-text-4xl); }
+
+/* Lead más refinado */
+.lead {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-regular);
+  line-height: var(--ds-leading-relaxed);
+  color: var(--ds-ink-secondary);
+}
+
+/* ============================================================
+   BUTTONS — Botón primario dorado, secundario con borde tinta
+   ============================================================ */
+.btn {
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-medium);
+  font-size: var(--ds-text-sm);
+  letter-spacing: 0.01em;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--ds-radius-md);
+  border-width: 1px;
+  transition: var(--ds-transition-color),
+              transform var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-base) var(--ds-ease-out);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+/* Primario: dorado con tinta oscura */
+.btn-primary {
+  background-color: var(--ds-gold);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+}
+.btn-primary:hover {
+  background-color: var(--ds-gold-hover);
+  border-color: var(--ds-gold-hover);
+  color: var(--ds-ink-on-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-gold);
+}
+.btn-primary:active,
+.btn-primary:focus,
+.btn-check:checked + .btn-primary {
+  background-color: var(--ds-gold-active) !important;
+  border-color: var(--ds-gold-active) !important;
+  color: var(--ds-ink-on-accent) !important;
+  transform: translateY(0);
+}
+
+/* Secundario: transparente con borde tinta */
+.btn-secondary,
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--ds-ink);
+  color: var(--ds-ink);
+}
+.btn-secondary:hover,
+.btn-outline-secondary:hover {
+  background-color: var(--ds-ink);
+  border-color: var(--ds-ink);
+  color: var(--ds-bg);
+}
+
+/* Outline primario */
+.btn-outline-primary {
+  background-color: transparent;
+  border-color: var(--ds-gold);
+  color: var(--ds-ink);
+}
+.btn-outline-primary:hover {
+  background-color: var(--ds-gold);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+}
+
+/* Ghost (link-style sin underline) */
+.btn-link {
+  color: var(--ds-ink);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  position: relative;
+}
+.btn-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform-origin: right;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.btn-link:hover {
+  color: var(--ds-gold-active);
+}
+.btn-link:hover::after {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* Tamaños */
+.btn-sm  { padding: 0.5rem 1rem;    font-size: var(--ds-text-xs); }
+.btn-lg  { padding: 1rem 2rem;      font-size: var(--ds-text-base); }
+
+/* ============================================================
+   CARDS — Crema con bordes sutiles
+   ============================================================ */
+.card {
+  background-color: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  transition: box-shadow var(--ds-duration-base) var(--ds-ease-out),
+              transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.card:hover {
+  box-shadow: var(--ds-shadow-md);
+}
+.card-body    { padding: var(--ds-space-6); }
+.card-header,
+.card-footer  {
+  background-color: transparent;
+  border-color: var(--ds-border);
+  padding: var(--ds-space-5) var(--ds-space-6);
+}
+.card-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  margin-bottom: var(--ds-space-3);
+}
+.card-subtitle {
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-sm);
+}
+
+/* ============================================================
+   FORMS — Inputs cálidos con focus dorado
+   ============================================================ */
+.form-control,
+.form-select {
+  background-color: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-base);
+  padding: 0.75rem 1rem;
+  transition: var(--ds-transition-color),
+              box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--ds-surface-elevated);
+  border-color: var(--ds-gold);
+  box-shadow: var(--ds-focus-ring);
+  color: var(--ds-ink);
+}
+.form-control::placeholder {
+  color: var(--ds-ink-muted);
+  opacity: 1;
+}
+.form-label {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  margin-bottom: var(--ds-space-2);
+}
+.form-text {
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-xs);
+}
+
+/* Checkbox y radio */
+.form-check-input {
+  background-color: var(--ds-surface);
+  border-color: var(--ds-border-strong);
+}
+.form-check-input:checked {
+  background-color: var(--ds-gold);
+  border-color: var(--ds-gold);
+}
+.form-check-input:focus {
+  border-color: var(--ds-gold);
+  box-shadow: var(--ds-focus-ring);
+}
+
+/* ============================================================
+   BADGES — pill por defecto, paleta cálida
+   ============================================================ */
+.badge {
+  font-family: var(--ds-font-body);
+  font-weight: var(--ds-weight-medium);
+  font-size: var(--ds-text-2xs);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--ds-radius-pill);
+}
+.badge.text-bg-primary {
+  background-color: var(--ds-gold) !important;
+  color: var(--ds-ink) !important;
+}
+.badge.text-bg-secondary {
+  background-color: var(--ds-ink) !important;
+  color: var(--ds-bg) !important;
+}
+
+/* ============================================================
+   ALERTS — Suaves, con barra lateral
+   ============================================================ */
+.alert {
+  border: 1px solid transparent;
+  border-left-width: 4px;
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  font-size: var(--ds-text-sm);
+}
+.alert-primary {
+  background-color: var(--ds-gold-faint);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink);
+}
+.alert-success {
+  background-color: var(--ds-success-soft);
+  border-color: var(--ds-success);
+  color: var(--ds-ink);
+}
+.alert-warning {
+  background-color: var(--ds-warning-soft);
+  border-color: var(--ds-warning);
+  color: var(--ds-ink);
+}
+.alert-danger {
+  background-color: var(--ds-danger-soft);
+  border-color: var(--ds-danger);
+  color: var(--ds-ink);
+}
+.alert-info {
+  background-color: var(--ds-info-soft);
+  border-color: var(--ds-info);
+  color: var(--ds-ink);
+}
+
+/* ============================================================
+   NAVBAR — Crema, sin sombras pesadas
+   ============================================================ */
+.navbar {
+  background-color: var(--ds-surface);
+  border-bottom: 1px solid var(--ds-border);
+  padding: var(--ds-space-4) 0;
+}
+.navbar-brand {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+}
+.navbar-nav .nav-link {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  transition: var(--ds-transition-color);
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: var(--ds-gold-active);
+}
+
+/* ============================================================
+   TABLES — Sobrias
+   ============================================================ */
+.table {
+  --bs-table-bg:           transparent;
+  --bs-table-color:        var(--ds-ink);
+  --bs-table-border-color: var(--ds-border);
+  --bs-table-striped-bg:   var(--ds-bg-alt);
+  --bs-table-hover-bg:     var(--ds-gold-faint);
+}
+.table thead th {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  border-bottom: 2px solid var(--ds-border-strong);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.table tbody td {
+  padding: var(--ds-space-4) var(--ds-space-5);
+  vertical-align: middle;
+}
+
+/* ============================================================
+   MODAL — Crema elevada, sombra suave
+   ============================================================ */
+.modal-content {
+  background-color: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xl);
+}
+.modal-header,
+.modal-footer {
+  border-color: var(--ds-border);
+}
+.modal-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+}
+
+/* ============================================================
+   DROPDOWN
+   ============================================================ */
+.dropdown-menu {
+  background-color: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-lg);
+  padding: var(--ds-space-2);
+}
+.dropdown-item {
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-text-sm);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  color: var(--ds-ink);
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--ds-gold-faint);
+  color: var(--ds-ink);
+}
+
+/* ============================================================
+   PROGRESS — Dorado
+   ============================================================ */
+.progress {
+  background-color: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-pill);
+  height: 0.5rem;
+}
+.progress-bar {
+  background-color: var(--ds-gold);
+}

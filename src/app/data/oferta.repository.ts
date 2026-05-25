@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
 import { OfertaForm } from '../models';
+import { EstadoExpediente, EstadoOferta, TablesInsert, TablesUpdate } from '../types/supabase';
 
 export type OfertaRaw = {
   id:                string;
@@ -69,7 +70,7 @@ export class OfertaRepository {
       .select('expediente_id')
       .eq('constructor_id', constructorId);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((o: any) => o.expediente_id as string);
+    return (data ?? []).map((o: { expediente_id: string }) => o.expediente_id);
   }
 
   async findByConstructorIdConExpediente(constructorId: string): Promise<OfertaConExpediente[]> {
@@ -149,11 +150,11 @@ export class OfertaRepository {
     garantia_anos:     number | null;
     fecha_inicio:      string | null;
     descripcion:       string;
-    estado:            string;
+    estado:            EstadoOferta;
   }): Promise<string> {
     const { data, error } = await this.db
       .from('oferta')
-      .insert(payload as any)
+      .insert(payload as TablesInsert<'oferta'>)
       .select('id')
       .single();
     if (error) throw new Error(error.message);
@@ -170,7 +171,7 @@ export class OfertaRepository {
         garantia_anos:     form.garantia_anos ?? null,
         fecha_inicio:      form.fecha_inicio  || null,
         descripcion:       form.descripcion,
-      } as any)
+      } as TablesUpdate<'oferta'>)
       .eq('id', ofertaId);
     if (error) throw new Error(error.message);
   }
@@ -178,7 +179,7 @@ export class OfertaRepository {
   async updateEstadoExpedienteEnOferta(expedienteId: string): Promise<void> {
     const { error } = await this.db
       .from('expediente')
-      .update({ estado: 'en_oferta' } as any)
+      .update({ estado: 'en_oferta' as EstadoExpediente })
       .eq('id', expedienteId)
       .in('estado', ['estimado', 'en_oferta']);
     if (error) throw new Error(error.message);

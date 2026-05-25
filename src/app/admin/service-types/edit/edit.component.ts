@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -20,6 +20,7 @@ interface Servicio {
 @Component({
   selector: 'app-admin-service-type-edit',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './edit.component.html',
   styleUrl:    './edit.component.css',
@@ -32,10 +33,10 @@ export class AdminServiceTypeEditComponent implements OnInit {
   private toast     = inject(ToastService);
   private translate = inject(TranslateService);
 
-  cargando  = true;
-  guardando = false;
-  error: string | null = null;
-  servicio: Servicio | null = null;
+  cargando  = signal(true);
+  guardando = signal(false);
+  error     = signal<string | null>(null);
+  servicio  = signal<Servicio | null>(null);
 
   form = this.fb.group({
     nombre_fr:      ['', Validators.required],
@@ -63,7 +64,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
       if (error) throw error;
       if (!data)  throw new Error(this.translate.instant('admin_service_types.err_load'));
 
-      this.servicio = data as Servicio;
+      this.servicio.set(data as Servicio);
       this.form.patchValue({
         nombre_fr:      data.nombre_fr,
         nombre_en:      data.nombre_en,
@@ -74,17 +75,18 @@ export class AdminServiceTypeEditComponent implements OnInit {
         activo:         data.activo,
       });
     } catch (e: any) {
-      this.error = e.message ?? this.translate.instant('admin_service_types.err_load');
+      this.error.set(e.message ?? this.translate.instant('admin_service_types.err_load'));
     } finally {
-      this.cargando = false;
+      this.cargando.set(false);
     }
   }
 
   async onSubmit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    if (!this.servicio) return;
+    const s = this.servicio();
+    if (!s) return;
 
-    this.guardando = true;
+    this.guardando.set(true);
     try {
       const v = this.form.getRawValue();
       const { error } = await this.auth.client
@@ -98,7 +100,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
           descripcion_es: v.descripcion_es || null,
           activo:         v.activo!,
         })
-        .eq('id', this.servicio.id);
+        .eq('id', s.id);
 
       if (error) throw error;
 
@@ -113,7 +115,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
         'danger',
       );
     } finally {
-      this.guardando = false;
+      this.guardando.set(false);
     }
   }
 

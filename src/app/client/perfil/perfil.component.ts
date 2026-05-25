@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,18 +14,11 @@ interface PerfilRow {
   proveedor: string | null;
 }
 
-const ROL_BADGE: Record<string, string> = {
-  cliente:       'bg-primary',
-  estimador:     'bg-info text-dark',
-  constructor:   'bg-warning text-dark',
-  administrador: 'bg-danger',
-};
-
-const ROL_RING: Record<string, string> = {
-  cliente:       '#0d6efd',
-  estimador:     '#0dcaf0',
-  constructor:   '#ffc107',
-  administrador: '#dc3545',
+const ROL_BADGE_CLASS: Record<string, string> = {
+  cliente:       'role-badge role-badge--cliente',
+  estimador:     'role-badge role-badge--estimador',
+  constructor:   'role-badge role-badge--constructor',
+  administrador: 'role-badge role-badge--administrador',
 };
 
 const FALLBACK = 'assets/avatar-fallback.jpg';
@@ -34,6 +27,7 @@ const BUCKET   = 'archivos';
 @Component({
   selector: 'app-perfil',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslatePipe],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
@@ -112,7 +106,6 @@ export class PerfilComponent implements OnInit {
     const userId = this.user()?.id;
     if (!userId) return;
 
-    // Vista previa inmediata
     this.previewUrl.set(URL.createObjectURL(file));
     this.subiendoAvatar.set(true);
     this.exitoMsg.set('');
@@ -132,10 +125,8 @@ export class PerfilComponent implements OnInit {
         .from(BUCKET)
         .getPublicUrl(path).data.publicUrl;
 
-      // Añadir timestamp para evitar caché del navegador entre subidas
       const freshUrl = `${publicUrl}?t=${Date.now()}`;
 
-      // Guardar URL con cache-buster en DB para que el refresh también funcione
       const { error: updateError } = await this.auth.client
         .from('perfil')
         .update({ avatar_url: freshUrl })
@@ -209,8 +200,10 @@ export class PerfilComponent implements OnInit {
   }
 
   rolLabel(rol: string): string { return 'role.' + rol; }
-  rolBadge(rol: string): string { return ROL_BADGE[rol] ?? 'bg-secondary'; }
-  rolRing(rol: string):  string { return ROL_RING[rol]  ?? '#adb5bd'; }
+
+  rolBadgeClass(rol: string): string {
+    return ROL_BADGE_CLASS[rol] ?? 'role-badge role-badge--cliente';
+  }
 
   get displayName(): string {
     const p = this.perfil();

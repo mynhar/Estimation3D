@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
@@ -8,6 +8,7 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 @Component({
   selector: 'app-admin-file-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
@@ -52,6 +53,14 @@ export class AdminFileListComponent implements OnInit {
   hayFiltros = computed(() =>
     this.busqueda() !== '' || this.filtroEstado() !== 'todos'
   );
+
+  estadoCounts = computed(() => {
+    const counts: Record<string, number> = {};
+    for (const e of this._expedientes()) {
+      counts[e.estado] = (counts[e.estado] ?? 0) + 1;
+    }
+    return counts;
+  });
 
   get total(): number { return this._expedientes().length; }
 

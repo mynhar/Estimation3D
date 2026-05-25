@@ -1,98 +1,197 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, ElementRef, OnInit,
+  ViewChild, computed, inject, signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
-import { ExpedienteCliente } from '../../models';
+import { ArchivoService } from '../../services/archivo.service';
+import { EstimacionService } from '../../services/estimacion.service';
+import { ArchivoRow, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
 
-export interface EstadoConfig {
-  key:         string;
-  color:       string;
-  textColor:   string;
-  progressPct: number;
-  icon:        string;
+// ── 5 visual phases for the progress bar ─────────────────────────────────────
+
+export const FASES = [
+  { key: 'nuevo',         icon: 'bi-inbox'            },
+  { key: 'en_estimacion', icon: 'bi-search'            },
+  { key: 'estimado',      icon: 'bi-clipboard-check'   },
+  { key: 'en_oferta',     icon: 'bi-chat-square-quote' },
+  { key: 'contratado',    icon: 'bi-check-circle'      },
+] as const;
+
+// Maps DB estado to 1-based phase index (adjudicado → 5, cancelado → 0)
+const FASE_MAP: Record<string, number> = {
+  nuevo:         1,
+  en_estimacion: 2,
+  estimado:      3,
+  en_oferta:     4,
+  adjudicado:    5,
+  contratado:    5,
+  cancelado:     0,
+};
+
+// Token-based CSS class per estado
+const ESTADO_CLASE: Record<string, string> = {
+  nuevo:         'estado-badge--nuevo',
+  en_estimacion: 'estado-badge--en-estimacion',
+  estimado:      'estado-badge--estimado',
+  en_oferta:     'estado-badge--en-oferta',
+  adjudicado:    'estado-badge--adjudicado',
+  contratado:    'estado-badge--contratado',
+  cancelado:     'estado-badge--cancelado',
+};
+
+export interface TimelineEvento {
+  fecha:      string;
+  icon:       string;
+  titulo:     string;
+  subtitulo?: string;
+  tipo:       string;
 }
 
-export const ESTADOS: EstadoConfig[] = [
-  { key: 'nuevo',         color: '#adb5bd', textColor: '#fff', progressPct: 10,  icon: 'bi-inbox'           },
-  { key: 'en_estimacion', color: '#0dcaf0', textColor: '#000', progressPct: 30,  icon: 'bi-pencil-square'   },
-  { key: 'estimado',      color: '#0d6efd', textColor: '#fff', progressPct: 55,  icon: 'bi-clipboard-check' },
-  { key: 'en_oferta',     color: '#ffc107', textColor: '#000', progressPct: 70,  icon: 'bi-cash-coin'       },
-  { key: 'adjudicado',    color: '#fd7e14', textColor: '#fff', progressPct: 85,  icon: 'bi-award'           },
-  { key: 'contratado',    color: '#198754', textColor: '#fff', progressPct: 100, icon: 'bi-check2-circle'   },
-];
-
-const R             = 54;
-const CIRCUMFERENCE = 2 * Math.PI * R;
+// Priority sort: most urgent states first
+function estadoPriority(e: ExpedienteCliente): number {
+  const p: Record<string, number> = {
+    en_oferta: 0, adjudicado: 1, en_estimacion: 2,
+    estimado: 3, nuevo: 4, contratado: 5, cancelado: 6,
+  };
+  return p[e.estado] ?? 7;
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, NgbTooltipModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('matterportIframe') matterportIframe?: ElementRef<HTMLIFrameElement>;
+  @ViewChild('mediaVideo')       mediaVideo?:       ElementRef<HTMLVideoElement>;
+
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
+  private archivoService    = inject(ArchivoService);
   private translate         = inject(TranslateService);
+  private sanitizer         = inject(DomSanitizer);
 
   user        = toSignal(this.auth.user$);
-
-  private currentLang = toSignal(
+  currentLang = toSignal(
     this.translate.onLangChange.pipe(map(e => e.lang)),
     { initialValue: this.translate.currentLang || 'fr' },
   );
-  expedientes = signal<ExpedienteCliente[]>([]);
-  cargando    = signal(true);
 
-  // ── KPIs ──────────────────────────────────────────────────────────────────
+  expedientes     = signal<ExpedienteCliente[]>([]);
+  cargando        = signal(true);
+  idSeleccionado  = signal<string | null>(null);
+  detalleActivo   = signal<ExpedienteVistaCliente | null>(null);
+  cargandoDetalle = signal(false);
+  matterportTip   = signal(false);
+
+  // Media zone — index: 0..tourUrls.length-1 = tours, then videos
+  tourUrls    = signal<string[]>([]);
+  videos      = signal<ArchivoRow[]>([]);
+  mediaActiva = signal<number>(0);
+
+  readonly FASES = FASES;
+
+  // ── KPI computed ──────────────────────────────────────────────────────────
 
   total       = computed(() => this.expedientes().length);
   enProceso   = computed(() =>
-    this.expedientes().filter(e =>
-      ['nuevo', 'en_estimacion', 'estimado'].includes(e.estado)).length);
-  adjudicados = computed(() =>
-    this.expedientes().filter(e => e.estado === 'adjudicado').length);
+    this.expedientes().filter(e => ['nuevo','en_estimacion','estimado'].includes(e.estado)).length);
+  conOfertas  = computed(() =>
+    this.expedientes().filter(e => e.estado === 'en_oferta').length);
   completados = computed(() =>
     this.expedientes().filter(e => e.estado === 'contratado').length);
 
-  conOfertasPendientes = computed(() =>
-    this.expedientes().filter(e => e.estado === 'en_oferta').length);
+  // ── Active expediente ─────────────────────────────────────────────────────
 
-  // ── Donut SVG ─────────────────────────────────────────────────────────────
-
-  donutSegments = computed(() => {
-    const total = this.total();
-    if (total === 0) return [];
-    let offset = 0;
-    const segs: { key: string; count: number; color: string; dasharray: string; dashoffset: number }[] = [];
-    for (const cfg of ESTADOS) {
-      const count = this.expedientes().filter(e => e.estado === cfg.key).length;
-      if (count === 0) continue;
-      const portion = (count / total) * CIRCUMFERENCE;
-      segs.push({ key: cfg.key, count, color: cfg.color,
-        dasharray:  `${portion} ${CIRCUMFERENCE}`,
-        dashoffset: -offset });
-      offset += portion;
-    }
-    return segs;
-  });
-
-  estadoBreakdown = computed(() =>
-    ESTADOS
-      .map(cfg => ({ ...cfg, count: this.expedientes().filter(e => e.estado === cfg.key).length, pct: 0 }))
-      .filter(cfg => cfg.count > 0)
-      .map(cfg => ({ ...cfg, pct: Math.round((cfg.count / this.total()) * 100) }))
+  expedienteActivo = computed(() =>
+    this.expedientes().find(e => this.expId(e) === this.idSeleccionado())
+    ?? this.expedientes()[0]
+    ?? null
   );
 
-  readonly R             = R;
-  readonly CIRCUMFERENCE = CIRCUMFERENCE;
+  faseActual = computed((): number => {
+    const exp = this.expedienteActivo();
+    return exp ? (FASE_MAP[exp.estado] ?? 1) : 0;
+  });
+
+  estadoClase = computed((): string => {
+    const exp = this.expedienteActivo();
+    return exp ? (ESTADO_CLASE[exp.estado] ?? 'estado-badge--nuevo') : 'estado-badge--nuevo';
+  });
+
+  matterportUrl = computed((): SafeResourceUrl | null => {
+    if (!this.activaEsTour()) return null;
+    const url = this.tourUrls()[this.mediaActiva()];
+    return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
+  });
+
+  // ── Media zone computed ───────────────────────────────────────────────────
+
+  activaEsTour = computed(() => this.mediaActiva() < this.tourUrls().length);
+  tieneTour    = computed(() => this.tourUrls().length > 0);
+  tieneVideos  = computed(() => this.videos().length > 0);
+  tieneMedia   = computed(() => this.tieneTour() || this.tieneVideos());
+
+  videoActivoUrl = computed((): string | null => {
+    if (this.activaEsTour()) return null;
+    const vidIdx = this.mediaActiva() - this.tourUrls().length;
+    const v = this.videos()[vidIdx];
+    return v ? this.archivoService.publicUrl(v.url_storage) : null;
+  });
+
+  // ── Timeline computed ─────────────────────────────────────────────────────
+
+  timelineEventos = computed((): TimelineEvento[] => {
+    const d = this.detalleActivo();
+    if (!d) return [];
+    const events: TimelineEvento[] = [
+      { fecha: d.creado_en, tipo: 'creacion', icon: 'bi-folder-plus', titulo: 'timeline.created' },
+    ];
+    if (d.estimador_nombre) {
+      events.push({
+        fecha: d.fecha_visita, tipo: 'asignacion', icon: 'bi-person-check',
+        titulo: 'timeline.estimator_assigned', subtitulo: d.estimador_nombre,
+      });
+    }
+    if (d.fecha_visita_real) {
+      events.push({ fecha: d.fecha_visita_real, tipo: 'visita', icon: 'bi-camera', titulo: 'timeline.visit_done' });
+    } else if (d.fecha_visita && d.estimador_nombre) {
+      events.push({ fecha: d.fecha_visita, tipo: 'visita_prog', icon: 'bi-calendar-check', titulo: 'timeline.visit_scheduled' });
+    }
+    if (this.tourUrls().length > 0 || this.videos().length > 0) {
+      events.push({
+        fecha: d.fecha_visita_real ?? d.fecha_visita, tipo: 'tour',
+        icon: 'bi-camera-video', titulo: 'timeline.tour_available',
+      });
+    }
+    return events.sort((a, b) =>
+      new Date(b.fecha ?? '').getTime() - new Date(a.fecha ?? '').getTime()
+    );
+  });
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  get bienvenida(): string {
+    const u = this.user();
+    return u?.user_metadata?.['full_name']?.split(' ')[0]
+      ?? u?.email?.split('@')[0]
+      ?? '';
+  }
+
+  expId(exp: ExpedienteCliente): string { return String(exp.id); }
+
+  estadoClaseFor(estado: string): string {
+    return ESTADO_CLASE[estado] ?? 'estado-badge--nuevo';
+  }
 
   servicioNombre(s: ExpedienteCliente['servicio']): string {
     if (!s) return '';
@@ -102,11 +201,10 @@ export class DashboardComponent implements OnInit {
     return s.nombre_fr || s.nombre_es || '';
   }
 
-  cfg(estado: string): EstadoConfig {
-    return ESTADOS.find(e => e.key === estado) ?? ESTADOS[0];
-  }
+  isFaseDone(idx: number): boolean   { return this.faseActual() > idx + 1; }
+  isFaseActive(idx: number): boolean { return this.faseActual() === idx + 1; }
 
-  formatFecha(valor: string): string {
+  formatFecha(valor: string | null | undefined): string {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
@@ -120,24 +218,78 @@ export class DashboardComponent implements OnInit {
       : `${p['day']} ${p['month']} ${p['year']}`;
   }
 
-  get bienvenida(): string {
-    const u = this.user();
-    return u?.user_metadata?.['full_name']?.split(' ')[0]
-      ?? u?.email?.split('@')[0]
-      ?? '';
+  seleccionarMedia(idx: number) {
+    this.mediaActiva.set(idx);
   }
 
-  // ── Ciclo de vida ─────────────────────────────────────────────────────────
+  solicitarFullscreen() {
+    if (this.activaEsTour()) {
+      const el = this.matterportIframe?.nativeElement as HTMLIFrameElement & { requestFullscreen?: () => void };
+      if (el?.requestFullscreen) el.requestFullscreen();
+    } else {
+      const el = this.mediaVideo?.nativeElement;
+      if (el?.requestFullscreen) el.requestFullscreen();
+    }
+  }
+
+  dismissMatterportTip() {
+    this.matterportTip.set(false);
+    localStorage.setItem('matterport_tip_shown', '1');
+  }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   async ngOnInit() {
     const userId = this.user()?.id;
     if (!userId) return;
     try {
-      this.expedientes.set(await this.expedienteService.getMisExpedientes(userId));
+      const exps = await this.expedienteService.getMisExpedientes(userId);
+      exps.sort((a, b) => estadoPriority(a) - estadoPriority(b)
+        || new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
+      this.expedientes.set(exps);
+
+      if (exps.length > 0) {
+        this.idSeleccionado.set(this.expId(exps[0]));
+        await this.cargarDetalle(this.expId(exps[0]));
+        if (!localStorage.getItem('matterport_tip_shown')) {
+          this.matterportTip.set(true);
+        }
+      }
     } catch (e: any) {
       console.error('[Dashboard]', e.message);
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  async seleccionarExpediente(id: string) {
+    if (id === this.idSeleccionado()) return;
+    this.idSeleccionado.set(id);
+    this.detalleActivo.set(null);
+    this.tourUrls.set([]);
+    this.videos.set([]);
+    await this.cargarDetalle(id);
+  }
+
+  private async cargarDetalle(id: string) {
+    this.cargandoDetalle.set(true);
+    this.mediaActiva.set(0);
+    const [detalleResult, vidsResult] = await Promise.allSettled([
+      this.expedienteService.getVistaParaCliente(id),
+      this.archivoService.listarPorExpediente(id),
+    ]);
+    if (detalleResult.status === 'fulfilled') {
+      this.detalleActivo.set(detalleResult.value);
+      this.tourUrls.set(EstimacionService.parseUrls(detalleResult.value.url_tour));
+    } else {
+      console.error('[Dashboard detalle]', (detalleResult.reason as any)?.message);
+    }
+    if (vidsResult.status === 'fulfilled') {
+      this.videos.set(vidsResult.value.videos);
+    } else {
+      console.error('[Dashboard videos]', (vidsResult.reason as any)?.message);
+      this.videos.set([]);
+    }
+    this.cargandoDetalle.set(false);
   }
 }

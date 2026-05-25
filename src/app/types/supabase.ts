@@ -503,6 +503,10 @@ export type Database = {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
       }
+      cancelar_contrato: {
+        Args: { p_expediente_id: string }
+        Returns: undefined
+      }
       contar_ofertas_expedientes: {
         Args: { p_ids: string[] }
         Returns: {
@@ -510,7 +514,15 @@ export type Database = {
           total: number
         }[]
       }
+      firmar_contrato: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
       get_rol_usuario: { Args: never; Returns: string }
+      marcar_contratado: {
+        Args: { p_expediente_id: string }
+        Returns: undefined
+      }
       mi_rol: {
         Args: never
         Returns: Database["public"]["Enums"]["rol_usuario"]

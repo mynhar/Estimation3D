@@ -1,0 +1,197 @@
+/* ============================================================
+   DESIGN TOKENS
+   Sistema de diseño editorial cálido con acento dorado.
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     COLOR — Superficies
+     ---------------------------------------------------------- */
+  --ds-bg:                #F5F3EE;  /* Fondo principal (beige cálido) */
+  --ds-bg-alt:            #EFEDE6;  /* Variante para secciones alternas */
+  --ds-surface:           #FBFAF6;  /* Tarjetas, paneles (crema) */
+  --ds-surface-elevated:  #FFFFFF;  /* Modales, overlays */
+  --ds-overlay:           rgba(26, 26, 26, 0.4); /* Backdrops */
+
+  /* ----------------------------------------------------------
+     COLOR — Tinta / Texto
+     ---------------------------------------------------------- */
+  --ds-ink:               #1A1A1A;  /* Texto principal */
+  --ds-ink-secondary:     #4A4A4A;  /* Texto secundario */
+  --ds-ink-muted:         #7A7770;  /* Texto terciario, captions */
+  --ds-ink-on-accent:     #1A1A1A;  /* Texto sobre fondo dorado */
+  --ds-ink-inverse:       #FBFAF6;  /* Texto sobre fondos oscuros (raro) */
+
+  /* ----------------------------------------------------------
+     COLOR — Acento dorado (premium)
+     ---------------------------------------------------------- */
+  --ds-gold:              #D4B96E;  /* Dorado principal */
+  --ds-gold-hover:        #C2A85C;  /* Hover */
+  --ds-gold-active:       #B0964A;  /* Active / pressed */
+  --ds-gold-soft:         #EBD9A8;  /* Fondos sutiles, highlights */
+  --ds-gold-faint:        #F7EFD9;  /* Backgrounds muy suaves */
+
+  /* ----------------------------------------------------------
+     COLOR — Bordes y separadores
+     ---------------------------------------------------------- */
+  --ds-border:            #E8E5DC;  /* Borde estándar */
+  --ds-border-strong:     #D4D0C2;  /* Bordes de énfasis */
+  --ds-border-subtle:     #EFEDE6;  /* Separadores muy sutiles */
+
+  /* ----------------------------------------------------------
+     COLOR — Estados semánticos (en armonía con la paleta)
+     ---------------------------------------------------------- */
+  --ds-success:           #5B7A4F;  /* Verde oliva */
+  --ds-success-soft:      #E4ECDF;
+  --ds-warning:           #B8862E;  /* Mostaza */
+  --ds-warning-soft:      #F4E8CC;
+  --ds-danger:            #A14545;  /* Borgoña */
+  --ds-danger-soft:       #EFD9D9;
+  --ds-info:              #4A6B7A;  /* Azul pizarra */
+  --ds-info-soft:         #DBE5E9;
+
+  /* ----------------------------------------------------------
+     TIPOGRAFÍA
+     ---------------------------------------------------------- */
+  --ds-font-display:      'Fraunces', 'Iowan Old Style', 'Palatino', Georgia, serif;
+  --ds-font-body:         'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ds-font-mono:         'DM Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Escala tipográfica (basada en 16px) */
+  --ds-text-2xs:          0.6875rem;   /* 11px - eyebrows, labels */
+  --ds-text-xs:           0.75rem;     /* 12px */
+  --ds-text-sm:           0.875rem;    /* 14px */
+  --ds-text-base:         1rem;        /* 16px - body */
+  --ds-text-lg:           1.125rem;    /* 18px - lead */
+  --ds-text-xl:           1.375rem;    /* 22px - h5 */
+  --ds-text-2xl:          1.75rem;     /* 28px - h4 */
+  --ds-text-3xl:          2.25rem;     /* 36px - h3 */
+  --ds-text-4xl:          3rem;        /* 48px - h2 */
+  --ds-text-5xl:          4rem;        /* 64px - h1 */
+  --ds-text-display:      5.5rem;      /* 88px - hero */
+
+  /* Pesos */
+  --ds-weight-regular:    400;
+  --ds-weight-medium:     500;
+  --ds-weight-semibold:   600;
+  --ds-weight-bold:       700;
+
+  /* Interlineado */
+  --ds-leading-tight:     1.1;
+  --ds-leading-snug:      1.25;
+  --ds-leading-normal:    1.5;
+  --ds-leading-relaxed:   1.65;
+
+  /* Tracking (letter-spacing) */
+  --ds-tracking-tight:    -0.02em;
+  --ds-tracking-normal:   0;
+  --ds-tracking-wide:     0.04em;
+  --ds-tracking-widest:   0.18em;  /* Para eyebrows en mayúsculas */
+
+  /* ----------------------------------------------------------
+     ESPACIADO (escala de 4px, generosa)
+     ---------------------------------------------------------- */
+  --ds-space-0:           0;
+  --ds-space-1:           0.25rem;   /* 4px */
+  --ds-space-2:           0.5rem;    /* 8px */
+  --ds-space-3:           0.75rem;   /* 12px */
+  --ds-space-4:           1rem;      /* 16px */
+  --ds-space-5:           1.5rem;    /* 24px */
+  --ds-space-6:           2rem;      /* 32px */
+  --ds-space-7:           2.5rem;    /* 40px */
+  --ds-space-8:           3rem;      /* 48px */
+  --ds-space-9:           4rem;      /* 64px */
+  --ds-space-10:          5rem;      /* 80px */
+  --ds-space-11:          6rem;      /* 96px */
+  --ds-space-12:          8rem;      /* 128px */
+
+  /* ----------------------------------------------------------
+     RADIO DE BORDES (sutiles, 4-6px según brief)
+     ---------------------------------------------------------- */
+  --ds-radius-none:       0;
+  --ds-radius-sm:         4px;
+  --ds-radius-md:         6px;       /* Default para botones, inputs */
+  --ds-radius-lg:         8px;       /* Cards */
+  --ds-radius-xl:         12px;      /* Modales */
+  --ds-radius-pill:       999px;     /* Tags, chips */
+  --ds-radius-circle:     50%;
+
+  /* ----------------------------------------------------------
+     SOMBRAS (suaves, cálidas — no negras puras)
+     ---------------------------------------------------------- */
+  --ds-shadow-xs:         0 1px 2px rgba(26, 26, 26, 0.04);
+  --ds-shadow-sm:         0 2px 4px rgba(26, 26, 26, 0.05),
+                          0 1px 2px rgba(26, 26, 26, 0.04);
+  --ds-shadow-md:         0 4px 12px rgba(26, 26, 26, 0.06),
+                          0 2px 4px rgba(26, 26, 26, 0.04);
+  --ds-shadow-lg:         0 12px 24px rgba(26, 26, 26, 0.08),
+                          0 4px 8px rgba(26, 26, 26, 0.04);
+  --ds-shadow-xl:         0 24px 48px rgba(26, 26, 26, 0.12),
+                          0 8px 16px rgba(26, 26, 26, 0.06);
+  --ds-shadow-gold:       0 4px 16px rgba(212, 185, 110, 0.32);
+
+  /* Focus ring (dorado, accesible) */
+  --ds-focus-ring:        0 0 0 3px rgba(212, 185, 110, 0.4);
+
+  /* ----------------------------------------------------------
+     TRANSICIONES
+     ---------------------------------------------------------- */
+  --ds-ease-out:          cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-in-out:       cubic-bezier(0.65, 0, 0.35, 1);
+
+  --ds-duration-fast:     150ms;
+  --ds-duration-base:     250ms;
+  --ds-duration-slow:     400ms;
+
+  --ds-transition-color:  color var(--ds-duration-fast) var(--ds-ease-out),
+                          background-color var(--ds-duration-fast) var(--ds-ease-out),
+                          border-color var(--ds-duration-fast) var(--ds-ease-out);
+
+  /* ----------------------------------------------------------
+     LAYOUT
+     ---------------------------------------------------------- */
+  --ds-container-sm:      640px;
+  --ds-container-md:      768px;
+  --ds-container-lg:      1024px;
+  --ds-container-xl:      1280px;
+  --ds-container-2xl:     1440px;
+
+  --ds-z-base:            1;
+  --ds-z-dropdown:        100;
+  --ds-z-sticky:          200;
+  --ds-z-overlay:         900;
+  --ds-z-modal:           1000;
+  --ds-z-toast:           1100;
+}
+
+/* ============================================================
+   RESET BASE
+   ============================================================ */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-color: var(--ds-bg);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-base);
+  line-height: var(--ds-leading-normal);
+  font-weight: var(--ds-weight-regular);
+}
+
+::selection {
+  background-color: var(--ds-gold-soft);
+  color: var(--ds-ink);
+}
+
+/* Accesibilidad: respeta preferencias de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

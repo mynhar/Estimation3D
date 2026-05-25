@@ -108,7 +108,7 @@ export class ContratoService {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, url_pdf, descripcion_trabajo,
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -154,8 +154,9 @@ export class ContratoService {
         fecha_inicio:      ofe?.fecha_inicio      ?? '',
         descripcion_trabajo: c.descripcion_trabajo ?? '',
         estado:             c.estado,
-        generado_en:        c.generado_en ?? '',
-        url_pdf:            c.url_pdf     ?? null,
+        generado_en:        c.generado_en  ?? '',
+        firmado_en:         c.firmado_en   ?? null,
+        url_pdf:            c.url_pdf      ?? null,
       } as ContratoListItem;
     });
   }
@@ -188,7 +189,12 @@ export class ContratoService {
   }
 
   async cancelarContrato(expedienteId: string): Promise<void> {
-    const { error } = await (this.db.rpc as any)('cancelar_contrato', { p_expediente_id: expedienteId });
+    const { error } = await this.db.rpc('cancelar_contrato', { p_expediente_id: expedienteId });
+    if (error) throw new Error(error.message);
+  }
+
+  async firmarContrato(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('firmar_contrato', { p_contrato_id: contratoId });
     if (error) throw new Error(error.message);
   }
 
@@ -211,7 +217,7 @@ export class ContratoService {
       .single();
 
     if (error) throw new Error(error.message);
-    return (data as any).id as string;
+    return data.id;
   }
 
   async actualizarUrlPdf(contratoId: string, urlPdf: string): Promise<void> {

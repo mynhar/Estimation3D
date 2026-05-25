@@ -1,53 +1,84 @@
-<div class="container-xl py-4 px-3 px-md-4 perfil-wrap">
+<div class="container-xl py-5 px-3 px-md-4 perfil-wrap">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="perfil-header rounded-4 p-4 mb-4">
-    <h4 class="fw-bold mb-1">{{ 'profile.title' | translate }}</h4>
-    <p class="text-muted small mb-0">
-      {{ 'profile.subtitle' | translate }}
-    </p>
+  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+  <header class="perfil-page-header mb-5">
+    <span class="eyebrow">{{ 'profile.eyebrow' | translate }}</span>
+    <h1 class="perfil-page-header__title">{{ 'profile.title' | translate }}</h1>
+    <p class="perfil-page-header__lead">{{ 'profile.subtitle' | translate }}</p>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Skeleton mientras carga ───────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="row g-4 g-lg-5 align-items-start" aria-hidden="true">
+
+      <!-- Skeleton identidad -->
+      <div class="col-lg-4">
+        <div class="card identity-card">
+          <div class="card-body p-4 text-center">
+            <div class="skel skel--circle skel--avatar mx-auto mb-4"></div>
+            <div class="skel skel--xl-line skel--half mx-auto mb-2"></div>
+            <div class="skel skel--md-line skel--wide mx-auto mb-4"></div>
+            <div class="skel skel--pill mx-auto mb-4"></div>
+            <hr class="identity-divider">
+            @for (_ of [1, 2, 3]; track $index) {
+              <div class="d-flex align-items-start gap-3 mb-3 text-start">
+                <div class="skel skel--icon"></div>
+                <div class="flex-grow-1">
+                  <div class="skel skel--sm-line skel--narrow mb-2"></div>
+                  <div class="skel skel--md-line skel--half"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Skeleton formulario -->
+      <div class="col-lg-8">
+        <div class="card form-card">
+          <div class="form-card__header">
+            <div class="skel skel--lg-line skel--hdr-title"></div>
+          </div>
+          <div class="card-body p-4">
+            <div class="row g-3">
+              @for (_ of [1, 2, 3, 4]; track $index) {
+                <div class="col-sm-6">
+                  <div class="skel skel--sm-line skel--narrow mb-2"></div>
+                  <div class="skel skel--input"></div>
+                </div>
+              }
+            </div>
+            <div class="skel skel--btn mt-4"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
   } @else {
-    <div class="row g-4 align-items-start">
+    <div class="row g-4 g-lg-5 align-items-start">
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA IZQUIERDA · Identidad                                     -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- ════════════════════════════════════════════════════════════════════
+           COLUMNA IZQUIERDA · Identidad
+           ════════════════════════════════════════════════════════════════════ -->
       <div class="col-lg-4">
-
-        <!-- Tarjeta de identidad -->
-        <div class="card border-0 shadow-sm rounded-4 identity-card">
+        <div class="card identity-card">
           <div class="card-body p-4 text-center">
 
-            <!-- Avatar con anillo de color por rol -->
-            <div class="avatar-wrap mx-auto mb-3"
-                 [style.--ring-color]="perfil() ? rolRing(perfil()!.rol) : '#adb5bd'">
+            <!-- Avatar con anillo dorado -->
+            <div class="avatar-wrap mx-auto mb-3">
 
-              <!-- Email: clicable para subir foto -->
               @if (esProveedorEmail) {
-                <label class="avatar-label d-block position-relative" [class.uploading]="subiendoAvatar()">
-                  <img
-                    [src]="avatarSrc"
-                    [alt]="displayName"
-                    class="avatar-img rounded-circle"
-                    (error)="$any($event.target).src='assets/avatar-fallback.jpg'"
-                  />
-                  <!-- Overlay cámara -->
-                  <span class="avatar-camera-overlay rounded-circle d-flex flex-column align-items-center justify-content-center">
+                <label class="avatar-label" [class.avatar-label--uploading]="subiendoAvatar()">
+                  <img [src]="avatarSrc" [alt]="displayName" class="avatar-img"
+                       (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
+                  <span class="avatar-overlay" aria-hidden="true">
                     @if (subiendoAvatar()) {
                       <span class="spinner-border spinner-border-sm text-white" role="status"></span>
                     } @else {
-                      <i class="bi bi-camera-fill text-white fs-5"></i>
-                      <span class="text-white" style="font-size:0.6rem;margin-top:2px">{{ 'profile.change_photo_short' | translate }}</span>
+                      <i class="bi bi-camera"></i>
+                      <span class="avatar-overlay__label">{{ 'profile.change_photo_short' | translate }}</span>
                     }
                   </span>
                   <input type="file" accept="image/jpeg,image/png,image/webp"
@@ -55,29 +86,22 @@
                          [disabled]="subiendoAvatar()">
                 </label>
 
-              <!-- Google: solo muestra el avatar -->
               } @else {
-                <img
-                  [src]="avatarSrc"
-                  [alt]="displayName"
-                  class="avatar-img rounded-circle"
-                  referrerpolicy="no-referrer"
-                  (error)="$any($event.target).src='assets/avatar-fallback.jpg'"
-                />
+                <img [src]="avatarSrc" [alt]="displayName" class="avatar-img"
+                     referrerpolicy="no-referrer"
+                     (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
               }
 
             </div>
 
-            <!-- Nombre -->
-            <h5 class="identity-name fw-bold mb-1">{{ displayName }}</h5>
+            <!-- Nombre y email -->
+            <h2 class="identity-name mb-1">{{ displayName }}</h2>
+            <p class="identity-email mb-3">{{ user()?.email }}</p>
 
-            <!-- Email -->
-            <p class="identity-email text-muted mb-3">{{ user()?.email }}</p>
-
-            <!-- Badges de rol y proveedor -->
+            <!-- Rol y proveedor -->
             <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap mb-4">
               @if (perfil()) {
-                <span class="badge {{ rolBadge(perfil()!.rol) }} role-badge">
+                <span [class]="rolBadgeClass(perfil()!.rol)">
                   {{ rolLabel(perfil()!.rol) | translate }}
                 </span>
               }
@@ -99,28 +123,30 @@
             <!-- Datos de cuenta -->
             <div class="account-info text-start">
               <div class="account-row">
-                <span class="account-row__icon"><i class="bi bi-calendar3"></i></span>
+                <span class="account-row__icon" aria-hidden="true"><i class="bi bi-calendar3"></i></span>
                 <div>
                   <p class="account-row__label">{{ 'profile.member_since' | translate }}</p>
                   <p class="account-row__value">{{ memberSince || '—' }}</p>
                 </div>
               </div>
               <div class="account-row">
-                <span class="account-row__icon"><i class="bi bi-shield-check"></i></span>
+                <span class="account-row__icon" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
                 <div>
                   <p class="account-row__label">{{ 'profile.account_status' | translate }}</p>
-                  <p class="account-row__value text-success fw-semibold">
-                    <i class="bi bi-check-circle-fill me-1"></i>{{ 'profile.status_active' | translate }}
+                  <p class="account-row__value account-row__value--active">
+                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ 'profile.status_active' | translate }}
                   </p>
                 </div>
               </div>
               @if (perfil()?.proveedor) {
                 <div class="account-row">
-                  <span class="account-row__icon"><i class="bi bi-lock"></i></span>
+                  <span class="account-row__icon" aria-hidden="true"><i class="bi bi-lock"></i></span>
                   <div>
                     <p class="account-row__label">{{ 'profile.auth_method' | translate }}</p>
                     <p class="account-row__value">
-                      {{ perfil()!.proveedor === 'google' ? ('profile.auth_google' | translate) : ('profile.auth_email' | translate) }}
+                      {{ perfil()!.proveedor === 'google'
+                          ? ('profile.auth_google' | translate)
+                          : ('profile.auth_email'  | translate) }}
                     </p>
                   </div>
                 </div>
@@ -129,23 +155,21 @@
 
           </div>
         </div>
-
       </div>
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA DERECHA · Formulario de edición                           -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
+      <!-- ════════════════════════════════════════════════════════════════════
+           COLUMNA DERECHA · Formulario
+           ════════════════════════════════════════════════════════════════════ -->
       <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
+        <div class="card form-card">
 
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-pencil-square me-2 text-primary"></i>{{ 'profile.personal_data' | translate }}
+          <div class="form-card__header">
+            <span class="form-card__title">
+              <i class="bi bi-pencil-square form-card__title-icon" aria-hidden="true"></i>
+              {{ 'profile.personal_data' | translate }}
             </span>
             @if (hasCambios()) {
-              <span class="cambios-pill">
-                <i class="bi bi-circle-fill me-1" style="font-size:0.5rem"></i>
+              <span class="cambios-pill" role="status">
                 {{ 'profile.unsaved_changes' | translate }}
               </span>
             }
@@ -153,121 +177,103 @@
 
           <div class="card-body p-4">
 
-            <!-- Mensajes de feedback -->
+            <!-- Alertas de feedback -->
             @if (exitoMsg()) {
-              <div class="alert alert-success d-flex align-items-center gap-2 py-2 mb-4">
-                <i class="bi bi-check-circle-fill flex-shrink-0"></i>
-                <span class="small">{{ exitoMsg() | translate }}</span>
+              <div class="feedback-alert feedback-alert--success" role="alert">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                <span>{{ exitoMsg() | translate }}</span>
               </div>
             }
             @if (errorMsg()) {
-              <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-4">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-                <span class="small">{{ errorMsg() | translate }}</span>
+              <div class="feedback-alert feedback-alert--danger" role="alert">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <span>{{ errorMsg() | translate }}</span>
               </div>
             }
 
-            <div class="row g-3">
+            <div class="row g-4">
 
               <!-- Nombre -->
               <div class="col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'common.name' | translate }} <span class="text-danger">*</span>
+                <label class="form-label">
+                  {{ 'common.name' | translate }}
+                  <span class="req-star" aria-hidden="true">*</span>
                 </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  [ngModel]="nombre()"
-                  (ngModelChange)="nombre.set($event)"
-                  [placeholder]="'profile.name_placeholder' | translate"
-                  maxlength="80"
-                  autocomplete="given-name"
-                />
+                <input type="text" class="form-control"
+                       [ngModel]="nombre()" (ngModelChange)="nombre.set($event)"
+                       [placeholder]="'profile.name_placeholder' | translate"
+                       maxlength="80" autocomplete="given-name" />
               </div>
 
               <!-- Apellido -->
               <div class="col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'common.lastname' | translate }} <span class="text-danger">*</span>
+                <label class="form-label">
+                  {{ 'common.lastname' | translate }}
+                  <span class="req-star" aria-hidden="true">*</span>
                 </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  [ngModel]="apellido()"
-                  (ngModelChange)="apellido.set($event)"
-                  [placeholder]="'profile.lastname_placeholder' | translate"
-                  maxlength="80"
-                  autocomplete="family-name"
-                />
+                <input type="text" class="form-control"
+                       [ngModel]="apellido()" (ngModelChange)="apellido.set($event)"
+                       [placeholder]="'profile.lastname_placeholder' | translate"
+                       maxlength="80" autocomplete="family-name" />
               </div>
 
               <!-- Teléfono -->
               <div class="col-sm-6">
-                <label class="form-label fw-medium">{{ 'common.phone' | translate }}</label>
+                <label class="form-label">{{ 'common.phone' | translate }}</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                  <input
-                    type="tel"
-                    class="form-control"
-                    [ngModel]="telefono()"
-                    (ngModelChange)="telefono.set($event)"
-                    [placeholder]="'profile.phone_placeholder' | translate"
-                    maxlength="20"
-                    autocomplete="tel"
-                  />
+                  <span class="input-group-text" aria-hidden="true">
+                    <i class="bi bi-telephone"></i>
+                  </span>
+                  <input type="tel" class="form-control"
+                         [ngModel]="telefono()" (ngModelChange)="telefono.set($event)"
+                         [placeholder]="'profile.phone_placeholder' | translate"
+                         maxlength="20" autocomplete="tel" />
                 </div>
               </div>
 
               <!-- Email (solo lectura) -->
               <div class="col-sm-6">
-                <label class="form-label fw-medium">{{ 'common.email' | translate }}</label>
+                <label class="form-label">{{ 'common.email' | translate }}</label>
                 <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                  <input
-                    type="email"
-                    class="form-control bg-light"
-                    [value]="user()?.email ?? ''"
-                    readonly
-                    tabindex="-1"
-                    autocomplete="email"
-                  />
+                  <span class="input-group-text" aria-hidden="true">
+                    <i class="bi bi-envelope"></i>
+                  </span>
+                  <input type="email" class="form-control form-control-readonly"
+                         [value]="user()?.email ?? ''"
+                         readonly tabindex="-1" autocomplete="email" />
                 </div>
                 <div class="form-text">
-                  <i class="bi bi-lock me-1"></i>{{ 'profile.email_readonly' | translate }}
+                  <i class="bi bi-lock me-1" aria-hidden="true"></i>{{ 'profile.email_readonly' | translate }}
                 </div>
               </div>
 
             </div>
 
             <!-- Botonera -->
-            <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+            <div class="form-actions mt-5">
 
-              <button
-                class="btn btn-primary px-4 fw-semibold"
-                (click)="guardar()"
-                [disabled]="guardando() || !hasCambios()"
-              >
+              <button class="btn btn-primary px-4"
+                      (click)="guardar()"
+                      [disabled]="guardando() || !hasCambios()">
                 @if (guardando()) {
-                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                   {{ 'common.saving' | translate }}
                 } @else {
-                  <i class="bi bi-floppy me-2"></i>{{ 'profile.save_changes' | translate }}
+                  <i class="bi bi-floppy me-2" aria-hidden="true"></i>{{ 'profile.save_changes' | translate }}
                 }
               </button>
 
               @if (hasCambios()) {
-                <button
-                  class="btn btn-outline-secondary"
-                  (click)="resetForm()"
-                  [disabled]="guardando()"
-                >
-                  <i class="bi bi-arrow-counterclockwise me-1"></i>{{ 'common.discard' | translate }}
+                <button class="btn btn-outline-secondary"
+                        (click)="resetForm()"
+                        [disabled]="guardando()">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>{{ 'common.discard' | translate }}
                 </button>
               }
 
               @if (!hasCambios() && !guardando()) {
                 <span class="no-cambios-hint">
-                  <i class="bi bi-check-circle me-1"></i>{{ 'profile.no_changes' | translate }}
+                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ 'profile.no_changes' | translate }}
                 </span>
               }
 
@@ -276,12 +282,10 @@
           </div>
         </div>
 
-        <!-- ── Nota informativa ────────────────────────────────────────── -->
-        <div class="info-note rounded-3 p-3 mt-3 d-flex align-items-start gap-2">
-          <i class="bi bi-info-circle-fill text-primary flex-shrink-0 mt-1"></i>
-          <p class="small mb-0 text-muted">
-            {{ 'profile.info_note' | translate }}
-          </p>
+        <!-- Nota informativa -->
+        <div class="info-note mt-3">
+          <i class="bi bi-info-circle flex-shrink-0 mt-1" aria-hidden="true"></i>
+          <p class="mb-0">{{ 'profile.info_note' | translate }}</p>
         </div>
 
       </div>

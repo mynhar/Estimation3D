@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AdminFileListComponent } from './list/list.component';
 
 @Component({
   selector: 'app-admin-file',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AdminFileListComponent],
   template: `<app-admin-file-list />`,
 })

@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,7 +9,8 @@ import { RolUsuario } from '../../../types/supabase';
 @Component({
   selector: 'app-admin-user-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -21,10 +21,10 @@ export class AdminUserCreateComponent {
   private router    = inject(Router);
   private translate = inject(TranslateService);
 
-  guardando       = false;
-  mostrarPassword = false;
-  subiendoAvatar  = false;
-  previewUrl: string | null = null;
+  guardando       = signal(false);
+  mostrarPassword = signal(false);
+  subiendoAvatar  = signal(false);
+  previewUrl      = signal<string | null>(null);
 
   readonly roles: RolUsuario[] = ['cliente', 'estimador', 'constructor', 'administrador'];
 
@@ -47,7 +47,7 @@ export class AdminUserCreateComponent {
       return;
     }
 
-    this.guardando = true;
+    this.guardando.set(true);
     try {
       const v = this.form.getRawValue();
       await this.service.crearUsuario({
@@ -66,7 +66,7 @@ export class AdminUserCreateComponent {
     } catch (e: any) {
       this.toast.show(e.message ?? this.translate.instant('admin_users.err_create'), 'danger');
     } finally {
-      this.guardando = false;
+      this.guardando.set(false);
     }
   }
 
@@ -74,16 +74,16 @@ export class AdminUserCreateComponent {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    this.previewUrl = URL.createObjectURL(file);
-    this.subiendoAvatar = true;
+    this.previewUrl.set(URL.createObjectURL(file));
+    this.subiendoAvatar.set(true);
     try {
       const url = await this.service.uploadAvatar(file);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
       this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
-      this.previewUrl = null;
+      this.previewUrl.set(null);
     } finally {
-      this.subiendoAvatar = false;
+      this.subiendoAvatar.set(false);
     }
   }
 

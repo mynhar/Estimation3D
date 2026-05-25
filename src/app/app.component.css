@@ -1,26 +1,48 @@
-/* ── Variables del sidebar ───────────────────────────────────────────────── */
+/* ── Shell variables ──────────────────────────────────────────────────────── */
+/*
+   Sidebar uses an intentional dark-surface inversion (warm espresso)
+   against the light content area. These local vars consolidate ALL
+   sidebar-specific color decisions in one place; the rest of the file
+   uses only var(--sb-*) or var(--ds-*) — never raw hex.
+*/
 .app-shell {
-  --sb-width:           240px;
-  --sb-collapsed-width: 60px;
-  --sb-bg:              #2C2820;
-  --sb-text:            #9A8C7C;
-  --sb-text-hover:      #EDE4D6;
-  --sb-text-active:     #FBFAF6;
-  --sb-item-hover:      rgba(255,255,255,.05);
-  --sb-item-active-bg:  rgba(212,185,110,.16);
-  --sb-item-active-brd: #D4B96E;
-  --sb-divider:         rgba(255,255,255,.07);
-  --sb-transition:      0.22s ease;
-  --topbar-h:           56px;
+  /* Dimensions */
+  --sb-width:            248px;
+  --sb-collapsed-width:  62px;
+  --topbar-h:            56px;
+
+  /* Sidebar dark palette */
+  --sb-bg:               #2A2420;
+  --sb-bg-deep:          #221E1A;
+
+  /* Text layers on dark surface */
+  --sb-text:             rgba(251, 250, 246, 0.46);
+  --sb-text-hover:       rgba(251, 250, 246, 0.88);
+  --sb-text-active:      rgba(251, 250, 246, 0.97);
+  --sb-text-muted:       rgba(251, 250, 246, 0.24);
+
+  /* Interactive states */
+  --sb-item-hover:       rgba(255, 255, 255, 0.05);
+  --sb-item-active-bg:   rgba(212, 185, 110, 0.13);
+  --sb-item-active-brd:  var(--ds-gold);
+
+  /* Structural */
+  --sb-divider:          rgba(255, 255, 255, 0.07);
+  --sb-transition:       var(--ds-duration-base) var(--ds-ease-out);
+
+  /* Danger action (logout) — lightened for dark surface */
+  --sb-danger:           #D47A76;
+  --sb-danger-hover:     #EDAAA7;
+  --sb-danger-hover-bg:  rgba(168, 74, 70, 0.10);
 }
 
-/* ── Shell ───────────────────────────────────────────────────────────────── */
+/* ── Shell layout ─────────────────────────────────────────────────────────── */
 .app-shell {
   display: flex;
   min-height: 100vh;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
 .app-sidebar {
   width: var(--sb-width);
   background: var(--sb-bg);
@@ -38,23 +60,24 @@
 
 .app-shell.sidebar-collapsed .app-sidebar { width: var(--sb-collapsed-width); }
 
-/* ── Contenido principal ─────────────────────────────────────────────────── */
+/* ── Main content ─────────────────────────────────────────────────────────── */
 .app-main {
   flex: 1;
   margin-left: var(--sb-width);
   transition: margin-left var(--sb-transition);
   min-height: 100vh;
-  background: #F5F3EE;
+  background: var(--ds-bg);
 }
 .app-shell.sidebar-collapsed .app-main { margin-left: var(--sb-collapsed-width); }
 
-/* ── Encabezado del sidebar ──────────────────────────────────────────────── */
+/* ── Sidebar header ───────────────────────────────────────────────────────── */
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.65rem 0 1rem;
+  padding: 0 var(--ds-space-2) 0 var(--ds-space-4);
   height: 60px;
+  background: var(--sb-bg-deep);
   border-bottom: 1px solid var(--sb-divider);
   flex-shrink: 0;
 }
@@ -62,96 +85,113 @@
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  color: #FBFAF6;
+  gap: var(--ds-space-2);
+  color: var(--sb-text-active);
   text-decoration: none;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-regular);
+  font-size: var(--ds-text-base);
+  letter-spacing: var(--ds-tracking-tight);
   cursor: pointer;
   min-width: 0;
   overflow: hidden;
   flex: 1;
+  transition: color var(--sb-transition);
 }
-.sidebar-brand:hover { color: #D4B96E; text-decoration: none; }
+.sidebar-brand:hover { color: var(--ds-gold); text-decoration: none; }
 
-.sidebar-brand__icon { font-size: 1.15rem; color: #D4B96E; flex-shrink: 0; }
+.sidebar-brand__icon {
+  font-size: 1.1rem;
+  color: var(--ds-gold);
+  flex-shrink: 0;
+  transition: transform var(--sb-transition);
+}
+.sidebar-brand:hover .sidebar-brand__icon { transform: scale(1.1); }
 
 .sidebar-brand__text {
   white-space: nowrap;
   overflow: hidden;
-  transition: opacity var(--sb-transition);
+  transition: opacity var(--sb-transition), width var(--sb-transition);
 }
-.app-shell.sidebar-collapsed .sidebar-brand__text { opacity: 0; pointer-events: none; }
+.app-shell.sidebar-collapsed .sidebar-brand__text {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+}
 
 .sidebar-toggle {
   background: none;
   border: none;
   color: var(--sb-text);
-  width: 30px; height: 30px;
-  border-radius: 0.375rem;
+  width: 28px; height: 28px;
+  border-radius: var(--ds-radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 0.85rem;
+  font-size: var(--ds-text-xs);
   transition: background var(--sb-transition), color var(--sb-transition);
 }
 .sidebar-toggle:hover { background: var(--sb-item-hover); color: var(--sb-text-hover); }
 
-/* ── Navegación ──────────────────────────────────────────────────────────── */
+/* ── Navigation ───────────────────────────────────────────────────────────── */
 .sidebar-nav {
   flex: 1;
-  padding: 0.5rem 0;
+  padding: var(--ds-space-2) 0;
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-section-label {
-  padding: 0.75rem 1rem 0.25rem;
-  font-size: 0.62rem;
+  padding: var(--ds-space-3) var(--ds-space-4) var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
   text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: #5C5048;
-  font-weight: 700;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--sb-text-muted);
   white-space: nowrap;
   overflow: hidden;
   transition: opacity var(--sb-transition), height var(--sb-transition), padding var(--sb-transition);
 }
 .app-shell.sidebar-collapsed .sidebar-section-label {
-  opacity: 0; height: 0; padding-top: 0; padding-bottom: 0;
+  opacity: 0;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
+.sidebar-section-separator { display: none; }
 .app-shell.sidebar-collapsed .sidebar-section-separator {
   display: block;
   height: 1px;
   background: var(--sb-divider);
-  margin: 0.35rem 0.75rem;
+  margin: var(--ds-space-2) var(--ds-space-3);
 }
-.sidebar-section-separator { display: none; }
 
-/* ── Item de navegación ──────────────────────────────────────────────────── */
+/* ── Nav item ─────────────────────────────────────────────────────────────── */
 .sidebar-item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.58rem 0.875rem;
-  margin: 0.1rem 0.5rem;
-  border-radius: 0.5rem;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  margin: 1px var(--ds-space-2);
+  border-radius: var(--ds-radius-md);
   color: var(--sb-text);
   text-decoration: none;
-  font-size: 0.855rem;
-  font-weight: 500;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
   border: none;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
   background: none;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
-  width: calc(100% - 1rem);
+  width: calc(100% - var(--ds-space-4));
   text-align: left;
-  transition: background var(--sb-transition), color var(--sb-transition);
+  transition: background var(--sb-transition), color var(--sb-transition),
+              border-color var(--sb-transition);
 }
 .sidebar-item:hover {
   background: var(--sb-item-hover);
@@ -162,31 +202,50 @@
   background: var(--sb-item-active-bg);
   color: var(--sb-text-active);
   border-left-color: var(--sb-item-active-brd);
+  font-weight: var(--ds-weight-semibold);
 }
-.sidebar-item--danger        { color: #D47A76; }
-.sidebar-item--danger:hover  { background: rgba(168,74,70,.12); color: #E8A09D; }
 
+.sidebar-item--danger { color: var(--sb-danger); }
+.sidebar-item--danger:hover {
+  background: var(--sb-danger-hover-bg);
+  color: var(--sb-danger-hover);
+}
+
+/* Collapsed item layout */
 .app-shell.sidebar-collapsed .sidebar-item {
   justify-content: center;
-  padding: 0.62rem 0;
-  margin: 0.1rem auto;
+  padding: var(--ds-space-2) 0;
+  margin: 1px auto;
   width: calc(var(--sb-collapsed-width) - 12px);
   border-left-color: transparent !important;
-  border-radius: 0.5rem;
+  border-radius: var(--ds-radius-md);
+}
+
+/* Gold dot indicator for active item in collapsed mode */
+.app-shell.sidebar-collapsed .sidebar-item.active-link::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-gold);
 }
 
 .sidebar-item__icon {
   font-size: 1rem;
   flex-shrink: 0;
-  width: 1.15rem;
+  width: 1.125rem;
   text-align: center;
+  transition: color var(--sb-transition);
 }
 
 .sidebar-item__label {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
-  transition: opacity var(--sb-transition);
+  transition: opacity var(--sb-transition), width var(--sb-transition), flex var(--sb-transition);
 }
 .app-shell.sidebar-collapsed .sidebar-item__label {
   opacity: 0;
@@ -195,144 +254,189 @@
   flex: 0;
 }
 
-/* ── Footer del sidebar ──────────────────────────────────────────────────── */
+/* ── Nav loading skeleton ─────────────────────────────────────────────────── */
+@keyframes sb-skel-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.sidebar-skeleton {
+  padding: var(--ds-space-2) var(--ds-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+
+.sidebar-skel {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: var(--ds-radius-md);
+  animation: sb-skel-pulse 1.6s var(--ds-ease-in-out) infinite;
+  flex-shrink: 0;
+}
+.sidebar-skel--item   { height: 36px; margin: 0 var(--ds-space-1); }
+.sidebar-skel--label  { height: 8px;  width: 60%; margin: var(--ds-space-3) var(--ds-space-4) var(--ds-space-1); border-radius: 2px; }
+.sidebar-skel--avatar { width: 32px; height: 32px; border-radius: var(--ds-radius-circle); }
+.sidebar-skel--name   { height: 10px; width: 72%; border-radius: 3px; margin-bottom: var(--ds-space-1); }
+.sidebar-skel--role   { height: 8px;  width: 44%; border-radius: 3px; }
+
+/* ── Sidebar footer ───────────────────────────────────────────────────────── */
 .sidebar-footer {
   border-top: 1px solid var(--sb-divider);
-  padding: 0.5rem 0;
+  padding: var(--ds-space-2) 0;
   flex-shrink: 0;
+}
+
+.sidebar-footer__divider {
+  height: 1px;
+  background: var(--sb-divider);
+  margin: var(--ds-space-2) var(--ds-space-4);
 }
 
 .sidebar-user {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem 0.75rem;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4) var(--ds-space-3);
   overflow: hidden;
 }
 .app-shell.sidebar-collapsed .sidebar-user {
   justify-content: center;
-  padding: 0.6rem 0.5rem 0.75rem;
+  padding: var(--ds-space-2) 0 var(--ds-space-3);
 }
 
 .sidebar-user__avatar {
   width: 32px; height: 32px;
-  border-radius: 50%;
+  border-radius: var(--ds-radius-circle);
   object-fit: cover;
-  border: 2px solid rgba(212,185,110,.3);
+  border: 1.5px solid rgba(212, 185, 110, 0.35);
   flex-shrink: 0;
+  transition: border-color var(--sb-transition);
 }
+.sidebar-user:hover .sidebar-user__avatar { border-color: var(--ds-gold); }
 
 .sidebar-user__info {
   min-width: 0;
   overflow: hidden;
-  transition: opacity var(--sb-transition);
+  transition: opacity var(--sb-transition), width var(--sb-transition);
 }
 .app-shell.sidebar-collapsed .sidebar-user__info {
-  opacity: 0; width: 0; pointer-events: none;
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
 }
 
 .sidebar-user__name {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #EDE4D6;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--sb-text-hover);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: var(--ds-leading-snug);
 }
 .sidebar-user__role {
   display: block;
-  font-size: 0.69rem;
-  color: #6B6058;
+  font-size: var(--ds-text-2xs);
+  color: var(--sb-text-muted);
   white-space: nowrap;
   text-transform: capitalize;
+  letter-spacing: var(--ds-tracking-wide);
+  margin-top: 1px;
 }
 
-/* ── Topbar móvil ────────────────────────────────────────────────────────── */
+/* Lang toggle */
+.sidebar-lang {
+  display: flex;
+  justify-content: center;
+  padding: var(--ds-space-1) var(--ds-space-3);
+}
+
+/* ── Mobile topbar ────────────────────────────────────────────────────────── */
 .mobile-topbar {
   display: none;
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--topbar-h);
-  background: #FBFAF6;
-  border-bottom: 1px solid #EAE7DF;
+  background: rgba(251, 250, 246, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ds-border);
   z-index: 1035;
   align-items: center;
-  padding: 0 1rem;
-  gap: 0.75rem;
-  box-shadow: 0 1px 4px rgba(26,20,12,.07);
+  padding: 0 var(--ds-space-4);
+  gap: var(--ds-space-3);
+  box-shadow: var(--ds-shadow-sm);
 }
 
 .mobile-topbar__toggle {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: #5C5750;
-  padding: 0.2rem 0.3rem;
+  font-size: 1.4rem;
+  color: var(--ds-ink-muted);
+  padding: var(--ds-space-1);
   cursor: pointer;
   display: flex;
   align-items: center;
   line-height: 1;
+  border-radius: var(--ds-radius-md);
+  transition: color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
 }
-.mobile-topbar__toggle:hover { color: #1A1A1A; }
+.mobile-topbar__toggle:hover { color: var(--ds-ink); background: var(--ds-bg-alt); }
 
 .mobile-topbar__brand {
   flex: 1;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #1A1A1A;
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-regular);
+  font-size: var(--ds-text-base);
+  color: var(--ds-ink);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--ds-space-2);
   text-decoration: none;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--ds-tracking-tight);
+  transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.mobile-topbar__brand i { color: #D4B96E; font-size: 1.05rem; }
-.mobile-topbar__brand:hover { color: #1A1A1A; text-decoration: none; }
+.mobile-topbar__brand i { color: var(--ds-gold); font-size: 1rem; }
+.mobile-topbar__brand:hover { color: var(--ds-ink); text-decoration: none; }
 
 .mobile-topbar__right {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--ds-space-2);
   margin-left: auto;
 }
 
 .mobile-topbar__avatar img {
   width: 32px; height: 32px;
-  border-radius: 50%;
+  border-radius: var(--ds-radius-circle);
   object-fit: cover;
-  border: 2px solid #EAE7DF;
+  border: 1.5px solid var(--ds-border-strong);
   display: block;
 }
 
-/* ── Lang toggle en sidebar ──────────────────────────────────────────────── */
-.sidebar-lang {
-  display: flex;
-  justify-content: center;
-  padding: 0.5rem 0.75rem 0.25rem;
-}
-
-/* ── Backdrop ────────────────────────────────────────────────────────────── */
+/* ── Backdrop ─────────────────────────────────────────────────────────────── */
 .sidebar-backdrop {
   display: none;
   position: fixed; inset: 0;
-  background: rgba(26,20,12,.45);
+  background: var(--ds-overlay);
   z-index: 1039;
   cursor: pointer;
 }
 
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 991.98px) {
   .mobile-topbar { display: flex; }
 
   .app-sidebar {
     transform: translateX(-100%);
     width: var(--sb-width) !important;
-    box-shadow: 6px 0 24px rgba(26,20,12,.25);
+    box-shadow: var(--ds-shadow-xl);
   }
 
-  .app-shell.sidebar-open .app-sidebar    { transform: translateX(0); }
+  .app-shell.sidebar-open .app-sidebar     { transform: translateX(0); }
   .app-shell.sidebar-open .sidebar-backdrop { display: block; }
 
   .app-main {

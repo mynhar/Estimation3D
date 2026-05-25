@@ -5,6 +5,12 @@ import { environment } from '../../environments/environment';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
 
+export type PerfilCache = {
+  nombre:     string;
+  apellido:   string;
+  avatar_url: string | null;
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,17 +21,30 @@ export class AuthSupabaseService {
   private perfilEditadoSubject  = new Subject<{ nombre: string; apellido: string }>();
   private avatarActualizadoSubject = new Subject<string>();
 
-  user$               = this.userSubject.asObservable();
-  initialized$        = this.initializedSubject.asObservable();
+  // Caché de rol y perfil — evita re-queries en cada navegación guardada
+  private lastUserId: string | null = null;
+  private rolSubject         = new BehaviorSubject<RolUsuario | null | undefined>(undefined);
+  private perfilCacheSubject = new BehaviorSubject<PerfilCache | null>(null);
+
+  user$        = this.userSubject.asObservable();
+  initialized$ = this.initializedSubject.asObservable();
+  rol$         = this.rolSubject.asObservable();
+  perfilCache$ = this.perfilCacheSubject.asObservable();
+
+  // Mantenidos para compatibilidad con componentes que los usen directamente
   perfilEditado$      = this.perfilEditadoSubject.asObservable();
   avatarActualizado$  = this.avatarActualizadoSubject.asObservable();
 
   notificarEdicionPerfil(nombre: string, apellido: string): void {
     this.perfilEditadoSubject.next({ nombre, apellido });
+    const current = this.perfilCacheSubject.value;
+    if (current) this.perfilCacheSubject.next({ ...current, nombre, apellido });
   }
 
   notificarEdicionAvatar(url: string): void {
     this.avatarActualizadoSubject.next(url);
+    const current = this.perfilCacheSubject.value;
+    if (current) this.perfilCacheSubject.next({ ...current, avatar_url: url || null });
   }
 
   get client(): SupabaseClient<Database> { return this.supabase; }
@@ -51,15 +70,56 @@ export class AuthSupabaseService {
         this.initializedSubject.next(true);
       }
 
-      // Google OAuth: sincronizar perfil y redirigir solo desde login/landing
-      if (event === 'SIGNED_IN' && user?.app_metadata?.['provider'] === 'google') {
-        this.syncGoogleProfile(user);
-        const url = this.router.url;
-        const esRutaPublica = url === '/' || url === '/login' || url.startsWith('/?') || url.startsWith('/login?');
-        if (esRutaPublica) {
-          this.getHomeRoute().then(route => this.router.navigate([route]));
+      if (user) {
+        // Solo re-carga si cambia el usuario (evita re-queries en TOKEN_REFRESHED, etc.)
+        if (user.id !== this.lastUserId) {
+          this.lastUserId = user.id;
+          this.rolSubject.next(undefined); // señal de "cargando"
+          this.cargarPerfilCache(user.id);
         }
+
+        // Google OAuth: sincronizar perfil y redirigir solo desde login/landing
+        if (event === 'SIGNED_IN' && user.app_metadata?.['provider'] === 'google') {
+          this.syncGoogleProfile(user);
+          const url = this.router.url;
+          const esRutaPublica = url === '/' || url === '/login' || url.startsWith('/?') || url.startsWith('/login?');
+          if (esRutaPublica) {
+            this.getHomeRoute().then(route => this.router.navigate([route]));
+          }
+        }
+      } else {
+        this.lastUserId = null;
+        this.rolSubject.next(null);
+        this.perfilCacheSubject.next(null);
       }
+    });
+  }
+
+  // ----------------------------------------------------------
+  // Carga y cachea rol + perfil desde la tabla perfil
+  // ----------------------------------------------------------
+  private async cargarPerfilCache(userId: string): Promise<void> {
+    const { data, error } = await this.supabase
+      .from('perfil')
+      .select('rol, nombre, apellido, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      if (error.message?.includes('infinite recursion')) {
+        console.error('[Auth] RLS recursivo en tabla perfil.');
+      } else {
+        console.error('[Auth] cargarPerfilCache error:', error.message);
+      }
+      this.rolSubject.next(null);
+      return;
+    }
+
+    this.rolSubject.next(data?.rol ?? null);
+    this.perfilCacheSubject.next({
+      nombre:     data?.nombre     ?? '',
+      apellido:   data?.apellido   ?? '',
+      avatar_url: data?.avatar_url ?? null,
     });
   }
 

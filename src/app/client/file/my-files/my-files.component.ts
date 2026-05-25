@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -21,6 +21,7 @@ type Filtro = 'todos' | 'activos' | 'finalizados';
 @Component({
   selector: 'app-my-files',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './my-files.component.html',
   styleUrl: './my-files.component.css',

@@ -16,17 +16,17 @@
   } @else {
 
   <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="create-header rounded-4 p-4 mb-4">
+  <header class="create-header p-4 mb-4">
     <div class="d-flex align-items-center gap-3 mb-3">
       <a routerLink="/admin/file" class="btn btn-outline-secondary btn-sm flex-shrink-0"
          [title]="'common.back' | translate">
         <i class="bi bi-arrow-left"></i>
       </a>
       <div class="flex-grow-1 min-w-0">
-        <p class="text-primary small fw-semibold mb-0">
-          <i class="bi bi-shield-check me-1"></i>{{ 'role.administrateur' | translate }}
+        <p class="create-eyebrow">
+          <i class="bi bi-shield-check"></i>{{ 'role.administrateur' | translate }}
         </p>
-        <h4 class="fw-bold mb-0">{{ 'admin_file_edit.title' | translate }}</h4>
+        <h4 class="mb-0">{{ 'admin_file_edit.title' | translate }}</h4>
         <p class="text-muted small mb-0">
           {{ 'admin_file_edit.subtitle' | translate }}
           @if (numero()) {
@@ -75,7 +75,7 @@
             <small class="text-muted">{{ 'admin_file_create.step2_hint' | translate }}</small>
           </div>
           @if (step1Complete()) {
-            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+            <span class="done-badge flex-shrink-0">
               <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
             </span>
           }
@@ -182,7 +182,7 @@
             <small class="text-muted">{{ 'file_create.step1_hint' | translate }}</small>
           </div>
           @if (step2Complete()) {
-            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+            <span class="done-badge flex-shrink-0">
               <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
             </span>
           }
@@ -213,7 +213,7 @@
                         <p class="service-desc mb-0">{{ s.descripcion_local }}</p>
                       </div>
                       @if (servicioId() === s.id) {
-                        <i class="bi bi-check-circle-fill text-primary flex-shrink-0 mt-1"></i>
+                        <i class="bi bi-check-circle service-check"></i>
                       }
                     </div>
                   </label>
@@ -245,7 +245,7 @@
             <small class="text-muted">{{ 'file_create.step3_hint' | translate }}</small>
           </div>
           @if (step3Complete()) {
-            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+            <span class="done-badge flex-shrink-0">
               <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
             </span>
           }
@@ -321,7 +321,7 @@
             <small class="text-muted">{{ 'file_create.step4_hint' | translate }}</small>
           </div>
           @if (step4Complete()) {
-            <span class="badge bg-success-subtle text-success-emphasis flex-shrink-0">
+            <span class="done-badge flex-shrink-0">
               <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
             </span>
           }
@@ -543,7 +543,7 @@
                 <button type="button"
                         class="gps-toggle w-100 d-flex align-items-center gap-2"
                         (click)="gpsVisible.set(!gpsVisible())">
-                  <i class="bi bi-compass text-primary"></i>
+                  <i class="bi bi-compass"></i>
                   <span class="fw-medium">{{ 'file_create.gps_coords' | translate }}</span>
                   <span class="text-muted fw-normal small">({{ 'common.optional' | translate }})</span>
                   <i class="bi ms-auto gps-chevron"
@@ -551,7 +551,7 @@
                      [class.bi-chevron-up]="gpsVisible()"></i>
                 </button>
                 @if (gpsVisible()) {
-                  <div class="gps-panel mt-2 p-3 rounded-3 border bg-light">
+                  <div class="gps-panel-body mt-2">
                     <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
                       <p class="text-muted small mb-0 flex-grow-1">{{ 'file_create.gps_hint' | translate }}</p>
                       <button type="button"
@@ -606,17 +606,12 @@
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <span class="fw-semibold">{{ 'dashboard_client.progress' | translate }}</span>
-              <span class="badge rounded-pill"
-                    [class.bg-success]="allComplete()"
-                    [class.bg-primary]="!allComplete()">
+              <span class="badge rounded-pill step-badge" [class.step-badge--done]="allComplete()">
                 {{ completedSteps() }}/4 {{ 'file_create.steps_label' | translate }}
               </span>
             </div>
-            <div class="progress mb-4" style="height: 8px; border-radius: 4px;">
-              <div class="progress-bar bg-success"
-                   [style.width.%]="progressPct()"
-                   style="transition: width .4s ease;">
-              </div>
+            <div class="progress sidebar-progress mb-4">
+              <div class="progress-bar" [style.width.%]="progressPct()"></div>
             </div>
             @for (step of STEPS; let i = $index; track step) {
               <div class="sidebar-step d-flex align-items-center gap-3 py-2"
@@ -631,7 +626,7 @@
                   {{ step | translate }}
                 </span>
                 @if (stepDone(i)) {
-                  <i class="bi bi-check-circle-fill text-success small"></i>
+                  <i class="bi bi-check-circle text-success small"></i>
                 }
               </div>
             }

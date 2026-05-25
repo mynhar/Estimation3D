@@ -1,0 +1,498 @@
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+:host { display: block; }
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.dash-header {
+  background: linear-gradient(135deg, var(--ds-surface) 0%, var(--ds-bg-alt) 100%);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.dash-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-4xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  line-height: var(--ds-leading-tight);
+}
+
+.refresh-label {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Skeleton loading ─────────────────────────────────────────────────────── */
+.skeleton-kpi {
+  height: 110px;
+  background: var(--ds-border-subtle);
+  border-radius: var(--ds-radius-lg);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-panel {
+  height: 260px;
+  background: var(--ds-border-subtle);
+  border-radius: var(--ds-radius-lg);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ── KPI cards ────────────────────────────────────────────────────────────── */
+.kpi-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  padding: var(--ds-space-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-4);
+  transition: box-shadow var(--ds-duration-base) var(--ds-ease-out),
+              transform  var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.kpi-card:hover {
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-1px);
+}
+
+.kpi-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ds-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.kpi-icon--exp { background: var(--ds-info-soft);    color: var(--ds-info); }
+.kpi-icon--est { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.kpi-icon--con { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.kpi-icon--ctr { background: var(--ds-success-soft); color: var(--ds-success); }
+
+.kpi-num {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-ink);
+  line-height: var(--ds-leading-tight);
+}
+
+.kpi-label {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-secondary);
+  margin-top: 0.1rem;
+}
+
+.kpi-sub {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin-top: 0.1rem;
+}
+
+.kpi-sub--gold {
+  color: var(--ds-gold-active);
+  font-weight: var(--ds-weight-semibold);
+}
+
+/* ── Process panels ───────────────────────────────────────────────────────── */
+.panel-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+  height: 100%;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-3) var(--ds-space-5);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  border-left: 3px solid transparent;
+  min-height: 44px;
+}
+
+.panel-header--exp {
+  background: var(--ds-info-soft);
+  border-left-color: var(--ds-info);
+  color: var(--ds-info);
+}
+
+.panel-header--est {
+  background: var(--ds-warning-soft);
+  border-left-color: var(--ds-warning);
+  color: var(--ds-warning);
+}
+
+.panel-header--con {
+  background: var(--ds-gold-faint);
+  border-left-color: var(--ds-gold-active);
+  color: var(--ds-gold-active);
+}
+
+.panel-header--ctr {
+  background: var(--ds-success-soft);
+  border-left-color: var(--ds-success);
+  color: var(--ds-success);
+}
+
+.panel-total {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-regular);
+  opacity: 0.75;
+}
+
+.panel-body {
+  padding: var(--ds-space-5);
+}
+
+/* ── Mini stats row ───────────────────────────────────────────────────────── */
+.mini-stats {
+  display: flex;
+  gap: var(--ds-space-3);
+}
+
+.mini-stat {
+  flex: 1;
+  min-width: 0;
+  padding: var(--ds-space-3) var(--ds-space-3);
+  background: var(--ds-bg);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  text-align: center;
+}
+
+.mini-stat-num {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-ink);
+  line-height: 1;
+  margin-bottom: var(--ds-space-1);
+}
+
+.mini-stat-num--gold {
+  font-size: var(--ds-text-lg);
+  color: var(--ds-gold-active);
+}
+
+.mini-stat-label {
+  font-size: var(--ds-text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Cost range ───────────────────────────────────────────────────────────── */
+.cost-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  border-radius: var(--ds-radius-md);
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.cost-range-label {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.cost-range-val {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-gold-active);
+}
+
+.cost-sep { color: var(--ds-ink-muted); font-weight: var(--ds-weight-regular); }
+
+/* ── Funnel bars ──────────────────────────────────────────────────────────── */
+.funnel { display: flex; flex-direction: column; gap: var(--ds-space-2); }
+
+.funnel-divider {
+  height: 1px;
+  background: var(--ds-border-subtle);
+  margin: var(--ds-space-2) 0;
+}
+
+.funnel-row {
+  display: grid;
+  grid-template-columns: 148px 1fr 32px;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.funnel-row--muted .funnel-estado { color: var(--ds-ink-muted); }
+
+.funnel-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  min-width: 0;
+}
+
+.funnel-estado {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.funnel-bar-wrap {
+  height: 8px;
+  background: var(--ds-border-subtle);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+}
+
+.funnel-bar {
+  height: 100%;
+  border-radius: var(--ds-radius-pill);
+  transition: width var(--ds-duration-slow) var(--ds-ease-out);
+  min-width: 3px;
+}
+
+.funnel-count {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-muted);
+  text-align: right;
+}
+
+/* ── Estado dots ──────────────────────────────────────────────────────────── */
+.estado-dot {
+  width: 8px; height: 8px;
+  border-radius: var(--ds-radius-circle);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* Expediente states */
+.estado-dot--exp-nuevo         { background: var(--ds-info); }
+.estado-dot--exp-en_estimacion { background: var(--ds-warning); }
+.estado-dot--exp-estimado      { background: var(--ds-gold); }
+.estado-dot--exp-en_oferta     { background: var(--ds-info); opacity: 0.65; }
+.estado-dot--exp-adjudicado    { background: var(--ds-warning); opacity: 0.65; }
+.estado-dot--exp-contratado    { background: var(--ds-success); }
+.estado-dot--cancelado         { background: var(--ds-border-strong); }
+
+/* Oferta states */
+.estado-dot--ofe-pendiente { background: var(--ds-warning); }
+.estado-dot--ofe-aceptada  { background: var(--ds-success); }
+.estado-dot--ofe-rechazada { background: var(--ds-danger); }
+
+/* Contrato states */
+.estado-dot--ctr-generado     { background: var(--ds-info); }
+.estado-dot--ctr-firmado      { background: var(--ds-gold); }
+.estado-dot--ctr-en_ejecucion { background: var(--ds-warning); }
+.estado-dot--ctr-completado   { background: var(--ds-success); }
+.estado-dot--ctr-cancelado    { background: var(--ds-border-strong); }
+
+/* ── Funnel bar colors ────────────────────────────────────────────────────── */
+/* Expediente */
+.funnel-bar--exp-nuevo         { background: var(--ds-info); }
+.funnel-bar--exp-en_estimacion { background: var(--ds-warning); }
+.funnel-bar--exp-estimado      { background: var(--ds-gold); }
+.funnel-bar--exp-en_oferta     { background: var(--ds-info);    opacity: 0.65; }
+.funnel-bar--exp-adjudicado    { background: var(--ds-warning); opacity: 0.65; }
+.funnel-bar--exp-contratado    { background: var(--ds-success); }
+.funnel-bar--cancelado         { background: var(--ds-border-strong); }
+
+/* Oferta */
+.funnel-bar--ofe-pendiente { background: var(--ds-warning); }
+.funnel-bar--ofe-aceptada  { background: var(--ds-success); }
+.funnel-bar--ofe-rechazada { background: var(--ds-danger); }
+
+/* Contrato */
+.funnel-bar--ctr-generado     { background: var(--ds-info); }
+.funnel-bar--ctr-firmado      { background: var(--ds-gold); }
+.funnel-bar--ctr-en_ejecucion { background: var(--ds-warning); }
+.funnel-bar--ctr-completado   { background: var(--ds-success); }
+.funnel-bar--ctr-cancelado    { background: var(--ds-border-strong); }
+
+/* ── Timeline card ────────────────────────────────────────────────────────── */
+.tl-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+
+.tl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.tl-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  margin: 0;
+}
+
+/* ── Timeline filters ─────────────────────────────────────────────────────── */
+.tl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.tl-filter {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.3em 0.85em;
+  border-radius: var(--ds-radius-pill);
+  border: 1px solid var(--ds-border);
+  background: transparent;
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+  line-height: 1.5;
+}
+
+.tl-filter:hover {
+  background: var(--ds-bg-alt);
+  border-color: var(--ds-border-strong);
+  color: var(--ds-ink);
+}
+
+.tl-filter.active {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink);
+}
+
+/* ── Timeline list ────────────────────────────────────────────────────────── */
+.tl-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--ds-space-3) var(--ds-space-5);
+}
+
+.tl-event {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-3) 0;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.tl-event:last-child { border-bottom: none; }
+
+.tl-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--ds-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tl-dot--expediente { background: var(--ds-info-soft);    color: var(--ds-info); }
+.tl-dot--estimacion { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.tl-dot--oferta     { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.tl-dot--contrato   { background: var(--ds-success-soft); color: var(--ds-success); }
+
+.tl-content { flex: 1; min-width: 0; }
+
+.tl-desc {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tl-ref {
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-bold);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  padding: 0.1em 0.5em;
+  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-gold-soft);
+  white-space: nowrap;
+}
+
+.tl-meta {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+
+.tl-sep { opacity: 0.4; }
+
+/* ── Timeline type badge ──────────────────────────────────────────────────── */
+.tl-badge {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.2em 0.65em;
+  border-radius: var(--ds-radius-pill);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.tl-badge--expediente { background: var(--ds-info-soft);    color: var(--ds-info); }
+.tl-badge--estimacion { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.tl-badge--oferta     { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.tl-badge--contrato   { background: var(--ds-success-soft); color: var(--ds-success); }
+
+/* ── Empty / loading states ───────────────────────────────────────────────── */
+.tl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-8) var(--ds-space-5);
+  color: var(--ds-ink-muted);
+}
+
+.tl-placeholder {
+  display: flex;
+  align-items: center;
+  padding: var(--ds-space-5);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .funnel-bar, .kpi-card { transition: none; }
+  .skeleton-kpi, .skeleton-panel { animation: none; }
+}

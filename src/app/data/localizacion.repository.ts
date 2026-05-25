@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
-import { TipoInmueble } from '../types/supabase';
+import { TablesInsert, TablesUpdate, TipoInmueble } from '../types/supabase';
 
 export type LocRaw = {
   expediente_id: string;
@@ -53,13 +53,16 @@ export class LocalizacionRepository {
   }
 
   async insert(data: Omit<LocFull, 'expediente_id'> & { expediente_id: string }): Promise<void> {
-    const { error } = await (this.db.from('localizacion') as any).insert(data);
+    const { error } = await this.db
+      .from('localizacion')
+      .insert(data as TablesInsert<'localizacion'>);
     if (error) throw new Error(error.message);
   }
 
   async update(expedienteId: string, data: Partial<LocFull>): Promise<void> {
-    const { error } = await (this.db.from('localizacion') as any)
-      .update(data)
+    const { error } = await this.db
+      .from('localizacion')
+      .update(data as TablesUpdate<'localizacion'>)
       .eq('expediente_id', expedienteId);
     if (error) throw new Error(error.message);
   }

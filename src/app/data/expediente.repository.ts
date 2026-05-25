@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
-import { EstadoExpediente, TipoInmueble } from '../types/supabase';
+import { EstadoExpediente, TablesInsert, TablesUpdate, TipoInmueble } from '../types/supabase';
 
 export type ExpedienteRaw = {
   id:           string;
@@ -133,13 +133,13 @@ export class ExpedienteRepository {
     numero:       string;
     cliente_id:   string;
     servicio_id:  number;
-    estado:       string;
+    estado:       EstadoExpediente;
     fecha_visita: string;
     descripcion:  string | null;
   }): Promise<string> {
     const { data, error } = await this.db
       .from('expediente')
-      .insert(payload as any)
+      .insert(payload as TablesInsert<'expediente'>)
       .select('id')
       .single();
     if (error) throw new Error(error.message);
@@ -155,7 +155,7 @@ export class ExpedienteRepository {
   }): Promise<void> {
     const { error } = await this.db
       .from('expediente')
-      .update(payload as any)
+      .update(payload as TablesUpdate<'expediente'>)
       .eq('id', id);
     if (error) throw new Error(error.message);
   }
@@ -169,7 +169,7 @@ export class ExpedienteRepository {
   }
 
   async marcarContratado(expedienteId: string): Promise<void> {
-    const { error } = await (this.db.rpc as any)('marcar_contratado', { p_expediente_id: expedienteId });
+    const { error } = await this.db.rpc('marcar_contratado', { p_expediente_id: expedienteId });
     if (error) throw new Error(error.message);
   }
 

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, computed, inject, signal } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,6 +10,7 @@ import { ExpedienteRow } from '../../models';
 @Component({
   selector: 'app-files-to-be-estimated',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslatePipe],
   templateUrl: './files-to-be-estimated.component.html',
   styleUrl:    './files-to-be-estimated.component.css',

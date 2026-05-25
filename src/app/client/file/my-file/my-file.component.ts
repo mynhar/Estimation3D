@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExpedienteService } from '../../../services/expediente.service';
@@ -11,6 +11,7 @@ import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../
 @Component({
   selector: 'app-my-file',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',

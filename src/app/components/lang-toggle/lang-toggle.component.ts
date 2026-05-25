@@ -1,10 +1,11 @@
-import { Component, inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangService } from '../../services/lang.service';
 
 @Component({
   selector: 'app-lang-toggle',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './lang-toggle.component.html',
   styleUrl: './lang-toggle.component.css',

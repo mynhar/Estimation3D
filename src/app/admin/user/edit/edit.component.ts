@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -17,7 +17,8 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
 @Component({
   selector: 'app-admin-user-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -30,13 +31,13 @@ export class AdminUserEditComponent implements OnInit {
   private toast     = inject(ToastService);
   private translate = inject(TranslateService);
 
-  cargando        = true;
-  guardando       = false;
-  mostrarPassword = false;
-  subiendoAvatar  = false;
-  previewUrl: string | null = null;
-  error: string | null = null;
-  usuario: DbPerfil | null = null;
+  cargando        = signal(true);
+  guardando       = signal(false);
+  mostrarPassword = signal(false);
+  subiendoAvatar  = signal(false);
+  previewUrl      = signal<string | null>(null);
+  error           = signal<string | null>(null);
+  usuario         = signal<DbPerfil | null>(null);
 
   readonly roles: RolUsuario[] = ['cliente', 'estimador', 'constructor', 'administrador'];
 
@@ -52,7 +53,13 @@ export class AdminUserEditComponent implements OnInit {
   });
 
   get f() { return this.form.controls; }
-  get esProveedorEmail(): boolean { return this.usuario?.proveedor === 'email'; }
+  get esProveedorEmail(): boolean { return this.usuario()?.proveedor === 'email'; }
+
+  avatarFallback(): string {
+    const u = this.usuario();
+    if (!u) return '?';
+    return ((u.nombre?.[0] ?? '') + (u.apellido?.[0] ?? '')).toUpperCase() || '?';
+  }
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
@@ -68,7 +75,7 @@ export class AdminUserEditComponent implements OnInit {
       if (error) throw error;
       if (!data)  throw new Error(this.translate.instant('admin_users.err_not_found'));
 
-      this.usuario = data;
+      this.usuario.set(data);
       this.form.patchValue({
         nombre:     data.nombre,
         apellido:   data.apellido,
@@ -79,23 +86,22 @@ export class AdminUserEditComponent implements OnInit {
         email:      data.email ?? '',
       });
 
-      // Email requerido solo para proveedor 'email'
       if (this.esProveedorEmail) {
         this.f['email'].setValidators([Validators.required, Validators.email]);
         this.f['email'].updateValueAndValidity();
       }
     } catch (e: any) {
-      this.error = e.message ?? this.translate.instant('admin_users.err_load');
+      this.error.set(e.message ?? this.translate.instant('admin_users.err_load'));
     } finally {
-      this.cargando = false;
+      this.cargando.set(false);
     }
   }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    if (!this.usuario)     return;
+    if (!this.usuario())   return;
 
-    this.guardando = true;
+    this.guardando.set(true);
     try {
       const v = this.form.getRawValue();
 
@@ -113,13 +119,13 @@ export class AdminUserEditComponent implements OnInit {
         if (v.password) params.password = v.password;
       }
 
-      await this.service.actualizarUsuario(this.usuario.id, params);
+      await this.service.actualizarUsuario(this.usuario()!.id, params);
       this.toast.show(this.translate.instant('admin_users.success_updated', { nombre: v.nombre, apellido: v.apellido }), 'success');
       this.router.navigate(['/admin/user']);
     } catch (e: any) {
       this.toast.show(e.message ?? this.translate.instant('admin_users.err_update'), 'danger');
     } finally {
-      this.guardando = false;
+      this.guardando.set(false);
     }
   }
 
@@ -127,16 +133,16 @@ export class AdminUserEditComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    this.previewUrl = URL.createObjectURL(file);
-    this.subiendoAvatar = true;
+    this.previewUrl.set(URL.createObjectURL(file));
+    this.subiendoAvatar.set(true);
     try {
-      const url = await this.service.uploadAvatar(file, this.usuario?.id);
+      const url = await this.service.uploadAvatar(file, this.usuario()?.id);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
       this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
-      this.previewUrl = null;
+      this.previewUrl.set(null);
     } finally {
-      this.subiendoAvatar = false;
+      this.subiendoAvatar.set(false);
     }
   }
 

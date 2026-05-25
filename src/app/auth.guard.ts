@@ -3,6 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { combineLatest, filter, firstValueFrom, map, take } from 'rxjs';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 import { ROLES_ESTIMADOR, ROLES_CONSTRUCTOR, ROLES_ADMINISTRADOR } from './roles';
+import { RolUsuario } from './types/supabase';
 
 export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthSupabaseService);
@@ -15,6 +16,16 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
+// Helper: espera a que rol$ tenga un valor resuelto (no undefined = cargando)
+async function resolverRol(auth: AuthSupabaseService): Promise<RolUsuario | null> {
+  return firstValueFrom(
+    auth.rol$.pipe(
+      filter((r): r is RolUsuario | null => r !== undefined),
+      take(1),
+    )
+  );
+}
+
 export const estimatorGuard: CanActivateFn = async () => {
   const auth   = inject(AuthSupabaseService);
   const router = inject(Router);
@@ -22,21 +33,14 @@ export const estimatorGuard: CanActivateFn = async () => {
   const [, user] = await firstValueFrom(
     combineLatest([auth.initialized$, auth.user$]).pipe(
       filter(([initialized]) => initialized),
-      take(1)
+      take(1),
     )
   );
 
   if (!user) return router.createUrlTree(['/login']);
 
-  const { data, error } = await auth.client
-    .from('perfil')
-    .select('rol')
-    .eq('id', user.id)
-    .single();
-
-  if (error) return router.createUrlTree(['/login']);
-
-  return data?.rol && ROLES_ESTIMADOR.includes(data.rol)
+  const rol = await resolverRol(auth);
+  return rol && ROLES_ESTIMADOR.includes(rol)
     ? true
     : router.createUrlTree(['/client/dashboard']);
 };
@@ -48,21 +52,14 @@ export const constructorGuard: CanActivateFn = async () => {
   const [, user] = await firstValueFrom(
     combineLatest([auth.initialized$, auth.user$]).pipe(
       filter(([initialized]) => initialized),
-      take(1)
+      take(1),
     )
   );
 
   if (!user) return router.createUrlTree(['/login']);
 
-  const { data, error } = await auth.client
-    .from('perfil')
-    .select('rol')
-    .eq('id', user.id)
-    .single();
-
-  if (error) return router.createUrlTree(['/login']);
-
-  return data?.rol && ROLES_CONSTRUCTOR.includes(data.rol)
+  const rol = await resolverRol(auth);
+  return rol && ROLES_CONSTRUCTOR.includes(rol)
     ? true
     : router.createUrlTree(['/client/dashboard']);
 };
@@ -74,21 +71,14 @@ export const adminGuard: CanActivateFn = async () => {
   const [, user] = await firstValueFrom(
     combineLatest([auth.initialized$, auth.user$]).pipe(
       filter(([initialized]) => initialized),
-      take(1)
+      take(1),
     )
   );
 
   if (!user) return router.createUrlTree(['/login']);
 
-  const { data, error } = await auth.client
-    .from('perfil')
-    .select('rol')
-    .eq('id', user.id)
-    .single();
-
-  if (error) return router.createUrlTree(['/login']);
-
-  return data?.rol && ROLES_ADMINISTRADOR.includes(data.rol)
+  const rol = await resolverRol(auth);
+  return rol && ROLES_ADMINISTRADOR.includes(rol)
     ? true
     : router.createUrlTree(['/client/dashboard']);
 };

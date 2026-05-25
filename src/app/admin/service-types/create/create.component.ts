@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,7 @@ import { ToastService } from '../../../services/toast.service';
 @Component({
   selector: 'app-admin-service-type-create',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './create.component.html',
   styleUrl:    './create.component.css',
@@ -19,7 +20,7 @@ export class AdminServiceTypeCreateComponent {
   private toast     = inject(ToastService);
   private translate = inject(TranslateService);
 
-  guardando = false;
+  guardando = signal(false);
 
   form = this.fb.group({
     codigo:         ['', [Validators.required, Validators.pattern(/^[a-z_]+$/)]],
@@ -37,7 +38,7 @@ export class AdminServiceTypeCreateComponent {
   async onSubmit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
 
-    this.guardando = true;
+    this.guardando.set(true);
     try {
       const v = this.form.getRawValue();
       const { error } = await this.auth.client
@@ -67,7 +68,7 @@ export class AdminServiceTypeCreateComponent {
         'danger',
       );
     } finally {
-      this.guardando = false;
+      this.guardando.set(false);
     }
   }
 

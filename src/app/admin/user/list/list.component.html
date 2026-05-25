@@ -1,119 +1,154 @@
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 px-3 px-xl-4">
 
-  <!-- Encabezado -->
-  <div class="mb-3">
-    <p class="text-primary small fw-semibold mb-1">
-      <i class="bi bi-shield-check me-1"></i>{{ 'role.administrateur' | translate }}
-    </p>
-    <div class="d-flex align-items-center gap-2">
-      <h4 class="mb-0">{{ 'admin_users.title' | translate }}</h4>
-      <span class="badge bg-secondary">
-        {{ usuariosFiltrados().length }}
-        <ng-container *ngIf="hayFiltros()"> / {{ totalUsuarios }}</ng-container>
-      </span>
-      <a routerLink="/admin/user/create" class="btn btn-primary btn-sm ms-auto fw-semibold">
-        <i class="bi bi-person-plus me-1"></i>{{ 'admin_users.create_btn' | translate }}
-      </a>
-    </div>
-  </div>
-
-  <!-- Cargando -->
-  <div *ngIf="cargando" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">{{ 'common.loading' | translate }}</span>
-    </div>
-  </div>
-
-  <!-- Error -->
-  <div *ngIf="error && !cargando" class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
-  </div>
-
-  <ng-container *ngIf="!cargando && !error">
-
-    <!-- ── Filtros ── -->
-    <div class="card border-0 shadow-sm mb-3 p-3">
-
-      <div class="mb-3">
-        <div class="input-group">
-          <span class="input-group-text bg-white border-end-0">
-            <i class="bi bi-search text-muted"></i>
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <div class="list-page-header mb-4">
+    <div>
+      <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+      <div class="d-flex align-items-center gap-3 mt-1">
+        <h1 class="list-page-header__title">{{ 'admin_users.title' | translate }}</h1>
+        @if (!cargando()) {
+          <span class="kpi-pill">
+            {{ usuariosFiltrados().length }}
+            @if (hayFiltros()) { <span class="kpi-sep">/</span> {{ totalUsuarios }} }
           </span>
-          <input type="text" class="form-control border-start-0 ps-0"
-                 [placeholder]="'admin_users.search_placeholder' | translate"
-                 [value]="busqueda()"
-                 (input)="setBusqueda($event)">
-          <button *ngIf="busqueda()" class="btn btn-outline-secondary"
-                  type="button" (click)="busqueda.set('')">
-            <i class="bi bi-x-lg"></i>
+        }
+      </div>
+    </div>
+    <a routerLink="/admin/user/create" class="btn btn-primary">
+      <i class="bi bi-person-plus me-1" aria-hidden="true"></i>{{ 'admin_users.create_btn' | translate }}
+    </a>
+  </div>
+
+  <!-- ── Skeleton ──────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="card filter-card mb-3" aria-hidden="true">
+      <div class="skel skel--field mb-3"></div>
+      <div class="d-flex gap-2 flex-wrap">
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <div class="skel skel--chip"></div>
+        }
+      </div>
+    </div>
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="table table-admin align-middle mb-0">
+          <thead><tr>
+            <th style="width:48px"></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--md"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th class="text-center"><div class="skel skel--line skel--sm mx-auto" style="width:48px"></div></th>
+            <th style="width:56px"></th>
+          </tr></thead>
+          <tbody>
+            @for (_ of [1,2,3,4,5,6]; track $index) {
+              <tr>
+                <td><div class="skel skel--avatar"></div></td>
+                <td><div class="skel skel--line skel--md"></div></td>
+                <td><div class="skel skel--line skel--md"></div></td>
+                <td><div class="skel skel--line skel--sm"></div></td>
+                <td><div class="skel skel--line skel--lg"></div></td>
+                <td><div class="skel skel--chip"></div></td>
+                <td><div class="skel skel--chip"></div></td>
+                <td class="text-center"><div class="skel skel--icon mx-auto"></div></td>
+                <td><div class="skel skel--icon mx-auto"></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  <!-- ── Error ─────────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="error-alert" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <span>{{ error() }}</span>
+    </div>
+
+  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Filtros -->
+    <div class="card filter-card mb-3">
+
+      <!-- Búsqueda -->
+      <div class="search-wrap mb-3">
+        <span class="search-icon"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input type="text" class="search-input"
+               [placeholder]="'admin_users.search_placeholder' | translate"
+               [value]="busqueda()"
+               (input)="setBusqueda($event)">
+        @if (busqueda()) {
+          <button class="search-clear" type="button" (click)="busqueda.set('')">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
-        </div>
+        }
       </div>
 
-      <div class="row g-2 align-items-center">
+      <!-- Filter chips -->
+      <div class="filter-row">
 
-        <!-- Filtro Rol -->
-        <div class="col-auto">
-          <span class="text-muted small me-1">{{ 'admin_users.role_filter' | translate }}</span>
-          <div class="btn-group btn-group-sm" role="group">
-            <button *ngFor="let r of roles" type="button"
-                    class="btn"
-                    [class.btn-primary]="filtroRol() === r"
-                    [class.btn-outline-secondary]="filtroRol() !== r"
-                    (click)="filtroRol.set(r)">
-              {{ r === 'todos' ? ('common.all' | translate) : (('role.' + r) | translate) }}
-            </button>
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.role_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (r of roles; track r) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroRol() === r"
+                      (click)="filtroRol.set(r)">
+                {{ r === 'todos' ? ('common.all' | translate) : (('role.' + r) | translate) }}
+              </button>
+            }
           </div>
         </div>
 
-        <!-- Filtro Proveedor -->
-        <div class="col-auto">
-          <span class="text-muted small me-1">{{ 'admin_users.provider_filter' | translate }}</span>
-          <div class="btn-group btn-group-sm" role="group">
-            <button *ngFor="let p of proveedores" type="button"
-                    class="btn"
-                    [class.btn-primary]="filtroProveedor() === p"
-                    [class.btn-outline-secondary]="filtroProveedor() !== p"
-                    (click)="filtroProveedor.set(p)">
-              <i *ngIf="p === 'google'" class="bi bi-google me-1"></i>
-              <i *ngIf="p === 'email'"  class="bi bi-envelope-fill me-1"></i>
-              {{ p === 'todos' ? ('common.all' | translate) : p }}
-            </button>
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.provider_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (p of proveedores; track p) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroProveedor() === p"
+                      (click)="filtroProveedor.set(p)">
+                @if (p === 'google') { <i class="bi bi-google me-1" aria-hidden="true"></i> }
+                @if (p === 'email')  { <i class="bi bi-envelope me-1" aria-hidden="true"></i> }
+                {{ p === 'todos' ? ('common.all' | translate) : p }}
+              </button>
+            }
           </div>
         </div>
 
-        <!-- Filtro Activo -->
-        <div class="col-auto">
-          <span class="text-muted small me-1">{{ 'admin_users.status_filter' | translate }}</span>
-          <div class="btn-group btn-group-sm" role="group">
-            <button *ngFor="let a of estadosActivo" type="button"
-                    class="btn"
-                    [class.btn-success]="filtroActivo() === a && a === 'activo'"
-                    [class.btn-danger]="filtroActivo() === a && a === 'inactivo'"
-                    [class.btn-primary]="filtroActivo() === a && a === 'todos'"
-                    [class.btn-outline-secondary]="filtroActivo() !== a"
-                    (click)="filtroActivo.set(a)">
-              {{ a === 'todos' ? ('common.all' | translate) : a === 'activo' ? ('common.active' | translate) : ('common.inactive' | translate) }}
-            </button>
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.status_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (a of estadosActivo; track a) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroActivo() === a"
+                      [class.filter-chip--active-yes]="filtroActivo() === a && a === 'activo'"
+                      [class.filter-chip--active-no]="filtroActivo() === a && a === 'inactivo'"
+                      (click)="filtroActivo.set(a)">
+                {{ a === 'todos' ? ('common.all' | translate) : a === 'activo' ? ('common.active' | translate) : ('common.inactive' | translate) }}
+              </button>
+            }
           </div>
         </div>
 
-        <!-- Limpiar -->
-        <div class="col-auto ms-auto">
-          <button *ngIf="hayFiltros()" class="btn btn-sm btn-link text-muted p-0"
-                  (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+        @if (hayFiltros()) {
+          <button type="button" class="filter-clear" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>{{ 'common.clear_filters' | translate }}
           </button>
-        </div>
+        }
 
       </div>
     </div>
 
-    <!-- ── Tabla ── -->
-    <div class="card shadow-sm border-0">
+    <!-- Tabla -->
+    <div class="card table-card">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-dark">
+        <table class="table table-admin table-hover align-middle mb-0">
+          <thead>
             <tr>
               <th style="width:48px"></th>
               <th>{{ 'admin_users.col_name' | translate }}</th>
@@ -127,85 +162,77 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of usuariosPaginados()">
-
-              <!-- Avatar -->
-              <td>
-                <ng-container *ngIf="u.avatar_url; else initiales">
-                  <img [src]="u.avatar_url" alt="avatar"
-                       class="avatar-img rounded-circle"
-                       width="36" height="36"
-                       referrerpolicy="no-referrer"
-                       (error)="$any($event.target).style.display='none';
-                                $any($event.target).nextElementSibling.style.display='flex'">
-                  <div class="avatar-fallback rounded-circle d-flex align-items-center
-                              justify-content-center fw-semibold"
-                       style="width:36px;height:36px;font-size:13px;display:none;">
-                    {{ avatarFallback(u) }}
+            @if (usuariosFiltrados().length === 0) {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state">
+                    @if (hayFiltros()) {
+                      <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
+                      <span>{{ 'admin_users.no_results' | translate }}</span>
+                      <button type="button" class="btn btn-sm btn-outline-secondary"
+                              (click)="limpiarFiltros()">
+                        {{ 'common.clear_filters' | translate }}
+                      </button>
+                    } @else {
+                      <i class="bi bi-people empty-state__icon" aria-hidden="true"></i>
+                      <span>{{ 'admin_users.no_data' | translate }}</span>
+                    }
                   </div>
-                </ng-container>
-                <ng-template #initiales>
-                  <div class="avatar-fallback rounded-circle d-flex align-items-center
-                              justify-content-center fw-semibold"
-                       style="width:36px;height:36px;font-size:13px;">
-                    {{ avatarFallback(u) }}
-                  </div>
-                </ng-template>
-              </td>
-
-              <td>{{ u.nombre }}</td>
-              <td>{{ u.apellido }}</td>
-              <td>{{ u.telefono ?? '—' }}</td>
-              <td class="text-truncate" style="max-width:200px;">{{ u.email ?? '—' }}</td>
-
-              <!-- Rol -->
-              <td>
-                <span class="badge rounded-pill" [class]="rolClass(u.rol)">
-                  {{ ('role.' + u.rol) | translate }}
-                </span>
-              </td>
-
-              <!-- Proveedor -->
-              <td>
-                <span class="d-flex align-items-center gap-1">
-                  <i class="bi" [class]="proveedorIcon(u.proveedor)"></i>
-                  {{ u.proveedor }}
-                </span>
-              </td>
-
-              <!-- Activo -->
-              <td class="text-center">
-                <i class="bi"
-                   [class]="u.activo ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'">
-                </i>
-              </td>
-
-              <!-- Acciones -->
-              <td class="text-center">
-                <a [routerLink]="['/admin/user/edit', u.id]"
-                   class="btn btn-sm btn-outline-secondary" [title]="'admin_users.edit_user' | translate">
-                  <i class="bi bi-pencil-square"></i>
-                </a>
-              </td>
-
-            </tr>
-
-            <!-- Sin resultados -->
-            <tr *ngIf="usuariosFiltrados().length === 0">
-              <td colspan="9" class="text-center text-muted py-4">
-                <ng-container *ngIf="hayFiltros(); else sinDatos">
-                  <i class="bi bi-funnel me-1"></i>
-                  {{ 'admin_users.no_results' | translate }}
-                </ng-container>
-                <ng-template #sinDatos>
-                  {{ 'admin_users.no_data' | translate }}
-                </ng-template>
-              </td>
-            </tr>
+                </td>
+              </tr>
+            } @else {
+              @for (u of usuariosPaginados(); track u.id) {
+                <tr>
+                  <td>
+                    @if (u.avatar_url) {
+                      <img [src]="u.avatar_url" [alt]="u.nombre"
+                           class="user-avatar rounded-circle"
+                           referrerpolicy="no-referrer">
+                    } @else {
+                      <div class="user-avatar-fallback rounded-circle">
+                        {{ avatarFallback(u) }}
+                      </div>
+                    }
+                  </td>
+                  <td class="fw-medium">{{ u.nombre }}</td>
+                  <td>{{ u.apellido }}</td>
+                  <td class="text-ink-muted">{{ u.telefono ?? '—' }}</td>
+                  <td class="user-email">{{ u.email ?? '—' }}</td>
+                  <td>
+                    <span [class]="rolBadgeClass(u.rol)">
+                      {{ ('role.' + u.rol) | translate }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="provider-badge">
+                      @if (u.proveedor === 'google') {
+                        <i class="bi bi-google" aria-hidden="true"></i>
+                      } @else {
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                      }
+                      {{ u.proveedor }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    @if (u.activo) {
+                      <i class="bi bi-check-circle status-icon status-icon--active" aria-hidden="true"></i>
+                    } @else {
+                      <i class="bi bi-x-circle status-icon status-icon--inactive" aria-hidden="true"></i>
+                    }
+                  </td>
+                  <td class="text-center">
+                    <a [routerLink]="['/admin/user/edit', u.id]"
+                       class="btn-icon-edit" [title]="'admin_users.edit_user' | translate">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
           </tbody>
         </table>
       </div>
-      <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
+      <div class="table-card__footer">
         <app-pagination
           [total]="usuariosFiltrados().length"
           [page]="paginaActual()"
@@ -215,6 +242,6 @@
       </div>
     </div>
 
-  </ng-container>
+  }
 
 </div>

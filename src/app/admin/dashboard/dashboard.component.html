@@ -1,1 +1,421 @@
-<p>dashboard works!</p>
+<div class="dash-wrap">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="dash-header">
+    <div class="container-fluid px-4 py-4">
+      <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+        <div>
+          <p class="eyebrow mb-2">{{ 'admin_dashboard.eyebrow' | translate }}</p>
+          <h1 class="dash-title mb-1">{{ 'admin_dashboard.title' | translate }}</h1>
+          <p class="text-ink-muted mb-0" style="font-size:var(--ds-text-sm)">
+            {{ 'admin_dashboard.subtitle' | translate }}
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          @if (refreshedAt()) {
+            <span class="refresh-label">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              {{ 'admin_dashboard.refreshed_at' | translate }} {{ refreshedAt() }}
+            </span>
+          }
+          <button class="btn btn-outline-primary btn-sm"
+                  (click)="recargar()"
+                  [disabled]="cargando()">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            {{ 'admin_dashboard.refresh' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid px-4 py-4">
+
+    <!-- ── Cargando ─────────────���───────────────────────────────────────── -->
+    @if (cargando()) {
+      <div class="row g-3 mb-4">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="col-6 col-xl-3"><div class="skeleton-kpi"></div></div>
+        }
+      </div>
+      <div class="row g-3">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="col-lg-6"><div class="skeleton-panel"></div></div>
+        }
+      </div>
+
+    <!-- ── Error ─────────────���───────────────────────────────────────────── -->
+    } @else if (error()) {
+      <div class="alert alert-danger rounded-3 d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <span>{{ error() }}</span>
+        <button class="btn btn-sm btn-outline-danger ms-auto" (click)="recargar()">
+          <i class="bi bi-arrow-clockwise me-1"></i>
+          {{ 'admin_dashboard.retry' | translate }}
+        </button>
+      </div>
+
+    <!-- ── Contenido ──���─────────────────────────��────────────────────────── -->
+    } @else {
+
+      <!-- ── KPI Row ───────��───────────────────────────��─────────────────── -->
+      <div class="row g-3 mb-4">
+
+        <div class="col-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--exp"><i class="bi bi-folder2-open"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-num">{{ stats()!.expedientes.total }}</div>
+              <div class="kpi-label">{{ 'admin_dashboard.kpi_exp' | translate }}</div>
+              <div class="kpi-sub">
+                {{ expCancelados() }} {{ 'admin_dashboard.kpi_sub_cancelled' | translate }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--est"><i class="bi bi-clipboard-data"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-num">{{ stats()!.estimaciones.total }}</div>
+              <div class="kpi-label">{{ 'admin_dashboard.kpi_est' | translate }}</div>
+              <div class="kpi-sub">
+                {{ expSinAsignar() }} {{ 'admin_dashboard.kpi_sub_unassigned' | translate }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--con"><i class="bi bi-person-workspace"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-num">{{ stats()!.ofertas.constructoresActivos }}</div>
+              <div class="kpi-label">{{ 'admin_dashboard.kpi_con' | translate }}</div>
+              <div class="kpi-sub">
+                {{ stats()!.ofertas.total }} {{ 'admin_dashboard.kpi_sub_offers_sent' | translate }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon--ctr"><i class="bi bi-file-earmark-check"></i></div>
+            <div class="kpi-body">
+              <div class="kpi-num">{{ stats()!.contratos.total }}</div>
+              <div class="kpi-label">{{ 'admin_dashboard.kpi_ctr' | translate }}</div>
+              <div class="kpi-sub kpi-sub--gold">{{ formatPrecio(stats()!.contratos.valorTotal) }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- / KPI row -->
+
+      <!-- ── Process Panels ───��─────────────────────────────────────────── -->
+      <div class="row g-3 mb-4">
+
+        <!-- Panel 1: Expedientes -->
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <div class="panel-header panel-header--exp">
+              <i class="bi bi-folder2-open me-2"></i>
+              {{ 'admin_dashboard.panel_exp' | translate }}
+              <span class="panel-total ms-auto">
+                {{ stats()!.expedientes.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
+              </span>
+            </div>
+            <div class="panel-body">
+              <div class="funnel">
+                @for (item of funnelExp(); track item.estado) {
+                  <div class="funnel-row">
+                    <div class="funnel-label">
+                      <span class="estado-dot estado-dot--exp-{{ item.estado }}"></span>
+                      <span class="funnel-estado">
+                        {{ 'admin_file.status_' + item.estado | translate }}
+                      </span>
+                    </div>
+                    <div class="funnel-bar-wrap">
+                      <div class="funnel-bar funnel-bar--exp-{{ item.estado }}"
+                           [style.width.%]="barWidth(item.count, stats()!.expedientes.total)">
+                      </div>
+                    </div>
+                    <span class="funnel-count">{{ item.count }}</span>
+                  </div>
+                }
+                @if (expCancelados() > 0) {
+                  <div class="funnel-divider"></div>
+                  <div class="funnel-row funnel-row--muted">
+                    <div class="funnel-label">
+                      <span class="estado-dot estado-dot--cancelado"></span>
+                      <span class="funnel-estado">
+                        {{ 'admin_file.status_cancelado' | translate }}
+                      </span>
+                    </div>
+                    <div class="funnel-bar-wrap">
+                      <div class="funnel-bar funnel-bar--cancelado"
+                           [style.width.%]="barWidth(expCancelados(), stats()!.expedientes.total)">
+                      </div>
+                    </div>
+                    <span class="funnel-count">{{ expCancelados() }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Estimaciones -->
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <div class="panel-header panel-header--est">
+              <i class="bi bi-clipboard-data me-2"></i>
+              {{ 'admin_dashboard.panel_est' | translate }}
+              <span class="panel-total ms-auto">
+                {{ stats()!.estimaciones.total }} {{ 'admin_dashboard.panel_completed_suffix' | translate }}
+              </span>
+            </div>
+            <div class="panel-body">
+
+              <div class="mini-stats mb-4">
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ expSinAsignar() }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_unassigned' | translate }}</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ expEnEstimacion() }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_in_progress' | translate }}</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ stats()!.estimaciones.total }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_completed' | translate }}</div>
+                </div>
+              </div>
+
+              @if (stats()!.estimaciones.promedioMin) {
+                <div class="cost-range mb-3">
+                  <span class="cost-range-label">{{ 'admin_dashboard.cost_avg' | translate }}</span>
+                  <span class="cost-range-val">
+                    {{ formatPrecio(stats()!.estimaciones.promedioMin) }}
+                    @if (stats()!.estimaciones.promedioMax) {
+                      <span class="cost-sep"> – </span>
+                      {{ formatPrecio(stats()!.estimaciones.promedioMax) }}
+                    }
+                  </span>
+                </div>
+              }
+
+              <div class="funnel">
+                <div class="funnel-row">
+                  <div class="funnel-label">
+                    <span class="estado-dot estado-dot--exp-nuevo"></span>
+                    <span class="funnel-estado">{{ 'admin_dashboard.est_label_unassigned' | translate }}</span>
+                  </div>
+                  <div class="funnel-bar-wrap">
+                    <div class="funnel-bar funnel-bar--exp-nuevo"
+                         [style.width.%]="barWidth(expSinAsignar(), stats()!.expedientes.total)"></div>
+                  </div>
+                  <span class="funnel-count">{{ expSinAsignar() }}</span>
+                </div>
+                <div class="funnel-row">
+                  <div class="funnel-label">
+                    <span class="estado-dot estado-dot--exp-en_estimacion"></span>
+                    <span class="funnel-estado">{{ 'admin_dashboard.est_label_in_estimation' | translate }}</span>
+                  </div>
+                  <div class="funnel-bar-wrap">
+                    <div class="funnel-bar funnel-bar--exp-en_estimacion"
+                         [style.width.%]="barWidth(expEnEstimacion(), stats()!.expedientes.total)"></div>
+                  </div>
+                  <span class="funnel-count">{{ expEnEstimacion() }}</span>
+                </div>
+                <div class="funnel-row">
+                  <div class="funnel-label">
+                    <span class="estado-dot" style="background:var(--ds-success)"></span>
+                    <span class="funnel-estado">{{ 'admin_dashboard.est_label_estimated' | translate }}</span>
+                  </div>
+                  <div class="funnel-bar-wrap">
+                    <div class="funnel-bar funnel-bar--exp-contratado"
+                         [style.width.%]="barWidth(stats()!.estimaciones.total, stats()!.expedientes.total)"></div>
+                  </div>
+                  <span class="funnel-count">{{ stats()!.estimaciones.total }}</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Constructores y Ofertas -->
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <div class="panel-header panel-header--con">
+              <i class="bi bi-person-workspace me-2"></i>
+              {{ 'admin_dashboard.panel_con' | translate }}
+              <span class="panel-total ms-auto">
+                {{ stats()!.ofertas.constructoresActivos }} {{ 'admin_dashboard.panel_active_suffix' | translate }}
+              </span>
+            </div>
+            <div class="panel-body">
+
+              <div class="mini-stats mb-4">
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ stats()!.ofertas.constructoresActivos }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_builders' | translate }}</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ stats()!.ofertas.total }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_offers_total' | translate }}</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ stats()!.expedientes.porEstado['en_oferta'] }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_files_on_offer' | translate }}</div>
+                </div>
+              </div>
+
+              <div class="funnel">
+                @for (item of funnelOfe(); track item.estado) {
+                  <div class="funnel-row">
+                    <div class="funnel-label">
+                      <span class="estado-dot estado-dot--ofe-{{ item.estado }}"></span>
+                      <span class="funnel-estado">{{ 'state.' + item.estado | translate }}</span>
+                    </div>
+                    <div class="funnel-bar-wrap">
+                      <div class="funnel-bar funnel-bar--ofe-{{ item.estado }}"
+                           [style.width.%]="barWidth(item.count, stats()!.ofertas.total)">
+                      </div>
+                    </div>
+                    <span class="funnel-count">{{ item.count }}</span>
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 4: Contratos -->
+        <div class="col-lg-6">
+          <div class="panel-card">
+            <div class="panel-header panel-header--ctr">
+              <i class="bi bi-file-earmark-check me-2"></i>
+              {{ 'admin_dashboard.panel_ctr' | translate }}
+              <span class="panel-total ms-auto">
+                {{ stats()!.contratos.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
+              </span>
+            </div>
+            <div class="panel-body">
+
+              <div class="mini-stats mb-4">
+                <div class="mini-stat">
+                  <div class="mini-stat-num">{{ stats()!.contratos.total }}</div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_total_contracts' | translate }}</div>
+                </div>
+                <div class="mini-stat">
+                  <div class="mini-stat-num mini-stat-num--gold">
+                    {{ formatPrecio(stats()!.contratos.valorTotal) }}
+                  </div>
+                  <div class="mini-stat-label">{{ 'admin_dashboard.mini_contract_value' | translate }}</div>
+                </div>
+              </div>
+
+              <div class="funnel">
+                @for (item of funnelCtr(); track item.estado) {
+                  <div class="funnel-row">
+                    <div class="funnel-label">
+                      <span class="estado-dot estado-dot--ctr-{{ item.estado }}"></span>
+                      <span class="funnel-estado">
+                        {{ 'admin_dashboard.contract_' + item.estado | translate }}
+                      </span>
+                    </div>
+                    <div class="funnel-bar-wrap">
+                      <div class="funnel-bar funnel-bar--ctr-{{ item.estado }}"
+                           [style.width.%]="barWidth(item.count, stats()!.contratos.total)">
+                      </div>
+                    </div>
+                    <span class="funnel-count">{{ item.count }}</span>
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div><!-- / process panels -->
+
+      <!-- ── Línea de tiempo ────���────────────────────────────────────────── -->
+      @defer (on viewport) {
+        <div class="tl-card">
+
+          <div class="tl-head">
+            <div>
+              <h5 class="tl-title mb-1">
+                <i class="bi bi-clock-history me-2"></i>
+                {{ 'admin_dashboard.tl_title' | translate }}
+              </h5>
+              <p class="text-ink-muted mb-0" style="font-size:var(--ds-text-sm)">
+                {{ 'admin_dashboard.tl_subtitle' | translate }}
+              </p>
+            </div>
+            <nav class="tl-filters" [attr.aria-label]="'admin_dashboard.tl_title' | translate">
+              @for (f of timelineFiltros; track f.key) {
+                <button class="tl-filter"
+                        [class.active]="filtroTimeline() === f.key"
+                        (click)="filtroTimeline.set(f.key)">
+                  {{ f.labelKey | translate }}
+                </button>
+              }
+            </nav>
+          </div>
+
+          @if (cargandoTimeline()) {
+            <div class="tl-empty">
+              <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+            </div>
+          } @else if (timelineFiltrada().length === 0) {
+            <div class="tl-empty">
+              <i class="bi bi-clock fs-3 text-ink-muted"></i>
+              <p class="text-ink-muted mb-0">{{ 'admin_dashboard.tl_empty' | translate }}</p>
+            </div>
+          } @else {
+            <ul class="tl-list">
+              @for (ev of timelineFiltrada(); track ev.id) {
+                <li class="tl-event">
+                  <div class="tl-dot tl-dot--{{ ev.tipo }}">
+                    <i class="{{ tipoIcon(ev.tipo) }}"></i>
+                  </div>
+                  <div class="tl-content">
+                    <div class="tl-desc">
+                      <span class="tl-ref">{{ ev.referencia }}</span>
+                      {{ ev.descKey | translate }}
+                      @if (ev.precio) { · {{ ev.precio }} }
+                    </div>
+                    <div class="tl-meta">
+                      <i class="bi bi-person me-1"></i>{{ ev.autor }}
+                      <span class="tl-sep">·</span>
+                      <span>{{ formatTs(ev.timestamp) }}</span>
+                    </div>
+                  </div>
+                  <span class="tl-badge tl-badge--{{ ev.tipo }}">
+                    {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+
+        </div>
+      } @placeholder {
+        <div class="tl-placeholder">
+          <div class="spinner-border spinner-border-sm text-muted" role="status"></div>
+          <span class="text-ink-muted ms-2" style="font-size:var(--ds-text-sm)">
+            {{ 'admin_dashboard.tl_loading' | translate }}
+          </span>
+        </div>
+      }
+
+    }<!-- /contenido -->
+
+  </div><!-- /container-fluid -->
+</div><!-- /dash-wrap -->

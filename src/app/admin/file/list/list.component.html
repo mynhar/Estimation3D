@@ -1,11 +1,11 @@
 <div class="container-fluid py-4 px-3 px-xl-4">
 
   <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
+  <header class="page-header p-4 mb-4">
     <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
       <div>
-        <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-shield-check me-1"></i>{{ 'role.administrateur' | translate }}
+        <p class="page-eyebrow">
+          <i class="bi bi-shield-check"></i>{{ 'role.administrateur' | translate }}
         </p>
         <h4 class="mb-1">{{ 'admin_file.title' | translate }}</h4>
         <p class="text-muted small mb-0">{{ 'admin_file.subtitle' | translate }}</p>
@@ -13,148 +13,229 @@
       <div class="d-flex align-items-center gap-2 flex-wrap">
         @if (!cargando() && !error()) {
           <span class="kpi-pill">
-            <i class="bi bi-folder2 me-1"></i>
-            {{ expedientesFiltrados().length }}
-            @if (hayFiltros()) { / {{ total }} }
+            <i class="bi bi-folder2"></i>
+            @if (hayFiltros()) {
+              {{ expedientesFiltrados().length }} / {{ total }}
+            } @else {
+              {{ total }}
+            }
             {{ 'admin_file.count' | translate }}
           </span>
         }
-        <a routerLink="/admin/file/create" class="btn btn-primary btn-sm fw-semibold">
-          <i class="bi bi-plus-circle me-1"></i>{{ 'admin_file.add_btn' | translate }}
+        <a routerLink="/admin/file/create" class="btn btn-primary btn-sm">
+          <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
         </a>
       </div>
     </div>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Skeleton ──────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="skeleton-wrap">
+      <div class="skeleton-toolbar mb-3">
+        <div class="skel skel--search"></div>
+        <div class="d-flex gap-2 mt-3">
+          @for (i of [1,2,3,4,5]; track i) { <div class="skel skel--chip"></div> }
+        </div>
+      </div>
+      <div class="skeleton-table">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="skeleton-row">
+            <div class="skel skel--xs"></div>
+            <div class="skel skel--lg"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--md"></div>
+            <div class="skel skel--md"></div>
+            <div class="skel skel--sm"></div>
+          </div>
+        }
+      </div>
     </div>
 
   <!-- ── Error ──────────────────────────────────────────────────────────────── -->
   } @else if (error()) {
-    <div class="alert alert-danger rounded-4">
-      <i class="bi bi-exclamation-triangle me-2"></i>{{ error() }}
+    <div class="empty-state">
+      <div class="empty-state__icon empty-state__icon--danger">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <p class="empty-state__title">{{ 'common.error' | translate }}</p>
+      <p class="empty-state__desc">{{ error() }}</p>
     </div>
 
   <!-- ── Contenido ──────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- Filtros -->
-    <div class="filter-bar rounded-4 p-3 mb-3">
+    <!-- ── Filtros ──────────────────────────────────────────────────────────── -->
+    <div class="filter-bar mb-3">
 
       <!-- Búsqueda -->
-      <div class="input-group mb-3">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" class="form-control border-start-0 ps-0"
-               [placeholder]="'admin_file.search_placeholder' | translate"
-               [value]="busqueda()"
-               (input)="setBusqueda($event)">
-        @if (busqueda()) {
-          <button class="btn btn-outline-secondary" type="button" (click)="busqueda.set('')">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        }
+      <div class="filter-bar__search">
+        <div class="input-group">
+          <span class="input-group-text search-icon">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" class="form-control search-input"
+                 [placeholder]="'admin_file.search_placeholder' | translate"
+                 [value]="busqueda()"
+                 (input)="setBusqueda($event)">
+          @if (busqueda()) {
+            <button class="btn search-clear" type="button" (click)="busqueda.set('')"
+                    [title]="'common.clear' | translate">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          }
+        </div>
       </div>
 
-      <!-- Estado + limpiar -->
-      <div class="d-flex align-items-center gap-3 flex-wrap">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-          <span class="text-muted small fw-semibold">{{ 'admin_file.status_filter' | translate }}</span>
-          <select class="form-select form-select-sm filter-select"
-                  [value]="filtroEstado()"
-                  (change)="filtroEstado.set($any($event.target).value)">
-            @for (e of estados; track e) {
-              <option [value]="e">
-                {{ e === 'todos'
+      <!-- Status chips -->
+      <div class="filter-bar__chips">
+        <div class="status-chips" role="group">
+          @for (estado of estados; track estado) {
+            <button type="button" class="status-chip"
+                    [class.status-chip--active]="filtroEstado() === estado"
+                    (click)="filtroEstado.set(estado)">
+              <span class="status-chip__label">
+                {{ estado === 'todos'
                     ? ('common.all' | translate)
-                    : (('admin_file.status_' + e) | translate) }}
-              </option>
-            }
-          </select>
+                    : (('admin_file.status_' + estado) | translate) }}
+              </span>
+              <span class="status-chip__count">
+                {{ estado === 'todos' ? total : (estadoCounts()[estado] || 0) }}
+              </span>
+            </button>
+          }
         </div>
-
         @if (hayFiltros()) {
-          <button class="btn btn-sm btn-link text-muted p-0 ms-auto" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+          <button class="btn-clear-filters" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
           </button>
         }
       </div>
 
     </div>
 
-    <!-- Tabla -->
-    <div class="card shadow-sm border-0">
+    <!-- ── Tabla ────────────────────────────────────────────────────────────── -->
+    <div class="table-card">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 table-admin">
-          <thead class="table-dark">
+        <table class="table table-admin align-middle mb-0">
+          <thead>
             <tr>
-              <th>{{ 'admin_file.col_number'     | translate }}</th>
-              <th>{{ 'admin_file.col_service'    | translate }}</th>
-              <th>{{ 'admin_file.col_client'     | translate }}</th>
+              <th class="col-num">#</th>
+              <th>{{ 'admin_file.col_client' | translate }} / {{ 'admin_file.col_service' | translate }}</th>
               <th>{{ 'admin_file.col_visit_date' | translate }}</th>
-              <th>{{ 'admin_file.col_status'     | translate }}</th>
-              <th>{{ 'admin_file.col_estimator'  | translate }}</th>
-              <th>{{ 'admin_file.col_real_visit' | translate }}</th>
-              <th class="text-end">{{ 'admin_file.col_price'      | translate }}</th>
-              <th>{{ 'admin_file.col_start_date' | translate }}</th>
-              <th style="width:52px"></th>
+              <th>{{ 'admin_file.col_status' | translate }}</th>
+              <th>{{ 'admin_file.col_estimator' | translate }}</th>
+              <th class="text-end">{{ 'admin_file.col_price' | translate }}</th>
+              <th class="col-actions"></th>
             </tr>
           </thead>
           <tbody>
 
             @for (e of expedientesPaginados(); track e.id) {
-              <tr>
-                <td><span class="exp-num">{{ e.numero }}</span></td>
-                <td class="col-servicio">{{ servicioNombre(e) }}</td>
-                <td class="text-nowrap">{{ e.cliente_nombre }}</td>
-                <td class="text-nowrap">{{ formatFecha(e.fecha_visita) }}</td>
+              <tr class="table-row">
+
+                <!-- Número -->
+                <td class="col-num">
+                  <span class="exp-num">{{ e.numero }}</span>
+                </td>
+
+                <!-- Cliente / Servicio -->
+                <td class="col-identity">
+                  <span class="cell-primary">{{ e.cliente_nombre }}</span>
+                  <span class="cell-secondary">{{ servicioNombre(e) }}</span>
+                </td>
+
+                <!-- Visita -->
+                <td class="col-date">
+                  <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
+                  @if (e.fecha_visita_real) {
+                    <span class="cell-secondary cell-real-date">
+                      <i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}
+                    </span>
+                  }
+                </td>
+
+                <!-- Estado -->
                 <td>
-                  <span class="badge rounded-pill {{ estadoBadge(e.estado) }}">
+                  <span class="estado-badge {{ estadoBadge(e.estado) }}">
                     {{ ('admin_file.status_' + e.estado) | translate }}
                   </span>
                 </td>
-                <td class="text-nowrap">{{ e.estimador_nombre ?? '—' }}</td>
-                <td class="text-nowrap">{{ formatFecha(e.fecha_visita_real) }}</td>
-                <td class="text-end text-nowrap precio-val">{{ formatPrecio(e.oferta_precio) }}</td>
-                <td class="text-nowrap">{{ formatFecha(e.oferta_fecha_inicio) }}</td>
-                <td class="text-center">
-                  <a [routerLink]="['/admin/file/edit', e.id]"
-                     class="btn btn-sm btn-outline-secondary"
-                     [title]="'admin_file.edit_btn' | translate">
-                    <i class="bi bi-pencil-square"></i>
-                  </a>
-                </td>
-              </tr>
-            }
 
-            @if (expedientesFiltrados().length === 0) {
-              <tr>
-                <td colspan="10" class="text-center text-muted py-4">
-                  @if (hayFiltros()) {
-                    <i class="bi bi-funnel me-1"></i>{{ 'admin_file.no_results' | translate }}
+                <!-- Estimador -->
+                <td class="col-estimador">
+                  @if (e.estimador_nombre) {
+                    <span class="cell-primary">{{ e.estimador_nombre }}</span>
                   } @else {
-                    <i class="bi bi-folder2 me-1"></i>{{ 'admin_file.no_data' | translate }}
+                    <span class="cell-muted">—</span>
                   }
                 </td>
+
+                <!-- Precio / Inicio -->
+                <td class="text-end col-precio">
+                  @if (e.oferta_precio) {
+                    <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
+                    @if (e.oferta_fecha_inicio) {
+                      <span class="cell-secondary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
+                    }
+                  } @else {
+                    <span class="cell-muted">—</span>
+                  }
+                </td>
+
+                <!-- Acciones -->
+                <td class="col-actions">
+                  <a [routerLink]="['/admin/file/edit', e.id]"
+                     class="action-btn"
+                     [title]="'admin_file.edit_btn' | translate">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                </td>
+
               </tr>
             }
 
           </tbody>
         </table>
       </div>
-      <div class="card-footer bg-transparent border-0 pt-0 px-3 pb-3">
-        <app-pagination
-          [total]="expedientesFiltrados().length"
-          [page]="paginaActual()"
-          [pageSize]="POR_PAGINA"
-          (pageChange)="paginaActual.set($event)">
-        </app-pagination>
-      </div>
+
+      <!-- ── Empty state ──────────────────────────────────────────────────── -->
+      @if (expedientesFiltrados().length === 0) {
+        <div class="empty-state empty-state--table">
+          @if (hayFiltros()) {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_file.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_file.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_file.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_file.no_data_hint' | translate }}</p>
+            <a routerLink="/admin/file/create" class="btn btn-primary btn-sm mt-2">
+              <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
+            </a>
+          }
+        </div>
+      }
+
+      <!-- ── Paginación ───────────────────────────────────────────────────── -->
+      @if (expedientesFiltrados().length > 0) {
+        <div class="table-footer">
+          <app-pagination
+            [total]="expedientesFiltrados().length"
+            [page]="paginaActual()"
+            [pageSize]="POR_PAGINA"
+            (pageChange)="paginaActual.set($event)">
+          </app-pagination>
+        </div>
+      }
+
     </div>
 
   }

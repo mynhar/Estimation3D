@@ -1,5 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
@@ -8,44 +7,53 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 
+const ROL_BADGE_CLASS: Record<string, string> = {
+  administrador: 'role-badge role-badge--administrador',
+  estimador:     'role-badge role-badge--estimador',
+  constructor:   'role-badge role-badge--constructor',
+  cliente:       'role-badge role-badge--cliente',
+};
+
 @Component({
   selector: 'app-admin-user-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, PaginationComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
 export class AdminUserListComponent implements OnInit {
-  private _usuarios = signal<DbPerfil[]>([]);
-  cargando = true;
-  error: string | null = null;
+  private auth      = inject(AuthSupabaseService);
+  private translate = inject(TranslateService);
 
-  // Filtros reactivos
+  private _usuarios = signal<DbPerfil[]>([]);
+  cargando = signal(true);
+  error    = signal<string | null>(null);
+
   busqueda        = signal('');
   filtroRol       = signal<RolUsuario | 'todos'>('todos');
   filtroProveedor = signal<ProveedorAuth | 'todos'>('todos');
   filtroActivo    = signal<FiltroActivo>('todos');
 
-  readonly roles: Array<RolUsuario | 'todos'>       = ['todos', 'cliente', 'estimador', 'constructor', 'administrador'];
+  readonly roles: Array<RolUsuario | 'todos'>          = ['todos', 'cliente', 'estimador', 'constructor', 'administrador'];
   readonly proveedores: Array<ProveedorAuth | 'todos'> = ['todos', 'email', 'google'];
-  readonly estadosActivo: FiltroActivo[]             = ['todos', 'activo', 'inactivo'];
+  readonly estadosActivo: FiltroActivo[]               = ['todos', 'activo', 'inactivo'];
 
-  // ── Paginación ─────────────────────────────────────────────────────────────
   readonly POR_PAGINA = 15;
   paginaActual = signal(1);
 
   usuariosFiltrados = computed(() => {
-    const q          = this.busqueda().toLowerCase().trim();
-    const rol        = this.filtroRol();
-    const proveedor  = this.filtroProveedor();
-    const activo     = this.filtroActivo();
+    const q         = this.busqueda().toLowerCase().trim();
+    const rol       = this.filtroRol();
+    const proveedor = this.filtroProveedor();
+    const activo    = this.filtroActivo();
 
     return this._usuarios().filter(u => {
       if (q && !`${u.nombre} ${u.apellido} ${u.email ?? ''}`.toLowerCase().includes(q)) return false;
-      if (rol       !== 'todos' && u.rol       !== rol)      return false;
+      if (rol       !== 'todos' && u.rol       !== rol)       return false;
       if (proveedor !== 'todos' && u.proveedor !== proveedor) return false;
-      if (activo === 'activo'   && !u.activo)  return false;
-      if (activo === 'inactivo' &&  u.activo)  return false;
+      if (activo === 'activo'   && !u.activo) return false;
+      if (activo === 'inactivo' &&  u.activo) return false;
       return true;
     });
   });
@@ -64,9 +72,7 @@ export class AdminUserListComponent implements OnInit {
 
   get totalUsuarios(): number { return this._usuarios().length; }
 
-  private translate = inject(TranslateService);
-
-  constructor(private auth: AuthSupabaseService) {
+  constructor() {
     effect(() => {
       this.busqueda();
       this.filtroRol();
@@ -86,9 +92,9 @@ export class AdminUserListComponent implements OnInit {
       if (error) throw error;
       this._usuarios.set(data ?? []);
     } catch (e: any) {
-      this.error = e.message ?? this.translate.instant('admin_users.err_load_list');
+      this.error.set(e.message ?? this.translate.instant('admin_users.err_load_list'));
     } finally {
-      this.cargando = false;
+      this.cargando.set(false);
     }
   }
 
@@ -109,17 +115,7 @@ export class AdminUserListComponent implements OnInit {
     return (n + a).toUpperCase() || '?';
   }
 
-  rolClass(rol: string): string {
-    const map: Record<string, string> = {
-      administrador: 'bg-danger',
-      estimador:     'bg-warning text-dark',
-      constructor:   'bg-info text-dark',
-      cliente:       'bg-primary',
-    };
-    return map[rol] ?? 'bg-secondary';
-  }
-
-  proveedorIcon(proveedor: string): string {
-    return proveedor === 'google' ? 'bi-google text-danger' : 'bi-envelope-fill text-secondary';
+  rolBadgeClass(rol: string): string {
+    return ROL_BADGE_CLASS[rol] ?? 'role-badge role-badge--cliente';
   }
 }

@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
 import { ArchivoRow, BUCKET } from '../models';
+import { TablesInsert, TipoArchivo } from '../types/supabase';
 
 export type ArchivoConTipo = ArchivoRow & { tipo: string };
 export type ArchivoConOferta = ArchivoConTipo & { oferta_id: string };
 
 export type ArchivoInsertData = {
-  tipo:           string;
+  tipo:           TipoArchivo;
   nombre_archivo: string;
   url_storage:    string;
   mime_type:      string;
@@ -23,14 +24,13 @@ export class ArchivoRepository {
 
   // ── DB queries ──────────────────────────────────────────────────────────────
 
-  async findByExpedienteId(expedienteId: string, tipo?: string): Promise<ArchivoRow[]> {
-    let q: any = this.db
+  async findByExpedienteId(expedienteId: string, tipo?: TipoArchivo): Promise<ArchivoRow[]> {
+    const query = this.db
       .from('archivo')
       .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
       .eq('expediente_id', expedienteId)
       .order('creado_en', { ascending: false });
-    if (tipo) q = q.eq('tipo', tipo);
-    const { data } = await q;
+    const { data } = await (tipo ? query.eq('tipo', tipo) : query);
     return (data ?? []) as ArchivoRow[];
   }
 
@@ -54,18 +54,18 @@ export class ArchivoRepository {
     return (data ?? []) as unknown as ArchivoConTipo[];
   }
 
-  async findByOfertaIdAndTipo(ofertaId: string, tipo: string): Promise<{ id: string; url_storage: string } | null> {
-    const { data } = await (this.db
+  async findByOfertaIdAndTipo(ofertaId: string, tipo: TipoArchivo): Promise<{ id: string; url_storage: string } | null> {
+    const { data } = await this.db
       .from('archivo')
       .select('id, url_storage')
-      .eq('oferta_id', ofertaId) as any)
+      .eq('oferta_id', ofertaId)
       .eq('tipo', tipo)
       .maybeSingle();
     return data as { id: string; url_storage: string } | null;
   }
 
   async insert(data: ArchivoInsertData): Promise<void> {
-    const { error } = await this.db.from('archivo').insert(data as any);
+    const { error } = await this.db.from('archivo').insert(data as TablesInsert<'archivo'>);
     if (error) throw new Error(error.message);
   }
 
@@ -87,11 +87,11 @@ export class ArchivoRepository {
     if (paths.length) await this.db.storage.from(BUCKET).remove(paths);
   }
 
-  async listFromStorage(prefix: string): Promise<{ id: string; name: string; metadata: any }[]> {
+  async listFromStorage(prefix: string): Promise<{ id: string; name: string; metadata: Record<string, unknown> }[]> {
     const { data } = await this.db.storage
       .from(BUCKET)
       .list(prefix, { sortBy: { column: 'created_at', order: 'desc' } });
-    return (data ?? []) as any[];
+    return (data ?? []) as { id: string; name: string; metadata: Record<string, unknown> }[];
   }
 
   getPublicUrl(path: string): string {

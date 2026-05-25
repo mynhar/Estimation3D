@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -12,6 +12,7 @@ import { PaginationComponent } from '../../shared/pagination/pagination.componen
 @Component({
   selector: 'app-available-files',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslatePipe, PaginationComponent],
   templateUrl: './available-files.component.html',
   styleUrl: './available-files.component.css',

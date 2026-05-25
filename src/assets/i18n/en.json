@@ -22,7 +22,8 @@
     "mon_profil": "My profile",
     "deconnexion": "Log out",
     "ouvrir_menu": "Open menu",
-    "colapsar_menu": "Collapse menu"
+    "colapsar_menu": "Collapse menu",
+    "inicio": "Home"
   },
   "role": {
     "client": "Client",
@@ -171,7 +172,31 @@
     "banner_single": "You have a new builder offer to review.",
     "banner_plural": "You have {{count}} builder offers to review.",
     "compare_text": "Compare and choose the best proposal for your project.",
-    "create_first": "Create my first file"
+    "create_first": "Create my first file",
+    "matterport_coming": "Your 3D video is coming soon",
+    "matterport_pending": "Your 3D video will be available 24–48 h after the visit of our certified estimator, scheduled on {{ date }}.",
+    "matterport_step1": "Visit",
+    "matterport_step2": "3D scan",
+    "matterport_step3": "Video ready",
+    "matterport_fullscreen": "Fullscreen",
+    "tour_label": "3D Tour",
+    "video_label": "Video",
+    "matterport_tooltip": "Navigate through your scanned property. Click to move, pinch to zoom.",
+    "next_step": "Next step",
+    "team_message": "Team message",
+    "my_documents": "My documents",
+    "no_message": "No message from the team yet.",
+    "no_documents": "No documents available yet.",
+    "timeline_title": "History",
+    "timeline_empty": "No events to display yet.",
+    "progress_label": "File progress"
+  },
+  "timeline": {
+    "created": "File created",
+    "estimator_assigned": "Estimator assigned",
+    "visit_scheduled": "Visit scheduled",
+    "visit_done": "Visit completed",
+    "tour_available": "3D tour available"
   },
   "dashboard_builder": {
     "title": "Dashboard",
@@ -734,6 +759,7 @@
   },
   "profile": {
     "title": "My profile",
+    "eyebrow": "My account",
     "subtitle": "Manage your personal information.",
     "name": "First name",
     "lastname": "Last name",
@@ -839,7 +865,9 @@
     "status_filter": "Status",
     "edit_btn": "Edit",
     "no_results": "No results match the applied filters",
+    "no_results_hint": "Try adjusting your search or clearing the active filters.",
     "no_data": "No files registered",
+    "no_data_hint": "Create the first file to start managing requests.",
     "col_number": "No.",
     "col_service": "Service",
     "col_client": "Client",
@@ -870,8 +898,22 @@
     "contractor": "Builder",
     "price": "Price",
     "generated_on": "Generated on",
-    "status_generado": "Generated",
-    "status_firmado": "Signed"
+    "signed_on": "Signed on",
+    "status_generado": "Pending signature",
+    "status_firmado": "Signed",
+    "status_en_ejecucion": "In progress",
+    "status_completado": "Completed",
+    "status_cancelado": "Cancelled",
+    "sign_btn": "Sign contract",
+    "sign_title": "Digital signature",
+    "sign_subtitle": "Review the terms and confirm your acceptance",
+    "sign_legal_text": "By signing digitally, you confirm that you have read and reviewed the full contract and that you accept its terms and conditions.",
+    "sign_terms_label": "I have read and accept the contract terms",
+    "sign_btn_confirm": "Sign digitally",
+    "sign_cancel": "Cancel",
+    "signing": "Signing…",
+    "success_signed": "Contract signed successfully.",
+    "err_sign": "Could not sign the contract. Please try again."
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -894,6 +936,20 @@
     "file_size": "The file exceeds the maximum allowed size.",
     "file_type": "File type not allowed.",
     "avatar_type": "Only JPG, PNG or WebP images are allowed."
+  },
+  "realtime": {
+    "exp_cambio": "File {{numero}}: new status «{{estado}}»",
+    "exp_asignado": "Your file {{numero}} has been assigned to an estimator.",
+    "exp_en_estimacion": "Your file {{numero}} is being evaluated by an estimator.",
+    "exp_estimado": "Your file {{numero}} has been estimated. Check the report.",
+    "exp_en_oferta": "Your file {{numero}} has builder proposals available.",
+    "exp_adjudicado": "Your file {{numero}} has been awarded to a builder.",
+    "exp_contratado": "File {{numero}} has been successfully contracted!",
+    "exp_cancelado": "File {{numero}} has been cancelled.",
+    "exp_asignado_estimador": "File {{numero}} has been assigned to you. Check your files to estimate.",
+    "ofe_aceptada": "Your offer was accepted! Go to My Offers to view the details.",
+    "ofe_rechazada": "Your offer was not selected. The client chose another proposal.",
+    "ofe_pendiente": "Your offer has returned to pending status."
   },
   "admin_service_types": {
     "title": "Service types",
@@ -941,5 +997,73 @@
     "create_submit": "Create service",
     "err_create": "Error creating the service.",
     "success_created": "Service created successfully."
+  },
+
+  "admin_dashboard": {
+    "eyebrow": "Overview",
+    "title": "Dashboard",
+    "subtitle": "Operational summary of all files and active processes.",
+    "refresh": "Refresh",
+    "refreshed_at": "Updated at",
+    "retry": "Retry",
+
+    "kpi_exp": "Files",
+    "kpi_est": "Estimates",
+    "kpi_con": "Contractors",
+    "kpi_ctr": "Contracts",
+
+    "kpi_sub_cancelled": "cancelled",
+    "kpi_sub_unassigned": "unassigned",
+    "kpi_sub_offers_sent": "offers sent",
+
+    "panel_exp": "File funnel",
+    "panel_est": "Estimates",
+    "panel_con": "Contractors & offers",
+    "panel_ctr": "Contracts",
+
+    "panel_total_suffix": "total",
+    "panel_completed_suffix": "completed",
+    "panel_active_suffix": "active",
+
+    "mini_unassigned": "Unassigned",
+    "mini_in_progress": "In estimation",
+    "mini_completed": "Estimated",
+    "mini_builders": "Active contractors",
+    "mini_offers_total": "Total offers",
+    "mini_files_on_offer": "In offer process",
+    "mini_total_contracts": "Total contracts",
+    "mini_contract_value": "Total active value",
+
+    "cost_avg": "Average estimated cost",
+
+    "est_label_unassigned": "Unassigned",
+    "est_label_in_estimation": "In estimation",
+    "est_label_estimated": "Estimated",
+
+    "contract_generado": "Generated",
+    "contract_firmado": "Signed",
+    "contract_en_ejecucion": "In progress",
+    "contract_completado": "Completed",
+    "contract_cancelado": "Cancelled",
+
+    "tipo_expediente": "File",
+    "tipo_estimacion": "Estimate",
+    "tipo_oferta": "Offer",
+    "tipo_contrato": "Contract",
+
+    "tl_title": "Recent activity",
+    "tl_subtitle": "Latest system events across all processes.",
+    "tl_filter_exp": "Files",
+    "tl_filter_est": "Estimates",
+    "tl_filter_ofe": "Offers",
+    "tl_filter_ctr": "Contracts",
+    "tl_empty": "No events to display.",
+    "tl_loading": "Loading activity…",
+
+    "tl_event_exp_created": "File created",
+    "tl_event_est_created": "Estimate recorded",
+    "tl_event_ofe_sent": "Offer submitted",
+    "tl_event_ctr_generated": "Contract generated",
+    "tl_event_ctr_signed": "Contract signed"
   }
 }

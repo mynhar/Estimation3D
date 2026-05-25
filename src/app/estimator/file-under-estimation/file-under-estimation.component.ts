@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -14,6 +14,7 @@ import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validato
 @Component({
   selector: 'app-file-under-estimation',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, TranslatePipe],
   templateUrl: './file-under-estimation.component.html',
   styleUrl:    './file-under-estimation.component.css',

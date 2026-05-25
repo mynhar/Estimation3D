@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -22,6 +22,7 @@ const ESTADO_ICON: Record<string, string> = {
 @Component({
   selector: 'app-my-offers',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, FormsModule, TranslatePipe],
   templateUrl: './my-offers.component.html',
   styleUrl: './my-offers.component.css',

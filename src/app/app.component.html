@@ -5,23 +5,39 @@
   @if (user()) {
 
     <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" aria-label="Navegación principal">
 
       <!-- Encabezado: brand + botón colapso -->
       <div class="sidebar-header">
-        <a class="sidebar-brand" (click)="irAHome(); closeMobile()">
-          <i class="bi bi-box-seam sidebar-brand__icon"></i>
+        <a class="sidebar-brand"
+           (click)="irAHome(); closeMobile()"
+           [title]="'nav.inicio' | translate">
+          <i class="bi bi-box-seam sidebar-brand__icon" aria-hidden="true"></i>
           <span class="sidebar-brand__text">Estimation3D</span>
         </a>
         <button class="sidebar-toggle"
                 (click)="toggleCollapse()"
+                [attr.aria-label]="collapsed() ? ('nav.ouvrir_menu' | translate) : ('nav.colapsar_menu' | translate)"
                 [title]="collapsed() ? ('nav.ouvrir_menu' | translate) : ('nav.colapsar_menu' | translate)">
-          <i class="bi" [class.bi-chevron-left]="!collapsed()" [class.bi-chevron-right]="collapsed()"></i>
+          <i class="bi" [class.bi-chevron-left]="!collapsed()" [class.bi-chevron-right]="collapsed()" aria-hidden="true"></i>
         </button>
       </div>
 
       <!-- Navegación -->
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" aria-label="Menú">
+
+        <!-- Skeleton mientras carga el perfil -->
+        @if (cargandoPerfil()) {
+          <div class="sidebar-skeleton" aria-hidden="true">
+            <div class="sidebar-skel sidebar-skel--label"></div>
+            <div class="sidebar-skel sidebar-skel--item"></div>
+            <div class="sidebar-skel sidebar-skel--label"></div>
+            <div class="sidebar-skel sidebar-skel--item"></div>
+            <div class="sidebar-skel sidebar-skel--item"></div>
+            <div class="sidebar-skel sidebar-skel--item"></div>
+            <div class="sidebar-skel sidebar-skel--item"></div>
+          </div>
+        }
 
         <!-- ── Cliente ─────────────────────────────────────────────────── -->
         @if (esCliente()) {
@@ -29,31 +45,40 @@
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/client/dashboard"
              routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}"
+             [title]="'nav.dashboard' | translate"
              (click)="closeMobile()">
-            <i class="bi bi-speedometer2 sidebar-item__icon"></i>
+            <i class="bi bi-speedometer2 sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dashboard' | translate }}</span>
           </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_dossiers' | translate }}</div>
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/client/file/create"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-plus-circle sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.nouveau_dossier' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-plus-circle sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.nouveau_dossier' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/client/file/my-files"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-folder2 sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.mes_dossiers' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-folder2 sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.mes_dossiers' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/client/offers-received"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-envelope-open sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.offres_recues' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-envelope-open sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.offres_recues' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/client/contracts"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-file-earmark-text sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.contrats' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-file-earmark-text sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.contrats' | translate }}</span>
           </a>
         }
@@ -64,21 +89,26 @@
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/builder/dashboard"
              routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}"
+             [title]="'nav.dashboard' | translate"
              (click)="closeMobile()">
-            <i class="bi bi-speedometer2 sidebar-item__icon"></i>
+            <i class="bi bi-speedometer2 sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dashboard' | translate }}</span>
           </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_travaux' | translate }}</div>
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/builder/available-files"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-search sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.dossiers_disponibles' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-search sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dossiers_disponibles' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/builder/my-offers"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-list-ul sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.mes_offres' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-list-ul sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.mes_offres' | translate }}</span>
           </a>
         }
@@ -89,26 +119,33 @@
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/estimator/dashboard"
              routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}"
+             [title]="'nav.dashboard' | translate"
              (click)="closeMobile()">
-            <i class="bi bi-speedometer2 sidebar-item__icon"></i>
+            <i class="bi bi-speedometer2 sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dashboard' | translate }}</span>
           </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_dossiers' | translate }}</div>
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/estimator/files-to-be-estimated"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-inbox sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.a_estimer' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-inbox sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.a_estimer' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/estimator/files-under-estimation"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-pencil-square sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.en_estimation' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-pencil-square sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.en_estimation' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/estimator/estimated-files"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-clipboard-check sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.completes' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-clipboard-check sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.completes' | translate }}</span>
           </a>
         }
@@ -119,87 +156,120 @@
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/admin/dashboard"
              routerLinkActive="active-link" [routerLinkActiveOptions]="{exact:true}"
+             [title]="'nav.dashboard' | translate"
              (click)="closeMobile()">
-            <i class="bi bi-speedometer2 sidebar-item__icon"></i>
+            <i class="bi bi-speedometer2 sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dashboard' | translate }}</span>
           </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_gestion' | translate }}</div>
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/admin/file"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-folder2-open sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.dossiers' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-folder2-open sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.dossiers' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/admin/offer"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-tags sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.offres' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-tags sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.offres' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/admin/contract"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-file-earmark-text sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.contrats' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-file-earmark-text sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.contrats' | translate }}</span>
           </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_config' | translate }}</div>
           <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/admin/service-type"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-grid sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.types_service' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-grid sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.types_service' | translate }}</span>
           </a>
           <a class="sidebar-item" routerLink="/admin/user"
-             routerLinkActive="active-link" (click)="closeMobile()">
-            <i class="bi bi-people sidebar-item__icon"></i>
+             routerLinkActive="active-link"
+             [title]="'nav.utilisateurs' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-people sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.utilisateurs' | translate }}</span>
           </a>
         }
 
       </nav>
 
-      <!-- Footer: usuario + perfil + cerrar sesión + lang toggle -->
+      <!-- Footer: usuario → perfil → lang → divisor → cerrar sesión -->
       <div class="sidebar-footer">
-        <div class="sidebar-user">
-          <img [src]="avatarPerfil() || 'assets/avatar-fallback.jpg'"
-               [alt]="nombrePerfil() || ''"
-               class="sidebar-user__avatar"
-               referrerpolicy="no-referrer"
-               (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
-          <div class="sidebar-user__info">
-            <span class="sidebar-user__name">{{ nombrePerfil() || user()?.email }}</span>
-            <span class="sidebar-user__role">{{ rolLabel() | translate }}</span>
+
+        <!-- Usuario: skeleton mientras carga, info real cuando está listo -->
+        @if (cargandoPerfil()) {
+          <div class="sidebar-user" aria-hidden="true">
+            <div class="sidebar-skel sidebar-skel--avatar"></div>
+            <div class="sidebar-user__info">
+              <div class="sidebar-skel sidebar-skel--name"></div>
+              <div class="sidebar-skel sidebar-skel--role"></div>
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="sidebar-user">
+            <img [src]="avatarPerfil() || 'assets/avatar-fallback.jpg'"
+                 [alt]="nombrePerfil() || ''"
+                 class="sidebar-user__avatar"
+                 referrerpolicy="no-referrer"
+                 (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
+            <div class="sidebar-user__info">
+              <span class="sidebar-user__name">{{ nombrePerfil() || user()?.email }}</span>
+              <span class="sidebar-user__role">{{ rolLabel() | translate }}</span>
+            </div>
+          </div>
+        }
 
         <a class="sidebar-item" routerLink="/client/perfil"
-           routerLinkActive="active-link" (click)="closeMobile()">
-          <i class="bi bi-person sidebar-item__icon"></i>
+           routerLinkActive="active-link"
+           [title]="'nav.mon_profil' | translate"
+           (click)="closeMobile()">
+          <i class="bi bi-person sidebar-item__icon" aria-hidden="true"></i>
           <span class="sidebar-item__label">{{ 'nav.mon_profil' | translate }}</span>
         </a>
-
-        <button class="sidebar-item sidebar-item--danger" (click)="logout()">
-          <i class="bi bi-box-arrow-right sidebar-item__icon"></i>
-          <span class="sidebar-item__label">{{ 'nav.deconnexion' | translate }}</span>
-        </button>
 
         <div class="sidebar-lang">
           <app-lang-toggle [compact]="collapsed()" />
         </div>
+
+        <div class="sidebar-footer__divider"></div>
+
+        <button class="sidebar-item sidebar-item--danger"
+                [title]="'nav.deconnexion' | translate"
+                (click)="logout()">
+          <i class="bi bi-box-arrow-right sidebar-item__icon" aria-hidden="true"></i>
+          <span class="sidebar-item__label">{{ 'nav.deconnexion' | translate }}</span>
+        </button>
+
       </div>
 
     </aside>
 
     <!-- Backdrop (cierra sidebar en móvil al tocar fuera) -->
-    <div class="sidebar-backdrop" (click)="closeMobile()"></div>
+    <div class="sidebar-backdrop" (click)="closeMobile()" aria-hidden="true"></div>
 
     <!-- Topbar fija en móvil -->
-    <div class="mobile-topbar">
-      <button class="mobile-topbar__toggle" (click)="toggleMobile()" [attr.aria-label]="'nav.ouvrir_menu' | translate">
-        <i class="bi bi-list"></i>
+    <div class="mobile-topbar" role="banner">
+      <button class="mobile-topbar__toggle"
+              (click)="toggleMobile()"
+              [attr.aria-label]="'nav.ouvrir_menu' | translate"
+              [attr.aria-expanded]="mobileOpen()">
+        <i class="bi bi-list" aria-hidden="true"></i>
       </button>
       <a class="mobile-topbar__brand" (click)="irAHome(); closeMobile()">
-        <i class="bi bi-box-seam"></i>Estimation3D
+        <i class="bi bi-box-seam" aria-hidden="true"></i>Estimation3D
       </a>
       <div class="mobile-topbar__right">
         <app-lang-toggle />

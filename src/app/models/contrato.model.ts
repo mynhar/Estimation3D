@@ -10,6 +10,7 @@ export interface ContratoListItem {
   garantia_anos:      number | null;
   estado:             string;
   generado_en:        string;
+  firmado_en:         string | null;
   url_pdf:            string | null;
 
   // ── datos para regenerar el PDF en cualquier idioma ───────────────────────

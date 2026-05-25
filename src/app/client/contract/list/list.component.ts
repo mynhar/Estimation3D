@@ -1,14 +1,16 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoService } from '../../../services/contrato.service';
+import { ToastService } from '../../../services/toast.service';
 import { ContratoListItem } from '../../../models';
 
 @Component({
   selector: 'app-contract-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
@@ -16,6 +18,7 @@ import { ContratoListItem } from '../../../models';
 export class ContractListComponent implements OnInit {
   private auth            = inject(AuthSupabaseService);
   private contratoService = inject(ContratoService);
+  private toast           = inject(ToastService);
   private translate       = inject(TranslateService);
   private router          = inject(Router);
 
@@ -23,7 +26,10 @@ export class ContractListComponent implements OnInit {
   contratos = signal<ContratoListItem[]>([]);
   cargando  = signal(true);
 
-  descargando = signal<string | null>(null);
+  descargando  = signal<string | null>(null);
+  firmandoId   = signal<string | null>(null);   // id del contrato en proceso de firma
+  confirmandoId = signal<string | null>(null);  // id del panel de confirmación abierto
+  aceptado     = signal(false);                 // checkbox de aceptación de términos
 
   async ngOnInit() {
     const userId = this.user()?.id;
@@ -37,20 +43,44 @@ export class ContractListComponent implements OnInit {
     }
   }
 
-  servicioNombre(c: ContratoListItem): string {
-    const lang = this.translate.currentLang;
-    if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
-    if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
-    return c.servicio_nombre;
+  // ── Firma ─────────────────────────────────────────────────────────────────
+
+  abrirPanelFirma(id: string): void {
+    this.confirmandoId.set(id);
+    this.aceptado.set(false);
   }
 
-  estadoBadge(estado: string): string {
-    const map: Record<string, string> = {
-      generado: 'badge-generado',
-      firmado:  'badge-firmado',
-    };
-    return map[estado] ?? 'badge-generado';
+  cerrarPanelFirma(): void {
+    this.confirmandoId.set(null);
+    this.aceptado.set(false);
   }
+
+  toggleAceptado(): void {
+    this.aceptado.update(v => !v);
+  }
+
+  async confirmarFirma(c: ContratoListItem): Promise<void> {
+    if (!this.aceptado() || this.firmandoId()) return;
+    this.firmandoId.set(c.id);
+    try {
+      await this.contratoService.firmarContrato(c.id);
+      this.contratos.update(list =>
+        list.map(item => item.id === c.id
+          ? { ...item, estado: 'firmado', firmado_en: new Date().toISOString() }
+          : item
+        )
+      );
+      this.cerrarPanelFirma();
+      this.toast.show(this.translate.instant('contract_list.success_signed'), 'success');
+    } catch (e: any) {
+      console.error('[ContractList] firmarContrato:', e.message);
+      this.toast.show(this.translate.instant('contract_list.err_sign'), 'danger');
+    } finally {
+      this.firmandoId.set(null);
+    }
+  }
+
+  // ── PDF ───────────────────────────────────────────────────────────────────
 
   descargarPdf(c: ContratoListItem) {
     if (this.descargando()) return;
@@ -111,7 +141,35 @@ export class ContractListComponent implements OnInit {
     }
   }
 
-  formatFecha(valor: string): string {
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  servicioNombre(c: ContratoListItem): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
+    if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
+    return c.servicio_nombre;
+  }
+
+  estadoBadge(estado: string): string {
+    const map: Record<string, string> = {
+      generado:     'badge-generado',
+      firmado:      'badge-firmado',
+      en_ejecucion: 'badge-en-ejecucion',
+      completado:   'badge-completado',
+      cancelado:    'badge-cancelado',
+    };
+    return map[estado] ?? 'badge-generado';
+  }
+
+  formatPlazo(c: ContratoListItem): string {
+    const l = this.translate.currentLang ?? 'fr';
+    const sem = l === 'en' ? 'wks.' : 'sem.';
+    if (c.plazo_semanas_min == null && c.plazo_semanas_max == null) return '—';
+    if (c.plazo_semanas_min === c.plazo_semanas_max) return `${c.plazo_semanas_min} ${sem}`;
+    return `${c.plazo_semanas_min ?? '?'} – ${c.plazo_semanas_max ?? '?'} ${sem}`;
+  }
+
+  formatFecha(valor: string | null): string {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);

@@ -1,18 +1,124 @@
-/* ── Card ────────────────────────────────────────────────────────────────── */
-.card { border-radius: 0.75rem; }
-
-/* ── Flags ───────────────────────────────────────────────────────────────── */
-.flag { font-size: 0.9em; }
-
-/* ── Form focus ──────────────────────────────────────────────────────────── */
-.form-control:focus,
-.form-select:focus {
-  box-shadow: 0 0 0 3px rgba(212,185,110,.18);
-  border-color: #D4B96E;
+/* ── Encabezado de página ─────────────────────────────────────────────────── */
+.form-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
 }
+
+.form-page-header__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  margin: var(--ds-space-1) 0 0;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  color: var(--ds-ink-muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: var(--ds-transition-color),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-back:hover {
+  color: var(--ds-ink);
+  border-color: var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+/* ── Card del formulario ─────────────────────────────────────────────────── */
+.form-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.form-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  border-top: 1px solid var(--ds-border);
+}
+
+/* ── Secciones del formulario ───────��────────────────────────────────────── */
+.form-section { }
+
+.form-section__header {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+  margin-bottom: var(--ds-space-4);
+}
+
+.form-section-divider {
+  height: 1px;
+  background: var(--ds-border);
+  margin: var(--ds-space-5) 0;
+}
+
+/* ── Lang badges ─────────────────────────────────────────────────────────── */
+.lang-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ds-font-mono);
+  font-size: 0.65rem;
+  font-weight: var(--ds-weight-bold);
+  padding: 0.1em 0.45em;
+  border-radius: var(--ds-radius-sm);
+  letter-spacing: var(--ds-tracking-wide);
+  vertical-align: middle;
+}
+.lang-badge--fr { background: var(--ds-info-soft);    color: var(--ds-info);         border: 1px solid rgba(74,107,122,.2); }
+.lang-badge--en { background: var(--ds-gold-faint);   color: var(--ds-gold-active);  border: 1px solid rgba(212,185,110,.3); }
+.lang-badge--es { background: var(--ds-success-soft); color: var(--ds-success);      border: 1px solid rgba(91,122,79,.2); }
+
+/* ── Textarea ─────────────────────────────────────────────────────────────── */
+.form-textarea { resize: vertical; }
+
+/* ── Input readonly ──────────────────────────────────────────────────────── */
+.form-control-readonly {
+  background: var(--ds-bg-alt) !important;
+  color: var(--ds-ink-muted) !important;
+  cursor: default;
+}
+
+/* ── Required star ───────────────────────────────────────────────────────── */
+.req-star { color: var(--ds-danger); }
 
 /* ── Form switch ─────────────────────────────────────────────────────────── */
 .form-check-input:checked {
-  background-color: #198754;
-  border-color: #198754;
+  background-color: var(--ds-success);
+  border-color: var(--ds-success);
+}
+.form-check-label { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+
+/* ── Error alert ──��──────────────────────────────────────────────────────── */
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-danger-soft);
+  color: var(--ds-danger);
+  border: 1px solid rgba(161, 69, 69, 0.2);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
 }

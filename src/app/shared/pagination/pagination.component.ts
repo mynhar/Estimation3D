@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './pagination.component.html',
   styleUrl: './pagination.component.css',

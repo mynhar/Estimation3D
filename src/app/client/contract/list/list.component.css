@@ -2,69 +2,295 @@
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .page-header {
-  background: linear-gradient(135deg, #FBFAF6 0%, #F2EFE6 60%, #EDE7DA 100%);
-  border: 1px solid #EAE7DF;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
 }
 .page-header h4 {
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.35rem; font-weight: 400; color: #1A1A1A;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+}
+.eyebrow {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-gold-active);
 }
 
 /* ── KPI pill ────────────────────────────────────────────────────────────── */
 .kpi-pill {
   display: inline-flex; align-items: center;
-  background: #EEF2FF; color: #3730A3;
-  font-size: 0.78rem; font-weight: 700;
-  padding: 0.35em 0.9em; border-radius: 20px;
-  border: 1px solid #C7D2FE;
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-bold);
+  padding: 0.35em 0.9em;
+  border-radius: var(--ds-radius-pill);
+  border: 1px solid var(--ds-gold-soft);
 }
 
 /* ── Loading ─────────────────────────────────────────────────────────────── */
 .loading-state {
   display: flex; align-items: center; justify-content: center;
   gap: 0.6rem; padding: 3rem 1rem;
-  color: #6b7280; font-size: 0.9rem;
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-sm);
 }
+.loading-state .spinner-border { color: var(--ds-gold); }
 
 /* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-state-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+}
 .empty-state {
   display: flex; flex-direction: column; align-items: center;
   text-align: center; padding: 3.5rem 2rem;
 }
 .empty-icon {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: #F3F4F6; color: #9CA3AF;
+  width: 64px; height: 64px;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-bg-alt);
+  color: var(--ds-ink-muted);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.7rem; margin-bottom: 1rem;
 }
-.empty-title { font-size: 1.05rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem; }
-.empty-text  { font-size: 0.87rem; color: #6B7280; max-width: 340px; margin: 0; }
+.empty-title {
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  margin-bottom: 0.35rem;
+}
+.empty-text {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  max-width: 340px; margin: 0;
+}
 
 /* ── Contract card ───────────────────────────────────────────────────────── */
 .contrato-card {
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
-  transition: box-shadow 0.15s;
+  background: var(--ds-surface-elevated);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-sm);
+  transition: box-shadow var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
+  overflow: hidden;
 }
-.contrato-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.10); }
+.contrato-card:hover { box-shadow: var(--ds-shadow-md); }
+.contrato-card.panel-open {
+  border-color: var(--ds-gold);
+  box-shadow: var(--ds-shadow-gold);
+}
 
 /* ── Expedition number chip ──────────────────────────────────────────────── */
 .exp-num {
-  font-family: monospace; font-size: 0.8em; font-weight: 700;
-  letter-spacing: 0.05em;
-  background: rgba(212,185,110,.14); color: #C4A55A;
-  padding: 0.15em 0.55em; border-radius: 4px;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-wide);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  padding: 0.15em 0.55em;
+  border-radius: var(--ds-radius-sm);
 }
 
 /* ── Status badges ───────────────────────────────────────────────────────── */
-.badge-generado { background: #EEF2FF; color: #3730A3; }
-.badge-firmado  { background: #DCFCE7; color: #166534; }
+.badge-generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.badge-firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
+.badge-en-ejecucion { background: var(--ds-info-soft);    color: var(--ds-info); }
+.badge-completado   { background: var(--ds-success-soft); color: var(--ds-success); }
+.badge-cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); }
 
 /* ── Info rows ───────────────────────────────────────────────────────────── */
 .info-label {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
-  text-transform: uppercase; color: #9A938C; margin-bottom: 0.2rem;
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  margin-bottom: 0.2rem;
 }
-.info-value { font-size: 0.9rem; color: #1A1A1A; }
-.price-val  { font-size: 1.05rem; font-weight: 700; color: #1d4ed8; }
+.info-value  { font-size: var(--ds-text-sm); color: var(--ds-ink); }
+.price-val   {
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-gold-active);
+}
+.signed-date { color: var(--ds-success); font-weight: var(--ds-weight-semibold); }
+
+/* ── PDF download button ─────────────────────────────────────────────────── */
+.btn-pdf {
+  background: transparent;
+  border: 1px solid var(--ds-border-strong);
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  padding: 0.4em 1em;
+  border-radius: var(--ds-radius-md);
+  transition: var(--ds-transition-color);
+}
+.btn-pdf:hover:not(:disabled) {
+  background: var(--ds-bg-alt);
+  border-color: var(--ds-border-strong);
+  color: var(--ds-ink);
+}
+.btn-pdf:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Sign button ─────────────────────────────────────────────────────────── */
+.btn-sign {
+  background: transparent;
+  border: 1.5px solid var(--ds-gold);
+  color: var(--ds-gold-active);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.45em 1.1em;
+  border-radius: var(--ds-radius-md);
+  transition: var(--ds-transition-color);
+}
+.btn-sign:hover {
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  border-color: var(--ds-gold-hover);
+}
+
+/* ── Sign panel ──────────────────────────────────────────────────────────── */
+.sign-panel {
+  background: var(--ds-gold-faint);
+  border-top: 2px solid var(--ds-gold-soft);
+  animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sign-panel-header {
+  display: flex; align-items: flex-start; gap: 0.85rem;
+  padding: 1rem 0 0.75rem;
+}
+
+.sign-panel-icon {
+  width: 36px; height: 36px;
+  background: var(--ds-gold-soft);
+  color: var(--ds-gold-active);
+  border-radius: var(--ds-radius-circle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+.sign-panel-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  margin: 0 0 0.1rem;
+}
+
+.sign-panel-sub {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+
+/* ── Key terms summary ───────────────────────────────────────────────────── */
+.sign-summary {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  background: var(--ds-surface-elevated);
+  border: 1px solid var(--ds-gold-soft);
+  border-radius: var(--ds-radius-lg);
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+}
+.sign-summary-item {
+  display: flex; flex-direction: column;
+  min-width: 120px; flex: 1;
+}
+.sign-summary-label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  margin-bottom: 0.15rem;
+}
+.sign-summary-value {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+
+/* ── Legal text ──────────────────────────────────────────────────────────── */
+.sign-legal-text {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  line-height: var(--ds-leading-relaxed);
+  margin-bottom: 0.85rem;
+}
+
+/* ── Checkbox ────────────────────────────────────────────────────────────── */
+.sign-checkbox-label {
+  display: flex; align-items: flex-start; gap: 0.65rem;
+  cursor: pointer;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  font-weight: var(--ds-weight-medium);
+  margin-bottom: 1.25rem;
+  user-select: none;
+}
+
+.sign-checkbox {
+  width: 20px; height: 20px;
+  border: 2px solid var(--ds-gold);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface-elevated);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+  transition: var(--ds-transition-color);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-on-accent);
+}
+
+.sign-checkbox.checked {
+  background: var(--ds-gold);
+  border-color: var(--ds-gold);
+}
+
+/* ── Actions row ─────────────────────────────────────────────────────────── */
+.sign-actions {
+  display: flex; align-items: center; gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn-sign-confirm {
+  background: var(--ds-gold);
+  border: none;
+  color: var(--ds-ink-on-accent);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.55em 1.4em;
+  border-radius: var(--ds-radius-md);
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              opacity var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-sign-confirm:hover:not(:disabled) { background: var(--ds-gold-hover); }
+.btn-sign-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.sign-cancel-link {
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-sm);
+  text-decoration: none; padding: 0;
+  transition: color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.sign-cancel-link:hover { color: var(--ds-ink-secondary); text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sign-panel { animation: none; }
+}

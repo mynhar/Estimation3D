@@ -1,303 +1,402 @@
-<div class="container-xl py-4 px-3 px-md-4 dash-wrap">
+<div class="container-xl py-5 px-3 px-md-4 dash-root">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="dash-header rounded-4 p-4 mb-4 d-flex flex-wrap gap-3 align-items-center justify-content-between">
-    <div>
-      <h3 class="fw-bold mb-1">
-        {{ 'dashboard_client.welcome' | translate }}{{ bienvenida ? ', ' + bienvenida : '' }}
-      </h3>
-      <p class="mb-0 text-muted small">
-        <i class="bi bi-grid-1x2 me-1"></i>
-        {{ 'dashboard_client.activity_summary' | translate }}
-      </p>
+  <!-- ── Welcome ────────────────────────────────────────────────────────── -->
+  <header class="dash-welcome mb-5">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <span class="eyebrow">{{ 'role.client' | translate }}</span>
+        <h1 class="dash-welcome__title title-editorial mt-1">
+          {{ 'dashboard_client.welcome' | translate }}<em>{{ bienvenida ? ', ' + bienvenida : '' }}</em>
+        </h1>
+      </div>
+      <a routerLink="/client/file/create"
+         class="btn btn-primary btn-lg flex-shrink-0 align-self-start mt-2">
+        <i class="bi bi-plus me-2"></i>{{ 'file.new_file' | translate }}
+      </a>
     </div>
-    <a routerLink="/client/file/create" class="btn btn-primary px-4 fw-semibold">
-      <i class="bi bi-plus-lg me-1"></i>{{ 'file.new_file' | translate }}
-    </a>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="d-flex align-items-center justify-content-center py-5 text-muted gap-2">
-      <div class="spinner-border spinner-border-sm"></div>
-      <span>{{ 'common.loading' | translate }}</span>
-    </div>
-
-  <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
-  } @else if (total() === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="card-body text-center py-5 px-4">
-        <div class="empty-icon mx-auto mb-4">
-          <i class="bi bi-folder2-open"></i>
-        </div>
-        <h5 class="fw-bold mb-2">{{ 'dashboard_client.no_files' | translate }}</h5>
-        <p class="text-muted mb-4" style="max-width:380px;margin-inline:auto">
-          {{ 'dashboard_client.no_files_text' | translate }}
-        </p>
-        <a routerLink="/client/file/create" class="btn btn-primary px-4 fw-semibold">
-          <i class="bi bi-plus-lg me-1"></i>{{ 'dashboard_client.create_first' | translate }}
-        </a>
+    <div>
+      <div class="skel skel--hero mb-4"></div>
+      <div class="skel skel--exp-header mb-4"></div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="skel skel--module"></div></div>
+        <div class="col-md-4"><div class="skel skel--module"></div></div>
+        <div class="col-md-4"><div class="skel skel--module"></div></div>
       </div>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ── Sin expedientes ─────────────────────────────────────────────────── -->
+  } @else if (total() === 0) {
+    <div class="empty-state text-center">
+      <div class="empty-state__icon mx-auto mb-4">
+        <i class="bi bi-folder2-open"></i>
+      </div>
+      <h3 class="font-display empty-state__title mb-2">{{ 'dashboard_client.no_files' | translate }}</h3>
+      <p class="empty-state__text mb-5">{{ 'dashboard_client.no_files_text' | translate }}</p>
+      <a routerLink="/client/file/create" class="btn btn-primary">
+        <i class="bi bi-plus me-2"></i>{{ 'dashboard_client.create_first' | translate }}
+      </a>
+    </div>
+
+  <!-- ── Con expedientes ─────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── KPI cards ─────────────────────────────────────────────────────── -->
-    <div class="row g-3 mb-4">
-
-      <div class="col-6 col-xl-3">
-        <div class="kpi-card kpi-total card border-0 shadow-sm rounded-4 h-100"
-             [ngbTooltip]="'dashboard_client.tooltip_total' | translate" placement="bottom">
-          <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
-            <div class="kpi-icon kpi-icon--total">
-              <i class="bi bi-folder2-open"></i>
-            </div>
-            <div>
-              <p class="kpi-label">{{ 'common.total' | translate }}</p>
-              <p class="kpi-num kpi-num--total">{{ total() }}</p>
-            </div>
+    <!-- ── Selector de expedientes (siempre visible) ────────────────────── -->
+    <div class="exp-card-strip mb-4" role="tablist" aria-label="Expedientes">
+      @for (exp of expedientes(); track expId(exp)) {
+        <button
+          class="exp-card"
+          [class.exp-card--active]="expId(exp) === idSeleccionado()"
+          (click)="seleccionarExpediente(expId(exp))"
+          role="tab"
+          [attr.aria-selected]="expId(exp) === idSeleccionado()">
+          <div class="exp-card__top">
+            <span class="exp-card__num font-display">{{ exp.numero }}</span>
+            <span [class]="'estado-badge ' + estadoClaseFor(exp.estado)">
+              {{ ('state.' + exp.estado) | translate }}
+            </span>
           </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-xl-3">
-        <div class="kpi-card kpi-proceso card border-0 shadow-sm rounded-4 h-100"
-             [ngbTooltip]="'dashboard_client.tooltip_in_progress' | translate" placement="bottom">
-          <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
-            <div class="kpi-icon kpi-icon--proceso">
-              <i class="bi bi-hourglass-split"></i>
-            </div>
-            <div>
-              <p class="kpi-label">{{ 'dashboard_client.in_progress' | translate }}</p>
-              <p class="kpi-num kpi-num--proceso">{{ enProceso() }}</p>
-            </div>
+          <div class="exp-card__meta">
+            @if (servicioNombre(exp.servicio)) {
+              <span class="exp-card__service">{{ servicioNombre(exp.servicio) }}</span>
+            }
+            <span class="exp-card__date">
+              <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
+            </span>
           </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-xl-3">
-        <div class="kpi-card card border-0 shadow-sm rounded-4 h-100"
-             [class.kpi-oferta]="true"
-             [class.kpi-oferta--activa]="conOfertasPendientes() > 0"
-             [ngbTooltip]="'dashboard_client.tooltip_offers' | translate" placement="bottom">
-          <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
-            <div class="kpi-icon kpi-icon--oferta">
-              <i class="bi" [class.bi-bell-fill]="conOfertasPendientes() > 0"
-                            [class.bi-bell]="conOfertasPendientes() === 0"></i>
-            </div>
-            <div>
-              <p class="kpi-label">{{ 'dashboard_client.pending_offers' | translate }}</p>
-              <p class="kpi-num kpi-num--oferta">{{ conOfertasPendientes() }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 col-xl-3">
-        <div class="kpi-card kpi-ok card border-0 shadow-sm rounded-4 h-100"
-             [ngbTooltip]="'dashboard_client.tooltip_completed' | translate" placement="bottom">
-          <div class="card-body d-flex align-items-center gap-3 px-4 py-3">
-            <div class="kpi-icon kpi-icon--ok">
-              <i class="bi bi-trophy"></i>
-            </div>
-            <div>
-              <p class="kpi-label">{{ 'dashboard_client.completed' | translate }}</p>
-              <p class="kpi-num kpi-num--ok">{{ completados() }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+        </button>
+      }
     </div>
 
-    <!-- ── Banner de alertas ─────────────────────────────────────────────── -->
-    @if (conOfertasPendientes() > 0) {
-      <div class="alert-banner d-flex flex-wrap align-items-center gap-3 mb-4 p-3 rounded-4">
-        <div class="alert-banner__icon">
-          <i class="bi bi-bell-fill"></i>
-        </div>
-        <div class="flex-grow-1">
-          <p class="fw-semibold mb-0 text-dark">
-            @if (conOfertasPendientes() === 1) {
-              {{ 'dashboard_client.banner_single' | translate }}
-            } @else {
-              {{ 'dashboard_client.banner_plural' | translate: { count: conOfertasPendientes() } }}
+    <!-- ── Zona de medios HERO ───────────────────────────────────────────── -->
+    @if (cargandoDetalle()) {
+      <div class="skel skel--hero mb-4"></div>
+
+    } @else if (tieneMedia()) {
+      <div class="media-card mb-4">
+
+        <!-- Header -->
+        <div class="media-card__header">
+          <div class="d-flex align-items-center gap-2 min-w-0">
+            <span class="eyebrow">
+              @if (activaEsTour()) {
+                {{ 'file.tour_title' | translate }}
+                @if (tourUrls().length > 1) { &nbsp;{{ mediaActiva() + 1 }} }
+              } @else {
+                {{ 'dashboard_client.video_label' | translate }}&nbsp;{{ mediaActiva() - tourUrls().length + 1 }}
+              }
+            </span>
+            @if (activaEsTour() && tieneTour()) {
+              <span class="tag tag-gold ms-1 flex-shrink-0">{{ 'file.immersive_badge' | translate }}</span>
             }
-          </p>
-          <p class="small mb-0 text-warning-emphasis">
-            {{ 'dashboard_client.compare_text' | translate }}
-          </p>
+          </div>
+          <button class="btn-fullscreen flex-shrink-0"
+                  (click)="solicitarFullscreen()"
+                  [attr.aria-label]="'dashboard_client.matterport_fullscreen' | translate">
+            <i class="bi bi-fullscreen"></i>
+            <span class="d-none d-sm-inline ms-2">
+              {{ 'dashboard_client.matterport_fullscreen' | translate }}
+            </span>
+          </button>
         </div>
-        <a routerLink="/client/offers-received" class="btn btn-warning fw-semibold flex-shrink-0">
-          <i class="bi bi-eye me-1"></i>{{ 'dashboard_client.review_offers' | translate }}
-        </a>
+
+        <!-- Lista de medios (siempre visible) -->
+        <div class="media-playlist" role="tablist">
+
+          @for (url of tourUrls(); track url; let i = $index) {
+            <button class="media-pl-item"
+                    [class.media-pl-item--active]="mediaActiva() === i"
+                    (click)="seleccionarMedia(i)"
+                    role="tab"
+                    [attr.aria-selected]="mediaActiva() === i">
+              <div class="media-pl-thumb media-pl-thumb--tour">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/>
+                  <path d="m16 2-2 3h4l-2-3z"/>
+                  <path d="M22 15a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/>
+                  <path d="m16 13 1.5 1.5L20 12"/>
+                </svg>
+              </div>
+              <div class="media-pl-info">
+                <span class="media-pl-label">
+                  {{ 'dashboard_client.tour_label' | translate }}
+                  @if (tourUrls().length > 1) { &nbsp;{{ i + 1 }} }
+                </span>
+                <span class="media-pl-sub tag tag-gold">3D</span>
+              </div>
+            </button>
+          }
+
+          @for (v of videos(); track v.id; let i = $index) {
+            <button class="media-pl-item"
+                    [class.media-pl-item--active]="mediaActiva() === tourUrls().length + i"
+                    (click)="seleccionarMedia(tourUrls().length + i)"
+                    role="tab"
+                    [attr.aria-selected]="mediaActiva() === tourUrls().length + i">
+              <div class="media-pl-thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m15 10 4.553-2.069A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.447.894L15 14"/>
+                  <rect x="2" y="6" width="13" height="12" rx="2"/>
+                </svg>
+              </div>
+              <div class="media-pl-info">
+                <span class="media-pl-label">
+                  {{ 'dashboard_client.video_label' | translate }}&nbsp;{{ i + 1 }}
+                </span>
+                <span class="media-pl-sub">{{ v.nombre_archivo }}</span>
+              </div>
+            </button>
+          }
+
+        </div>
+
+        <!-- Visor -->
+        <div class="media-viewer-wrap">
+
+          <!-- Tip Matterport (primera visita) -->
+          @if (matterportTip() && activaEsTour()) {
+            <div class="matterport-tip">
+              <i class="bi bi-info-circle flex-shrink-0"></i>
+              <span>{{ 'dashboard_client.matterport_tooltip' | translate }}</span>
+              <button class="btn-tip-close ms-auto"
+                      (click)="dismissMatterportTip()"
+                      [attr.aria-label]="'common.close' | translate">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          }
+
+          <!-- Iframe Matterport -->
+          @if (activaEsTour() && matterportUrl()) {
+            <iframe
+              #matterportIframe
+              class="media-iframe"
+              [src]="matterportUrl()!"
+              allow="vr; fullscreen; xr-spatial-tracking"
+              allowfullscreen
+              title="Tour Matterport 3D">
+            </iframe>
+          }
+
+          <!-- Reproductor de video -->
+          @if (!activaEsTour() && videoActivoUrl()) {
+            <video
+              #mediaVideo
+              class="media-video"
+              controls
+              preload="metadata"
+              [attr.src]="videoActivoUrl()">
+            </video>
+          }
+
+        </div>
+      </div>
+
+    } @else {
+      <!-- Placeholder: video 3D en preparación -->
+      <div class="media-placeholder mb-4">
+        <div class="media-placeholder__body">
+
+          <!-- Icono animado con anillos -->
+          <div class="media-ph-rings mb-5">
+            <div class="media-ph-ring media-ph-ring--3"></div>
+            <div class="media-ph-ring media-ph-ring--2"></div>
+            <div class="media-ph-ring media-ph-ring--1"></div>
+            <div class="media-ph-icon-wrap">
+              <svg class="media-ph-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m15 10 4.553-2.069A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.447.894L15 14"/>
+                <rect x="2" y="6" width="13" height="12" rx="2"/>
+              </svg>
+              <span class="media-ph-badge">3D</span>
+            </div>
+          </div>
+
+          <!-- Título -->
+          <h4 class="font-display media-placeholder__title mb-3">
+            {{ 'dashboard_client.matterport_coming' | translate }}
+          </h4>
+
+          <!-- Mensaje con fecha interpolada -->
+          @if (expedienteActivo(); as exp) {
+            <p class="media-placeholder__text mb-5">
+              {{ 'dashboard_client.matterport_pending' | translate: { date: formatFecha(exp.fecha_visita) } }}
+            </p>
+          }
+
+          <!-- 3 pasos del proceso -->
+          <div class="media-steps">
+            <div class="media-step">
+              <div class="media-step__num">01</div>
+              <span class="media-step__label">{{ 'dashboard_client.matterport_step1' | translate }}</span>
+            </div>
+            <div class="media-step-arrow"><i class="bi bi-arrow-right"></i></div>
+            <div class="media-step">
+              <div class="media-step__num">02</div>
+              <span class="media-step__label">{{ 'dashboard_client.matterport_step2' | translate }}</span>
+            </div>
+            <div class="media-step-arrow"><i class="bi bi-arrow-right"></i></div>
+            <div class="media-step">
+              <div class="media-step__num">03</div>
+              <span class="media-step__label">{{ 'dashboard_client.matterport_step3' | translate }}</span>
+            </div>
+          </div>
+
+        </div>
       </div>
     }
 
-    <!-- ── Contenido principal ─────────────────────────────────────────────── -->
-    <div class="row g-4">
+    <!-- ── Tarjeta encabezado del expediente activo ───────────────────────── -->
+    @if (expedienteActivo(); as exp) {
+      <div class="exp-header-card card-premium mb-4">
 
-      <!-- ── Lista de expedientes ──────────────────────────────────────────── -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex justify-content-between align-items-center">
-            <span class="fw-semibold">
-              <i class="bi bi-list-ul me-2 text-primary"></i>{{ 'file.my_files' | translate }}
-            </span>
-            <a routerLink="/client/file/my-files" class="btn btn-outline-secondary btn-sm">
-              {{ 'common.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
-            </a>
+        <!-- Top row: referencia + badge de estado -->
+        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+          <div>
+            <span class="eyebrow mb-1">{{ 'file.exp_abbr' | translate }}</span>
+            <h2 class="exp-ref font-display mt-2 mb-0">{{ exp.numero }}</h2>
+            <div class="exp-meta d-flex align-items-center flex-wrap gap-3 mt-2">
+              @if (servicioNombre(exp.servicio)) {
+                <span class="exp-meta__item">
+                  <i class="bi bi-grid-3x3-gap me-1"></i>{{ servicioNombre(exp.servicio) }}
+                </span>
+              }
+              <span class="exp-meta__item">
+                <i class="bi bi-calendar3 me-1"></i>{{ formatFecha(exp.fecha_visita) }}
+              </span>
+            </div>
           </div>
+          <span [class]="'estado-badge ' + estadoClase()">
+            {{ ('state.' + exp.estado) | translate }}
+          </span>
+        </div>
 
-          <div class="card-body p-0 exp-list">
-            @for (exp of expedientes(); track exp.id) {
-              <div class="exp-item" [style.--estado-color]="cfg(exp.estado).color">
+        <div class="exp-divider"></div>
 
-                <!-- Fila superior: ícono + número + servicio + badge estado -->
-                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                  <div class="d-flex align-items-center gap-2 flex-wrap text-truncate">
-                    <i class="bi {{ cfg(exp.estado).icon }} flex-shrink-0"
-                       [style.color]="cfg(exp.estado).color"></i>
-                    <span class="fw-semibold text-nowrap">{{ 'file.exp_abbr' | translate }} {{ exp.numero }}</span>
-                    @if (servicioNombre(exp.servicio)) {
-                      <span class="text-muted small text-truncate">
-                        · {{ servicioNombre(exp.servicio) }}
-                      </span>
-                    }
-                  </div>
-                  <span class="est-badge badge flex-shrink-0"
-                        [style.background-color]="cfg(exp.estado).color"
-                        [style.color]="cfg(exp.estado).textColor">
-                    {{ ('state.' + exp.estado) | translate }}
-                  </span>
-                </div>
-
-                <!-- Siguiente paso -->
-                <p class="exp-next-step mb-2">
-                  <i class="bi bi-arrow-right-circle-fill me-1"></i>{{ ('state_desc.' + exp.estado) | translate }}
-                </p>
-
-                <!-- Barra de progreso + fecha + acción contextual -->
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                  <div class="d-flex align-items-center gap-2 flex-grow-1">
-                    <div class="progress exp-progress flex-grow-1">
-                      <div class="progress-bar"
-                           role="progressbar"
-                           [style.width.%]="cfg(exp.estado).progressPct"
-                           [style.background-color]="cfg(exp.estado).color"
-                           [attr.aria-valuenow]="cfg(exp.estado).progressPct"
-                           aria-valuemin="0" aria-valuemax="100">
-                      </div>
-                    </div>
-                    <small class="text-muted pct-lbl">{{ cfg(exp.estado).progressPct }}%</small>
-                  </div>
-                  <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <small class="text-muted">
-                      <i class="bi bi-calendar3 me-1"></i>{{ formatFecha(exp.fecha_visita) }}
-                    </small>
-                    @if (exp.estado === 'en_oferta') {
-                      <a routerLink="/client/offers-received"
-                         class="btn btn-warning btn-sm py-0 px-2 fw-semibold">
-                        <i class="bi bi-eye me-1"></i>{{ 'common.view' | translate }}
-                      </a>
-                    }
-                  </div>
-                </div>
-
+        <!-- Barra de 5 fases -->
+        <div class="fase-bar mt-4"
+             role="list"
+             [attr.aria-label]="'dashboard_client.progress_label' | translate">
+          @for (fase of FASES; track fase.key; let i = $index) {
+            <div class="fase-step"
+                 [class.fase-step--done]="isFaseDone(i)"
+                 [class.fase-step--active]="isFaseActive(i)"
+                 role="listitem">
+              <div class="fase-dot">
+                @if (isFaseDone(i)) {
+                  <i class="bi bi-check-lg"></i>
+                } @else {
+                  <i class="bi {{ fase.icon }}"></i>
+                }
               </div>
+              <span class="fase-label">{{ ('state.' + fase.key) | translate }}</span>
+            </div>
+            @if (i < FASES.length - 1) {
+              <div class="fase-connector"
+                   [class.fase-connector--done]="faseActual() > i + 1"></div>
+            }
+          }
+        </div>
+
+        <!-- Descripción del estado actual -->
+        <p class="exp-state-desc mt-4 mb-0">
+          <i class="bi bi-info-circle me-2"></i>{{ ('state_desc.' + exp.estado) | translate }}
+        </p>
+
+      </div>
+    }
+
+    <!-- ── 3 módulos ────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+      <!-- Próximo paso -->
+      <div class="col-md-4">
+        <div class="module-card h-100">
+          <div class="module-card__header">
+            <i class="bi bi-arrow-right-circle"></i>
+            <span>{{ 'dashboard_client.next_step' | translate }}</span>
+          </div>
+          <div class="module-card__body">
+            @if (expedienteActivo(); as exp) {
+              <p class="module-card__desc mb-0">
+                {{ ('state_desc.' + exp.estado) | translate }}
+              </p>
+              @if (exp.estado === 'en_oferta') {
+                <a routerLink="/client/offers-received"
+                   class="btn btn-primary btn-sm mt-3">
+                  <i class="bi bi-eye me-1"></i>{{ 'dashboard_client.review_offers' | translate }}
+                </a>
+              }
             }
           </div>
-
         </div>
       </div>
 
-      <!-- ── Columna derecha ────────────────────────────────────────────────── -->
-      <div class="col-lg-4 d-flex flex-column gap-4">
-
-        <!-- Donut de distribución -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3">
-            <span class="fw-semibold">
-              <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
-            </span>
+      <!-- Mensaje del equipo -->
+      <div class="col-md-4">
+        <div class="module-card h-100">
+          <div class="module-card__header">
+            <i class="bi bi-chat-square"></i>
+            <span>{{ 'dashboard_client.team_message' | translate }}</span>
           </div>
-          <div class="card-body d-flex flex-column align-items-center py-4 px-3">
-
-            <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
-              <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-              @for (seg of donutSegments(); track seg.key) {
-                <circle cx="70" cy="70" [attr.r]="R" fill="none"
-                        [attr.stroke]="seg.color" stroke-width="18"
-                        [attr.stroke-dasharray]="seg.dasharray"
-                        [attr.stroke-dashoffset]="seg.dashoffset"
-                        transform="rotate(-90 70 70)"/>
-              }
-              <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
-              <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.files_count' | translate }}</text>
-            </svg>
-
-            <div class="w-100 mt-3">
-              @for (e of estadoBreakdown(); track e.key) {
-                <div class="d-flex align-items-center justify-content-between legend-row">
-                  <div class="d-flex align-items-center gap-2">
-                    <i class="bi {{ e.icon }}" [style.color]="e.color"></i>
-                    <span class="small">{{ ('state.' + e.key) | translate }}</span>
-                  </div>
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="progress legend-bar">
-                      <div class="progress-bar"
-                           [style.width.%]="e.pct"
-                           [style.background-color]="e.color">
-                      </div>
-                    </div>
-                    <span class="small fw-semibold" style="min-width:18px">{{ e.count }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-
+          <div class="module-card__body module-card__body--empty">
+            <i class="bi bi-chat-square module-card__empty-icon"></i>
+            <p class="module-card__empty-text">{{ 'dashboard_client.no_message' | translate }}</p>
           </div>
         </div>
-
-        <!-- Acciones rápidas -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3">
-            <span class="fw-semibold">
-              <i class="bi bi-lightning-charge me-2 text-primary"></i>{{ 'dashboard_builder.quick_actions' | translate }}
-            </span>
-          </div>
-          <div class="card-body d-flex flex-column gap-2 py-3 px-3">
-
-            <a routerLink="/client/file/create"
-               class="quick-btn btn btn-outline-primary d-flex align-items-center gap-2 text-start">
-              <span class="quick-icon"><i class="bi bi-plus-circle"></i></span>
-              <span>{{ 'file.new_file' | translate }}</span>
-            </a>
-
-            <a routerLink="/client/offers-received"
-               class="quick-btn btn d-flex align-items-center gap-2 text-start"
-               [class.btn-warning]="conOfertasPendientes() > 0"
-               [class.btn-outline-secondary]="conOfertasPendientes() === 0">
-              <span class="quick-icon"><i class="bi bi-envelope-open"></i></span>
-              <span class="flex-grow-1">{{ 'nav.offres_recues' | translate }}</span>
-              @if (conOfertasPendientes() > 0) {
-                <span class="badge bg-dark rounded-pill">{{ conOfertasPendientes() }}</span>
-              }
-            </a>
-
-            <a routerLink="/client/file/my-files"
-               class="quick-btn btn btn-outline-secondary d-flex align-items-center gap-2 text-start">
-              <span class="quick-icon"><i class="bi bi-folder2"></i></span>
-              <span>{{ 'file.my_files' | translate }}</span>
-            </a>
-
-          </div>
-        </div>
-
       </div>
 
+      <!-- Mis documentos -->
+      <div class="col-md-4">
+        <div class="module-card h-100">
+          <div class="module-card__header">
+            <i class="bi bi-folder2"></i>
+            <span>{{ 'dashboard_client.my_documents' | translate }}</span>
+          </div>
+          <div class="module-card__body module-card__body--empty">
+            <i class="bi bi-folder2 module-card__empty-icon"></i>
+            <p class="module-card__empty-text">{{ 'dashboard_client.no_documents' | translate }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Timeline ─────────────────────────────────────────────────────── -->
+    <div class="timeline-card">
+      <div class="timeline-card__header">
+        <span class="eyebrow">{{ 'dashboard_client.timeline_title' | translate }}</span>
+      </div>
+      @if (timelineEventos().length === 0) {
+        <div class="timeline-empty">
+          <i class="bi bi-clock-history"></i>
+          <p>{{ 'dashboard_client.timeline_empty' | translate }}</p>
+        </div>
+      } @else {
+        <ol class="timeline-list">
+          @for (evt of timelineEventos(); track evt.tipo) {
+            <li class="timeline-item">
+              <div class="timeline-dot">
+                <i class="bi {{ evt.icon }}"></i>
+              </div>
+              <div class="timeline-content">
+                <p class="timeline-title mb-1">
+                  {{ evt.titulo | translate }}
+                  @if (evt.subtitulo) {
+                    <span class="timeline-subtitle"> — {{ evt.subtitulo }}</span>
+                  }
+                </p>
+                <time class="timeline-date">{{ formatFecha(evt.fecha) }}</time>
+              </div>
+            </li>
+          }
+        </ol>
+      }
     </div>
 
   }

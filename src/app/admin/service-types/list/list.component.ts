@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
@@ -21,6 +21,7 @@ type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 @Component({
   selector: 'app-admin-service-type-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl:    './list.component.css',

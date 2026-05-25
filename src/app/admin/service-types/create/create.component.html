@@ -1,28 +1,30 @@
 <div class="container-fluid py-4 px-3 px-xl-4">
 
   <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
-  <div class="d-flex align-items-center mb-4">
-    <button class="btn btn-link text-secondary p-0 me-3"
+  <div class="form-page-header mb-4">
+    <button class="btn-back" type="button"
             (click)="cancelar()" [title]="'common.back' | translate">
-      <i class="bi bi-arrow-left fs-5"></i>
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
     </button>
-    <i class="bi bi-grid fs-4 text-primary me-2"></i>
-    <h4 class="mb-0">{{ 'admin_service_types.create_title' | translate }}</h4>
+    <div>
+      <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+      <h1 class="form-page-header__title">{{ 'admin_service_types.create_title' | translate }}</h1>
+    </div>
   </div>
 
   <div class="row justify-content-center">
     <div class="col-12 col-lg-9 col-xl-8">
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-4">
+        <div class="card form-card">
+          <div class="card-body p-4 p-lg-5">
 
             <!-- ── Código semántico ────────────────────────────────────────── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-key me-1"></i>{{ 'admin_service_types.codigo_create_label' | translate }}
-            </h6>
-
-            <div class="mb-4">
+            <div class="form-section mb-5">
+              <div class="form-section__header">
+                <i class="bi bi-key" aria-hidden="true"></i>
+                {{ 'admin_service_types.codigo_create_label' | translate }}
+              </div>
               <input type="text" class="form-control font-monospace"
                      formControlName="codigo"
                      placeholder="ej: remodelacion_exterior"
@@ -35,153 +37,146 @@
                 }
               </div>
               <div class="form-text">
-                <i class="bi bi-info-circle me-1"></i>
+                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
                 {{ 'admin_service_types.codigo_create_note' | translate }}
               </div>
             </div>
 
-            <hr class="my-3">
+            <div class="form-section-divider"></div>
 
             <!-- ── Nombres ─────────────────────────────────────────────────── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-translate me-1"></i>{{ 'admin_service_types.section_names' | translate }}
-            </h6>
-
-            <div class="row g-3 mb-4">
-
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.nombre_fr' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇫🇷</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="nombre_fr"
-                       [class.is-invalid]="f['nombre_fr'].invalid && f['nombre_fr'].touched">
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.nombre_required' | translate }}
-                </div>
+            <div class="form-section mb-5">
+              <div class="form-section__header">
+                <i class="bi bi-translate" aria-hidden="true"></i>
+                {{ 'admin_service_types.section_names' | translate }}
               </div>
+              <div class="row g-3">
 
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.nombre_en' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇨🇦</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="nombre_en"
-                       [class.is-invalid]="f['nombre_en'].invalid && f['nombre_en'].touched">
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.nombre_required' | translate }}
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.nombre_fr' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--fr ms-1">FR</span>
+                  </label>
+                  <input type="text" class="form-control"
+                         formControlName="nombre_fr"
+                         [class.is-invalid]="f['nombre_fr'].invalid && f['nombre_fr'].touched">
+                  <div class="invalid-feedback">{{ 'admin_service_types.nombre_required' | translate }}</div>
                 </div>
-              </div>
 
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.nombre_es' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇨🇷</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="nombre_es"
-                       [class.is-invalid]="f['nombre_es'].invalid && f['nombre_es'].touched">
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.nombre_required' | translate }}
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.nombre_en' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--en ms-1">EN</span>
+                  </label>
+                  <input type="text" class="form-control"
+                         formControlName="nombre_en"
+                         [class.is-invalid]="f['nombre_en'].invalid && f['nombre_en'].touched">
+                  <div class="invalid-feedback">{{ 'admin_service_types.nombre_required' | translate }}</div>
                 </div>
-              </div>
 
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.nombre_es' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--es ms-1">ES</span>
+                  </label>
+                  <input type="text" class="form-control"
+                         formControlName="nombre_es"
+                         [class.is-invalid]="f['nombre_es'].invalid && f['nombre_es'].touched">
+                  <div class="invalid-feedback">{{ 'admin_service_types.nombre_required' | translate }}</div>
+                </div>
+
+              </div>
             </div>
 
-            <hr class="my-3">
+            <div class="form-section-divider"></div>
 
             <!-- ── Descripciones ───────────────────────────────────────────── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-card-text me-1"></i>{{ 'admin_service_types.section_descs' | translate }}
-            </h6>
-
-            <div class="row g-3 mb-4">
-
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.desc_fr' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇫🇷</span>
-                </label>
-                <textarea class="form-control" formControlName="descripcion_fr"
-                          rows="4" style="resize:vertical"
-                          [class.is-invalid]="f['descripcion_fr'].invalid && f['descripcion_fr'].touched">
-                </textarea>
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.desc_required' | translate }}
-                </div>
+            <div class="form-section mb-5">
+              <div class="form-section__header">
+                <i class="bi bi-card-text" aria-hidden="true"></i>
+                {{ 'admin_service_types.section_descs' | translate }}
               </div>
+              <div class="row g-3">
 
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.desc_en' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇨🇦</span>
-                </label>
-                <textarea class="form-control" formControlName="descripcion_en"
-                          rows="4" style="resize:vertical"
-                          [class.is-invalid]="f['descripcion_en'].invalid && f['descripcion_en'].touched">
-                </textarea>
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.desc_required' | translate }}
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.desc_fr' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--fr ms-1">FR</span>
+                  </label>
+                  <textarea class="form-control form-textarea"
+                            formControlName="descripcion_fr" rows="5"
+                            [class.is-invalid]="f['descripcion_fr'].invalid && f['descripcion_fr'].touched">
+                  </textarea>
+                  <div class="invalid-feedback">{{ 'admin_service_types.desc_required' | translate }}</div>
                 </div>
-              </div>
 
-              <div class="col-12 col-md-4">
-                <label class="form-label fw-semibold">
-                  {{ 'admin_service_types.desc_es' | translate }}
-                  <span class="text-danger">*</span>
-                  <span class="flag ms-1">🇨🇷</span>
-                </label>
-                <textarea class="form-control" formControlName="descripcion_es"
-                          rows="4" style="resize:vertical"
-                          [class.is-invalid]="f['descripcion_es'].invalid && f['descripcion_es'].touched">
-                </textarea>
-                <div class="invalid-feedback">
-                  {{ 'admin_service_types.desc_required' | translate }}
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.desc_en' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--en ms-1">EN</span>
+                  </label>
+                  <textarea class="form-control form-textarea"
+                            formControlName="descripcion_en" rows="5"
+                            [class.is-invalid]="f['descripcion_en'].invalid && f['descripcion_en'].touched">
+                  </textarea>
+                  <div class="invalid-feedback">{{ 'admin_service_types.desc_required' | translate }}</div>
                 </div>
-              </div>
 
+                <div class="col-12 col-md-4">
+                  <label class="form-label">
+                    {{ 'admin_service_types.desc_es' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                    <span class="lang-badge lang-badge--es ms-1">ES</span>
+                  </label>
+                  <textarea class="form-control form-textarea"
+                            formControlName="descripcion_es" rows="5"
+                            [class.is-invalid]="f['descripcion_es'].invalid && f['descripcion_es'].touched">
+                  </textarea>
+                  <div class="invalid-feedback">{{ 'admin_service_types.desc_required' | translate }}</div>
+                </div>
+
+              </div>
             </div>
 
-            <hr class="my-3">
+            <div class="form-section-divider"></div>
 
             <!-- ── Configuración ───────────────────────────────────────────── -->
-            <h6 class="text-muted text-uppercase small fw-semibold mb-3">
-              <i class="bi bi-sliders me-1"></i>{{ 'admin_service_types.section_config' | translate }}
-            </h6>
-
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" formControlName="activo"
-                     id="chkActivo">
-              <label class="form-check-label fw-semibold" for="chkActivo">
-                {{ 'admin_service_types.active_label' | translate }}
-                <small class="d-block fw-normal text-muted">
-                  {{ 'admin_service_types.active_hint' | translate }}
-                </small>
-              </label>
+            <div class="form-section">
+              <div class="form-section__header">
+                <i class="bi bi-sliders" aria-hidden="true"></i>
+                {{ 'admin_service_types.section_config' | translate }}
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox"
+                       formControlName="activo" id="chkActivo">
+                <label class="form-check-label" for="chkActivo">
+                  {{ 'admin_service_types.active_label' | translate }}
+                  <small class="d-block fw-normal text-ink-muted mt-1">
+                    {{ 'admin_service_types.active_hint' | translate }}
+                  </small>
+                </label>
+              </div>
             </div>
 
           </div>
 
           <!-- ── Footer acciones ─────────────────────────────────────────── -->
-          <div class="card-footer bg-white border-0 px-4 pb-4 pt-0
-                      d-flex gap-2 justify-content-end">
+          <div class="form-card__footer">
             <button type="button" class="btn btn-outline-secondary"
-                    (click)="cancelar()" [disabled]="guardando">
-              <i class="bi bi-x-lg me-1"></i>{{ 'common.cancel' | translate }}
+                    (click)="cancelar()" [disabled]="guardando()">
+              <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="guardando">
-              @if (guardando) {
-                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 {{ 'admin_service_types.creating' | translate }}
               } @else {
-                <i class="bi bi-plus-circle me-1"></i>
+                <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>
                 {{ 'admin_service_types.create_submit' | translate }}
               }
             </button>

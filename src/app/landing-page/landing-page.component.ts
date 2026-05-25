@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangService, Lang } from '../services/lang.service';
@@ -6,6 +6,7 @@ import { LangService, Lang } from '../services/lang.service';
 @Component({
   selector: 'app-landing-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe],
   templateUrl: './landing-page.component.html',
   styleUrl:    './landing-page.component.css',
