@@ -1,69 +1,93 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-5 px-3 px-md-4 or-wrap">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <h4 class="fw-bold mb-1">{{ 'nav.offres_recues' | translate }}</h4>
-        <p class="text-muted small mb-0">
-          {{ 'offers_received.subtitle' | translate }}
-        </p>
-      </div>
-      @if (!cargando() && pendientes().length > 0) {
-        <span class="pending-pill flex-shrink-0">
-          <i class="bi bi-bell-fill me-1"></i>
-          {{ pendientes().length }} {{ pendientes().length !== 1 ? ('offers_received.pending_plural' | translate) : ('offers_received.pending_singular' | translate) }}
-        </span>
+  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+  <header class="or-header mb-5">
+    <div class="or-header__text">
+      <h1 class="or-title">{{ 'nav.offres_recues' | translate }}</h1>
+      @if (!cargando()) {
+        <p class="or-lead">{{ 'offers_received.subtitle' | translate }}</p>
       }
     </div>
+    @if (!cargando() && pendientes().length > 0) {
+      <span class="pending-pill flex-shrink-0">
+        <i class="bi bi-bell me-1" aria-hidden="true"></i>
+        {{ pendientes().length }}
+        {{ pendientes().length !== 1
+            ? ('offers_received.pending_plural' | translate)
+            : ('offers_received.pending_singular' | translate) }}
+      </span>
+    }
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="skel-section-label mb-3" aria-hidden="true">
+      <div class="skel skel--dot-sm"></div>
+      <div class="skel skel--label"></div>
+    </div>
+    <div class="row g-3 row-cols-1 row-cols-md-2" aria-hidden="true">
+      @for (_ of [1,2]; track $index) {
+        <div class="col">
+          <div class="skel-card">
+            <div class="skel skel-card__accent"></div>
+            <div class="skel-card__body">
+              <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                <div class="skel skel--num"></div>
+                <div class="d-flex gap-2">
+                  <div class="skel skel--pill"></div>
+                  <div class="skel skel--badge-sm"></div>
+                </div>
+              </div>
+              <div class="skel skel--title mb-1"></div>
+              <div class="skel skel--desc mb-3"></div>
+              <div class="skel skel--meta mb-1"></div>
+              <div class="skel skel--meta mb-3"></div>
+              <hr class="skel-divider my-3">
+              <div class="skel skel--date mb-4"></div>
+              <div class="skel skel--btn"></div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
 
   <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-envelope-open"></i>
-        </div>
-        <p class="empty-title">{{ 'offers_received.empty_title' | translate }}</p>
-        <p class="empty-text">{{ 'offers_received.empty_text' | translate }}</p>
+    <div class="empty-panel">
+      <div class="empty-icon">
+        <i class="bi bi-envelope-open" aria-hidden="true"></i>
       </div>
+      <p class="empty-title">{{ 'offers_received.empty_title' | translate }}</p>
+      <p class="empty-text">{{ 'offers_received.empty_text' | translate }}</p>
     </div>
 
   <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── Banner de urgencia ─────────────────────────────────────────────── -->
+    <!-- Banner de urgencia -->
     @if (pendientes().length > 0) {
-      <div class="urgency-banner d-flex flex-wrap align-items-center gap-3 mb-4 p-3 rounded-4">
+      <div class="urgency-banner mb-4">
         <div class="urgency-banner__icon">
-          <i class="bi bi-bell-fill"></i>
+          <i class="bi bi-bell" aria-hidden="true"></i>
         </div>
-        <div class="flex-grow-1">
-          <p class="fw-semibold mb-0 text-dark">
+        <div class="urgency-banner__content">
+          <p class="urgency-banner__title mb-0">
             @if (pendientes().length === 1) {
               {{ 'offers_received.banner_single' | translate }}
             } @else {
               {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
             }
           </p>
-          <p class="small mb-0 text-warning-emphasis">
+          <p class="urgency-banner__sub mb-0">
             {{ 'dashboard_client.compare_text' | translate }}
           </p>
         </div>
       </div>
     }
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- SECCIÓN 1 · Pendientes de revisión (en_oferta)                        -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════════════
+         SECCIÓN 1 · Pendientes de revisión (en_oferta)
+    ════════════════════════════════════════════════════════════════════════════ -->
     @if (pendientes().length > 0) {
       <div class="section-label mb-3">
         <span class="section-dot section-dot--amber"></span>
@@ -76,19 +100,18 @@
           <div class="col">
             <div class="offer-card offer-card--pending h-100"
                  [style.--acento]="estadoColor(exp.estado)">
-              <div class="offer-accent"></div>
+              <div class="offer-accent" aria-hidden="true"></div>
               <div class="offer-body d-flex flex-column">
 
-                <!-- Fila 1: número + conteo ofertas + badge estado -->
+                <!-- Número + conteo + badge -->
                 <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
                   <span class="exp-num">{{ exp.numero }}</span>
                   <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="offers-pill">
-                      <i class="bi bi-people-fill me-1"></i>
+                      <i class="bi bi-people me-1" aria-hidden="true"></i>
                       {{ ofertasTip(exp.total_ofertas) }}
                     </span>
-                    <span class="estado-badge badge"
-                          [class]="estadoClase(exp.estado)">
+                    <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
                       {{ estadoTexto(exp.estado) }}
                     </span>
                   </div>
@@ -102,11 +125,11 @@
 
                 <!-- Ubicación -->
                 <p class="exp-meta mb-1">
-                  <i class="bi bi-geo-alt me-1"></i>
+                  <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
                   <span>{{ exp.direccion }}{{ exp.referencia ? ' · ' + exp.referencia : '' }}</span>
                 </p>
                 <p class="exp-meta mb-0">
-                  <i class="bi bi-map me-1"></i>
+                  <i class="bi bi-map me-1" aria-hidden="true"></i>
                   {{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
                 </p>
 
@@ -114,21 +137,19 @@
 
                 <!-- Fecha de visita -->
                 <p class="exp-fecha mb-0">
-                  <i class="bi bi-calendar3 me-1"></i>
+                  <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
                   {{ 'file.visit_date' | translate }}: {{ formatFecha(exp.fecha_visita) }}
                   @if (formatHora(exp.fecha_visita)) {
-                    <span class="ms-1 text-muted">· {{ formatHora(exp.fecha_visita) }}</span>
+                    <span class="exp-hora ms-1">· {{ formatHora(exp.fecha_visita) }}</span>
                   }
                 </p>
 
                 <!-- CTA principal -->
-                <button class="btn btn-warning fw-semibold mt-auto pt-3 d-flex align-items-center
-                               justify-content-center gap-2 w-100"
-                        style="margin-top: 1rem !important"
+                <button class="offer-cta mt-auto w-100 d-flex align-items-center justify-content-center gap-2"
                         (click)="ver(exp.id)">
-                  <i class="bi bi-eye"></i>
+                  <i class="bi bi-eye" aria-hidden="true"></i>
                   {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
-                  <i class="bi bi-arrow-right"></i>
+                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
                 </button>
 
               </div>
@@ -138,15 +159,13 @@
       </div>
     }
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- SECCIÓN 2 · Ya gestionados (adjudicado / contratado / cancelado)       -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- ════════════════════════════════════════════════════════════════════════
+         SECCIÓN 2 · Ya gestionados (adjudicado / contratado / cancelado)
+    ════════════════════════════════════════════════════════════════════════════ -->
     @if (gestionados().length > 0) {
-
       @if (pendientes().length > 0) {
         <div class="section-separator mb-4"></div>
       }
-
       <div class="section-label mb-3">
         <span class="section-dot section-dot--green"></span>
         {{ 'offers_received.section_managed' | translate }}
@@ -158,19 +177,18 @@
           <div class="col">
             <div class="offer-card offer-card--managed h-100"
                  [style.--acento]="estadoColor(exp.estado)">
-              <div class="offer-accent"></div>
+              <div class="offer-accent" aria-hidden="true"></div>
               <div class="offer-body d-flex flex-column">
 
-                <!-- Fila 1: número + estado -->
+                <!-- Número + badge -->
                 <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
                   <span class="exp-num">{{ exp.numero }}</span>
                   <div class="d-flex align-items-center gap-2">
                     <span class="offers-pill offers-pill--muted">
-                      <i class="bi bi-people me-1"></i>
+                      <i class="bi bi-people me-1" aria-hidden="true"></i>
                       {{ ofertasLabel(exp.total_ofertas) }}
                     </span>
-                    <span class="estado-badge badge"
-                          [class]="estadoClase(exp.estado)">
+                    <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
                       {{ estadoTexto(exp.estado) }}
                     </span>
                   </div>
@@ -184,22 +202,20 @@
 
                 <!-- Ubicación compacta -->
                 <p class="exp-meta mb-0">
-                  <i class="bi bi-geo-alt me-1"></i>
+                  <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
                   {{ exp.provincia }}, {{ exp.canton }}
                 </p>
 
                 <!-- Fecha -->
                 <p class="exp-fecha mt-1 mb-0">
-                  <i class="bi bi-calendar3 me-1"></i>
+                  <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
                   {{ formatFecha(exp.fecha_visita) }}
                 </p>
 
                 <!-- CTA secundario -->
-                <button class="btn btn-outline-secondary btn-sm mt-auto d-flex align-items-center
-                               justify-content-center gap-2 w-100"
-                        style="margin-top: 0.85rem !important"
+                <button class="btn btn-outline-secondary btn-sm mt-auto w-100 d-flex align-items-center justify-content-center gap-2"
                         (click)="ver(exp.id)">
-                  <i class="bi bi-eye"></i>
+                  <i class="bi bi-eye" aria-hidden="true"></i>
                   {{ 'common.see_detail' | translate }}
                 </button>
 

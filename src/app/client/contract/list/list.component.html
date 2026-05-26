@@ -1,77 +1,117 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-fluid py-5 px-3 px-md-5 cl-wrap">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <p class="eyebrow mb-1">
-          <i class="bi bi-file-earmark-text me-1"></i>{{ 'role.client' | translate }}
-        </p>
-        <h4 class="mb-1">{{ 'contract_list.title' | translate }}</h4>
-        <p class="text-muted small mb-0">{{ 'contract_list.subtitle' | translate }}</p>
-      </div>
-      @if (!cargando() && contratos().length > 0) {
-        <span class="kpi-pill">
-          <i class="bi bi-file-earmark-check me-1"></i>
-          {{ contratos().length }} {{ 'contract_list.count' | translate }}
-        </span>
+  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+  <header class="cl-header mb-5">
+    <div class="cl-header__text">
+      <p class="cl-eyebrow">
+        <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>
+        {{ 'role.client' | translate }}
+      </p>
+      <h1 class="cl-title">{{ 'contract_list.title' | translate }}</h1>
+      @if (!cargando()) {
+        <p class="cl-lead">{{ 'contract_list.subtitle' | translate }}</p>
       }
     </div>
+    @if (!cargando() && contratos().length > 0) {
+      <span class="kpi-pill flex-shrink-0">
+        <i class="bi bi-file-earmark-check me-1" aria-hidden="true"></i>
+        {{ contratos().length }} {{ 'contract_list.count' | translate }}
+      </span>
+    }
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm" role="status"></div>
-      {{ 'common.loading' | translate }}
-    </div>
-
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
-  } @else if (contratos().length === 0) {
-    <div class="empty-state-card">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-file-earmark-x"></i>
+    <div class="contracts-grid" aria-hidden="true">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="skel-card">
+          <div class="skel-card__body">
+            <!-- Row 1 -->
+            <div class="d-flex justify-content-between align-items-start mb-4 gap-3">
+              <div class="d-flex gap-2">
+                <div class="skel skel--num"></div>
+                <div class="skel skel--badge-sm"></div>
+              </div>
+              <div class="skel skel--btn-sm"></div>
+            </div>
+            <!-- Row 2 -->
+            <div class="row g-3 mb-4">
+              <div class="col-sm-6">
+                <div class="skel skel--label mb-2"></div>
+                <div class="skel skel--value"></div>
+              </div>
+              <div class="col-sm-6">
+                <div class="skel skel--label mb-2"></div>
+                <div class="skel skel--value"></div>
+              </div>
+            </div>
+            <!-- Row 3 -->
+            <div class="row g-3 mb-4">
+              <div class="col-sm-4">
+                <div class="skel skel--label mb-2"></div>
+                <div class="skel skel--price"></div>
+              </div>
+              <div class="col-sm-4">
+                <div class="skel skel--label mb-2"></div>
+                <div class="skel skel--value"></div>
+              </div>
+              <div class="col-sm-4">
+                <div class="skel skel--label mb-2"></div>
+                <div class="skel skel--value"></div>
+              </div>
+            </div>
+            <!-- View PDF btn skeleton -->
+            <div class="skel skel--view-btn"></div>
+          </div>
         </div>
-        <p class="empty-title">{{ 'contract_list.empty_title' | translate }}</p>
-        <p class="empty-text">{{ 'contract_list.empty_text' | translate }}</p>
-      </div>
+      }
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ── Sin contratos ─────────────────────────────────────────────────────── -->
+  } @else if (contratos().length === 0) {
+    <div class="empty-panel">
+      <div class="empty-icon">
+        <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
+      </div>
+      <p class="empty-title">{{ 'contract_list.empty_title' | translate }}</p>
+      <p class="empty-text">{{ 'contract_list.empty_text' | translate }}</p>
+    </div>
+
+  <!-- ── Lista de contratos ─────────────────────────────────────────────────── -->
   } @else {
-    <div class="d-flex flex-column gap-3">
+    <div class="contracts-grid">
       @for (c of contratos(); track c.id) {
 
         <div class="contrato-card" [class.panel-open]="confirmandoId() === c.id">
 
-          <!-- ── Cuerpo de la tarjeta ─────────────────────────────────────── -->
-          <div class="p-4">
+          <!-- ── Cuerpo principal ──────────────────────────────────────────── -->
+          <div class="contrato-card__body">
 
-            <!-- Fila 1: expediente + estado + PDF -->
-            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
+            <!-- Fila 1: número · estado | descargar -->
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
               <div class="d-flex align-items-center gap-2 flex-wrap">
                 <span class="exp-num">{{ c.expediente_numero }}</span>
                 <span class="badge rounded-pill px-3 py-1 {{ estadoBadge(c.estado) }}">
-                  <i class="bi {{ c.estado === 'firmado' ? 'bi-patch-check me-1' : '' }}"></i>
+                  @if (c.estado === 'firmado') {
+                    <i class="bi bi-patch-check me-1" aria-hidden="true"></i>
+                  }
                   {{ ('contract_list.status_' + c.estado) | translate }}
                 </span>
               </div>
-              <button class="btn btn-pdf d-flex align-items-center gap-2"
-                      type="button"
+              <button class="btn-download d-flex align-items-center gap-2" type="button"
                       [disabled]="descargando() === c.id"
                       (click)="descargarPdf(c)">
                 @if (descargando() === c.id) {
-                  <span class="spinner-border spinner-border-sm"></span>
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 } @else {
-                  <i class="bi bi-file-earmark-pdf"></i>
+                  <i class="bi bi-download" aria-hidden="true"></i>
                 }
                 {{ 'contract_list.download_pdf' | translate }}
               </button>
             </div>
 
             <!-- Fila 2: servicio + constructor -->
-            <div class="row g-3 mb-3">
+            <div class="row g-3 mb-4">
               <div class="col-sm-6">
                 <p class="info-label">{{ 'contract_list.service' | translate }}</p>
                 <p class="info-value mb-0">{{ servicioNombre(c) }}</p>
@@ -82,8 +122,8 @@
               </div>
             </div>
 
-            <!-- Fila 3: precio + garantia + fecha generado / firmado -->
-            <div class="row g-3">
+            <!-- Fila 3: precio · garantía · fecha -->
+            <div class="row g-3 mb-4">
               <div class="col-sm-4">
                 <p class="info-label">{{ 'contract_list.price' | translate }}</p>
                 <p class="info-value price-val mb-0">{{ formatPrecio(c.precio_final) }}</p>
@@ -98,7 +138,8 @@
                 @if (c.estado === 'firmado' && c.firmado_en) {
                   <p class="info-label">{{ 'contract_list.signed_on' | translate }}</p>
                   <p class="info-value signed-date mb-0">
-                    <i class="bi bi-patch-check me-1"></i>{{ formatFecha(c.firmado_en) }}
+                    <i class="bi bi-patch-check me-1" aria-hidden="true"></i>
+                    {{ formatFecha(c.firmado_en) }}
                   </p>
                 } @else {
                   <p class="info-label">{{ 'contract_list.generated_on' | translate }}</p>
@@ -107,26 +148,68 @@
               </div>
             </div>
 
-            <!-- Botón firmar (solo para contratos en estado generado) -->
+            <!-- Botón ver contrato PDF -->
+            <button class="btn-view-pdf w-100 d-flex align-items-center justify-content-center gap-2"
+                    type="button"
+                    [class.btn-view-pdf--open]="pdfVistaId() === c.id"
+                    (click)="togglePdf(c)">
+              <i class="bi" aria-hidden="true"
+                 [class.bi-file-earmark-pdf]="pdfVistaId() !== c.id"
+                 [class.bi-chevron-up]="pdfVistaId() === c.id"></i>
+              {{ pdfVistaId() === c.id
+                  ? ('contract_list.close_pdf' | translate)
+                  : ('contract_list.view_pdf' | translate) }}
+            </button>
+
+            <!-- ── Visor PDF inline ───────────────────────────────────────── -->
+            @if (pdfVistaId() === c.id) {
+              <div class="pdf-viewer-wrap">
+                <div class="pdf-viewer-toolbar">
+                  <span class="pdf-viewer-label">
+                    <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
+                    {{ 'contract_list.pdf_preview' | translate }} · {{ c.expediente_numero }}
+                  </span>
+                  <button class="pdf-viewer-download btn-download d-flex align-items-center gap-2"
+                          type="button"
+                          [disabled]="descargando() === c.id"
+                          (click)="descargarPdf(c)">
+                    @if (descargando() === c.id) {
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-download" aria-hidden="true"></i>
+                    }
+                    {{ 'contract_list.download_pdf' | translate }}
+                  </button>
+                </div>
+                <iframe class="pdf-viewer-frame"
+                        [src]="safePdfUrl()"
+                        [title]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero"
+                        [attr.aria-label]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero">
+                </iframe>
+              </div>
+            }
+
+            <!-- Botón firmar (estado generado, panel no abierto) -->
             @if (c.estado === 'generado' && confirmandoId() !== c.id) {
-              <div class="mt-3 pt-3 border-top">
-                <button class="btn btn-sign d-flex align-items-center gap-2"
-                        type="button"
+              <div class="sign-row">
+                <button class="btn-sign d-flex align-items-center gap-2" type="button"
                         (click)="abrirPanelFirma(c.id)">
-                  <i class="bi bi-pen"></i>
+                  <i class="bi bi-pen" aria-hidden="true"></i>
                   {{ 'contract_list.sign_btn' | translate }}
                 </button>
               </div>
             }
 
-          </div><!-- /p-4 -->
+          </div><!-- /contrato-card__body -->
 
-          <!-- ── Panel de firma ───────────────────────────────────────────── -->
+          <!-- ── Panel de firma ────────────────────────────────────────────── -->
           @if (confirmandoId() === c.id) {
-            <div class="sign-panel px-4 pb-4">
+            <div class="sign-panel">
 
               <div class="sign-panel-header">
-                <span class="sign-panel-icon"><i class="bi bi-pen"></i></span>
+                <span class="sign-panel-icon">
+                  <i class="bi bi-pen" aria-hidden="true"></i>
+                </span>
                 <div>
                   <p class="sign-panel-title">{{ 'contract_list.sign_title' | translate }}</p>
                   <p class="sign-panel-sub">{{ 'contract_list.sign_subtitle' | translate }}</p>
@@ -159,32 +242,36 @@
                 }
               </div>
 
-              <!-- Texto legal + checkbox -->
+              <!-- Texto legal -->
               <p class="sign-legal-text">{{ 'contract_list.sign_legal_text' | translate }}</p>
 
+              <!-- Checkbox aceptación -->
               <label class="sign-checkbox-label" (click)="toggleAceptado()">
-                <span class="sign-checkbox" [class.checked]="aceptado()" role="checkbox" [attr.aria-checked]="aceptado()">
-                  @if (aceptado()) { <i class="bi bi-check-lg"></i> }
+                <span class="sign-checkbox" [class.checked]="aceptado()"
+                      role="checkbox" [attr.aria-checked]="aceptado()">
+                  @if (aceptado()) {
+                    <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  }
                 </span>
                 <span>{{ 'contract_list.sign_terms_label' | translate }}</span>
               </label>
 
-              <!-- Acciones -->
+              <!-- Acciones de firma -->
               <div class="sign-actions">
-                <button class="btn btn-sign-confirm d-flex align-items-center gap-2"
+                <button class="btn-sign-confirm d-flex align-items-center gap-2"
                         type="button"
                         [disabled]="!aceptado() || firmandoId() === c.id"
                         (click)="confirmarFirma(c)">
                   @if (firmandoId() === c.id) {
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="spinner-border spinner-border-sm"
+                          role="status" aria-hidden="true"></span>
                     {{ 'contract_list.signing' | translate }}
                   } @else {
-                    <i class="bi bi-pen"></i>
+                    <i class="bi bi-pen" aria-hidden="true"></i>
                     {{ 'contract_list.sign_btn_confirm' | translate }}
                   }
                 </button>
-                <button class="btn btn-link sign-cancel-link"
-                        type="button"
+                <button class="sign-cancel-link" type="button"
                         [disabled]="firmandoId() === c.id"
                         (click)="cerrarPanelFirma()">
                   {{ 'contract_list.sign_cancel' | translate }}

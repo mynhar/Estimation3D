@@ -193,36 +193,37 @@
                 </td>
 
               </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state empty-state--table">
+                    @if (hayFiltros()) {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-funnel"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'admin_file.no_results' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'admin_file.no_results_hint' | translate }}</p>
+                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+                      </button>
+                    } @else {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-folder2-open"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'admin_file.no_data' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'admin_file.no_data_hint' | translate }}</p>
+                      <a routerLink="/admin/file/create" class="btn btn-primary btn-sm mt-2">
+                        <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
+                      </a>
+                    }
+                  </div>
+                </td>
+              </tr>
             }
 
           </tbody>
         </table>
       </div>
-
-      <!-- ── Empty state ──────────────────────────────────────────────────── -->
-      @if (expedientesFiltrados().length === 0) {
-        <div class="empty-state empty-state--table">
-          @if (hayFiltros()) {
-            <div class="empty-state__icon">
-              <i class="bi bi-funnel"></i>
-            </div>
-            <p class="empty-state__title">{{ 'admin_file.no_results' | translate }}</p>
-            <p class="empty-state__desc">{{ 'admin_file.no_results_hint' | translate }}</p>
-            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
-              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-            </button>
-          } @else {
-            <div class="empty-state__icon">
-              <i class="bi bi-folder2-open"></i>
-            </div>
-            <p class="empty-state__title">{{ 'admin_file.no_data' | translate }}</p>
-            <p class="empty-state__desc">{{ 'admin_file.no_data_hint' | translate }}</p>
-            <a routerLink="/admin/file/create" class="btn btn-primary btn-sm mt-2">
-              <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
-            </a>
-          }
-        </div>
-      }
 
       <!-- ── Paginación ───────────────────────────────────────────────────── -->
       @if (expedientesFiltrados().length > 0) {

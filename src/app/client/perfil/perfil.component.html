@@ -1,28 +1,27 @@
 <div class="container-xl py-5 px-3 px-md-4 perfil-wrap">
 
   <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
-  <header class="perfil-page-header mb-5">
+  <header class="perfil-header mb-5">
     <span class="eyebrow">{{ 'profile.eyebrow' | translate }}</span>
-    <h1 class="perfil-page-header__title">{{ 'profile.title' | translate }}</h1>
-    <p class="perfil-page-header__lead">{{ 'profile.subtitle' | translate }}</p>
+    <h1 class="perfil-title">{{ 'profile.title' | translate }}</h1>
+    <p class="perfil-lead">{{ 'profile.subtitle' | translate }}</p>
   </header>
 
   <!-- ── Skeleton mientras carga ───────────────────────────────────────────── -->
   @if (cargando()) {
     <div class="row g-4 g-lg-5 align-items-start" aria-hidden="true">
 
-      <!-- Skeleton identidad -->
       <div class="col-lg-4">
-        <div class="card identity-card">
-          <div class="card-body p-4 text-center">
-            <div class="skel skel--circle skel--avatar mx-auto mb-4"></div>
+        <div class="skel-panel">
+          <div class="skel-panel__body text-center">
+            <div class="skel skel--avatar mx-auto mb-4"></div>
             <div class="skel skel--xl-line skel--half mx-auto mb-2"></div>
             <div class="skel skel--md-line skel--wide mx-auto mb-4"></div>
             <div class="skel skel--pill mx-auto mb-4"></div>
             <hr class="identity-divider">
             @for (_ of [1, 2, 3]; track $index) {
               <div class="d-flex align-items-start gap-3 mb-3 text-start">
-                <div class="skel skel--icon"></div>
+                <div class="skel skel--icon flex-shrink-0"></div>
                 <div class="flex-grow-1">
                   <div class="skel skel--sm-line skel--narrow mb-2"></div>
                   <div class="skel skel--md-line skel--half"></div>
@@ -33,13 +32,12 @@
         </div>
       </div>
 
-      <!-- Skeleton formulario -->
       <div class="col-lg-8">
-        <div class="card form-card">
-          <div class="form-card__header">
+        <div class="skel-panel">
+          <div class="skel-panel__head">
             <div class="skel skel--lg-line skel--hdr-title"></div>
           </div>
-          <div class="card-body p-4">
+          <div class="skel-panel__body">
             <div class="row g-3">
               @for (_ of [1, 2, 3, 4]; track $index) {
                 <div class="col-sm-6">
@@ -63,14 +61,15 @@
            COLUMNA IZQUIERDA · Identidad
            ════════════════════════════════════════════════════════════════════ -->
       <div class="col-lg-4">
-        <div class="card identity-card">
-          <div class="card-body p-4 text-center">
+        <div class="identity-card">
+          <div class="identity-body text-center">
 
             <!-- Avatar con anillo dorado -->
             <div class="avatar-wrap mx-auto mb-3">
-
               @if (esProveedorEmail) {
-                <label class="avatar-label" [class.avatar-label--uploading]="subiendoAvatar()">
+                <label class="avatar-label" [class.avatar-label--uploading]="subiendoAvatar()"
+                       [attr.aria-label]="'profile.change_photo_short' | translate"
+                       [attr.title]="'profile.change_photo_short' | translate">
                   <img [src]="avatarSrc" [alt]="displayName" class="avatar-img"
                        (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
                   <span class="avatar-overlay" aria-hidden="true">
@@ -85,14 +84,18 @@
                          class="d-none" (change)="onAvatarChange($event)"
                          [disabled]="subiendoAvatar()">
                 </label>
-
               } @else {
                 <img [src]="avatarSrc" [alt]="displayName" class="avatar-img"
                      referrerpolicy="no-referrer"
                      (error)="$any($event.target).src='assets/avatar-fallback.jpg'" />
               }
-
             </div>
+
+            @if (esProveedorEmail) {
+              <p class="avatar-hint mb-3">
+                <i class="bi bi-camera me-1" aria-hidden="true"></i>{{ 'profile.avatar_hint' | translate }}
+              </p>
+            }
 
             <!-- Nombre y email -->
             <h2 class="identity-name mb-1">{{ displayName }}</h2>
@@ -161,32 +164,32 @@
            COLUMNA DERECHA · Formulario
            ════════════════════════════════════════════════════════════════════ -->
       <div class="col-lg-8">
-        <div class="card form-card">
+        <div class="form-card">
 
-          <div class="form-card__header">
+          <div class="form-card__head">
             <span class="form-card__title">
               <i class="bi bi-pencil-square form-card__title-icon" aria-hidden="true"></i>
               {{ 'profile.personal_data' | translate }}
             </span>
             @if (hasCambios()) {
               <span class="cambios-pill" role="status">
-                {{ 'profile.unsaved_changes' | translate }}
+                <i class="bi bi-dot" aria-hidden="true"></i>{{ 'profile.unsaved_changes' | translate }}
               </span>
             }
           </div>
 
-          <div class="card-body p-4">
+          <div class="form-card__body">
 
             <!-- Alertas de feedback -->
             @if (exitoMsg()) {
               <div class="feedback-alert feedback-alert--success" role="alert">
-                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                <i class="bi bi-check-circle flex-shrink-0" aria-hidden="true"></i>
                 <span>{{ exitoMsg() | translate }}</span>
               </div>
             }
             @if (errorMsg()) {
               <div class="feedback-alert feedback-alert--danger" role="alert">
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i class="bi bi-exclamation-triangle flex-shrink-0" aria-hidden="true"></i>
                 <span>{{ errorMsg() | translate }}</span>
               </div>
             }
@@ -195,11 +198,11 @@
 
               <!-- Nombre -->
               <div class="col-sm-6">
-                <label class="form-label">
+                <label class="form-label" for="nombre-input">
                   {{ 'common.name' | translate }}
-                  <span class="req-star" aria-hidden="true">*</span>
+                  <span class="req-mark" aria-hidden="true">*</span>
                 </label>
-                <input type="text" class="form-control"
+                <input id="nombre-input" type="text" class="form-control"
                        [ngModel]="nombre()" (ngModelChange)="nombre.set($event)"
                        [placeholder]="'profile.name_placeholder' | translate"
                        maxlength="80" autocomplete="given-name" />
@@ -207,11 +210,11 @@
 
               <!-- Apellido -->
               <div class="col-sm-6">
-                <label class="form-label">
+                <label class="form-label" for="apellido-input">
                   {{ 'common.lastname' | translate }}
-                  <span class="req-star" aria-hidden="true">*</span>
+                  <span class="req-mark" aria-hidden="true">*</span>
                 </label>
-                <input type="text" class="form-control"
+                <input id="apellido-input" type="text" class="form-control"
                        [ngModel]="apellido()" (ngModelChange)="apellido.set($event)"
                        [placeholder]="'profile.lastname_placeholder' | translate"
                        maxlength="80" autocomplete="family-name" />
@@ -219,12 +222,12 @@
 
               <!-- Teléfono -->
               <div class="col-sm-6">
-                <label class="form-label">{{ 'common.phone' | translate }}</label>
+                <label class="form-label" for="telefono-input">{{ 'common.phone' | translate }}</label>
                 <div class="input-group">
                   <span class="input-group-text" aria-hidden="true">
                     <i class="bi bi-telephone"></i>
                   </span>
-                  <input type="tel" class="form-control"
+                  <input id="telefono-input" type="tel" class="form-control"
                          [ngModel]="telefono()" (ngModelChange)="telefono.set($event)"
                          [placeholder]="'profile.phone_placeholder' | translate"
                          maxlength="20" autocomplete="tel" />
@@ -233,25 +236,25 @@
 
               <!-- Email (solo lectura) -->
               <div class="col-sm-6">
-                <label class="form-label">{{ 'common.email' | translate }}</label>
+                <label class="form-label" for="email-input">{{ 'common.email' | translate }}</label>
                 <div class="input-group">
                   <span class="input-group-text" aria-hidden="true">
                     <i class="bi bi-envelope"></i>
                   </span>
-                  <input type="email" class="form-control form-control-readonly"
+                  <input id="email-input" type="email" class="form-control email-readonly"
                          [value]="user()?.email ?? ''"
-                         readonly tabindex="-1" autocomplete="email" />
+                         readonly tabindex="-1" autocomplete="email"
+                         aria-readonly="true" />
                 </div>
-                <div class="form-text">
+                <small class="form-text">
                   <i class="bi bi-lock me-1" aria-hidden="true"></i>{{ 'profile.email_readonly' | translate }}
-                </div>
+                </small>
               </div>
 
             </div>
 
             <!-- Botonera -->
             <div class="form-actions mt-5">
-
               <button class="btn btn-primary px-4"
                       (click)="guardar()"
                       [disabled]="guardando() || !hasCambios()">
@@ -276,7 +279,6 @@
                   <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ 'profile.no_changes' | translate }}
                 </span>
               }
-
             </div>
 
           </div>

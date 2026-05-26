@@ -1,77 +1,172 @@
-<div class="landing-wrap">
+<div class="lp-root">
 
-  <!-- ── Barra superior ─────────────────────────────────────────────────────── -->
-  <nav class="top-bar">
-
-    <span class="logo">Estimation3D</span>
-
-    <div class="top-bar__right">
-      <!-- Toggle idioma -->
-      <div class="lang-toggle" role="group">
+  <!-- ── Navegación ─────────────────────────────────────────────────────────── -->
+  <nav class="lp-nav">
+    <span class="lp-logo">Estimation3D</span>
+    <div class="lp-nav__right">
+      <div class="lp-lang" role="group" [attr.aria-label]="'Idioma'">
         @for (l of langs; track l) {
-          <button type="button"
-                  class="lang-btn"
-                  [class.lang-btn--active]="lang.current() === l"
-                  (click)="setLang(l)">
-            {{ l.toUpperCase() }}
-          </button>
+          <button type="button" class="lp-lang__btn"
+                  [class.lp-lang__btn--active]="lang.current() === l"
+                  (click)="setLang(l)">{{ l.toUpperCase() }}</button>
         }
       </div>
-
-      <!-- Acceso rápido para usuarios existentes -->
-      <a routerLink="/login" class="login-link">
+      <a routerLink="/login" class="lp-login-link">
         {{ 'landing.login_link' | translate }}
       </a>
     </div>
-
   </nav>
 
   <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
-  <main class="hero">
+  <section class="lp-hero">
 
-    <div class="hero__content">
+    <!-- Contenido editorial -->
+    <div class="lp-hero__content">
 
-      <!-- Eyebrow -->
-      <p class="hero__eyebrow">Montréal · 3D scan</p>
+      <p class="lp-eyebrow">
+        <span class="lp-eyebrow__dot" aria-hidden="true"></span>
+        {{ 'landing.eyebrow' | translate }}
+      </p>
 
-      <!-- Título principal -->
-      <h1 class="hero__title">{{ 'landing.title' | translate }}</h1>
+      <h1 class="lp-title">{{ 'landing.title' | translate }}</h1>
 
-      <!-- Subtítulo -->
-      <p class="hero__subtitle">{{ 'landing.subtitle' | translate }}</p>
+      <p class="lp-lead">{{ 'landing.subtitle' | translate }}</p>
 
-      <!-- CTAs -->
-      <div class="hero__actions">
-        <a routerLink="/login" class="btn-cta btn-cta--primary">
+      <div class="lp-actions">
+        <a routerLink="/login" class="lp-btn lp-btn--gold">
+          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
           {{ 'landing.cta_client' | translate }}
         </a>
-        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="btn-cta btn-cta--outline">
+        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--outline">
           {{ 'landing.cta_builder' | translate }}
         </a>
       </div>
 
+      <div class="lp-trust">
+        <span class="lp-trust-badge">
+          <i class="bi bi-box" aria-hidden="true"></i>
+          {{ 'landing.badge_3d' | translate }}
+        </span>
+        <span class="lp-trust-sep" aria-hidden="true"></span>
+        <span class="lp-trust-badge">
+          <i class="bi bi-patch-check" aria-hidden="true"></i>
+          {{ 'landing.badge_verified' | translate }}
+        </span>
+        <span class="lp-trust-sep" aria-hidden="true"></span>
+        <span class="lp-trust-badge">
+          <i class="bi bi-gift" aria-hidden="true"></i>
+          {{ 'landing.badge_free' | translate }}
+        </span>
+      </div>
+
     </div>
 
-    <!-- Decoración visual -->
-    <div class="hero__deco" aria-hidden="true">
-      <div class="deco-ring deco-ring--1"></div>
-      <div class="deco-ring deco-ring--2"></div>
-      <div class="deco-ring deco-ring--3"></div>
-      <div class="deco-dot deco-dot--a"></div>
-      <div class="deco-dot deco-dot--b"></div>
-      <div class="deco-dot deco-dot--c"></div>
+    <!-- Visual decorativo 3D -->
+    <div class="lp-hero__visual" aria-hidden="true">
+      <div class="lp-vis">
+        <div class="lp-vis__ring lp-vis__ring--3"></div>
+        <div class="lp-vis__ring lp-vis__ring--2"></div>
+        <div class="lp-vis__ring lp-vis__ring--1"></div>
+        <div class="lp-vis__grid"></div>
+        <div class="lp-vis__center">
+          <svg class="lp-vis__svg" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.4"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/>
+            <path d="m16 2-2 3h4l-2-3z"/>
+            <path d="M22 15a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/>
+            <path d="m16 13 1.5 1.5L20 12"/>
+          </svg>
+        </div>
+        <!-- Puntos orbitales -->
+        <div class="lp-vis__dot lp-vis__dot--1"></div>
+        <div class="lp-vis__dot lp-vis__dot--2"></div>
+        <div class="lp-vis__dot lp-vis__dot--3"></div>
+      </div>
     </div>
 
-  </main>
+  </section>
+
+  <!-- ── Cómo funciona ──────────────────────────────────────────────────────── -->
+  <section class="lp-how">
+
+    <div class="lp-how__head">
+      <p class="lp-section-eyebrow">{{ 'landing.how_eyebrow' | translate }}</p>
+      <h2 class="lp-section-title">{{ 'landing.how_title' | translate }}</h2>
+    </div>
+
+    <div class="lp-steps">
+
+      <article class="lp-step">
+        <span class="lp-step__num">01</span>
+        <div class="lp-step__icon-wrap">
+          <i class="bi bi-folder-plus lp-step__icon" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step1_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step1_desc' | translate }}</p>
+      </article>
+
+      <div class="lp-step-connector" aria-hidden="true">
+        <i class="bi bi-chevron-right"></i>
+      </div>
+
+      <article class="lp-step">
+        <span class="lp-step__num">02</span>
+        <div class="lp-step__icon-wrap">
+          <i class="bi bi-camera lp-step__icon" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step2_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step2_desc' | translate }}</p>
+      </article>
+
+      <div class="lp-step-connector" aria-hidden="true">
+        <i class="bi bi-chevron-right"></i>
+      </div>
+
+      <article class="lp-step">
+        <span class="lp-step__num">03</span>
+        <div class="lp-step__icon-wrap">
+          <i class="bi bi-handshake lp-step__icon" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step3_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step3_desc' | translate }}</p>
+      </article>
+
+    </div>
+
+  </section>
+
+  <!-- ── CTA final ──────────────────────────────────────────────────────────── -->
+  <section class="lp-cta-section">
+    <div class="lp-cta-section__inner">
+      <div class="lp-cta-section__deco" aria-hidden="true">
+        <div class="lp-cta-ring lp-cta-ring--1"></div>
+        <div class="lp-cta-ring lp-cta-ring--2"></div>
+      </div>
+      <div class="lp-cta-section__content">
+        <h2 class="lp-cta-title">{{ 'landing.cta_section_title' | translate }}</h2>
+        <p class="lp-cta-desc">{{ 'landing.cta_section_desc' | translate }}</p>
+        <div class="lp-actions">
+          <a routerLink="/login" class="lp-btn lp-btn--gold">
+            <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+            {{ 'landing.cta_client' | translate }}
+          </a>
+          <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--ghost">
+            {{ 'landing.cta_builder' | translate }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
-  <footer class="landing-footer">
-    <span class="footer-brand">Estimation3D</span>
-    <span class="footer-sep">·</span>
+  <footer class="lp-footer">
+    <span class="lp-footer__brand">Estimation3D</span>
+    <span class="lp-footer__sep" aria-hidden="true">·</span>
     <span>© {{ year }}</span>
-    <span class="footer-sep">·</span>
+    <span class="lp-footer__sep" aria-hidden="true">·</span>
     <span>{{ 'footer.rights_' + lang.current() | translate }}</span>
-    <span class="footer-sep">·</span>
+    <span class="lp-footer__sep" aria-hidden="true">·</span>
     <span>{{ 'footer.country' | translate }}</span>
   </footer>
 

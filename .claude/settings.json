@@ -86,7 +86,11 @@
       "Bash(Sort-Object -Property Count -Descending)",
       "Bash(Format-Table Name, Count -AutoSize)",
       "PowerShell(Select-String -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\types\\\\supabase.ts\" -Pattern \"TablesInsert|TablesUpdate|type Tables\" | Select-Object -First 20 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line\\)\" })",
-      "PowerShell($content = Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\estimated-files\\\\estimated-files.component.css\" -Raw -Encoding UTF8; $bytes = [System.Text.Encoding]::UTF8.GetByteCount\\($content\\); $lines = \\(Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\estimated-files\\\\estimated-files.component.css\"\\).Count; Write-Output \"Lines: $lines\"; Write-Output \"Size: $\\([math]::Round\\($bytes / 1024, 2\\)\\) kB\")"
+      "PowerShell($content = Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\estimated-files\\\\estimated-files.component.css\" -Raw -Encoding UTF8; $bytes = [System.Text.Encoding]::UTF8.GetByteCount\\($content\\); $lines = \\(Get-Content \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\estimated-files\\\\estimated-files.component.css\"\\).Count; Write-Output \"Lines: $lines\"; Write-Output \"Size: $\\([math]::Round\\($bytes / 1024, 2\\)\\) kB\")",
+      "Bash(powershell -Command \"Select-String -Path 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\en.json' -Pattern '\\\\\"progress\\\\\"' | Select-Object -First 5\")",
+      "Bash(powershell -Command \"Select-String -Path 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\fr.json' -Pattern '\\\\\"progress\\\\\"' | Select-Object -First 5\")",
+      "Bash(powershell -Command \"Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\en.json' | Select-Object -Skip 799 -First 15\")",
+      "Bash(powershell -Command \"Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\fr.json' | Select-Object -Skip 799 -First 15\")"
     ],
     "additionalDirectories": [
       "\\tmp"

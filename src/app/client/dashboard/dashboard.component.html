@@ -67,6 +67,12 @@
               <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
             </span>
           </div>
+          <div class="exp-card__prog">
+            <div class="exp-card__prog-track">
+              <div class="exp-card__prog-fill" [style.width.%]="progresoPct(exp)"></div>
+            </div>
+            <span class="exp-card__prog-pct">{{ progresoPct(exp) }}%</span>
+          </div>
         </button>
       }
     </div>
@@ -278,6 +284,15 @@
 
         <div class="exp-divider"></div>
 
+        <!-- Progreso en porcentaje -->
+        <div class="exp-pct-row mt-4">
+          <span class="exp-pct-label">{{ 'dashboard_client.progress' | translate }}</span>
+          <span class="exp-pct-value font-display">{{ faseActualPct() }}%</span>
+        </div>
+        <div class="exp-pct-track mt-2">
+          <div class="exp-pct-fill" [style.width.%]="faseActualPct()"></div>
+        </div>
+
         <!-- Barra de 5 fases -->
         <div class="fase-bar mt-4"
              role="list"
@@ -367,35 +382,101 @@
 
     </div>
 
-    <!-- ── Timeline ─────────────────────────────────────────────────────── -->
+    <!-- ── Historial · Calendario ────────────────────────────────────────── -->
     <div class="timeline-card">
+
       <div class="timeline-card__header">
-        <span class="eyebrow">{{ 'dashboard_client.timeline_title' | translate }}</span>
+        <span class="eyebrow">
+          <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+          {{ 'dashboard_client.timeline_title' | translate }}
+        </span>
       </div>
+
       @if (timelineEventos().length === 0) {
         <div class="timeline-empty">
           <i class="bi bi-clock-history"></i>
           <p>{{ 'dashboard_client.timeline_empty' | translate }}</p>
         </div>
       } @else {
-        <ol class="timeline-list">
-          @for (evt of timelineEventos(); track evt.tipo) {
-            <li class="timeline-item">
-              <div class="timeline-dot">
-                <i class="bi {{ evt.icon }}"></i>
+
+        <!-- ── Barra de navegación ──── -->
+        <div class="cal-nav">
+          @if (calExpandido()) {
+            <button class="cal-nav-btn" type="button" (click)="calPrevYear()"
+                    title="Año anterior" aria-label="Año anterior">
+              <i class="bi bi-chevron-double-left" aria-hidden="true"></i>
+            </button>
+          }
+          <button class="cal-nav-btn" type="button" (click)="calPrev()"
+                  [title]="calExpandido() ? 'Mes anterior' : 'Semana anterior'"
+                  [attr.aria-label]="calExpandido() ? 'Mes anterior' : 'Semana anterior'">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+          </button>
+          <span class="cal-month-label">{{ calMesLabel() }}</span>
+          <button class="cal-nav-btn" type="button" (click)="calNext()"
+                  [title]="calExpandido() ? 'Mes siguiente' : 'Semana siguiente'"
+                  [attr.aria-label]="calExpandido() ? 'Mes siguiente' : 'Semana siguiente'">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </button>
+          @if (calExpandido()) {
+            <button class="cal-nav-btn" type="button" (click)="calNextYear()"
+                    title="Año siguiente" aria-label="Año siguiente">
+              <i class="bi bi-chevron-double-right" aria-hidden="true"></i>
+            </button>
+          }
+          <button class="cal-nav-btn cal-nav-btn--expand" type="button"
+                  (click)="calToggleExpand()"
+                  [title]="calExpandido() ? 'Ver semana' : 'Ver mes completo'"
+                  [attr.aria-label]="calExpandido() ? 'Ver semana' : 'Ver mes completo'">
+            <i class="bi" aria-hidden="true"
+               [class.bi-arrows-angle-expand]="!calExpandido()"
+               [class.bi-arrows-angle-contract]="calExpandido()"></i>
+          </button>
+        </div>
+
+        <!-- ── Cuadrícula ──── -->
+        <div class="cal-wrap">
+          <div class="cal-weekdays">
+            @for (wd of calWeekdays(); track $index) {
+              <div class="cal-wd">{{ wd }}</div>
+            }
+          </div>
+          <div class="cal-grid" [class.cal-grid--week]="!calExpandido()">
+            @for (dia of calDias(); track $index) {
+              <div class="cal-day"
+                   [class.cal-day--other]="!dia.inMonth"
+                   [class.cal-day--today]="dia.isToday && !dia.isAnchor"
+                   [class.cal-day--event]="dia.eventos.length > 0 && !dia.isAnchor"
+                   [class.cal-day--anchor]="dia.isAnchor">
+                <span class="cal-day-num">{{ dia.day }}</span>
+                @if (dia.eventos.length > 0) {
+                  <span class="cal-dot" aria-hidden="true"></span>
+                }
               </div>
-              <div class="timeline-content">
-                <p class="timeline-title mb-1">
+            }
+          </div>
+        </div>
+
+        <!-- ── Lista de eventos ──── -->
+        <ol class="cal-events-list">
+          @for (evt of timelineEventos(); track evt.tipo) {
+            <li class="cal-evt-item">
+              <div class="cal-evt-icon">
+                <i class="bi {{ evt.icon }}" aria-hidden="true"></i>
+              </div>
+              <div class="cal-evt-body">
+                <p class="cal-evt-title mb-0">
                   {{ evt.titulo | translate }}
                   @if (evt.subtitulo) {
-                    <span class="timeline-subtitle"> — {{ evt.subtitulo }}</span>
+                    <span class="cal-evt-sub"> — {{ evt.subtitulo }}</span>
                   }
                 </p>
-                <time class="timeline-date">{{ formatFecha(evt.fecha) }}</time>
+                <time class="cal-evt-date">{{ formatFecha(evt.fecha) }}</time>
               </div>
             </li>
           }
         </ol>
+
       }
     </div>
 

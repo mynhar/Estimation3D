@@ -802,7 +802,21 @@
     "subtitle": "The platform connecting property owners with certified contractors in Montreal through 3D scanning.",
     "cta_client": "Request an evaluation",
     "cta_builder": "I'm a contractor",
-    "login_link": "Sign in"
+    "login_link": "Sign in",
+    "eyebrow": "Montréal · Certified 3D scanning",
+    "badge_3d": "3D technology",
+    "badge_verified": "Verified contractors",
+    "badge_free": "Free registration",
+    "how_eyebrow": "Process",
+    "how_title": "Three steps to your renovation",
+    "step1_title": "Create your file",
+    "step1_desc": "Register your project details. We collect everything needed to get started without the paperwork.",
+    "step2_title": "3D scan visit",
+    "step2_desc": "A certified estimator visits your property and documents it in 3D for a precise quote.",
+    "step3_title": "Choose your contractor",
+    "step3_desc": "Compare offers from verified builders and sign the contract that works best for you.",
+    "cta_section_title": "Ready to get started?",
+    "cta_section_desc": "Create your free file today and receive your first estimate in less than 48 hours."
   },
   "auth": {
     "login": "Sign in",
@@ -913,7 +927,10 @@
     "sign_cancel": "Cancel",
     "signing": "Signing…",
     "success_signed": "Contract signed successfully.",
-    "err_sign": "Could not sign the contract. Please try again."
+    "err_sign": "Could not sign the contract. Please try again.",
+    "view_pdf": "View contract PDF",
+    "close_pdf": "Close PDF",
+    "pdf_preview": "PDF preview"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

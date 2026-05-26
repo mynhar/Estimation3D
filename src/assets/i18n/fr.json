@@ -802,7 +802,21 @@
     "subtitle": "La plateforme qui connecte propriétaires et entrepreneurs certifiés à Montréal grâce au scan 3D.",
     "cta_client": "Demander une évaluation",
     "cta_builder": "Je suis entrepreneur",
-    "login_link": "Se connecter"
+    "login_link": "Se connecter",
+    "eyebrow": "Montréal · Scan 3D certifié",
+    "badge_3d": "Technologie 3D",
+    "badge_verified": "Entrepreneurs vérifiés",
+    "badge_free": "Inscription gratuite",
+    "how_eyebrow": "Processus",
+    "how_title": "Trois étapes vers votre rénovation",
+    "step1_title": "Créez votre dossier",
+    "step1_desc": "Renseignez les détails de votre projet. Nous recueillons tout le nécessaire pour démarrer sans paperasse.",
+    "step2_title": "Visite avec scan 3D",
+    "step2_desc": "Un estimateur certifié visite votre propriété et la documente en 3D pour un devis précis.",
+    "step3_title": "Choisissez votre entrepreneur",
+    "step3_desc": "Comparez les offres d'entrepreneurs vérifiés et signez le contrat qui vous convient le mieux.",
+    "cta_section_title": "Prêt à commencer?",
+    "cta_section_desc": "Créez votre dossier gratuitement aujourd'hui et recevez votre première estimation en moins de 48 h."
   },
   "auth": {
     "login": "Connexion",
@@ -913,7 +927,10 @@
     "sign_cancel": "Annuler",
     "signing": "Signature en cours…",
     "success_signed": "Contrat signé avec succès.",
-    "err_sign": "Impossible de signer le contrat. Veuillez réessayer."
+    "err_sign": "Impossible de signer le contrat. Veuillez réessayer.",
+    "view_pdf": "Voir le contrat PDF",
+    "close_pdf": "Fermer le PDF",
+    "pdf_preview": "Aperçu PDF"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

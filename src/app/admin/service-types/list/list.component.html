@@ -151,9 +151,7 @@
                   </a>
                 </td>
               </tr>
-            }
-
-            @if (serviciosFiltrados().length === 0) {
+            } @empty {
               <tr>
                 <td colspan="5">
                   <div class="empty-state">

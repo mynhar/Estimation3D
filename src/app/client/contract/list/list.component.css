@@ -1,29 +1,48 @@
-.page-wrap { max-width: 900px; }
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+.cl-wrap { width: 100%; }
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
-.page-header {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
+/* ── Lista de contratos (columna única, ancho completo) ──────────────────── */
+.contracts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
 }
-.page-header h4 {
-  font-family: var(--ds-font-display);
-  font-size: var(--ds-text-xl);
-  font-weight: var(--ds-weight-regular);
-  color: var(--ds-ink);
+
+/* ── Encabezado editorial ────────────────────────────────────────────────── */
+.cl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  flex-wrap: wrap;
 }
-.eyebrow {
+.cl-eyebrow {
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
   letter-spacing: var(--ds-tracking-wide);
   text-transform: uppercase;
   color: var(--ds-gold-active);
+  margin-bottom: var(--ds-space-1);
+}
+.cl-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  margin: 0 0 var(--ds-space-1);
+}
+.cl-lead {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  margin: 0;
 }
 
 /* ── KPI pill ────────────────────────────────────────────────────────────── */
 .kpi-pill {
-  display: inline-flex; align-items: center;
+  display: inline-flex;
+  align-items: center;
   background: var(--ds-gold-faint);
   color: var(--ds-gold-active);
   font-size: var(--ds-text-xs);
@@ -31,65 +50,120 @@
   padding: 0.35em 0.9em;
   border-radius: var(--ds-radius-pill);
   border: 1px solid var(--ds-gold-soft);
+  margin-top: var(--ds-space-1);
 }
 
-/* ── Loading ─────────────────────────────────────────────────────────────── */
-.loading-state {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0.6rem; padding: 3rem 1rem;
-  color: var(--ds-ink-muted);
-  font-size: var(--ds-text-sm);
+/* ════════════════════════════════════════════════════════════════════════════
+   SKELETON — shimmer
+════════════════════════════════════════════════════════════════════════════ */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
-.loading-state .spinner-border { color: var(--ds-gold); }
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--ds-border) 25%,
+    var(--ds-border-subtle) 50%,
+    var(--ds-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--ds-radius-sm);
+  display: block;
+}
+
+.skel--num      { width: 90px;  height: 20px; }
+.skel--badge-sm { width: 80px;  height: 22px; border-radius: var(--ds-radius-pill); }
+.skel--btn-sm   { width: 130px; height: 34px; border-radius: var(--ds-radius-md); }
+.skel--label    { height: 10px; width: 45%; }
+.skel--value    { height: 14px; width: 70%; }
+.skel--price    { height: 20px; width: 80%; }
+.skel--view-btn { height: 40px; border-radius: var(--ds-radius-md); }
+
+.skel-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+}
+.skel-card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--ds-border);
+}
+.skel-card__body { padding: var(--ds-space-5); }
 
 /* ── Empty state ─────────────────────────────────────────────────────────── */
-.empty-state-card {
+.empty-panel {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
   box-shadow: var(--ds-shadow-xs);
-}
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; padding: 3.5rem 2rem;
+  padding: var(--ds-space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--ds-space-2);
 }
 .empty-icon {
   width: 64px; height: 64px;
   border-radius: var(--ds-radius-circle);
   background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
   color: var(--ds-ink-muted);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.7rem; margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ds-text-2xl);
+  margin-bottom: var(--ds-space-2);
 }
 .empty-title {
   font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
-  margin-bottom: 0.35rem;
+  margin: 0;
 }
 .empty-text {
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-muted);
-  max-width: 340px; margin: 0;
+  max-width: 340px;
+  margin: 0;
+  line-height: 1.6;
 }
 
-/* ── Contract card ───────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   CONTRACT CARD
+════════════════════════════════════════════════════════════════════════════ */
 .contrato-card {
-  background: var(--ds-surface-elevated);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-sm);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
   transition: box-shadow var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out);
-  overflow: hidden;
+}
+.contrato-card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: var(--ds-gold);
 }
 .contrato-card:hover { box-shadow: var(--ds-shadow-md); }
 .contrato-card.panel-open {
-  border-color: var(--ds-gold);
-  box-shadow: var(--ds-shadow-gold);
+  border-color: var(--ds-gold-soft);
+  box-shadow: var(--ds-shadow-md);
 }
+.contrato-card__body { padding: var(--ds-space-4) var(--ds-space-5); }
 
-/* ── Expedition number chip ──────────────────────────────────────────────── */
+/* ── Número de expediente ────────────────────────────────────────────────── */
 .exp-num {
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-xs);
@@ -101,14 +175,14 @@
   border-radius: var(--ds-radius-sm);
 }
 
-/* ── Status badges ───────────────────────────────────────────────────────── */
+/* ── Badges de estado ────────────────────────────────────────────────────── */
 .badge-generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
 .badge-firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
 .badge-en-ejecucion { background: var(--ds-info-soft);    color: var(--ds-info); }
 .badge-completado   { background: var(--ds-success-soft); color: var(--ds-success); }
-.badge-cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); }
+.badge-cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
 
-/* ── Info rows ───────────────────────────────────────────────────────────── */
+/* ── Campos de información ───────────────────────────────────────────────── */
 .info-label {
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
@@ -117,16 +191,15 @@
   color: var(--ds-ink-muted);
   margin-bottom: 0.2rem;
 }
-.info-value  { font-size: var(--ds-text-sm); color: var(--ds-ink); }
-.price-val   {
-  font-size: var(--ds-text-base);
-  font-weight: var(--ds-weight-bold);
-  color: var(--ds-gold-active);
-}
-.signed-date { color: var(--ds-success); font-weight: var(--ds-weight-semibold); }
+.info-value   { font-size: var(--ds-text-sm); color: var(--ds-ink); }
+.price-val    { font-size: var(--ds-text-base); font-weight: var(--ds-weight-bold); color: var(--ds-gold-active); }
+.signed-date  { color: var(--ds-success); font-weight: var(--ds-weight-semibold); }
 
-/* ── PDF download button ─────────────────────────────────────────────────── */
-.btn-pdf {
+/* ── Botón descargar PDF ─────────────────────────────────────────────────── */
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
   background: transparent;
   border: 1px solid var(--ds-border-strong);
   color: var(--ds-ink-secondary);
@@ -134,17 +207,94 @@
   font-weight: var(--ds-weight-medium);
   padding: 0.4em 1em;
   border-radius: var(--ds-radius-md);
-  transition: var(--ds-transition-color);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out),
+              color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-pdf:hover:not(:disabled) {
+.btn-download:hover:not(:disabled) {
   background: var(--ds-bg-alt);
   border-color: var(--ds-border-strong);
   color: var(--ds-ink);
 }
-.btn-pdf:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-download:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ── Sign button ─────────────────────────────────────────────────────────── */
+/* ── Botón ver contrato PDF ──────────────────────────────────────────────── */
+.btn-view-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  width: 100%;
+  background: var(--ds-gold-faint);
+  border: 1.5px solid var(--ds-gold-soft);
+  color: var(--ds-gold-active);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.6em 1.25em;
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-view-pdf:hover     { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
+.btn-view-pdf--open     { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   VISOR PDF INLINE
+════════════════════════════════════════════════════════════════════════════ */
+.pdf-viewer-wrap {
+  margin-top: var(--ds-space-3);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.pdf-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-bg-alt);
+  border-bottom: 1px solid var(--ds-border);
+  flex-wrap: wrap;
+}
+
+.pdf-viewer-label {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-muted);
+  letter-spacing: var(--ds-tracking-wide);
+}
+
+.pdf-viewer-download {
+  font-size: var(--ds-text-xs);
+  padding: 0.3em 0.8em;
+}
+
+.pdf-viewer-frame {
+  display: block;
+  width: 100%;
+  height: 80vh;
+  min-height: 480px;
+  border: none;
+  background: var(--ds-bg-alt);
+}
+
+/* ── Fila de firma ───────────────────────────────────────────────────────── */
+.sign-row {
+  padding-top: var(--ds-space-3);
+  margin-top: var(--ds-space-3);
+  border-top: 1px solid var(--ds-border);
+}
+
+/* ── Botón firmar ────────────────────────────────────────────────────────── */
 .btn-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
   background: transparent;
   border: 1.5px solid var(--ds-gold);
   color: var(--ds-gold-active);
@@ -152,66 +302,73 @@
   font-weight: var(--ds-weight-semibold);
   padding: 0.45em 1.1em;
   border-radius: var(--ds-radius-md);
-  transition: var(--ds-transition-color);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-sign:hover {
-  background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
-  border-color: var(--ds-gold-hover);
-}
+.btn-sign:hover { background: var(--ds-gold-faint); border-color: var(--ds-gold-hover, var(--ds-gold)); }
 
-/* ── Sign panel ──────────────────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════════════════
+   PANEL DE FIRMA
+════════════════════════════════════════════════════════════════════════════ */
 .sign-panel {
   background: var(--ds-gold-faint);
   border-top: 2px solid var(--ds-gold-soft);
+  padding: var(--ds-space-4) var(--ds-space-5);
   animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .sign-panel-header {
-  display: flex; align-items: flex-start; gap: 0.85rem;
-  padding: 1rem 0 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding-bottom: var(--ds-space-3);
 }
-
 .sign-panel-icon {
   width: 36px; height: 36px;
   background: var(--ds-gold-soft);
   color: var(--ds-gold-active);
   border-radius: var(--ds-radius-circle);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ds-text-base);
+  flex-shrink: 0;
 }
-
 .sign-panel-title {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-medium);
   color: var(--ds-ink);
-  margin: 0 0 0.1rem;
+  margin: 0 0 var(--ds-space-1);
 }
-
 .sign-panel-sub {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
   margin: 0;
 }
 
-/* ── Key terms summary ───────────────────────────────────────────────────── */
+/* ── Resumen de términos ─────────────────────────────────────────────────── */
 .sign-summary {
-  display: flex; flex-wrap: wrap; gap: 0.5rem;
-  background: var(--ds-surface-elevated);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  background: var(--ds-surface);
   border: 1px solid var(--ds-gold-soft);
-  border-radius: var(--ds-radius-lg);
-  padding: 0.9rem 1rem;
-  margin-bottom: 1rem;
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin-bottom: var(--ds-space-3);
 }
 .sign-summary-item {
-  display: flex; flex-direction: column;
-  min-width: 120px; flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+  flex: 1;
 }
 .sign-summary-label {
   font-size: var(--ds-text-2xs);
@@ -227,70 +384,98 @@
   color: var(--ds-ink);
 }
 
-/* ── Legal text ──────────────────────────────────────────────────────────── */
+/* ── Texto legal ─────────────────────────────────────────────────────────── */
 .sign-legal-text {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
   line-height: var(--ds-leading-relaxed);
-  margin-bottom: 0.85rem;
+  margin-bottom: var(--ds-space-3);
 }
 
-/* ── Checkbox ────────────────────────────────────────────────────────────── */
+/* ── Checkbox personalizado ──────────────────────────────────────────────── */
 .sign-checkbox-label {
-  display: flex; align-items: flex-start; gap: 0.65rem;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
   cursor: pointer;
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-secondary);
   font-weight: var(--ds-weight-medium);
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--ds-space-4);
   user-select: none;
 }
-
 .sign-checkbox {
   width: 20px; height: 20px;
   border: 2px solid var(--ds-gold);
   border-radius: var(--ds-radius-sm);
-  background: var(--ds-surface-elevated);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
-  transition: var(--ds-transition-color);
+  background: var(--ds-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
   font-size: var(--ds-text-xs);
-  color: var(--ds-ink-on-accent);
+  color: var(--ds-surface);
 }
-
 .sign-checkbox.checked {
   background: var(--ds-gold);
   border-color: var(--ds-gold);
 }
 
-/* ── Actions row ─────────────────────────────────────────────────────────── */
+/* ── Acciones de firma ───────────────────────────────────────────────────── */
 .sign-actions {
-  display: flex; align-items: center; gap: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
   flex-wrap: wrap;
 }
 
 .btn-sign-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
   background: var(--ds-gold);
   border: none;
-  color: var(--ds-ink-on-accent);
+  color: var(--ds-surface);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   padding: 0.55em 1.4em;
   border-radius: var(--ds-radius-md);
+  cursor: pointer;
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               opacity var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-sign-confirm:hover:not(:disabled) { background: var(--ds-gold-hover); }
+.btn-sign-confirm:hover:not(:disabled) { background: var(--ds-gold-active); }
 .btn-sign-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .sign-cancel-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   color: var(--ds-ink-muted);
   font-size: var(--ds-text-sm);
-  text-decoration: none; padding: 0;
+  text-decoration: none;
   transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.sign-cancel-link:hover { color: var(--ds-ink-secondary); text-decoration: underline; }
+.sign-cancel-link:hover:not(:disabled) { color: var(--ds-ink-secondary); text-decoration: underline; }
+.sign-cancel-link:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+  .cl-title             { font-size: var(--ds-text-2xl); }
+  .contrato-card__body  { padding: var(--ds-space-4); }
+  .sign-panel           { padding: var(--ds-space-4); }
+  .pdf-viewer-frame     { height: 70vh; }
+}
+
+@media (max-width: 575.98px) {
+  .pdf-viewer-toolbar   { flex-direction: column; align-items: flex-start; }
+  .pdf-viewer-frame     { height: 60vh; }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .sign-panel { animation: none; }
+  .sign-panel, .pdf-viewer-wrap { animation: none; }
 }

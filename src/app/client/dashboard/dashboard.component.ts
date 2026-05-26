@@ -128,6 +128,11 @@ export class DashboardComponent implements OnInit {
     return exp ? (ESTADO_CLASE[exp.estado] ?? 'estado-badge--nuevo') : 'estado-badge--nuevo';
   });
 
+  faseActualPct = computed((): number => {
+    const exp = this.expedienteActivo();
+    return exp ? Math.round((FASE_MAP[exp.estado] ?? 0) / 5 * 100) : 0;
+  });
+
   matterportUrl = computed((): SafeResourceUrl | null => {
     if (!this.activaEsTour()) return null;
     const url = this.tourUrls()[this.mediaActiva()];
@@ -178,6 +183,144 @@ export class DashboardComponent implements OnInit {
     );
   });
 
+  // ── Calendar ─────────────────────────────────────────────────────────────
+
+  calAnchor    = signal<Date>(new Date());
+  calExpandido = signal(false);
+  calMes       = signal<{ year: number; month: number }>({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth(),
+  });
+
+  calMesLabel = computed((): string => {
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.currentLang()] ?? 'fr-CA';
+    const ref = this.calExpandido()
+      ? new Date(this.calMes().year, this.calMes().month, 1)
+      : new Date(this.calAnchor().getFullYear(), this.calAnchor().getMonth(), 1);
+    return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(ref);
+  });
+
+  calWeekdays = computed((): string[] => {
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.currentLang()] ?? 'fr-CA';
+    return Array.from({ length: 7 }, (_, i) =>
+      new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2025, 0, 6 + i))
+    );
+  });
+
+  calDias = computed((): { day: number; inMonth: boolean; isToday: boolean; isAnchor: boolean; eventos: TimelineEvento[] }[] => {
+    const anchor  = this.calAnchor();
+    const today   = new Date();
+    const eventos = this.timelineEventos();
+
+    if (!this.calExpandido()) {
+      // Week view: 7 days of the week containing the anchor (Monday-first)
+      const dow       = anchor.getDay();
+      const mondayOff = (dow + 6) % 7;
+      const monday    = new Date(anchor);
+      monday.setDate(anchor.getDate() - mondayOff);
+
+      return Array.from({ length: 7 }, (_, i) => {
+        const d        = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const isToday  = d.toDateString() === today.toDateString();
+        const isAnchor = d.toDateString() === anchor.toDateString();
+        const dayEvts  = eventos.filter(e => {
+          if (!e.fecha) return false;
+          const ev = new Date(e.fecha.includes('T') ? e.fecha : `${e.fecha}T00:00:00`);
+          return ev.toDateString() === d.toDateString();
+        });
+        return { day: d.getDate(), inMonth: d.getMonth() === anchor.getMonth(), isToday, isAnchor, eventos: dayEvts };
+      });
+    }
+
+    // Month view
+    const { year, month } = this.calMes();
+    const firstWeekday    = new Date(year, month, 1).getDay();
+    const offset          = (firstWeekday + 6) % 7;
+    const daysInMonth     = new Date(year, month + 1, 0).getDate();
+    const daysInPrev      = new Date(year, month, 0).getDate();
+    const days: { day: number; inMonth: boolean; isToday: boolean; isAnchor: boolean; eventos: TimelineEvento[] }[] = [];
+
+    for (let i = offset - 1; i >= 0; i--) {
+      days.push({ day: daysInPrev - i, inMonth: false, isToday: false, isAnchor: false, eventos: [] });
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date     = new Date(year, month, d);
+      const isToday  = date.toDateString() === today.toDateString();
+      const isAnchor = date.toDateString() === anchor.toDateString();
+      const dayEvts  = eventos.filter(e => {
+        if (!e.fecha) return false;
+        const ev = new Date(e.fecha.includes('T') ? e.fecha : `${e.fecha}T00:00:00`);
+        return ev.getFullYear() === year && ev.getMonth() === month && ev.getDate() === d;
+      });
+      days.push({ day: d, inMonth: true, isToday, isAnchor, eventos: dayEvts });
+    }
+    const tail = (7 - (days.length % 7)) % 7;
+    for (let d = 1; d <= tail; d++) {
+      days.push({ day: d, inMonth: false, isToday: false, isAnchor: false, eventos: [] });
+    }
+    return days;
+  });
+
+  calPrev(): void {
+    if (!this.calExpandido()) {
+      const d = new Date(this.calAnchor());
+      d.setDate(d.getDate() - 7);
+      this.calAnchor.set(d);
+    } else {
+      const { year, month } = this.calMes();
+      this.calMes.set(month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 });
+    }
+  }
+
+  calNext(): void {
+    if (!this.calExpandido()) {
+      const d = new Date(this.calAnchor());
+      d.setDate(d.getDate() + 7);
+      this.calAnchor.set(d);
+    } else {
+      const { year, month } = this.calMes();
+      this.calMes.set(month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 });
+    }
+  }
+
+  calPrevYear(): void {
+    const { year, month } = this.calMes();
+    this.calMes.set({ year: year - 1, month });
+  }
+
+  calNextYear(): void {
+    const { year, month } = this.calMes();
+    this.calMes.set({ year: year + 1, month });
+  }
+
+  calToggleExpand(): void {
+    if (!this.calExpandido()) {
+      const a = this.calAnchor();
+      this.calMes.set({ year: a.getFullYear(), month: a.getMonth() });
+      this.calExpandido.set(true);
+    } else {
+      this.calExpandido.set(false);
+    }
+  }
+
+  private calInicializar(): void {
+    const eventos = this.timelineEventos();
+    if (eventos.length === 0) return;
+    const now     = new Date();
+    const futuros = eventos
+      .filter(e => e.fecha && new Date(e.fecha.includes('T') ? e.fecha : `${e.fecha}T00:00:00`) >= now)
+      .sort((a, b) => new Date(a.fecha!).getTime() - new Date(b.fecha!).getTime());
+    const target = futuros.length > 0 ? futuros[0] : eventos[0];
+    if (target.fecha) {
+      const d = new Date(target.fecha.includes('T') ? target.fecha : `${target.fecha}T00:00:00`);
+      this.calAnchor.set(d);
+      this.calMes.set({ year: d.getFullYear(), month: d.getMonth() });
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   get bienvenida(): string {
@@ -188,6 +331,10 @@ export class DashboardComponent implements OnInit {
   }
 
   expId(exp: ExpedienteCliente): string { return String(exp.id); }
+
+  progresoPct(exp: ExpedienteCliente): number {
+    return Math.round((FASE_MAP[exp.estado] ?? 0) / 5 * 100);
+  }
 
   estadoClaseFor(estado: string): string {
     return ESTADO_CLASE[estado] ?? 'estado-badge--nuevo';
@@ -268,6 +415,7 @@ export class DashboardComponent implements OnInit {
     this.detalleActivo.set(null);
     this.tourUrls.set([]);
     this.videos.set([]);
+    this.calExpandido.set(false);
     await this.cargarDetalle(id);
   }
 
@@ -290,6 +438,7 @@ export class DashboardComponent implements OnInit {
       console.error('[Dashboard videos]', (vidsResult.reason as any)?.message);
       this.videos.set([]);
     }
+    this.calInicializar();
     this.cargandoDetalle.set(false);
   }
 }

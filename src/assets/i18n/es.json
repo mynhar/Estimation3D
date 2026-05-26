@@ -802,7 +802,21 @@
     "subtitle": "La plataforma que conecta propietarios con contratistas certificados en Montreal mediante escaneo 3D.",
     "cta_client": "Solicitar evaluación",
     "cta_builder": "Soy contratista",
-    "login_link": "Iniciar sesión"
+    "login_link": "Iniciar sesión",
+    "eyebrow": "Montréal · Escaneo 3D certificado",
+    "badge_3d": "Tecnología 3D",
+    "badge_verified": "Contratistas verificados",
+    "badge_free": "Registro gratuito",
+    "how_eyebrow": "Proceso",
+    "how_title": "Tres pasos hacia tu reforma",
+    "step1_title": "Crea tu expediente",
+    "step1_desc": "Registra los detalles de tu proyecto. Recibimos todo lo necesario para arrancar sin papeleos.",
+    "step2_title": "Visita con escaneo 3D",
+    "step2_desc": "Un estimador certificado visita tu propiedad y la documenta en 3D para un presupuesto preciso.",
+    "step3_title": "Elige tu contratista",
+    "step3_desc": "Compara ofertas de constructores verificados y firma el contrato que más te conviene.",
+    "cta_section_title": "¿Listo para comenzar?",
+    "cta_section_desc": "Crea tu expediente gratis hoy y recibe tu primera estimación en menos de 48 horas."
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -913,7 +927,10 @@
     "sign_cancel": "Cancelar",
     "signing": "Firmando…",
     "success_signed": "Contrato firmado correctamente.",
-    "err_sign": "No se pudo firmar el contrato. Intenta de nuevo."
+    "err_sign": "No se pudo firmar el contrato. Intenta de nuevo.",
+    "view_pdf": "Ver contrato PDF",
+    "close_pdf": "Cerrar PDF",
+    "pdf_preview": "Vista previa PDF"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

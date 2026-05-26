@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
@@ -21,15 +22,20 @@ export class ContractListComponent implements OnInit {
   private toast           = inject(ToastService);
   private translate       = inject(TranslateService);
   private router          = inject(Router);
+  private sanitizer       = inject(DomSanitizer);
 
   user      = toSignal(this.auth.user$);
   contratos = signal<ContratoListItem[]>([]);
   cargando  = signal(true);
 
-  descargando  = signal<string | null>(null);
-  firmandoId   = signal<string | null>(null);   // id del contrato en proceso de firma
-  confirmandoId = signal<string | null>(null);  // id del panel de confirmación abierto
-  aceptado     = signal(false);                 // checkbox de aceptación de términos
+  descargando   = signal<string | null>(null);
+  firmandoId    = signal<string | null>(null);
+  confirmandoId = signal<string | null>(null);
+  aceptado      = signal(false);
+
+  // ── PDF viewer ────────────────────────────────────────────────────────────
+  pdfVistaId  = signal<string | null>(null);
+  pdfBlobUrl  = signal<string | null>(null);
 
   async ngOnInit() {
     const userId = this.user()?.id;
@@ -80,54 +86,59 @@ export class ContractListComponent implements OnInit {
     }
   }
 
-  // ── PDF ───────────────────────────────────────────────────────────────────
+  // ── PDF — generación compartida ───────────────────────────────────────────
+
+  private generarBlob(c: ContratoListItem): Blob {
+    const lang = this.translate.currentLang ?? 'fr';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-CA', fr: 'fr-CA' };
+    const fechaGenerado = new Intl.DateTimeFormat(
+      localeMap[lang] ?? 'fr-CA',
+      { day: 'numeric', month: 'long', year: 'numeric' },
+    ).format(new Date(c.generado_en || Date.now()));
+
+    const svcNombre =
+      lang === 'en' ? (c.servicio_nombre_en || c.servicio_nombre)
+    : lang === 'fr' ? (c.servicio_nombre_fr || c.servicio_nombre)
+    : c.servicio_nombre;
+
+    const svcDesc =
+      lang === 'en' ? (c.servicio_desc_en || c.servicio_desc)
+    : lang === 'fr' ? (c.servicio_desc_fr || c.servicio_desc)
+    : c.servicio_desc;
+
+    return this.contratoService.generarPdfBlob({
+      contratoId:          c.id,
+      expedienteNumero:    c.expediente_numero,
+      fechaGenerado,
+      clienteNombre:       c.cliente_nombre,
+      constructorNombre:   c.constructor_nombre,
+      constructorTelefono: c.constructor_telefono,
+      constructorEmail:    c.constructor_email,
+      servicioNombre:      svcNombre,
+      servicioDescripcion: svcDesc,
+      direccion:           c.direccion,
+      canton:              c.canton,
+      provincia:           c.provincia,
+      distrito:            c.distrito ?? '',
+      precioFinal:         c.precio_final,
+      plazoMin:            c.plazo_semanas_min,
+      plazoMax:            c.plazo_semanas_max,
+      garantiaAnos:        c.garantia_anos,
+      fechaInicio:         c.fecha_inicio ?? '',
+      descripcionTrabajo:  c.descripcion_trabajo,
+      lang,
+    });
+  }
+
+  // ── PDF — descarga ────────────────────────────────────────────────────────
 
   descargarPdf(c: ContratoListItem) {
     if (this.descargando()) return;
     this.descargando.set(c.id);
     try {
-      const lang = this.translate.currentLang ?? 'fr';
-      const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-CA', fr: 'fr-CA' };
-      const fechaGenerado = new Intl.DateTimeFormat(
-        localeMap[lang] ?? 'fr-CA',
-        { day: 'numeric', month: 'long', year: 'numeric' },
-      ).format(new Date(c.generado_en || Date.now()));
-
-      const svcNombre =
-        lang === 'en' ? (c.servicio_nombre_en || c.servicio_nombre)
-      : lang === 'fr' ? (c.servicio_nombre_fr || c.servicio_nombre)
-      : c.servicio_nombre;
-
-      const svcDesc =
-        lang === 'en' ? (c.servicio_desc_en || c.servicio_desc)
-      : lang === 'fr' ? (c.servicio_desc_fr || c.servicio_desc)
-      : c.servicio_desc;
-
-      const blob = this.contratoService.generarPdfBlob({
-        contratoId:          c.id,
-        expedienteNumero:    c.expediente_numero,
-        fechaGenerado,
-        clienteNombre:       c.cliente_nombre,
-        constructorNombre:   c.constructor_nombre,
-        constructorTelefono: c.constructor_telefono,
-        constructorEmail:    c.constructor_email,
-        servicioNombre:      svcNombre,
-        servicioDescripcion: svcDesc,
-        direccion:           c.direccion,
-        canton:              c.canton,
-        provincia:           c.provincia,
-        distrito:            c.distrito ?? '',
-        precioFinal:         c.precio_final,
-        plazoMin:            c.plazo_semanas_min,
-        plazoMax:            c.plazo_semanas_max,
-        garantiaAnos:        c.garantia_anos,
-        fechaInicio:         c.fecha_inicio ?? '',
-        descripcionTrabajo:  c.descripcion_trabajo,
-        lang,
-      });
-
+      const blob   = this.generarBlob(c);
       const objUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a      = document.createElement('a');
       a.href     = objUrl;
       a.download = `contrato-${c.expediente_numero}.pdf`;
       document.body.appendChild(a);
@@ -139,6 +150,29 @@ export class ContractListComponent implements OnInit {
     } finally {
       this.descargando.set(null);
     }
+  }
+
+  // ── PDF — visor inline ────────────────────────────────────────────────────
+
+  togglePdf(c: ContratoListItem): void {
+    if (this.pdfVistaId() === c.id) {
+      if (this.pdfBlobUrl()) URL.revokeObjectURL(this.pdfBlobUrl()!);
+      this.pdfVistaId.set(null);
+      this.pdfBlobUrl.set(null);
+      return;
+    }
+    if (this.pdfBlobUrl()) URL.revokeObjectURL(this.pdfBlobUrl()!);
+    try {
+      const blob = this.generarBlob(c);
+      this.pdfBlobUrl.set(URL.createObjectURL(blob));
+      this.pdfVistaId.set(c.id);
+    } catch (e: any) {
+      console.error('[ContractList] togglePdf:', e.message);
+    }
+  }
+
+  safePdfUrl(): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfBlobUrl() ?? '');
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
