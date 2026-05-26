@@ -11,7 +11,7 @@ import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-f
 import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
 import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
 import { EstimatorDashboardComponent } from './estimator/dashboard/dashboard.component';
-import { adminGuard, authGuard, constructorGuard, estimatorGuard, guestGuard } from './auth.guard';
+import { adminGuard, authGuard, constructorGuard, estimatorGuard, guestGuard, wildcardGuard } from './auth.guard';
 import { AdminDashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminFileComponent } from './admin/file/file.component';
 import { AdminOfferComponent } from './admin/offer/offer.component';
@@ -73,5 +73,5 @@ export const routes: Routes = [
   { path: 'admin/user/create',  component: AdminUserCreateComponent,   canActivate: [adminGuard] },
   { path: 'admin/user/edit/:id', component: AdminUserEditComponent,    canActivate: [adminGuard] },
 
-  { path: '**', redirectTo: '' },
+  { path: '**', canActivate: [wildcardGuard], component: LandingPageComponent },
 ];

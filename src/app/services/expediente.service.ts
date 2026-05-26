@@ -308,6 +308,7 @@ export class ExpedienteService {
         id:                 e.id,
         numero:             e.numero,
         estado:             e.estado,
+        creado_en:          e.creado_en ?? '',
         servicio_nombre:    svc?.nombre_es ?? '—',
         servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
         servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',

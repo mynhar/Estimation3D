@@ -4,7 +4,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
-import { ArchivoRow, OfertaDetalle, ESTADO_BADGE_OFERTA } from '../../models';
+import { ArchivoRow, OfertaDetalle } from '../../models';
+
+const ESTADO_ICON: Record<string, string> = {
+  pendiente: 'bi-hourglass',
+  aceptada:  'bi-check-circle',
+  rechazada: 'bi-x-circle',
+};
 
 @Component({
   selector: 'app-my-offer',
@@ -28,15 +34,12 @@ export class MyOfferComponent implements OnInit {
   cargando   = signal(true);
   errorMsg   = signal('');
 
-  // Archivos del expediente
   fotosExp      = signal<ArchivoRow[]>([]);
   documentosExp = signal<ArchivoRow[]>([]);
   tabMedia      = signal<'tour' | 'fotos' | 'docs'>('tour');
 
-  // Lightbox
   fotoAmpliada = signal<string | null>(null);
-
-  videoActivo = signal<ArchivoRow | null>(null);
+  videoActivo  = signal<ArchivoRow | null>(null);
 
   private ofertaId = '';
 
@@ -54,7 +57,6 @@ export class MyOfferComponent implements OnInit {
       this.documentos.set(archivosOferta.documentos);
       this.videos.set(archivosOferta.videos);
 
-      // Archivos del expediente — leer desde Storage para evitar RLS de la tabla
       const archivosExp = await this.archivoService.listarPorExpediente(detalle.expediente_id);
       this.fotosExp.set(archivosExp.fotos);
       this.documentosExp.set(archivosExp.documentos);
@@ -89,8 +91,8 @@ export class MyOfferComponent implements OnInit {
     return d.servicio_nombre;
   }
 
-  badgeClass(estado: string): string {
-    return ESTADO_BADGE_OFERTA[estado] ?? 'bg-light text-dark';
+  estadoIcon(estado: string): string {
+    return ESTADO_ICON[estado] ?? 'bi-circle';
   }
 
   toggleVideo(video: ArchivoRow) {
@@ -119,7 +121,7 @@ export class MyOfferComponent implements OnInit {
   }
 
   formatCosto(valor: number): string {
-    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(valor);
   }
 
   formatFecha(valor: string): string {
@@ -129,12 +131,7 @@ export class MyOfferComponent implements OnInit {
     if (isNaN(d.getTime())) return '—';
     const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
-    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
-    const p: Record<string, string> = {};
-    for (const part of parts) p[part.type] = part.value;
-    return this.translate.currentLang === 'en'
-      ? `${p['month']} ${p['day']}, ${p['year']}`
-      : `${p['day']} ${p['month']} ${p['year']}`;
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
   }
 
   formatHora(valor: string): string {
@@ -145,7 +142,7 @@ export class MyOfferComponent implements OnInit {
   formatPlazo(min: number | null, max: number | null): string {
     if (!min && !max) return '—';
     const w = this.translate.instant('offer.weeks');
-    if (min === max)  return `${min} ${w}`;
+    if (min === max) return `${min} ${w}`;
     return `${min ?? '?'} – ${max ?? '?'} ${w}`;
   }
 

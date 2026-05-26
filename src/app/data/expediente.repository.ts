@@ -93,7 +93,7 @@ export class ExpedienteRepository {
       .from('expediente')
       .select('id, numero, estado, servicio_id, cliente_id, estimador_id, fecha_visita, creado_en, descripcion')
       .in('estado', ['estimado', 'en_oferta'])
-      .order('id', { ascending: false });
+      .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as ExpedienteRaw[];
   }

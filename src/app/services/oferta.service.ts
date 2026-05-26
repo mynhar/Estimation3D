@@ -188,6 +188,7 @@ export class OfertaService {
         plazo_semanas_min: o.plazo_semanas_min,
         plazo_semanas_max: o.plazo_semanas_max,
         estado:            o.estado,
+        creado_en:         o.creado_en ?? '',
         expediente_numero:  exp?.numero                   ?? '—',
         servicio_nombre:    exp?.servicio?.nombre_es      ?? '—',
         servicio_nombre_en: exp?.servicio?.nombre_en      ?? exp?.servicio?.nombre_es ?? '—',

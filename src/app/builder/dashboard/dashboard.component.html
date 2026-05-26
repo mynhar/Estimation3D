@@ -1,20 +1,28 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER EDITORIAL
+  ══════════════════════════════════════════════════════════════════ -->
+  <header class="dash-header card card-premium mb-5 fade-up">
+    <div class="card-body px-4 px-lg-5 py-4 d-flex align-items-start justify-content-between gap-4 flex-wrap">
       <div>
-        <p class="text-primary small fw-semibold mb-1">
+        <span class="eyebrow">
           <i class="bi bi-building me-1"></i>{{ 'role.constructeur' | translate }}
+        </span>
+        <h1 class="dash-title title-editorial mb-1">
+          @if (bienvenida) {
+            {{ 'dashboard_client.welcome' | translate }},&nbsp;<em>{{ bienvenida }}</em>
+          } @else {
+            <em>{{ 'dashboard_builder.title' | translate }}</em>
+          }
+        </h1>
+        <p class="text-ink-muted mb-0 dash-subtitle">
+          {{ 'dashboard_builder.subtitle' | translate }}
         </p>
-        <h4 class="mb-1">
-          {{ bienvenida ? ('dashboard_client.welcome' | translate) + ', ' + bienvenida : ('dashboard_builder.title' | translate) }}
-        </h4>
-        <p class="text-muted small mb-0">{{ 'dashboard_builder.subtitle' | translate }}</p>
       </div>
-      <div class="d-flex gap-2 flex-wrap">
+      <div class="d-flex gap-2 flex-wrap align-items-center pt-1">
         <a routerLink="/builder/my-offers"
-           class="btn btn-outline-primary btn-sm fw-semibold">
+           class="btn btn-secondary btn-sm fw-semibold">
           <i class="bi bi-list-ul me-1"></i>{{ 'nav.mes_offres' | translate }}
         </a>
         <a routerLink="/builder/available-files"
@@ -25,87 +33,122 @@
     </div>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: CARGANDO
+  ══════════════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="dash-loading">
+      <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: SIN DATOS
+  ══════════════════════════════════════════════════════════════════ -->
   } @else if (total() === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
+    <div class="empty-wrap fade-up">
+      <div class="card card-premium text-center px-4 px-lg-5 py-5">
+        <div class="empty-icon mx-auto mb-4">
           <i class="bi bi-clipboard2-x"></i>
         </div>
-        <p class="empty-title">{{ 'dashboard_builder.no_offers' | translate }}</p>
-        <p class="empty-text">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
-        <a routerLink="/builder/available-files"
-           class="btn btn-primary fw-semibold">
-          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
-        </a>
+        <h2 class="empty-title mb-2">{{ 'dashboard_builder.no_offers' | translate }}</h2>
+        <p class="text-ink-muted mb-4">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
+        <div>
+          <a routerLink="/builder/available-files" class="btn btn-primary fw-semibold">
+            <i class="bi bi-search me-2"></i>{{ 'common.see_available' | translate }}
+          </a>
+        </div>
       </div>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: CON DATOS
+  ══════════════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- ── KPI fila 1: Volumen ─────────────────────────────────────────────── -->
+    <!-- ── KPIs: contadores ──────────────────────────────────────────────── -->
     <div class="row g-3 mb-3">
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--total h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--total">
-              <i class="bi bi-file-earmark-text"></i>
-            </div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.total_offers' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0">{{ total() }}</p>
-            </div>
+      <div class="col-6 col-xl-3 fade-up" style="--delay:0ms">
+        <div class="kpi-card kpi-card--neutral h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--neutral">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ total() }}</span>
+            <span class="kpi-label">{{ 'dashboard_builder.total_offers' | translate }}</span>
           </div>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--pendiente h-100"
-             [class.kpi-card--pendiente-activa]="pendientes() > 0">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--pendiente">
-              <i class="bi bi-hourglass-split"></i>
-            </div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.pending' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-warning">{{ pendientes() }}</p>
-            </div>
+      <div class="col-6 col-xl-3 fade-up" style="--delay:80ms">
+        <div class="kpi-card kpi-card--warning h-100"
+             [class.kpi-card--pulse]="pendientes() > 0">
+          <div class="kpi-icon-wrap kpi-icon-wrap--warning">
+            <i class="bi bi-hourglass-split"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-value kpi-value--warning">{{ pendientes() }}</span>
+            <span class="kpi-label">{{ 'dashboard_builder.pending' | translate }}</span>
           </div>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--aceptada h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--aceptada">
-              <i class="bi bi-trophy"></i>
-            </div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.accepted' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-success">{{ aceptadas() }}</p>
-            </div>
+      <div class="col-6 col-xl-3 fade-up" style="--delay:160ms">
+        <div class="kpi-card kpi-card--success h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--success">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-value kpi-value--success">{{ aceptadas() }}</span>
+            <span class="kpi-label">{{ 'dashboard_builder.accepted' | translate }}</span>
           </div>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--rechazada h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--rechazada">
-              <i class="bi bi-x-circle"></i>
+      <div class="col-6 col-xl-3 fade-up" style="--delay:240ms">
+        <div class="kpi-card kpi-card--danger h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--danger">
+            <i class="bi bi-x-circle"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-value kpi-value--danger">{{ rechazadas() }}</span>
+            <span class="kpi-label">{{ 'dashboard_builder.rejected' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── KPIs: valor y tasa ────────────────────────────────────────────── -->
+    <div class="row g-3 mb-5">
+
+      <div class="col-12 col-md-7 fade-up" style="--delay:300ms">
+        <div class="kpi-card kpi-card--gold h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--gold">
+            <i class="bi bi-coin"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-value kpi-value--gold">{{ formatPrecio(montoAdjudicado()) }}</span>
+            <span class="kpi-label">{{ 'dashboard_builder.awarded_amount' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-5 fade-up" style="--delay:360ms">
+        <div class="kpi-card kpi-card--neutral h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--neutral">
+            <i class="bi bi-bar-chart"></i>
+          </div>
+          <div class="kpi-body flex-grow-1" style="min-width:0">
+            <div class="d-flex align-items-baseline justify-content-between gap-2 mb-2">
+              <span class="kpi-label mb-0">{{ 'dashboard_builder.success_rate' | translate }}</span>
+              <span class="kpi-value kpi-value--success mb-0" style="font-size:var(--ds-text-xl)">{{ tasaExito() }}%</span>
             </div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.rejected' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-danger">{{ rechazadas() }}</p>
+            <div class="kpi-progress-track">
+              <div class="kpi-progress-fill" [style.width.%]="tasaExito()"></div>
             </div>
           </div>
         </div>
@@ -113,152 +156,123 @@
 
     </div>
 
-    <!-- ── KPI fila 2: Valor y rendimiento ───────────────────────────────── -->
-    <div class="row g-3 mb-4">
-
-      <div class="col-12 col-md-7">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--monto h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--monto">
-              <i class="bi bi-cash-coin"></i>
-            </div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.awarded_amount' | translate }}</p>
-              <p class="kpi-num-lg fw-bold mb-0 text-primary">
-                {{ formatPrecio(montoAdjudicado()) }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-5">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--tasa h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--tasa">
-              <i class="bi bi-graph-up-arrow"></i>
-            </div>
-            <div class="flex-grow-1">
-              <div class="d-flex align-items-center justify-content-between mb-1">
-                <p class="text-muted small mb-0">{{ 'dashboard_builder.success_rate' | translate }}</p>
-                <span class="fw-bold text-success">{{ tasaExito() }}%</span>
-              </div>
-              <div class="progress progress-thin">
-                <div class="progress-bar bg-success tasa-bar"
-                     [style.width.%]="tasaExito()"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── Contenido principal ─────────────────────────────────────────────── -->
+    <!-- ══════════════════════════════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ══════════════════════════════════════════════════════════════════ -->
     <div class="row g-4 align-items-start">
 
-      <!-- ── Lista de ofertas ────────────────────────────────────────────── -->
+      <!-- ── Columna principal: lista de ofertas ─────────────────────────── -->
       <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
+        <div class="content-card fade-up" style="--delay:200ms">
 
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-list-check me-2 text-primary"></i>{{ 'dashboard_builder.my_offers_progress' | translate }}
+          <div class="content-card__header d-flex align-items-center justify-content-between">
+            <span class="section-heading">
+              <i class="bi bi-list-check me-2"></i>{{ 'dashboard_builder.my_offers_progress' | translate }}
             </span>
-            <a routerLink="/builder/my-offers"
-               class="btn btn-outline-secondary btn-sm">
-              {{ 'dashboard_builder.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
+            <a routerLink="/builder/my-offers" class="btn btn-outline-secondary btn-sm">
+              {{ 'dashboard_builder.view_all' | translate }}&nbsp;<i class="bi bi-arrow-right"></i>
             </a>
           </div>
 
-          <div class="card-body p-0">
-            <div class="offer-list">
-              @for (oferta of ofertas(); track oferta.id) {
-                <div class="oferta-item"
-                     [class.oferta-item--aceptada]="oferta.estado === 'aceptada'"
-                     [class.oferta-item--rechazada]="oferta.estado === 'rechazada'"
-                     [style.--estado-color]="cfg(oferta.estado).color">
-                  <div class="oferta-accent"></div>
-                  <div class="oferta-body">
+          @for (oferta of ofertas(); track oferta.id) {
+            <a [routerLink]="['/builder/my-offer', oferta.id]"
+               class="oferta-row"
+               [class.oferta-row--aceptada]="oferta.estado === 'aceptada'"
+               [class.oferta-row--rechazada]="oferta.estado === 'rechazada'"
+               [style.--est-color]="cfg(oferta.estado).color">
 
-                    <!-- Fila 1: número + servicio + badge estado -->
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2 flex-wrap">
-                      <div class="d-flex align-items-center gap-2 min-w-0">
-                        <span class="oferta-num">{{ oferta.expediente_numero }}</span>
-                        <span class="oferta-servicio text-truncate">{{ servicioNombre(oferta) }}</span>
-                      </div>
-                      <span class="badge flex-shrink-0 oferta-badge"
-                            [style.background-color]="cfg(oferta.estado).color"
-                            [style.color]="cfg(oferta.estado).textColor">
-                        <i class="bi {{ cfg(oferta.estado).icon }} me-1"></i>
-                        {{ ('state.' + oferta.estado) | translate }}
-                      </span>
-                    </div>
+              <!-- Acento lateral de color -->
+              <span class="oferta-accent" aria-hidden="true"></span>
 
-                    <!-- Fila 2: ubicación + precio -->
-                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
-                      <span class="oferta-meta">
-                        <i class="bi bi-geo-alt me-1"></i>{{ oferta.provincia }}, {{ oferta.canton }}
-                      </span>
-                      <span class="oferta-precio fw-semibold">{{ formatPrecio(oferta.precio) }}</span>
-                    </div>
+              <!-- Información del expediente -->
+              <div class="oferta-content">
 
-                    <!-- Fila 3: barra de progreso o nota de rechazo -->
-                    @if (oferta.estado !== 'rechazada') {
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="progress progress-thin flex-grow-1">
-                          <div class="progress-bar"
-                               role="progressbar"
-                               [style.width.%]="progress(oferta)"
-                               [style.background-color]="cfg(oferta.estado).color"
-                               [attr.aria-valuenow]="progress(oferta)"
-                               aria-valuemin="0" aria-valuemax="100">
-                          </div>
-                        </div>
-                        <span class="pct-lbl">{{ progress(oferta) }}%</span>
-                      </div>
-                    } @else {
-                      <p class="oferta-rejected mb-0">
-                        <i class="bi bi-info-circle me-1"></i>{{ 'offer.not_selected' | translate }}
-                      </p>
-                    }
-
-                    <!-- Fila 4: fecha + plazo -->
-                    <div class="oferta-footer mt-2">
-                      <i class="bi bi-calendar3 me-1"></i>
-                      {{ 'dashboard_builder.start_label' | translate }}: {{ formatFecha(oferta.fecha_inicio) }}
-                      @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
-                        <span class="ms-2">
-                          <i class="bi bi-clock me-1"></i>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
-                        </span>
-                      }
-                    </div>
-
-                  </div>
+                <!-- Fila 1: número + servicio + badge -->
+                <div class="oferta-head">
+                  <span class="oferta-num">{{ oferta.expediente_numero }}</span>
+                  <span class="oferta-servicio">{{ servicioNombre(oferta) }}</span>
+                  <span class="oferta-badge"
+                        [style.background]="cfg(oferta.estado).color + '1A'"
+                        [style.color]="cfg(oferta.estado).color"
+                        [style.border-color]="cfg(oferta.estado).color + '4D'">
+                    <i class="bi {{ cfg(oferta.estado).icon }} me-1"></i>
+                    {{ ('state.' + oferta.estado) | translate }}
+                  </span>
                 </div>
-              }
-            </div>
-          </div>
+
+                <!-- Fila 2: ubicación + precio -->
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                  <span class="oferta-meta">
+                    <i class="bi bi-geo-alt me-1"></i>{{ oferta.provincia }}, {{ oferta.canton }}
+                  </span>
+                  <span class="oferta-precio">{{ formatPrecio(oferta.precio) }}</span>
+                </div>
+
+                <!-- Fila 3: fechas y plazo -->
+                @if (oferta.fecha_inicio || oferta.plazo_semanas_min) {
+                  <div class="oferta-footer">
+                    @if (oferta.fecha_inicio) {
+                      <span>
+                        <i class="bi bi-calendar3 me-1"></i>
+                        {{ 'dashboard_builder.start_label' | translate }}: {{ formatFecha(oferta.fecha_inicio) }}
+                      </span>
+                    }
+                    @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
+                      <span>
+                        <i class="bi bi-clock me-1"></i>
+                        {{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
+                      </span>
+                    }
+                  </div>
+                }
+
+                <!-- Nota de rechazo -->
+                @if (oferta.estado === 'rechazada') {
+                  <p class="oferta-rejected-note mb-0 mt-1">
+                    <i class="bi bi-info-circle me-1"></i>{{ 'offer.not_selected' | translate }}
+                  </p>
+                }
+
+              </div>
+
+              <!-- ── Ring de progreso ──────────────────────────────────── -->
+              <div class="ring-wrap" [attr.aria-label]="progress(oferta) + '%'">
+                <svg class="progress-ring" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle class="ring-track" cx="28" cy="28" r="23"/>
+                  <circle class="ring-fill"  cx="28" cy="28" r="23"
+                          [attr.stroke]="cfg(oferta.estado).color"
+                          [attr.stroke-dasharray]="RING_CIRC"
+                          [attr.stroke-dashoffset]="ringOffset(oferta)"
+                          transform="rotate(-90 28 28)"/>
+                  <text x="28" y="28" text-anchor="middle"
+                        dominant-baseline="central" class="ring-pct">
+                    {{ progress(oferta) }}%
+                  </text>
+                </svg>
+              </div>
+
+            </a>
+          }
 
         </div>
       </div>
 
-      <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+      <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
       <div class="col-lg-4">
-        <div class="sidebar-sticky">
+        <div class="dash-sidebar">
 
-          <!-- Distribución (donut) -->
-          <div class="card border-0 shadow-sm rounded-4 mb-3">
-            <div class="card-header bg-transparent border-bottom px-4 py-3">
-              <span class="fw-semibold">
-                <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
+          <!-- Distribución de ofertas (donut) -->
+          <div class="content-card mb-3 fade-up" style="--delay:280ms">
+            <div class="content-card__header">
+              <span class="section-heading">
+                <i class="bi bi-pie-chart me-2"></i>{{ 'dashboard_builder.distribution' | translate }}
               </span>
             </div>
-            <div class="card-body d-flex flex-column align-items-center py-3 px-3">
+            <div class="py-3 px-3 d-flex flex-column align-items-center">
 
               <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
-                <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+                <circle cx="70" cy="70" r="54" fill="none"
+                        stroke="var(--ds-border)" stroke-width="18"/>
                 @for (seg of donutSegments(); track seg.color) {
                   <circle cx="70" cy="70" [attr.r]="R" fill="none"
                           [attr.stroke]="seg.color" stroke-width="18"
@@ -267,22 +281,25 @@
                           transform="rotate(-90 70 70)"/>
                 }
                 <text x="70" y="66" text-anchor="middle" class="donut-num">{{ total() }}</text>
-                <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.offers_count' | translate }}</text>
+                <text x="70" y="83" text-anchor="middle" class="donut-sub">
+                  {{ 'common.offers_count' | translate }}
+                </text>
               </svg>
 
-              <div class="w-100 mt-1">
+              <div class="w-100 mt-2">
                 @for (e of estadoBreakdown(); track e.key) {
-                  <div class="d-flex align-items-center justify-content-between legend-row">
+                  <div class="legend-row d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
                       <span class="legend-dot" [style.background]="e.color"></span>
-                      <span class="small">{{ ('state.' + e.key) | translate }}</span>
+                      <span class="legend-label">{{ ('state.' + e.key) | translate }}</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
-                      <div class="progress legend-bar">
-                        <div class="progress-bar" [style.width.%]="e.pct"
-                             [style.background-color]="e.color"></div>
+                      <div class="legend-bar-track">
+                        <div class="legend-bar-fill"
+                             [style.width.%]="e.pct"
+                             [style.background]="e.color"></div>
                       </div>
-                      <span class="small fw-semibold legend-count">{{ e.count }}</span>
+                      <span class="legend-count">{{ e.count }}</span>
                     </div>
                   </div>
                 }
@@ -292,58 +309,45 @@
           </div>
 
           <!-- Referencia de progreso -->
-          <div class="card border-0 shadow-sm rounded-4 mb-3">
-            <div class="card-body px-4 py-3">
-              <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-info-circle me-1"></i>{{ 'dashboard_builder.progress_meaning' | translate }}
-              </p>
-              <div class="d-flex flex-column gap-2">
+          <div class="content-card mb-3 fade-up" style="--delay:360ms">
+            <div class="content-card__header">
+              <span class="section-heading">
+                <i class="bi bi-info-circle me-2"></i>{{ 'dashboard_builder.progress_meaning' | translate }}
+              </span>
+            </div>
+            <div class="px-4 py-3 d-flex flex-column gap-2">
+              @for (ref of progressRefs; track ref.pct) {
                 <div class="ref-row">
                   <div class="ref-bar-wrap">
-                    <div class="ref-bar" style="background:#ffc107; width:35%"></div>
+                    <div class="ref-bar"
+                         [style.background]="ref.color"
+                         [style.width.%]="ref.pct"></div>
                   </div>
-                  <span class="ref-label">{{ 'dashboard_builder.ref_35' | translate }}</span>
+                  <span class="ref-pct">{{ ref.pct }}%</span>
+                  <span class="ref-label">{{ ref.label | translate }}</span>
                 </div>
-                <div class="ref-row">
-                  <div class="ref-bar-wrap">
-                    <div class="ref-bar" style="background:#198754; width:60%"></div>
-                  </div>
-                  <span class="ref-label">{{ 'dashboard_builder.ref_60' | translate }}</span>
-                </div>
-                <div class="ref-row">
-                  <div class="ref-bar-wrap">
-                    <div class="ref-bar" style="background:#198754; width:80%"></div>
-                  </div>
-                  <span class="ref-label">{{ 'dashboard_builder.ref_80' | translate }}</span>
-                </div>
-                <div class="ref-row">
-                  <div class="ref-bar-wrap">
-                    <div class="ref-bar" style="background:#198754; width:100%"></div>
-                  </div>
-                  <span class="ref-label">{{ 'dashboard_builder.ref_100' | translate }}</span>
-                </div>
-              </div>
+              }
             </div>
           </div>
 
           <!-- Acciones rápidas -->
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body px-4 py-3">
-              <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-lightning me-1"></i>{{ 'dashboard_builder.quick_actions' | translate }}
-              </p>
-              <div class="d-flex flex-column gap-2">
-                <a routerLink="/builder/available-files"
-                   class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
-                  <i class="bi bi-search"></i>
-                  <span>{{ 'common.see_available' | translate }}</span>
-                </a>
-                <a routerLink="/builder/my-offers"
-                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-                  <i class="bi bi-list-ul"></i>
-                  <span>{{ 'nav.mes_offres' | translate }}</span>
-                </a>
-              </div>
+          <div class="content-card fade-up" style="--delay:440ms">
+            <div class="content-card__header">
+              <span class="section-heading">
+                <i class="bi bi-lightning me-2"></i>{{ 'dashboard_builder.quick_actions' | translate }}
+              </span>
+            </div>
+            <div class="px-4 py-3 d-flex flex-column gap-2">
+              <a routerLink="/builder/available-files"
+                 class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
+                <i class="bi bi-search"></i>
+                <span>{{ 'common.see_available' | translate }}</span>
+              </a>
+              <a routerLink="/builder/my-offers"
+                 class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
+                <i class="bi bi-list-ul"></i>
+                <span>{{ 'nav.mes_offres' | translate }}</span>
+              </a>
             </div>
           </div>
 
@@ -351,6 +355,7 @@
       </div>
 
     </div>
+
   }
 
 </div>

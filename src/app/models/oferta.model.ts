@@ -69,6 +69,7 @@ export interface OfertaRow {
   plazo_semanas_min: number | null;
   plazo_semanas_max: number | null;
   estado: string;
+  creado_en: string;
 }
 
 export interface OfertaDashboard extends OfertaRow {

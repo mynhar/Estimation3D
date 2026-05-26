@@ -83,6 +83,21 @@ export const adminGuard: CanActivateFn = async () => {
     : router.createUrlTree(['/client/dashboard']);
 };
 
+export const wildcardGuard: CanActivateFn = async () => {
+  const auth   = inject(AuthSupabaseService);
+  const router = inject(Router);
+
+  const [, user] = await firstValueFrom(
+    combineLatest([auth.initialized$, auth.user$]).pipe(
+      filter(([initialized]) => initialized),
+      take(1)
+    )
+  );
+
+  if (!user) return router.createUrlTree(['/login']);
+  return router.createUrlTree([await auth.getHomeRoute()]);
+};
+
 export const guestGuard: CanActivateFn = async () => {
   const auth   = inject(AuthSupabaseService);
   const router = inject(Router);

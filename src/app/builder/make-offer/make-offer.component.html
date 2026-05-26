@@ -1,176 +1,234 @@
-<!-- ── Lightbox ─────────────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════
+     LIGHTBOX
+══════════════════════════════════════════════════════════════ -->
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" (click)="cerrarFoto()">
+    <button class="lightbox-close" type="button" (click)="cerrarFoto()"
+            [title]="'common.close' | translate">
+      <i class="bi bi-x-lg"></i>
+    </button>
     <div class="lightbox-container" (click)="$event.stopPropagation()">
       <img [src]="fotoAmpliada()!" class="lightbox-img" alt="" />
-      <button class="lightbox-close" type="button" (click)="cerrarFoto()">
-        <i class="bi bi-x-lg"></i>
-      </button>
     </div>
   </div>
 }
 
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: CARGANDO
+  ══════════════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-cyan" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="page-loading">
+      <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ── No encontrado ──────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: NO ENCONTRADO
+  ══════════════════════════════════════════════════════════════════ -->
   } @else if (!detalle()) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
+    <div class="empty-wrap">
+      <div class="card card-premium text-center px-4 py-5">
+        <div class="empty-icon mx-auto mb-4">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h2 class="empty-title mb-2">{{ 'file.not_found' | translate }}</h2>
         @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
+          <p class="text-danger small mb-3">{{ errorMsg() | translate }}</p>
         }
-        <button class="btn btn-outline-secondary btn-sm" type="button" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
-        </button>
+        <div>
+          <button class="btn btn-outline-secondary" type="button" (click)="volver()">
+            <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
+          </button>
+        </div>
       </div>
     </div>
 
-  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       CONTENIDO PRINCIPAL
+  ══════════════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- Header ──────────────────────────────────────────────────────────────── -->
-    <header class="page-header rounded-4 p-3 p-md-4 mb-4">
-      <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" type="button" (click)="volver()" [title]="'common.back' | translate">
-            <i class="bi bi-arrow-left"></i>
-          </button>
-          <div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <span class="exp-num">{{ detalle()!.numero }}</span>
-              @if (ofertaId()) {
-                <span class="badge rounded-pill bg-warning text-dark px-3 py-1">
-                  <i class="bi bi-pencil me-1"></i>{{ 'make_offer.editing_badge' | translate }}
-                </span>
-              } @else {
-                <span class="badge rounded-pill bg-cyan-subtle text-cyan px-3 py-1">
-                  <i class="bi bi-plus-circle me-1"></i>{{ 'make_offer.new_badge' | translate }}
-                </span>
-              }
+    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <header class="page-header card card-premium mb-4 fade-up">
+      <div class="card-body px-4 px-lg-5 py-4">
+        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="btn-back" type="button" (click)="volver()"
+                    [title]="'common.back' | translate">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+            <div>
+              <span class="eyebrow mb-1 d-block">
+                <i class="bi bi-send me-1"></i>{{ 'role.constructeur' | translate }}
+              </span>
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="exp-num">{{ detalle()!.numero }}</span>
+                @if (ofertaId()) {
+                  <span class="mode-tag mode-tag--editing">
+                    <i class="bi bi-pencil me-1"></i>{{ 'make_offer.editing_badge' | translate }}
+                  </span>
+                } @else {
+                  <span class="tag tag-gold" style="font-size:var(--ds-text-2xs)">
+                    <i class="bi bi-plus-circle me-1"></i>{{ 'make_offer.new_badge' | translate }}
+                  </span>
+                }
+              </div>
+              <p class="text-ink-secondary mt-1 mb-0" style="font-size:var(--ds-text-sm)">
+                {{ servicioNombre() }}
+              </p>
             </div>
-            <p class="text-muted small mb-0 mt-1">{{ servicioNombre() }}</p>
           </div>
-        </div>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
+
           @if (detalle()!.total_ofertas > 0) {
-            <span class="kpi-pill kpi-pill--ofertas">
+            <span class="comp-pill">
               <i class="bi bi-people me-1"></i>
-              {{ detalle()!.total_ofertas }} {{ 'available_files.offers_label' | translate }}
+              {{ detalle()!.total_ofertas }}/5 {{ 'available_files.offers_label' | translate }}
             </span>
           }
+
         </div>
       </div>
     </header>
 
-    <!-- ── Main grid ─────────────────────────────────────────────────────── -->
+    <!-- ── Main grid ────────────────────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
-      <!-- ══ LEFT: Info compacta + Media tabulada ═══════════════════════════ -->
-      <div class="col-lg-5 d-flex flex-column gap-4">
+      <!-- ════════════════════════════════════════════════════════════
+           COLUMNA IZQUIERDA — Info del expediente + Media
+      ════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-5 d-flex flex-column gap-3 fade-up" style="--delay:80ms">
 
-        <!-- Info compacta del expediente ────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-          <div class="card-body p-0">
+        <!-- Info del expediente ─────────────────────────────────────────────── -->
+        <div class="info-card">
 
-            <div class="context-row">
-              <div class="context-icon context-icon--service"><i class="bi bi-tools"></i></div>
-              <div class="context-content">
-                <p class="context-label">{{ 'make_offer.service_label' | translate }}</p>
-                <p class="context-value">{{ servicioNombre() }}</p>
-                @if (servicioDescripcion()) {
-                  <p class="context-sub">{{ servicioDescripcion() }}</p>
-                }
-              </div>
-            </div>
-
-            <div class="context-divider"></div>
-
-            <div class="context-row">
-              <div class="context-icon context-icon--location"><i class="bi bi-geo-alt-fill"></i></div>
-              <div class="context-content">
-                <p class="context-label">{{ 'make_offer.location_label' | translate }}</p>
-                <p class="context-value mb-0">{{ detalle()!.direccion }}</p>
-                <p class="context-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
-                <p class="context-value fw-semibold text-uppercase small mb-0">{{ 'footer.country' | translate }}</p>
-                @if (detalle()!.referencia) {
-                  <p class="context-sub mt-1">{{ detalle()!.referencia }}</p>
-                }
-              </div>
-            </div>
-
-            <div class="context-divider"></div>
-
-            <div class="context-row">
-              <div class="context-icon context-icon--date"><i class="bi bi-calendar3"></i></div>
-              <div class="context-content">
-                <p class="context-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
-                <p class="context-value">
-                  {{ formatFecha(detalle()!.fecha_visita) }}
-                  @if (formatHora(detalle()!.fecha_visita) !== '—') {
-                    <span class="context-time">· {{ formatHora(detalle()!.fecha_visita) }}</span>
-                  }
-                </p>
-              </div>
-            </div>
-
-            <div class="context-divider"></div>
-
-            <div class="context-row">
-              <div class="context-icon context-icon--visit"><i class="bi bi-calendar-check-fill"></i></div>
-              <div class="context-content">
-                <p class="context-label">{{ 'make_offer.estimator_visit' | translate }}</p>
-                <p class="context-value">
-                  {{ formatFecha(detalle()!.fecha_visita_real) }}
-                  @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
-                    <span class="context-time">· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
-                  }
-                </p>
-              </div>
-            </div>
-
-            @if (detalle()!.descripcion_problemas) {
-              <div class="context-divider"></div>
-              <div class="context-row context-row--last">
-                <div class="context-icon context-icon--warn"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                <div class="context-content">
-                  <p class="context-label">{{ 'make_offer.problems_noted' | translate }}</p>
-                  <p class="context-sub context-sub--pre">{{ detalle()!.descripcion_problemas }}</p>
-                </div>
-              </div>
-            }
-
+          <div class="info-card__header">
+            <span class="section-heading">
+              <i class="bi bi-clipboard2-data me-2"></i>{{ 'make_offer.case_summary' | translate }}
+            </span>
           </div>
+
+          <div class="context-row">
+            <div class="context-icon context-icon--service">
+              <i class="bi bi-tools"></i>
+            </div>
+            <div class="context-content">
+              <p class="context-label">{{ 'make_offer.service_label' | translate }}</p>
+              <p class="context-value">{{ servicioNombre() }}</p>
+              @if (servicioDescripcion()) {
+                <p class="context-sub">{{ servicioDescripcion() }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="context-divider"></div>
+
+          <div class="context-row">
+            <div class="context-icon context-icon--location">
+              <i class="bi bi-geo-alt"></i>
+            </div>
+            <div class="context-content">
+              <p class="context-label">{{ 'make_offer.location_label' | translate }}</p>
+              <p class="context-value mb-1">{{ detalle()!.canton }}, {{ detalle()!.provincia }}</p>
+              <p class="context-sub mb-0">{{ detalle()!.direccion }}</p>
+              @if (detalle()!.referencia) {
+                <p class="context-sub mb-0">{{ detalle()!.referencia }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="context-divider"></div>
+
+          <div class="context-row">
+            <div class="context-icon context-icon--date">
+              <i class="bi bi-calendar3"></i>
+            </div>
+            <div class="context-content">
+              <p class="context-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
+              <p class="context-value mb-0">
+                {{ formatFecha(detalle()!.fecha_visita) }}
+                @if (formatHora(detalle()!.fecha_visita) !== '—') {
+                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita) }}</span>
+                }
+              </p>
+            </div>
+          </div>
+
+          <div class="context-divider"></div>
+
+          <div class="context-row">
+            <div class="context-icon context-icon--visit">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <div class="context-content">
+              <p class="context-label">{{ 'make_offer.estimator_visit' | translate }}</p>
+              <p class="context-value mb-0">
+                {{ formatFecha(detalle()!.fecha_visita_real) }}
+                @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
+                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
+                }
+              </p>
+            </div>
+          </div>
+
+          @if (detalle()!.descripcion_problemas) {
+            <div class="context-divider"></div>
+            <div class="context-row context-row--last">
+              <div class="context-icon context-icon--warn">
+                <i class="bi bi-exclamation-triangle"></i>
+              </div>
+              <div class="context-content">
+                <p class="context-label">{{ 'make_offer.problems_noted' | translate }}</p>
+                <p class="context-sub context-sub--pre mb-0">{{ detalle()!.descripcion_problemas }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Costo estimado por el estimador -->
+          @if (detalle()!.costo_estimado) {
+            <div class="context-divider"></div>
+            <div class="cost-summary-row">
+              <span class="context-label mb-0">{{ 'make_offer.estimated_range' | translate }}</span>
+              <span class="cost-summary__value">
+                @if (detalle()!.costo_estimado_max && detalle()!.costo_estimado_max !== detalle()!.costo_estimado) {
+                  {{ detalle()!.costo_estimado | number:'1.0-0' }}
+                  – {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
+                } @else {
+                  {{ detalle()!.costo_estimado | number:'1.0-0' }} CAD
+                }
+              </span>
+            </div>
+          }
+
         </div>
 
-        <!-- Media tabulada (Fotos / Tour 3D / Docs) ─────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <!-- Media tabulada ──────────────────────────────────────────────────── -->
+        <div class="info-card overflow-hidden">
 
           <div class="media-tabs">
-            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'tour'"
-                    type="button" (click)="tabMedia.set('tour')">
+            <button class="media-tab" type="button"
+                    [class.media-tab--active]="tabMedia() === 'tour'"
+                    (click)="tabMedia.set('tour')">
               <i class="bi bi-camera-video me-1"></i>{{ 'make_offer.tab_tour' | translate }}
               @if (urlsTour.length > 0) {
                 <span class="media-tab__count">{{ urlsTour.length }}</span>
               }
             </button>
-            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'fotos'"
-                    type="button" (click)="tabMedia.set('fotos')">
+            <button class="media-tab" type="button"
+                    [class.media-tab--active]="tabMedia() === 'fotos'"
+                    (click)="tabMedia.set('fotos')">
               <i class="bi bi-images me-1"></i>{{ 'make_offer.tab_photos' | translate }}
               @if (fotos().length > 0) {
                 <span class="media-tab__count">{{ fotos().length }}</span>
               }
             </button>
-            <button class="media-tab" [class.media-tab--active]="tabMedia() === 'docs'"
-                    type="button" (click)="tabMedia.set('docs')">
+            <button class="media-tab" type="button"
+                    [class.media-tab--active]="tabMedia() === 'docs'"
+                    (click)="tabMedia.set('docs')">
               <i class="bi bi-file-earmark-text me-1"></i>{{ 'make_offer.tab_docs' | translate }}
               @if (documentos().length > 0) {
                 <span class="media-tab__count">{{ documentos().length }}</span>
@@ -178,71 +236,83 @@
             </button>
           </div>
 
+          <!-- Tab: Fotos -->
           @if (tabMedia() === 'fotos') {
-            <div class="card-body p-3">
+            <div class="tab-body">
               @if (fotos().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-image fs-2 mb-1 d-block"></i>{{ 'make_offer.no_photos' | translate }}
+                  <i class="bi bi-image"></i>
+                  <span>{{ 'make_offer.no_photos' | translate }}</span>
                 </div>
               } @else {
                 <div class="photos-grid">
                   @for (f of fotos(); track f.id) {
-                    <div class="photo-thumb" (click)="abrirFoto(f)" [title]="f.nombre_archivo">
-                      <img [src]="publicUrl(f.url_storage)" class="photo-thumb__img" [alt]="f.nombre_archivo" />
-                      <div class="photo-thumb__overlay"><i class="bi bi-zoom-in"></i></div>
-                    </div>
+                    <button class="photo-thumb" type="button"
+                            (click)="abrirFoto(f)" [title]="f.nombre_archivo">
+                      <img [src]="publicUrl(f.url_storage)"
+                           class="photo-thumb__img" [alt]="f.nombre_archivo" />
+                      <div class="photo-thumb__overlay" aria-hidden="true">
+                        <i class="bi bi-zoom-in"></i>
+                      </div>
+                    </button>
                   }
                 </div>
               }
             </div>
           }
 
+          <!-- Tab: Tour 3D -->
           @if (tabMedia() === 'tour') {
-            <div class="card-body p-3">
+            <div class="tab-body">
               @if (urlsTour.length > 0) {
-                @for (url of urlsTour; track $index) {
-                  <div [class.mb-3]="$index < urlsTour.length - 1">
-                    <p class="tour-video-label">
-                      <i class="bi bi-camera-video-fill me-1"></i>
-                      {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
-                    </p>
-                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                      <iframe [src]="getSafeUrl(url)" allowfullscreen allow="xr-spatial-tracking"
-                              [title]="'Video ' + ($index + 1)"></iframe>
+                <div class="d-flex flex-column gap-3">
+                  @for (url of urlsTour; track $index) {
+                    <div>
+                      <p class="tour-label">
+                        <i class="bi bi-camera-video me-1"></i>
+                        {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                      </p>
+                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                        <iframe [src]="getSafeUrl(url)" allowfullscreen
+                                allow="xr-spatial-tracking"
+                                [title]="'Video ' + ($index + 1)"></iframe>
+                      </div>
                     </div>
-                  </div>
-                }
+                  }
+                </div>
               } @else {
                 <div class="media-empty">
-                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>{{ 'make_offer.no_tour' | translate }}
+                  <i class="bi bi-camera-video"></i>
+                  <span>{{ 'make_offer.no_tour' | translate }}</span>
                 </div>
               }
             </div>
           }
 
+          <!-- Tab: Documentos -->
           @if (tabMedia() === 'docs') {
-            <div class="card-body p-2">
+            <div class="tab-body tab-body--compact">
               @if (documentos().length === 0) {
                 <div class="media-empty">
-                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>{{ 'make_offer.no_docs' | translate }}
+                  <i class="bi bi-file-earmark"></i>
+                  <span>{{ 'make_offer.no_docs' | translate }}</span>
                 </div>
               } @else {
                 <div class="file-list">
-                  @for (d of documentos(); track d.id) {
+                  @for (doc of documentos(); track doc.id) {
                     <div class="file-row">
-                      <div class="file-row__icon file-row__icon--doc">
-                        <i class="bi bi-file-earmark-text-fill"></i>
+                      <div class="file-row__icon">
+                        <i class="bi bi-file-earmark-text"></i>
                       </div>
                       <div class="file-row__info">
-                        <p class="file-row__name">{{ d.nombre_archivo }}</p>
-                        <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                        <span class="file-row__name">{{ doc.nombre_archivo }}</span>
+                        <span class="file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</span>
                       </div>
-                      <div class="file-row__actions">
-                        <button class="btn btn-outline-secondary btn-sm" type="button"
-                                (click)="verArchivo(d)" [title]="'common.open' | translate">
-                          <i class="bi bi-box-arrow-up-right"></i>
-                        </button>
-                      </div>
+                      <button class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                              type="button" (click)="verArchivo(doc)"
+                              [title]="'common.open' | translate">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                      </button>
                     </div>
                   }
                 </div>
@@ -252,122 +322,152 @@
 
         </div>
 
-      </div><!-- /col-lg-5 LEFT -->
+      </div><!-- /col izquierda -->
 
-      <!-- ══ RIGHT: Formulario de oferta ════════════════════════════════════ -->
-      <div class="col-lg-7">
+      <!-- ════════════════════════════════════════════════════════════
+           COLUMNA DERECHA — Formulario de oferta
+      ════════════════════════════════════════════════════════════ -->
+      <div class="col-lg-7 fade-up" style="--delay:160ms">
         <div class="sidebar-sticky">
-          <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="form-card">
 
-            <!-- Encabezado con barra de progreso -->
-            <div class="form-header">
+            <!-- ── Encabezado del formulario con progreso ─────────────────── -->
+            <div class="form-card__header">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="fw-semibold text-dark">
-                  <i class="bi bi-pencil-square me-2 text-cyan"></i>
+                <span class="form-card__title">
+                  <i class="bi bi-pencil-square me-2"></i>
                   {{ ofertaId() ? ('make_offer.update_title' | translate) : ('make_offer.form_title' | translate) }}
                 </span>
-                <span class="progress-label">{{ completedSteps }}/5 {{ 'make_offer.steps_done' | translate }}</span>
+                <span class="progress-label">
+                  <span class="progress-label__num">{{ completedSteps }}</span>/5
+                  {{ 'make_offer.steps_done' | translate }}
+                </span>
               </div>
-              <div class="progress-wrap">
-                <div class="progress-bar-fill" [style.width.%]="(completedSteps / 5) * 100"></div>
+              <div class="progress-track">
+                <div class="progress-fill" [style.width.%]="(completedSteps / 5) * 100"></div>
+              </div>
+              <div class="progress-steps">
+                @for (step of [1,2,3,4,5]; track step) {
+                  <div class="progress-step"
+                       [class.progress-step--done]="completedSteps >= step"></div>
+                }
               </div>
             </div>
 
-            <div class="card-body p-4">
+            <div class="form-card__body">
 
-              <!-- Precio total -->
-              <div class="form-section mb-4">
-                <p class="form-section__label">
-                  <i class="bi bi-cash-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
+              <!-- ── Precio ─────────────────────────────────────────────────── -->
+              <div class="form-field mb-5">
+                <label class="form-field__label">
+                  <i class="bi bi-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
                   <span class="req-mark">*</span>
-                </p>
-                <div class="price-input-wrap">
-                  <span class="price-symbol">CA$</span>
+                </label>
+                <div class="price-wrap" [class.price-wrap--focus]="false">
+                  <span class="price-currency">CA$</span>
                   <input type="number" class="price-input"
                          placeholder="0" min="1" step="1000"
                          [(ngModel)]="precio" />
                 </div>
+                @if (precio && precio > 0) {
+                  <p class="field-hint field-hint--ok">
+                    <i class="bi bi-check-circle me-1"></i>
+                    {{ precio | number:'1.0-0' }} CAD
+                  </p>
+                }
               </div>
 
-              <!-- Plazos + Garantía -->
-              <div class="form-section mb-4">
-                <p class="form-section__label">
+              <!-- ── Plazos + Garantía ──────────────────────────────────────── -->
+              <div class="form-field mb-5">
+                <label class="form-field__label">
                   <i class="bi bi-clock me-1"></i>{{ 'make_offer.project_times' | translate }}
-                </p>
-                <div class="row g-2">
+                </label>
+                <div class="row g-3">
                   <div class="col-4">
-                    <label class="field-label">
-                      {{ 'make_offer.min_deadline' | translate }} <small>({{ 'offer.weeks' | translate }})</small>
+                    <label class="field-sublabel">
+                      {{ 'make_offer.min_deadline' | translate }}
+                      <small class="text-ink-muted">({{ 'offer.weeks' | translate }})</small>
                       <span class="req-mark">*</span>
                     </label>
                     <input type="number" class="form-control" placeholder="1" min="1" step="1"
                            [(ngModel)]="plazoMin" />
                   </div>
                   <div class="col-4">
-                    <label class="field-label">
-                      {{ 'make_offer.max_deadline' | translate }} <small>({{ 'offer.weeks' | translate }})</small>
+                    <label class="field-sublabel">
+                      {{ 'make_offer.max_deadline' | translate }}
+                      <small class="text-ink-muted">({{ 'offer.weeks' | translate }})</small>
                       <span class="req-mark">*</span>
                     </label>
                     <input type="number" class="form-control" placeholder="4" min="1" step="1"
                            [(ngModel)]="plazoMax" />
                   </div>
                   <div class="col-4">
-                    <label class="field-label">{{ 'offer.warranty' | translate }} <small>({{ 'offer.years' | translate }})</small></label>
+                    <label class="field-sublabel">
+                      {{ 'offer.warranty' | translate }}
+                      <small class="text-ink-muted">({{ 'offer.years' | translate }})</small>
+                    </label>
                     <input type="number" class="form-control" placeholder="1" min="0" step="1"
                            [(ngModel)]="garantiaAnos" />
                   </div>
                 </div>
               </div>
 
-              <!-- Fecha de inicio -->
-              <div class="form-section mb-4">
-                <p class="form-section__label">
+              <!-- ── Fecha de inicio ────────────────────────────────────────── -->
+              <div class="form-field mb-5">
+                <label class="form-field__label">
                   <i class="bi bi-calendar-event me-1"></i>{{ 'make_offer.start_date' | translate }}
                   <span class="req-mark">*</span>
-                </p>
+                </label>
                 <input type="date" class="form-control" [(ngModel)]="fechaInicio" />
               </div>
 
-              <!-- Descripción del enfoque -->
-              <div class="form-section mb-4">
-                <p class="form-section__label">
+              <!-- ── Descripción ────────────────────────────────────────────── -->
+              <div class="form-field mb-5">
+                <label class="form-field__label">
                   <i class="bi bi-text-paragraph me-1"></i>{{ 'make_offer.approach_desc' | translate }}
                   <span class="req-mark">*</span>
-                </p>
+                </label>
                 <textarea class="form-control" rows="4"
                           [placeholder]="'make_offer.approach_placeholder' | translate"
                           [(ngModel)]="descripcion"></textarea>
+                <p class="field-hint">{{ descripcion.trim().length }} {{ 'common.chars' | translate }}</p>
               </div>
 
-              <!-- Adjuntos -->
-              <div class="form-section mb-4">
-                <p class="form-section__label">
+              <!-- ── Adjuntos ───────────────────────────────────────────────── -->
+              <div class="form-field mb-5">
+                <label class="form-field__label">
                   <i class="bi bi-paperclip me-1"></i>{{ 'make_offer.attachments' | translate }}
-                </p>
-                <div class="attachments-section">
+                </label>
+                <div class="attach-panel">
 
-                  <div class="attach-row">
-                    <div class="attach-row__icon attach-row__icon--doc">
-                      <i class="bi bi-file-earmark-pdf-fill"></i>
+                  <!-- PDF -->
+                  <div class="attach-item">
+                    <div class="attach-item__icon attach-item__icon--pdf">
+                      <i class="bi bi-file-earmark-pdf"></i>
                     </div>
-                    <div class="attach-row__info">
-                      <p class="attach-row__label">
+                    <div class="attach-item__info">
+                      <p class="attach-item__label">
                         {{ 'make_offer.pdf_doc' | translate }}
-                        @if (!ofertaId()) { <span class="req-mark">*</span> }
+                        @if (!ofertaId()) {
+                          <span class="req-mark">*</span>
+                        }
                       </p>
                       @if (documentoOferta()) {
-                        <p class="attach-row__name">{{ documentoOferta()!.name }}
-                          <span class="text-muted">· {{ formatTamano(documentoOferta()!.size) }}</span>
+                        <p class="attach-item__name attach-item__name--new">
+                          <i class="bi bi-check-circle me-1"></i>
+                          {{ documentoOferta()!.name }}
+                          <span class="attach-item__size">{{ formatTamano(documentoOferta()!.size) }}</span>
                         </p>
                       } @else if (documentoActual()) {
-                        <p class="attach-row__name">
-                          <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        <p class="attach-item__name attach-item__name--saved">
+                          <i class="bi bi-check-circle-fill me-1"></i>
                           {{ documentoActual()!.nombre_archivo }}
-                          <button class="btn btn-link btn-sm p-0 ms-1" type="button"
-                                  (click)="verArchivo(documentoActual()!)">{{ 'make_offer.view' | translate }}</button>
+                          <button class="attach-view-btn" type="button"
+                                  (click)="verArchivo(documentoActual()!)">
+                            {{ 'make_offer.view' | translate }}
+                          </button>
                         </p>
                       } @else {
-                        <p class="attach-row__empty">{{ 'make_offer.no_document' | translate }}</p>
+                        <p class="attach-item__empty">{{ 'make_offer.no_document' | translate }}</p>
                       }
                     </div>
                     <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
@@ -377,25 +477,35 @@
                     </label>
                   </div>
 
-                  <div class="attach-row">
-                    <div class="attach-row__icon attach-row__icon--video">
-                      <i class="bi bi-camera-video-fill"></i>
+                  <div class="attach-divider"></div>
+
+                  <!-- Video -->
+                  <div class="attach-item">
+                    <div class="attach-item__icon attach-item__icon--video">
+                      <i class="bi bi-camera-video"></i>
                     </div>
-                    <div class="attach-row__info">
-                      <p class="attach-row__label">{{ 'make_offer.video_opt' | translate }} <span class="opt-mark">({{ 'common.optional' | translate }})</span></p>
+                    <div class="attach-item__info">
+                      <p class="attach-item__label">
+                        {{ 'make_offer.video_opt' | translate }}
+                        <span class="opt-badge">{{ 'common.optional' | translate }}</span>
+                      </p>
                       @if (videoOferta()) {
-                        <p class="attach-row__name">{{ videoOferta()!.name }}
-                          <span class="text-muted">· {{ formatTamano(videoOferta()!.size) }}</span>
+                        <p class="attach-item__name attach-item__name--new">
+                          <i class="bi bi-check-circle me-1"></i>
+                          {{ videoOferta()!.name }}
+                          <span class="attach-item__size">{{ formatTamano(videoOferta()!.size) }}</span>
                         </p>
                       } @else if (videoActual()) {
-                        <p class="attach-row__name">
-                          <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        <p class="attach-item__name attach-item__name--saved">
+                          <i class="bi bi-check-circle-fill me-1"></i>
                           {{ videoActual()!.nombre_archivo }}
-                          <button class="btn btn-link btn-sm p-0 ms-1" type="button"
-                                  (click)="verArchivo(videoActual()!)">{{ 'make_offer.view' | translate }}</button>
+                          <button class="attach-view-btn" type="button"
+                                  (click)="verArchivo(videoActual()!)">
+                            {{ 'make_offer.view' | translate }}
+                          </button>
                         </p>
                       } @else {
-                        <p class="attach-row__empty">{{ 'make_offer.no_video' | translate }}</p>
+                        <p class="attach-item__empty">{{ 'make_offer.no_video' | translate }}</p>
                       }
                     </div>
                     <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
@@ -408,60 +518,71 @@
                 </div>
               </div>
 
-              <!-- Checklist horizontal -->
-              <div class="checklist-inline mb-4">
-                <div class="checklist-item" [class.checklist-item--done]="!!precio && precio > 0">
+              <!-- ── Checklist de completitud ──────────────────────────────── -->
+              <div class="checklist mb-4">
+                <div class="checklist__item" [class.checklist__item--done]="!!precio && precio > 0">
                   <i class="bi" [class.bi-check-circle-fill]="!!precio && precio > 0"
-                                [class.bi-circle]="!precio || precio <= 0"></i>{{ 'make_offer.checklist_price' | translate }}
+                                [class.bi-circle]="!precio || precio <= 0"></i>
+                  {{ 'make_offer.checklist_price' | translate }}
                 </div>
-                <div class="checklist-item"
-                     [class.checklist-item--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin">
+                <div class="checklist__item"
+                     [class.checklist__item--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin">
                   <i class="bi"
                      [class.bi-check-circle-fill]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
-                     [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>{{ 'make_offer.checklist_deadline' | translate }}
+                     [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>
+                  {{ 'make_offer.checklist_deadline' | translate }}
                 </div>
-                <div class="checklist-item" [class.checklist-item--done]="!!fechaInicio">
+                <div class="checklist__item" [class.checklist__item--done]="!!fechaInicio">
                   <i class="bi" [class.bi-check-circle-fill]="!!fechaInicio"
-                                [class.bi-circle]="!fechaInicio"></i>{{ 'make_offer.checklist_start' | translate }}
+                                [class.bi-circle]="!fechaInicio"></i>
+                  {{ 'make_offer.checklist_start' | translate }}
                 </div>
-                <div class="checklist-item" [class.checklist-item--done]="!!descripcion.trim()">
+                <div class="checklist__item" [class.checklist__item--done]="!!descripcion.trim()">
                   <i class="bi" [class.bi-check-circle-fill]="!!descripcion.trim()"
-                                [class.bi-circle]="!descripcion.trim()"></i>{{ 'make_offer.checklist_desc' | translate }}
+                                [class.bi-circle]="!descripcion.trim()"></i>
+                  {{ 'make_offer.checklist_desc' | translate }}
                 </div>
                 @if (!ofertaId()) {
-                  <div class="checklist-item" [class.checklist-item--done]="!!documentoOferta()">
+                  <div class="checklist__item" [class.checklist__item--done]="!!documentoOferta()">
                     <i class="bi" [class.bi-check-circle-fill]="!!documentoOferta()"
-                                  [class.bi-circle]="!documentoOferta()"></i>PDF
+                                  [class.bi-circle]="!documentoOferta()"></i>
+                    PDF
                   </div>
                 }
               </div>
 
-              <!-- Mensajes de feedback -->
+              <!-- ── Feedback ─────────────────────────────────────────────── -->
               @if (errorEnvio()) {
-                <div class="alert alert-danger py-2 small mb-3">{{ errorEnvio() | translate }}</div>
+                <div class="feedback-msg feedback-msg--error mb-3">
+                  <i class="bi bi-exclamation-circle flex-shrink-0"></i>
+                  {{ errorEnvio() | translate }}
+                </div>
               }
               @if (exitoMsg()) {
-                <div class="alert alert-success py-2 small mb-3 d-flex align-items-center gap-2">
-                  <i class="bi bi-check-circle-fill flex-shrink-0"></i>{{ exitoMsg() | translate }}
+                <div class="feedback-msg feedback-msg--success mb-3">
+                  <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+                  {{ exitoMsg() | translate }}
                 </div>
               }
 
-              <!-- Acciones -->
+              <!-- ── Acciones ──────────────────────────────────────────────── -->
               <div class="d-flex flex-column gap-2">
-                <button class="btn-offer" type="button"
+
+                <button class="btn-send" type="button"
                         (click)="enviarOferta()"
                         [disabled]="enviando() || (enviada() && !ofertaId())">
                   @if (enviando()) {
-                    <span class="spinner-border spinner-border-sm"></span>
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
                     {{ ofertaId() ? ('make_offer.updating' | translate) : ('make_offer.sending' | translate) }}
                   } @else {
-                    <i class="bi" [class.bi-send-check]="!ofertaId()" [class.bi-arrow-repeat]="!!ofertaId()"></i>
+                    <i class="bi" [class.bi-send-check]="!ofertaId()"
+                                  [class.bi-arrow-repeat]="!!ofertaId()"></i>
                     {{ ofertaId() ? ('make_offer.update_offer' | translate) : ('make_offer.send_offer' | translate) }}
                   }
                 </button>
 
                 @if (enviada() && !ofertaId()) {
-                  <button class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2"
+                  <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
                           type="button" (click)="verMisOfertas()">
                     <i class="bi bi-list-check"></i>{{ 'make_offer.view_my_offers' | translate }}
                   </button>
@@ -471,12 +592,13 @@
                         type="button" (click)="volver()">
                   <i class="bi bi-arrow-left"></i>{{ 'make_offer.back_to_files' | translate }}
                 </button>
+
               </div>
 
-            </div>
-          </div>
-        </div>
-      </div><!-- /col-lg-7 RIGHT -->
+            </div><!-- /form-card__body -->
+          </div><!-- /form-card -->
+        </div><!-- /sidebar-sticky -->
+      </div><!-- /col derecha -->
 
     </div><!-- /row -->
 

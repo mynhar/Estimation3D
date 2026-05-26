@@ -1,31 +1,38 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER EDITORIAL
+  ══════════════════════════════════════════════════════════════════ -->
+  <header class="card card-premium mb-4 fade-up">
+    <div class="card-body px-4 px-lg-5 py-4 d-flex align-items-start justify-content-between gap-4 flex-wrap">
       <div>
-        <p class="text-primary small fw-semibold mb-1">
+        <span class="eyebrow">
           <i class="bi bi-search me-1"></i>{{ 'role.constructeur' | translate }}
+        </span>
+        <h1 class="page-title title-editorial mb-1">
+          {{ 'available_files.title' | translate }}
+        </h1>
+        <p class="text-ink-muted page-subtitle mb-0">
+          {{ 'available_files.subtitle' | translate }}
         </p>
-        <h4 class="mb-1">{{ 'available_files.title' | translate }}</h4>
-        <p class="text-muted small mb-0">{{ 'available_files.subtitle' | translate }}</p>
       </div>
+
       @if (!cargando() && expedientes().length > 0) {
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <span class="kpi-pill kpi-pill--available">
+        <div class="d-flex gap-2 flex-wrap align-items-center pt-1">
+          <span class="stat-pill stat-pill--neutral">
             <i class="bi bi-clipboard2-check me-1"></i>
             {{ expedientes().length }} {{ 'available_files.available' | translate }}
           </span>
-          @if (totalConOferta() > 0) {
-            <span class="kpi-pill kpi-pill--offered">
-              <i class="bi bi-check-circle-fill me-1"></i>
-              {{ totalConOferta() }} {{ 'available_files.offered' | translate }}
-            </span>
-          }
           @if (totalSinOferta() > 0) {
-            <span class="kpi-pill kpi-pill--pending">
+            <span class="stat-pill stat-pill--opportunity">
               <i class="bi bi-hourglass me-1"></i>
               {{ totalSinOferta() }} {{ 'available_files.no_offer_count' | translate }}
+            </span>
+          }
+          @if (totalConOferta() > 0) {
+            <span class="stat-pill stat-pill--offered">
+              <i class="bi bi-check-circle me-1"></i>
+              {{ totalConOferta() }} {{ 'available_files.offered' | translate }}
             </span>
           }
         </div>
@@ -33,36 +40,44 @@
     </div>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: CARGANDO
+  ══════════════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="page-loading">
+      <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: SIN EXPEDIENTES
+  ══════════════════════════════════════════════════════════════════ -->
   } @else if (expedientes().length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
+    <div class="empty-wrap fade-up">
+      <div class="card card-premium text-center px-4 px-lg-5 py-5">
+        <div class="empty-icon mx-auto mb-4">
           <i class="bi bi-clipboard2-x"></i>
         </div>
-        <p class="empty-title">{{ 'available_files.empty_title' | translate }}</p>
-        <p class="empty-text">{{ 'available_files.empty_text' | translate }}</p>
+        <h2 class="empty-title mb-2">{{ 'available_files.empty_title' | translate }}</h2>
+        <p class="text-ink-muted mb-0">{{ 'available_files.empty_text' | translate }}</p>
       </div>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       CON DATOS
+  ══════════════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- ── Barra de filtros ───────────────────────────────────────────────── -->
-    <div class="filter-bar rounded-4 mb-3 p-3">
+    <!-- ── Barra de filtros ──────────────────────────────────────────────── -->
+    <div class="filter-bar mb-3 fade-up" style="--delay:80ms">
 
       <div class="filter-search">
-        <span class="filter-search__icon"><i class="bi bi-search"></i></span>
+        <i class="bi bi-search filter-search__icon"></i>
         <input
           type="search"
-          class="form-control filter-search__input"
+          class="filter-input"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
           [placeholder]="'available_files.search_placeholder' | translate"
@@ -70,134 +85,182 @@
         />
       </div>
 
-      <div class="filter-group">
-        <span class="filter-group__label">{{ 'available_files.competition_label' | translate }}</span>
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button" class="btn"
-                  [class.btn-secondary]="filtroCompetencia() === 'todos'"
-                  [class.btn-outline-secondary]="filtroCompetencia() !== 'todos'"
-                  (click)="filtroCompetencia.set('todos')">{{ 'common.all' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-success]="filtroCompetencia() === 'baja'"
-                  [class.btn-outline-success]="filtroCompetencia() !== 'baja'"
-                  (click)="filtroCompetencia.set('baja')">{{ 'competition.low' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-warning]="filtroCompetencia() === 'media'"
-                  [class.btn-outline-warning]="filtroCompetencia() !== 'media'"
-                  (click)="filtroCompetencia.set('media')">{{ 'competition.mid' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-danger]="filtroCompetencia() === 'alta'"
-                  [class.btn-outline-danger]="filtroCompetencia() !== 'alta'"
-                  (click)="filtroCompetencia.set('alta')">{{ 'competition.high' | translate }}</button>
+      <div class="filter-section">
+        <span class="filter-label">{{ 'available_files.competition_label' | translate }}</span>
+        <div class="seg-group">
+          <button type="button" class="seg-btn"
+                  [class.active]="filtroCompetencia() === 'todos'"
+                  (click)="filtroCompetencia.set('todos')">
+            {{ 'common.all' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--success"
+                  [class.active]="filtroCompetencia() === 'baja'"
+                  (click)="filtroCompetencia.set('baja')">
+            {{ 'competition.low' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--warning"
+                  [class.active]="filtroCompetencia() === 'media'"
+                  (click)="filtroCompetencia.set('media')">
+            {{ 'competition.mid' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--danger"
+                  [class.active]="filtroCompetencia() === 'alta'"
+                  (click)="filtroCompetencia.set('alta')">
+            {{ 'competition.high' | translate }}
+          </button>
         </div>
       </div>
 
-      <div class="filter-group">
-        <span class="filter-group__label">{{ 'available_files.my_offer_label' | translate }}</span>
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button" class="btn"
-                  [class.btn-secondary]="filtroOferta() === 'todos'"
-                  [class.btn-outline-secondary]="filtroOferta() !== 'todos'"
-                  (click)="filtroOferta.set('todos')">{{ 'common.all' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-primary]="filtroOferta() === 'sin'"
-                  [class.btn-outline-primary]="filtroOferta() !== 'sin'"
-                  (click)="filtroOferta.set('sin')">{{ 'available_files.no_offer_filter' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-success]="filtroOferta() === 'con'"
-                  [class.btn-outline-success]="filtroOferta() !== 'con'"
-                  (click)="filtroOferta.set('con')">{{ 'available_files.offered_filter' | translate }}</button>
+      <div class="filter-section">
+        <span class="filter-label">{{ 'available_files.my_offer_label' | translate }}</span>
+        <div class="seg-group">
+          <button type="button" class="seg-btn"
+                  [class.active]="filtroOferta() === 'todos'"
+                  (click)="filtroOferta.set('todos')">
+            {{ 'common.all' | translate }}
+          </button>
+          <button type="button" class="seg-btn"
+                  [class.active]="filtroOferta() === 'sin'"
+                  (click)="filtroOferta.set('sin')">
+            {{ 'available_files.no_offer_filter' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--success"
+                  [class.active]="filtroOferta() === 'con'"
+                  (click)="filtroOferta.set('con')">
+            {{ 'available_files.offered_filter' | translate }}
+          </button>
         </div>
       </div>
 
       @if (hayFiltros()) {
-        <button type="button" class="btn btn-link btn-sm text-muted filter-clear"
-                (click)="limpiarFiltros()">
+        <button type="button" class="filter-clear" (click)="limpiarFiltros()">
           <i class="bi bi-x-circle me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
 
     </div>
 
+    <!-- ── Conteo de resultados ──────────────────────────────────────────── -->
     @if (hayFiltros()) {
-      <p class="results-hint mb-3">
+      <p class="results-count mb-3 fade-up">
         <i class="bi bi-funnel me-1"></i>
-        {{ 'common.showing' | translate }} <strong>{{ expedientesFiltrados().length }}</strong>
-        {{ 'common.of' | translate }} {{ expedientes().length }} {{ 'available_files.files_count' | translate }}
+        {{ 'common.showing' | translate }}
+        <strong>{{ expedientesFiltrados().length }}</strong>
+        {{ 'common.of' | translate }} {{ expedientes().length }}
+        {{ 'available_files.files_count' | translate }}
       </p>
     }
 
-    <!-- ── Sin resultados tras filtro ────────────────────────────────────── -->
+    <!-- ── Sin resultados tras filtro ───────────────────────────────────── -->
     @if (expedientesFiltrados().length === 0) {
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="bi bi-funnel-x"></i>
+      <div class="empty-wrap fade-up">
+        <div class="card card-premium text-center px-4 px-lg-5 py-5">
+          <div class="empty-icon mx-auto mb-4">
+            <i class="bi bi-funnel"></i>
           </div>
-          <p class="empty-title">{{ 'common.no_results' | translate }}</p>
-          <p class="empty-text">{{ 'available_files.no_filter_text' | translate }}</p>
-          <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-          </button>
+          <h2 class="empty-title mb-2">{{ 'common.no_results' | translate }}</h2>
+          <p class="text-ink-muted mb-4">{{ 'available_files.no_filter_text' | translate }}</p>
+          <div>
+            <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          </div>
         </div>
       </div>
 
-    <!-- ── Cuadrícula de tarjetas ─────────────────────────────────────────── -->
+    <!-- ── Cuadrícula de expedientes ─────────────────────────────────────── -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3 fade-up" style="--delay:120ms">
+
         @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
             <div class="file-card h-100"
                  [class.file-card--offered]="tieneOferta(exp.id)"
-                 [style.--comp-color]="tieneOferta(exp.id) ? '#16a34a' : competenciaColor(exp.total_ofertas)">
-              <div class="file-accent"></div>
-              <div class="file-body d-flex flex-column">
+                 [class.file-card--low]="!tieneOferta(exp.id) && exp.total_ofertas <= 1"
+                 [class.file-card--mid]="!tieneOferta(exp.id) && exp.total_ofertas >= 2 && exp.total_ofertas <= 3"
+                 [class.file-card--high]="!tieneOferta(exp.id) && exp.total_ofertas >= 4">
 
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+              <div class="file-card__body d-flex flex-column">
+
+                <!-- ── Fila 1: número + estado + reciente ────────────────── -->
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
                   <span class="file-num">{{ exp.numero }}</span>
+
                   @if (tieneOferta(exp.id)) {
-                    <span class="badge text-bg-success file-badge">
-                      <i class="bi bi-check-circle-fill me-1"></i>{{ 'available_files.offer_sent' | translate }}
+                    <span class="cbadge cbadge--offered">
+                      <i class="bi bi-check-circle me-1"></i>{{ 'available_files.offer_sent' | translate }}
                     </span>
                   } @else {
-                    <span class="badge file-badge" [class]="competenciaBadge(exp.total_ofertas)">
-                      <i class="bi bi-bar-chart-fill me-1"></i>{{ competenciaLabel(exp.total_ofertas) | translate }}
+                    <span class="cbadge" [class]="competenciaClass(exp.total_ofertas)">
+                      <i class="bi bi-bar-chart me-1"></i>{{ competenciaLabel(exp.total_ofertas) | translate }}
+                    </span>
+                  }
+
+                  @if (esReciente(exp.creado_en)) {
+                    <span class="tag tag-gold ms-auto">
+                      <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
                     </span>
                   }
                 </div>
 
-                <p class="file-servicio mb-2">{{ servicioNombre(exp) }}</p>
+                <!-- ── Servicio (título) ──────────────────────────────────── -->
+                <h3 class="file-servicio mb-3">{{ servicioNombre(exp) }}</h3>
 
-                <p class="file-meta mb-1">
-                  <i class="bi bi-geo-alt me-1"></i>{{ exp.direccion }}
-                </p>
-                <p class="file-meta mb-0">
-                  <i class="bi bi-map me-1"></i>{{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
-                </p>
-
-                <hr class="file-divider my-3" />
-
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <div class="offer-slots">
-                    @for (i of slots; track i) {
-                      <span class="offer-slot"
-                            [class.offer-slot--filled]="i <= exp.total_ofertas"
-                            [style.background]="i <= exp.total_ofertas ? competenciaColor(exp.total_ofertas) : undefined">
-                      </span>
-                    }
+                <!-- ── Ubicación ─────────────────────────────────────────── -->
+                <div class="file-location mb-auto">
+                  <div class="d-flex align-items-start gap-2 mb-1">
+                    <i class="bi bi-geo-alt file-location__icon"></i>
+                    <span class="file-location__main">{{ exp.provincia }}, {{ exp.canton }}</span>
                   </div>
-                  <span class="offer-slots-label">{{ exp.total_ofertas }}/5 {{ 'available_files.offers_label' | translate }}</span>
+                  <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-signpost file-location__icon"></i>
+                    <span class="file-location__detail">{{ exp.distrito }} · {{ exp.direccion }}</span>
+                  </div>
                 </div>
 
+                <!-- ── Estimación de costo ───────────────────────────────── -->
+                @if (exp.costo_estimado) {
+                  <div class="file-cost mt-3">
+                    @if (exp.costo_estimado_max && exp.costo_estimado_max > exp.costo_estimado) {
+                      <span class="file-cost__value">
+                        {{ formatPrecio(exp.costo_estimado) }} – {{ formatPrecio(exp.costo_estimado_max) }}
+                      </span>
+                    } @else {
+                      <span class="file-cost__value">{{ formatPrecio(exp.costo_estimado) }}</span>
+                    }
+                  </div>
+                }
+
+                <hr class="file-divider my-3">
+
+                <!-- ── Slots de competencia + fecha ─────────────────────── -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="slot-track">
+                      @for (i of slots; track i) {
+                        <span class="slot"
+                              [class.slot--filled]="i <= exp.total_ofertas"
+                              [style.background]="i <= exp.total_ofertas ? competenciaColor(exp.total_ofertas) : undefined">
+                        </span>
+                      }
+                    </div>
+                    <span class="slot-label">{{ exp.total_ofertas }}/5</span>
+                  </div>
+                  <span class="file-date">
+                    <i class="bi bi-calendar3 me-1"></i>{{ formatFechaCorta(exp.creado_en) }}
+                  </span>
+                </div>
+
+                <!-- ── CTA ──────────────────────────────────────────────── -->
                 @if (tieneOferta(exp.id)) {
-                  <button class="btn btn-outline-success btn-sm fw-semibold mt-auto
-                                 d-flex align-items-center justify-content-center gap-2 w-100"
+                  <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold
+                                 d-flex align-items-center justify-content-center gap-2"
                           (click)="hacerOferta(exp.id)">
                     <i class="bi bi-eye"></i>{{ 'available_files.view_offer' | translate }}
                   </button>
                 } @else {
-                  <button class="btn btn-primary btn-sm fw-semibold mt-auto
-                                 d-flex align-items-center justify-content-center gap-2 w-100"
+                  <button class="btn btn-primary btn-sm w-100 fw-semibold
+                                 d-flex align-items-center justify-content-center gap-2"
                           (click)="hacerOferta(exp.id)"
                           [disabled]="exp.total_ofertas >= 5">
                     @if (exp.total_ofertas >= 5) {
@@ -212,6 +275,7 @@
             </div>
           </div>
         }
+
       </div>
 
       <app-pagination
@@ -221,16 +285,20 @@
         (pageChange)="paginaActual.set($event)">
       </app-pagination>
 
-      <div class="competition-legend mt-4">
-        <span class="competition-legend__title">{{ 'available_files.legend_title' | translate }}</span>
-        <span class="comp-badge comp-badge--low">
-          <span class="comp-dot"></span>{{ 'available_files.legend_low' | translate }}
+      <!-- ── Leyenda ────────────────────────────────────────────────────── -->
+      <div class="legend-bar mt-4">
+        <span class="legend-bar__title">{{ 'available_files.legend_title' | translate }}</span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:var(--ds-success)"></span>
+          {{ 'available_files.legend_low' | translate }}
         </span>
-        <span class="comp-badge comp-badge--mid">
-          <span class="comp-dot"></span>{{ 'available_files.legend_mid' | translate }}
+        <span class="legend-item">
+          <span class="legend-dot" style="background:var(--ds-warning)"></span>
+          {{ 'available_files.legend_mid' | translate }}
         </span>
-        <span class="comp-badge comp-badge--high">
-          <span class="comp-dot"></span>{{ 'available_files.legend_high' | translate }}
+        <span class="legend-item">
+          <span class="legend-dot" style="background:var(--ds-danger)"></span>
+          {{ 'available_files.legend_high' | translate }}
         </span>
       </div>
 

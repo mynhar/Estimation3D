@@ -75,6 +75,7 @@ export interface ExpedienteDisponible {
   id: string;
   numero: string;
   estado: string;
+  creado_en: string;
   servicio_nombre: string;
   servicio_nombre_en: string;
   servicio_nombre_fr: string;

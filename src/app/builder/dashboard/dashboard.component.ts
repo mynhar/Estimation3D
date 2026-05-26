@@ -14,13 +14,18 @@ interface EstadoCfg {
 }
 
 const OFERTA_CFG: Record<string, EstadoCfg> = {
-  pendiente: { color: '#ffc107', textColor: '#000', icon: 'bi-hourglass-split' },
-  aceptada:  { color: '#198754', textColor: '#fff', icon: 'bi-trophy'          },
-  rechazada: { color: '#dc3545', textColor: '#fff', icon: 'bi-x-circle'        },
+  pendiente: { color: '#B8862E', textColor: '#FBFAF6', icon: 'bi-hourglass-split' },
+  aceptada:  { color: '#5B7A4F', textColor: '#FBFAF6', icon: 'bi-check-circle'   },
+  rechazada: { color: '#A14545', textColor: '#FBFAF6', icon: 'bi-x-circle'       },
 };
 
+// Donut (sidebar)
 const R             = 54;
 const CIRCUMFERENCE = 2 * Math.PI * R;
+
+// Ring de progreso por oferta (viewBox 56×56, r=23)
+const RING_R    = 23;
+const RING_CIRC = 2 * Math.PI * RING_R;
 
 function calcProgress(ofertaEstado: string, expEstado: string): number {
   if (ofertaEstado === 'rechazada') return 0;
@@ -75,8 +80,11 @@ export class BuilderDashboardComponent implements OnInit {
       const count = this.ofertas().filter(o => o.estado === key).length;
       if (count === 0) continue;
       const portion = (count / total) * CIRCUMFERENCE;
-      segs.push({ color: OFERTA_CFG[key].color,
-        dasharray: `${portion} ${CIRCUMFERENCE}`, dashoffset: -offset });
+      segs.push({
+        color: OFERTA_CFG[key].color,
+        dasharray: `${portion} ${CIRCUMFERENCE}`,
+        dashoffset: -offset,
+      });
       offset += portion;
     }
     return segs;
@@ -91,6 +99,22 @@ export class BuilderDashboardComponent implements OnInit {
         : 0,
     })).filter(e => e.count > 0)
   );
+
+  // ── Ring de progreso ──────────────────────────────────────────────────────
+  readonly RING_R    = RING_R;
+  readonly RING_CIRC = RING_CIRC;
+
+  ringOffset(oferta: OfertaDashboard): string {
+    return (RING_CIRC * (1 - this.progress(oferta) / 100)).toFixed(2);
+  }
+
+  // ── Referencia de progreso ────────────────────────────────────────────────
+  readonly progressRefs = [
+    { pct: 35,  color: '#B8862E', label: 'dashboard_builder.ref_35'  },
+    { pct: 60,  color: '#5B7A4F', label: 'dashboard_builder.ref_60'  },
+    { pct: 80,  color: '#5B7A4F', label: 'dashboard_builder.ref_80'  },
+    { pct: 100, color: '#5B7A4F', label: 'dashboard_builder.ref_100' },
+  ];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   cfg(estado: string): EstadoCfg { return OFERTA_CFG[estado] ?? OFERTA_CFG['pendiente']; }

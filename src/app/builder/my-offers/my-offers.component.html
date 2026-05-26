@@ -1,31 +1,42 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+  <!-- ══════════════════════════════════════════════════════════════
+       HEADER EDITORIAL
+  ══════════════════════════════════════════════════════════════════ -->
+  <header class="card card-premium mb-4 fade-up">
+    <div class="card-body px-4 px-lg-5 py-4 d-flex align-items-start justify-content-between gap-4 flex-wrap">
       <div>
-        <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-list-ul me-1"></i>{{ 'role.constructeur' | translate }}
+        <span class="eyebrow">
+          <i class="bi bi-list-check me-1"></i>{{ 'role.constructeur' | translate }}
+        </span>
+        <h1 class="page-title title-editorial mb-1">
+          {{ 'nav.mes_offres' | translate }}
+        </h1>
+        <p class="text-ink-muted page-subtitle mb-0">
+          {{ 'my_offers.subtitle' | translate }}
         </p>
-        <h4 class="mb-1">{{ 'nav.mes_offres' | translate }}</h4>
-        <p class="text-muted small mb-0">{{ 'my_offers.subtitle' | translate }}</p>
       </div>
+
       @if (!cargando() && ofertas().length > 0) {
-        <div class="d-flex gap-2 flex-wrap align-items-center">
+        <div class="d-flex gap-2 flex-wrap align-items-center pt-1">
+          <span class="stat-pill stat-pill--neutral">
+            <i class="bi bi-send me-1"></i>
+            {{ ofertas().length }} {{ 'my_offers.total_sent' | translate }}
+          </span>
           @if (totalPendientes() > 0) {
-            <span class="kpi-pill kpi-pill--pending">
-              <i class="bi bi-hourglass-split me-1"></i>
+            <span class="stat-pill stat-pill--pending">
+              <i class="bi bi-hourglass me-1"></i>
               {{ totalPendientes() }} {{ 'state.pendiente' | translate }}
             </span>
           }
           @if (totalAceptadas() > 0) {
-            <span class="kpi-pill kpi-pill--accepted">
-              <i class="bi bi-trophy-fill me-1"></i>
+            <span class="stat-pill stat-pill--accepted">
+              <i class="bi bi-check-circle me-1"></i>
               {{ totalAceptadas() }} {{ 'state.aceptada' | translate }}
             </span>
           }
           @if (totalRechazadas() > 0) {
-            <span class="kpi-pill kpi-pill--rejected">
+            <span class="stat-pill stat-pill--rejected">
               <i class="bi bi-x-circle me-1"></i>
               {{ totalRechazadas() }} {{ 'state.rechazada' | translate }}
             </span>
@@ -35,93 +46,102 @@
     </div>
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: CARGANDO
+  ══════════════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-      {{ 'common.loading' | translate }}
+    <div class="page-loading">
+      <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       ESTADO: SIN OFERTAS
+  ══════════════════════════════════════════════════════════════════ -->
   } @else if (ofertas().length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-file-earmark-x"></i>
+    <div class="empty-wrap fade-up">
+      <div class="card card-premium text-center px-4 px-lg-5 py-5">
+        <div class="empty-icon mx-auto mb-4">
+          <i class="bi bi-clipboard2-x"></i>
         </div>
-        <p class="empty-title">{{ 'dashboard_builder.no_offers' | translate }}</p>
-        <p class="empty-text">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
-        <a routerLink="/builder/available-files" class="btn btn-primary fw-semibold">
-          <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
-        </a>
+        <h2 class="empty-title mb-2">{{ 'dashboard_builder.no_offers' | translate }}</h2>
+        <p class="text-ink-muted mb-4">{{ 'dashboard_builder.no_offers_text' | translate }}</p>
+        <div>
+          <a routerLink="/builder/available-files" class="btn btn-primary fw-semibold">
+            <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
+          </a>
+        </div>
       </div>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════
+       CON DATOS
+  ══════════════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- ── KPIs ───────────────────────────────────────────────────────────── -->
-    <div class="row g-3 mb-4">
+    <!-- ── KPI Strip ─────────────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4 fade-up" style="--delay:40ms">
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--total h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--total"><i class="bi bi-send"></i></div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'my_offers.total_sent' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0">{{ ofertas().length }}</p>
-            </div>
+        <div class="kpi-card kpi-card--neutral h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--neutral">
+            <i class="bi bi-send"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'my_offers.total_sent' | translate }}</span>
+            <span class="kpi-value">{{ ofertas().length }}</span>
           </div>
         </div>
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--pending h-100"
-             [class.kpi-card--pending-activa]="totalPendientes() > 0">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--pending"><i class="bi bi-hourglass-split"></i></div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.pending' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-warning">{{ totalPendientes() }}</p>
-            </div>
+        <div class="kpi-card kpi-card--warning h-100" [class.kpi-card--pulse]="totalPendientes() > 0">
+          <div class="kpi-icon-wrap kpi-icon-wrap--warning">
+            <i class="bi bi-hourglass"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'dashboard_builder.pending' | translate }}</span>
+            <span class="kpi-value" style="color:var(--ds-warning)">{{ totalPendientes() }}</span>
           </div>
         </div>
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--accepted h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--accepted"><i class="bi bi-trophy-fill"></i></div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.accepted' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-success">{{ totalAceptadas() }}</p>
-            </div>
+        <div class="kpi-card kpi-card--success h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--success">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'dashboard_builder.accepted' | translate }}</span>
+            <span class="kpi-value" style="color:var(--ds-success)">{{ totalAceptadas() }}</span>
           </div>
         </div>
       </div>
 
       <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--amount h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--amount"><i class="bi bi-cash-coin"></i></div>
-            <div>
-              <p class="text-muted small mb-0">{{ 'dashboard_builder.awarded_amount' | translate }}</p>
-              <p class="kpi-num-sm fw-bold mb-0 text-primary">{{ formatCosto(montoAdjudicado()) }}</p>
-            </div>
+        <div class="kpi-card kpi-card--gold h-100">
+          <div class="kpi-icon-wrap kpi-icon-wrap--gold">
+            <i class="bi bi-coin"></i>
+          </div>
+          <div class="kpi-body">
+            <span class="kpi-label">{{ 'dashboard_builder.awarded_amount' | translate }}</span>
+            <span class="kpi-value kpi-value--sm">{{ formatCosto(montoAdjudicado()) }}</span>
           </div>
         </div>
       </div>
 
     </div>
 
-    <!-- ── Barra de filtros ───────────────────────────────────────────────── -->
-    <div class="filter-bar rounded-4 mb-3 p-3">
+    <!-- ── Barra de filtros ──────────────────────────────────────────────── -->
+    <div class="filter-bar mb-3 fade-up" style="--delay:80ms">
 
       <div class="filter-search">
-        <span class="filter-search__icon"><i class="bi bi-search"></i></span>
+        <i class="bi bi-search filter-search__icon"></i>
         <input
           type="search"
-          class="form-control filter-search__input"
+          class="filter-input"
           [ngModel]="busqueda()"
           (ngModelChange)="busqueda.set($event)"
           [placeholder]="'my_offers.search_placeholder' | translate"
@@ -129,141 +149,170 @@
         />
       </div>
 
-      <div class="filter-group">
-        <span class="filter-group__label">{{ 'common.status' | translate }}</span>
-        <div class="btn-group btn-group-sm" role="group">
-          <button type="button" class="btn"
-                  [class.btn-secondary]="filtroEstado() === 'todos'"
-                  [class.btn-outline-secondary]="filtroEstado() !== 'todos'"
-                  (click)="filtroEstado.set('todos')">{{ 'common.all' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-warning]="filtroEstado() === 'pendiente'"
-                  [class.btn-outline-warning]="filtroEstado() !== 'pendiente'"
-                  (click)="filtroEstado.set('pendiente')">{{ 'state.pendiente' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-success]="filtroEstado() === 'aceptada'"
-                  [class.btn-outline-success]="filtroEstado() !== 'aceptada'"
-                  (click)="filtroEstado.set('aceptada')">{{ 'state.aceptada' | translate }}</button>
-          <button type="button" class="btn"
-                  [class.btn-danger]="filtroEstado() === 'rechazada'"
-                  [class.btn-outline-danger]="filtroEstado() !== 'rechazada'"
-                  (click)="filtroEstado.set('rechazada')">{{ 'state.rechazada' | translate }}</button>
+      <div class="filter-section">
+        <span class="filter-label">{{ 'common.status' | translate }}</span>
+        <div class="seg-group">
+          <button type="button" class="seg-btn"
+                  [class.active]="filtroEstado() === 'todos'"
+                  (click)="filtroEstado.set('todos')">
+            {{ 'common.all' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--warning"
+                  [class.active]="filtroEstado() === 'pendiente'"
+                  (click)="filtroEstado.set('pendiente')">
+            {{ 'state.pendiente' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--success"
+                  [class.active]="filtroEstado() === 'aceptada'"
+                  (click)="filtroEstado.set('aceptada')">
+            {{ 'state.aceptada' | translate }}
+          </button>
+          <button type="button" class="seg-btn seg-btn--danger"
+                  [class.active]="filtroEstado() === 'rechazada'"
+                  (click)="filtroEstado.set('rechazada')">
+            {{ 'state.rechazada' | translate }}
+          </button>
         </div>
       </div>
 
       @if (hayFiltros()) {
-        <button type="button" class="btn btn-link btn-sm text-muted filter-clear"
-                (click)="limpiarFiltros()">
+        <button type="button" class="filter-clear" (click)="limpiarFiltros()">
           <i class="bi bi-x-circle me-1"></i>{{ 'common.clear' | translate }}
         </button>
       }
 
     </div>
 
+    <!-- ── Conteo de resultados ──────────────────────────────────────────── -->
     @if (hayFiltros()) {
-      <p class="results-hint mb-3">
+      <p class="results-count mb-3 fade-up">
         <i class="bi bi-funnel me-1"></i>
-        {{ 'common.showing' | translate }} <strong>{{ ofertasFiltradas().length }}</strong>
-        {{ 'common.of' | translate }} {{ ofertas().length }} {{ 'common.offers_count' | translate }}
+        {{ 'common.showing' | translate }}
+        <strong>{{ ofertasFiltradas().length }}</strong>
+        {{ 'common.of' | translate }} {{ ofertas().length }}
+        {{ 'common.offers_count' | translate }}
       </p>
     }
 
-    <!-- ── Sin resultados tras filtro ────────────────────────────────────── -->
+    <!-- ── Sin resultados tras filtro ───────────────────────────────────── -->
     @if (ofertasFiltradas().length === 0) {
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="empty-state">
-          <div class="empty-icon">
-            <i class="bi bi-funnel-x"></i>
+      <div class="empty-wrap fade-up">
+        <div class="card card-premium text-center px-4 px-lg-5 py-5">
+          <div class="empty-icon mx-auto mb-4">
+            <i class="bi bi-funnel"></i>
           </div>
-          <p class="empty-title">{{ 'common.no_results' | translate }}</p>
-          <p class="empty-text">{{ 'my_offers.no_match' | translate }}</p>
-          <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-          </button>
+          <h2 class="empty-title mb-2">{{ 'common.no_results' | translate }}</h2>
+          <p class="text-ink-muted mb-4">{{ 'my_offers.no_match' | translate }}</p>
+          <div>
+            <button class="btn btn-outline-secondary" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          </div>
         </div>
       </div>
 
-    <!-- ── Cuadrícula de tarjetas ─────────────────────────────────────────── -->
+    <!-- ── Cuadrícula de ofertas ─────────────────────────────────────────── -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
-        @for (oferta of ofertasFiltradas(); track oferta.id) {
-          <div class="col">
-            <div class="oferta-card h-100"
-                 [class.oferta-card--aceptada]="oferta.estado === 'aceptada'"
-                 [class.oferta-card--rechazada]="oferta.estado === 'rechazada'"
-                 [class.oferta-card--pendiente]="oferta.estado === 'pendiente'"
-                 [style.--estado-color]="estadoColor(oferta.estado)">
-              <div class="oferta-accent"></div>
-              <div class="oferta-body d-flex flex-column">
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3 fade-up" style="--delay:120ms">
 
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                  <span class="oferta-num">{{ oferta.expediente_numero }}</span>
-                  <span class="badge oferta-badge {{ badgeClass(oferta.estado) }}">
+        @for (oferta of ofertasPaginadas(); track oferta.id) {
+          <div class="col">
+            <div class="offer-card h-100"
+                 [class.offer-card--pending]="oferta.estado === 'pendiente'"
+                 [class.offer-card--accepted]="oferta.estado === 'aceptada'"
+                 [class.offer-card--rejected]="oferta.estado === 'rechazada'">
+
+              <div class="offer-card__body d-flex flex-column">
+
+                <!-- ── Fila 1: número + estado + fecha ──────────────────── -->
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                  <span class="offer-num">{{ oferta.expediente_numero }}</span>
+                  <span class="offer-badge"
+                        [class.offer-badge--pending]="oferta.estado === 'pendiente'"
+                        [class.offer-badge--accepted]="oferta.estado === 'aceptada'"
+                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'">
                     <i class="bi {{ estadoIcon(oferta.estado) }} me-1"></i>
                     {{ ('state.' + oferta.estado) | translate }}
                   </span>
+                  <span class="offer-date ms-auto">
+                    <i class="bi bi-calendar3 me-1"></i>{{ formatFechaCorta(oferta.creado_en) }}
+                  </span>
                 </div>
 
-                <p class="oferta-servicio mb-2">{{ servicioNombre(oferta) }}</p>
+                <!-- ── Servicio ──────────────────────────────────────────── -->
+                <h3 class="offer-servicio mb-3">{{ servicioNombre(oferta) }}</h3>
 
-                <p class="oferta-meta mb-1">
-                  <i class="bi bi-geo-alt me-1"></i>
-                  {{ oferta.direccion }}{{ oferta.referencia ? ' · ' + oferta.referencia : '' }}
-                </p>
-                <p class="oferta-meta mb-0">
-                  <i class="bi bi-map me-1"></i>
-                  {{ oferta.provincia }}, {{ oferta.canton }}, {{ oferta.distrito }}
-                </p>
+                <!-- ── Ubicación ─────────────────────────────────────────── -->
+                <div class="offer-location mb-auto">
+                  <div class="d-flex align-items-start gap-2 mb-1">
+                    <i class="bi bi-geo-alt offer-location__icon"></i>
+                    <span class="offer-location__main">{{ oferta.provincia }}, {{ oferta.canton }}</span>
+                  </div>
+                  <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-signpost offer-location__icon"></i>
+                    <span class="offer-location__detail">
+                      {{ oferta.distrito }} · {{ oferta.direccion }}
+                    </span>
+                  </div>
+                </div>
 
+                <!-- ── Nota de estado ────────────────────────────────────── -->
                 @if (oferta.estado === 'aceptada') {
-                  <div class="estado-note estado-note--success mt-2">
-                    <i class="bi bi-trophy-fill me-1"></i>{{ 'offer.accepted_note' | translate }}
+                  <div class="offer-status-note offer-status-note--accepted mt-3">
+                    <i class="bi bi-check-circle me-1"></i>{{ 'offer.accepted_note' | translate }}
                   </div>
                 } @else if (oferta.estado === 'rechazada') {
-                  <div class="estado-note estado-note--muted mt-2">
+                  <div class="offer-status-note offer-status-note--rejected mt-3">
                     <i class="bi bi-info-circle me-1"></i>{{ 'offer.rejected_note' | translate }}
                   </div>
                 }
 
-                <hr class="oferta-divider my-3" />
+                <hr class="offer-divider my-3">
 
-                <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
+                <!-- ── Precio + Plazos ───────────────────────────────────── -->
+                <div class="d-flex align-items-start justify-content-between gap-2 mb-4 flex-wrap">
                   <div>
-                    <p class="oferta-price-label mb-0">{{ 'my_offers.my_price' | translate }}</p>
-                    <p class="oferta-price fw-bold mb-0">{{ formatCosto(oferta.precio) }}</p>
+                    <p class="offer-detail-label mb-0">{{ 'my_offers.my_price' | translate }}</p>
+                    <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
                   </div>
-                  <div class="text-end">
-                    <p class="oferta-price-label mb-0">{{ 'my_offers.start_deadline' | translate }}</p>
-                    <p class="oferta-date mb-0">
-                      {{ formatFecha(oferta.fecha_inicio) }}
-                      @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
-                        <span class="text-muted">
-                          · {{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}
-                        </span>
-                      }
-                    </p>
-                  </div>
+                  @if (oferta.fecha_inicio) {
+                    <div class="text-end">
+                      <p class="offer-detail-label mb-0">{{ 'my_offers.start_deadline' | translate }}</p>
+                      <p class="offer-detail-value mb-0">
+                        {{ formatFecha(oferta.fecha_inicio) }}
+                        @if (oferta.plazo_semanas_min || oferta.plazo_semanas_max) {
+                          <br><span class="text-ink-muted" style="font-size:var(--ds-text-2xs)">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</span>
+                        }
+                      </p>
+                    </div>
+                  }
                 </div>
 
-                <button
-                  class="btn btn-sm fw-semibold mt-auto w-100
-                         d-flex align-items-center justify-content-center gap-2"
-                  [class.btn-outline-primary]="oferta.estado === 'pendiente'"
-                  [class.btn-outline-success]="oferta.estado === 'aceptada'"
-                  [class.btn-outline-secondary]="oferta.estado === 'rechazada'"
-                  (click)="ver(oferta.id)">
-                  <i class="bi bi-eye"></i>{{ 'offer.my_offer' | translate }}
+                <!-- ── CTA ──────────────────────────────────────────────── -->
+                <button class="offer-cta mt-auto"
+                        [class.offer-cta--pending]="oferta.estado === 'pendiente'"
+                        [class.offer-cta--accepted]="oferta.estado === 'aceptada'"
+                        [class.offer-cta--rejected]="oferta.estado === 'rechazada'"
+                        type="button" (click)="ver(oferta.id)">
+                  <i class="bi bi-eye me-1"></i>{{ 'offer.my_offer' | translate }}
                 </button>
 
               </div>
             </div>
           </div>
         }
+
       </div>
 
+      <app-pagination
+        [total]="ofertasFiltradas().length"
+        [page]="paginaActual()"
+        [pageSize]="POR_PAGINA"
+        (pageChange)="paginaActual.set($event)">
+      </app-pagination>
+
       <div class="mt-4 text-center">
-        <a routerLink="/builder/available-files"
-           class="btn btn-outline-primary btn-sm fw-semibold">
+        <a routerLink="/builder/available-files" class="btn btn-outline-secondary">
           <i class="bi bi-search me-1"></i>{{ 'common.see_available' | translate }}
         </a>
       </div>

@@ -44,32 +44,35 @@ export class AvailableFilesComponent implements OnInit {
     this.filtroOferta()      !== 'todos'
   );
 
+  // Filtra y ordena por creado_en descendente (más recientes primero)
   expedientesFiltrados = computed(() => {
     const q  = this.busqueda().toLowerCase().trim();
     const fc = this.filtroCompetencia();
     const fo = this.filtroOferta();
 
-    return this.expedientes().filter(exp => {
-      if (q && !(
-        exp.numero.toLowerCase().includes(q)             ||
-        exp.servicio_nombre.toLowerCase().includes(q)    ||
-        exp.servicio_nombre_en.toLowerCase().includes(q) ||
-        exp.servicio_nombre_fr.toLowerCase().includes(q) ||
-        exp.provincia.toLowerCase().includes(q)          ||
-        exp.canton.toLowerCase().includes(q)             ||
-        exp.direccion.toLowerCase().includes(q)
-      )) return false;
+    return this.expedientes()
+      .filter(exp => {
+        if (q && !(
+          exp.numero.toLowerCase().includes(q)             ||
+          exp.servicio_nombre.toLowerCase().includes(q)    ||
+          exp.servicio_nombre_en.toLowerCase().includes(q) ||
+          exp.servicio_nombre_fr.toLowerCase().includes(q) ||
+          exp.provincia.toLowerCase().includes(q)          ||
+          exp.canton.toLowerCase().includes(q)             ||
+          exp.direccion.toLowerCase().includes(q)
+        )) return false;
 
-      const n = exp.total_ofertas;
-      if (fc === 'baja'  && n  >  1)          return false;
-      if (fc === 'media' && (n < 2 || n > 3)) return false;
-      if (fc === 'alta'  && n  <  4)          return false;
+        const n = exp.total_ofertas;
+        if (fc === 'baja'  && n  >  1)          return false;
+        if (fc === 'media' && (n < 2 || n > 3)) return false;
+        if (fc === 'alta'  && n  <  4)          return false;
 
-      if (fo === 'sin' &&  this.tieneOferta(exp.id)) return false;
-      if (fo === 'con' && !this.tieneOferta(exp.id)) return false;
+        if (fo === 'sin' &&  this.tieneOferta(exp.id)) return false;
+        if (fo === 'con' && !this.tieneOferta(exp.id)) return false;
 
-      return true;
-    });
+        return true;
+      })
+      .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
   });
 
   expedientesPaginados = computed(() => {
@@ -117,22 +120,30 @@ export class AvailableFilesComponent implements OnInit {
     return this.ofertasHechas().has(expedienteId);
   }
 
+  // Devuelve true si el expediente fue creado en los últimos 7 días
+  esReciente(creado_en: string): boolean {
+    if (!creado_en) return false;
+    const d = new Date(creado_en);
+    return (Date.now() - d.getTime()) < 7 * 24 * 60 * 60 * 1000;
+  }
+
   competenciaLabel(n: number): string {
     if (n <= 1) return 'competition.low';
     if (n <= 3) return 'competition.mid';
     return 'competition.high';
   }
 
+  // Devuelve hex que coincide exactamente con los tokens DS semánticos
   competenciaColor(n: number): string {
-    if (n <= 1) return '#16a34a';
-    if (n <= 3) return '#d97706';
-    return '#dc3545';
+    if (n <= 1) return '#5B7A4F'; // --ds-success
+    if (n <= 3) return '#B8862E'; // --ds-warning
+    return '#A14545';              // --ds-danger
   }
 
-  competenciaBadge(n: number): string {
-    if (n <= 1) return 'text-bg-success';
-    if (n <= 3) return 'text-bg-warning';
-    return 'text-bg-danger';
+  competenciaClass(n: number): string {
+    if (n <= 1) return 'cbadge--low';
+    if (n <= 3) return 'cbadge--mid';
+    return 'cbadge--high';
   }
 
   servicioNombre(exp: ExpedienteDisponible): string {
@@ -140,6 +151,19 @@ export class AvailableFilesComponent implements OnInit {
     if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
     if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
     return exp.servicio_nombre;
+  }
+
+  formatFechaCorta(valor: string): string {
+    if (!valor) return '—';
+    const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
+    if (isNaN(d.getTime())) return '—';
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+  }
+
+  formatPrecio(v: number): string {
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(v);
   }
 
   limpiarFiltros() {
