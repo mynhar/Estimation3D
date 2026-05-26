@@ -1,201 +1,213 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="fue-root">
 
-  <!-- ── Header ────────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <h4 class="fw-bold mb-1">{{ 'files_under_estimation.title' | translate }}</h4>
-        <p class="text-muted small mb-0">
-          {{ 'files_under_estimation.subtitle' | translate }}
-        </p>
-      </div>
-      <div class="d-flex gap-2 flex-wrap">
-        <span class="kpi-pill kpi-pill--total">
-          <i class="bi bi-clipboard-data me-1"></i>
-          {{ expedientes().length }} {{ 'files_under_estimation.assigned' | translate }}
-        </span>
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="fue-header">
+    <div class="fue-header__content">
+      <p class="fue-header__eyebrow">
+        <i class="bi bi-clipboard-data"></i>
+        {{ 'role.estimateur' | translate }}
+      </p>
+      <h1 class="fue-header__title">{{ 'files_under_estimation.title' | translate }}</h1>
+      <p class="fue-header__sub">{{ 'files_under_estimation.subtitle' | translate }}</p>
+    </div>
+    @if (!cargando() && expedientes().length > 0) {
+      <div class="fue-kpis">
+        <div class="fue-kpi">
+          <span class="fue-kpi__val">{{ expedientes().length }}</span>
+          <span class="fue-kpi__label">{{ 'files_under_estimation.assigned' | translate }}</span>
+        </div>
         @if (urgentesCount() > 0) {
-          <span class="kpi-pill kpi-pill--urgente">
-            <i class="bi bi-exclamation-triangle me-1"></i>
-            {{ urgentesCount() }} {{ 'files_under_estimation.urgent' | translate }}
-          </span>
+          <div class="fue-kpi fue-kpi--urgente">
+            <span class="fue-kpi__val">{{ urgentesCount() }}</span>
+            <span class="fue-kpi__label">{{ 'files_under_estimation.urgent' | translate }}</span>
+          </div>
         }
       </div>
-    </div>
+    }
   </header>
 
-  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+    <div class="fue-loading">
+      <span class="fue-spinner" role="status"></span>
       {{ 'files_under_estimation.loading' | translate }}
     </div>
 
+  <!-- ── Sin expedientes ──────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
-
-    <!-- ── Empty ─────────────────────────────────────────────────────────── -->
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-clipboard-check"></i>
-        </div>
-        <h5 class="empty-title">{{ 'files_under_estimation.empty_title' | translate }}</h5>
-        <p class="empty-text">
-          {{ 'files_under_estimation.empty_text' | translate }}
-          <strong>{{ 'nav.a_estimer' | translate }}</strong>
-          {{ 'files_under_estimation.empty_text_after' | translate }}
-        </p>
-      </div>
+    <div class="fue-empty">
+      <div class="fue-empty__icon"><i class="bi bi-clipboard-check"></i></div>
+      <p class="fue-empty__title">{{ 'files_under_estimation.empty_title' | translate }}</p>
+      <p class="fue-empty__text">
+        {{ 'files_under_estimation.empty_text' | translate }}
+        <strong>{{ 'nav.a_estimer' | translate }}</strong>
+        {{ 'files_under_estimation.empty_text_after' | translate }}
+      </p>
     </div>
 
+  <!-- ── Con expedientes ──────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── Filter bar ─────────────────────────────────────────────────────── -->
-    <div class="filter-bar rounded-3 p-3 mb-4 d-flex align-items-center gap-3 flex-wrap">
-      <div class="search-wrap flex-grow-1">
-        <i class="bi bi-search search-icon"></i>
-        <input class="form-control search-input ps-5"
-               type="search"
+    <!-- Toolbar -->
+    <div class="fue-toolbar">
+      <div class="fue-search">
+        <i class="bi bi-search fue-search__icon"></i>
+        <input type="search" class="fue-search__input"
                [placeholder]="'files_under_estimation.search_placeholder' | translate"
                [ngModel]="busqueda()"
                (ngModelChange)="busqueda.set($event)" />
       </div>
 
-      <button class="btn filter-btn d-flex align-items-center gap-2"
-              [class.filter-btn--active]="soloUrgentes()"
+      <button class="fue-chip"
+              [class.fue-chip--active]="soloUrgentes()"
               (click)="soloUrgentes.set(!soloUrgentes())">
         <i class="bi bi-exclamation-triangle"></i>
         {{ 'files_under_estimation.urgent_only' | translate }}
         @if (urgentesCount() > 0) {
-          <span class="badge rounded-pill"
-                [class.bg-danger]="soloUrgentes()"
-                [class.bg-secondary]="!soloUrgentes()">
-            {{ urgentesCount() }}
-          </span>
+          <span class="fue-chip__badge">{{ urgentesCount() }}</span>
         }
       </button>
 
       @if (hayFiltros()) {
-        <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
-          <i class="bi bi-x me-1"></i>{{ 'common.clear' | translate }}
+        <button class="fue-clear" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'common.clear' | translate }}
         </button>
       }
     </div>
 
-    <!-- ── Sin resultados de búsqueda ────────────────────────────────────── -->
+    <!-- Results bar -->
+    @if (hayFiltros()) {
+      <p class="fue-results-bar">
+        {{ 'common.showing' | translate }}
+        <strong>{{ expedientesFiltrados().length }}</strong>
+        {{ 'common.of' | translate }} {{ expedientes().length }}
+        {{ 'files_under_estimation.assigned' | translate }}
+      </p>
+    }
+
+    <!-- Sin resultados con filtro -->
     @if (expedientesFiltrados().length === 0) {
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="empty-inline">
-          <i class="bi bi-search fs-2 mb-2 text-muted"></i>
-          <p class="mb-1 fw-medium">{{ 'common.no_results' | translate }}</p>
-          <p class="text-muted small mb-0">
-            {{ 'files_under_estimation.no_filter_text' | translate }}
-          </p>
-        </div>
+      <div class="fue-empty-inline">
+        <i class="bi bi-search"></i>
+        <p class="fue-empty-inline__title">{{ 'common.no_results' | translate }}</p>
+        <p class="fue-empty-inline__text">{{ 'files_under_estimation.no_filter_text' | translate }}</p>
+        <button class="fue-btn-outline" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'common.clear_filters' | translate }}
+        </button>
       </div>
 
+    <!-- Grid de cards -->
     } @else {
+      <div class="fue-grid">
+        @for (exp of expedientesFiltrados(); track exp.id; let idx = $index) {
+          <article class="fue-card"
+                   [class.fue-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                   [class.fue-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
+                   [class.fue-card--proxima]="urgencia(exp.fecha_visita) === 'proxima'"
+                   [class.fue-card--confirming]="confirmandoId() === exp.id"
+                   [class.fue-card--reciente]="idx === 0 && !hayFiltros()">
 
-      <!-- ── Card grid ──────────────────────────────────────────────────── -->
-      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
-        @for (exp of expedientesFiltrados(); track exp.id) {
-          <div class="col">
-            <div class="work-card d-flex flex-column h-100"
-                 [class.work-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
-                 [class.work-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
-                 [class.work-card--confirming]="confirmandoId() === exp.id">
-
-              <!-- Número + badge urgencia -->
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="work-num">{{ exp.numero }}</span>
-
+            <!-- Head: num + badges -->
+            <div class="fue-card__head">
+              <span class="fue-card__num">{{ exp.numero }}</span>
+              <div class="fue-card__badges">
                 @if (urgencia(exp.fecha_visita) === 'vencida') {
-                  <span class="badge bg-danger-subtle text-danger urg-badge">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'common.urgency_expired' | translate }}
+                  <span class="fue-badge fue-badge--danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ 'common.urgency_expired' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'hoy') {
-                  <span class="badge bg-warning-subtle text-warning-emphasis urg-badge">
-                    <i class="bi bi-clock-fill me-1"></i>{{ 'common.urgency_today' | translate }}
+                  <span class="fue-badge fue-badge--warning">
+                    <i class="bi bi-clock"></i>
+                    {{ 'common.urgency_today' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'proxima') {
-                  <span class="badge urg-badge--proxima urg-badge">
-                    <i class="bi bi-calendar-event me-1"></i>{{ 'common.urgency_upcoming' | translate }}
+                  <span class="fue-badge fue-badge--info">
+                    <i class="bi bi-calendar-event"></i>
+                    {{ 'common.urgency_upcoming' | translate }}
                   </span>
                 } @else {
-                  <span class="badge bg-success-subtle text-success urg-badge">
-                    <i class="bi bi-person-workspace me-1"></i>{{ 'files_under_estimation.in_progress' | translate }}
+                  <span class="fue-badge fue-badge--success">
+                    <i class="bi bi-person-workspace"></i>
+                    {{ 'files_under_estimation.in_progress' | translate }}
+                  </span>
+                }
+                @if (idx === 0 && !hayFiltros()) {
+                  <span class="fue-badge fue-badge--reciente">
+                    {{ 'common.recent' | translate }}
                   </span>
                 }
               </div>
-
-              <!-- Servicio -->
-              <p class="work-servicio mb-2">{{ exp.servicio_nombre }}</p>
-
-              <!-- Cliente + ubicación -->
-              <div class="work-info mb-3">
-                <div class="work-meta">
-                  <i class="bi bi-person text-muted me-1"></i>{{ exp.cliente_nombre }}
-                </div>
-                <div class="work-meta">
-                  <i class="bi bi-geo-alt text-muted me-1"></i>
-                  {{ exp.provincia }}, {{ exp.canton }}
-                </div>
-              </div>
-
-              <!-- Fecha visita planificada -->
-              <div class="work-fecha-row d-flex align-items-center gap-2 mb-3"
-                   [class.work-fecha-row--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
-                   [class.work-fecha-row--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
-                <i class="bi bi-calendar3 flex-shrink-0"></i>
-                <span>{{ formatFecha(exp.fecha_visita) }}</span>
-                @if (formatHora(exp.fecha_visita) !== '—') {
-                  <span class="ms-auto fw-semibold">{{ formatHora(exp.fecha_visita) }}</span>
-                }
-              </div>
-
-              <!-- Acciones -->
-              <div class="d-flex gap-2 mt-auto">
-                <button class="btn btn-primary btn-sm flex-grow-1"
-                        (click)="estimar(exp.id)">
-                  <i class="bi bi-pencil-square me-1"></i>{{ 'files_under_estimation.continue_btn' | translate }}
-                </button>
-
-                @if (confirmandoId() === exp.id) {
-                  <button class="btn btn-danger btn-sm liberar-confirm-btn flex-shrink-0"
-                          (click)="confirmarLiberar(exp.id)"
-                          [disabled]="liberandoId() === exp.id"
-                          [title]="'files_under_estimation.confirm_release_title' | translate">
-                    @if (liberandoId() === exp.id) {
-                      <span class="spinner-border spinner-border-sm"></span>
-                    } @else {
-                      <i class="bi bi-check2-circle"></i>
-                    }
-                  </button>
-                } @else {
-                  <button class="btn btn-outline-secondary btn-sm liberar-btn flex-shrink-0"
-                          (click)="confirmarLiberar(exp.id)"
-                          [title]="'files_under_estimation.release_title' | translate">
-                    <i class="bi bi-x-lg"></i>
-                  </button>
-                }
-              </div>
-
-              <!-- Aviso de confirmación de liberar -->
-              @if (confirmandoId() === exp.id) {
-                <div class="confirm-msg mt-2">
-                  <i class="bi bi-exclamation-diamond me-1"></i>
-                  {{ 'files_under_estimation.confirm_msg_before' | translate }}
-                  <i class="bi bi-check2-circle"></i>
-                  {{ 'files_under_estimation.confirm_msg_after' | translate }}
-                </div>
-              }
-
             </div>
-          </div>
+
+            <!-- Servicio -->
+            <h2 class="fue-card__service">{{ exp.servicio_nombre }}</h2>
+
+            <!-- Meta -->
+            <div class="fue-card__meta">
+              <span class="fue-meta-item">
+                <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
+              </span>
+              <span class="fue-meta-item">
+                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
+              </span>
+            </div>
+
+            <!-- Visit date -->
+            <div class="fue-card__fecha"
+                 [class.fue-card__fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                 [class.fue-card__fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+              <i class="bi bi-calendar3"></i>
+              <span>{{ formatFecha(exp.fecha_visita) }}</span>
+              @if (formatHora(exp.fecha_visita) !== '—') {
+                <span class="fue-card__hora">{{ formatHora(exp.fecha_visita) }}</span>
+              }
+            </div>
+
+            <!-- Acciones -->
+            <div class="fue-actions">
+              <button class="fue-btn-continue" (click)="estimar(exp.id)">
+                <i class="bi bi-pencil-square"></i>
+                {{ 'files_under_estimation.continue_btn' | translate }}
+              </button>
+
+              @if (confirmandoId() === exp.id) {
+                <button class="fue-btn-release fue-btn-release--confirm"
+                        (click)="confirmarLiberar(exp.id)"
+                        [disabled]="liberandoId() === exp.id"
+                        [title]="'files_under_estimation.confirm_release_title' | translate">
+                  @if (liberandoId() === exp.id) {
+                    <span class="fue-spinner-sm"></span>
+                  } @else {
+                    <i class="bi bi-check2-circle"></i>
+                  }
+                </button>
+              } @else {
+                <button class="fue-btn-release"
+                        (click)="confirmarLiberar(exp.id)"
+                        [title]="'files_under_estimation.release_title' | translate">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              }
+            </div>
+
+            <!-- Aviso de confirmación -->
+            @if (confirmandoId() === exp.id) {
+              <div class="fue-confirm-msg">
+                <i class="bi bi-exclamation-diamond"></i>
+                {{ 'files_under_estimation.confirm_msg_before' | translate }}
+                <i class="bi bi-check2-circle"></i>
+                {{ 'files_under_estimation.confirm_msg_after' | translate }}
+              </div>
+            }
+
+          </article>
         }
       </div>
-
     }
+
   }
 
 </div>

@@ -242,6 +242,15 @@ export class EstimatedFileComponent implements OnInit {
     this.expandedIndex.set(this.expandedIndex() === i ? null : i);
   }
 
+  get servicioNombre(): string {
+    const d    = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
+  }
+
   badgeClass(estado: string | undefined): string {
     return ESTADO_BADGE_ESTIMADOR[estado ?? ''] ?? 'bg-light text-dark';
   }
@@ -301,56 +310,241 @@ export class EstimatedFileComponent implements OnInit {
     const est = this.estimacion();
     if (!d) return;
 
-    const t = (key: string) => this.translate.instant(key);
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
-    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    const t        = (key: string) => this.translate.instant(key);
+    const now      = new Date();
+    const printDate = this.formatFecha(now.toISOString());
+    const lang     = this.translate.currentLang ?? 'es';
 
-    const costoStr = est?.costo_estimado != null
-      ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'CRC' }).format(est.costo_estimado)
-      : '—';
+    const costoMinStr = this.formatCosto(est?.costo_estimado ?? null);
+    const costoMaxStr = this.formatCosto(est?.costo_estimado_max ?? null);
+    const hasCosto    = est?.costo_estimado != null;
+    const hasMax      = est?.costo_estimado_max != null;
 
-    const docEstimacion = est ? `
-      <div class="row g-4">
-        <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.real_visit_date')}</p><p class="fw-semibold mb-0">${this.formatFecha(est.fecha_visita_real)}</p></div>
-        <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.check_visit_time')}</p><p class="fw-semibold mb-0">${this.formatHora(est.fecha_visita_real)}</p></div>
-        <div class="col-12"><hr class="my-0"/></div>
-        <div class="col-12"><p class="text-muted small mb-1">${t('estimator_file.problems_observed')}</p><p class="mb-0" style="white-space:pre-wrap">${est.descripcion_problemas || '—'}</p></div>
-        <div class="col-6"><p class="text-muted small mb-1">${t('file.estimated_cost')}</p><p class="fw-semibold mb-0">${costoStr}</p></div>
-        <div class="col-12"><p class="text-muted small mb-1">${t('estimator_file.internal_notes')}</p><p class="mb-0" style="white-space:pre-wrap">${est.notas_internas || '—'}</p></div>
-      </div>` : `<p class="text-muted">${t('estimator_file.print_no_doc')}</p>`;
+    const costBlock = hasCosto ? `
+      <div class="cost-block">
+        <div class="cost-block__bar"></div>
+        <p class="cost-block__label">${t('file.estimated_cost')}</p>
+        <div class="cost-block__row">
+          <div class="cost-item">
+            <span class="cost-item__tag">${t('common.min') || 'Mín'}</span>
+            <span class="cost-item__value">${costoMinStr}</span>
+          </div>
+          ${hasMax ? `<div class="cost-item__sep">→</div>
+          <div class="cost-item">
+            <span class="cost-item__tag">${t('common.max') || 'Máx'}</span>
+            <span class="cost-item__value">${costoMaxStr}</span>
+          </div>` : ''}
+        </div>
+      </div>` : '';
+
+    const visitSection = est ? `
+      <div class="section">
+        <h3 class="section__title">${t('estimator_file.estimation_doc_title')}</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-item__label">${t('estimator_file.real_visit_date')}</span>
+            <span class="info-item__value">${this.formatFecha(est.fecha_visita_real)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">${t('estimator_file.check_visit_time')}</span>
+            <span class="info-item__value">${this.formatHora(est.fecha_visita_real)}</span>
+          </div>
+        </div>
+        ${est.descripcion_problemas ? `
+        <div class="prose-block">
+          <p class="prose-block__label">${t('estimator_file.problems_observed')}</p>
+          <p class="prose-block__text">${est.descripcion_problemas.replace(/\n/g, '<br>')}</p>
+        </div>` : ''}
+        ${est.notas_internas ? `
+        <div class="prose-block">
+          <p class="prose-block__label">${t('estimator_file.internal_notes')}</p>
+          <p class="prose-block__text">${est.notas_internas.replace(/\n/g, '<br>')}</p>
+        </div>` : ''}
+      </div>` : `
+      <div class="section">
+        <h3 class="section__title">${t('estimator_file.estimation_doc_title')}</h3>
+        <p class="empty-note">${t('estimator_file.print_no_doc')}</p>
+      </div>`;
 
     const html = `<!DOCTYPE html>
-<html lang="${this.translate.currentLang}">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8">
-  <title>${t('file.exp_abbr')} ${d.numero}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
-  <style>body{padding:2rem} @page{margin:1.5cm} .card{border:1px solid #dee2e6!important}</style>
+  <title>${t('file.exp_abbr')} ${d.numero} — Estimation3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: A4; margin: 2cm; }
+    :root {
+      --gold:        #D4B96E;
+      --gold-faint:  #FBF7EE;
+      --gold-soft:   #E8D9AA;
+      --ink:         #1A1A1A;
+      --ink-2:       #3D3D3D;
+      --ink-3:       #6B6B6B;
+      --surface:     #FBFAF6;
+      --border:      #E8E5DE;
+      --bg:          #F5F3EE;
+      --ff-display:  'Fraunces', Georgia, serif;
+      --ff-body:     'DM Sans', system-ui, sans-serif;
+    }
+    body {
+      font-family: var(--ff-body);
+      font-size: 11pt;
+      color: var(--ink);
+      background: #fff;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    /* ── Letterhead ── */
+    .letterhead {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--gold);
+      margin-bottom: 28px;
+    }
+    .letterhead__brand { font-family: var(--ff-display); font-size: 22pt; font-weight: 300; color: var(--ink); letter-spacing: -0.5px; }
+    .letterhead__brand span { font-weight: 600; color: var(--gold); }
+    .letterhead__meta { text-align: right; font-size: 8.5pt; color: var(--ink-3); line-height: 1.6; }
+    .letterhead__meta strong { color: var(--ink-2); font-weight: 500; }
+    /* ── Title block ── */
+    .title-block {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .title-block__bar { width: 4px; background: var(--gold); border-radius: 2px; flex-shrink: 0; }
+    .title-block__eyebrow { font-size: 7.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink-3); margin-bottom: 4px; }
+    .title-block__name { font-family: var(--ff-display); font-size: 18pt; font-weight: 300; color: var(--ink); line-height: 1.2; }
+    .title-block__badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 7.5pt; font-weight: 500; border: 1px solid var(--border); color: var(--ink-2); background: var(--bg); }
+    .badge--gold { background: var(--gold-faint); border-color: var(--gold-soft); color: var(--ink); }
+    /* ── Sections ── */
+    .section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+    .section__title { font-family: var(--ff-display); font-size: 11pt; font-weight: 400; color: var(--ink); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    /* ── Info grid ── */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; }
+    .info-grid--wide { grid-template-columns: 2fr 1fr 1fr; }
+    .info-item { display: flex; flex-direction: column; gap: 2px; }
+    .info-item__label { font-size: 7.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-3); }
+    .info-item__value { font-size: 10pt; font-weight: 500; color: var(--ink); }
+    .info-item--full { grid-column: 1 / -1; }
+    .info-divider { grid-column: 1 / -1; height: 1px; background: var(--border); }
+    /* ── Cost block ── */
+    .cost-block {
+      position: relative;
+      background: var(--gold-faint);
+      border: 1px solid var(--gold-soft);
+      border-radius: 8px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .cost-block__bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+    .cost-block__label { font-size: 7.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); margin-bottom: 10px; }
+    .cost-block__row { display: flex; align-items: center; gap: 20px; }
+    .cost-item { display: flex; flex-direction: column; gap: 2px; }
+    .cost-item__tag { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-3); }
+    .cost-item__value { font-family: var(--ff-display); font-size: 20pt; font-weight: 300; color: var(--ink); line-height: 1; }
+    .cost-item__sep { font-size: 14pt; color: var(--gold); font-weight: 300; align-self: flex-end; margin-bottom: 4px; }
+    /* ── Prose blocks ── */
+    .prose-block { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .prose-block__label { font-size: 7.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink-3); margin-bottom: 6px; }
+    .prose-block__text { font-size: 10pt; color: var(--ink-2); line-height: 1.6; }
+    /* ── Footer ── */
+    .footer {
+      margin-top: 32px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.5pt;
+      color: var(--ink-3);
+    }
+    .footer__brand { font-family: var(--ff-display); font-size: 9pt; color: var(--ink-3); font-weight: 300; }
+    .footer__brand span { color: var(--gold); }
+    .empty-note { font-size: 10pt; color: var(--ink-3); font-style: italic; }
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; }
+      .section { break-inside: avoid; }
+      .cost-block { break-inside: avoid; }
+      .title-block { break-inside: avoid; }
+    }
+  </style>
 </head>
 <body>
-  <div class="container" style="max-width:720px">
-    <h4 class="fw-semibold mb-1">${t('file.exp_abbr')} ${d.numero} — ${t('estimator_file.print_estimation_completed')}</h4>
-    <p class="text-muted mb-4">${t('role.estimador')}: <strong>${d.estimador_nombre}</strong></p>
-    <div class="card mb-4"><div class="card-body p-4"><div class="row g-4">
-      <div class="col-6"><p class="text-muted small mb-1">${t('file.number')}</p><p class="fw-semibold mb-0">${d.numero}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('file.service')}</p><p class="fw-semibold mb-0">${d.servicio_nombre}</p></div>
-      <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('builder_offer.client_label')}</p><p class="fw-semibold mb-0">${d.cliente_nombre}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('common.phone')}</p><p class="fw-semibold mb-0">${d.cliente_telefono || '—'}</p></div>
-      <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-8"><p class="text-muted small mb-1">${t('common.address')}</p>${this.formatDireccionCA(d)}</div>
-      <div class="col-4"><p class="text-muted small mb-1">${t('file.reference')}</p><p class="fw-semibold mb-0">${d.referencia || '—'}</p></div>
-      <div class="col-12"><hr class="my-0"/></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.scheduled_visit')}</p><p class="fw-semibold mb-0">${this.formatFecha(d.fecha_visita)}</p></div>
-      <div class="col-6"><p class="text-muted small mb-1">${t('estimator_file.check_visit_time')}</p><p class="fw-semibold mb-0">${this.formatHora(d.fecha_visita)}</p></div>
-    </div></div></div>
-    <div class="card"><div class="card-body p-4">
-      <h5 class="fw-semibold mb-4">${t('estimator_file.estimation_doc_title')}</h5>
-      ${docEstimacion}
-    </div></div>
+  <header class="letterhead">
+    <div class="letterhead__brand">Estimation<span>3D</span></div>
+    <div class="letterhead__meta">
+      <strong>${t('file.exp_abbr')} ${d.numero}</strong><br>
+      ${printDate}
+    </div>
+  </header>
+
+  <div class="title-block">
+    <div class="title-block__bar"></div>
+    <div>
+      <p class="title-block__eyebrow">${t('file.service')}</p>
+      <h1 class="title-block__name">${this.servicioNombre}</h1>
+      <div class="title-block__badges">
+        <span class="badge badge--gold">${t('file.exp_abbr')} ${d.numero}</span>
+        <span class="badge">${d.estado}</span>
+        <span class="badge">${t('role.estimador')}: ${d.estimador_nombre}</span>
+      </div>
+    </div>
   </div>
-  <script>window.addEventListener('load',()=>window.print())</script>
-</body></html>`;
+
+  ${costBlock}
+
+  <div class="section">
+    <h3 class="section__title">${t('builder_offer.client_label')}</h3>
+    <div class="info-grid info-grid--wide">
+      <div class="info-item">
+        <span class="info-item__label">${t('builder_offer.client_label')}</span>
+        <span class="info-item__value">${d.cliente_nombre}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-item__label">${t('common.phone')}</span>
+        <span class="info-item__value">${d.cliente_telefono || '—'}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-item__label">${t('file.reference')}</span>
+        <span class="info-item__value">${d.referencia || '—'}</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item info-item--full">
+        <span class="info-item__label">${t('common.address')}</span>
+        <span class="info-item__value">${d.direccion}, ${d.canton}, ${d.provincia}</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item">
+        <span class="info-item__label">${t('estimator_file.scheduled_visit')}</span>
+        <span class="info-item__value">${this.formatFecha(d.fecha_visita)}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-item__label">${t('estimator_file.check_visit_time')}</span>
+        <span class="info-item__value">${this.formatHora(d.fecha_visita)}</span>
+      </div>
+    </div>
+  </div>
+
+  ${visitSection}
+
+  <footer class="footer">
+    <span class="footer__brand">Estimation<span>3D</span></span>
+    <span>${t('estimator_file.print_estimation_completed')} · ${printDate}</span>
+  </footer>
+
+  <script>window.addEventListener('load', () => { setTimeout(() => window.print(), 400); })</script>
+</body>
+</html>`;
 
     const win = window.open('', '_blank', 'width=900,height=700');
     if (!win) return;

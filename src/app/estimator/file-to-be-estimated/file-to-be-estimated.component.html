@@ -1,258 +1,244 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="fte-root">
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    <div class="fte-loading">
+      <span class="fte-spinner" role="status"></span>
       {{ 'builder_offer.loading' | translate }}
     </div>
 
   <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
   } @else if (!detalle()) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon empty-icon--warn"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
-        @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
-        }
-        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
-        </button>
-      </div>
+    <div class="fte-state-empty">
+      <div class="fte-state-empty__icon"><i class="bi bi-exclamation-triangle"></i></div>
+      <p class="fte-state-empty__title">{{ 'file.not_found' | translate }}</p>
+      @if (errorMsg()) {
+        <p class="fte-state-empty__msg">{{ errorMsg() | translate }}</p>
+      }
+      <button class="fte-btn-outline" (click)="volver()">
+        <i class="bi bi-arrow-left"></i>{{ 'common.back' | translate }}
+      </button>
     </div>
 
   <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- Encabezado -->
-    <header class="page-header rounded-4 p-4 mb-4">
-      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+    <!-- Header -->
+    <header class="fte-header">
+      <div class="fte-header__content">
+        <button class="fte-back-btn" (click)="volver()" [title]="'common.back' | translate">
+          <i class="bi bi-arrow-left"></i>
+        </button>
         <div>
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <button class="btn-back" (click)="volver()" [title]="'common.back' | translate">
-              <i class="bi bi-arrow-left"></i>
-            </button>
-            <span class="text-muted small">{{ 'files_to_estimate.title' | translate }}</span>
-          </div>
-          <h4 class="fw-bold mb-1">
-            <span class="exp-num me-2">{{ detalle()!.numero }}</span>
-            {{ detalle()!.servicio_nombre }}
-          </h4>
-          <p class="text-muted small mb-0">
-            <i class="bi bi-person me-1"></i>{{ detalle()!.cliente_nombre }}
-            <span class="mx-2">·</span>
-            <i class="bi bi-geo-alt me-1"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }} {{ detalle()!.distrito }}
+          <p class="fte-header__eyebrow">
+            <span class="fte-num-mono">{{ detalle()!.numero }}</span>
+            · {{ 'files_to_estimate.title' | translate }}
           </p>
+          <h1 class="fte-header__title">{{ servicioNombre }}</h1>
+          <div class="fte-header__meta">
+            <span class="fte-meta-item">
+              <i class="bi bi-person"></i>{{ detalle()!.cliente_nombre }}
+            </span>
+            <span class="fte-meta-sep">·</span>
+            <span class="fte-meta-item">
+              <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
+            </span>
+          </div>
         </div>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          @if (formularioCompleto) {
-            <span class="kpi-pill kpi-pill--listo">
-              <i class="bi bi-check-circle-fill me-1"></i>{{ 'estimator_file.pill_ready' | translate }}
-            </span>
-          } @else {
-            <span class="kpi-pill kpi-pill--progreso">
-              <i class="bi bi-pencil me-1"></i>{{ 'estimator_file.pill_in_progress' | translate }}
-            </span>
-          }
-          @if (fotos().length > 0) {
-            <span class="kpi-pill kpi-pill--fotos">
-              <i class="bi bi-images me-1"></i>{{ fotos().length }}
-              {{ fotos().length !== 1 ? ('estimator_file.photos_many' | translate) : ('estimator_file.photos_one' | translate) }}
-            </span>
-          }
-        </div>
+      </div>
+      <div class="fte-header__badges">
+        @if (formularioCompleto) {
+          <span class="fte-badge fte-badge--success">
+            <i class="bi bi-check-circle"></i>{{ 'estimator_file.pill_ready' | translate }}
+          </span>
+        } @else {
+          <span class="fte-badge fte-badge--warning">
+            <i class="bi bi-pencil"></i>{{ 'estimator_file.pill_in_progress' | translate }}
+          </span>
+        }
+        @if (fotos().length > 0) {
+          <span class="fte-badge fte-badge--info">
+            <i class="bi bi-images"></i>{{ fotos().length }}
+          </span>
+        }
       </div>
     </header>
 
-    <!-- Layout principal -->
-    <div class="row g-4 align-items-start">
+    <!-- Main grid -->
+    <div class="fte-main">
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA IZQUIERDA: Info + Archivos                                -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="col-lg-7 d-flex flex-column gap-4">
+      <!-- ── Columna izquierda ──────────────────────────────────────────── -->
+      <div class="fte-col-main">
 
         <!-- Detalles del expediente -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3">
-            <span class="fw-semibold">
-              <i class="bi bi-info-circle me-2 text-primary"></i>{{ 'estimator_file.details_title' | translate }}
-            </span>
+        <section class="fte-card">
+          <h2 class="fte-card__title">
+            <i class="bi bi-info-circle"></i>{{ 'estimator_file.details_title' | translate }}
+          </h2>
+
+          <div class="fte-info-section">
+            <p class="fte-section-label">{{ 'builder_offer.client_label' | translate }}</p>
+            <div class="fte-info-grid">
+              <div class="fte-info-item">
+                <span class="fte-info-label">{{ 'common.name' | translate }}</span>
+                <span class="fte-info-value">{{ detalle()!.cliente_nombre }}</span>
+              </div>
+              <div class="fte-info-item">
+                <span class="fte-info-label">{{ 'common.phone' | translate }}</span>
+                <span class="fte-info-value">{{ detalle()!.cliente_telefono || '—' }}</span>
+              </div>
+            </div>
           </div>
-          <div class="card-body p-4">
 
-            <!-- Cliente -->
-            <p class="info-section-label">{{ 'builder_offer.client_label' | translate }}</p>
-            <div class="row g-3 mb-3">
-              <div class="col-sm-7">
-                <p class="info-label">{{ 'common.name' | translate }}</p>
-                <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
+          <div class="fte-divider"></div>
+
+          <div class="fte-info-section">
+            <p class="fte-section-label">{{ 'estimator_file.location_section' | translate }}</p>
+            <div class="fte-info-grid fte-info-grid--wide">
+              <div class="fte-info-item fte-info-item--full">
+                <span class="fte-info-label">{{ 'common.address' | translate }}</span>
+                <span class="fte-info-value">{{ detalle()!.direccion }}</span>
+                <span class="fte-info-value">{{ detalle()!.canton }}, {{ detalle()!.provincia }}, {{ detalle()!.distrito }}</span>
               </div>
-              <div class="col-sm-5">
-                <p class="info-label">{{ 'common.phone' | translate }}</p>
-                <p class="info-value">{{ detalle()!.cliente_telefono || '—' }}</p>
-              </div>
-            </div>
-
-            <hr class="my-3">
-
-            <!-- Ubicación -->
-            <p class="info-section-label">{{ 'estimator_file.location_section' | translate }}</p>
-
-            <div class="row g-3 mb-3">
-              <div class="col-sm-8">
-                <p class="info-label">{{ 'common.address' | translate }}</p>
-                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
-                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
-                <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
-              </div>
-              <div class="col-sm-4">
-                <p class="info-label">{{ 'file.reference' | translate }}</p>
-                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
+              <div class="fte-info-item">
+                <span class="fte-info-label">{{ 'file.reference' | translate }}</span>
+                <span class="fte-info-value">{{ detalle()!.referencia || '—' }}</span>
               </div>
             </div>
-
-            <hr class="my-3">
-
-            <!-- Visita planificada -->
-            <p class="info-section-label">{{ 'estimator_file.planned_visit' | translate }}</p>
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'common.date' | translate }}</p>
-                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
-              </div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'file.hour' | translate }}</p>
-                <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
-              </div>
-            </div>
-
           </div>
-        </div>
 
-        <!-- ── Fotos del sitio ──────────────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-images me-2 text-primary"></i>{{ 'file.site_photos' | translate }}
+          <div class="fte-divider"></div>
+
+          <div class="fte-info-section">
+            <p class="fte-section-label">{{ 'estimator_file.planned_visit' | translate }}</p>
+            <div class="fte-info-grid">
+              <div class="fte-info-item">
+                <span class="fte-info-label">{{ 'common.date' | translate }}</span>
+                <span class="fte-info-value">{{ formatFecha(detalle()!.fecha_visita) }}</span>
+              </div>
+              <div class="fte-info-item">
+                <span class="fte-info-label">{{ 'file.hour' | translate }}</span>
+                <span class="fte-info-value">{{ formatHora(detalle()!.fecha_visita) }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Fotos del sitio ────────────────────────────────────────── -->
+        <section class="fte-card">
+          <div class="fte-card__header">
+            <h2 class="fte-card__title">
+              <i class="bi bi-images"></i>{{ 'file.site_photos' | translate }}
               @if (fotos().length > 0) {
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
-                  {{ fotos().length }}
-                </span>
+                <span class="fte-count-badge">{{ fotos().length }}</span>
               }
-            </span>
-            <label class="btn btn-outline-primary btn-sm mb-0 d-flex align-items-center gap-1"
-                   [class.disabled]="subiendoFoto()">
+            </h2>
+            <label class="fte-btn-upload" [class.fte-btn-upload--busy]="subiendoFoto()">
               @if (subiendoFoto()) {
-                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
+                <span class="fte-spinner-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
                 <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_photos' | translate }}
               }
-              <input type="file" accept="image/*" multiple class="d-none"
+              <input type="file" accept="image/*" multiple class="fte-file-input"
                      (change)="subirFotos($event)" [disabled]="subiendoFoto()"/>
             </label>
           </div>
-          <div class="card-body p-4">
-            @if (errorFotos()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorFotos() }}</div>
-            }
-            @if (fotos().length === 0) {
-              <div class="upload-empty">
-                <i class="bi bi-camera fs-2 mb-2 d-block"></i>
-                <p class="mb-0">{{ 'estimator_file.no_photos_hint' | translate }}</p>
-              </div>
-            } @else {
-              <div class="photos-grid">
-                @for (f of fotos(); track f.id) {
-                  <div class="photo-thumb">
-                    <img [src]="publicUrl(f.url_storage)"
-                         class="photo-thumb__img"
-                         [title]="f.nombre_archivo"
-                         (click)="verArchivo(f)" />
-                    <button class="photo-thumb__delete"
-                            [title]="'estimator_file.delete_photo' | translate"
-                            (click)="eliminarArchivo(f, 'foto')">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
 
-        <!-- ── Tour virtual (Matterport) ──────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-camera-video me-2 text-primary"></i>{{ 'estimator_file.tour_title' | translate }}
-              @if (urlsTour().length > 0) {
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
-                  {{ urlsTour().length }}
-                </span>
+          @if (errorFotos()) {
+            <div class="fte-alert fte-alert--danger">
+              <i class="bi bi-exclamation-circle"></i>{{ errorFotos() }}
+            </div>
+          }
+
+          @if (fotos().length === 0) {
+            <div class="fte-upload-empty">
+              <i class="bi bi-camera"></i>
+              <p>{{ 'estimator_file.no_photos_hint' | translate }}</p>
+            </div>
+          } @else {
+            <div class="fte-photo-grid">
+              @for (f of fotos(); track f.id) {
+                <div class="fte-photo-thumb">
+                  <img [src]="publicUrl(f.url_storage)"
+                       class="fte-photo-thumb__img"
+                       [title]="f.nombre_archivo"
+                       (click)="verArchivo(f)" />
+                  <button class="fte-photo-thumb__del"
+                          [title]="'estimator_file.delete_photo' | translate"
+                          (click)="eliminarArchivo(f, 'foto')">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
               }
-            </span>
+            </div>
+          }
+        </section>
+
+        <!-- ── Tour virtual ───────────────────────────────────────────── -->
+        <section class="fte-card">
+          <div class="fte-card__header">
+            <h2 class="fte-card__title">
+              <i class="bi bi-camera-video"></i>{{ 'estimator_file.tour_title' | translate }}
+              @if (urlsTour().length > 0) {
+                <span class="fte-count-badge">{{ urlsTour().length }}</span>
+              }
+            </h2>
             @if (!mostrandoFormAdd() && editandoIndex() === null) {
-              <button class="btn btn-outline-primary btn-sm"
+              <button class="fte-btn-secondary"
                       (click)="mostrarFormAgregarVideo()"
                       [disabled]="guardandoTour()">
-                <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                <i class="bi bi-plus-lg"></i>{{ 'estimator_file.tour_add_video' | translate }}
               </button>
             }
           </div>
 
-          <div class="card-body p-4">
-            @if (errorTour()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorTour() }}</div>
-            }
+          @if (errorTour()) {
+            <div class="fte-alert fte-alert--danger">
+              <i class="bi bi-exclamation-circle"></i>{{ errorTour() }}
+            </div>
+          }
+          @if (!hasDraft() && (mostrandoFormAdd() || urlsTour().length === 0)) {
+            <div class="fte-alert fte-alert--info">
+              <i class="bi bi-info-circle"></i>{{ 'estimator_file.tour_draft_hint_alt' | translate }}
+            </div>
+          }
 
-            @if (!hasDraft() && (mostrandoFormAdd() || urlsTour().length === 0)) {
-              <div class="alert alert-warning py-2 small mb-3">
-                <i class="bi bi-info-circle me-1"></i>
-                {{ 'estimator_file.tour_draft_hint_alt' | translate }}
-              </div>
-            }
-
-            <!-- Lista de videos -->
+          <div class="fte-tour-list">
             @for (url of urlsTour(); track $index) {
-              <div class="tour-video-item" [class.mb-3]="$index < urlsTour().length - 1 || mostrandoFormAdd()">
+              <div class="fte-tour-item">
 
                 @if (editandoIndex() === $index) {
-                  <!-- Modo edición de este video -->
-                  <div class="tour-edit-wrap">
-                    <p class="small fw-semibold mb-2">
-                      <i class="bi bi-pencil me-1 text-primary"></i>
+                  <div class="fte-tour-edit">
+                    <p class="fte-tour-edit__label">
+                      <i class="bi bi-pencil"></i>
                       {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
                     </p>
-                    <div class="input-group input-group-sm mb-2">
-                      <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                      <input type="url" class="form-control"
+                    <div class="fte-url-input-wrap">
+                      <i class="bi bi-link-45deg fte-url-input-icon"></i>
+                      <input type="url" class="fte-url-input"
                              placeholder="https://my.matterport.com/show/?m=…"
                              [(ngModel)]="editandoUrlTemp"
                              [disabled]="guardandoTour()" />
                     </div>
-                    <div class="d-flex gap-2 mb-3">
-                      <button class="btn btn-primary btn-sm flex-grow-1"
+                    <div class="fte-tour-edit__actions">
+                      <button class="fte-btn-gold"
                               (click)="guardarEdicionVideo()"
                               [disabled]="guardandoTour() || !editandoUrlTemp.trim()">
                         @if (guardandoTour()) {
-                          <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                          <span class="fte-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
                         } @else {
-                          <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
+                          <i class="bi bi-check-lg"></i>{{ 'common.save' | translate }}
                         }
                       </button>
-                      <button class="btn btn-outline-secondary btn-sm"
+                      <button class="fte-btn-ghost"
                               (click)="cancelarEdicionVideo()"
                               [disabled]="guardandoTour()">
                         {{ 'common.cancel' | translate }}
                       </button>
                     </div>
                     @if (editandoUrlSafe) {
-                      <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                      <p class="fte-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                      <div class="fte-iframe-wrap">
                         <iframe [src]="editandoUrlSafe"
                                 allowfullscreen allow="xr-spatial-tracking"
                                 title="Vista previa"></iframe>
@@ -261,31 +247,31 @@
                   </div>
 
                 } @else {
-                  <!-- Fila del video (colapsada / expandida) -->
-                  <div class="tour-video-row" [class.tour-video-row--expanded]="expandedIndex() === $index">
-                    <button class="tour-video-row__toggle"
-                            (click)="toggleExpandVideo($index)"
-                            [title]="expandedIndex() === $index ? ('common.collapse' | translate) : ('common.expand' | translate)">
-                      <i class="bi bi-camera-video-fill text-primary me-2"></i>
-                      <span class="fw-semibold small">{{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}</span>
-                      <span class="text-muted small ms-2 tour-video-url">{{ url }}</span>
-                      <i class="bi ms-auto"
+                  <div class="fte-tour-row" [class.fte-tour-row--expanded]="expandedIndex() === $index">
+                    <button class="fte-tour-row__toggle"
+                            (click)="toggleExpandVideo($index)">
+                      <i class="bi bi-camera-video"></i>
+                      <span class="fte-tour-row__label">
+                        {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                      </span>
+                      <span class="fte-tour-row__url">{{ url }}</span>
+                      <i class="bi fte-tour-row__chevron"
                          [class.bi-chevron-down]="expandedIndex() !== $index"
                          [class.bi-chevron-up]="expandedIndex() === $index"></i>
                     </button>
-                    <div class="tour-video-row__actions">
-                      <button class="btn btn-outline-secondary btn-sm"
+                    <div class="fte-tour-row__actions">
+                      <button class="fte-btn-icon"
                               (click)="iniciarEdicionVideo($index)"
                               [disabled]="guardandoTour()"
                               [title]="'common.edit' | translate">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-outline-danger btn-sm"
+                      <button class="fte-btn-icon fte-btn-icon--danger"
                               (click)="eliminarVideo($index)"
                               [disabled]="guardandoTour()"
                               [title]="'estimator_file.tour_delete_video' | translate">
                         @if (guardandoTour()) {
-                          <span class="spinner-border spinner-border-sm"></span>
+                          <span class="fte-spinner-sm"></span>
                         } @else {
                           <i class="bi bi-trash3"></i>
                         }
@@ -293,7 +279,7 @@
                     </div>
                   </div>
                   @if (expandedIndex() === $index) {
-                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden mt-2">
+                    <div class="fte-iframe-wrap fte-iframe-wrap--connected">
                       <iframe [src]="getSafeUrl(url)"
                               allowfullscreen allow="xr-spatial-tracking"
                               [title]="'Video ' + ($index + 1)"></iframe>
@@ -304,47 +290,44 @@
               </div>
             }
 
-            <!-- Estado vacío -->
             @if (urlsTour().length === 0 && !mostrandoFormAdd()) {
-              <div class="upload-empty">
-                <i class="bi bi-camera-video fs-2 mb-2 d-block"></i>
-                <p class="mb-0">{{ 'estimator_file.no_tour_use_add' | translate }}</p>
+              <div class="fte-upload-empty">
+                <i class="bi bi-camera-video"></i>
+                <p>{{ 'estimator_file.no_tour_use_add' | translate }}</p>
               </div>
             }
 
-            <!-- Formulario agregar nuevo video -->
             @if (mostrandoFormAdd()) {
-              <div class="tour-edit-wrap" [class.mt-3]="urlsTour().length > 0">
-                @if (urlsTour().length > 0) { <hr class="mb-3"> }
-                <p class="small fw-semibold mb-2">
-                  <i class="bi bi-plus-circle me-1 text-primary"></i>{{ 'estimator_file.tour_add_video' | translate }}
+              <div class="fte-tour-edit" [class.fte-tour-edit--after-list]="urlsTour().length > 0">
+                <p class="fte-tour-edit__label">
+                  <i class="bi bi-plus-circle"></i>{{ 'estimator_file.tour_add_video' | translate }}
                 </p>
-                <div class="input-group input-group-sm mb-2">
-                  <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                  <input type="url" class="form-control"
+                <div class="fte-url-input-wrap">
+                  <i class="bi bi-link-45deg fte-url-input-icon"></i>
+                  <input type="url" class="fte-url-input"
                          placeholder="https://my.matterport.com/show/?m=…"
                          [(ngModel)]="nuevoUrlInput"
                          [disabled]="guardandoTour()" />
                 </div>
-                <div class="d-flex gap-2 mb-3">
-                  <button class="btn btn-primary btn-sm flex-grow-1"
+                <div class="fte-tour-edit__actions">
+                  <button class="fte-btn-gold"
                           (click)="agregarVideo()"
                           [disabled]="guardandoTour() || !nuevoUrlInput.trim()">
                     @if (guardandoTour()) {
-                      <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                      <span class="fte-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
                     } @else {
-                      <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                      <i class="bi bi-plus-lg"></i>{{ 'estimator_file.tour_add_video' | translate }}
                     }
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm"
+                  <button class="fte-btn-ghost"
                           (click)="cancelarAgregarVideo()"
                           [disabled]="guardandoTour()">
                     {{ 'common.cancel' | translate }}
                   </button>
                 </div>
                 @if (nuevoUrlSafe) {
-                  <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                  <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
+                  <p class="fte-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                  <div class="fte-iframe-wrap">
                     <iframe [src]="nuevoUrlSafe"
                             allowfullscreen allow="xr-spatial-tracking"
                             title="Vista previa"></iframe>
@@ -352,234 +335,237 @@
                 }
               </div>
             }
-
           </div>
-        </div>
+        </section>
 
-        <!-- ── Documentos técnicos ─────────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-file-earmark-text me-2 text-primary"></i>{{ 'file.technical_docs' | translate }}
+        <!-- ── Documentos técnicos ────────────────────────────────────── -->
+        <section class="fte-card">
+          <div class="fte-card__header">
+            <h2 class="fte-card__title">
+              <i class="bi bi-file-earmark-text"></i>{{ 'file.technical_docs' | translate }}
               @if (documentos().length > 0) {
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
-                  {{ documentos().length }}
-                </span>
+                <span class="fte-count-badge">{{ documentos().length }}</span>
               }
-            </span>
-            <label class="btn btn-outline-primary btn-sm mb-0 d-flex align-items-center gap-1"
-                   [class.disabled]="subiendoDocumento()">
+            </h2>
+            <label class="fte-btn-upload" [class.fte-btn-upload--busy]="subiendoDocumento()">
               @if (subiendoDocumento()) {
-                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
+                <span class="fte-spinner-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
                 <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_doc' | translate }}
               }
               <input type="file"
                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                     class="d-none"
+                     class="fte-file-input"
                      (change)="subirDocumento($event)" [disabled]="subiendoDocumento()"/>
             </label>
           </div>
-          <div class="card-body p-3">
-            @if (errorDocumentos()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorDocumentos() }}</div>
-            }
-            @if (documentos().length === 0) {
-              <div class="upload-empty">
-                <i class="bi bi-file-earmark fs-2 mb-2 d-block"></i>
-                <p class="mb-0">{{ 'estimator_file.no_docs_hint' | translate }}</p>
-              </div>
-            } @else {
-              @for (d of documentos(); track d.id) {
-                <div class="file-row">
-                  <div class="file-row__icon file-row__icon--doc">
+
+          @if (errorDocumentos()) {
+            <div class="fte-alert fte-alert--danger">
+              <i class="bi bi-exclamation-circle"></i>{{ errorDocumentos() }}
+            </div>
+          }
+
+          @if (documentos().length === 0) {
+            <div class="fte-upload-empty">
+              <i class="bi bi-file-earmark"></i>
+              <p>{{ 'estimator_file.no_docs_hint' | translate }}</p>
+            </div>
+          } @else {
+            <div class="fte-file-list">
+              @for (doc of documentos(); track doc.id) {
+                <div class="fte-file-row">
+                  <div class="fte-file-row__icon">
                     <i class="bi bi-file-earmark-text"></i>
                   </div>
-                  <div class="file-row__info min-w-0">
-                    <p class="file-row__name">{{ d.nombre_archivo }}</p>
-                    <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                  <div class="fte-file-row__info">
+                    <p class="fte-file-row__name">{{ doc.nombre_archivo }}</p>
+                    <p class="fte-file-row__size">{{ formatTamano(doc.tamano_bytes) }}</p>
                   </div>
-                  <div class="file-row__actions">
-                    <button class="btn btn-outline-secondary btn-sm"
-                            (click)="verArchivo(d)" [title]="'common.view' | translate">
+                  <div class="fte-file-row__actions">
+                    <button class="fte-btn-icon"
+                            (click)="verArchivo(doc)"
+                            [title]="'common.view' | translate">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm"
-                            (click)="eliminarArchivo(d, 'documento')" [title]="'common.delete' | translate">
+                    <button class="fte-btn-icon fte-btn-icon--danger"
+                            (click)="eliminarArchivo(doc, 'documento')"
+                            [title]="'common.delete' | translate">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
                 </div>
               }
+            </div>
+          }
+        </section>
+
+      </div>
+
+      <!-- ── Columna derecha: formulario (sticky) ───────────────────────── -->
+      <aside class="fte-col-side">
+        <div class="fte-form-card">
+          <div class="fte-form-card__head">
+            <i class="bi bi-clipboard2-check"></i>
+            <h2 class="fte-form-card__title">{{ 'estimator_file.visit_doc_title' | translate }}</h2>
+          </div>
+
+          <div class="fte-form-body">
+
+            <!-- Fecha y hora -->
+            <div class="fte-field-row">
+              <div class="fte-field">
+                <label class="fte-label">
+                  <i class="bi bi-calendar3"></i>{{ 'estimator_file.real_date' | translate }}
+                  <span class="fte-req">*</span>
+                </label>
+                <input type="date" class="fte-input" [(ngModel)]="fechaVisita" />
+              </div>
+              <div class="fte-field">
+                <label class="fte-label">
+                  <i class="bi bi-clock"></i>{{ 'file.hour' | translate }}
+                  <span class="fte-req">*</span>
+                </label>
+                <input type="time" class="fte-input" [(ngModel)]="horaVisita" />
+              </div>
+            </div>
+
+            <!-- Problemas observados -->
+            <div class="fte-field">
+              <label class="fte-label">
+                <i class="bi bi-card-text"></i>{{ 'estimator_file.problems_observed' | translate }}
+                <span class="fte-req">*</span>
+              </label>
+              <textarea class="fte-input fte-input--textarea" rows="4"
+                        [placeholder]="'estimator_file.problems_placeholder' | translate"
+                        [(ngModel)]="descripcionProblemas"></textarea>
+            </div>
+
+            <!-- Costo aproximado -->
+            <div class="fte-field">
+              <label class="fte-label">
+                <i class="bi bi-cash-coin"></i>{{ 'estimator_file.approx_cost' | translate }}
+                <span class="fte-opt">({{ 'common.optional' | translate }})</span>
+              </label>
+              <div class="fte-cost-row">
+                <div class="fte-cost-field">
+                  <span class="fte-cost-sub">{{ 'file.min' | translate }}</span>
+                  <div class="fte-input-group">
+                    <span class="fte-input-prefix">CA$</span>
+                    <input type="number" class="fte-input fte-input--num"
+                           placeholder="0" min="0" step="1000"
+                           [(ngModel)]="costoMin" />
+                  </div>
+                </div>
+                <span class="fte-cost-sep">→</span>
+                <div class="fte-cost-field">
+                  <span class="fte-cost-sub">{{ 'file.max' | translate }}</span>
+                  <div class="fte-input-group">
+                    <span class="fte-input-prefix">CA$</span>
+                    <input type="number" class="fte-input fte-input--num"
+                           placeholder="0" min="0" step="1000"
+                           [(ngModel)]="costoMax" />
+                  </div>
+                </div>
+              </div>
+              @if (!costoValido) {
+                <p class="fte-field-error">
+                  <i class="bi bi-exclamation-circle"></i>{{ 'estimator_file.cost_error' | translate }}
+                </p>
+              }
+            </div>
+
+            <!-- Notas internas -->
+            <div class="fte-field">
+              <label class="fte-label fte-label--muted">
+                <i class="bi bi-lock"></i>{{ 'estimator_file.internal_notes' | translate }}
+                <span class="fte-opt">({{ 'common.optional' | translate }})</span>
+              </label>
+              <textarea class="fte-input fte-input--textarea" rows="3"
+                        [placeholder]="'estimator_file.notes_placeholder' | translate"
+                        [(ngModel)]="notasInternas"></textarea>
+            </div>
+
+            <!-- Checklist de completado -->
+            <div class="fte-checklist">
+              <div class="fte-checklist-item" [class.fte-checklist-item--done]="!!fechaVisita">
+                <i class="bi"
+                   [class.bi-check-circle]="!!fechaVisita"
+                   [class.bi-circle]="!fechaVisita"></i>
+                {{ 'estimator_file.check_visit_date' | translate }}
+              </div>
+              <div class="fte-checklist-item" [class.fte-checklist-item--done]="!!horaVisita">
+                <i class="bi"
+                   [class.bi-check-circle]="!!horaVisita"
+                   [class.bi-circle]="!horaVisita"></i>
+                {{ 'estimator_file.check_visit_time' | translate }}
+              </div>
+              <div class="fte-checklist-item"
+                   [class.fte-checklist-item--done]="!!descripcionProblemas.trim()">
+                <i class="bi"
+                   [class.bi-check-circle]="!!descripcionProblemas.trim()"
+                   [class.bi-circle]="!descripcionProblemas.trim()"></i>
+                {{ 'estimator_file.problems_observed' | translate }}
+              </div>
+              <div class="fte-checklist-item"
+                   [class.fte-checklist-item--done]="costoMin !== null && costoMax !== null && costoValido">
+                <i class="bi"
+                   [class.bi-check-circle]="costoMin !== null && costoMax !== null && costoValido"
+                   [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
+                {{ 'estimator_file.approx_cost' | translate }}
+                <span class="fte-opt">({{ 'common.optional' | translate }})</span>
+              </div>
+            </div>
+
+            <!-- Mensajes de borrador -->
+            @if (errorVisitaMsg()) {
+              <div class="fte-alert fte-alert--danger">
+                <i class="bi bi-exclamation-circle"></i>{{ errorVisitaMsg() | translate }}
+              </div>
             }
-          </div>
-        </div>
-
-      </div>
-
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA DERECHA: Formulario (sticky)                              -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="col-lg-5">
-        <div class="sidebar-sticky">
-          <div class="card border-0 shadow-sm rounded-4">
-
-            <div class="card-header bg-transparent border-bottom px-4 py-3">
-              <span class="fw-semibold">
-                <i class="bi bi-clipboard2-check me-2 text-primary"></i>{{ 'estimator_file.visit_doc_title' | translate }}
-              </span>
-            </div>
-
-            <div class="card-body p-4">
-
-              <!-- Fecha + Hora -->
-              <div class="row g-3 mb-3">
-                <div class="col-7">
-                  <label class="form-label small fw-semibold">
-                    <i class="bi bi-calendar3 me-1 text-muted"></i>{{ 'estimator_file.real_date' | translate }}
-                    <span class="req-mark">*</span>
-                  </label>
-                  <input type="date" class="form-control" [(ngModel)]="fechaVisita" />
-                </div>
-                <div class="col-5">
-                  <label class="form-label small fw-semibold">
-                    <i class="bi bi-clock me-1 text-muted"></i>{{ 'file.hour' | translate }}
-                    <span class="req-mark">*</span>
-                  </label>
-                  <input type="time" class="form-control" [(ngModel)]="horaVisita" />
-                </div>
+            @if (exitoVisitaMsg()) {
+              <div class="fte-alert fte-alert--success">
+                <i class="bi bi-check-circle"></i>{{ exitoVisitaMsg() | translate }}
               </div>
+            }
 
-              <!-- Problemas observados -->
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">
-                  <i class="bi bi-card-text me-1 text-muted"></i>{{ 'estimator_file.problems_observed' | translate }}
-                  <span class="req-mark">*</span>
-                </label>
-                <textarea class="form-control" rows="4"
-                          [placeholder]="'estimator_file.problems_placeholder' | translate"
-                          [(ngModel)]="descripcionProblemas"></textarea>
-              </div>
-
-              <!-- Costo estimado (rango opcional) -->
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">
-                  <i class="bi bi-cash-coin me-1 text-muted"></i>{{ 'estimator_file.approx_cost' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </label>
-                <div class="row g-2">
-                  <div class="col-6">
-                    <label class="form-label small text-muted mb-1">{{ 'file.min' | translate }}</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">CA$</span>
-                      <input type="number" class="form-control"
-                             placeholder="0" min="0" step="1000"
-                             [(ngModel)]="costoMin" />
-                    </div>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small text-muted mb-1">{{ 'file.max' | translate }}</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">CA$</span>
-                      <input type="number" class="form-control"
-                             placeholder="0" min="0" step="1000"
-                             [(ngModel)]="costoMax" />
-                    </div>
-                  </div>
-                </div>
-                @if (!costoValido) {
-                  <div class="form-text text-danger mt-1">
-                    <i class="bi bi-exclamation-circle me-1"></i>
-                    {{ 'estimator_file.cost_error' | translate }}
-                  </div>
+            <!-- Botones de acción -->
+            <div class="fte-actions">
+              <button class="fte-btn-draft"
+                      (click)="guardarVisita()"
+                      [disabled]="guardandoVisita()">
+                @if (guardandoVisita()) {
+                  <span class="fte-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
+                } @else {
+                  <i class="bi bi-floppy"></i>{{ 'estimator_file.save_draft' | translate }}
                 }
-              </div>
-
-              <!-- Notas internas -->
-              <div class="mb-4">
-                <label class="form-label small fw-semibold text-muted">
-                  <i class="bi bi-lock me-1"></i>{{ 'estimator_file.internal_notes' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </label>
-                <textarea class="form-control form-control-sm" rows="3"
-                          [placeholder]="'estimator_file.notes_placeholder' | translate"
-                          [(ngModel)]="notasInternas"></textarea>
-              </div>
-
-              <!-- Checklist de completado -->
-              <div class="completion-list mb-4">
-                <div class="completion-item" [class.completion-item--done]="!!fechaVisita">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!fechaVisita"
-                     [class.bi-circle]="!fechaVisita"></i>
-                  {{ 'estimator_file.check_visit_date' | translate }}
-                </div>
-                <div class="completion-item" [class.completion-item--done]="!!horaVisita">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!horaVisita"
-                     [class.bi-circle]="!horaVisita"></i>
-                  {{ 'estimator_file.check_visit_time' | translate }}
-                </div>
-                <div class="completion-item"
-                     [class.completion-item--done]="!!descripcionProblemas.trim()">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!descripcionProblemas.trim()"
-                     [class.bi-circle]="!descripcionProblemas.trim()"></i>
-                  {{ 'estimator_file.problems_observed' | translate }}
-                </div>
-                <div class="completion-item"
-                     [class.completion-item--done]="costoMin !== null && costoMax !== null && costoValido">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="costoMin !== null && costoMax !== null && costoValido"
-                     [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
-                  {{ 'estimator_file.approx_cost' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </div>
-              </div>
-
-              <!-- Mensajes de la visita -->
-              @if (errorVisitaMsg()) {
-                <div class="alert alert-danger py-2 small mb-3">{{ errorVisitaMsg() | translate }}</div>
-              }
-              @if (exitoVisitaMsg()) {
-                <div class="alert alert-success py-2 small mb-3">{{ exitoVisitaMsg() | translate }}</div>
-              }
-
-              <!-- Acciones -->
-              <div class="d-flex flex-column gap-2">
-                <button class="btn btn-outline-secondary fw-semibold d-flex align-items-center justify-content-center gap-2"
-                        (click)="guardarVisita()"
-                        [disabled]="guardandoVisita()">
-                  @if (guardandoVisita()) {
-                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.saving' | translate }}
-                  } @else {
-                    <i class="bi bi-floppy"></i>{{ 'estimator_file.save_draft' | translate }}
-                  }
-                </button>
-                <button class="btn btn-primary fw-semibold d-flex align-items-center justify-content-center gap-2"
-                        (click)="guardarEstimacion()"
-                        [disabled]="guardando() || !formularioCompleto">
-                  @if (guardando()) {
-                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.sending' | translate }}
-                  } @else {
-                    <i class="bi bi-send-check"></i>{{ 'estimator_file.send_estimation' | translate }}
-                  }
-                </button>
-              </div>
-
-              <!-- Mensajes de envío -->
-              @if (errorGuardado()) {
-                <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardado() | translate }}</div>
-              }
-              @if (exitoMsg()) {
-                <div class="alert alert-success py-2 small mt-3 mb-0">{{ exitoMsg() | translate }}</div>
-              }
-
+              </button>
+              <button class="fte-btn-submit"
+                      (click)="guardarEstimacion()"
+                      [disabled]="guardando() || !formularioCompleto">
+                @if (guardando()) {
+                  <span class="fte-spinner-sm"></span>{{ 'estimator_file.sending' | translate }}
+                } @else {
+                  <i class="bi bi-send-check"></i>{{ 'estimator_file.send_estimation' | translate }}
+                }
+              </button>
             </div>
+
+            <!-- Mensajes de envío -->
+            @if (errorGuardado()) {
+              <div class="fte-alert fte-alert--danger">
+                <i class="bi bi-exclamation-circle"></i>{{ errorGuardado() | translate }}
+              </div>
+            }
+            @if (exitoMsg()) {
+              <div class="fte-alert fte-alert--success">
+                <i class="bi bi-check-circle"></i>{{ exitoMsg() | translate }}
+              </div>
+            }
+
           </div>
         </div>
-      </div>
+      </aside>
 
     </div>
   }

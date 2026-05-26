@@ -42,6 +42,8 @@ export interface ExpedienteRow {
   fecha_visita: string;
   estado?: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   cliente_nombre: string;
   direccion: string;
   provincia: string;
@@ -56,6 +58,8 @@ export interface ExpedienteDetalle {
   fecha_visita: string;
   descripcion?: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   cliente_nombre: string;
   cliente_telefono: string;
   direccion: string;

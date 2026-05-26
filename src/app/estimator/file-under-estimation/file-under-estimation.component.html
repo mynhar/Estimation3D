@@ -1,63 +1,65 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="fued-root">
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+    <div class="fued-loading">
+      <span class="fued-spinner" role="status"></span>
       {{ 'builder_offer.loading' | translate }}
     </div>
 
-  <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
+  <!-- ── No encontrado ────────────────────────────────────────────────────── -->
   } @else if (!detalle()) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon empty-icon--warn"><i class="bi bi-exclamation-triangle"></i></div>
-        <p class="empty-title">{{ 'file.not_found' | translate }}</p>
-        @if (errorMsg()) {
-          <p class="text-danger small mb-2">{{ errorMsg() | translate }}</p>
-        }
-        <button class="btn btn-outline-secondary btn-sm" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
-        </button>
-      </div>
+    <div class="fued-not-found">
+      <div class="fued-not-found__icon"><i class="bi bi-exclamation-triangle"></i></div>
+      <p class="fued-not-found__title">{{ 'file.not_found' | translate }}</p>
+      @if (errorMsg()) {
+        <p class="fued-not-found__error">{{ errorMsg() | translate }}</p>
+      }
+      <button class="fued-btn-back-outline" (click)="volver()">
+        <i class="bi bi-arrow-left"></i>{{ 'common.back' | translate }}
+      </button>
     </div>
 
   <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
   } @else {
 
     <!-- Encabezado -->
-    <header class="page-header rounded-4 p-4 mb-4">
-      <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-        <div>
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <button class="btn-back" (click)="volver()" [title]="'common.back' | translate">
-              <i class="bi bi-arrow-left"></i>
-            </button>
-            <span class="text-muted small">{{ 'files_under_estimation.title' | translate }}</span>
+    <header class="fued-header">
+      <div class="fued-header__top">
+        <button class="fued-btn-back" (click)="volver()" [title]="'common.back' | translate">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <span class="fued-header__eyebrow">
+          <i class="bi bi-clipboard-data"></i>
+          {{ 'files_under_estimation.title' | translate }}
+        </span>
+      </div>
+      <div class="fued-header__body">
+        <div class="fued-header__info">
+          <p class="fued-header__num">{{ detalle()!.numero }}</p>
+          <h1 class="fued-header__title">{{ servicioNombre }}</h1>
+          <div class="fued-header__meta">
+            <span class="fued-meta-item">
+              <i class="bi bi-person"></i>{{ detalle()!.cliente_nombre }}
+            </span>
+            <span class="fued-meta-item">
+              <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
+            </span>
           </div>
-          <h4 class="fw-bold mb-1">
-            <span class="exp-num me-2">{{ detalle()!.numero }}</span>
-            {{ detalle()!.servicio_nombre }}
-          </h4>
-          <p class="text-muted small mb-0">
-            <i class="bi bi-person me-1"></i>{{ detalle()!.cliente_nombre }}
-            <span class="mx-2">·</span>
-            <i class="bi bi-geo-alt me-1"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }} {{ detalle()!.distrito }}
-          </p>
         </div>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
+        <div class="fued-header__badges">
           @if (formularioCompleto) {
-            <span class="kpi-pill kpi-pill--listo">
-              <i class="bi bi-check-circle-fill me-1"></i>{{ 'estimator_file.pill_ready' | translate }}
+            <span class="fued-badge fued-badge--success">
+              <i class="bi bi-check-circle"></i>{{ 'estimator_file.pill_ready' | translate }}
             </span>
           } @else {
-            <span class="kpi-pill kpi-pill--progreso">
-              <i class="bi bi-hourglass-split me-1"></i>{{ 'estimator_file.pill_in_estimation' | translate }}
+            <span class="fued-badge fued-badge--warning">
+              <i class="bi bi-hourglass-split"></i>{{ 'estimator_file.pill_in_estimation' | translate }}
             </span>
           }
           @if (fotos().length > 0) {
-            <span class="kpi-pill kpi-pill--fotos">
-              <i class="bi bi-images me-1"></i>{{ fotos().length }}
+            <span class="fued-badge fued-badge--info">
+              <i class="bi bi-images"></i>{{ fotos().length }}
               {{ fotos().length !== 1 ? ('estimator_file.photos_many' | translate) : ('estimator_file.photos_one' | translate) }}
             </span>
           }
@@ -66,124 +68,115 @@
     </header>
 
     <!-- Layout principal -->
-    <div class="row g-4 align-items-start">
+    <div class="fued-main">
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA IZQUIERDA: Info + Archivos                                -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="col-lg-7 d-flex flex-column gap-4">
+      <!-- ── Columna izquierda ──────────────────────────────────────────── -->
+      <div class="fued-col-main">
 
         <!-- Detalles del expediente -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3">
-            <span class="fw-semibold">
-              <i class="bi bi-info-circle me-2 text-warning"></i>{{ 'estimator_file.details_title' | translate }}
-            </span>
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-info-circle"></i>
+              {{ 'estimator_file.details_title' | translate }}
+            </div>
           </div>
-          <div class="card-body p-4">
+          <div class="fued-card__body">
 
-            <!-- Cliente -->
-            <p class="info-section-label">{{ 'builder_offer.client_label' | translate }}</p>
-            <div class="row g-3 mb-3">
-              <div class="col-sm-7">
-                <p class="info-label">{{ 'common.name' | translate }}</p>
-                <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
+            <p class="fued-section-label">{{ 'builder_offer.client_label' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'common.name' | translate }}</p>
+                <p class="fued-info-value">{{ detalle()!.cliente_nombre }}</p>
               </div>
-              <div class="col-sm-5">
-                <p class="info-label">{{ 'common.phone' | translate }}</p>
-                <p class="info-value">
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'common.phone' | translate }}</p>
+                <p class="fued-info-value">
                   @if (detalle()!.cliente_telefono) {
-                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="text-decoration-none">
-                      <i class="bi bi-telephone me-1 text-warning"></i>{{ detalle()!.cliente_telefono }}
+                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="fued-link">
+                      <i class="bi bi-telephone"></i>{{ detalle()!.cliente_telefono }}
                     </a>
                   } @else { — }
                 </p>
               </div>
             </div>
 
-            <hr class="my-3">
+            <div class="fued-divider"></div>
 
-            <!-- Ubicación -->
-            <p class="info-section-label">{{ 'estimator_file.location_section' | translate }}</p>
-
-            <div class="row g-3 mb-3">
-              <div class="col-sm-8">
-                <p class="info-label">{{ 'common.address' | translate }}</p>
-                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
-                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
-                <p class="info-value fw-semibold text-uppercase small mb-0">CANADA</p>
+            <p class="fued-section-label">{{ 'estimator_file.location_section' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item fued-info-item--full">
+                <p class="fued-info-label">{{ 'common.address' | translate }}</p>
+                <p class="fued-info-value">{{ detalle()!.direccion }}</p>
+                <p class="fued-info-value">{{ detalle()!.canton }}, {{ detalle()!.provincia }}, {{ detalle()!.distrito }}</p>
               </div>
-              <div class="col-sm-4">
-                <p class="info-label">{{ 'file.reference' | translate }}</p>
-                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'file.reference' | translate }}</p>
+                <p class="fued-info-value">{{ detalle()!.referencia || '—' }}</p>
               </div>
             </div>
 
-            <hr class="my-3">
+            <div class="fued-divider"></div>
 
-            <!-- Visita planificada -->
-            <p class="info-section-label">{{ 'estimator_file.planned_visit_client' | translate }}</p>
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'common.date' | translate }}</p>
-                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+            <p class="fued-section-label">{{ 'estimator_file.planned_visit_client' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'common.date' | translate }}</p>
+                <p class="fued-info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
               </div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'file.hour' | translate }}</p>
-                <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'file.hour' | translate }}</p>
+                <p class="fued-info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
               </div>
               @if (detalle()!.descripcion) {
-                <div class="col-12">
-                  <p class="info-label">{{ 'estimator_file.client_desc' | translate }}</p>
-                  <p class="info-value descripcion-cliente">{{ detalle()!.descripcion }}</p>
+                <div class="fued-info-item fued-info-item--full">
+                  <p class="fued-info-label">{{ 'estimator_file.client_desc' | translate }}</p>
+                  <p class="fued-desc-client">{{ detalle()!.descripcion }}</p>
                 </div>
               }
             </div>
 
           </div>
-        </div>
+        </section>
 
-        <!-- ── Fotos del sitio ──────────────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-images me-2 text-warning"></i>{{ 'file.site_photos' | translate }}
+        <!-- Fotos del sitio -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-images"></i>
+              {{ 'file.site_photos' | translate }}
               @if (fotos().length > 0) {
-                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
-                  {{ fotos().length }}
-                </span>
+                <span class="fued-count-badge">{{ fotos().length }}</span>
               }
-            </span>
-            <label class="btn btn-outline-warning btn-sm mb-0 d-flex align-items-center gap-1"
-                   [class.disabled]="subiendoFoto()">
+            </div>
+            <label class="fued-btn-upload" [class.fued-btn-upload--busy]="subiendoFoto()">
               @if (subiendoFoto()) {
-                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
+                <span class="fued-spinner-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
                 <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_photos' | translate }}
               }
-              <input type="file" accept="image/*" multiple class="d-none"
+              <input type="file" accept="image/*" multiple class="fued-file-input"
                      (change)="subirFotos($event)" [disabled]="subiendoFoto()"/>
             </label>
           </div>
-          <div class="card-body p-4">
+          <div class="fued-card__body">
             @if (errorFotos()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorFotos() }}</div>
+              <div class="fued-alert fued-alert--danger">{{ errorFotos() }}</div>
             }
             @if (fotos().length === 0) {
-              <div class="upload-empty">
-                <i class="bi bi-camera fs-2 mb-2 d-block"></i>
-                <p class="mb-0">{{ 'estimator_file.no_photos_hint' | translate }}</p>
+              <div class="fued-empty-inline">
+                <i class="bi bi-camera"></i>
+                <p>{{ 'estimator_file.no_photos_hint' | translate }}</p>
               </div>
             } @else {
-              <div class="photos-grid">
+              <div class="fued-photo-grid">
                 @for (f of fotos(); track f.id) {
-                  <div class="photo-thumb">
+                  <div class="fued-photo-thumb">
                     <img [src]="publicUrl(f.url_storage)"
-                         class="photo-thumb__img"
+                         class="fued-photo-thumb__img"
                          [title]="f.nombre_archivo"
                          (click)="verArchivo(f)" />
-                    <button class="photo-thumb__delete"
+                    <button class="fued-photo-thumb__del"
                             [title]="'estimator_file.delete_photo' | translate"
                             (click)="eliminarArchivo(f, 'foto')">
                       <i class="bi bi-x-lg"></i>
@@ -193,236 +186,209 @@
               </div>
             }
           </div>
-        </div>
+        </section>
 
-        <!-- ── Tour virtual (Matterport) ──────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-badge-3d-fill me-2 text-warning"></i>{{ 'estimator_file.tour_title' | translate }}
+        <!-- Tour virtual -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-badge-3d"></i>
+              {{ 'estimator_file.tour_title' | translate }}
               @if (urlsTour().length > 0) {
-                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
-                  {{ urlsTour().length }}
-                </span>
+                <span class="fued-count-badge">{{ urlsTour().length }}</span>
               }
-            </span>
+            </div>
             @if (!mostrandoFormAdd() && editandoIndex() === null) {
-              <button class="btn btn-outline-warning btn-sm d-flex align-items-center gap-1"
-                      (click)="mostrarFormAgregarVideo()"
-                      [disabled]="guardandoTour()">
+              <button class="fued-btn-add" (click)="mostrarFormAgregarVideo()" [disabled]="guardandoTour()">
                 <i class="bi bi-plus-lg"></i>{{ 'estimator_file.tour_add_video' | translate }}
               </button>
             }
           </div>
-
-          <div class="card-body p-4">
+          <div class="fued-card__body">
             @if (errorTour()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorTour() }}</div>
+              <div class="fued-alert fued-alert--danger">{{ errorTour() }}</div>
             }
 
-            <!-- Lista de videos -->
+            <!-- Videos — siempre expandidos -->
             @for (url of urlsTour(); track $index) {
-              <div class="tour-video-item" [class.mb-3]="$index < urlsTour().length - 1 || mostrandoFormAdd()">
-
+              <div class="fued-tour-item">
                 @if (editandoIndex() === $index) {
-                  <!-- Modo edición de este video -->
-                  <div class="tour-edit-wrap">
-                    <p class="small fw-semibold mb-2">
-                      <i class="bi bi-pencil me-1 text-warning"></i>
+                  <!-- Modo edición -->
+                  <div class="fued-tour-edit">
+                    <p class="fued-tour-edit__label">
+                      <i class="bi bi-pencil"></i>
                       {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
                     </p>
-                    <div class="input-group input-group-sm mb-2">
-                      <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                      <input type="url" class="form-control"
+                    <div class="fued-input-group">
+                      <span class="fued-input-prefix"><i class="bi bi-link-45deg"></i></span>
+                      <input type="url" class="fued-input"
                              placeholder="https://my.matterport.com/show/?m=…"
                              [(ngModel)]="editandoUrlTemp"
                              [disabled]="guardandoTour()" />
                     </div>
-                    <div class="d-flex gap-2 mb-3">
-                      <button class="btn btn-warning btn-sm text-white fw-semibold flex-grow-1"
-                              (click)="guardarEdicionVideo()"
+                    <div class="fued-tour-edit__actions">
+                      <button class="fued-btn-save" (click)="guardarEdicionVideo()"
                               [disabled]="guardandoTour() || !editandoUrlTemp.trim()">
                         @if (guardandoTour()) {
-                          <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                          <span class="fued-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
                         } @else {
-                          <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
+                          <i class="bi bi-check-lg"></i>{{ 'common.save' | translate }}
                         }
                       </button>
-                      <button class="btn btn-outline-secondary btn-sm"
-                              (click)="cancelarEdicionVideo()"
-                              [disabled]="guardandoTour()">
+                      <button class="fued-btn-cancel" (click)="cancelarEdicionVideo()" [disabled]="guardandoTour()">
                         {{ 'common.cancel' | translate }}
                       </button>
                     </div>
                     @if (editandoUrlSafe) {
-                      <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                        <iframe [src]="editandoUrlSafe"
-                                allowfullscreen allow="xr-spatial-tracking"
-                                title="Vista previa"></iframe>
+                      <p class="fued-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                      <div class="fued-tour-embed fued-tour-embed--standalone">
+                        <iframe [src]="editandoUrlSafe" allowfullscreen allow="xr-spatial-tracking" title="Vista previa"></iframe>
                       </div>
                     }
                   </div>
 
                 } @else {
-                  <!-- Fila del video (colapsada / expandida) -->
-                  <div class="tour-video-row" [class.tour-video-row--expanded]="expandedIndex() === $index">
-                    <button class="tour-video-row__toggle"
+                  <!-- Fila del video con toggle expandir/contraer -->
+                  <div class="fued-tour-row" [class.fued-tour-row--expanded]="isExpanded($index)">
+                    <button class="fued-tour-row__toggle"
                             (click)="toggleExpandVideo($index)"
-                            [title]="expandedIndex() === $index ? ('common.collapse' | translate) : ('common.expand' | translate)">
-                      <i class="bi bi-badge-3d-fill text-warning me-2"></i>
-                      <span class="fw-semibold small">{{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}</span>
-                      <span class="text-muted small ms-2 tour-video-url">{{ url }}</span>
-                      <i class="bi ms-auto"
-                         [class.bi-chevron-down]="expandedIndex() !== $index"
-                         [class.bi-chevron-up]="expandedIndex() === $index"></i>
+                            [title]="isExpanded($index) ? ('common.collapse' | translate) : ('common.expand' | translate)">
+                      <i class="bi bi-badge-3d fued-tour-row__icon"></i>
+                      <span class="fued-tour-row__label">{{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}</span>
+                      <span class="fued-tour-row__url">{{ url }}</span>
+                      <i class="bi fued-tour-row__chevron"
+                         [class.bi-chevron-down]="!isExpanded($index)"
+                         [class.bi-chevron-up]="isExpanded($index)"></i>
                     </button>
-                    <div class="tour-video-row__actions">
-                      <button class="btn btn-outline-secondary btn-sm"
-                              (click)="iniciarEdicionVideo($index)"
-                              [disabled]="guardandoTour()"
-                              [title]="'common.edit' | translate">
+                    <div class="fued-tour-row__actions">
+                      <button class="fued-btn-icon" (click)="iniciarEdicionVideo($index)"
+                              [disabled]="guardandoTour()" [title]="'common.edit' | translate">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button class="btn btn-outline-danger btn-sm"
-                              (click)="eliminarVideo($index)"
-                              [disabled]="guardandoTour()"
-                              [title]="'estimator_file.tour_delete_video' | translate">
+                      <button class="fued-btn-icon fued-btn-icon--danger" (click)="eliminarVideo($index)"
+                              [disabled]="guardandoTour()" [title]="'estimator_file.tour_delete_video' | translate">
                         @if (guardandoTour()) {
-                          <span class="spinner-border spinner-border-sm"></span>
+                          <span class="fued-spinner-sm"></span>
                         } @else {
                           <i class="bi bi-trash3"></i>
                         }
                       </button>
                     </div>
                   </div>
-                  @if (expandedIndex() === $index) {
-                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden mt-2">
-                      <iframe [src]="getSafeUrl(url)"
-                              allowfullscreen allow="xr-spatial-tracking"
+                  @if (isExpanded($index)) {
+                    <div class="fued-tour-embed">
+                      <iframe [src]="getSafeUrl(url)" allowfullscreen allow="xr-spatial-tracking"
                               [title]="'Video ' + ($index + 1)"></iframe>
                     </div>
                   }
                 }
-
               </div>
             }
 
             <!-- Estado vacío -->
             @if (urlsTour().length === 0 && !mostrandoFormAdd()) {
-              <div class="upload-empty">
-                <i class="bi bi-badge-3d fs-2 mb-2 d-block text-warning"></i>
-                <p class="mb-0">{{ 'estimator_file.no_tour_hint' | translate }}</p>
+              <div class="fued-empty-inline">
+                <i class="bi bi-badge-3d"></i>
+                <p>{{ 'estimator_file.no_tour_hint' | translate }}</p>
                 @if (!hasDraft()) {
-                  <p class="mb-0 mt-2 small text-muted">
-                    <i class="bi bi-info-circle me-1"></i>{{ 'estimator_file.tour_draft_hint' | translate }}
+                  <p class="fued-hint-muted">
+                    <i class="bi bi-info-circle"></i>{{ 'estimator_file.tour_draft_hint' | translate }}
                   </p>
                 }
               </div>
             }
 
-            <!-- Formulario agregar nuevo video -->
+            <!-- Formulario agregar video -->
             @if (mostrandoFormAdd()) {
-              <div class="tour-edit-wrap" [class.mt-3]="urlsTour().length > 0">
-                @if (urlsTour().length > 0) { <hr class="mb-3"> }
+              <div class="fued-tour-edit" [class.fued-tour-edit--separated]="urlsTour().length > 0">
                 @if (!hasDraft()) {
-                  <div class="alert alert-warning py-2 small mb-3">
-                    <i class="bi bi-info-circle me-1"></i>
+                  <div class="fued-alert fued-alert--warning">
+                    <i class="bi bi-info-circle"></i>
                     {{ 'estimator_file.tour_draft_hint_alt' | translate }}
                   </div>
                 }
-                <p class="small fw-semibold mb-2">
-                  <i class="bi bi-plus-circle me-1 text-warning"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                <p class="fued-tour-edit__label">
+                  <i class="bi bi-plus-circle"></i>
+                  {{ 'estimator_file.tour_add_video' | translate }}
                 </p>
-                <div class="input-group input-group-sm mb-2">
-                  <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                  <input type="url" class="form-control"
+                <div class="fued-input-group">
+                  <span class="fued-input-prefix"><i class="bi bi-link-45deg"></i></span>
+                  <input type="url" class="fued-input"
                          placeholder="https://my.matterport.com/show/?m=…"
                          [(ngModel)]="nuevoUrlInput"
                          [disabled]="guardandoTour()" />
                 </div>
-                <div class="d-flex gap-2 mb-3">
-                  <button class="btn btn-warning btn-sm text-white fw-semibold flex-grow-1"
-                          (click)="agregarVideo()"
+                <div class="fued-tour-edit__actions">
+                  <button class="fued-btn-save" (click)="agregarVideo()"
                           [disabled]="guardandoTour() || !nuevoUrlInput.trim()">
                     @if (guardandoTour()) {
-                      <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                      <span class="fued-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
                     } @else {
-                      <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                      <i class="bi bi-plus-lg"></i>{{ 'estimator_file.tour_add_video' | translate }}
                     }
                   </button>
-                  <button class="btn btn-outline-secondary btn-sm"
-                          (click)="cancelarAgregarVideo()"
-                          [disabled]="guardandoTour()">
+                  <button class="fued-btn-cancel" (click)="cancelarAgregarVideo()" [disabled]="guardandoTour()">
                     {{ 'common.cancel' | translate }}
                   </button>
                 </div>
                 @if (nuevoUrlSafe) {
-                  <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                  <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                    <iframe [src]="nuevoUrlSafe"
-                            allowfullscreen allow="xr-spatial-tracking"
-                            title="Vista previa"></iframe>
+                  <p class="fued-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                  <div class="fued-tour-embed fued-tour-embed--standalone">
+                    <iframe [src]="nuevoUrlSafe" allowfullscreen allow="xr-spatial-tracking" title="Vista previa"></iframe>
                   </div>
                 }
               </div>
             }
 
           </div>
-        </div>
+        </section>
 
-        <!-- ── Documentos técnicos ─────────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-file-earmark-text me-2 text-warning"></i>{{ 'file.technical_docs' | translate }}
+        <!-- Documentos técnicos -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-file-earmark-text"></i>
+              {{ 'file.technical_docs' | translate }}
               @if (documentos().length > 0) {
-                <span class="badge bg-warning bg-opacity-10 text-warning ms-1 rounded-pill">
-                  {{ documentos().length }}
-                </span>
+                <span class="fued-count-badge">{{ documentos().length }}</span>
               }
-            </span>
-            <label class="btn btn-outline-warning btn-sm mb-0 d-flex align-items-center gap-1"
-                   [class.disabled]="subiendoDocumento()">
+            </div>
+            <label class="fued-btn-upload" [class.fued-btn-upload--busy]="subiendoDocumento()">
               @if (subiendoDocumento()) {
-                <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.uploading' | translate }}
+                <span class="fued-spinner-sm"></span>{{ 'estimator_file.uploading' | translate }}
               } @else {
                 <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_doc' | translate }}
               }
-              <input type="file"
-                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                     class="d-none"
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                     class="fued-file-input"
                      (change)="subirDocumento($event)" [disabled]="subiendoDocumento()"/>
             </label>
           </div>
-          <div class="card-body p-3">
+          <div class="fued-card__body">
             @if (errorDocumentos()) {
-              <div class="alert alert-danger py-2 small mb-3">{{ errorDocumentos() }}</div>
+              <div class="fued-alert fued-alert--danger">{{ errorDocumentos() }}</div>
             }
             @if (documentos().length === 0) {
-              <div class="upload-empty">
-                <i class="bi bi-file-earmark fs-2 mb-2 d-block"></i>
-                <p class="mb-0">{{ 'estimator_file.no_docs_hint' | translate }}</p>
+              <div class="fued-empty-inline">
+                <i class="bi bi-file-earmark"></i>
+                <p>{{ 'estimator_file.no_docs_hint' | translate }}</p>
               </div>
             } @else {
               @for (d of documentos(); track d.id) {
-                <div class="file-row">
-                  <div class="file-row__icon file-row__icon--doc">
+                <div class="fued-file-row">
+                  <div class="fued-file-row__icon">
                     <i class="bi bi-file-earmark-text"></i>
                   </div>
-                  <div class="file-row__info min-w-0">
-                    <p class="file-row__name">{{ d.nombre_archivo }}</p>
-                    <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                  <div class="fued-file-row__info">
+                    <p class="fued-file-row__name">{{ d.nombre_archivo }}</p>
+                    <p class="fued-file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
                   </div>
-                  <div class="file-row__actions">
-                    <button class="btn btn-outline-secondary btn-sm"
-                            (click)="verArchivo(d)" [title]="'common.view' | translate">
+                  <div class="fued-file-row__actions">
+                    <button class="fued-btn-icon" (click)="verArchivo(d)" [title]="'common.view' | translate">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm"
-                            (click)="eliminarArchivo(d, 'documento')" [title]="'common.delete' | translate">
+                    <button class="fued-btn-icon fued-btn-icon--danger" (click)="eliminarArchivo(d, 'documento')"
+                            [title]="'common.delete' | translate">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
@@ -430,174 +396,153 @@
               }
             }
           </div>
-        </div>
+        </section>
 
       </div>
 
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <!-- COLUMNA DERECHA: Formulario (sticky)                              -->
-      <!-- ══════════════════════════════════════════════════════════════════ -->
-      <div class="col-lg-5">
-        <div class="sidebar-sticky">
-          <div class="card border-0 shadow-sm rounded-4">
+      <!-- ── Columna derecha: formulario sticky ─────────────────────────── -->
+      <aside class="fued-col-side">
+        <div class="fued-form-card">
+          <div class="fued-form-card__header">
+            <i class="bi bi-clipboard2-check"></i>
+            {{ 'estimator_file.visit_doc_title' | translate }}
+          </div>
+          <div class="fued-form-card__body">
 
-            <div class="card-header bg-transparent border-bottom px-4 py-3">
-              <span class="fw-semibold">
-                <i class="bi bi-clipboard2-check me-2 text-warning"></i>{{ 'estimator_file.visit_doc_title' | translate }}
-              </span>
+            <!-- Fecha + Hora real de visita -->
+            <div class="fued-field-row">
+              <div class="fued-field">
+                <label class="fued-label">
+                  <i class="bi bi-calendar3"></i>{{ 'estimator_file.real_date' | translate }}
+                  <span class="fued-req">*</span>
+                </label>
+                <input type="date" class="fued-input" [(ngModel)]="fechaVisita" />
+              </div>
+              <div class="fued-field">
+                <label class="fued-label">
+                  <i class="bi bi-clock"></i>{{ 'file.hour' | translate }}
+                  <span class="fued-req">*</span>
+                </label>
+                <input type="time" class="fued-input" [(ngModel)]="horaVisita" />
+              </div>
             </div>
 
-            <div class="card-body p-4">
+            <!-- Problemas observados -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-card-text"></i>{{ 'estimator_file.problems_observed' | translate }}
+                <span class="fued-req">*</span>
+              </label>
+              <textarea class="fued-input fued-textarea" rows="4"
+                        [placeholder]="'estimator_file.problems_placeholder' | translate"
+                        [(ngModel)]="descripcionProblema"></textarea>
+            </div>
 
-              <!-- Fecha + Hora real de visita -->
-              <div class="row g-3 mb-3">
-                <div class="col-7">
-                  <label class="form-label small fw-semibold">
-                    <i class="bi bi-calendar3 me-1 text-muted"></i>{{ 'estimator_file.real_date' | translate }}
-                    <span class="req-mark">*</span>
-                  </label>
-                  <input type="date" class="form-control" [(ngModel)]="fechaVisita" />
+            <!-- Costo estimado (rango) -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-cash-coin"></i>{{ 'estimator_file.approx_cost' | translate }}
+                <span class="fued-opt">({{ 'common.optional' | translate }})</span>
+              </label>
+              <div class="fued-cost-range">
+                <div>
+                  <p class="fued-cost-sub">{{ 'file.min' | translate }}</p>
+                  <div class="fued-input-group">
+                    <span class="fued-input-prefix">CA$</span>
+                    <input type="number" class="fued-input" placeholder="0" min="0" step="1000"
+                           [(ngModel)]="costoMin" />
+                  </div>
                 </div>
-                <div class="col-5">
-                  <label class="form-label small fw-semibold">
-                    <i class="bi bi-clock me-1 text-muted"></i>{{ 'file.hour' | translate }}
-                    <span class="req-mark">*</span>
-                  </label>
-                  <input type="time" class="form-control" [(ngModel)]="horaVisita" />
+                <span class="fued-cost-sep">→</span>
+                <div>
+                  <p class="fued-cost-sub">{{ 'file.max' | translate }}</p>
+                  <div class="fued-input-group">
+                    <span class="fued-input-prefix">CA$</span>
+                    <input type="number" class="fued-input" placeholder="0" min="0" step="1000"
+                           [(ngModel)]="costoMax" />
+                  </div>
                 </div>
               </div>
+              @if (!costoValido) {
+                <p class="fued-field-error">
+                  <i class="bi bi-exclamation-circle"></i>{{ 'estimator_file.cost_error' | translate }}
+                </p>
+              }
+            </div>
 
-              <!-- Problemas observados -->
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">
-                  <i class="bi bi-card-text me-1 text-muted"></i>{{ 'estimator_file.problems_observed' | translate }}
-                  <span class="req-mark">*</span>
-                </label>
-                <textarea class="form-control" rows="4"
-                          [placeholder]="'estimator_file.problems_placeholder' | translate"
-                          [(ngModel)]="descripcionProblema"></textarea>
+            <!-- Notas internas -->
+            <div class="fued-field">
+              <label class="fued-label fued-label--muted">
+                <i class="bi bi-lock"></i>{{ 'estimator_file.internal_notes' | translate }}
+                <span class="fued-opt">({{ 'common.optional' | translate }})</span>
+              </label>
+              <textarea class="fued-input fued-textarea fued-textarea--sm" rows="3"
+                        [placeholder]="'estimator_file.notes_placeholder' | translate"
+                        [(ngModel)]="notasInternas"></textarea>
+            </div>
+
+            <!-- Checklist de completado -->
+            <div class="fued-checklist">
+              <div class="fued-checklist-item" [class.fued-checklist-item--done]="!!fechaVisita">
+                <i class="bi" [class.bi-check-circle]="!!fechaVisita" [class.bi-circle]="!fechaVisita"></i>
+                {{ 'estimator_file.check_visit_date' | translate }}
               </div>
+              <div class="fued-checklist-item" [class.fued-checklist-item--done]="!!horaVisita">
+                <i class="bi" [class.bi-check-circle]="!!horaVisita" [class.bi-circle]="!horaVisita"></i>
+                {{ 'estimator_file.check_visit_time' | translate }}
+              </div>
+              <div class="fued-checklist-item" [class.fued-checklist-item--done]="!!descripcionProblema.trim()">
+                <i class="bi"
+                   [class.bi-check-circle]="!!descripcionProblema.trim()"
+                   [class.bi-circle]="!descripcionProblema.trim()"></i>
+                {{ 'estimator_file.problems_observed' | translate }}
+              </div>
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="costoMin !== null && costoMax !== null && costoValido">
+                <i class="bi"
+                   [class.bi-check-circle]="costoMin !== null && costoMax !== null && costoValido"
+                   [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
+                {{ 'estimator_file.approx_cost' | translate }}
+                <span class="fued-opt">({{ 'common.optional' | translate }})</span>
+              </div>
+            </div>
 
-              <!-- Costo estimado (rango opcional) -->
-              <div class="mb-3">
-                <label class="form-label small fw-semibold">
-                  <i class="bi bi-cash-coin me-1 text-muted"></i>{{ 'estimator_file.approx_cost' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </label>
-                <div class="row g-2">
-                  <div class="col-6">
-                    <label class="form-label small text-muted mb-1">{{ 'file.min' | translate }}</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">CA$</span>
-                      <input type="number" class="form-control"
-                             placeholder="0" min="0" step="1000"
-                             [(ngModel)]="costoMin" />
-                    </div>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small text-muted mb-1">{{ 'file.max' | translate }}</label>
-                    <div class="input-group input-group-sm">
-                      <span class="input-group-text">CA$</span>
-                      <input type="number" class="form-control"
-                             placeholder="0" min="0" step="1000"
-                             [(ngModel)]="costoMax" />
-                    </div>
-                  </div>
-                </div>
-                @if (!costoValido) {
-                  <div class="form-text text-danger mt-1">
-                    <i class="bi bi-exclamation-circle me-1"></i>
-                    {{ 'estimator_file.cost_error' | translate }}
-                  </div>
+            @if (errorVisitaMsg()) {
+              <div class="fued-alert fued-alert--danger">{{ errorVisitaMsg() | translate }}</div>
+            }
+            @if (exitoVisitaMsg()) {
+              <div class="fued-alert fued-alert--success">{{ exitoVisitaMsg() | translate }}</div>
+            }
+
+            <!-- Acciones -->
+            <div class="fued-form-actions">
+              <button class="fued-btn-draft" (click)="guardarVisita()" [disabled]="guardandoVisita()">
+                @if (guardandoVisita()) {
+                  <span class="fued-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
+                } @else {
+                  <i class="bi bi-floppy"></i>{{ 'estimator_file.save_draft' | translate }}
                 }
-              </div>
-
-              <!-- Notas internas -->
-              <div class="mb-4">
-                <label class="form-label small fw-semibold text-muted">
-                  <i class="bi bi-lock me-1"></i>{{ 'estimator_file.internal_notes' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </label>
-                <textarea class="form-control form-control-sm" rows="3"
-                          [placeholder]="'estimator_file.notes_placeholder' | translate"
-                          [(ngModel)]="notasInternas"></textarea>
-              </div>
-
-              <!-- Checklist de completado -->
-              <div class="completion-list mb-4">
-                <div class="completion-item" [class.completion-item--done]="!!fechaVisita">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!fechaVisita"
-                     [class.bi-circle]="!fechaVisita"></i>
-                  {{ 'estimator_file.check_visit_date' | translate }}
-                </div>
-                <div class="completion-item" [class.completion-item--done]="!!horaVisita">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!horaVisita"
-                     [class.bi-circle]="!horaVisita"></i>
-                  {{ 'estimator_file.check_visit_time' | translate }}
-                </div>
-                <div class="completion-item"
-                     [class.completion-item--done]="!!descripcionProblema.trim()">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="!!descripcionProblema.trim()"
-                     [class.bi-circle]="!descripcionProblema.trim()"></i>
-                  {{ 'estimator_file.problems_observed' | translate }}
-                </div>
-                <div class="completion-item"
-                     [class.completion-item--done]="costoMin !== null && costoMax !== null && costoValido">
-                  <i class="bi"
-                     [class.bi-check-circle-fill]="costoMin !== null && costoMax !== null && costoValido"
-                     [class.bi-circle]="costoMin === null || costoMax === null || !costoValido"></i>
-                  {{ 'estimator_file.approx_cost' | translate }}
-                  <span class="opt-mark">({{ 'common.optional' | translate }})</span>
-                </div>
-              </div>
-
-              <!-- Mensajes borrador -->
-              @if (errorVisitaMsg()) {
-                <div class="alert alert-danger py-2 small mb-3">{{ errorVisitaMsg() | translate }}</div>
-              }
-              @if (exitoVisitaMsg()) {
-                <div class="alert alert-success py-2 small mb-3">{{ exitoVisitaMsg() | translate }}</div>
-              }
-
-              <!-- Acciones -->
-              <div class="d-flex flex-column gap-2">
-                <button class="btn btn-outline-secondary fw-semibold
-                               d-flex align-items-center justify-content-center gap-2"
-                        (click)="guardarVisita()"
-                        [disabled]="guardandoVisita()">
-                  @if (guardandoVisita()) {
-                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.saving' | translate }}
-                  } @else {
-                    <i class="bi bi-floppy"></i>{{ 'estimator_file.save_draft' | translate }}
-                  }
-                </button>
-                <button class="btn btn-warning fw-semibold text-white
-                               d-flex align-items-center justify-content-center gap-2"
-                        (click)="guardarEstimacion()"
-                        [disabled]="guardando() || !formularioCompleto">
-                  @if (guardando()) {
-                    <span class="spinner-border spinner-border-sm"></span>{{ 'estimator_file.sending' | translate }}
-                  } @else {
-                    <i class="bi bi-send-check"></i>{{ 'estimator_file.send_estimation' | translate }}
-                  }
-                </button>
-              </div>
-
-              <!-- Mensajes envío -->
-              @if (errorGuardado()) {
-                <div class="alert alert-danger py-2 small mt-3 mb-0">{{ errorGuardado() | translate }}</div>
-              }
-              @if (exitoMsg()) {
-                <div class="alert alert-success py-2 small mt-3 mb-0">{{ exitoMsg() | translate }}</div>
-              }
-
+              </button>
+              <button class="fued-btn-submit" (click)="guardarEstimacion()"
+                      [disabled]="guardando() || !formularioCompleto">
+                @if (guardando()) {
+                  <span class="fued-spinner-sm"></span>{{ 'estimator_file.sending' | translate }}
+                } @else {
+                  <i class="bi bi-send-check"></i>{{ 'estimator_file.send_estimation' | translate }}
+                }
+              </button>
             </div>
+
+            @if (errorGuardado()) {
+              <div class="fued-alert fued-alert--danger">{{ errorGuardado() | translate }}</div>
+            }
+            @if (exitoMsg()) {
+              <div class="fued-alert fued-alert--success">{{ exitoMsg() | translate }}</div>
+            }
+
           </div>
         </div>
-      </div>
+      </aside>
 
     </div>
   }

@@ -231,16 +231,18 @@ export class ExpedienteService {
       const servicio = servicios.find(s => s.id === e.servicio_id);
       const loc      = locs.find(l => l.expediente_id === e.id);
       return {
-        id:              e.id,
-        numero:          e.numero,
-        fecha_visita:    e.fecha_visita,
-        estado:          e.estado,
-        servicio_nombre: servicio?.nombre_es ?? '—',
-        cliente_nombre:  perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-        direccion:       loc?.direccion ?? '—',
-        provincia:       loc?.provincia ?? '—',
-        canton:          loc?.canton    ?? '—',
-        distrito:        loc?.distrito  ?? '—',
+        id:                 e.id,
+        numero:             e.numero,
+        fecha_visita:       e.fecha_visita,
+        estado:             e.estado,
+        servicio_nombre:    servicio?.nombre_es ?? '—',
+        servicio_nombre_en: servicio?.nombre_en ?? servicio?.nombre_es ?? '—',
+        servicio_nombre_fr: servicio?.nombre_fr ?? servicio?.nombre_es ?? '—',
+        cliente_nombre:     perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
+        direccion:          loc?.direccion ?? '—',
+        provincia:          loc?.provincia ?? '—',
+        canton:             loc?.canton    ?? '—',
+        distrito:           loc?.distrito  ?? '—',
       } as ExpedienteRow;
     });
   }
@@ -265,9 +267,11 @@ export class ExpedienteService {
       estado:           exp.estado,
       fecha_visita:     exp.fecha_visita,
       descripcion:      exp.descripcion ?? '',
-      servicio_nombre:  servicio?.nombre_es ?? '—',
-      cliente_nombre:   perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
-      cliente_telefono: perfil?.telefono ?? '',
+      servicio_nombre:    servicio?.nombre_es ?? '—',
+      servicio_nombre_en: servicio?.nombre_en ?? servicio?.nombre_es ?? '—',
+      servicio_nombre_fr: servicio?.nombre_fr ?? servicio?.nombre_es ?? '—',
+      cliente_nombre:     perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
+      cliente_telefono:   perfil?.telefono ?? '',
       direccion:  loc?.direccion  ?? '—',
       referencia: loc?.referencia ?? '—',
       provincia:  loc?.provincia  ?? '—',

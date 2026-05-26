@@ -1,158 +1,165 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="ftbe-root">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-inbox me-1"></i>{{ 'role.estimateur' | translate }}
-        </p>
-        <h4 class="mb-1">{{ 'files_to_estimate.title' | translate }}</h4>
-        <p class="text-muted small mb-0">{{ 'files_to_estimate.subtitle' | translate }}</p>
-      </div>
-      @if (!cargando() && expedientes().length > 0) {
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <span class="kpi-pill kpi-pill--total">
-            <i class="bi bi-files me-1"></i>
-            {{ expedientes().length }} {{ 'files_to_estimate.count_available' | translate }}
-          </span>
-          @if (urgentesCount() > 0) {
-            <span class="kpi-pill kpi-pill--urgente">
-              <i class="bi bi-clock me-1"></i>
-              {{ urgentesCount() }} {{ 'files_to_estimate.count_urgent' | translate }}
-            </span>
-          }
-        </div>
-      }
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="ftbe-header">
+    <div class="ftbe-header__content">
+      <p class="ftbe-header__eyebrow">
+        <i class="bi bi-inbox"></i>
+        {{ 'role.estimateur' | translate }}
+      </p>
+      <h1 class="ftbe-header__title">{{ 'files_to_estimate.title' | translate }}</h1>
+      <p class="ftbe-header__sub">{{ 'files_to_estimate.subtitle' | translate }}</p>
     </div>
+    @if (!cargando() && expedientes().length > 0) {
+      <div class="ftbe-kpis">
+        <div class="ftbe-kpi">
+          <span class="ftbe-kpi__val">{{ expedientes().length }}</span>
+          <span class="ftbe-kpi__label">{{ 'files_to_estimate.count_available' | translate }}</span>
+        </div>
+        @if (urgentesCount() > 0) {
+          <div class="ftbe-kpi ftbe-kpi--urgente">
+            <span class="ftbe-kpi__val">{{ urgentesCount() }}</span>
+            <span class="ftbe-kpi__label">{{ 'files_to_estimate.count_urgent' | translate }}</span>
+          </div>
+        }
+      </div>
+    }
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    <div class="ftbe-loading">
+      <span class="ftbe-spinner" role="status" aria-hidden="true"></span>
       {{ 'common.loading' | translate }}
     </div>
 
-  <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
+  <!-- ── Sin expedientes ──────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon"><i class="bi bi-inbox"></i></div>
-        <p class="empty-title">{{ 'files_to_estimate.empty_title' | translate }}</p>
-        <p class="empty-text">{{ 'files_to_estimate.empty_text' | translate }}</p>
-      </div>
+    <div class="ftbe-empty">
+      <div class="ftbe-empty__icon"><i class="bi bi-inbox"></i></div>
+      <p class="ftbe-empty__title">{{ 'files_to_estimate.empty_title' | translate }}</p>
+      <p class="ftbe-empty__text">{{ 'files_to_estimate.empty_text' | translate }}</p>
     </div>
 
-  <!-- ── Con expedientes ───────────────────────────────────────────────────── -->
+  <!-- ── Con expedientes ──────────────────────────────────────────────────── -->
   } @else {
 
-    <div class="filter-bar rounded-4 p-3 mb-4 d-flex gap-3 flex-wrap align-items-center">
-
-      <div class="search-wrap flex-grow-1">
-        <i class="bi bi-search search-icon"></i>
-        <input type="text" class="form-control search-input ps-5"
+    <!-- Toolbar -->
+    <div class="ftbe-toolbar">
+      <div class="ftbe-search">
+        <i class="bi bi-search ftbe-search__icon"></i>
+        <input type="text" class="ftbe-search__input"
                [placeholder]="'files_to_estimate.search_placeholder' | translate"
                [ngModel]="busqueda()"
                (ngModelChange)="busqueda.set($event)" />
       </div>
 
-      <button class="btn btn-sm fw-semibold filter-btn"
-              [class.filter-btn--active]="soloUrgentes()"
+      <button class="ftbe-chip"
+              [class.ftbe-chip--active]="soloUrgentes()"
               (click)="soloUrgentes.set(!soloUrgentes())">
-        <i class="bi bi-clock me-1"></i>{{ 'files_to_estimate.urgent_only' | translate }}
+        <i class="bi bi-clock"></i>
+        {{ 'files_to_estimate.urgent_only' | translate }}
         @if (urgentesCount() > 0) {
-          <span class="badge ms-1"
-                [class.bg-danger]="soloUrgentes()"
-                [class.bg-secondary]="!soloUrgentes()">
-            {{ urgentesCount() }}
-          </span>
+          <span class="ftbe-chip__badge">{{ urgentesCount() }}</span>
         }
       </button>
 
-      @if (hayFiltros()) {
-        <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none"
-                (click)="limpiarFiltros()">
-          <i class="bi bi-x-circle me-1"></i>{{ 'common.clear' | translate }}
+      @if (busqueda() !== '' || soloUrgentes()) {
+        <button class="ftbe-clear" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'common.clear' | translate }}
         </button>
       }
-
     </div>
 
+    <!-- Results bar -->
+    @if (busqueda() !== '' || soloUrgentes()) {
+      <p class="ftbe-results-bar">
+        {{ 'common.showing' | translate }}
+        <strong>{{ expedientesFiltrados().length }}</strong>
+        {{ 'common.of' | translate }} {{ expedientes().length }}
+        {{ 'files_to_estimate.files_count' | translate }}
+      </p>
+    }
+
+    <!-- Sin resultados con filtro -->
     @if (expedientesFiltrados().length === 0) {
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="empty-inline">
-          <i class="bi bi-search text-muted fs-3 mb-2"></i>
-          <p class="fw-semibold mb-1">{{ 'common.no_results' | translate }}</p>
-          <p class="text-muted small mb-3">{{ 'files_to_estimate.no_filter_text' | translate }}</p>
-          <button class="btn btn-outline-secondary btn-sm" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-          </button>
-        </div>
+      <div class="ftbe-empty-inline">
+        <i class="bi bi-search"></i>
+        <p class="ftbe-empty-inline__title">{{ 'common.no_results' | translate }}</p>
+        <p class="ftbe-empty-inline__text">{{ 'files_to_estimate.no_filter_text' | translate }}</p>
+        <button class="ftbe-btn-outline" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'common.clear_filters' | translate }}
+        </button>
       </div>
 
+    <!-- Grid de cards -->
     } @else {
+      <div class="ftbe-grid">
+        @for (exp of expedientesFiltrados(); track exp.id; let idx = $index) {
+          <article class="ftbe-card"
+                   [class.ftbe-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                   [class.ftbe-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
+                   [class.ftbe-card--proxima]="urgencia(exp.fecha_visita) === 'proxima'"
+                   [class.ftbe-card--reciente]="idx === 0 && busqueda() === '' && !soloUrgentes()">
 
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
-        @for (exp of expedientesFiltrados(); track exp.id) {
-          <div class="col">
-            <div class="file-card h-100"
-                 [class.file-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
-                 [class.file-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
-
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                <span class="file-num">{{ exp.numero }}</span>
+            <div class="ftbe-card__head">
+              <span class="ftbe-card__num">{{ exp.numero }}</span>
+              <div class="ftbe-card__badges">
                 @if (urgencia(exp.fecha_visita) === 'vencida') {
-                  <span class="badge text-bg-danger urg-badge">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'common.urgency_expired' | translate }}
+                  <span class="ftbe-badge ftbe-badge--danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ 'common.urgency_expired' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'hoy') {
-                  <span class="badge text-bg-warning urg-badge">
-                    <i class="bi bi-clock-fill me-1"></i>{{ 'common.urgency_today' | translate }}
+                  <span class="ftbe-badge ftbe-badge--warning">
+                    <i class="bi bi-clock"></i>
+                    {{ 'common.urgency_today' | translate }}
                   </span>
                 } @else if (urgencia(exp.fecha_visita) === 'proxima') {
-                  <span class="badge urg-badge urg-badge--proxima">
-                    <i class="bi bi-calendar-event me-1"></i>{{ 'common.urgency_upcoming' | translate }}
+                  <span class="ftbe-badge ftbe-badge--info">
+                    <i class="bi bi-calendar-event"></i>
+                    {{ 'common.urgency_upcoming' | translate }}
+                  </span>
+                }
+                @if (idx === 0 && busqueda() === '' && !soloUrgentes()) {
+                  <span class="ftbe-badge ftbe-badge--reciente">
+                    {{ 'common.recent' | translate }}
                   </span>
                 }
               </div>
-
-              <p class="file-servicio mb-2">{{ exp.servicio_nombre }}</p>
-
-              <div class="d-flex flex-column gap-1 mb-3">
-                <span class="file-meta">
-                  <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
-                </span>
-                <span class="file-meta">
-                  <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
-                </span>
-              </div>
-
-              <div class="file-fecha-row mb-3"
-                   [class.file-fecha-row--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
-                   [class.file-fecha-row--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
-                <i class="bi bi-calendar3 me-1"></i>
-                {{ 'files_to_estimate.visit_label' | translate }} <strong>{{ formatFecha(exp.fecha_visita) }}</strong>
-              </div>
-
-              <button class="btn btn-primary w-100 fw-semibold btn-estimar mt-auto"
-                      (click)="estimar(exp.id)">
-                <i class="bi bi-pencil-square me-2"></i>{{ 'files_to_estimate.take_estimate' | translate }}
-              </button>
-
             </div>
-          </div>
+
+            <h2 class="ftbe-card__service">{{ exp.servicio_nombre }}</h2>
+
+            <div class="ftbe-card__meta">
+              <span class="ftbe-meta-item">
+                <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
+              </span>
+              <span class="ftbe-meta-item">
+                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
+              </span>
+            </div>
+
+            <div class="ftbe-card__fecha"
+                 [class.ftbe-card__fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                 [class.ftbe-card__fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+              <i class="bi bi-calendar3"></i>
+              {{ 'files_to_estimate.visit_label' | translate }}
+              <strong>{{ formatFecha(exp.fecha_visita) }}</strong>
+            </div>
+
+            <button class="ftbe-btn-cta" (click)="estimar(exp.id)">
+              <i class="bi bi-pencil-square"></i>
+              {{ 'files_to_estimate.take_estimate' | translate }}
+            </button>
+
+          </article>
         }
       </div>
-
-      @if (hayFiltros()) {
-        <p class="text-muted small text-center mt-4 mb-0">
-          {{ 'common.showing' | translate }} {{ expedientesFiltrados().length }}
-          {{ 'common.of' | translate }} {{ expedientes().length }} {{ 'files_to_estimate.files_count' | translate }}
-        </p>
-      }
-
     }
+
   }
 
 </div>

@@ -1,167 +1,175 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="ef-root">
 
   <!-- ── Loading ───────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+    <div class="ef-loading">
+      <span class="ef-spinner" aria-hidden="true"></span>
       {{ 'builder_offer.loading' | translate }}
     </div>
 
   } @else if (!detalle()) {
 
-    <!-- ── Error ──────────────────────────────────────────────────────────── -->
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon empty-icon--warn">
-          <i class="bi bi-exclamation-triangle"></i>
-        </div>
-        <h5 class="empty-title">{{ 'file.not_found' | translate }}</h5>
-        @if (errorMsg()) {
-          <p class="empty-text text-danger">{{ errorMsg() | translate }}</p>
-        }
-        <button class="btn btn-outline-secondary btn-sm mt-2" (click)="volver()">
-          <i class="bi bi-arrow-left me-1"></i>{{ 'common.back' | translate }}
-        </button>
+    <!-- ── Error ─────────────────────────────────────────────────────────── -->
+    <div class="ef-empty">
+      <div class="ef-empty__icon ef-empty__icon--warn">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
       </div>
+      <h2 class="ef-empty__title">{{ 'file.not_found' | translate }}</h2>
+      @if (errorMsg()) {
+        <p class="ef-empty__text">{{ errorMsg() | translate }}</p>
+      }
+      <button class="ef-btn ef-btn--ghost" (click)="volver()">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        {{ 'common.back' | translate }}
+      </button>
     </div>
 
   } @else {
 
-    <!-- ── Header ─────────────────────────────────────────────────────────── -->
-    <header class="page-header rounded-4 p-4 mb-4">
-      <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        <div class="d-flex align-items-center gap-3">
-          <button class="btn-back" (click)="volver()" [title]="'common.back' | translate">
-            <i class="bi bi-arrow-left"></i>
-          </button>
-          <div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-              <span class="exp-num">{{ detalle()!.numero }}</span>
-              <span class="badge rounded-pill px-3 py-1 {{ badgeClass(detalle()!.estado) }}">
-                @if (detalle()!.estado === 'contratado') {
-                  <i class="bi bi-trophy-fill me-1"></i>
-                } @else if (detalle()!.estado === 'adjudicado') {
-                  <i class="bi bi-award me-1"></i>
-                } @else {
-                  <i class="bi bi-clipboard-check me-1"></i>
-                }
-                {{ ('state.' + detalle()!.estado) | translate }}
+    <!-- ── Header ────────────────────────────────────────────────────────── -->
+    <header class="ef-header">
+
+      <div class="ef-header__left">
+        <button class="ef-btn-back" (click)="volver()" [title]="'common.back' | translate">
+          <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        </button>
+        <div class="ef-header__text">
+          <p class="ef-eyebrow">
+            <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+            {{ 'estimator_file.print_estimation_completed' | translate }}
+          </p>
+          <h1 class="ef-title">{{ servicioNombre }}</h1>
+          <div class="ef-header__badges">
+            <span class="ef-num">{{ detalle()!.numero }}</span>
+            <span class="ef-badge badge rounded-pill {{ badgeClass(detalle()!.estado) }}">
+              @if (detalle()!.estado === 'contratado') {
+                <i class="bi bi-trophy-fill me-1" aria-hidden="true"></i>
+              } @else if (detalle()!.estado === 'adjudicado') {
+                <i class="bi bi-award me-1" aria-hidden="true"></i>
+              }
+              {{ ('state.' + detalle()!.estado) | translate }}
+            </span>
+            @if (detalle()!.estimador_nombre) {
+              <span class="ef-estimador">
+                <i class="bi bi-person-check" aria-hidden="true"></i>
+                {{ detalle()!.estimador_nombre }}
               </span>
-            </div>
-            <p class="text-muted small mb-0 mt-1">
-              {{ detalle()!.servicio_nombre }}
-            </p>
+            }
           </div>
         </div>
-        <button class="btn btn-outline-success btn-sm d-flex align-items-center gap-2"
-                (click)="imprimir()" [title]="'estimator_file.print' | translate">
-          <i class="bi bi-printer"></i>
-          <span class="d-none d-sm-inline">{{ 'estimator_file.print' | translate }}</span>
-        </button>
       </div>
+
+      <button class="ef-btn ef-btn--print" (click)="imprimir()">
+        <i class="bi bi-printer" aria-hidden="true"></i>
+        {{ 'estimator_file.print' | translate }}
+      </button>
+
     </header>
 
-    <!-- ── Main grid ──────────────────────────────────────────────────────── -->
-    <div class="row g-4">
+    <!-- ── Main grid ─────────────────────────────────────────────────────── -->
+    <div class="ef-main">
 
-      <!-- ── LEFT: expedition info + files ──────────────────────────────── -->
-      <div class="col-lg-7">
+      <!-- LEFT: expedition info + files ──────────────────────────────────── -->
+      <div class="ef-col-main">
 
         <!-- Datos del expediente -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-body p-4">
-            <p class="section-label">{{ 'estimator_file.file_data_title' | translate }}</p>
+        <section class="ef-card">
+          <div class="ef-card__head">
+            <p class="ef-section-label">{{ 'estimator_file.file_data_title' | translate }}</p>
+          </div>
+          <div class="ef-card__body">
 
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'builder_offer.client_label' | translate }}</p>
-                <p class="info-value">{{ detalle()!.cliente_nombre }}</p>
+            <div class="ef-info-grid">
+              <div class="ef-info-item">
+                <p class="ef-info-label">{{ 'builder_offer.client_label' | translate }}</p>
+                <p class="ef-info-value">{{ detalle()!.cliente_nombre }}</p>
               </div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'common.phone' | translate }}</p>
-                <p class="info-value">
+              <div class="ef-info-item">
+                <p class="ef-info-label">{{ 'common.phone' | translate }}</p>
+                <p class="ef-info-value">
                   @if (detalle()!.cliente_telefono) {
-                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="text-decoration-none text-success">
-                      <i class="bi bi-telephone me-1"></i>{{ detalle()!.cliente_telefono }}
+                    <a href="tel:{{ detalle()!.cliente_telefono }}" class="ef-tel-link">
+                      <i class="bi bi-telephone" aria-hidden="true"></i>
+                      {{ detalle()!.cliente_telefono }}
                     </a>
                   } @else { — }
                 </p>
               </div>
-              <div class="col-12"><hr class="divider" /></div>
-              <div class="col-sm-8">
-                <p class="info-label">{{ 'common.address' | translate }}</p>
-                <p class="info-value mb-0">{{ detalle()!.direccion }}</p>
-                <p class="info-value mb-0">{{ detalle()!.canton }} {{ detalle()!.provincia }} {{ detalle()!.distrito }}</p>
-                <p class="info-value fw-semibold text-uppercase small mb-0">{{ 'footer.country' | translate }}</p>
-              </div>
-              <div class="col-sm-4">
-                <p class="info-label">{{ 'file.reference' | translate }}</p>
-                <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
-              </div>
-              <div class="col-12"><hr class="divider" /></div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'estimator_file.scheduled_visit' | translate }}</p>
-                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
-              </div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'file.hour' | translate }}</p>
-                <p class="info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
-              </div>
-              @if (detalle()!.estimador_nombre) {
-                <div class="col-12"><hr class="divider" /></div>
-                <div class="col-12">
-                  <p class="info-label">{{ 'role.estimador' | translate }}</p>
-                  <p class="info-value">
-                    <i class="bi bi-person-check text-success me-1"></i>
-                    {{ detalle()!.estimador_nombre }}
-                  </p>
-                </div>
-              }
             </div>
+
+            <div class="ef-divider"></div>
+
+            <div class="ef-info-grid">
+              <div class="ef-info-item ef-info-item--wide">
+                <p class="ef-info-label">{{ 'common.address' | translate }}</p>
+                <p class="ef-info-value">{{ detalle()!.direccion }}</p>
+                <p class="ef-info-value">{{ detalle()!.canton }}, {{ detalle()!.provincia }}, {{ detalle()!.distrito }}</p>
+                <p class="ef-info-value ef-info-value--upper">{{ 'footer.country' | translate }}</p>
+              </div>
+              <div class="ef-info-item">
+                <p class="ef-info-label">{{ 'file.reference' | translate }}</p>
+                <p class="ef-info-value">{{ detalle()!.referencia || '—' }}</p>
+              </div>
+            </div>
+
+            <div class="ef-divider"></div>
+
+            <div class="ef-info-grid">
+              <div class="ef-info-item">
+                <p class="ef-info-label">{{ 'estimator_file.scheduled_visit' | translate }}</p>
+                <p class="ef-info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+              </div>
+              <div class="ef-info-item">
+                <p class="ef-info-label">{{ 'file.hour' | translate }}</p>
+                <p class="ef-info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
+              </div>
+            </div>
+
           </div>
-        </div>
+        </section>
 
-        <!-- ── Archivos ──────────────────────────────────────────────────── -->
-        <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-body p-4">
-            <p class="section-label">{{ 'estimator_file.file_attachments' | translate }}</p>
+        <!-- Archivos del expediente -->
+        <section class="ef-card">
+          <div class="ef-card__head">
+            <p class="ef-section-label">{{ 'estimator_file.file_attachments' | translate }}</p>
+          </div>
+          <div class="ef-card__body ef-card__body--files">
 
-            <!-- Fotos -->
-            <div class="mb-4">
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="file-section-title mb-0">
-                  <i class="bi bi-images me-2 text-success"></i>{{ 'file.site_photos' | translate }}
+            <!-- ── Fotos ────────────────────────────────────────────────── -->
+            <div class="ef-file-section">
+              <div class="ef-file-section__head">
+                <h3 class="ef-file-title">
+                  <i class="bi bi-images" aria-hidden="true"></i>
+                  {{ 'file.site_photos' | translate }}
                   @if (fotos().length > 0) {
-                    <span class="file-count">{{ fotos().length }}</span>
+                    <span class="ef-count">{{ fotos().length }}</span>
                   }
-                </h6>
-                <label class="btn btn-outline-success btn-sm mb-0"
-                       [class.disabled]="subiendoFoto()">
-                  <i class="bi bi-cloud-upload me-1"></i>
+                </h3>
+                <label class="ef-btn ef-btn--upload" [class.ef-btn--loading]="subiendoFoto()">
+                  <i class="bi bi-cloud-upload" aria-hidden="true"></i>
                   {{ subiendoFoto() ? ('estimator_file.uploading' | translate) : ('estimator_file.upload_photos' | translate) }}
-                  <input type="file" accept="image/*" multiple class="d-none"
+                  <input type="file" accept="image/*" multiple class="ef-file-input"
                          (change)="subirFotos($event)" [disabled]="subiendoFoto()" />
                 </label>
               </div>
               @if (errorFotos()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorFotos() }}</div>
+                <div class="ef-alert">{{ errorFotos() }}</div>
               }
               @if (fotos().length === 0) {
-                <div class="upload-empty">
-                  <i class="bi bi-image fs-2 mb-1 d-block"></i>{{ 'estimator_file.no_photos' | translate }}
+                <div class="ef-upload-empty">
+                  <i class="bi bi-image" aria-hidden="true"></i>
+                  {{ 'estimator_file.no_photos' | translate }}
                 </div>
               } @else {
-                <div class="photos-grid">
+                <div class="ef-photos-grid">
                   @for (f of fotos(); track f.id) {
-                    <div class="photo-thumb">
-                      <img [src]="publicUrl(f.url_storage)"
-                           class="photo-thumb__img"
-                           [title]="f.nombre_archivo"
-                           (click)="verArchivo(f)" />
-                      <button class="photo-thumb__delete"
+                    <div class="ef-photo">
+                      <img [src]="publicUrl(f.url_storage)" class="ef-photo__img"
+                           [title]="f.nombre_archivo" (click)="verArchivo(f)" />
+                      <button class="ef-photo__delete"
                               [title]="'common.delete' | translate"
                               (click)="eliminarArchivo(f, 'foto')">
-                        <i class="bi bi-x-lg"></i>
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
                       </button>
                     </div>
                   }
@@ -169,108 +177,109 @@
               }
             </div>
 
-            <hr class="my-3" />
+            <div class="ef-divider"></div>
 
-            <!-- Tour virtual -->
-            <div class="mb-4">
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="file-section-title mb-0">
-                  <i class="bi bi-camera-video me-2 text-success"></i>{{ 'estimator_file.tour_title' | translate }}
+            <!-- ── Tour virtual ──────────────────────────────────────────── -->
+            <div class="ef-file-section">
+              <div class="ef-file-section__head">
+                <h3 class="ef-file-title">
+                  <i class="bi bi-camera-video" aria-hidden="true"></i>
+                  {{ 'estimator_file.tour_title' | translate }}
                   @if (urlsTour().length > 0) {
-                    <span class="file-count">{{ urlsTour().length }}</span>
+                    <span class="ef-count">{{ urlsTour().length }}</span>
                   }
-                </h6>
+                </h3>
                 @if (!mostrandoFormAdd() && editandoIndex() === null) {
-                  <button class="btn btn-outline-success btn-sm"
+                  <button class="ef-btn ef-btn--upload"
                           (click)="mostrarFormAgregarVideo()"
                           [disabled]="guardandoTour()">
-                    <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    {{ 'estimator_file.tour_add_video' | translate }}
                   </button>
                 }
               </div>
-
               @if (errorTour()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorTour() }}</div>
+                <div class="ef-alert">{{ errorTour() }}</div>
               }
 
               <!-- Lista de videos -->
               @for (url of urlsTour(); track $index) {
-                <div class="tour-video-item" [class.mb-3]="$index < urlsTour().length - 1 || mostrandoFormAdd()">
+                <div class="ef-tour-item">
 
                   @if (editandoIndex() === $index) {
-                    <!-- Modo edición de este video -->
-                    <div class="tour-edit-wrap">
-                      <p class="small fw-semibold mb-2">
-                        <i class="bi bi-pencil me-1 text-success"></i>
+                    <div class="ef-tour-edit">
+                      <p class="ef-tour-edit__title">
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
                         {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
                       </p>
-                      <div class="input-group input-group-sm mb-2">
-                        <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                        <input type="url" class="form-control"
+                      <div class="ef-url-input-wrap">
+                        <i class="bi bi-link-45deg ef-url-icon" aria-hidden="true"></i>
+                        <input type="url" class="ef-url-input"
                                placeholder="https://my.matterport.com/show/?m=…"
                                [(ngModel)]="editandoUrlTemp"
                                [disabled]="guardandoTour()" />
                       </div>
-                      <div class="d-flex gap-2 mb-3">
-                        <button class="btn btn-success btn-sm flex-grow-1"
+                      <div class="ef-tour-edit__actions">
+                        <button class="ef-btn ef-btn--save"
                                 (click)="guardarEdicionVideo()"
                                 [disabled]="guardandoTour() || !editandoUrlTemp.trim()">
                           @if (guardandoTour()) {
-                            <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                            <span class="ef-spinner ef-spinner--sm" aria-hidden="true"></span>
+                            {{ 'estimator_file.saving' | translate }}
                           } @else {
-                            <i class="bi bi-check-lg me-1"></i>{{ 'common.save' | translate }}
+                            <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            {{ 'common.save' | translate }}
                           }
                         </button>
-                        <button class="btn btn-outline-secondary btn-sm"
+                        <button class="ef-btn ef-btn--ghost"
                                 (click)="cancelarEdicionVideo()"
                                 [disabled]="guardandoTour()">
                           {{ 'common.cancel' | translate }}
                         </button>
                       </div>
                       @if (editandoUrlSafe) {
-                        <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                        <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                          <iframe [src]="editandoUrlSafe"
-                                  allowfullscreen allow="xr-spatial-tracking"
-                                  title="Vista previa"></iframe>
+                        <p class="ef-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                        <div class="ef-iframe-wrap">
+                          <iframe [src]="editandoUrlSafe" allowfullscreen
+                                  allow="xr-spatial-tracking" title="Vista previa"></iframe>
                         </div>
                       }
                     </div>
 
                   } @else {
-                    <!-- Fila del video (colapsada / expandida) -->
-                    <div class="tour-video-row" [class.tour-video-row--expanded]="expandedIndex() === $index">
-                      <button class="tour-video-row__toggle"
-                              (click)="toggleExpandVideo($index)"
-                              [title]="expandedIndex() === $index ? ('common.collapse' | translate) : ('common.expand' | translate)">
-                        <i class="bi bi-camera-video-fill text-success me-2"></i>
-                        <span class="fw-semibold small">{{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}</span>
-                        <span class="text-muted small ms-2 tour-video-url">{{ url }}</span>
+                    <div class="ef-tour-row" [class.ef-tour-row--expanded]="expandedIndex() === $index">
+                      <button class="ef-tour-row__toggle" (click)="toggleExpandVideo($index)">
+                        <i class="bi bi-camera-video-fill ef-tour-icon" aria-hidden="true"></i>
+                        <span class="ef-tour-row__label">
+                          {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                        </span>
+                        <span class="ef-tour-row__url">{{ url }}</span>
                         <i class="bi ms-auto"
                            [class.bi-chevron-down]="expandedIndex() !== $index"
-                           [class.bi-chevron-up]="expandedIndex() === $index"></i>
+                           [class.bi-chevron-up]="expandedIndex() === $index"
+                           aria-hidden="true"></i>
                       </button>
-                      <div class="tour-video-row__actions">
-                        <button class="btn btn-outline-secondary btn-sm"
+                      <div class="ef-tour-row__actions">
+                        <button class="ef-btn ef-btn--icon"
                                 (click)="iniciarEdicionVideo($index)"
                                 [disabled]="guardandoTour()"
                                 [title]="'common.edit' | translate">
-                          <i class="bi bi-pencil"></i>
+                          <i class="bi bi-pencil" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-outline-danger btn-sm"
+                        <button class="ef-btn ef-btn--icon ef-btn--icon-danger"
                                 (click)="eliminarVideo($index)"
                                 [disabled]="guardandoTour()"
                                 [title]="'estimator_file.tour_delete_video' | translate">
                           @if (guardandoTour()) {
-                            <span class="spinner-border spinner-border-sm"></span>
+                            <span class="ef-spinner ef-spinner--sm" aria-hidden="true"></span>
                           } @else {
-                            <i class="bi bi-trash3"></i>
+                            <i class="bi bi-trash3" aria-hidden="true"></i>
                           }
                         </button>
                       </div>
                     </div>
                     @if (expandedIndex() === $index) {
-                      <div class="ratio ratio-16x9 rounded-3 overflow-hidden mt-2">
+                      <div class="ef-iframe-wrap ef-iframe-wrap--tour">
                         <iframe [src]="getSafeUrl(url)"
                                 allowfullscreen allow="xr-spatial-tracking"
                                 [title]="'Video ' + ($index + 1)"></iframe>
@@ -281,102 +290,105 @@
                 </div>
               }
 
-              <!-- Estado vacío -->
               @if (urlsTour().length === 0 && !mostrandoFormAdd()) {
-                <div class="upload-empty">
-                  <i class="bi bi-camera-video fs-2 mb-1 d-block"></i>{{ 'estimator_file.no_tour' | translate }}
+                <div class="ef-upload-empty">
+                  <i class="bi bi-camera-video" aria-hidden="true"></i>
+                  {{ 'estimator_file.no_tour' | translate }}
                 </div>
               }
 
-              <!-- Formulario agregar nuevo video -->
               @if (mostrandoFormAdd()) {
-                <div class="tour-edit-wrap" [class.mt-3]="urlsTour().length > 0">
-                  @if (urlsTour().length > 0) { <hr class="mb-3"> }
-                  <p class="small fw-semibold mb-2">
-                    <i class="bi bi-plus-circle me-1 text-success"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                <div class="ef-tour-edit" [class.ef-tour-edit--bordered]="urlsTour().length > 0">
+                  <p class="ef-tour-edit__title">
+                    <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                    {{ 'estimator_file.tour_add_video' | translate }}
                   </p>
-                  <div class="input-group input-group-sm mb-2">
-                    <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                    <input type="url" class="form-control"
+                  <div class="ef-url-input-wrap">
+                    <i class="bi bi-link-45deg ef-url-icon" aria-hidden="true"></i>
+                    <input type="url" class="ef-url-input"
                            placeholder="https://my.matterport.com/show/?m=…"
                            [(ngModel)]="nuevoUrlInput"
                            [disabled]="guardandoTour()" />
                   </div>
-                  <div class="d-flex gap-2 mb-3">
-                    <button class="btn btn-success btn-sm flex-grow-1"
+                  <div class="ef-tour-edit__actions">
+                    <button class="ef-btn ef-btn--save"
                             (click)="agregarVideo()"
                             [disabled]="guardandoTour() || !nuevoUrlInput.trim()">
                       @if (guardandoTour()) {
-                        <span class="spinner-border spinner-border-sm me-1"></span>{{ 'estimator_file.saving' | translate }}
+                        <span class="ef-spinner ef-spinner--sm" aria-hidden="true"></span>
+                        {{ 'estimator_file.saving' | translate }}
                       } @else {
-                        <i class="bi bi-plus-lg me-1"></i>{{ 'estimator_file.tour_add_video' | translate }}
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                        {{ 'estimator_file.tour_add_video' | translate }}
                       }
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm"
+                    <button class="ef-btn ef-btn--ghost"
                             (click)="cancelarAgregarVideo()"
                             [disabled]="guardandoTour()">
                       {{ 'common.cancel' | translate }}
                     </button>
                   </div>
                   @if (nuevoUrlSafe) {
-                    <p class="text-muted small mb-1">{{ 'estimator_file.preview_label' | translate }}</p>
-                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
-                      <iframe [src]="nuevoUrlSafe"
-                              allowfullscreen allow="xr-spatial-tracking"
-                              title="Vista previa"></iframe>
+                    <p class="ef-preview-label">{{ 'estimator_file.preview_label' | translate }}</p>
+                    <div class="ef-iframe-wrap">
+                      <iframe [src]="nuevoUrlSafe" allowfullscreen
+                              allow="xr-spatial-tracking" title="Vista previa"></iframe>
                     </div>
                   }
                 </div>
               }
-
             </div>
 
-            <hr class="my-3" />
+            <div class="ef-divider"></div>
 
-            <!-- Documentos -->
-            <div>
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="file-section-title mb-0">
-                  <i class="bi bi-file-earmark-text me-2 text-success"></i>{{ 'file.technical_docs' | translate }}
+            <!-- ── Documentos ────────────────────────────────────────────── -->
+            <div class="ef-file-section">
+              <div class="ef-file-section__head">
+                <h3 class="ef-file-title">
+                  <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                  {{ 'file.technical_docs' | translate }}
                   @if (documentos().length > 0) {
-                    <span class="file-count">{{ documentos().length }}</span>
+                    <span class="ef-count">{{ documentos().length }}</span>
                   }
-                </h6>
-                <label class="btn btn-outline-success btn-sm mb-0"
-                       [class.disabled]="subiendoDocumento()">
-                  <i class="bi bi-cloud-upload me-1"></i>
+                </h3>
+                <label class="ef-btn ef-btn--upload" [class.ef-btn--loading]="subiendoDocumento()">
+                  <i class="bi bi-cloud-upload" aria-hidden="true"></i>
                   {{ subiendoDocumento() ? ('estimator_file.uploading' | translate) : ('estimator_file.upload_doc' | translate) }}
                   <input type="file"
                          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                         class="d-none"
+                         class="ef-file-input"
                          (change)="subirDocumento($event)"
                          [disabled]="subiendoDocumento()" />
                 </label>
               </div>
               @if (errorDocumentos()) {
-                <div class="alert alert-danger py-2 small mb-2">{{ errorDocumentos() }}</div>
+                <div class="ef-alert">{{ errorDocumentos() }}</div>
               }
               @if (documentos().length === 0) {
-                <div class="upload-empty">
-                  <i class="bi bi-file-earmark fs-2 mb-1 d-block"></i>{{ 'estimator_file.no_docs' | translate }}
+                <div class="ef-upload-empty">
+                  <i class="bi bi-file-earmark" aria-hidden="true"></i>
+                  {{ 'estimator_file.no_docs' | translate }}
                 </div>
               } @else {
-                <div class="file-list">
-                  @for (d of documentos(); track d.id) {
-                    <div class="file-row">
-                      <div class="file-row__icon file-row__icon--doc">
-                        <i class="bi bi-file-earmark-text-fill"></i>
+                <div class="ef-doc-list">
+                  @for (doc of documentos(); track doc.id) {
+                    <div class="ef-doc-row">
+                      <div class="ef-doc-row__icon">
+                        <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
                       </div>
-                      <div class="file-row__info">
-                        <p class="file-row__name">{{ d.nombre_archivo }}</p>
-                        <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                      <div class="ef-doc-row__info">
+                        <p class="ef-doc-row__name">{{ doc.nombre_archivo }}</p>
+                        <p class="ef-doc-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
                       </div>
-                      <div class="file-row__actions">
-                        <button class="btn btn-sm btn-outline-secondary" (click)="verArchivo(d)">
-                          <i class="bi bi-box-arrow-up-right"></i>
+                      <div class="ef-doc-row__actions">
+                        <button class="ef-btn ef-btn--icon" (click)="verArchivo(doc)"
+                                [title]="'common.open' | translate">
+                          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" (click)="eliminarArchivo(d, 'documento')">
-                          <i class="bi bi-trash3"></i>
+                        <button class="ef-btn ef-btn--icon ef-btn--icon-danger"
+                                (click)="eliminarArchivo(doc, 'documento')"
+                                [title]="'common.delete' | translate">
+                          <i class="bi bi-trash3" aria-hidden="true"></i>
                         </button>
                       </div>
                     </div>
@@ -386,139 +398,140 @@
             </div>
 
           </div>
-        </div>
+        </section>
 
-      </div><!-- /col-lg-7 -->
+      </div><!-- /ef-col-main -->
 
-      <!-- ── RIGHT: estimation sidebar ──────────────────────────────────── -->
-      <div class="col-lg-5">
-        <div class="sidebar-sticky">
+      <!-- RIGHT: sidebar ──────────────────────────────────────────────────── -->
+      <aside class="ef-col-side">
 
-          <!-- Cost card -->
-          @if (estimacion()?.costo_estimado !== null && estimacion()?.costo_estimado !== undefined) {
-            <div class="cost-card rounded-4 p-4 mb-4">
-              <p class="cost-label">{{ 'estimator_file.cost_section' | translate }}</p>
-              <div class="d-flex align-items-center gap-3 flex-wrap mb-2">
-                <div>
-                  <p class="cost-sublabel mb-0">{{ 'file.min' | translate }}</p>
-                  <p class="cost-value mb-0">{{ formatCosto(estimacion()!.costo_estimado) }}</p>
+        <!-- Cost card -->
+        @if (estimacion()?.costo_estimado !== null && estimacion()?.costo_estimado !== undefined) {
+          <div class="ef-cost-card">
+            <p class="ef-cost-eyebrow">{{ 'estimator_file.cost_section' | translate }}</p>
+            <div class="ef-cost-row">
+              <div class="ef-cost-item">
+                <p class="ef-cost-label">{{ 'file.min' | translate }}</p>
+                <p class="ef-cost-value">{{ formatCosto(estimacion()!.costo_estimado) }}</p>
+              </div>
+              @if (estimacion()!.costo_estimado_max !== null) {
+                <i class="bi bi-arrow-right ef-cost-arrow" aria-hidden="true"></i>
+                <div class="ef-cost-item">
+                  <p class="ef-cost-label">{{ 'file.max' | translate }}</p>
+                  <p class="ef-cost-value">{{ formatCosto(estimacion()!.costo_estimado_max) }}</p>
                 </div>
-                @if (estimacion()!.costo_estimado_max !== null) {
-                  <i class="bi bi-arrow-right text-success opacity-75"></i>
-                  <div>
-                    <p class="cost-sublabel mb-0">{{ 'file.max' | translate }}</p>
-                    <p class="cost-value mb-0">{{ formatCosto(estimacion()!.costo_estimado_max) }}</p>
+              }
+            </div>
+            <p class="ef-cost-visit">
+              <i class="bi bi-calendar-check" aria-hidden="true"></i>
+              {{ 'estimator_file.real_visit' | translate }}
+              {{ formatFecha(estimacion()!.fecha_visita_real) }}
+              @if (formatHora(estimacion()!.fecha_visita_real) !== '—') {
+                &nbsp;·&nbsp;{{ formatHora(estimacion()!.fecha_visita_real) }}
+              }
+            </p>
+          </div>
+        }
+
+        <!-- Documentación de la estimación -->
+        <section class="ef-card">
+          <div class="ef-card__head">
+            <p class="ef-section-label">{{ 'estimator_file.estimation_doc_title' | translate }}</p>
+          </div>
+          <div class="ef-card__body">
+            @if (!estimacion()) {
+              <div class="ef-upload-empty">
+                <i class="bi bi-clipboard" aria-hidden="true"></i>
+                {{ 'estimator_file.no_estimation_doc' | translate }}
+              </div>
+            } @else {
+              @if (estimacion()!.fecha_visita_real) {
+                <div class="ef-info-grid ef-info-grid--2">
+                  <div class="ef-info-item">
+                    <p class="ef-info-label">{{ 'estimator_file.real_visit_date' | translate }}</p>
+                    <p class="ef-info-value">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
                   </div>
+                  <div class="ef-info-item">
+                    <p class="ef-info-label">{{ 'file.hour' | translate }}</p>
+                    <p class="ef-info-value">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
+                  </div>
+                </div>
+                <div class="ef-divider"></div>
+              }
+              @if (estimacion()!.descripcion_problemas) {
+                <div class="ef-info-item ef-info-item--block">
+                  <p class="ef-info-label">{{ 'estimator_file.problems_observed' | translate }}</p>
+                  <p class="ef-desc-block">{{ estimacion()!.descripcion_problemas }}</p>
+                </div>
+                <div class="ef-divider"></div>
+              }
+              <div class="ef-info-item ef-info-item--block">
+                <p class="ef-info-label">{{ 'estimator_file.internal_notes' | translate }}</p>
+                @if (estimacion()!.notas_internas) {
+                  <p class="ef-desc-block">{{ estimacion()!.notas_internas }}</p>
+                } @else {
+                  <p class="ef-info-value ef-info-value--muted">—</p>
                 }
               </div>
-              <p class="cost-sub text-muted small mb-0">
-                <i class="bi bi-calendar-check me-1"></i>
-                {{ 'estimator_file.real_visit' | translate }} {{ formatFecha(estimacion()!.fecha_visita_real) }}
-                @if (formatHora(estimacion()!.fecha_visita_real) !== '—') {
-                  &nbsp;·&nbsp;{{ formatHora(estimacion()!.fecha_visita_real) }}
-                }
-              </p>
-            </div>
-          }
-
-          <!-- Estimation documentation -->
-          <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-              <p class="section-label">{{ 'estimator_file.estimation_doc_title' | translate }}</p>
-
-              @if (!estimacion()) {
-                <div class="upload-empty">
-                  <i class="bi bi-clipboard fs-2 mb-1 d-block"></i>
-                  {{ 'estimator_file.no_estimation_doc' | translate }}
-                </div>
-              } @else {
-                @if (!estimacion()!.fecha_visita_real) {} @else {
-                  <div class="row g-3 mb-3">
-                    <div class="col-6">
-                      <p class="info-label">{{ 'estimator_file.real_visit_date' | translate }}</p>
-                      <p class="info-value">{{ formatFecha(estimacion()!.fecha_visita_real) }}</p>
-                    </div>
-                    <div class="col-6">
-                      <p class="info-label">{{ 'file.hour' | translate }}</p>
-                      <p class="info-value">{{ formatHora(estimacion()!.fecha_visita_real) }}</p>
-                    </div>
-                  </div>
-                  <hr class="divider mb-3" />
-                }
-
-                @if (estimacion()!.descripcion_problemas) {
-                  <div class="mb-3">
-                    <p class="info-label">{{ 'estimator_file.problems_observed' | translate }}</p>
-                    <p class="descripcion-block">{{ estimacion()!.descripcion_problemas }}</p>
-                  </div>
-                  <hr class="divider mb-3" />
-                }
-
-                @if (estimacion()!.notas_internas) {
-                  <div>
-                    <p class="info-label">{{ 'estimator_file.internal_notes' | translate }}</p>
-                    <p class="descripcion-block">{{ estimacion()!.notas_internas }}</p>
-                  </div>
-                } @else {
-                  <p class="info-label mb-0">{{ 'estimator_file.internal_notes' | translate }}</p>
-                  <p class="text-muted small mb-0">—</p>
-                }
-              }
-            </div>
-          </div>
-
-          <!-- Acciones -->
-          <div class="d-grid gap-2">
-            <button class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2"
-                    (click)="imprimir()">
-              <i class="bi bi-printer"></i>{{ 'estimator_file.print_export' | translate }}
-            </button>
-            <button class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
-                    (click)="volver()">
-              <i class="bi bi-arrow-left"></i>{{ 'estimator_file.back_to_estimations' | translate }}
-            </button>
-            @if (detalle()!.estado !== 'adjudicado' && detalle()!.estado !== 'contratado') {
-              @if (!confirmandoEliminar()) {
-                <button class="btn btn-outline-danger d-flex align-items-center justify-content-center gap-2"
-                        (click)="confirmandoEliminar.set(true)">
-                  <i class="bi bi-trash3"></i>{{ 'estimated_files.delete_title' | translate }}
-                </button>
-              } @else {
-                <div class="confirm-panel">
-                  <p class="confirm-msg">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    {{ 'estimated_files.confirm_before' | translate }}
-                    <strong>{{ 'state.nuevo' | translate }}</strong>
-                    {{ 'estimated_files.confirm_after' | translate }}
-                  </p>
-                  @if (errorEliminar()) {
-                    <p class="text-danger small mb-2">{{ errorEliminar() }}</p>
-                  }
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-danger btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
-                            (click)="eliminarEstimacion()"
-                            [disabled]="eliminando()">
-                      @if (eliminando()) {
-                        <span class="spinner-border spinner-border-sm"></span>{{ 'estimated_files.deleting' | translate }}
-                      } @else {
-                        <i class="bi bi-trash3"></i>{{ 'estimated_files.confirm_delete' | translate }}
-                      }
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm"
-                            (click)="confirmandoEliminar.set(false)"
-                            [disabled]="eliminando()">
-                      {{ 'common.cancel' | translate }}
-                    </button>
-                  </div>
-                </div>
-              }
             }
           </div>
+        </section>
 
+        <!-- Acciones -->
+        <div class="ef-actions-card">
+          <button class="ef-btn ef-btn--primary ef-btn--full" (click)="imprimir()">
+            <i class="bi bi-printer" aria-hidden="true"></i>
+            {{ 'estimator_file.print_export' | translate }}
+          </button>
+          <button class="ef-btn ef-btn--ghost ef-btn--full" (click)="volver()">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            {{ 'estimator_file.back_to_estimations' | translate }}
+          </button>
+
+          @if (detalle()!.estado !== 'adjudicado' && detalle()!.estado !== 'contratado') {
+            @if (!confirmandoEliminar()) {
+              <button class="ef-btn ef-btn--danger-ghost ef-btn--full"
+                      (click)="confirmandoEliminar.set(true)">
+                <i class="bi bi-trash3" aria-hidden="true"></i>
+                {{ 'estimated_files.delete_title' | translate }}
+              </button>
+            } @else {
+              <div class="ef-confirm">
+                <p class="ef-confirm__msg">
+                  <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                  {{ 'estimated_files.confirm_before' | translate }}
+                  <strong>{{ 'state.nuevo' | translate }}</strong>
+                  {{ 'estimated_files.confirm_after' | translate }}
+                </p>
+                @if (errorEliminar()) {
+                  <p class="ef-confirm__err">{{ errorEliminar() }}</p>
+                }
+                <div class="ef-confirm__actions">
+                  <button class="ef-btn ef-btn--danger"
+                          (click)="eliminarEstimacion()"
+                          [disabled]="eliminando()">
+                    @if (eliminando()) {
+                      <span class="ef-spinner ef-spinner--sm" aria-hidden="true"></span>
+                      {{ 'estimated_files.deleting' | translate }}
+                    } @else {
+                      <i class="bi bi-trash3" aria-hidden="true"></i>
+                      {{ 'estimated_files.confirm_delete' | translate }}
+                    }
+                  </button>
+                  <button class="ef-btn ef-btn--ghost"
+                          (click)="confirmandoEliminar.set(false)"
+                          [disabled]="eliminando()">
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+          }
         </div>
-      </div><!-- /col-lg-5 -->
 
-    </div><!-- /row -->
+      </aside>
+
+    </div><!-- /ef-main -->
 
   }
 

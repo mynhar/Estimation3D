@@ -401,5 +401,14 @@ export class FileToBeEstimatedComponent implements OnInit {
     this.expandedIndex.set(this.expandedIndex() === i ? null : i);
   }
 
+  get servicioNombre(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
+  }
+
   volver() { this.router.navigate(['/estimator/files-to-be-estimated']); }
 }

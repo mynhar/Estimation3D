@@ -1,442 +1,403 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="estd-root">
 
-  <!-- ── Encabezado ────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <p class="text-primary small fw-semibold mb-1">
-          <i class="bi bi-clipboard2-pulse me-1"></i>{{ 'role.estimateur' | translate }}
-        </p>
-        <h4 class="mb-1">
-          {{ bienvenida ? ('dashboard_client.welcome' | translate) + ', ' + bienvenida : ('dashboard_estimator.title' | translate) }}
-        </h4>
-        <p class="text-muted small mb-0">{{ 'dashboard_estimator.subtitle' | translate }}</p>
-      </div>
-      @if (!cargando()) {
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          @if (activos().length > 0) {
-            <span class="kpi-pill kpi-pill--active">
-              <i class="bi bi-pencil-square me-1"></i>
-              {{ activos().length }} {{ 'dashboard_estimator.in_progress' | translate }}
-            </span>
-          }
-          @if (disponibles() > 0) {
-            <span class="kpi-pill kpi-pill--available">
-              <i class="bi bi-inbox me-1"></i>
-              {{ disponibles() }} {{ 'common.available' | translate }}
-            </span>
-          }
-          @if (contratados().length > 0) {
-            <span class="kpi-pill kpi-pill--contratado">
-              <i class="bi bi-check-circle-fill me-1"></i>
-              {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
-            </span>
-          }
-        </div>
-      }
+  <!-- ── Encabezado ──────────────────────────────────────────────────────── -->
+  <header class="estd-header">
+    <div class="estd-header__info">
+      <p class="estd-header__eyebrow">
+        <i class="bi bi-clipboard2-pulse"></i>
+        {{ 'role.estimateur' | translate }}
+      </p>
+      <h1 class="estd-header__title">
+        {{ bienvenida
+          ? (('dashboard_client.welcome' | translate) + ', ' + bienvenida)
+          : ('dashboard_estimator.title' | translate) }}
+      </h1>
+      <p class="estd-header__sub">{{ 'dashboard_estimator.subtitle' | translate }}</p>
     </div>
+    @if (!cargando()) {
+      <div class="estd-header__pills">
+        @if (activos().length > 0) {
+          <span class="estd-pill estd-pill--activo">
+            <i class="bi bi-pencil-square"></i>
+            {{ activos().length }} {{ 'dashboard_estimator.in_progress' | translate }}
+          </span>
+        }
+        @if (disponibles() > 0) {
+          <span class="estd-pill estd-pill--disponible">
+            <i class="bi bi-inbox"></i>
+            {{ disponibles() }} {{ 'common.available' | translate }}
+          </span>
+        }
+        @if (contratados().length > 0) {
+          <span class="estd-pill estd-pill--contratado">
+            <i class="bi bi-check-circle"></i>
+            {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
+          </span>
+        }
+      </div>
+    }
   </header>
 
-  <!-- ── Cargando ───────────────────────────────────────────────────────────── -->
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    <div class="estd-loading">
+      <span class="estd-spinner" role="status"></span>
       {{ 'common.loading' | translate }}
     </div>
 
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  <!-- ── Sin datos ────────────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0 && disponibles() === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon"><i class="bi bi-clipboard2-x"></i></div>
-        <p class="empty-title">{{ 'dashboard_estimator.no_files' | translate }}</p>
-        <p class="empty-text">{{ 'dashboard_estimator.no_files_text' | translate }}</p>
-        <a routerLink="/estimator/files-to-be-estimated"
-           class="btn btn-outline-primary btn-sm fw-semibold">
-          <i class="bi bi-inbox me-1"></i>{{ 'nav.a_estimer' | translate }}
-        </a>
-      </div>
+    <div class="estd-empty">
+      <div class="estd-empty__icon"><i class="bi bi-clipboard2-x"></i></div>
+      <p class="estd-empty__title">{{ 'dashboard_estimator.no_files' | translate }}</p>
+      <p class="estd-empty__text">{{ 'dashboard_estimator.no_files_text' | translate }}</p>
+      <a routerLink="/estimator/files-to-be-estimated" class="estd-btn-cta">
+        <i class="bi bi-inbox"></i>{{ 'nav.a_estimer' | translate }}
+      </a>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ── Con datos ────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- KPI ROW -->
-    <div class="row g-3 mb-4">
+    <!-- KPIs -->
+    <div class="estd-kpis">
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--active h-100"
-             [class.kpi-card--active-pulso]="activos().length > 0">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--active"><i class="bi bi-pencil-square"></i></div>
-            <div class="min-w-0">
-              <p class="text-muted small mb-0">{{ 'state.en_estimacion' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-primary">{{ activos().length }}</p>
-            </div>
-          </div>
+      <div class="estd-kpi estd-kpi--activo" [class.estd-kpi--pulse]="activos().length > 0">
+        <div class="estd-kpi__icon estd-kpi__icon--activo">
+          <i class="bi bi-pencil-square"></i>
+        </div>
+        <div class="estd-kpi__text">
+          <p class="estd-kpi__val estd-kpi__val--activo">{{ activos().length }}</p>
+          <p class="estd-kpi__label">{{ 'state.en_estimacion' | translate }}</p>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--mercado h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--mercado"><i class="bi bi-people"></i></div>
-            <div class="min-w-0">
-              <p class="text-muted small mb-0">{{ 'dashboard_estimator.on_market' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-warning">{{ enMercado().length }}</p>
-            </div>
-          </div>
+      <div class="estd-kpi estd-kpi--mercado">
+        <div class="estd-kpi__icon estd-kpi__icon--mercado">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="estd-kpi__text">
+          <p class="estd-kpi__val estd-kpi__val--mercado">{{ enMercado().length }}</p>
+          <p class="estd-kpi__label">{{ 'dashboard_estimator.on_market' | translate }}</p>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--contratado h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--contratado"><i class="bi bi-check-circle-fill"></i></div>
-            <div class="min-w-0">
-              <p class="text-muted small mb-0">{{ 'dashboard_estimator.contracted' | translate }}</p>
-              <p class="kpi-num fw-bold mb-0 text-success">{{ contratados().length }}</p>
-            </div>
-          </div>
+      <div class="estd-kpi estd-kpi--contratado">
+        <div class="estd-kpi__icon estd-kpi__icon--contratado">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="estd-kpi__text">
+          <p class="estd-kpi__val estd-kpi__val--contratado">{{ contratados().length }}</p>
+          <p class="estd-kpi__label">{{ 'dashboard_estimator.contracted' | translate }}</p>
         </div>
       </div>
 
-      <div class="col-6 col-xl-3">
-        <div class="card border-0 shadow-sm rounded-4 kpi-card kpi-card--monto h-100">
-          <div class="card-body d-flex align-items-center gap-3 py-3">
-            <div class="kpi-icon kpi-icon--monto"><i class="bi bi-cash-coin"></i></div>
-            <div class="min-w-0">
-              <p class="text-muted small mb-0">{{ 'dashboard_estimator.estimated_value' | translate }}</p>
-              <p class="kpi-num-sm fw-bold mb-0 text-primary">{{ formatPrecio(montoTotal()) }}</p>
-            </div>
-          </div>
+      <div class="estd-kpi estd-kpi--monto">
+        <div class="estd-kpi__icon estd-kpi__icon--monto">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div class="estd-kpi__text">
+          <p class="estd-kpi__val estd-kpi__val--monto estd-kpi__val--sm">{{ formatPrecio(montoTotal()) }}</p>
+          <p class="estd-kpi__label">{{ 'dashboard_estimator.estimated_value' | translate }}</p>
         </div>
       </div>
 
     </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <div class="row g-4 align-items-start mb-4">
+    <!-- Layout principal: estimaciones activas + sidebar -->
+    <div class="estd-main">
 
       <!-- Estimaciones activas -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4">
-
-          <div class="card-header bg-transparent border-bottom px-4 py-3
-                      d-flex align-items-center justify-content-between">
-            <span class="fw-semibold">
-              <i class="bi bi-pencil-square me-2 text-primary"></i>{{ 'dashboard_estimator.active_estimations' | translate }}
-              @if (activos().length > 0) {
-                <span class="badge bg-primary bg-opacity-10 text-primary ms-1 rounded-pill">
-                  {{ activos().length }}
-                </span>
-              }
-            </span>
-            <a routerLink="/estimator/files-under-estimation"
-               class="btn btn-outline-secondary btn-sm">
-              {{ 'common.view_all' | translate }} <i class="bi bi-arrow-right ms-1"></i>
-            </a>
+      <section class="estd-card">
+        <div class="estd-card__header">
+          <div class="estd-card__header-left">
+            <i class="bi bi-pencil-square"></i>
+            {{ 'dashboard_estimator.active_estimations' | translate }}
+            @if (activos().length > 0) {
+              <span class="estd-count-badge">{{ activos().length }}</span>
+            }
           </div>
+          <a routerLink="/estimator/files-under-estimation" class="estd-btn-link">
+            {{ 'common.view_all' | translate }}<i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        <div class="estd-card__body">
+          @if (activos().length === 0) {
+            <div class="estd-empty-inline">
+              <i class="bi bi-check-circle estd-empty-inline__icon--success"></i>
+              <p class="estd-empty-inline__title">{{ 'dashboard_estimator.no_pending' | translate }}</p>
+              <p class="estd-empty-inline__text">{{ 'dashboard_estimator.take_available_hint' | translate }}</p>
+              <a routerLink="/estimator/files-to-be-estimated" class="estd-btn-cta">
+                <i class="bi bi-inbox"></i>{{ 'dashboard_estimator.see_available_btn' | translate }}
+                @if (disponibles() > 0) {
+                  <span class="estd-cta-badge">{{ disponibles() }}</span>
+                }
+              </a>
+            </div>
+          } @else {
+            <div class="estd-work-grid">
+              @for (exp of activos(); track exp.id) {
+                <article class="estd-work-card"
+                         [style.--estd-card-accent]="cfg(exp.estado ?? '').color">
+                  <div class="estd-work-card__top">
+                    <span class="estd-work-num">{{ exp.numero }}</span>
+                    <div class="estd-work-badges">
+                      @if (urgencia(exp.fecha_visita) === 'vencida') {
+                        <span class="estd-urgency estd-urgency--vencida">
+                          <i class="bi bi-exclamation-triangle"></i>{{ 'common.urgency_expired' | translate }}
+                        </span>
+                      } @else if (urgencia(exp.fecha_visita) === 'hoy') {
+                        <span class="estd-urgency estd-urgency--hoy">
+                          <i class="bi bi-clock"></i>{{ 'common.urgency_today' | translate }}
+                        </span>
+                      } @else if (urgencia(exp.fecha_visita) === 'proxima') {
+                        <span class="estd-urgency estd-urgency--proxima">
+                          <i class="bi bi-calendar-event"></i>{{ 'common.urgency_upcoming' | translate }}
+                        </span>
+                      }
+                    </div>
+                  </div>
 
-          <div class="card-body p-3">
-            @if (activos().length === 0) {
-              <div class="empty-inline">
-                <i class="bi bi-check-circle text-success fs-3 mb-2"></i>
-                <p class="mb-1 fw-semibold">{{ 'dashboard_estimator.no_pending' | translate }}</p>
-                <p class="text-muted small mb-3">{{ 'dashboard_estimator.take_available_hint' | translate }}</p>
-                <a routerLink="/estimator/files-to-be-estimated"
-                   class="btn btn-primary btn-sm fw-semibold">
-                  <i class="bi bi-inbox me-1"></i>{{ 'dashboard_estimator.see_available_btn' | translate }}
-                  @if (disponibles() > 0) {
-                    <span class="badge bg-white text-primary ms-1">{{ disponibles() }}</span>
-                  }
-                </a>
+                  <p class="estd-work-service">{{ servicioNombre(exp) }}</p>
+                  <div class="estd-work-meta">
+                    <span><i class="bi bi-person"></i>{{ exp.cliente_nombre }}</span>
+                    <span><i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}</span>
+                  </div>
+
+                  <div class="estd-progress-row">
+                    <div class="estd-progress">
+                      <div class="estd-progress__fill"
+                           [style.width.%]="cfg(exp.estado ?? '').pct"
+                           [style.background-color]="cfg(exp.estado ?? '').color"></div>
+                    </div>
+                    <span class="estd-progress-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
+                  </div>
+
+                  <div class="estd-work-card__footer">
+                    <span class="estd-work-fecha"
+                          [class.estd-work-fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                          [class.estd-work-fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+                      <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
+                    </span>
+                    <button class="estd-btn-continue" (click)="irAEstimar(exp.id)">
+                      <i class="bi bi-pencil-square"></i>{{ 'common.continue' | translate }}
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="estd-col-side">
+
+        <!-- Distribución -->
+        @if (expedientes().length > 0) {
+          <div class="estd-card">
+            <div class="estd-card__header">
+              <div class="estd-card__header-left">
+                <i class="bi bi-pie-chart"></i>
+                {{ 'dashboard_builder.distribution' | translate }}
               </div>
-            } @else {
-              <div class="row g-3">
-                @for (exp of activos(); track exp.id) {
-                  <div class="col-md-6">
-                    <div class="work-card h-100"
-                         [style.--estado-color]="cfg(exp.estado ?? '').color">
-
-                      <div class="work-card__accent"></div>
-                      <div class="work-card__body">
-
-                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                          <span class="work-num">{{ exp.numero }}</span>
-                          @if (urgencia(exp.fecha_visita) === 'vencida') {
-                            <span class="badge text-bg-danger urgencia-badge">
-                              <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ 'common.urgency_expired' | translate }}
-                            </span>
-                          } @else if (urgencia(exp.fecha_visita) === 'hoy') {
-                            <span class="badge text-bg-warning urgencia-badge">
-                              <i class="bi bi-clock-fill me-1"></i>{{ 'common.urgency_today' | translate }}
-                            </span>
-                          } @else if (urgencia(exp.fecha_visita) === 'proxima') {
-                            <span class="badge urgencia-badge urgencia-badge--proxima">
-                              <i class="bi bi-calendar-event me-1"></i>{{ 'common.urgency_upcoming' | translate }}
-                            </span>
-                          }
-                        </div>
-
-                        <p class="work-servicio mb-1">{{ exp.servicio_nombre }}</p>
-                        <p class="work-meta mb-0">
-                          <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
-                        </p>
-                        <p class="work-meta mb-3">
-                          <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
-                        </p>
-
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                          <div class="progress work-progress flex-grow-1">
-                            <div class="progress-bar work-progress__fill"
-                                 role="progressbar"
-                                 [style.width.%]="cfg(exp.estado ?? '').pct"
-                                 [style.background-color]="cfg(exp.estado ?? '').color">
-                            </div>
-                          </div>
-                          <span class="work-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
-                          <span class="work-fecha"
-                                [class.work-fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
-                                [class.work-fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
-                            <i class="bi bi-calendar3 me-1"></i>
-                            {{ formatFecha(exp.fecha_visita) }}
-                          </span>
-                          <button class="btn btn-continuar btn-sm fw-semibold"
-                                  (click)="irAEstimar(exp.id)">
-                            <i class="bi bi-pencil-square me-1"></i>{{ 'common.continue' | translate }}
-                          </button>
-                        </div>
-
+            </div>
+            <div class="estd-card__body estd-card__body--center">
+              <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
+                <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
+                @for (seg of donutSegments(); track seg.label) {
+                  <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                          [attr.stroke]="seg.color" stroke-width="18"
+                          [attr.stroke-dasharray]="seg.dasharray"
+                          [attr.stroke-dashoffset]="seg.dashoffset"
+                          transform="rotate(-90 70 70)"/>
+                }
+                <text x="70" y="66" text-anchor="middle" class="estd-donut-num">{{ expedientes().length }}</text>
+                <text x="70" y="83" text-anchor="middle" class="estd-donut-sub">{{ 'common.total' | translate }}</text>
+              </svg>
+              <div class="estd-legend">
+                @for (e of estadoBreakdown(); track e.key) {
+                  <div class="estd-legend-row">
+                    <div class="estd-legend-row__left">
+                      <span class="estd-legend-dot" [style.background]="e.color"></span>
+                      <span class="estd-legend-label">{{ ('state.' + e.key) | translate }}</span>
+                    </div>
+                    <div class="estd-legend-row__right">
+                      <div class="estd-legend-bar">
+                        <div class="estd-legend-bar__fill"
+                             [style.width.%]="e.pct"
+                             [style.background-color]="e.color"></div>
                       </div>
+                      <span class="estd-legend-count">{{ e.count }}</span>
                     </div>
                   </div>
                 }
               </div>
-            }
+            </div>
           </div>
+        }
 
-        </div>
-      </div>
-
-      <!-- Sidebar -->
-      <div class="col-lg-4">
-        <div class="sidebar-sticky d-flex flex-column gap-3">
-
-          @if (expedientes().length > 0) {
-            <div class="card border-0 shadow-sm rounded-4">
-              <div class="card-header bg-transparent border-bottom px-4 py-3">
-                <span class="fw-semibold">
-                  <i class="bi bi-pie-chart me-2 text-primary"></i>{{ 'dashboard_builder.distribution' | translate }}
-                </span>
-              </div>
-              <div class="card-body d-flex flex-column align-items-center py-3 px-3">
-
-                <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
-                  <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-                  @for (seg of donutSegments(); track seg.label) {
-                    <circle cx="70" cy="70" [attr.r]="R" fill="none"
-                            [attr.stroke]="seg.color" stroke-width="18"
-                            [attr.stroke-dasharray]="seg.dasharray"
-                            [attr.stroke-dashoffset]="seg.dashoffset"
-                            transform="rotate(-90 70 70)"/>
-                  }
-                  <text x="70" y="66" text-anchor="middle" class="donut-num">{{ expedientes().length }}</text>
-                  <text x="70" y="83" text-anchor="middle" class="donut-sub">{{ 'common.total' | translate }}</text>
-                </svg>
-
-                <div class="w-100 mt-1">
-                  @for (e of estadoBreakdown(); track e.key) {
-                    <div class="d-flex align-items-center justify-content-between legend-row">
-                      <div class="d-flex align-items-center gap-2">
-                        <span class="legend-dot" [style.background]="e.color"></span>
-                        <span class="small">{{ ('state.' + e.key) | translate }}</span>
-                      </div>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="progress legend-bar">
-                          <div class="progress-bar" [style.width.%]="e.pct"
-                               [style.background-color]="e.color"></div>
-                        </div>
-                        <span class="small fw-semibold legend-count">{{ e.count }}</span>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-              </div>
-            </div>
-          }
-
-          @if (totalCompletados() > 0) {
-            <div class="card border-0 shadow-sm rounded-4">
-              <div class="card-body px-4 py-3">
-                <p class="small fw-semibold text-muted mb-3">
-                  <i class="bi bi-trophy me-1 text-warning"></i>{{ 'dashboard_builder.success_rate' | translate }}
-                </p>
-                <div class="d-flex align-items-center gap-3">
-                  <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" class="flex-shrink-0">
-                    <circle cx="36" cy="36" r="28" fill="none" stroke="#e9ecef" stroke-width="8"/>
-                    <circle cx="36" cy="36" r="28" fill="none"
-                            stroke="#16a34a" stroke-width="8"
-                            [attr.stroke-dasharray]="(tasaExito() / 100 * 175.93) + ' 175.93'"
-                            stroke-dashoffset="0"
-                            transform="rotate(-90 36 36)"/>
-                    <text x="36" y="40" text-anchor="middle"
-                          font-size="14" font-weight="700" fill="#212529">{{ tasaExito() }}%</text>
-                  </svg>
-                  <div>
-                    <p class="mb-0 fw-bold fs-5 text-success">{{ contratados().length }}</p>
-                    <p class="text-muted small mb-0">{{ 'dashboard_estimator.contracted' | translate }}</p>
-                    <p class="text-muted small mb-0">{{ 'common.of' | translate }} {{ totalCompletados() }} {{ 'dashboard_estimator.estimated_lc' | translate }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body px-4 py-3">
-              <p class="small fw-semibold text-muted mb-2">
-                <i class="bi bi-lightning me-1"></i>{{ 'dashboard_builder.quick_actions' | translate }}
+        <!-- Tasa de éxito -->
+        @if (totalCompletados() > 0) {
+          <div class="estd-card">
+            <div class="estd-card__body">
+              <p class="estd-rate-label">
+                <i class="bi bi-trophy"></i>{{ 'dashboard_builder.success_rate' | translate }}
               </p>
-              <div class="d-flex flex-column gap-2">
-
-                <a routerLink="/estimator/files-to-be-estimated"
-                   class="btn btn-primary btn-sm fw-semibold d-flex align-items-center gap-2">
-                  <i class="bi bi-inbox"></i>
-                  <span>{{ 'nav.a_estimer' | translate }}</span>
-                  @if (disponibles() > 0) {
-                    <span class="badge bg-white text-primary ms-auto">{{ disponibles() }}</span>
-                  }
-                </a>
-
-                <a routerLink="/estimator/files-under-estimation"
-                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-                  <i class="bi bi-pencil-square"></i>
-                  <span>{{ 'dashboard_estimator.active_estimations_link' | translate }}</span>
-                  @if (activos().length > 0) {
-                    <span class="badge bg-secondary ms-auto">{{ activos().length }}</span>
-                  }
-                </a>
-
-                <a routerLink="/estimator/estimated-files"
-                   class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-                  <i class="bi bi-clipboard-check"></i>
-                  <span>{{ 'nav.completes' | translate }}</span>
-                  @if (totalCompletados() > 0) {
-                    <span class="badge bg-secondary ms-auto">{{ totalCompletados() }}</span>
-                  }
-                </a>
-
+              <div class="estd-rate-content">
+                <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" class="estd-rate-ring">
+                  <circle cx="36" cy="36" r="28" fill="none" stroke="#e9ecef" stroke-width="8"/>
+                  <circle cx="36" cy="36" r="28" fill="none"
+                          stroke="#5B7A4F" stroke-width="8"
+                          [attr.stroke-dasharray]="(tasaExito() / 100 * 175.93) + ' 175.93'"
+                          stroke-dashoffset="0"
+                          transform="rotate(-90 36 36)"/>
+                  <text x="36" y="40" text-anchor="middle"
+                        font-size="14" font-weight="700" fill="#1A1A1A">{{ tasaExito() }}%</text>
+                </svg>
+                <div>
+                  <p class="estd-rate-num">{{ contratados().length }}</p>
+                  <p class="estd-rate-sub">{{ 'dashboard_estimator.contracted' | translate }}</p>
+                  <p class="estd-rate-sub">
+                    {{ 'common.of' | translate }} {{ totalCompletados() }}
+                    {{ 'dashboard_estimator.estimated_lc' | translate }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
+        }
 
+        <!-- Acciones rápidas -->
+        <div class="estd-card">
+          <div class="estd-card__body">
+            <p class="estd-actions-label">
+              <i class="bi bi-lightning"></i>{{ 'dashboard_builder.quick_actions' | translate }}
+            </p>
+            <div class="estd-actions">
+              <a routerLink="/estimator/files-to-be-estimated" class="estd-action estd-action--primary">
+                <i class="bi bi-inbox"></i>
+                <span>{{ 'nav.a_estimer' | translate }}</span>
+                @if (disponibles() > 0) {
+                  <span class="estd-action-badge estd-action-badge--light">{{ disponibles() }}</span>
+                }
+              </a>
+              <a routerLink="/estimator/files-under-estimation" class="estd-action">
+                <i class="bi bi-pencil-square"></i>
+                <span>{{ 'dashboard_estimator.active_estimations_link' | translate }}</span>
+                @if (activos().length > 0) {
+                  <span class="estd-action-badge">{{ activos().length }}</span>
+                }
+              </a>
+              <a routerLink="/estimator/estimated-files" class="estd-action">
+                <i class="bi bi-clipboard-check"></i>
+                <span>{{ 'nav.completes' | translate }}</span>
+                @if (totalCompletados() > 0) {
+                  <span class="estd-action-badge">{{ totalCompletados() }}</span>
+                }
+              </a>
+            </div>
+          </div>
         </div>
-      </div>
 
+      </aside>
     </div>
 
-    <!-- SEGUIMIENTO POST-ESTIMACIÓN -->
+    <!-- Pipeline post-estimación -->
     @if (postEstimacion().length > 0) {
-      <div class="card border-0 shadow-sm rounded-4">
+      <section class="estd-card">
 
-        <div class="card-header bg-transparent border-bottom px-4 py-3">
-          <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-            <div>
-              <span class="fw-semibold">
-                <i class="bi bi-diagram-3 me-2 text-primary"></i>{{ 'dashboard_estimator.post_tracking' | translate }}
+        <div class="estd-card__header estd-card__header--pipeline">
+          <div>
+            <div class="estd-card__header-left">
+              <i class="bi bi-diagram-3"></i>
+              {{ 'dashboard_estimator.post_tracking' | translate }}
+            </div>
+            <p class="estd-pipeline-sub">{{ 'dashboard_estimator.post_tracking_text' | translate }}</p>
+          </div>
+          <div class="estd-pipeline-summary">
+            @if (enMercado().length > 0) {
+              <span class="estd-pill estd-pill--mercado">
+                <i class="bi bi-people"></i>{{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
               </span>
-              <p class="text-muted small mb-0 mt-1">{{ 'dashboard_estimator.post_tracking_text' | translate }}</p>
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
-              @if (enMercado().length > 0) {
-                <span class="pipe-summary-badge pipe-summary-badge--mercado">
-                  <i class="bi bi-people me-1"></i>{{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
-                </span>
-              }
-              @if (contratados().length > 0) {
-                <span class="pipe-summary-badge pipe-summary-badge--contratado">
-                  <i class="bi bi-trophy-fill me-1"></i>{{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
-                </span>
-              }
-            </div>
+            }
+            @if (contratados().length > 0) {
+              <span class="estd-pill estd-pill--contratado">
+                <i class="bi bi-trophy"></i>{{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
+              </span>
+            }
           </div>
         </div>
 
-        <div class="pipeline-legend px-4 py-2 border-bottom d-none d-md-flex">
+        <div class="estd-pipeline-legend">
           @for (step of pipelineSteps; track step; let last = $last) {
-            <div class="d-flex align-items-center gap-1">
-              <span class="legend-step-dot" [style.background]="cfg(step).color"></span>
-              <span class="legend-step-label">{{ ('state.' + step) | translate }}</span>
+            <div class="estd-pipeline-legend__step">
+              <span class="estd-pipeline-legend__dot" [style.background]="cfg(step).color"></span>
+              <span class="estd-pipeline-legend__label">{{ ('state.' + step) | translate }}</span>
             </div>
             @if (!last) {
-              <i class="bi bi-arrow-right legend-step-arrow mx-1"></i>
+              <i class="bi bi-chevron-right estd-pipeline-legend__arrow"></i>
             }
           }
         </div>
 
         @for (exp of postEstimacion(); track exp.id) {
-          <div class="pipeline-row"
-               [class.pipeline-row--contratado]="exp.estado === 'contratado'"
-               [class.pipeline-row--cancelado]="exp.estado === 'cancelado'">
+          <div class="estd-pipeline-row"
+               [class.estd-pipeline-row--contratado]="exp.estado === 'contratado'"
+               [class.estd-pipeline-row--cancelado]="exp.estado === 'cancelado'">
 
-            <div class="pipeline-info">
-              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                <span class="pipe-num">{{ exp.numero }}</span>
+            <div class="estd-pipeline-info">
+              <div class="estd-pipeline-info__top">
+                <span class="estd-pipe-num">{{ exp.numero }}</span>
                 @if (exp.estado === 'contratado') {
-                  <i class="bi bi-trophy-fill text-warning"></i>
+                  <i class="bi bi-trophy estd-trophy-icon"></i>
                 }
               </div>
-              <p class="pipe-servicio mb-1">{{ exp.servicio_nombre }}</p>
-              <p class="pipe-meta mb-0">
-                <i class="bi bi-person me-1"></i>{{ exp.cliente_nombre }}
-                <span class="mx-1 text-muted">·</span>
-                <i class="bi bi-geo-alt me-1"></i>{{ exp.provincia }}, {{ exp.canton }}
+              <p class="estd-pipe-service">{{ servicioNombre(exp) }}</p>
+              <p class="estd-pipe-meta">
+                <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
+                <span class="estd-pipe-sep">·</span>
+                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
               </p>
             </div>
 
-            <div class="pipeline-track">
+            <div class="estd-pipeline-track">
               @if (exp.estado !== 'cancelado') {
-                <div class="p-dots">
+                <div class="estd-p-dots">
                   @for (step of pipelineSteps; track step; let last = $last) {
-                    <span class="p-dot"
-                          [class.p-dot--done]="stepDone(exp.estado ?? '', step)"
-                          [class.p-dot--active]="stepActive(exp.estado ?? '', step)"
+                    <span class="estd-p-dot"
+                          [class.estd-p-dot--done]="stepDone(exp.estado ?? '', step)"
+                          [class.estd-p-dot--active]="stepActive(exp.estado ?? '', step)"
                           [style.--step-color]="cfg(step).color"
                           [title]="('state.' + step) | translate">
                     </span>
                     @if (!last) {
-                      <span class="p-line"
-                            [class.p-line--done]="stepDone(exp.estado ?? '', step)">
+                      <span class="estd-p-line"
+                            [class.estd-p-line--done]="stepDone(exp.estado ?? '', step)">
                       </span>
                     }
                   }
                 </div>
-                <span class="pipe-estado-badge"
+                <span class="estd-pipe-badge"
                       [style.background-color]="cfg(exp.estado ?? '').color + '18'"
                       [style.color]="cfg(exp.estado ?? '').color"
                       [style.border-color]="cfg(exp.estado ?? '').color + '40'">
-                  <i class="bi {{ cfg(exp.estado ?? '').icon }} me-1"></i>
+                  <i class="bi {{ cfg(exp.estado ?? '').icon }}"></i>
                   {{ ('state.' + (exp.estado ?? '')) | translate }}
                 </span>
               } @else {
-                <span class="badge bg-secondary-subtle text-secondary">{{ 'state.cancelado' | translate }}</span>
+                <span class="estd-pipe-badge estd-pipe-badge--cancelado">{{ 'state.cancelado' | translate }}</span>
               }
             </div>
 
-            <button class="btn btn-outline-secondary btn-sm pipeline-cta"
-                    (click)="irAVer(exp.id)">
+            <button class="estd-btn-icon" (click)="irAVer(exp.id)" [title]="'common.view' | translate">
               <i class="bi bi-eye"></i>
             </button>
 
           </div>
         }
 
-      </div>
+      </section>
     }
 
   }

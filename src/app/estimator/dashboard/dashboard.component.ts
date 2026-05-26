@@ -206,6 +206,13 @@ export class EstimatorDashboardComponent implements OnInit {
         ?? '';
   }
 
+  servicioNombre(exp: ExpedienteRow): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
+    if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
+    return exp.servicio_nombre;
+  }
+
   irAEstimar(id: string) { this.router.navigate(['/estimator/file-under-estimation', id]); }
   irAVer(id: string)     { this.router.navigate(['/estimator/estimated-file', id]); }
 }

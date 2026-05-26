@@ -61,7 +61,7 @@ export class FileUnderEstimationComponent implements OnInit {
 
   // Tour multi-video
   urlsTour         = signal<string[]>([]);
-  expandedIndex    = signal<number | null>(null);
+  collapsedSet     = signal<Set<number>>(new Set());
   editandoIndex    = signal<number | null>(null);
   editandoUrlTemp  = '';
   mostrandoFormAdd = signal(false);
@@ -386,7 +386,13 @@ export class FileUnderEstimationComponent implements OnInit {
         await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
       }
       this.urlsTour.set(nuevaLista);
-      if (this.expandedIndex() === i) this.expandedIndex.set(null);
+      // Shift collapsed indexes: remove deleted, decrement those above it
+      const rebuilt = new Set<number>();
+      for (const idx of this.collapsedSet()) {
+        if (idx < i) rebuilt.add(idx);
+        else if (idx > i) rebuilt.add(idx - 1);
+      }
+      this.collapsedSet.set(rebuilt);
       if (this.editandoIndex() === i) { this.editandoIndex.set(null); this.editandoUrlTemp = ''; }
     } catch (e: any) {
       this.errorTour.set(e.message);
@@ -395,8 +401,23 @@ export class FileUnderEstimationComponent implements OnInit {
     }
   }
 
+  isExpanded(i: number): boolean {
+    return !this.collapsedSet().has(i);
+  }
+
   toggleExpandVideo(i: number) {
-    this.expandedIndex.set(this.expandedIndex() === i ? null : i);
+    const s = new Set(this.collapsedSet());
+    if (s.has(i)) s.delete(i); else s.add(i);
+    this.collapsedSet.set(s);
+  }
+
+  get servicioNombre(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
   }
 
   volver() { this.router.navigate(['/estimator/files-under-estimation']); }
