@@ -85,6 +85,7 @@
     "no_results": "No results found",
     "showing": "Showing",
     "clear": "Clear",
+    "recent": "Recent",
     "clear_filters": "Clear filters",
     "continue": "Continue",
     "view": "View",
@@ -517,7 +518,8 @@
     "deleting": "Deleting…",
     "confirm_delete": "Yes, delete",
     "view_detail": "View detail",
-    "delete_title": "Delete estimation"
+    "delete_title": "Delete estimation",
+    "sorted_recent": "Most recent first"
   },
   "files_under_estimation": {
     "title": "My files under estimation",

@@ -1,195 +1,231 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="ef-root">
 
-  <!-- ── Header ────────────────────────────────────────────────────────────── -->
-  <header class="page-header rounded-4 p-4 mb-4">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <h4 class="fw-bold mb-1">{{ 'estimated_files.title' | translate }}</h4>
-        <p class="text-muted small mb-0">
-          {{ 'estimated_files.subtitle' | translate }}
-        </p>
+  <!-- ── Header ───────────────────────────────────────────────────────────── -->
+  <header class="ef-header">
+    <div class="ef-header__text">
+      <p class="ef-eyebrow">
+        <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+        {{ 'estimated_files.title' | translate }}
+      </p>
+      <h1 class="ef-title">{{ 'estimated_files.subtitle' | translate }}</h1>
+    </div>
+
+    <div class="ef-kpis">
+      <div class="ef-kpi">
+        <span class="ef-kpi__value">{{ expedientes().length }}</span>
+        <span class="ef-kpi__label">{{ 'common.total' | translate }}</span>
       </div>
-      <div class="d-flex gap-2 flex-wrap">
-        <span class="kpi-pill kpi-pill--total">
-          <i class="bi bi-clipboard-check me-1"></i>
-          {{ expedientes().length }} {{ 'common.total' | translate }}
-        </span>
-        @if (contarEstado('contratado') > 0) {
-          <span class="kpi-pill kpi-pill--contratado">
-            <i class="bi bi-trophy me-1"></i>
-            {{ contarEstado('contratado') }} {{ 'state.contratado' | translate }}
-          </span>
-        }
-        @if (contarEstado('en_oferta') > 0) {
-          <span class="kpi-pill kpi-pill--oferta">
-            <i class="bi bi-tags me-1"></i>
-            {{ contarEstado('en_oferta') }} {{ 'state.en_oferta' | translate }}
-          </span>
-        }
-      </div>
+      @if (contarEstado('contratado') > 0) {
+        <div class="ef-kpi ef-kpi--contratado">
+          <span class="ef-kpi__value">{{ contarEstado('contratado') }}</span>
+          <span class="ef-kpi__label">{{ 'state.contratado' | translate }}</span>
+        </div>
+      }
+      @if (contarEstado('adjudicado') > 0) {
+        <div class="ef-kpi ef-kpi--adjudicado">
+          <span class="ef-kpi__value">{{ contarEstado('adjudicado') }}</span>
+          <span class="ef-kpi__label">{{ 'state.adjudicado' | translate }}</span>
+        </div>
+      }
+      @if (contarEstado('en_oferta') > 0) {
+        <div class="ef-kpi ef-kpi--oferta">
+          <span class="ef-kpi__value">{{ contarEstado('en_oferta') }}</span>
+          <span class="ef-kpi__label">{{ 'state.en_oferta' | translate }}</span>
+        </div>
+      }
     </div>
   </header>
 
-  <!-- ── Loading ───────────────────────────────────────────────────────────── -->
+  <!-- ── Loading ──────────────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="loading-state">
-      <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+    <div class="ef-loading">
+      <span class="ef-loading__spinner" aria-hidden="true"></span>
       {{ 'estimated_files.loading' | translate }}
     </div>
 
   } @else if (expedientes().length === 0) {
 
     <!-- ── Empty ─────────────────────────────────────────────────────────── -->
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-clipboard-check"></i>
-        </div>
-        <h5 class="empty-title">{{ 'estimated_files.empty_title' | translate }}</h5>
-        <p class="empty-text">
-          {{ 'estimated_files.empty_text' | translate }}
-          <strong>{{ 'nav.en_estimation' | translate }}</strong>
-          {{ 'estimated_files.empty_text_after' | translate }}
-        </p>
-      </div>
+    <div class="ef-empty">
+      <div class="ef-empty__icon"><i class="bi bi-clipboard-check" aria-hidden="true"></i></div>
+      <h2 class="ef-empty__title">{{ 'estimated_files.empty_title' | translate }}</h2>
+      <p class="ef-empty__text">
+        {{ 'estimated_files.empty_text' | translate }}
+        <strong>{{ 'nav.en_estimation' | translate }}</strong>
+        {{ 'estimated_files.empty_text_after' | translate }}
+      </p>
     </div>
 
   } @else {
 
-    <!-- ── Chips de filtro por estado ────────────────────────────────────── -->
-    <div class="estado-filter mb-3">
-      <!-- Chip "Todos" -->
-      <button class="estado-chip"
-              [class.estado-chip--active]="filtroEstado() === null"
-              (click)="filtroEstado.set(null)">
-        <span class="estado-dot dot--todos"></span>
-        {{ 'common.all' | translate }}
-        <span class="chip-count">{{ expedientes().length }}</span>
-      </button>
+    <!-- ── Toolbar ───────────────────────────────────────────────────────── -->
+    <div class="ef-toolbar">
 
-      <!-- Chips por estado -->
-      @for (chip of estadoChips; track chip.value) {
-        @if (contarEstado(chip.value) > 0) {
-          <button class="estado-chip"
-                  [class.estado-chip--active]="filtroEstado() === chip.value"
-                  [class.estado-chip--estimado]="chip.value === 'estimado'"
-                  [class.estado-chip--en_oferta]="chip.value === 'en_oferta'"
-                  [class.estado-chip--adjudicado]="chip.value === 'adjudicado'"
-                  [class.estado-chip--contratado]="chip.value === 'contratado'"
-                  [class.estado-chip--cancelado]="chip.value === 'cancelado'"
-                  (click)="filtroEstado.set(filtroEstado() === chip.value ? null : chip.value)">
-            <span class="estado-dot"
-                  [class.dot--estimado]="chip.value === 'estimado'"
-                  [class.dot--en_oferta]="chip.value === 'en_oferta'"
-                  [class.dot--adjudicado]="chip.value === 'adjudicado'"
-                  [class.dot--contratado]="chip.value === 'contratado'"
-                  [class.dot--cancelado]="chip.value === 'cancelado'"></span>
-            {{ ('state.' + chip.value) | translate }}
-            <span class="chip-count">{{ contarEstado(chip.value) }}</span>
-          </button>
+      <!-- Estado chips -->
+      <div class="ef-chips" role="group">
+        <button class="ef-chip"
+                [class.ef-chip--active]="filtroEstado() === null"
+                (click)="filtroEstado.set(null)">
+          <span class="ef-chip__dot ef-chip__dot--todos" aria-hidden="true"></span>
+          {{ 'common.all' | translate }}
+          <span class="ef-chip__count">{{ expedientes().length }}</span>
+        </button>
+
+        @for (chip of estadoChips; track chip.value) {
+          @if (contarEstado(chip.value) > 0) {
+            <button class="ef-chip"
+                    [class.ef-chip--active]="filtroEstado() === chip.value"
+                    [class.ef-chip--estimado]="chip.value === 'estimado'"
+                    [class.ef-chip--en_oferta]="chip.value === 'en_oferta'"
+                    [class.ef-chip--adjudicado]="chip.value === 'adjudicado'"
+                    [class.ef-chip--contratado]="chip.value === 'contratado'"
+                    [class.ef-chip--cancelado]="chip.value === 'cancelado'"
+                    (click)="filtroEstado.set(filtroEstado() === chip.value ? null : chip.value)">
+              <span class="ef-chip__dot"
+                    [class.ef-chip__dot--estimado]="chip.value === 'estimado'"
+                    [class.ef-chip__dot--en_oferta]="chip.value === 'en_oferta'"
+                    [class.ef-chip__dot--adjudicado]="chip.value === 'adjudicado'"
+                    [class.ef-chip__dot--contratado]="chip.value === 'contratado'"
+                    [class.ef-chip__dot--cancelado]="chip.value === 'cancelado'"
+                    aria-hidden="true"></span>
+              {{ ('state.' + chip.value) | translate }}
+              <span class="ef-chip__count">{{ contarEstado(chip.value) }}</span>
+            </button>
+          }
         }
-      }
-    </div>
+      </div>
 
-    <!-- ── Barra de búsqueda ──────────────────────────────────────────────── -->
-    <div class="filter-bar rounded-3 p-3 mb-4 d-flex align-items-center gap-3 flex-wrap">
-      <div class="search-wrap flex-grow-1">
-        <i class="bi bi-search search-icon"></i>
-        <input class="form-control search-input ps-5"
+      <!-- Search -->
+      <div class="ef-search">
+        <i class="bi bi-search ef-search__icon" aria-hidden="true"></i>
+        <input class="ef-search__input"
                type="search"
                [placeholder]="'estimated_files.search_placeholder' | translate"
                [ngModel]="busqueda()"
                (ngModelChange)="busqueda.set($event)" />
+        @if (hayFiltros()) {
+          <button class="ef-search__clear" (click)="limpiarFiltros()"
+                  [title]="'common.clear' | translate">
+            <i class="bi bi-x" aria-hidden="true"></i>
+          </button>
+        }
       </div>
-      @if (hayFiltros()) {
-        <button class="btn btn-link btn-sm text-muted px-0" (click)="limpiarFiltros()">
-          <i class="bi bi-x me-1"></i>{{ 'common.clear' | translate }}
-        </button>
-      }
+
     </div>
 
-    <!-- ── Sin resultados ─────────────────────────────────────────────────── -->
+    <!-- ── Sin resultados ────────────────────────────────────────────────── -->
     @if (expedientesFiltrados().length === 0) {
-      <div class="card border-0 shadow-sm rounded-4">
-        <div class="empty-inline">
-          <i class="bi bi-search fs-2 mb-2 text-muted"></i>
-          <p class="mb-1 fw-medium">{{ 'common.no_results' | translate }}</p>
-          <p class="text-muted small mb-0">{{ 'estimated_files.no_filter_text' | translate }}</p>
+      <div class="ef-empty ef-empty--inline">
+        <div class="ef-empty__icon">
+          <i class="bi bi-search" aria-hidden="true"></i>
         </div>
+        <h2 class="ef-empty__title">{{ 'common.no_results' | translate }}</h2>
+        <p class="ef-empty__text">{{ 'estimated_files.no_filter_text' | translate }}</p>
+        <button class="ef-clear-btn" (click)="limpiarFiltros()">
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+          {{ 'common.clear' | translate }}
+        </button>
       </div>
 
     } @else {
 
-      <!-- ── Grid de tarjetas ───────────────────────────────────────────── -->
-      <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
-        @for (exp of expedientesPaginados(); track exp.id) {
-          <div class="col">
-            <div class="exp-card d-flex flex-column h-100"
-                 [class.exp-card--estimado]="exp.estado === 'estimado'"
-                 [class.exp-card--en_oferta]="exp.estado === 'en_oferta'"
-                 [class.exp-card--adjudicado]="exp.estado === 'adjudicado'"
-                 [class.exp-card--contratado]="exp.estado === 'contratado'"
-                 [class.exp-card--cancelado]="exp.estado === 'cancelado'">
+      <!-- ── Conteo de resultados ─────────────────────────────────────────── -->
+      <div class="ef-results-bar">
+        <span class="ef-results-count">
+          {{ expedientesFiltrados().length }}
+          @if (expedientesFiltrados().length !== expedientes().length) {
+            <span class="ef-results-total">/ {{ expedientes().length }}</span>
+          }
+          {{ 'common.total' | translate }}
+        </span>
+        <span class="ef-results-sep" aria-hidden="true">·</span>
+        <span class="ef-results-hint">
+          <i class="bi bi-sort-down-alt" aria-hidden="true"></i>
+          {{ 'estimated_files.sorted_recent' | translate }}
+        </span>
+      </div>
 
-              <!-- Número + badge estado -->
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="exp-num">{{ exp.numero }}</span>
-                <span class="badge rounded-pill px-3 py-1 {{ badgeClass(exp.estado) }}">
-                  @if (exp.estado === 'contratado') {
-                    <i class="bi bi-trophy-fill me-1"></i>
-                  }
-                  {{ estadoLabel(exp.estado) | translate }}
-                </span>
-              </div>
+      <!-- ── Grid de tarjetas ─────────────────────────────────────────────── -->
+      <div class="ef-grid">
 
-              <!-- Servicio -->
-              <p class="exp-servicio mb-2">{{ exp.servicio_nombre }}</p>
+        @for (exp of expedientesPaginados(); track exp.id; let idx = $index) {
 
-              <!-- Cliente + ubicación -->
-              <div class="exp-info mb-3">
-                <div class="exp-meta">
-                  <i class="bi bi-person text-muted me-1"></i>{{ exp.cliente_nombre }}
-                </div>
-                <div class="exp-meta">
-                  <i class="bi bi-geo-alt text-muted me-1"></i>
-                  {{ exp.provincia }}, {{ exp.canton }}
-                </div>
-              </div>
+          <article class="ef-card"
+                   [class.ef-card--estimado]="exp.estado === 'estimado'"
+                   [class.ef-card--en_oferta]="exp.estado === 'en_oferta'"
+                   [class.ef-card--adjudicado]="exp.estado === 'adjudicado'"
+                   [class.ef-card--contratado]="exp.estado === 'contratado'"
+                   [class.ef-card--cancelado]="exp.estado === 'cancelado'"
+                   [class.ef-card--reciente]="idx === 0 && paginaActual() === 1 && !hayFiltros()">
 
-              <!-- Fecha + hora visita -->
-              <div class="exp-fecha-row d-flex align-items-center gap-2 mb-3">
-                <i class="bi bi-calendar3 flex-shrink-0"></i>
-                <span>{{ formatFecha(exp.fecha_visita) }}</span>
-                @if (formatHora(exp.fecha_visita) !== '—') {
-                  <span class="ms-auto fw-semibold">{{ formatHora(exp.fecha_visita) }}</span>
+            <!-- Cabecera: número + badge -->
+            <div class="ef-card__head">
+              <div class="ef-card__left">
+                <span class="ef-num">{{ exp.numero }}</span>
+                @if (idx === 0 && paginaActual() === 1 && !hayFiltros()) {
+                  <span class="ef-reciente-tag">{{ 'common.recent' | translate }}</span>
                 }
               </div>
+              <span class="ef-badge badge rounded-pill {{ badgeClass(exp.estado) }}">
+                @if (exp.estado === 'contratado') {
+                  <i class="bi bi-trophy-fill me-1" aria-hidden="true"></i>
+                }
+                {{ estadoLabel(exp.estado) | translate }}
+              </span>
+            </div>
 
-              <!-- CTA -->
+            <!-- Servicio -->
+            <p class="ef-servicio">{{ exp.servicio_nombre }}</p>
+
+            <!-- Datos del cliente y ubicación -->
+            <div class="ef-meta-list">
+              <div class="ef-meta">
+                <i class="bi bi-person" aria-hidden="true"></i>
+                <span>{{ exp.cliente_nombre }}</span>
+              </div>
+              <div class="ef-meta">
+                <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                <span>{{ exp.provincia }}, {{ exp.canton }}</span>
+              </div>
+            </div>
+
+            <!-- Fecha de visita -->
+            <div class="ef-fecha">
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              <span>{{ formatFecha(exp.fecha_visita) }}</span>
+              @if (formatHora(exp.fecha_visita) !== '—') {
+                <span class="ef-hora">{{ formatHora(exp.fecha_visita) }}</span>
+              }
+            </div>
+
+            <!-- Acciones -->
+            <div class="ef-card__foot">
+
               @if (confirmandoId() === exp.id) {
 
-                <!-- ── Confirmación de eliminación ── -->
-                <div class="confirm-panel mt-auto">
-                  <p class="confirm-msg">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <div class="ef-confirm">
+                  <p class="ef-confirm__msg">
+                    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
                     {{ 'estimated_files.confirm_before' | translate }}
                     <strong>{{ 'state.nuevo' | translate }}</strong>
                     {{ 'estimated_files.confirm_after' | translate }}
                   </p>
                   @if (errorEliminar()) {
-                    <p class="text-danger small mb-2">{{ errorEliminar() }}</p>
+                    <p class="ef-confirm__err">{{ errorEliminar() }}</p>
                   }
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-danger btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+                  <div class="ef-confirm__actions">
+                    <button class="ef-btn ef-btn--danger"
                             (click)="eliminarEstimacion(exp)"
                             [disabled]="eliminando()">
                       @if (eliminando()) {
-                        <span class="spinner-border spinner-border-sm"></span>{{ 'estimated_files.deleting' | translate }}
+                        <span class="ef-spinner" aria-hidden="true"></span>
+                        {{ 'estimated_files.deleting' | translate }}
                       } @else {
-                        <i class="bi bi-trash3"></i>{{ 'estimated_files.confirm_delete' | translate }}
+                        <i class="bi bi-trash3" aria-hidden="true"></i>
+                        {{ 'estimated_files.confirm_delete' | translate }}
                       }
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm"
+                    <button class="ef-btn ef-btn--ghost"
                             (click)="cancelarConfirmacion()"
                             [disabled]="eliminando()">
                       {{ 'common.cancel' | translate }}
@@ -199,17 +235,16 @@
 
               } @else {
 
-                <!-- ── Acciones normales ── -->
-                <div class="d-flex gap-2 mt-auto">
-                  <button class="btn btn-outline-success btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
-                          (click)="ver(exp.id)">
-                    <i class="bi bi-eye"></i>{{ 'estimated_files.view_detail' | translate }}
+                <div class="ef-actions">
+                  <button class="ef-btn ef-btn--primary" (click)="ver(exp.id)">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    {{ 'estimated_files.view_detail' | translate }}
                   </button>
                   @if (exp.estado !== 'adjudicado' && exp.estado !== 'contratado') {
-                    <button class="btn btn-outline-danger btn-sm d-flex align-items-center justify-content-center"
+                    <button class="ef-btn ef-btn--icon ef-btn--delete"
                             (click)="pedirConfirmacion(exp.id)"
                             [title]="'estimated_files.delete_title' | translate">
-                      <i class="bi bi-trash3"></i>
+                      <i class="bi bi-trash3" aria-hidden="true"></i>
                     </button>
                   }
                 </div>
@@ -217,17 +252,25 @@
               }
 
             </div>
-          </div>
+
+          </article>
+
         }
+
       </div>
-      <app-pagination
-        [total]="expedientesFiltrados().length"
-        [page]="paginaActual()"
-        [pageSize]="POR_PAGINA"
-        (pageChange)="paginaActual.set($event)">
-      </app-pagination>
+
+      <!-- ── Paginación ────────────────────────────────────────────────────── -->
+      <div class="ef-pagination-wrap">
+        <app-pagination
+          [total]="expedientesFiltrados().length"
+          [page]="paginaActual()"
+          [pageSize]="POR_PAGINA"
+          (pageChange)="paginaActual.set($event)">
+        </app-pagination>
+      </div>
 
     }
+
   }
 
 </div>

@@ -85,6 +85,7 @@
     "no_results": "Sin resultados encontrados",
     "showing": "Mostrando",
     "clear": "Limpiar",
+    "recent": "Reciente",
     "clear_filters": "Limpiar filtros",
     "continue": "Continuar",
     "view": "Ver",
@@ -517,7 +518,8 @@
     "deleting": "Eliminando…",
     "confirm_delete": "Sí, eliminar",
     "view_detail": "Ver detalle",
-    "delete_title": "Eliminar estimación"
+    "delete_title": "Eliminar estimación",
+    "sorted_recent": "Más reciente primero"
   },
   "files_under_estimation": {
     "title": "Mis expedientes en estimación",

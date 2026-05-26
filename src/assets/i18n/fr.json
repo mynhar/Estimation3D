@@ -85,6 +85,7 @@
     "no_results": "Aucun résultat",
     "showing": "Affichage de",
     "clear": "Effacer",
+    "recent": "Récent",
     "clear_filters": "Effacer les filtres",
     "continue": "Continuer",
     "view": "Voir",
@@ -517,7 +518,8 @@
     "deleting": "Suppression…",
     "confirm_delete": "Oui, supprimer",
     "view_detail": "Voir le détail",
-    "delete_title": "Supprimer l'estimation"
+    "delete_title": "Supprimer l'estimation",
+    "sorted_recent": "Plus récent en premier"
   },
   "files_under_estimation": {
     "title": "Mes dossiers en estimation",
