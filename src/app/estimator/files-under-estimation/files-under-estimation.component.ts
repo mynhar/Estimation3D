@@ -36,10 +36,12 @@ export class FilesUnderEstimationComponent implements OnInit {
       if (u && this.urgencia(e.fecha_visita) === null) return false;
       if (!q) return true;
       return (
-        e.numero.toLowerCase().includes(q)          ||
-        e.servicio_nombre.toLowerCase().includes(q) ||
-        e.cliente_nombre.toLowerCase().includes(q)  ||
-        e.provincia.toLowerCase().includes(q)       ||
+        e.numero.toLowerCase().includes(q)             ||
+        e.servicio_nombre.toLowerCase().includes(q)    ||
+        e.servicio_nombre_en.toLowerCase().includes(q) ||
+        e.servicio_nombre_fr.toLowerCase().includes(q) ||
+        e.cliente_nombre.toLowerCase().includes(q)     ||
+        e.provincia.toLowerCase().includes(q)          ||
         e.canton.toLowerCase().includes(q)
       );
     });
@@ -100,6 +102,13 @@ export class FilesUnderEstimationComponent implements OnInit {
       return time ?? '—';
     }
     return '—';
+  }
+
+  servicioNombre(exp: ExpedienteRow): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
+    if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
+    return exp.servicio_nombre;
   }
 
   limpiarFiltros() {

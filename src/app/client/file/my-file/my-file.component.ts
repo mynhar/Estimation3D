@@ -116,6 +116,15 @@ export class MyFileComponent implements OnInit {
     return this.ESTADO_CFG[estado] ?? { clase: 'bg-secondary-subtle text-secondary', icono: 'bi-question-circle' };
   }
 
+  get servicioNombre(): string {
+    const d = this.detalle();
+    if (!d) return '';
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
+  }
+
   formatFecha(valor: string | null): string {
     if (!valor) return '—';
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;

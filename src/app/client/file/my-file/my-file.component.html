@@ -122,7 +122,7 @@
               {{ ('state.' + detalle()!.estado) | translate }}
             </span>
           </div>
-          <p class="exp-servicio mt-1 mb-0">{{ detalle()!.servicio_nombre }}</p>
+          <p class="exp-servicio mt-1 mb-0">{{ servicioNombre }}</p>
         </div>
       </div>
       <div class="hint-chip">
@@ -233,7 +233,7 @@
             <div class="row g-3">
               <div class="col-sm-6">
                 <p class="info-label">{{ 'file.service' | translate }}</p>
-                <p class="info-value">{{ detalle()!.servicio_nombre }}</p>
+                <p class="info-value">{{ servicioNombre }}</p>
               </div>
               <div class="col-sm-6">
                 <p class="info-label">{{ 'file.number' | translate }}</p>

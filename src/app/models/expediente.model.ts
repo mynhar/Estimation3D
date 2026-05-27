@@ -133,6 +133,8 @@ export interface ExpedienteVistaCliente {
   fecha_visita: string;
   creado_en: string;
   servicio_nombre: string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
   cliente_nombre: string;
   direccion: string;
   referencia: string;

@@ -53,10 +53,12 @@ export class EstimatedFilesComponent implements OnInit {
       if (e && exp.estado !== e) return false;
       if (!q) return true;
       return (
-        exp.numero.toLowerCase().includes(q)          ||
-        exp.servicio_nombre.toLowerCase().includes(q) ||
-        exp.cliente_nombre.toLowerCase().includes(q)  ||
-        exp.provincia.toLowerCase().includes(q)       ||
+        exp.numero.toLowerCase().includes(q)             ||
+        exp.servicio_nombre.toLowerCase().includes(q)    ||
+        exp.servicio_nombre_en.toLowerCase().includes(q) ||
+        exp.servicio_nombre_fr.toLowerCase().includes(q) ||
+        exp.cliente_nombre.toLowerCase().includes(q)     ||
+        exp.provincia.toLowerCase().includes(q)          ||
         exp.canton.toLowerCase().includes(q)
       );
     });
@@ -106,6 +108,13 @@ export class EstimatedFilesComponent implements OnInit {
 
   estadoLabel(estado: string | undefined): string {
     return 'state.' + (estado ?? '');
+  }
+
+  servicioNombre(exp: ExpedienteRow): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
+    if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
+    return exp.servicio_nombre;
   }
 
   limpiarFiltros() {
