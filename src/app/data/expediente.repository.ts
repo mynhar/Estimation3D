@@ -78,7 +78,7 @@ export class ExpedienteRepository {
   }): Promise<ExpedienteRaw[]> {
     let query = this.db
       .from('expediente')
-      .select('id, numero, fecha_visita, estado, cliente_id, servicio_id, creado_en')
+      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, servicio_id, creado_en')
       .order('creado_en', { ascending: false });
     if (options.estado)      query = query.eq('estado', options.estado);
     if (options.estados)     query = query.in('estado', options.estados);

@@ -1,0 +1,664 @@
+<!-- LIGHTBOX -->
+@if (fotoAmpliada()) {
+  <div class="lightbox-overlay" (click)="cerrarFoto()">
+    <button class="lightbox-close" type="button" (click)="cerrarFoto()"
+            [title]="'common.close' | translate">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <div class="lightbox-container" (click)="$event.stopPropagation()">
+      <img [src]="fotoAmpliada()!" class="lightbox-img" alt="" />
+    </div>
+  </div>
+}
+
+<div class="fued-root">
+
+  <!-- ── Cargando ──────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="fued-loading">
+      <span class="fued-spinner" role="status"></span>
+      {{ 'common.loading' | translate }}
+    </div>
+
+  <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
+  } @else if (!detalle()) {
+    <div class="fued-not-found">
+      <div class="fued-not-found__icon"><i class="bi bi-exclamation-triangle"></i></div>
+      <p class="fued-not-found__title">{{ 'file.not_found' | translate }}</p>
+      @if (errorMsg()) {
+        <p class="fued-not-found__error">{{ errorMsg() | translate }}</p>
+      }
+      <button class="fued-btn-back-outline" type="button" (click)="volver()">
+        <i class="bi bi-arrow-left"></i>{{ 'common.back' | translate }}
+      </button>
+    </div>
+
+  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Encabezado -->
+    <header class="fued-header">
+      <div class="fued-header__top">
+        <button class="fued-btn-back" type="button" (click)="volver()"
+                [title]="'common.back' | translate">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <span class="fued-header__eyebrow">
+          <i class="bi bi-shield-check"></i>
+          {{ 'role.administrateur' | translate }} · {{ 'admin_offer.title' | translate }}
+        </span>
+      </div>
+      <div class="fued-header__body">
+        <div class="fued-header__info">
+          <p class="fued-header__num">{{ detalle()!.numero }}</p>
+          <h1 class="fued-header__title">{{ servicioNombre() }}</h1>
+          <div class="fued-header__meta">
+            <span class="fued-meta-item">
+              <i class="bi bi-person"></i>{{ detalle()!.cliente_nombre }}
+            </span>
+            <span class="fued-meta-item">
+              <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
+            </span>
+            @if (constructorSeleccionadoNombre) {
+              <span class="fued-meta-item">
+                <i class="bi bi-person-gear"></i>{{ constructorSeleccionadoNombre }}
+              </span>
+            }
+          </div>
+        </div>
+        <div class="fued-header__badges">
+          @if (ofertaId()) {
+            <span class="fued-badge fued-badge--warning">
+              <i class="bi bi-pencil"></i>{{ 'make_offer.editing_badge' | translate }}
+            </span>
+          } @else {
+            <span class="fued-badge fued-badge--info">
+              <i class="bi bi-plus-circle"></i>{{ 'make_offer.new_badge' | translate }}
+            </span>
+          }
+          @if (detalle()!.total_ofertas > 0) {
+            <span class="fued-badge fued-badge--success">
+              <i class="bi bi-people"></i>{{ detalle()!.total_ofertas }}/5 {{ 'available_files.offers_label' | translate }}
+            </span>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout principal -->
+    <div class="fued-main">
+
+      <!-- ── Columna izquierda ───────────────────────────────────────────── -->
+      <div class="fued-col-main">
+
+        <!-- Ofertas de constructores -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-people"></i>
+              {{ 'admin_offer.offers_section_title' | translate }}
+            </div>
+            @if (todasLasOfertas().length > 0) {
+              <span class="fued-count-badge">{{ todasLasOfertas().length }}/5</span>
+            }
+          </div>
+          @if (todasLasOfertas().length === 0) {
+            <div class="fued-empty-inline">
+              <i class="bi bi-inbox"></i>
+              <p>{{ 'admin_offer.offers_empty' | translate }}</p>
+            </div>
+          } @else {
+            <div class="fued-offers-list">
+              @for (oferta of todasLasOfertas(); track oferta.id) {
+                <div class="fued-offer-row" role="button" tabindex="0"
+                     [class.fued-offer-row--active]="oferta.id === ofertaId()"
+                     (click)="seleccionarOferta(oferta)"
+                     (keydown.enter)="seleccionarOferta(oferta)">
+                  <div class="fued-offer-avatar"
+                       [class.fued-offer-avatar--active]="oferta.id === ofertaId()">
+                    {{ initiales(oferta.constructor_nombre) }}
+                  </div>
+                  <div class="fued-offer-body">
+                    <p class="fued-offer-name">{{ oferta.constructor_nombre }}</p>
+                    <div class="fued-offer-details">
+                      <span class="fued-offer-price">CA$ {{ oferta.precio | number:'1.0-0' }}</span>
+                      @if (oferta.plazo_semanas_min) {
+                        <span class="fued-offer-dot">·</span>
+                        <span>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max ?? oferta.plazo_semanas_min }} {{ 'offer.weeks' | translate }}</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="fued-offer-side" (click)="$event.stopPropagation()">
+                    @if (confirmandoEliminarId() === oferta.id) {
+                      <button class="fued-offer-confirm-btn" type="button"
+                              (click)="eliminarOfertaLista(oferta)" [disabled]="eliminando()">
+                        @if (eliminando()) {
+                          <span class="fued-spinner-sm"></span>
+                        } @else {
+                          <i class="bi bi-trash3"></i>
+                        }
+                      </button>
+                      <button class="fued-offer-cancel-btn" type="button"
+                              (click)="confirmandoEliminarId.set(null)" [disabled]="eliminando()">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    } @else {
+                      <span class="fued-badge"
+                            [class.fued-badge--success]="oferta.estado === 'aceptada'"
+                            [class.fued-badge--warning]="oferta.estado === 'pendiente'"
+                            [class.fued-badge--danger]="oferta.estado === 'rechazada'">
+                        {{ estadoOfertaKey(oferta.estado) | translate }}
+                      </span>
+                      @if (puedeEliminarOfertas) {
+                        <button class="fued-offer-del-btn" type="button"
+                                (click)="confirmandoEliminarId.set(oferta.id)"
+                                [title]="'admin_offer.delete_btn' | translate"
+                                [disabled]="eliminando()">
+                          <i class="bi bi-trash3"></i>
+                        </button>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            @if (errorEliminarLista()) {
+              <div class="fued-offers-error">
+                <i class="bi bi-exclamation-circle"></i>{{ errorEliminarLista() }}
+              </div>
+            }
+            <p class="fued-offers-hint">
+              <i class="bi bi-cursor"></i>
+              {{ 'admin_offer.offers_select_hint' | translate }}
+            </p>
+          }
+        </section>
+
+        <!-- Detalles del expediente -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-clipboard2-data"></i>
+              {{ 'make_offer.case_summary' | translate }}
+            </div>
+          </div>
+          <div class="fued-card__body">
+
+            <p class="fued-section-label">{{ 'make_offer.service_label' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item fued-info-item--full">
+                <p class="fued-info-label">{{ 'make_offer.service_label' | translate }}</p>
+                <p class="fued-info-value">{{ servicioNombre() }}</p>
+                @if (servicioDescripcion()) {
+                  <p class="fued-info-sub">{{ servicioDescripcion() }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="fued-divider"></div>
+
+            <p class="fued-section-label">{{ 'make_offer.location_label' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item fued-info-item--full">
+                <p class="fued-info-label">{{ 'common.address' | translate }}</p>
+                <p class="fued-info-value">{{ detalle()!.direccion }}</p>
+                <p class="fued-info-value">{{ detalle()!.canton }}, {{ detalle()!.provincia }}</p>
+              </div>
+              @if (detalle()!.referencia) {
+                <div class="fued-info-item">
+                  <p class="fued-info-label">{{ 'file.reference' | translate }}</p>
+                  <p class="fued-info-value">{{ detalle()!.referencia }}</p>
+                </div>
+              }
+            </div>
+
+            <div class="fued-divider"></div>
+
+            <p class="fued-section-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'common.date' | translate }}</p>
+                <p class="fued-info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+              </div>
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'file.hour' | translate }}</p>
+                <p class="fued-info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
+              </div>
+            </div>
+
+            <div class="fued-divider"></div>
+
+            <p class="fued-section-label">{{ 'make_offer.estimator_visit' | translate }}</p>
+            <div class="fued-info-grid">
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'common.date' | translate }}</p>
+                <p class="fued-info-value">{{ formatFecha(detalle()!.fecha_visita_real) }}</p>
+              </div>
+              <div class="fued-info-item">
+                <p class="fued-info-label">{{ 'file.hour' | translate }}</p>
+                <p class="fued-info-value">{{ formatHora(detalle()!.fecha_visita_real) }}</p>
+              </div>
+            </div>
+
+            @if (detalle()!.descripcion_problemas) {
+              <div class="fued-divider"></div>
+              <p class="fued-section-label">{{ 'make_offer.problems_noted' | translate }}</p>
+              <p class="fued-desc-client">{{ detalle()!.descripcion_problemas }}</p>
+            }
+
+            @if (detalle()!.costo_estimado) {
+              <div class="fued-divider"></div>
+              <div class="fued-cost-summary">
+                <p class="fued-section-label mb-0">{{ 'make_offer.estimated_range' | translate }}</p>
+                <p class="fued-cost-summary__value">
+                  @if (detalle()!.costo_estimado_max && detalle()!.costo_estimado_max !== detalle()!.costo_estimado) {
+                    {{ detalle()!.costo_estimado | number:'1.0-0' }} – {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
+                  } @else {
+                    {{ detalle()!.costo_estimado | number:'1.0-0' }} CAD
+                  }
+                </p>
+              </div>
+            }
+
+          </div>
+        </section>
+
+        <!-- Media -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-collection-play"></i>
+              Multimedia
+            </div>
+          </div>
+
+          <div class="fued-media-tabs">
+            <button class="fued-media-tab" type="button"
+                    [class.fued-media-tab--active]="tabMedia() === 'tour'"
+                    (click)="tabMedia.set('tour')">
+              <i class="bi bi-camera-video"></i>{{ 'make_offer.tab_tour' | translate }}
+              @if (urlsTour.length > 0) {
+                <span class="fued-count-badge">{{ urlsTour.length }}</span>
+              }
+            </button>
+            <button class="fued-media-tab" type="button"
+                    [class.fued-media-tab--active]="tabMedia() === 'fotos'"
+                    (click)="tabMedia.set('fotos')">
+              <i class="bi bi-images"></i>{{ 'make_offer.tab_photos' | translate }}
+              @if (fotos().length > 0) {
+                <span class="fued-count-badge">{{ fotos().length }}</span>
+              }
+            </button>
+            <button class="fued-media-tab" type="button"
+                    [class.fued-media-tab--active]="tabMedia() === 'docs'"
+                    (click)="tabMedia.set('docs')">
+              <i class="bi bi-file-earmark-text"></i>{{ 'make_offer.tab_docs' | translate }}
+              @if (documentos().length > 0) {
+                <span class="fued-count-badge">{{ documentos().length }}</span>
+              }
+            </button>
+          </div>
+
+          @if (tabMedia() === 'tour') {
+            <div class="fued-card__body">
+              @if (urlsTour.length > 0) {
+                <div class="d-flex flex-column gap-3">
+                  @for (url of urlsTour; track $index) {
+                    <div>
+                      <p class="fued-tour-label">
+                        <i class="bi bi-camera-video me-1"></i>
+                        {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                      </p>
+                      <div class="fued-tour-embed fued-tour-embed--standalone">
+                        <iframe [src]="getSafeUrl(url)" allowfullscreen allow="xr-spatial-tracking"
+                                [title]="'Video ' + ($index + 1)"></iframe>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="fued-empty-inline">
+                  <i class="bi bi-camera-video"></i>
+                  <p>{{ 'make_offer.no_tour' | translate }}</p>
+                </div>
+              }
+            </div>
+          }
+
+          @if (tabMedia() === 'fotos') {
+            <div class="fued-card__body">
+              @if (fotos().length === 0) {
+                <div class="fued-empty-inline">
+                  <i class="bi bi-image"></i>
+                  <p>{{ 'make_offer.no_photos' | translate }}</p>
+                </div>
+              } @else {
+                <div class="fued-photo-grid">
+                  @for (f of fotos(); track f.id) {
+                    <div class="fued-photo-thumb fued-photo-thumb--zoom"
+                         (click)="abrirFoto(f)" [title]="f.nombre_archivo">
+                      <img [src]="publicUrl(f.url_storage)"
+                           class="fued-photo-thumb__img" [alt]="f.nombre_archivo" />
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (tabMedia() === 'docs') {
+            <div class="fued-card__body">
+              @if (documentos().length === 0) {
+                <div class="fued-empty-inline">
+                  <i class="bi bi-file-earmark"></i>
+                  <p>{{ 'make_offer.no_docs' | translate }}</p>
+                </div>
+              } @else {
+                @for (doc of documentos(); track doc.id) {
+                  <div class="fued-file-row">
+                    <div class="fued-file-row__icon">
+                      <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="fued-file-row__info">
+                      <p class="fued-file-row__name">{{ doc.nombre_archivo }}</p>
+                      <p class="fued-file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                    </div>
+                    <div class="fued-file-row__actions">
+                      <button class="fued-btn-icon" type="button"
+                              (click)="verArchivo(doc)" [title]="'common.view' | translate">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+        </section>
+
+      </div>
+
+      <!-- ── Columna derecha: formulario sticky ──────────────────────────── -->
+      <aside class="fued-col-side">
+        <div class="fued-form-card">
+          <div class="fued-form-card__header">
+            <i class="bi bi-pencil-square"></i>
+            {{ ofertaId() ? ('make_offer.update_title' | translate) : ('make_offer.form_title' | translate) }}
+          </div>
+          <div class="fued-form-card__body">
+
+            <!-- Constructor -->
+            <div class="fued-field">
+              <label class="fued-label" for="constructor-select">
+                <i class="bi bi-person-gear"></i>{{ 'admin_offer.constructor_label' | translate }}
+                <span class="fued-req">*</span>
+              </label>
+              @if (constructores().length === 0) {
+                <p class="fued-field-hint">{{ 'admin_offer.no_constructores' | translate }}</p>
+              } @else {
+                <select id="constructor-select" class="fued-input fued-select"
+                        [ngModel]="constructorSeleccionadoId()"
+                        (ngModelChange)="onConstructorChange($event)">
+                  <option value="">{{ 'admin_offer.select_constructor' | translate }}</option>
+                  @for (c of constructores(); track c.id) {
+                    <option [value]="c.id">{{ c.nombre }} {{ c.apellido }}</option>
+                  }
+                </select>
+              }
+            </div>
+
+            <!-- Precio -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-coin"></i>{{ 'make_offer.total_price' | translate }}
+                <span class="fued-req">*</span>
+              </label>
+              <div class="fued-input-group">
+                <span class="fued-input-prefix">CA$</span>
+                <input type="number" class="fued-input" placeholder="0" min="1" step="1000"
+                       [(ngModel)]="precio" />
+              </div>
+            </div>
+
+            <!-- Plazos -->
+            <div class="fued-field-row">
+              <div class="fued-field">
+                <label class="fued-label">
+                  {{ 'make_offer.min_deadline' | translate }}
+                  <small class="fued-opt">({{ 'offer.weeks' | translate }})</small>
+                  <span class="fued-req">*</span>
+                </label>
+                <input type="number" class="fued-input" placeholder="1" min="1" step="1"
+                       [(ngModel)]="plazoMin" />
+              </div>
+              <div class="fued-field">
+                <label class="fued-label">
+                  {{ 'make_offer.max_deadline' | translate }}
+                  <small class="fued-opt">({{ 'offer.weeks' | translate }})</small>
+                  <span class="fued-req">*</span>
+                </label>
+                <input type="number" class="fued-input" placeholder="4" min="1" step="1"
+                       [(ngModel)]="plazoMax" />
+              </div>
+            </div>
+
+            <!-- Garantía -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-shield-check"></i>{{ 'offer.warranty' | translate }}
+                <span class="fued-opt">({{ 'common.optional' | translate }}) — {{ 'offer.years' | translate }}</span>
+              </label>
+              <input type="number" class="fued-input" placeholder="1" min="0" step="1"
+                     [(ngModel)]="garantiaAnos" />
+            </div>
+
+            <!-- Fecha inicio -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-calendar-event"></i>{{ 'make_offer.start_date' | translate }}
+                <span class="fued-req">*</span>
+              </label>
+              <input type="date" class="fued-input" [(ngModel)]="fechaInicio" />
+            </div>
+
+            <!-- Descripción -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-text-paragraph"></i>{{ 'make_offer.approach_desc' | translate }}
+                <span class="fued-req">*</span>
+              </label>
+              <textarea class="fued-input fued-textarea" rows="4"
+                        [placeholder]="'make_offer.approach_placeholder' | translate"
+                        [(ngModel)]="descripcion"></textarea>
+            </div>
+
+            <!-- Adjuntos -->
+            <div class="fued-field">
+              <label class="fued-label">
+                <i class="bi bi-paperclip"></i>{{ 'make_offer.attachments' | translate }}
+              </label>
+
+              <!-- PDF -->
+              <div class="fued-attach-row">
+                <div class="fued-attach-icon fued-attach-icon--pdf">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                </div>
+                <div class="fued-attach-info">
+                  <p class="fued-attach-name">
+                    {{ 'make_offer.pdf_doc' | translate }}
+                    @if (!ofertaId()) { <span class="fued-req">*</span> }
+                  </p>
+                  @if (documentoOferta()) {
+                    <p class="fued-attach-status fued-attach-status--new">
+                      <i class="bi bi-check-circle me-1"></i>{{ documentoOferta()!.name }}
+                    </p>
+                  } @else if (documentoActual()) {
+                    <p class="fued-attach-status fued-attach-status--saved">
+                      <i class="bi bi-check-circle-fill me-1"></i>{{ documentoActual()!.nombre_archivo }}
+                      <button class="fued-view-link" type="button"
+                              (click)="verArchivo(documentoActual()!)">
+                        {{ 'make_offer.view' | translate }}
+                      </button>
+                    </p>
+                  } @else {
+                    <p class="fued-attach-empty">{{ 'make_offer.no_document' | translate }}</p>
+                  }
+                </div>
+                <label class="fued-btn-upload mb-0 flex-shrink-0">
+                  <i class="bi bi-upload"></i>
+                  {{ (documentoActual() && !documentoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
+                  <input type="file" accept=".pdf" class="fued-file-input" (change)="onDocumento($event)" />
+                </label>
+              </div>
+
+              <!-- Video -->
+              <div class="fued-attach-row" style="margin-top:var(--ds-space-2)">
+                <div class="fued-attach-icon fued-attach-icon--video">
+                  <i class="bi bi-camera-video"></i>
+                </div>
+                <div class="fued-attach-info">
+                  <p class="fued-attach-name">
+                    {{ 'make_offer.video_opt' | translate }}
+                    <span class="fued-opt">({{ 'common.optional' | translate }})</span>
+                  </p>
+                  @if (videoOferta()) {
+                    <p class="fued-attach-status fued-attach-status--new">
+                      <i class="bi bi-check-circle me-1"></i>{{ videoOferta()!.name }}
+                    </p>
+                  } @else if (videoActual()) {
+                    <p class="fued-attach-status fued-attach-status--saved">
+                      <i class="bi bi-check-circle-fill me-1"></i>{{ videoActual()!.nombre_archivo }}
+                      <button class="fued-view-link" type="button"
+                              (click)="verArchivo(videoActual()!)">
+                        {{ 'make_offer.view' | translate }}
+                      </button>
+                    </p>
+                  } @else {
+                    <p class="fued-attach-empty">{{ 'make_offer.no_video' | translate }}</p>
+                  }
+                </div>
+                <label class="fued-btn-upload mb-0 flex-shrink-0">
+                  <i class="bi bi-upload"></i>
+                  {{ (videoActual() && !videoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
+                  <input type="file" accept="video/*" class="fued-file-input" (change)="onVideo($event)" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Checklist -->
+            <div class="fued-checklist">
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="!!constructorSeleccionadoId()">
+                <i class="bi" [class.bi-check-circle]="!!constructorSeleccionadoId()"
+                              [class.bi-circle]="!constructorSeleccionadoId()"></i>
+                {{ 'admin_offer.constructor_label' | translate }}
+              </div>
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="!!precio && precio > 0">
+                <i class="bi" [class.bi-check-circle]="!!precio && precio > 0"
+                              [class.bi-circle]="!precio || precio <= 0"></i>
+                {{ 'make_offer.checklist_price' | translate }}
+              </div>
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin">
+                <i class="bi"
+                   [class.bi-check-circle]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
+                   [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>
+                {{ 'make_offer.checklist_deadline' | translate }}
+              </div>
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="!!fechaInicio">
+                <i class="bi" [class.bi-check-circle]="!!fechaInicio"
+                              [class.bi-circle]="!fechaInicio"></i>
+                {{ 'make_offer.checklist_start' | translate }}
+              </div>
+              <div class="fued-checklist-item"
+                   [class.fued-checklist-item--done]="!!descripcion.trim()">
+                <i class="bi" [class.bi-check-circle]="!!descripcion.trim()"
+                              [class.bi-circle]="!descripcion.trim()"></i>
+                {{ 'make_offer.checklist_desc' | translate }}
+              </div>
+              @if (!ofertaId()) {
+                <div class="fued-checklist-item"
+                     [class.fued-checklist-item--done]="!!documentoOferta()">
+                  <i class="bi" [class.bi-check-circle]="!!documentoOferta()"
+                                [class.bi-circle]="!documentoOferta()"></i>
+                  PDF
+                </div>
+              }
+            </div>
+
+            @if (errorEnvio()) {
+              <div class="fued-alert fued-alert--danger">{{ errorEnvio() | translate }}</div>
+            }
+            @if (exitoMsg()) {
+              <div class="fued-alert fued-alert--success">{{ exitoMsg() | translate }}</div>
+            }
+
+            <!-- Acciones -->
+            <div class="fued-form-actions">
+              <button class="fued-btn-submit" type="button"
+                      (click)="enviarOferta()"
+                      [disabled]="enviando() || !formularioCompleto">
+                @if (enviando()) {
+                  <span class="fued-spinner-sm"></span>
+                  {{ ofertaId() ? ('make_offer.updating' | translate) : ('make_offer.sending' | translate) }}
+                } @else {
+                  <i class="bi" [class.bi-send-check]="!ofertaId()"
+                                [class.bi-arrow-repeat]="!!ofertaId()"></i>
+                  {{ ofertaId() ? ('make_offer.update_offer' | translate) : ('make_offer.send_offer' | translate) }}
+                }
+              </button>
+              <button class="fued-btn-draft" type="button" (click)="volver()">
+                <i class="bi bi-arrow-left"></i>{{ 'admin_offer.back_btn' | translate }}
+              </button>
+            </div>
+
+          </div><!-- /fued-form-card__body -->
+
+          <!-- Zona de peligro -->
+          @if (ofertaId()) {
+            <div class="fued-danger-zone">
+              @if (!puedeEliminar) {
+                <p class="fued-danger-zone__blocked">
+                  <i class="bi bi-lock"></i>{{ 'admin_offer.delete_blocked' | translate }}
+                </p>
+              } @else if (!confirmandoEliminar()) {
+                <button class="fued-btn-danger" type="button"
+                        (click)="eliminarOferta()" [disabled]="eliminando()">
+                  <i class="bi bi-trash3"></i>{{ 'admin_offer.delete_btn' | translate }}
+                </button>
+              } @else {
+                <p class="fued-danger-zone__confirm-msg">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  {{ 'admin_offer.delete_confirm' | translate }}
+                </p>
+                <div class="fued-danger-zone__actions">
+                  <button class="fued-btn-danger-confirm" type="button"
+                          (click)="eliminarOferta()" [disabled]="eliminando()">
+                    @if (eliminando()) {
+                      <span class="fued-spinner-sm"></span>{{ 'admin_offer.deleting' | translate }}
+                    } @else {
+                      <i class="bi bi-trash3"></i>{{ 'admin_offer.delete_confirm_btn' | translate }}
+                    }
+                  </button>
+                  <button class="fued-btn-cancel" type="button"
+                          (click)="cancelarEliminar()" [disabled]="eliminando()">
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                </div>
+                @if (errorEliminar()) {
+                  <div class="fued-alert fued-alert--danger">{{ errorEliminar() }}</div>
+                }
+              }
+            </div>
+          }
+
+        </div><!-- /fued-form-card -->
+      </aside>
+
+    </div>
+  }
+
+</div>

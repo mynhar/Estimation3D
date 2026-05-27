@@ -87,6 +87,14 @@ export class ArchivoService {
     await this.archivoRepo.deleteById(archivo.id);
   }
 
+  async eliminarTodos(expedienteId: string): Promise<void> {
+    const archivos = await this.archivoRepo.findByExpedienteId(expedienteId);
+    if (archivos.length) {
+      await this.archivoRepo.removeFromStorage(archivos.map(a => a.url_storage));
+      await this.archivoRepo.deleteByExpedienteId(expedienteId);
+    }
+  }
+
   publicUrl(storagePath: string): string {
     return this.archivoRepo.getPublicUrl(storagePath);
   }

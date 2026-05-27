@@ -40,6 +40,17 @@ export class OfertaRepository {
   private auth = inject(AuthSupabaseService);
   private get db() { return this.auth.client; }
 
+  async findByExpedienteIds(expedienteIds: string[]): Promise<OfertaRaw[]> {
+    if (!expedienteIds.length) return [];
+    const { data, error } = await this.db
+      .from('oferta')
+      .select('id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en')
+      .in('expediente_id', expedienteIds)
+      .order('creado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as OfertaRaw[];
+  }
+
   async findByExpedienteId(expedienteId: string): Promise<OfertaRaw[]> {
     const { data, error } = await this.db
       .from('oferta')
@@ -173,6 +184,20 @@ export class OfertaRepository {
         descripcion:       form.descripcion,
       } as TablesUpdate<'oferta'>)
       .eq('id', ofertaId);
+    if (error) throw new Error(error.message);
+  }
+
+  async deleteById(ofertaId: string): Promise<void> {
+    const { error } = await this.db.from('oferta').delete().eq('id', ofertaId);
+    if (error) throw new Error(error.message);
+  }
+
+  async restoreEstadoEstimado(expedienteId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente')
+      .update({ estado: 'estimado' as EstadoExpediente })
+      .eq('id', expedienteId)
+      .eq('estado', 'en_oferta');
     if (error) throw new Error(error.message);
   }
 

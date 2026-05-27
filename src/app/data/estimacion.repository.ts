@@ -22,6 +22,13 @@ export type EstimacionFecha = {
   fecha_visita_real: string | null;
 };
 
+export type EstimacionSummary = {
+  expediente_id:      string;
+  fecha_visita_real:  string | null;
+  costo_estimado:     number | null;
+  costo_estimado_max: number | null;
+};
+
 @Injectable({ providedIn: 'root' })
 export class EstimacionRepository {
   private auth = inject(AuthSupabaseService);
@@ -55,6 +62,16 @@ export class EstimacionRepository {
       .in('expediente_id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as EstimacionFecha[];
+  }
+
+  async findSummaryByExpedienteIds(ids: string[]): Promise<EstimacionSummary[]> {
+    if (!ids.length) return [];
+    const { data, error } = await this.db
+      .from('estimacion')
+      .select('expediente_id, fecha_visita_real, costo_estimado, costo_estimado_max')
+      .in('expediente_id', ids);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as EstimacionSummary[];
   }
 
   async upsert(

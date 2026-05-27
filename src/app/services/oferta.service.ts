@@ -246,4 +246,14 @@ export class OfertaService {
 
     await this.ofertaRepo.updateEstadoExpedienteEnOferta(expedienteId);
   }
+
+  async eliminarOferta(ofertaId: string, expedienteId: string): Promise<void> {
+    const archivos = await this.archivoRepo.findByOfertaId(ofertaId);
+    const paths = archivos.map(a => a.url_storage);
+    if (paths.length) await this.archivoRepo.removeFromStorage(paths);
+    await this.archivoRepo.deleteByOfertaId(ofertaId);
+    await this.ofertaRepo.deleteById(ofertaId);
+    const remaining = await this.ofertaRepo.countByExpedienteId(expedienteId);
+    if (remaining === 0) await this.ofertaRepo.restoreEstadoEstimado(expedienteId);
+  }
 }

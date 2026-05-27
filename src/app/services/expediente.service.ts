@@ -3,8 +3,10 @@ import {
   ExpedienteAdmin,
   ExpedienteCliente,
   ExpedienteConOfertas,
+  ExpedienteConOfertaAdmin,
   ExpedienteDetalleCliente,
   ExpedienteParaEdicion,
+  ExpedienteParaEstimar,
   ExpedienteRow,
   ExpedienteDetalle,
   ExpedienteDisponible,
@@ -20,6 +22,7 @@ import {
   EstimacionRepository,
   OfertaRepository,
 } from '../data';
+import { OfertaRaw } from '../data/oferta.repository';
 
 @Injectable({ providedIn: 'root' })
 export class ExpedienteService {
@@ -277,6 +280,7 @@ export class ExpedienteService {
       provincia:  loc?.provincia  ?? '—',
       canton:     loc?.canton     ?? '—',
       distrito:   loc?.distrito   ?? '—',
+      estimador_id:     exp.estimador_id ?? null,
       estimador_nombre: estimadorPerfil
         ? `${estimadorPerfil.nombre} ${estimadorPerfil.apellido}`
         : '—',
@@ -329,16 +333,19 @@ export class ExpedienteService {
     const exp = await this.expedienteRepo.findById(id);
     if (!exp) throw new Error('file.not_found');
 
-    const [servicio, loc, estimacion, totalOfertas] = await Promise.all([
+    const [servicio, loc, estimacion, totalOfertas, cliente] = await Promise.all([
       this.servicioRepo.findById(exp.servicio_id),
       this.localizacionRepo.findByExpedienteId(id),
       this.estimacionRepo.findByExpedienteId(id),
       this.ofertaRepo.countByExpedienteId(id),
+      this.perfilRepo.findById(exp.cliente_id),
     ]);
 
     return {
       id,
       numero:                  exp.numero,
+      estado:                  exp.estado,
+      cliente_nombre:          cliente ? `${cliente.nombre} ${cliente.apellido}`.trim() : '—',
       fecha_visita:            exp.fecha_visita,
       servicio_nombre:         servicio?.nombre_es         ?? '—',
       servicio_nombre_en:      servicio?.nombre_en         ?? servicio?.nombre_es ?? '—',
@@ -361,6 +368,47 @@ export class ExpedienteService {
   }
 
   // ── Módulo administrador ─────────────────────────────────────────────────
+
+  async getExpedientesParaEstimar(): Promise<ExpedienteParaEstimar[]> {
+    const estados: EstadoExpediente[] = ['nuevo', 'en_estimacion', 'estimado'];
+    const exps = await this.expedienteRepo.findByFiltro({ estados });
+    if (!exps.length) return [];
+
+    const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
+    const expedienteIds = exps.map(e => e.id);
+    const userIds       = [...new Set([
+      ...exps.map(e => e.cliente_id),
+      ...exps.filter(e => e.estimador_id).map(e => e.estimador_id as string),
+    ])];
+
+    const [servicios, perfiles, estimaciones] = await Promise.all([
+      this.servicioRepo.findByIds(servicioIds),
+      this.perfilRepo.findByIds(userIds),
+      this.estimacionRepo.findSummaryByExpedienteIds(expedienteIds),
+    ]);
+
+    return exps.map(e => {
+      const svc       = servicios.find(s => s.id === e.servicio_id);
+      const cliente   = perfiles.find(p => p.id === e.cliente_id);
+      const estimador = e.estimador_id ? perfiles.find(p => p.id === e.estimador_id) : null;
+      const est       = estimaciones.find(est => est.expediente_id === e.id);
+      return {
+        id:                  e.id,
+        numero:              e.numero,
+        estado:              e.estado,
+        fecha_visita:        e.fecha_visita,
+        creado_en:           e.creado_en,
+        servicio_nombre:     svc?.nombre_es         ?? '—',
+        servicio_nombre_en:  svc?.nombre_en         ?? svc?.nombre_es ?? '—',
+        servicio_nombre_fr:  svc?.nombre_fr         ?? svc?.nombre_es ?? '—',
+        cliente_nombre:      cliente   ? `${cliente.nombre}   ${cliente.apellido}`.trim()   : '—',
+        estimador_nombre:    estimador ? `${estimador.nombre} ${estimador.apellido}`.trim() : null,
+        fecha_visita_real:   est?.fecha_visita_real  ?? null,
+        costo_estimado:      est?.costo_estimado     ?? null,
+        costo_estimado_max:  est?.costo_estimado_max ?? null,
+      } as ExpedienteParaEstimar;
+    });
+  }
 
   async getExpedientesAdmin(): Promise<ExpedienteAdmin[]> {
     const exps = await this.expedienteRepo.findAll();
@@ -401,6 +449,64 @@ export class ExpedienteService {
         oferta_fecha_inicio: oferta?.fecha_inicio      ?? null,
       } as ExpedienteAdmin;
     });
+  }
+
+  async getExpedientesConOfertasAdmin(): Promise<ExpedienteConOfertaAdmin[]> {
+    const estados: EstadoExpediente[] = ['estimado', 'en_oferta', 'adjudicado'];
+    const exps = await this.expedienteRepo.findByFiltro({ estados });
+    if (!exps.length) return [];
+
+    const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
+    const expedienteIds = exps.map(e => e.id);
+    const userIds       = [...new Set([
+      ...exps.map(e => e.cliente_id),
+      ...exps.filter(e => e.estimador_id).map(e => e.estimador_id as string),
+    ])];
+
+    const [servicios, perfiles, ofertasRaw] = await Promise.all([
+      this.servicioRepo.findByIds(servicioIds),
+      this.perfilRepo.findByIds(userIds),
+      this.ofertaRepo.findByExpedienteIds(expedienteIds),
+    ]);
+
+    const constructorIds = [...new Set(ofertasRaw.map(o => o.constructor_id))];
+    const constructores  = constructorIds.length
+      ? await this.perfilRepo.findByIds(constructorIds)
+      : [];
+
+    return exps.map(e => {
+      const svc       = servicios.find(s => s.id === e.servicio_id);
+      const cliente   = perfiles.find(p => p.id === e.cliente_id);
+      const estimador = e.estimador_id ? perfiles.find(p => p.id === e.estimador_id) : null;
+
+      const expOfertas = ofertasRaw.filter(o => o.expediente_id === e.id);
+      let oferta: OfertaRaw | null = null;
+      if (e.estado === 'adjudicado') {
+        oferta = expOfertas.find(o => o.estado === 'aceptada') ?? expOfertas[0] ?? null;
+      } else {
+        oferta = expOfertas[0] ?? null;
+      }
+
+      const constructor = oferta ? constructores.find(c => c.id === oferta!.constructor_id) : null;
+
+      return {
+        id:                  e.id,
+        numero:              e.numero,
+        estado:              e.estado,
+        creado_en:           e.creado_en,
+        servicio_nombre:     svc?.nombre_es        ?? '—',
+        servicio_nombre_en:  svc?.nombre_en        ?? svc?.nombre_es ?? '—',
+        servicio_nombre_fr:  svc?.nombre_fr        ?? svc?.nombre_es ?? '—',
+        cliente_nombre:      cliente    ? `${cliente.nombre}    ${cliente.apellido}`.trim()    : '—',
+        estimador_nombre:    estimador  ? `${estimador.nombre}  ${estimador.apellido}`.trim()  : null,
+        oferta_id:           oferta?.id            ?? null,
+        constructor_nombre:  constructor ? `${constructor.nombre} ${constructor.apellido}`.trim() : null,
+        oferta_precio:       oferta?.precio        ?? null,
+        oferta_fecha_inicio: oferta?.fecha_inicio  ?? null,
+        oferta_estado:       oferta?.estado        ?? null,
+        sort_date:           oferta?.creado_en     ?? e.creado_en,
+      } as ExpedienteConOfertaAdmin;
+    }).sort((a, b) => b.sort_date.localeCompare(a.sort_date));
   }
 
   async getExpedienteParaEdicion(id: string): Promise<ExpedienteParaEdicion> {

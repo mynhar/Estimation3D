@@ -7,18 +7,18 @@
         <p class="page-eyebrow">
           <i class="bi bi-shield-check"></i>{{ 'role.administrateur' | translate }}
         </p>
-        <h4 class="mb-1">{{ 'admin_offer.title' | translate }}</h4>
-        <p class="text-muted small mb-0">{{ 'admin_offer.subtitle' | translate }}</p>
+        <h4 class="mb-1">{{ 'to_estimate.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'to_estimate.subtitle' | translate }}</p>
       </div>
       @if (!cargando() && !error()) {
         <span class="kpi-pill">
-          <i class="bi bi-tags"></i>
+          <i class="bi bi-clipboard-check"></i>
           @if (hayFiltros()) {
             {{ expedientesFiltrados().length }} / {{ total }}
           } @else {
             {{ total }}
           }
-          {{ 'admin_offer.count' | translate }}
+          {{ 'to_estimate.count' | translate }}
         </span>
       }
     </div>
@@ -42,8 +42,7 @@
             <div class="skel skel--md"></div>
             <div class="skel skel--md"></div>
             <div class="skel skel--sm"></div>
-            <div class="skel skel--sm"></div>
-            <div class="skel skel--sm"></div>
+            <div class="skel skel--md"></div>
           </div>
         }
       </div>
@@ -71,7 +70,7 @@
             <i class="bi bi-search"></i>
           </span>
           <input type="text" class="form-control search-input"
-                 [placeholder]="'admin_offer.search_placeholder' | translate"
+                 [placeholder]="'to_estimate.search_placeholder' | translate"
                  [value]="busqueda()"
                  (input)="setBusqueda($event)">
           @if (busqueda()) {
@@ -92,7 +91,7 @@
               <span class="status-chip__label">
                 {{ estado === 'todos'
                     ? ('common.all' | translate)
-                    : (('admin_offer.status_' + estado) | translate) }}
+                    : (('to_estimate.status_' + estado) | translate) }}
               </span>
               <span class="status-chip__count">
                 {{ estado === 'todos' ? total : (estadoCounts()[estado] || 0) }}
@@ -115,14 +114,13 @@
         <table class="table table-admin align-middle mb-0">
           <thead>
             <tr>
-              <th class="col-num">{{ 'admin_offer.col_number' | translate }}</th>
-              <th class="col-identity">{{ 'admin_offer.col_client' | translate }} / {{ 'admin_offer.col_service' | translate }}</th>
-              <th class="col-person">{{ 'admin_offer.col_estimator' | translate }}</th>
-              <th>{{ 'admin_offer.col_exp_status' | translate }}</th>
-              <th class="col-person">{{ 'admin_offer.col_constructor' | translate }}</th>
-              <th class="col-precio">{{ 'admin_offer.col_price' | translate }}</th>
-              <th class="col-date">{{ 'admin_offer.col_start_date' | translate }}</th>
-              <th>{{ 'admin_offer.col_offer_status' | translate }}</th>
+              <th class="col-num">{{ 'to_estimate.col_number' | translate }}</th>
+              <th class="col-identity">{{ 'to_estimate.col_client' | translate }} / {{ 'to_estimate.col_service' | translate }}</th>
+              <th class="col-date">{{ 'to_estimate.col_visit_date' | translate }}</th>
+              <th class="col-estimador">{{ 'to_estimate.col_estimator' | translate }}</th>
+              <th>{{ 'to_estimate.col_status' | translate }}</th>
+              <th class="col-date">{{ 'to_estimate.col_real_visit' | translate }}</th>
+              <th class="col-costo">{{ 'to_estimate.col_estimated_cost' | translate }}</th>
               <th class="col-actions"></th>
             </tr>
           </thead>
@@ -142,8 +140,13 @@
                   <span class="cell-secondary">{{ servicioNombre(e) }}</span>
                 </td>
 
+                <!-- Fecha visita prevista -->
+                <td class="col-date">
+                  <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
+                </td>
+
                 <!-- Estimador -->
-                <td class="col-person">
+                <td class="col-estimador">
                   @if (e.estimador_nombre) {
                     <span class="cell-primary">{{ e.estimador_nombre }}</span>
                   } @else {
@@ -151,38 +154,28 @@
                   }
                 </td>
 
-                <!-- Estado expediente -->
+                <!-- Estado -->
                 <td>
-                  <span class="estado-badge {{ estadoBadgeExp(e.estado) }}">
-                    {{ ('admin_offer.status_' + e.estado) | translate }}
+                  <span class="estado-badge {{ estadoBadge(e.estado) }}">
+                    {{ ('to_estimate.status_' + e.estado) | translate }}
                   </span>
                 </td>
 
-                <!-- Constructor -->
-                <td class="col-person">
-                  @if (e.constructor_nombre) {
-                    <span class="cell-primary">{{ e.constructor_nombre }}</span>
+                <!-- Visita real -->
+                <td class="col-date">
+                  @if (e.fecha_visita_real) {
+                    <span class="cell-primary cell-real-date">
+                      <i class="bi bi-check2 me-1"></i>{{ formatFecha(e.fecha_visita_real) }}
+                    </span>
                   } @else {
                     <span class="cell-muted">—</span>
                   }
                 </td>
 
-                <!-- Precio -->
-                <td class="col-precio">
-                  <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
-                </td>
-
-                <!-- Fecha inicio -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
-                </td>
-
-                <!-- Estado oferta -->
-                <td>
-                  @if (e.oferta_estado) {
-                    <span class="estado-badge {{ estadoBadgeOferta(e.oferta_estado) }}">
-                      {{ ('admin_offer.oferta_' + e.oferta_estado) | translate }}
-                    </span>
+                <!-- Costo estimado -->
+                <td class="col-costo">
+                  @if (e.costo_estimado != null) {
+                    <span class="cell-costo">{{ formatCosto(e.costo_estimado, e.costo_estimado_max) }}</span>
                   } @else {
                     <span class="cell-muted">—</span>
                   }
@@ -190,9 +183,9 @@
 
                 <!-- Acciones -->
                 <td class="col-actions">
-                  <a [routerLink]="['/admin/offer/edit', e.id]"
+                  <a [routerLink]="editRoute(e)"
                      class="action-btn"
-                     [title]="'admin_offer.edit_btn' | translate">
+                     [title]="'to_estimate.edit_btn' | translate">
                     <i class="bi bi-pencil"></i>
                   </a>
                 </td>
@@ -200,23 +193,23 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td colspan="8">
                   <div class="empty-state empty-state--table">
                     @if (hayFiltros()) {
                       <div class="empty-state__icon">
                         <i class="bi bi-funnel"></i>
                       </div>
-                      <p class="empty-state__title">{{ 'admin_offer.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_offer.no_results_hint' | translate }}</p>
+                      <p class="empty-state__title">{{ 'to_estimate.no_results' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'to_estimate.no_results_hint' | translate }}</p>
                       <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
                         <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
                       </button>
                     } @else {
                       <div class="empty-state__icon">
-                        <i class="bi bi-tags"></i>
+                        <i class="bi bi-clipboard2"></i>
                       </div>
-                      <p class="empty-state__title">{{ 'admin_offer.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_offer.no_data_hint' | translate }}</p>
+                      <p class="empty-state__title">{{ 'to_estimate.no_data' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'to_estimate.no_data_hint' | translate }}</p>
                     }
                   </div>
                 </td>

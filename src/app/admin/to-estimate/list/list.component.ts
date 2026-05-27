@@ -10,29 +10,30 @@ import {
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { ExpedienteConOfertaAdmin } from '../../../models';
+import { ExpedienteParaEstimar } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
 @Component({
-  selector: 'app-admin-offer-list',
+  selector: 'app-admin-to-estimate-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, TranslatePipe, PaginationComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
-export class AdminOfferListComponent implements OnInit {
+export class AdminToEstimateListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private translate         = inject(TranslateService);
 
-  private _expedientes = signal<ExpedienteConOfertaAdmin[]>([]);
+  private _expedientes = signal<ExpedienteParaEstimar[]>([]);
   cargando = signal(true);
   error    = signal<string | null>(null);
 
   busqueda     = signal('');
   filtroEstado = signal('todos');
 
-  readonly estados    = ['todos', 'estimado', 'en_oferta', 'adjudicado'];
+  readonly estados = ['todos', 'nuevo', 'en_estimacion', 'estimado'];
+
   readonly POR_PAGINA = 15;
   paginaActual = signal(1);
 
@@ -48,9 +49,7 @@ export class AdminOfferListComponent implements OnInit {
           e.cliente_nombre,
           this.servicioNombre(e),
           e.estado,
-          e.estimador_nombre   ?? '',
-          e.constructor_nombre ?? '',
-          e.oferta_estado      ?? '',
+          e.estimador_nombre ?? '',
         ].join(' ').toLowerCase();
         if (!haystack.includes(q)) return false;
       }
@@ -87,7 +86,7 @@ export class AdminOfferListComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      this._expedientes.set(await this.expedienteService.getExpedientesConOfertasAdmin());
+      this._expedientes.set(await this.expedienteService.getExpedientesParaEstimar());
     } catch (e: any) {
       this.error.set(e.message);
     } finally {
@@ -104,30 +103,24 @@ export class AdminOfferListComponent implements OnInit {
     this.busqueda.set((e.target as HTMLInputElement).value);
   }
 
-  servicioNombre(exp: ExpedienteConOfertaAdmin): string {
+  servicioNombre(exp: ExpedienteParaEstimar): string {
     const lang = this.translate.currentLang;
     if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
     if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
     return exp.servicio_nombre;
   }
 
-  estadoBadgeExp(estado: string): string {
+  estadoBadge(estado: string): string {
     const map: Record<string, string> = {
-      estimado:   'badge-estimado',
-      en_oferta:  'badge-en_oferta',
-      adjudicado: 'badge-adjudicado',
+      nuevo:         'badge-nuevo',
+      en_estimacion: 'badge-en_estimacion',
+      estimado:      'badge-estimado',
     };
-    return map[estado] ?? 'badge-estimado';
+    return map[estado] ?? 'badge-nuevo';
   }
 
-  estadoBadgeOferta(estado: string | null): string {
-    if (!estado) return '';
-    const map: Record<string, string> = {
-      pendiente: 'badge-oferta-pendiente',
-      aceptada:  'badge-oferta-aceptada',
-      rechazada: 'badge-oferta-rechazada',
-    };
-    return map[estado] ?? '';
+  editRoute(exp: ExpedienteParaEstimar): string[] {
+    return ['/admin/to-estimate/edit', exp.id];
   }
 
   formatFecha(valor: string | null): string {
@@ -140,10 +133,11 @@ export class AdminOfferListComponent implements OnInit {
     return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
   }
 
-  formatPrecio(precio: number | null): string {
-    if (precio == null) return '—';
-    return new Intl.NumberFormat('fr-CA', {
+  formatCosto(min: number | null, max: number | null): string {
+    if (min == null) return '—';
+    const fmt = (v: number) => new Intl.NumberFormat('fr-CA', {
       style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
-    }).format(precio);
+    }).format(v);
+    return max != null && max !== min ? `${fmt(min)} – ${fmt(max)}` : fmt(min);
   }
 }

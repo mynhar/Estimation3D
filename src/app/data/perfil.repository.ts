@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
-import { DbPerfil } from '../types/supabase';
+import { DbPerfil, RolUsuario } from '../types/supabase';
 
 export type PerfilNombre   = { id: string; nombre: string; apellido: string };
 export type PerfilContacto = PerfilNombre & { telefono: string | null; email: string | null };
@@ -48,6 +48,17 @@ export class PerfilRepository {
       .in('id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as PerfilContacto[];
+  }
+
+  async findByRoles(roles: RolUsuario[]): Promise<PerfilNombre[]> {
+    if (!roles.length) return [];
+    const { data, error } = await this.db
+      .from('perfil')
+      .select('id, nombre, apellido')
+      .in('rol', roles)
+      .order('nombre', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PerfilNombre[];
   }
 
   async findAll(): Promise<DbPerfil[]> {

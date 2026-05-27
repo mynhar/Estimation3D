@@ -19,6 +19,42 @@ export interface ExpedienteParaEdicion {
   longitud:      number | null;
 }
 
+/** Vista aplanada para la lista admin de ofertas (estados: estimado, en_oferta, adjudicado). */
+export interface ExpedienteConOfertaAdmin {
+  id:                  string;
+  numero:              string;
+  estado:              string;
+  creado_en:           string;
+  servicio_nombre:     string;
+  servicio_nombre_en:  string;
+  servicio_nombre_fr:  string;
+  cliente_nombre:      string;
+  estimador_nombre:    string | null;
+  oferta_id:           string | null;
+  constructor_nombre:  string | null;
+  oferta_precio:       number | null;
+  oferta_fecha_inicio: string | null;
+  oferta_estado:       string | null;
+  sort_date:           string;
+}
+
+/** Vista aplanada para la lista admin de expedientes a estimar (estados: nuevo, en_estimacion, estimado). */
+export interface ExpedienteParaEstimar {
+  id:                  string;
+  numero:              string;
+  estado:              string;
+  fecha_visita:        string;
+  creado_en:           string;
+  servicio_nombre:     string;
+  servicio_nombre_en:  string;
+  servicio_nombre_fr:  string;
+  cliente_nombre:      string;
+  estimador_nombre:    string | null;
+  fecha_visita_real:   string | null;
+  costo_estimado:      number | null;
+  costo_estimado_max:  number | null;
+}
+
 /** Vista aplanada para la lista admin de expedientes. */
 export interface ExpedienteAdmin {
   id:                   string;
@@ -67,6 +103,7 @@ export interface ExpedienteDetalle {
   provincia: string;
   canton: string;
   distrito: string;
+  estimador_id: string | null;
   estimador_nombre: string;
 }
 
@@ -114,6 +151,8 @@ export interface ExpedienteVistaCliente {
 export interface ExpedienteParaOferta {
   id: string;
   numero: string;
+  estado: string;
+  cliente_nombre: string;
   fecha_visita: string;
   servicio_nombre: string;
   servicio_nombre_en: string;

@@ -8,7 +8,6 @@ import {
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from './services/auth-supabase.service';
-import { ExpedienteService } from './services/expediente.service';
 import { RealtimeNotificationsService } from './services/realtime-notifications.service';
 import { ToastComponent } from './components/toast/toast.component';
 import { LangToggleComponent } from './components/lang-toggle/lang-toggle.component';
@@ -24,7 +23,6 @@ import { AppFooterComponent } from './components/app-footer/app-footer.component
 })
 export class AppComponent {
   private authService            = inject(AuthSupabaseService);
-  private expedienteService      = inject(ExpedienteService);
   private realtimeNotifications  = inject(RealtimeNotificationsService);
   private router                 = inject(Router);
 
@@ -89,22 +87,7 @@ export class AppComponent {
 
   // ── Navegación home según conteo de expedientes ───────────────────────────
 
-  async irAHome(): Promise<void> {
-    if (this.esCliente()) {
-      const userId = this.user()?.id;
-      if (!userId) { this.router.navigateByUrl('/client/dashboard'); return; }
-      try {
-        const { primeroId, hayMasDeUno } = await this.expedienteService.contarExpedientesCliente(userId);
-        if (!hayMasDeUno && primeroId) {
-          this.router.navigateByUrl(`/client/file/my-file/${primeroId}`);
-        } else {
-          this.router.navigateByUrl('/client/dashboard');
-        }
-      } catch {
-        this.router.navigateByUrl('/client/dashboard');
-      }
-      return;
-    }
+  irAHome(): void {
     const rol = this.rolPerfil();
     if (rol === 'administrador') this.router.navigateByUrl('/admin/dashboard');
     else if (rol === 'constructor') this.router.navigateByUrl('/builder/dashboard');

@@ -92,7 +92,8 @@
       "Bash(powershell -Command \"Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\en.json' | Select-Object -Skip 799 -First 15\")",
       "Bash(powershell -Command \"Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\fr.json' | Select-Object -Skip 799 -First 15\")",
       "Bash(ng build *)",
-      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)"
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)",
+      "Bash(Select-String \"admin/offer/edit\")"
     ],
     "additionalDirectories": [
       "\\tmp"

@@ -256,16 +256,6 @@ export class AuthSupabaseService {
     if (rol === 'administrador') return '/admin/dashboard';
     if (rol === 'constructor')   return '/builder/dashboard';
     if (rol === 'estimador')     return '/estimator/dashboard';
-
-    // Cliente: 1 expediente → detalle directo; 0 o 2+ → dashboard
-    const { data: exps } = await this.supabase
-      .from('expediente')
-      .select('id')
-      .eq('cliente_id', user.id)
-      .order('id', { ascending: false })
-      .limit(2);
-    const rows = exps ?? [];
-    if (rows.length === 1) return `/client/file/my-file/${rows[0].id}`;
     return '/client/dashboard';
   }
 

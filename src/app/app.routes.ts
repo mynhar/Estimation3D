@@ -14,7 +14,8 @@ import { EstimatorDashboardComponent } from './estimator/dashboard/dashboard.com
 import { adminGuard, authGuard, constructorGuard, estimatorGuard, guestGuard, wildcardGuard } from './auth.guard';
 import { AdminDashboardComponent } from './admin/dashboard/dashboard.component';
 import { AdminFileComponent } from './admin/file/file.component';
-import { AdminOfferComponent } from './admin/offer/offer.component';
+import { AdminOfferListComponent } from './admin/offer/list/list.component';
+import { AdminOfferEditComponent } from './admin/offer/edit/edit.component';
 import { AdminContractComponent } from './admin/contract/contract.component';
 import { AdminServiceTypesComponent } from './admin/service-types/service-types.component';
 import { AdminUserComponent } from './admin/user/user.component';
@@ -34,6 +35,9 @@ import { AdminFileCreateComponent } from './admin/file/create/create.component';
 import { AdminFileEditComponent } from './admin/file/edit/edit.component';
 import { AdminServiceTypeEditComponent }   from './admin/service-types/edit/edit.component';
 import { AdminServiceTypeCreateComponent } from './admin/service-types/create/create.component';
+import { AdminToEstimateListComponent }    from './admin/to-estimate/list/list.component';
+import { AdminToEstimateEditComponent }    from './admin/to-estimate/edit/edit.component';
+import { ListComponent as AdminOffersReceivedListComponent } from './admin/offers-received/list/list.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [guestGuard] },
@@ -64,14 +68,18 @@ export const routes: Routes = [
   { path: 'admin/file',            component: AdminFileComponent,         canActivate: [adminGuard] },
   { path: 'admin/file/create',     component: AdminFileCreateComponent,   canActivate: [adminGuard] },
   { path: 'admin/file/edit/:id',   component: AdminFileEditComponent,     canActivate: [adminGuard] },
-  { path: 'admin/offer',        component: AdminOfferComponent,        canActivate: [adminGuard] },
+  { path: 'admin/offer',                    component: AdminOfferListComponent,          canActivate: [adminGuard] },
+  { path: 'admin/offer/edit/:id',           component: AdminOfferEditComponent,          canActivate: [adminGuard] },
+  { path: 'admin/offers-received/list',     component: AdminOffersReceivedListComponent, canActivate: [adminGuard] },
   { path: 'admin/contract',     component: AdminContractComponent,     canActivate: [adminGuard] },
   { path: 'admin/service-type',            component: AdminServiceTypesComponent,      canActivate: [adminGuard] },
   { path: 'admin/service-type/create',    component: AdminServiceTypeCreateComponent, canActivate: [adminGuard] },
   { path: 'admin/service-type/edit/:id',  component: AdminServiceTypeEditComponent,   canActivate: [adminGuard] },
-  { path: 'admin/user',         component: AdminUserComponent,         canActivate: [adminGuard] },
-  { path: 'admin/user/create',  component: AdminUserCreateComponent,   canActivate: [adminGuard] },
-  { path: 'admin/user/edit/:id', component: AdminUserEditComponent,    canActivate: [adminGuard] },
+  { path: 'admin/to-estimate',            component: AdminToEstimateListComponent, canActivate: [adminGuard] },
+  { path: 'admin/to-estimate/edit/:id',   component: AdminToEstimateEditComponent,  canActivate: [adminGuard] },
+  { path: 'admin/user',         component: AdminUserComponent,           canActivate: [adminGuard] },
+  { path: 'admin/user/create',  component: AdminUserCreateComponent,     canActivate: [adminGuard] },
+  { path: 'admin/user/edit/:id', component: AdminUserEditComponent,      canActivate: [adminGuard] },
 
   { path: '**', canActivate: [wildcardGuard], component: LandingPageComponent },
 ];

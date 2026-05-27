@@ -74,6 +74,16 @@ export class ArchivoRepository {
     if (error) throw new Error(error.message);
   }
 
+  async deleteByExpedienteId(expedienteId: string): Promise<void> {
+    const { error } = await this.db.from('archivo').delete().eq('expediente_id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  async deleteByOfertaId(ofertaId: string): Promise<void> {
+    const { error } = await this.db.from('archivo').delete().eq('oferta_id', ofertaId);
+    if (error) throw new Error(error.message);
+  }
+
   // ── Storage operations ──────────────────────────────────────────────────────
 
   async uploadToStorage(path: string, file: File): Promise<void> {
