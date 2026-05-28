@@ -98,7 +98,13 @@
       "Bash(Select-Object Name, Mode)",
       "Bash(xargs head -50)",
       "Bash(grep -rn \"#[0-9A-Fa-f]\\\\{3,6\\\\}\" ./src/app --include=\"*.css\")",
-      "mcp__claude_ai_Supabase__generate_typescript_types"
+      "mcp__claude_ai_Supabase__generate_typescript_types",
+      "Bash(powershell -Command \"\\(Get-Item 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css'\\).Length / 1KB\")",
+      "Bash(powershell -Command \"Select-String -Path 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\angular.json' -Pattern 'budget' -Context 2,2 | Select-Object -First 20\")",
+      "Bash(powershell -Command \"\\(Get-Item 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css'\\).Length; \\(Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css' -Raw\\).Length\")",
+      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css'\\).Count\")",
+      "Bash(git -C c:\\\\desarrollo\\\\estimation3d-A18-v01 diff --stat HEAD)",
+      "PowerShell(Set-Location \"c:\\\\desarrollo\\\\estimation3d-A18-v01\"; \\(Get-Item \"src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css\"\\).Length / 1KB)"
     ],
     "additionalDirectories": [
       "\\tmp"
