@@ -252,8 +252,7 @@ export class OfertaService {
     const paths = archivos.map(a => a.url_storage);
     if (paths.length) await this.archivoRepo.removeFromStorage(paths);
     await this.archivoRepo.deleteByOfertaId(ofertaId);
-    await this.ofertaRepo.deleteById(ofertaId);
-    const remaining = await this.ofertaRepo.countByExpedienteId(expedienteId);
-    if (remaining === 0) await this.ofertaRepo.restoreEstadoEstimado(expedienteId);
+    // RPC: borra el contrato FK (si existe), la oferta y ajusta el estado del expediente
+    await this.ofertaRepo.eliminarConCascada(ofertaId, expedienteId);
   }
 }

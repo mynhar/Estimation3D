@@ -507,12 +507,32 @@ export type Database = {
         Args: { p_expediente_id: string }
         Returns: undefined
       }
+      cancelar_contrato_admin: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
+      firmar_contrato_admin: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
+      iniciar_ejecucion_contrato_admin: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
+      completar_contrato_admin: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
       contar_ofertas_expedientes: {
         Args: { p_ids: string[] }
         Returns: {
           expediente_id: string
           total: number
         }[]
+      }
+      eliminar_oferta_admin: {
+        Args: { p_expediente_id: string; p_oferta_id: string }
+        Returns: undefined
       }
       firmar_contrato: {
         Args: { p_contrato_id: string }

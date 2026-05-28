@@ -385,7 +385,7 @@
   width: 22px; height: 22px;
   border-radius: var(--ds-radius-circle);
   background: rgba(26,26,26,0.72);
-  color: #fff;
+  color: var(--ds-ink-inverse);
   border: none;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;

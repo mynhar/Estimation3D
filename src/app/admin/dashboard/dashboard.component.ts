@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AdminDashboardService, DashboardStats, TimelineEvent } from './admin-dashboard.service';
 
 const EXP_PIPELINE = ['nuevo','en_estimacion','estimado','en_oferta','adjudicado','contratado'] as const;
@@ -12,7 +13,7 @@ interface FunnelItem { estado: string; count: number }
   selector: 'app-admin-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, PaginationComponent],
   templateUrl: './dashboard.component.html',
   styleUrl:    './dashboard.component.css',
 })
@@ -26,6 +27,8 @@ export class AdminDashboardComponent implements OnInit {
   error            = signal<string | null>(null);
   refreshedAt      = signal('');
   filtroTimeline   = signal('todos');
+  paginaTl         = signal(1);
+  readonly TL_POR_PAGINA = 10;
 
   readonly timelineFiltros = [
     { key: 'todos',      labelKey: 'common.all' },
@@ -39,6 +42,18 @@ export class AdminDashboardComponent implements OnInit {
     const f = this.filtroTimeline();
     const all = this.timeline();
     return f === 'todos' ? all : all.filter(e => e.tipo === f);
+  });
+
+  timelinePaginada = computed(() => {
+    const items = this.timelineFiltrada();
+    const page  = this.paginaTl();
+    const start = (page - 1) * this.TL_POR_PAGINA;
+    return items.slice(start, start + this.TL_POR_PAGINA);
+  });
+
+  private _resetPagina = effect(() => {
+    this.filtroTimeline();
+    this.paginaTl.set(1);
   });
 
   funnelExp = computed((): FunnelItem[] => {

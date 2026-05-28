@@ -35,6 +35,7 @@ export interface ExpedienteConOfertaAdmin {
   oferta_precio:       number | null;
   oferta_fecha_inicio: string | null;
   oferta_estado:       string | null;
+  total_ofertas:       number;
   sort_date:           string;
 }
 

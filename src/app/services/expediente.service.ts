@@ -506,6 +506,7 @@ export class ExpedienteService {
         oferta_precio:       oferta?.precio        ?? null,
         oferta_fecha_inicio: oferta?.fecha_inicio  ?? null,
         oferta_estado:       oferta?.estado        ?? null,
+        total_ofertas:       expOfertas.length,
         sort_date:           oferta?.creado_en     ?? e.creado_en,
       } as ExpedienteConOfertaAdmin;
     }).sort((a, b) => b.sort_date.localeCompare(a.sort_date));

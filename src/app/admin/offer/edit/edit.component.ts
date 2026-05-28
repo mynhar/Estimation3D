@@ -8,8 +8,9 @@ import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.valid
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ArchivoService } from '../../../services/archivo.service';
 import { OfertaService } from '../../../services/oferta.service';
+import { ContratoService } from '../../../services/contrato.service';
 import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
-import { ExpedienteParaOferta, ArchivoRow, OfertaForm, OfertaConConstructor } from '../../../models';
+import { ContratoPdfData, ExpedienteParaOferta, ArchivoRow, OfertaForm, OfertaConConstructor } from '../../../models';
 
 @Component({
   selector: 'app-admin-offer-edit',
@@ -25,6 +26,7 @@ export class AdminOfferEditComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private archivoService    = inject(ArchivoService);
   private ofertaService     = inject(OfertaService);
+  private contratoService   = inject(ContratoService);
   private perfilRepo        = inject(PerfilRepository);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
@@ -63,6 +65,10 @@ export class AdminOfferEditComponent implements OnInit {
   confirmandoEliminarId = signal<string | null>(null);
   errorEliminarLista    = signal('');
 
+  adjudicando            = signal(false);
+  errorAdjudicar         = signal('');
+  confirmandoAdjudicarId = signal<string | null>(null);
+
   fotoAmpliada = signal<string | null>(null);
   tabMedia     = signal<'fotos' | 'tour' | 'docs'>('tour');
 
@@ -96,12 +102,17 @@ export class AdminOfferEditComponent implements OnInit {
   get puedeEliminar(): boolean {
     if (!this.ofertaId()) return false;
     const estado = this.detalle()?.estado ?? '';
-    return estado !== 'adjudicado' && estado !== 'contratado';
+    return estado !== 'contratado';
   }
 
   get puedeEliminarOfertas(): boolean {
     const estado = this.detalle()?.estado ?? '';
-    return estado !== 'adjudicado' && estado !== 'contratado';
+    return estado !== 'contratado';
+  }
+
+  get puedeAdjudicar(): boolean {
+    const estado = this.detalle()?.estado ?? '';
+    return estado === 'en_oferta' || estado === 'adjudicado';
   }
 
   get constructorSeleccionadoNombre(): string {
@@ -364,6 +375,85 @@ export class AdminOfferEditComponent implements OnInit {
   cancelarEliminar() {
     this.confirmandoEliminar.set(false);
     this.errorEliminar.set('');
+  }
+
+  async adjudicarOferta(oferta: OfertaConConstructor) {
+    if (this.adjudicando()) return;
+    this.adjudicando.set(true);
+    this.errorAdjudicar.set('');
+    this.confirmandoAdjudicarId.set(null);
+    try {
+      // Capturar url_pdf del contrato anterior antes de que el RPC lo elimine
+      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.expedienteId);
+      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+
+      // RPC: adjudica oferta + crea nuevo contrato en DB
+      await this.ofertaService.aceptarOferta(this.expedienteId, oferta.id);
+
+      // Refrescar estado de la UI y obtener el nuevo contrato en paralelo
+      const [ofertas, detalle, nuevoContrato] = await Promise.all([
+        this.ofertaService.getOfertasDeExpediente(this.expedienteId),
+        this.expedienteService.getExpedienteParaOferta(this.expedienteId),
+        this.contratoService.buscarPorExpediente(this.expedienteId),
+      ]);
+      this.todasLasOfertas.set(ofertas);
+      this.detalle.set(detalle);
+
+      // Generar y guardar PDF
+      if (nuevoContrato) {
+        if (urlPdfAnterior) {
+          await this.contratoService.eliminarPdfStorage(urlPdfAnterior);
+        }
+        const d    = this.detalle()!;
+        const lang = this.translate.currentLang;
+        const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+        const locale      = localeMap[lang] ?? 'fr-CA';
+        const fechaHoy    = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+        const pdfData: ContratoPdfData = {
+          contratoId:          nuevoContrato.id,
+          expedienteNumero:    d.numero,
+          fechaGenerado:       fechaHoy,
+          clienteNombre:       d.cliente_nombre,
+          constructorNombre:   oferta.constructor_nombre,
+          constructorTelefono: oferta.constructor_telefono,
+          constructorEmail:    oferta.constructor_email,
+          servicioNombre:      this.servicioNombre(),
+          servicioDescripcion: this.servicioDescripcion(),
+          direccion:           d.direccion,
+          canton:              d.canton,
+          provincia:           d.provincia,
+          distrito:            d.distrito,
+          precioFinal:         oferta.precio,
+          plazoMin:            oferta.plazo_semanas_min,
+          plazoMax:            oferta.plazo_semanas_max,
+          garantiaAnos:        oferta.garantia_anos,
+          fechaInicio:         oferta.fecha_inicio,
+          descripcionTrabajo:  oferta.descripcion,
+          lang,
+        };
+        const pdfBlob = this.contratoService.generarPdfBlob(pdfData);
+        const pdfPath = await this.contratoService.subirPdf(pdfBlob, nuevoContrato.id);
+        await this.contratoService.actualizarUrlPdf(nuevoContrato.id, pdfPath);
+      }
+    } catch (e: any) {
+      this.errorAdjudicar.set(e.message);
+    } finally {
+      this.adjudicando.set(false);
+    }
+  }
+
+  cancelarAdjudicar() {
+    this.confirmandoAdjudicarId.set(null);
+    this.errorAdjudicar.set('');
+  }
+
+  nuevaOferta() {
+    this.limpiarFormulario();
+    this.constructorSeleccionadoId.set('');
+    this.confirmandoEliminar.set(false);
+    this.confirmandoEliminarId.set(null);
+    this.errorEliminar.set('');
+    this.errorEliminarLista.set('');
   }
 
   seleccionarOferta(oferta: OfertaConConstructor) {

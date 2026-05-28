@@ -13,14 +13,12 @@
 
 <div class="fued-root">
 
-  <!-- ── Cargando ──────────────────────────────────────────────────────────── -->
   @if (cargando()) {
     <div class="fued-loading">
       <span class="fued-spinner" role="status"></span>
       {{ 'common.loading' | translate }}
     </div>
 
-  <!-- ── No encontrado ─────────────────────────────────────────────────────── -->
   } @else if (!detalle()) {
     <div class="fued-not-found">
       <div class="fued-not-found__icon"><i class="bi bi-exclamation-triangle"></i></div>
@@ -33,10 +31,9 @@
       </button>
     </div>
 
-  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- Encabezado -->
+    <!-- PAGE HEADER -->
     <header class="fued-header">
       <div class="fued-header__top">
         <button class="fued-btn-back" type="button" (click)="volver()"
@@ -53,15 +50,15 @@
           <p class="fued-header__num">{{ detalle()!.numero }}</p>
           <h1 class="fued-header__title">{{ servicioNombre() }}</h1>
           <div class="fued-header__meta">
-            <span class="fued-meta-item">
+            <span class="fued-meta-chip">
               <i class="bi bi-person"></i>{{ detalle()!.cliente_nombre }}
             </span>
-            <span class="fued-meta-item">
+            <span class="fued-meta-chip">
               <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
             </span>
-            @if (constructorSeleccionadoNombre) {
-              <span class="fued-meta-item">
-                <i class="bi bi-person-gear"></i>{{ constructorSeleccionadoNombre }}
+            @if (todasLasOfertas().length > 0) {
+              <span class="fued-meta-chip fued-meta-chip--gold">
+                <i class="bi bi-people"></i>{{ todasLasOfertas().length }}/5 {{ 'available_files.offers_label' | translate }}
               </span>
             }
           </div>
@@ -76,181 +73,86 @@
               <i class="bi bi-plus-circle"></i>{{ 'make_offer.new_badge' | translate }}
             </span>
           }
-          @if (detalle()!.total_ofertas > 0) {
-            <span class="fued-badge fued-badge--success">
-              <i class="bi bi-people"></i>{{ detalle()!.total_ofertas }}/5 {{ 'available_files.offers_label' | translate }}
-            </span>
-          }
         </div>
       </div>
     </header>
 
-    <!-- Layout principal -->
-    <div class="fued-main">
+    <!-- 3-COLUMN WORKSPACE -->
+    <div class="fued-workspace">
 
-      <!-- ── Columna izquierda ───────────────────────────────────────────── -->
-      <div class="fued-col-main">
+      <!-- COL 1: Expedition context -->
+      <div class="fued-col-context">
 
-        <!-- Ofertas de constructores -->
         <section class="fued-card">
           <div class="fued-card__header">
-            <div class="fued-card__header-left">
-              <i class="bi bi-people"></i>
-              {{ 'admin_offer.offers_section_title' | translate }}
-            </div>
-            @if (todasLasOfertas().length > 0) {
-              <span class="fued-count-badge">{{ todasLasOfertas().length }}/5</span>
-            }
-          </div>
-          @if (todasLasOfertas().length === 0) {
-            <div class="fued-empty-inline">
-              <i class="bi bi-inbox"></i>
-              <p>{{ 'admin_offer.offers_empty' | translate }}</p>
-            </div>
-          } @else {
-            <div class="fued-offers-list">
-              @for (oferta of todasLasOfertas(); track oferta.id) {
-                <div class="fued-offer-row" role="button" tabindex="0"
-                     [class.fued-offer-row--active]="oferta.id === ofertaId()"
-                     (click)="seleccionarOferta(oferta)"
-                     (keydown.enter)="seleccionarOferta(oferta)">
-                  <div class="fued-offer-avatar"
-                       [class.fued-offer-avatar--active]="oferta.id === ofertaId()">
-                    {{ initiales(oferta.constructor_nombre) }}
-                  </div>
-                  <div class="fued-offer-body">
-                    <p class="fued-offer-name">{{ oferta.constructor_nombre }}</p>
-                    <div class="fued-offer-details">
-                      <span class="fued-offer-price">CA$ {{ oferta.precio | number:'1.0-0' }}</span>
-                      @if (oferta.plazo_semanas_min) {
-                        <span class="fued-offer-dot">·</span>
-                        <span>{{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max ?? oferta.plazo_semanas_min }} {{ 'offer.weeks' | translate }}</span>
-                      }
-                    </div>
-                  </div>
-                  <div class="fued-offer-side" (click)="$event.stopPropagation()">
-                    @if (confirmandoEliminarId() === oferta.id) {
-                      <button class="fued-offer-confirm-btn" type="button"
-                              (click)="eliminarOfertaLista(oferta)" [disabled]="eliminando()">
-                        @if (eliminando()) {
-                          <span class="fued-spinner-sm"></span>
-                        } @else {
-                          <i class="bi bi-trash3"></i>
-                        }
-                      </button>
-                      <button class="fued-offer-cancel-btn" type="button"
-                              (click)="confirmandoEliminarId.set(null)" [disabled]="eliminando()">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    } @else {
-                      <span class="fued-badge"
-                            [class.fued-badge--success]="oferta.estado === 'aceptada'"
-                            [class.fued-badge--warning]="oferta.estado === 'pendiente'"
-                            [class.fued-badge--danger]="oferta.estado === 'rechazada'">
-                        {{ estadoOfertaKey(oferta.estado) | translate }}
-                      </span>
-                      @if (puedeEliminarOfertas) {
-                        <button class="fued-offer-del-btn" type="button"
-                                (click)="confirmandoEliminarId.set(oferta.id)"
-                                [title]="'admin_offer.delete_btn' | translate"
-                                [disabled]="eliminando()">
-                          <i class="bi bi-trash3"></i>
-                        </button>
-                      }
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-            @if (errorEliminarLista()) {
-              <div class="fued-offers-error">
-                <i class="bi bi-exclamation-circle"></i>{{ errorEliminarLista() }}
-              </div>
-            }
-            <p class="fued-offers-hint">
-              <i class="bi bi-cursor"></i>
-              {{ 'admin_offer.offers_select_hint' | translate }}
-            </p>
-          }
-        </section>
-
-        <!-- Detalles del expediente -->
-        <section class="fued-card">
-          <div class="fued-card__header">
-            <div class="fued-card__header-left">
-              <i class="bi bi-clipboard2-data"></i>
-              {{ 'make_offer.case_summary' | translate }}
-            </div>
+            <i class="bi bi-clipboard2-data"></i>
+            {{ 'make_offer.case_summary' | translate }}
           </div>
           <div class="fued-card__body">
 
-            <p class="fued-section-label">{{ 'make_offer.service_label' | translate }}</p>
-            <div class="fued-info-grid">
-              <div class="fued-info-item fued-info-item--full">
-                <p class="fued-info-label">{{ 'make_offer.service_label' | translate }}</p>
-                <p class="fued-info-value">{{ servicioNombre() }}</p>
-                @if (servicioDescripcion()) {
-                  <p class="fued-info-sub">{{ servicioDescripcion() }}</p>
-                }
+            <div class="fued-fact-strip">
+              <div class="fued-fact">
+                <div class="fued-fact__icon-wrap"><i class="bi bi-tools" aria-hidden="true"></i></div>
+                <div class="fued-fact__body">
+                  <p class="fued-fact__label">{{ 'make_offer.service_label' | translate }}</p>
+                  <p class="fued-fact__value">{{ servicioNombre() }}</p>
+                  @if (servicioDescripcion()) {
+                    <p class="fued-fact__sub">{{ servicioDescripcion() }}</p>
+                  }
+                </div>
               </div>
-            </div>
 
-            <div class="fued-divider"></div>
-
-            <p class="fued-section-label">{{ 'make_offer.location_label' | translate }}</p>
-            <div class="fued-info-grid">
-              <div class="fued-info-item fued-info-item--full">
-                <p class="fued-info-label">{{ 'common.address' | translate }}</p>
-                <p class="fued-info-value">{{ detalle()!.direccion }}</p>
-                <p class="fued-info-value">{{ detalle()!.canton }}, {{ detalle()!.provincia }}</p>
+              <div class="fued-fact">
+                <div class="fued-fact__icon-wrap"><i class="bi bi-geo-alt" aria-hidden="true"></i></div>
+                <div class="fued-fact__body">
+                  <p class="fued-fact__label">{{ 'common.address' | translate }}</p>
+                  <p class="fued-fact__value">{{ detalle()!.direccion }}</p>
+                  <p class="fued-fact__sub">{{ detalle()!.canton }}, {{ detalle()!.provincia }}</p>
+                </div>
               </div>
+
+              <div class="fued-fact">
+                <div class="fued-fact__icon-wrap"><i class="bi bi-calendar-event" aria-hidden="true"></i></div>
+                <div class="fued-fact__body">
+                  <p class="fued-fact__label">{{ 'make_offer.scheduled_visit' | translate }}</p>
+                  <p class="fued-fact__value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
+                  <p class="fued-fact__sub">{{ formatHora(detalle()!.fecha_visita) }}</p>
+                </div>
+              </div>
+
+              <div class="fued-fact">
+                <div class="fued-fact__icon-wrap"><i class="bi bi-clipboard2-check" aria-hidden="true"></i></div>
+                <div class="fued-fact__body">
+                  <p class="fued-fact__label">{{ 'make_offer.estimator_visit' | translate }}</p>
+                  <p class="fued-fact__value">{{ formatFecha(detalle()!.fecha_visita_real) }}</p>
+                  <p class="fued-fact__sub">{{ formatHora(detalle()!.fecha_visita_real) }}</p>
+                </div>
+              </div>
+
               @if (detalle()!.referencia) {
-                <div class="fued-info-item">
-                  <p class="fued-info-label">{{ 'file.reference' | translate }}</p>
-                  <p class="fued-info-value">{{ detalle()!.referencia }}</p>
+                <div class="fued-fact fued-fact--full">
+                  <div class="fued-fact__icon-wrap"><i class="bi bi-tag" aria-hidden="true"></i></div>
+                  <div class="fued-fact__body">
+                    <p class="fued-fact__label">{{ 'file.reference' | translate }}</p>
+                    <p class="fued-fact__value">{{ detalle()!.referencia }}</p>
+                  </div>
                 </div>
               }
-            </div>
-
-            <div class="fued-divider"></div>
-
-            <p class="fued-section-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
-            <div class="fued-info-grid">
-              <div class="fued-info-item">
-                <p class="fued-info-label">{{ 'common.date' | translate }}</p>
-                <p class="fued-info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
-              </div>
-              <div class="fued-info-item">
-                <p class="fued-info-label">{{ 'file.hour' | translate }}</p>
-                <p class="fued-info-value">{{ formatHora(detalle()!.fecha_visita) }}</p>
-              </div>
-            </div>
-
-            <div class="fued-divider"></div>
-
-            <p class="fued-section-label">{{ 'make_offer.estimator_visit' | translate }}</p>
-            <div class="fued-info-grid">
-              <div class="fued-info-item">
-                <p class="fued-info-label">{{ 'common.date' | translate }}</p>
-                <p class="fued-info-value">{{ formatFecha(detalle()!.fecha_visita_real) }}</p>
-              </div>
-              <div class="fued-info-item">
-                <p class="fued-info-label">{{ 'file.hour' | translate }}</p>
-                <p class="fued-info-value">{{ formatHora(detalle()!.fecha_visita_real) }}</p>
-              </div>
             </div>
 
             @if (detalle()!.descripcion_problemas) {
               <div class="fued-divider"></div>
-              <p class="fued-section-label">{{ 'make_offer.problems_noted' | translate }}</p>
-              <p class="fued-desc-client">{{ detalle()!.descripcion_problemas }}</p>
+              <div class="fued-prob-block">
+                <i class="bi bi-exclamation-circle fued-prob-block__icon" aria-hidden="true"></i>
+                <p class="fued-prob-block__text">{{ detalle()!.descripcion_problemas }}</p>
+              </div>
             }
 
             @if (detalle()!.costo_estimado) {
               <div class="fued-divider"></div>
-              <div class="fued-cost-summary">
-                <p class="fued-section-label mb-0">{{ 'make_offer.estimated_range' | translate }}</p>
-                <p class="fued-cost-summary__value">
+              <div class="fued-cost-banner">
+                <p class="fued-cost-banner__label">{{ 'make_offer.estimated_range' | translate }}</p>
+                <p class="fued-cost-banner__value">
                   @if (detalle()!.costo_estimado_max && detalle()!.costo_estimado_max !== detalle()!.costo_estimado) {
                     {{ detalle()!.costo_estimado | number:'1.0-0' }} – {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
                   } @else {
@@ -263,13 +165,10 @@
           </div>
         </section>
 
-        <!-- Media -->
-        <section class="fued-card">
+        <section class="fued-card fued-card--grow">
           <div class="fued-card__header">
-            <div class="fued-card__header-left">
-              <i class="bi bi-collection-play"></i>
-              Multimedia
-            </div>
+            <i class="bi bi-collection-play"></i>
+            Multimedia
           </div>
 
           <div class="fued-media-tabs">
@@ -302,14 +201,16 @@
           @if (tabMedia() === 'tour') {
             <div class="fued-card__body">
               @if (urlsTour.length > 0) {
-                <div class="d-flex flex-column gap-3">
+                <div class="fued-tour-grid">
                   @for (url of urlsTour; track $index) {
-                    <div>
-                      <p class="fued-tour-label">
-                        <i class="bi bi-camera-video me-1"></i>
-                        {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
-                      </p>
-                      <div class="fued-tour-embed fued-tour-embed--standalone">
+                    <div class="fued-tour-item">
+                      @if (urlsTour.length > 1) {
+                        <p class="fued-tour-label">
+                          <i class="bi bi-camera-video me-1" aria-hidden="true"></i>
+                          {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
+                        </p>
+                      }
+                      <div class="fued-tour-embed">
                         <iframe [src]="getSafeUrl(url)" allowfullscreen allow="xr-spatial-tracking"
                                 [title]="'Video ' + ($index + 1)"></iframe>
                       </div>
@@ -318,7 +219,7 @@
                 </div>
               } @else {
                 <div class="fued-empty-inline">
-                  <i class="bi bi-camera-video"></i>
+                  <i class="bi bi-camera-video" aria-hidden="true"></i>
                   <p>{{ 'make_offer.no_tour' | translate }}</p>
                 </div>
               }
@@ -356,9 +257,7 @@
               } @else {
                 @for (doc of documentos(); track doc.id) {
                   <div class="fued-file-row">
-                    <div class="fued-file-row__icon">
-                      <i class="bi bi-file-earmark-text"></i>
-                    </div>
+                    <div class="fued-file-row__icon"><i class="bi bi-file-earmark-text"></i></div>
                     <div class="fued-file-row__info">
                       <p class="fued-file-row__name">{{ doc.nombre_archivo }}</p>
                       <p class="fued-file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
@@ -374,19 +273,203 @@
               }
             </div>
           }
-
         </section>
 
-      </div>
+      </div><!-- /fued-col-context -->
 
-      <!-- ── Columna derecha: formulario sticky ──────────────────────────── -->
-      <aside class="fued-col-side">
-        <div class="fued-form-card">
-          <div class="fued-form-card__header">
-            <i class="bi bi-pencil-square"></i>
-            {{ ofertaId() ? ('make_offer.update_title' | translate) : ('make_offer.form_title' | translate) }}
+      <!-- COL 2: Offers list -->
+      <div class="fued-col-offers">
+
+        <div class="fued-offers-header">
+          <div class="fued-offers-header__left">
+            <h2 class="fued-offers-title">
+              <i class="bi bi-people" aria-hidden="true"></i>
+              {{ 'admin_offer.offers_section_title' | translate }}
+            </h2>
+            <div class="fued-slots-row" [title]="todasLasOfertas().length + '/5'">
+              @for (s of [1,2,3,4,5]; track s) {
+                <div class="fued-slot" [class.fued-slot--used]="s <= todasLasOfertas().length"></div>
+              }
+            </div>
           </div>
-          <div class="fued-form-card__body">
+          <button class="fued-btn-nueva" type="button"
+                  (click)="nuevaOferta()"
+                  [class.fued-btn-nueva--active]="!ofertaId()"
+                  [disabled]="todasLasOfertas().length >= 5">
+            <i class="bi bi-plus" aria-hidden="true"></i>
+            {{ 'make_offer.new_badge' | translate }}
+          </button>
+        </div>
+
+        @if (todasLasOfertas().length === 0) {
+          <div class="fued-offers-empty">
+            <i class="bi bi-inbox" aria-hidden="true"></i>
+            <p>{{ 'admin_offer.offers_empty' | translate }}</p>
+          </div>
+        } @else {
+          <div class="fued-offers-list">
+            @for (oferta of todasLasOfertas(); track oferta.id) {
+              <div class="fued-offer-card"
+                   [class.fued-offer-card--active]="oferta.id === ofertaId()"
+                   [class.fued-offer-card--awarded]="oferta.estado === 'aceptada'"
+                   role="button" tabindex="0"
+                   (click)="seleccionarOferta(oferta)"
+                   (keydown.enter)="seleccionarOferta(oferta)">
+
+                <div class="fued-offer-card__avatar"
+                     [class.fued-offer-card__avatar--active]="oferta.id === ofertaId()"
+                     [class.fued-offer-card__avatar--awarded]="oferta.estado === 'aceptada'">
+                  {{ initiales(oferta.constructor_nombre) }}
+                </div>
+
+                <div class="fued-offer-card__content">
+                  <div class="fued-offer-card__row1">
+                    <p class="fued-offer-card__name">{{ oferta.constructor_nombre }}</p>
+                    <p class="fued-offer-card__price">CA$ {{ oferta.precio | number:'1.0-0' }}</p>
+                  </div>
+                  <div class="fued-offer-card__row2">
+                    <span class="fued-badge fued-badge--sm"
+                          [class.fued-badge--success]="oferta.estado === 'aceptada'"
+                          [class.fued-badge--warning]="oferta.estado === 'pendiente'"
+                          [class.fued-badge--danger]="oferta.estado === 'rechazada'">
+                      {{ estadoOfertaKey(oferta.estado) | translate }}
+                    </span>
+                    @if (oferta.plazo_semanas_min) {
+                      <span class="fued-offer-card__meta">
+                        <i class="bi bi-hourglass" aria-hidden="true"></i>
+                        {{ oferta.plazo_semanas_min }}–{{ oferta.plazo_semanas_max }} sem
+                      </span>
+                    }
+                    @if (oferta.garantia_anos) {
+                      <span class="fued-offer-card__meta">
+                        <i class="bi bi-shield-check" aria-hidden="true"></i>
+                        {{ oferta.garantia_anos }} {{ 'offer.years' | translate }}
+                      </span>
+                    }
+                    @if (oferta.id === ofertaId()) {
+                      <span class="fued-offer-card__editing-tag">
+                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                        {{ 'make_offer.editing_badge' | translate }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Award action -->
+                @if (puedeAdjudicar) {
+                  <div class="fued-offer-card__award" (click)="$event.stopPropagation()">
+                    @if (oferta.estado === 'aceptada') {
+                      <span class="fued-award-badge"
+                            [title]="'admin_offer.oferta_aceptada' | translate">
+                        <i class="bi bi-trophy-fill" aria-hidden="true"></i>
+                      </span>
+                    } @else {
+                      <button class="fued-btn-award" type="button"
+                              (click)="confirmandoAdjudicarId.set(oferta.id)"
+                              [disabled]="adjudicando()"
+                              [title]="(detalle()!.estado === 'adjudicado' ? 'admin_offer.reasignar_btn' : 'admin_offer.adjudicar_btn') | translate">
+                        <i class="bi bi-trophy" aria-hidden="true"></i>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <!-- Delete actions -->
+                @if (puedeEliminarOfertas) {
+                  <div class="fued-offer-card__actions" (click)="$event.stopPropagation()">
+                    @if (confirmandoEliminarId() === oferta.id) {
+                      <button class="fued-btn-del-confirm" type="button"
+                              (click)="eliminarOfertaLista(oferta)" [disabled]="eliminando()">
+                        @if (eliminando()) {
+                          <span class="fued-spinner-sm"></span>
+                        } @else {
+                          <i class="bi bi-trash3" aria-hidden="true"></i>
+                        }
+                      </button>
+                      <button class="fued-btn-del-cancel" type="button"
+                              (click)="confirmandoEliminarId.set(null)" [disabled]="eliminando()">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      </button>
+                    } @else {
+                      <button class="fued-btn-del" type="button"
+                              (click)="confirmandoEliminarId.set(oferta.id)"
+                              [title]="'admin_offer.delete_btn' | translate"
+                              [disabled]="eliminando()">
+                        <i class="bi bi-trash3" aria-hidden="true"></i>
+                      </button>
+                    }
+                  </div>
+                }
+
+                <!-- Award confirm row (full-width second row inside card) -->
+                @if (puedeAdjudicar && confirmandoAdjudicarId() === oferta.id) {
+                  <div class="fued-offer-card__confirm-row" (click)="$event.stopPropagation()">
+                    <p class="fued-offer-card__confirm-msg">
+                      @if (detalle()!.estado === 'adjudicado') {
+                        <i class="bi bi-arrow-left-right" aria-hidden="true"></i>
+                        {{ 'admin_offer.reasignar_confirm' | translate }}
+                      } @else {
+                        <i class="bi bi-trophy" aria-hidden="true"></i>
+                        {{ 'admin_offer.adjudicar_confirm' | translate }}
+                      }
+                    </p>
+                    @if (errorAdjudicar()) {
+                      <p class="fued-offer-card__confirm-error">{{ errorAdjudicar() }}</p>
+                    }
+                    <div class="fued-offer-card__confirm-btns">
+                      <button class="fued-btn-award-confirm" type="button"
+                              (click)="adjudicarOferta(oferta)" [disabled]="adjudicando()">
+                        @if (adjudicando()) {
+                          <span class="fued-spinner-sm"></span>
+                        } @else {
+                          <i class="bi bi-check-lg" aria-hidden="true"></i>
+                        }
+                        {{ 'common.confirm' | translate }}
+                      </button>
+                      <button class="fued-btn-cancel" type="button"
+                              (click)="cancelarAdjudicar()" [disabled]="adjudicando()">
+                        {{ 'common.cancel' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                }
+
+              </div>
+            }
+          </div>
+        }
+
+        @if (errorEliminarLista()) {
+          <div class="fued-alert fued-alert--danger">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorEliminarLista() }}
+          </div>
+        }
+
+      </div><!-- /fued-col-offers -->
+
+      <!-- COL 3: Form panel (sticky) -->
+      <aside class="fued-col-form">
+        <div class="fued-form-panel">
+
+          <!-- Mode header -->
+          <div class="fued-form-panel__head">
+            <div class="fued-form-panel__mode">
+              @if (ofertaId()) {
+                <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                {{ 'make_offer.update_title' | translate }}
+              } @else {
+                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                {{ 'make_offer.form_title' | translate }}
+              }
+            </div>
+            @if (constructorSeleccionadoNombre) {
+              <p class="fued-form-panel__subtitle">{{ constructorSeleccionadoNombre }}</p>
+            }
+          </div>
+
+          <!-- Form body -->
+          <div class="fued-form-panel__body">
 
             <!-- Constructor -->
             <div class="fued-field">
@@ -443,32 +526,32 @@
               </div>
             </div>
 
-            <!-- Garantía -->
-            <div class="fued-field">
-              <label class="fued-label">
-                <i class="bi bi-shield-check"></i>{{ 'offer.warranty' | translate }}
-                <span class="fued-opt">({{ 'common.optional' | translate }}) — {{ 'offer.years' | translate }}</span>
-              </label>
-              <input type="number" class="fued-input" placeholder="1" min="0" step="1"
-                     [(ngModel)]="garantiaAnos" />
+            <!-- Garantia + Fecha -->
+            <div class="fued-field-row">
+              <div class="fued-field">
+                <label class="fued-label">
+                  <i class="bi bi-shield-check"></i>{{ 'offer.warranty' | translate }}
+                  <span class="fued-opt">({{ 'offer.years' | translate }})</span>
+                </label>
+                <input type="number" class="fued-input" placeholder="1" min="0" step="1"
+                       [(ngModel)]="garantiaAnos" />
+              </div>
+              <div class="fued-field">
+                <label class="fued-label">
+                  <i class="bi bi-calendar-event"></i>{{ 'make_offer.start_date' | translate }}
+                  <span class="fued-req">*</span>
+                </label>
+                <input type="date" class="fued-input" [(ngModel)]="fechaInicio" />
+              </div>
             </div>
 
-            <!-- Fecha inicio -->
-            <div class="fued-field">
-              <label class="fued-label">
-                <i class="bi bi-calendar-event"></i>{{ 'make_offer.start_date' | translate }}
-                <span class="fued-req">*</span>
-              </label>
-              <input type="date" class="fued-input" [(ngModel)]="fechaInicio" />
-            </div>
-
-            <!-- Descripción -->
+            <!-- Descripcion -->
             <div class="fued-field">
               <label class="fued-label">
                 <i class="bi bi-text-paragraph"></i>{{ 'make_offer.approach_desc' | translate }}
                 <span class="fued-req">*</span>
               </label>
-              <textarea class="fued-input fued-textarea" rows="4"
+              <textarea class="fued-input fued-textarea" rows="3"
                         [placeholder]="'make_offer.approach_placeholder' | translate"
                         [(ngModel)]="descripcion"></textarea>
             </div>
@@ -479,7 +562,6 @@
                 <i class="bi bi-paperclip"></i>{{ 'make_offer.attachments' | translate }}
               </label>
 
-              <!-- PDF -->
               <div class="fued-attach-row">
                 <div class="fued-attach-icon fued-attach-icon--pdf">
                   <i class="bi bi-file-earmark-pdf"></i>
@@ -512,8 +594,7 @@
                 </label>
               </div>
 
-              <!-- Video -->
-              <div class="fued-attach-row" style="margin-top:var(--ds-space-2)">
+              <div class="fued-attach-row">
                 <div class="fued-attach-icon fued-attach-icon--video">
                   <i class="bi bi-camera-video"></i>
                 </div>
@@ -546,45 +627,40 @@
               </div>
             </div>
 
-            <!-- Checklist -->
-            <div class="fued-checklist">
-              <div class="fued-checklist-item"
-                   [class.fued-checklist-item--done]="!!constructorSeleccionadoId()">
-                <i class="bi" [class.bi-check-circle]="!!constructorSeleccionadoId()"
-                              [class.bi-circle]="!constructorSeleccionadoId()"></i>
-                {{ 'admin_offer.constructor_label' | translate }}
+            <!-- Progress strip -->
+            <div class="fued-progress-strip">
+              <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!constructorSeleccionadoId()"
+                   [title]="'admin_offer.constructor_label' | translate">
+                <i class="bi" [class.bi-check-lg]="!!constructorSeleccionadoId()"
+                              [class.bi-person-gear]="!constructorSeleccionadoId()"></i>
               </div>
-              <div class="fued-checklist-item"
-                   [class.fued-checklist-item--done]="!!precio && precio > 0">
-                <i class="bi" [class.bi-check-circle]="!!precio && precio > 0"
-                              [class.bi-circle]="!precio || precio <= 0"></i>
-                {{ 'make_offer.checklist_price' | translate }}
+              <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!precio && precio > 0"
+                   [title]="'make_offer.checklist_price' | translate">
+                <i class="bi" [class.bi-check-lg]="!!precio && precio > 0"
+                              [class.bi-coin]="!precio || precio <= 0"></i>
               </div>
-              <div class="fued-checklist-item"
-                   [class.fued-checklist-item--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin">
+              <div class="fued-prog-dot"
+                   [class.fued-prog-dot--done]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
+                   [title]="'make_offer.checklist_deadline' | translate">
                 <i class="bi"
-                   [class.bi-check-circle]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
-                   [class.bi-circle]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>
-                {{ 'make_offer.checklist_deadline' | translate }}
+                   [class.bi-check-lg]="!!plazoMin && plazoMin > 0 && !!plazoMax && plazoMax >= plazoMin"
+                   [class.bi-hourglass]="!plazoMin || plazoMin <= 0 || !plazoMax || plazoMax < plazoMin"></i>
               </div>
-              <div class="fued-checklist-item"
-                   [class.fued-checklist-item--done]="!!fechaInicio">
-                <i class="bi" [class.bi-check-circle]="!!fechaInicio"
-                              [class.bi-circle]="!fechaInicio"></i>
-                {{ 'make_offer.checklist_start' | translate }}
+              <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!fechaInicio"
+                   [title]="'make_offer.checklist_start' | translate">
+                <i class="bi" [class.bi-check-lg]="!!fechaInicio"
+                              [class.bi-calendar-event]="!fechaInicio"></i>
               </div>
-              <div class="fued-checklist-item"
-                   [class.fued-checklist-item--done]="!!descripcion.trim()">
-                <i class="bi" [class.bi-check-circle]="!!descripcion.trim()"
-                              [class.bi-circle]="!descripcion.trim()"></i>
-                {{ 'make_offer.checklist_desc' | translate }}
+              <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!descripcion.trim()"
+                   [title]="'make_offer.checklist_desc' | translate">
+                <i class="bi" [class.bi-check-lg]="!!descripcion.trim()"
+                              [class.bi-text-paragraph]="!descripcion.trim()"></i>
               </div>
               @if (!ofertaId()) {
-                <div class="fued-checklist-item"
-                     [class.fued-checklist-item--done]="!!documentoOferta()">
-                  <i class="bi" [class.bi-check-circle]="!!documentoOferta()"
-                                [class.bi-circle]="!documentoOferta()"></i>
-                  PDF
+                <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!documentoOferta()"
+                     title="PDF">
+                  <i class="bi" [class.bi-check-lg]="!!documentoOferta()"
+                                [class.bi-file-earmark-pdf]="!documentoOferta()"></i>
                 </div>
               }
             </div>
@@ -596,7 +672,7 @@
               <div class="fued-alert fued-alert--success">{{ exitoMsg() | translate }}</div>
             }
 
-            <!-- Acciones -->
+            <!-- Actions -->
             <div class="fued-form-actions">
               <button class="fued-btn-submit" type="button"
                       (click)="enviarOferta()"
@@ -615,9 +691,9 @@
               </button>
             </div>
 
-          </div><!-- /fued-form-card__body -->
+          </div><!-- /fued-form-panel__body -->
 
-          <!-- Zona de peligro -->
+          <!-- Danger zone -->
           @if (ofertaId()) {
             <div class="fued-danger-zone">
               @if (!puedeEliminar) {
@@ -655,10 +731,11 @@
             </div>
           }
 
-        </div><!-- /fued-form-card -->
-      </aside>
+        </div><!-- /fued-form-panel -->
+      </aside><!-- /fued-col-form -->
 
-    </div>
+    </div><!-- /fued-workspace -->
+
   }
 
-</div>
+</div><!-- /fued-root -->

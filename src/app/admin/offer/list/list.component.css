@@ -162,9 +162,28 @@
 .col-num      { width: 110px; white-space: nowrap; }
 .col-identity { min-width: 160px; }
 .col-person   { max-width: 140px; }
+.col-count    { width: 70px; text-align: center; white-space: nowrap; }
 .col-precio   { width: 120px; white-space: nowrap; }
 .col-date     { width: 110px; white-space: nowrap; }
 .col-actions  { width: 48px; text-align: center; }
+
+.offers-count {
+  display: inline-block;
+  min-width: 24px;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  background: var(--ds-accent-subtle, #fdf6e3);
+  color: var(--ds-accent-dark, #a8873d);
+  border: 1px solid var(--ds-accent, #d4b96e);
+}
+.offers-count--zero {
+  background: var(--ds-bg-subtle, #f0ede6);
+  color: var(--ds-text-muted, #8a8070);
+  border-color: var(--ds-border, #d6d0c4);
+}
 
 /* ── Expedition number chip ───────────────────────────────────────────────── */
 .exp-num {

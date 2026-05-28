@@ -120,6 +120,7 @@
               <th class="col-person">{{ 'admin_offer.col_estimator' | translate }}</th>
               <th>{{ 'admin_offer.col_exp_status' | translate }}</th>
               <th class="col-person">{{ 'admin_offer.col_constructor' | translate }}</th>
+              <th class="col-count">{{ 'admin_offer.col_offers' | translate }}</th>
               <th class="col-precio">{{ 'admin_offer.col_price' | translate }}</th>
               <th class="col-date">{{ 'admin_offer.col_start_date' | translate }}</th>
               <th>{{ 'admin_offer.col_offer_status' | translate }}</th>
@@ -167,6 +168,13 @@
                   }
                 </td>
 
+                <!-- Cantidad de ofertas -->
+                <td class="col-count">
+                  <span class="offers-count" [class.offers-count--zero]="e.total_ofertas === 0">
+                    {{ e.total_ofertas }}
+                  </span>
+                </td>
+
                 <!-- Precio -->
                 <td class="col-precio">
                   <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
@@ -192,15 +200,15 @@
                 <td class="col-actions">
                   <a [routerLink]="['/admin/offer/edit', e.id]"
                      class="action-btn"
-                     [title]="'admin_offer.edit_btn' | translate">
-                    <i class="bi bi-pencil"></i>
+                     [title]="'admin_offer.ver_btn' | translate">
+                    <i class="bi bi-eye"></i>
                   </a>
                 </td>
 
               </tr>
             } @empty {
               <tr>
-                <td colspan="9">
+                <td colspan="10">
                   <div class="empty-state empty-state--table">
                     @if (hayFiltros()) {
                       <div class="empty-state__icon">

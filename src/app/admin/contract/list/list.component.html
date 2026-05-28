@@ -1,1 +1,262 @@
-<p>list works!</p>
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ──────────────────────────────────────────────────────────── -->
+  <header class="page-header p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <p class="page-eyebrow">
+          <i class="bi bi-shield-check"></i>{{ 'role.administrateur' | translate }}
+        </p>
+        <h4 class="mb-1">{{ 'admin_contract.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'admin_contract.subtitle' | translate }}</p>
+      </div>
+      @if (!cargando() && !error()) {
+        <span class="kpi-pill">
+          <i class="bi bi-file-earmark-text"></i>
+          @if (hayFiltros()) {
+            {{ contratosFiltrados().length }} / {{ total }}
+          } @else {
+            {{ total }}
+          }
+          {{ 'admin_contract.count' | translate }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <!-- ── Skeleton ────────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-wrap">
+      <div class="skeleton-toolbar mb-3">
+        <div class="skel skel--search"></div>
+        <div class="d-flex gap-2 mt-3">
+          @for (i of [1,2,3]; track i) { <div class="skel skel--chip"></div> }
+        </div>
+      </div>
+      <div class="skeleton-table">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <div class="skeleton-row">
+            <div class="skel skel--xs"></div>
+            <div class="skel skel--lg"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--md"></div>
+            <div class="skel skel--md"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--xs"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--xs"></div>
+          </div>
+        }
+      </div>
+    </div>
+
+  <!-- ── Error ────────────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="empty-state">
+      <div class="empty-state__icon empty-state__icon--danger">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <p class="empty-state__title">{{ 'common.error' | translate }}</p>
+      <p class="empty-state__desc">{{ error() }}</p>
+    </div>
+
+  <!-- ── Contenido ────────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- ── Filtros ────────────────────────────────────────────────────────────── -->
+    <div class="filter-bar mb-3">
+
+      <div class="filter-bar__search">
+        <div class="input-group">
+          <span class="input-group-text search-icon">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" class="form-control search-input"
+                 [placeholder]="'admin_contract.search_placeholder' | translate"
+                 [value]="busqueda()"
+                 (input)="setBusqueda($event)">
+          @if (busqueda()) {
+            <button class="btn search-clear" type="button" (click)="busqueda.set('')"
+                    [title]="'common.clear' | translate">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="filter-bar__chips">
+        <div class="status-chips" role="group">
+          @for (estado of estados; track estado) {
+            <button type="button" class="status-chip"
+                    [class.status-chip--active]="filtroEstado() === estado"
+                    (click)="filtroEstado.set(estado)">
+              <span class="status-chip__label">
+                {{ estado === 'todos'
+                    ? ('common.all' | translate)
+                    : (('admin_contract.contrato_' + estado) | translate) }}
+              </span>
+              <span class="status-chip__count">
+                {{ estado === 'todos' ? total : (estadoCounts()[estado] || 0) }}
+              </span>
+            </button>
+          }
+        </div>
+        @if (hayFiltros()) {
+          <button class="btn-clear-filters" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
+          </button>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="table table-admin align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="col-num">{{ 'admin_contract.col_number' | translate }}</th>
+              <th class="col-identity">{{ 'admin_contract.col_client' | translate }} / {{ 'admin_contract.col_service' | translate }}</th>
+              <th>{{ 'admin_contract.col_exp_status' | translate }}</th>
+              <th class="col-person">{{ 'admin_contract.col_estimator' | translate }}</th>
+              <th class="col-person">{{ 'admin_contract.col_constructor' | translate }}</th>
+              <th class="col-date">{{ 'admin_contract.col_start_date' | translate }}</th>
+              <th class="col-precio">{{ 'admin_contract.col_price' | translate }}</th>
+              <th class="col-warranty">{{ 'admin_contract.col_warranty' | translate }}</th>
+              <th>{{ 'admin_contract.col_contract_status' | translate }}</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            @for (c of contratosPaginados(); track c.contrato_id) {
+              <tr class="table-row">
+
+                <!-- Número expediente -->
+                <td class="col-num">
+                  <span class="exp-num">{{ c.expediente_numero }}</span>
+                </td>
+
+                <!-- Cliente / Servicio -->
+                <td class="col-identity">
+                  <span class="cell-primary">{{ c.cliente_nombre }}</span>
+                  <span class="cell-secondary">{{ servicioNombre(c) }}</span>
+                </td>
+
+                <!-- Estado expediente -->
+                <td>
+                  <span class="estado-badge {{ badgeExpediente(c.expediente_estado) }}">
+                    {{ ('admin_contract.status_' + c.expediente_estado) | translate }}
+                  </span>
+                </td>
+
+                <!-- Estimador -->
+                <td class="col-person">
+                  @if (c.estimador_nombre) {
+                    <span class="cell-primary">{{ c.estimador_nombre }}</span>
+                  } @else {
+                    <span class="cell-muted">—</span>
+                  }
+                </td>
+
+                <!-- Constructor -->
+                <td class="col-person">
+                  @if (c.constructor_nombre) {
+                    <span class="cell-primary">{{ c.constructor_nombre }}</span>
+                  } @else {
+                    <span class="cell-muted">—</span>
+                  }
+                </td>
+
+                <!-- Fecha inicio oferta -->
+                <td class="col-date">
+                  <span class="cell-primary">{{ formatFecha(c.oferta_fecha_inicio) }}</span>
+                </td>
+
+                <!-- Precio final -->
+                <td class="col-precio">
+                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                </td>
+
+                <!-- Garantía -->
+                <td class="col-warranty">
+                  @if (c.garantia_anos != null) {
+                    <span class="cell-primary">{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}</span>
+                  } @else {
+                    <span class="cell-muted">—</span>
+                  }
+                </td>
+
+                <!-- Estado contrato -->
+                <td>
+                  <div class="contrato-estado-cell">
+                    <span class="estado-badge {{ badgeContrato(c.contrato_estado) }}">
+                      {{ ('admin_contract.contrato_' + c.contrato_estado) | translate }}
+                    </span>
+                    <span class="cell-date-hint">
+                      @if (c.firmado_en && c.contrato_estado !== 'generado') {
+                        {{ formatFecha(c.firmado_en) }}
+                      } @else {
+                        {{ formatFecha(c.generado_en) }}
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Acciones -->
+                <td class="col-actions">
+                  <a [routerLink]="['/admin/contract/edit', c.contrato_id]"
+                     class="action-btn"
+                     [title]="'admin_contract.ver_btn' | translate">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </td>
+
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10">
+                  <div class="empty-state empty-state--table">
+                    @if (hayFiltros()) {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-funnel"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'admin_contract.no_results' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'admin_contract.no_results_hint' | translate }}</p>
+                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+                      </button>
+                    } @else {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'admin_contract.no_data' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'admin_contract.no_data_hint' | translate }}</p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Paginación ──────────────────────────────────────────────────────── -->
+      @if (contratosFiltrados().length > 0) {
+        <div class="table-footer">
+          <app-pagination
+            [total]="contratosFiltrados().length"
+            [page]="paginaActual()"
+            [pageSize]="POR_PAGINA"
+            (pageChange)="paginaActual.set($event)">
+          </app-pagination>
+        </div>
+      }
+
+    </div>
+
+  }
+
+</div>

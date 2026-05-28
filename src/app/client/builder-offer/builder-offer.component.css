@@ -390,7 +390,7 @@
 .video-btn--active  { background: var(--ds-gold-faint); border-color: var(--ds-gold-soft); color: var(--ds-gold-active); }
 
 .video-player {
-  background: #000;
+  background: var(--ds-ink);
   border-radius: 0 0 var(--ds-radius-md) var(--ds-radius-md);
   overflow: hidden;
 }

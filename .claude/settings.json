@@ -94,7 +94,11 @@
       "Bash(ng build *)",
       "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if \\($_.PSIsContainer\\) {\"DIR\"} else {\"FILE\"}}} | Format-Table -AutoSize)",
       "Bash(Select-String \"admin/offer/edit\")",
-      "Bash(node -e \"const fs=require\\('fs'\\);const p=n=>Math.round\\(fs.statSync\\(n\\).size/1024\\)+'kB';console.log\\('bootstrap.min.css:',p\\('node_modules/bootstrap/dist/css/bootstrap.min.css'\\)\\);console.log\\('bootstrap-icons.css:',p\\('node_modules/bootstrap-icons/font/bootstrap-icons.css'\\)\\);console.log\\('bootstrap.min.js:',p\\('node_modules/bootstrap/dist/js/bootstrap.min.js'\\)\\);console.log\\('popper.min.js:',p\\('node_modules/@popperjs/core/dist/umd/popper.min.js'\\)\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);const p=n=>Math.round\\(fs.statSync\\(n\\).size/1024\\)+'kB';console.log\\('bootstrap.min.css:',p\\('node_modules/bootstrap/dist/css/bootstrap.min.css'\\)\\);console.log\\('bootstrap-icons.css:',p\\('node_modules/bootstrap-icons/font/bootstrap-icons.css'\\)\\);console.log\\('bootstrap.min.js:',p\\('node_modules/bootstrap/dist/js/bootstrap.min.js'\\)\\);console.log\\('popper.min.js:',p\\('node_modules/@popperjs/core/dist/umd/popper.min.js'\\)\\);\")",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(xargs head -50)",
+      "Bash(grep -rn \"#[0-9A-Fa-f]\\\\{3,6\\\\}\" ./src/app --include=\"*.css\")",
+      "mcp__claude_ai_Supabase__generate_typescript_types"
     ],
     "additionalDirectories": [
       "\\tmp"

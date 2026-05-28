@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangService } from '../../services/lang.service';
 
@@ -11,6 +11,6 @@ import { LangService } from '../../services/lang.service';
   styleUrl: './lang-toggle.component.css',
 })
 export class LangToggleComponent {
-  @Input() compact = false;
+  compact = input(false);
   langSvc = inject(LangService);
 }

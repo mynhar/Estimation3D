@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import jsPDF from 'jspdf';
 import { AuthSupabaseService } from './auth-supabase.service';
-import { ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
+import { ContratoAdminDetalle, ContratoAdminListItem, ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
 
 // ── PDF label maps ────────────────────────────────────────────────────────────
 const L: Record<string, Record<string, string>> = {
@@ -193,6 +193,26 @@ export class ContratoService {
     if (error) throw new Error(error.message);
   }
 
+  async cancelarContratoAdmin(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('cancelar_contrato_admin', { p_contrato_id: contratoId });
+    if (error) throw new Error(error.message);
+  }
+
+  async firmarContratoAdmin(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('firmar_contrato_admin', { p_contrato_id: contratoId });
+    if (error) throw new Error(error.message);
+  }
+
+  async iniciarEjecucionContratoAdmin(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('iniciar_ejecucion_contrato_admin', { p_contrato_id: contratoId });
+    if (error) throw new Error(error.message);
+  }
+
+  async completarContratoAdmin(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('completar_contrato_admin', { p_contrato_id: contratoId });
+    if (error) throw new Error(error.message);
+  }
+
   async firmarContrato(contratoId: string): Promise<void> {
     const { error } = await this.db.rpc('firmar_contrato', { p_contrato_id: contratoId });
     if (error) throw new Error(error.message);
@@ -234,7 +254,7 @@ export class ContratoService {
     const path = `${contratoId}.pdf`;
     const { error } = await this.db.storage
       .from('contratos')
-      .upload(path, pdfBlob, { contentType: 'application/pdf', upsert: false });
+      .upload(path, pdfBlob, { contentType: 'application/pdf', upsert: true });
     if (error) throw new Error(error.message);
     return path;
   }
@@ -245,6 +265,159 @@ export class ContratoService {
       .createSignedUrl(path, expiresInSeconds);
     if (error) throw new Error(error.message);
     return data.signedUrl;
+  }
+
+  // ── Admin: detalle de un contrato por ID ─────────────────────────────────
+
+  async getContratoAdminById(contratoId: string): Promise<ContratoAdminDetalle> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
+        expediente:expediente_id (
+          id, numero, estado, estimador_id,
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
+          localizacion ( direccion, provincia, canton, distrito )
+        ),
+        cliente:cliente_id ( nombre, apellido, telefono, email ),
+        constructor:constructor_id ( nombre, apellido, telefono, email ),
+        oferta:oferta_id ( id, fecha_inicio, plazo_semanas_min, plazo_semanas_max )
+      `)
+      .eq('id', contratoId)
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const c   = data as any;
+    const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
+    const svc = exp?.servicio   ? (Array.isArray(exp.servicio)   ? exp.servicio[0]   : exp.servicio)   : null;
+    const loc = exp?.localizacion ? (Array.isArray(exp.localizacion) ? exp.localizacion[0] : exp.localizacion) : null;
+    const cli = Array.isArray(c.cliente)     ? c.cliente[0]     : c.cliente;
+    const con = Array.isArray(c.constructor) ? c.constructor[0] : c.constructor;
+    const ofe = Array.isArray(c.oferta)      ? c.oferta[0]      : c.oferta;
+
+    let estimadorNombre:    string | null = null;
+    let estimadorTelefono: string | null = null;
+    let estimadorEmail:    string | null = null;
+    if (exp?.estimador_id) {
+      const { data: p } = await this.db
+        .from('perfil')
+        .select('nombre, apellido, telefono, email')
+        .eq('id', exp.estimador_id)
+        .single();
+      if (p) {
+        estimadorNombre    = `${(p as any).nombre ?? ''} ${(p as any).apellido ?? ''}`.trim() || null;
+        estimadorTelefono  = (p as any).telefono ?? null;
+        estimadorEmail     = (p as any).email    ?? null;
+      }
+    }
+
+    return {
+      id:                   c.id,
+      precio_final:         c.precio_final,
+      garantia_anos:        c.garantia_anos        ?? null,
+      estado:               c.estado,
+      generado_en:          c.generado_en          ?? '',
+      firmado_en:           c.firmado_en           ?? null,
+      url_pdf:              c.url_pdf              ?? null,
+      descripcion_trabajo:  c.descripcion_trabajo  ?? '',
+      expediente_id:        exp?.id                ?? '',
+      expediente_numero:    exp?.numero            ?? '—',
+      expediente_estado:    exp?.estado            ?? '',
+      servicio_nombre:      svc?.nombre_es         ?? '—',
+      servicio_nombre_en:   svc?.nombre_en ?? svc?.nombre_es ?? '—',
+      servicio_nombre_fr:   svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+      servicio_desc:        svc?.descripcion_es    ?? '',
+      servicio_desc_en:     svc?.descripcion_en    ?? '',
+      servicio_desc_fr:     svc?.descripcion_fr    ?? '',
+      direccion:            loc?.direccion         ?? '—',
+      provincia:            loc?.provincia         ?? '—',
+      canton:               loc?.canton            ?? '—',
+      distrito:             loc?.distrito          ?? null,
+      cliente_nombre:       cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+      cliente_telefono:     cli?.telefono          ?? '—',
+      cliente_email:        cli?.email             ?? '—',
+      constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
+      constructor_telefono: con?.telefono          ?? '—',
+      constructor_email:    con?.email             ?? '—',
+      estimador_nombre:     estimadorNombre,
+      estimador_telefono:   estimadorTelefono,
+      estimador_email:      estimadorEmail,
+      oferta_id:            ofe?.id                ?? '',
+      oferta_fecha_inicio:  ofe?.fecha_inicio      ?? null,
+      plazo_semanas_min:    ofe?.plazo_semanas_min ?? null,
+      plazo_semanas_max:    ofe?.plazo_semanas_max ?? null,
+    };
+  }
+
+  // ── Admin: listar contratos (adjudicado / contratado) ────────────────────
+
+  async getContratosAdmin(): Promise<ContratoAdminListItem[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en,
+        expediente:expediente_id (
+          id, numero, estado, estimador_id,
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr )
+        ),
+        cliente:cliente_id ( nombre, apellido ),
+        constructor:constructor_id ( nombre, apellido ),
+        oferta:oferta_id ( fecha_inicio )
+      `)
+      .order('generado_en', { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    const rows = (data ?? []) as any[];
+
+    const estimadorIds = [...new Set(
+      rows
+        .map(c => {
+          const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
+          return exp?.estimador_id as string | null | undefined;
+        })
+        .filter((id): id is string => !!id),
+    )];
+
+    const estimadoresMap: Record<string, string> = {};
+    if (estimadorIds.length) {
+      const { data: perfiles } = await this.db
+        .from('perfil')
+        .select('id, nombre, apellido')
+        .in('id', estimadorIds);
+      for (const p of perfiles ?? []) {
+        estimadoresMap[p.id] = `${p.nombre ?? ''} ${p.apellido ?? ''}`.trim();
+      }
+    }
+
+    return rows
+      .map(c => {
+        const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
+        const svc = exp?.servicio ? (Array.isArray(exp.servicio) ? exp.servicio[0] : exp.servicio) : null;
+        const cli = Array.isArray(c.cliente)     ? c.cliente[0]     : c.cliente;
+        const con = Array.isArray(c.constructor) ? c.constructor[0] : c.constructor;
+        const ofe = Array.isArray(c.oferta)      ? c.oferta[0]      : c.oferta;
+
+        return {
+          contrato_id:         c.id,
+          precio_final:        c.precio_final,
+          garantia_anos:       c.garantia_anos       ?? null,
+          contrato_estado:     c.estado,
+          generado_en:         c.generado_en         ?? '',
+          firmado_en:          c.firmado_en          ?? null,
+          expediente_id:       exp?.id               ?? '',
+          expediente_numero:   exp?.numero           ?? '—',
+          expediente_estado:   exp?.estado           ?? '',
+          servicio_nombre:     svc?.nombre_es        ?? '—',
+          servicio_nombre_en:  svc?.nombre_en ?? svc?.nombre_es ?? '—',
+          servicio_nombre_fr:  svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+          cliente_nombre:      cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+          estimador_nombre:    exp?.estimador_id ? (estimadoresMap[exp.estimador_id] ?? null) : null,
+          constructor_nombre:  con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || null : null,
+          oferta_fecha_inicio: ofe?.fecha_inicio     ?? null,
+        } as ContratoAdminListItem;
+      });
   }
 
   // ── PDF generation ────────────────────────────────────────────────────────

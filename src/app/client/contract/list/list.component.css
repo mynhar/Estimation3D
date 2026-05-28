@@ -1,29 +1,38 @@
-/* ── Wrapper ──────────────────────────────────────────────────────────────── */
-.cl-wrap { width: 100%; }
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+:host { display: block; }
 
-/* ── Lista de contratos (columna única, ancho completo) ──────────────────── */
-.contracts-grid {
+.cl-page {
+  padding: var(--ds-space-6);
   display: flex;
   flex-direction: column;
-  gap: var(--ds-space-4);
+  min-height: 100%;
+  gap: 0;
 }
 
-/* ── Encabezado editorial ────────────────────────────────────────────────── */
+/* ── Header ───────────────────────────────────────────────────────────────── */
 .cl-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--ds-space-3);
+  gap: var(--ds-space-4);
   flex-wrap: wrap;
+  padding-bottom: var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border);
+  margin-bottom: var(--ds-space-5);
 }
+
 .cl-eyebrow {
-  font-size: var(--ds-text-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-semibold);
-  letter-spacing: var(--ds-tracking-wide);
+  letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
   color: var(--ds-gold-active);
-  margin-bottom: var(--ds-space-1);
+  margin: 0 0 var(--ds-space-1);
 }
+
 .cl-title {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-3xl);
@@ -33,16 +42,17 @@
   line-height: var(--ds-leading-tight);
   margin: 0 0 var(--ds-space-1);
 }
+
 .cl-lead {
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-muted);
   margin: 0;
 }
 
-/* ── KPI pill ────────────────────────────────────────────────────────────── */
 .kpi-pill {
   display: inline-flex;
   align-items: center;
+  gap: var(--ds-space-1);
   background: var(--ds-gold-faint);
   color: var(--ds-gold-active);
   font-size: var(--ds-text-xs);
@@ -50,12 +60,18 @@
   padding: 0.35em 0.9em;
   border-radius: var(--ds-radius-pill);
   border: 1px solid var(--ds-gold-soft);
+  white-space: nowrap;
   margin-top: var(--ds-space-1);
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   SKELETON — shimmer
-════════════════════════════════════════════════════════════════════════════ */
+/* ── List ─────────────────────────────────────────────────────────────────── */
+.cl-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
 @keyframes shimmer {
   from { background-position: 200% 0; }
   to   { background-position: -200% 0; }
@@ -74,13 +90,12 @@
   display: block;
 }
 
-.skel--num      { width: 90px;  height: 20px; }
-.skel--badge-sm { width: 80px;  height: 22px; border-radius: var(--ds-radius-pill); }
-.skel--btn-sm   { width: 130px; height: 34px; border-radius: var(--ds-radius-md); }
-.skel--label    { height: 10px; width: 45%; }
-.skel--value    { height: 14px; width: 70%; }
-.skel--price    { height: 20px; width: 80%; }
-.skel--view-btn { height: 40px; border-radius: var(--ds-radius-md); }
+.skel--num    { width: 90px;  height: 18px; }
+.skel--badge  { width: 110px; height: 22px; border-radius: var(--ds-radius-pill); }
+.skel--btn    { width: 140px; height: 34px; border-radius: var(--ds-radius-md); }
+.skel--col    { height: 96px; border-radius: var(--ds-radius-md); }
+.skel--date   { width: 260px; height: 14px; }
+.skel--btn-sm { width: 120px; height: 32px; border-radius: var(--ds-radius-md); }
 
 .skel-card {
   background: var(--ds-surface);
@@ -88,30 +103,55 @@
   border-radius: var(--ds-radius-xl);
   overflow: hidden;
 }
-.skel-card::before {
-  content: '';
-  display: block;
-  height: 3px;
-  background: var(--ds-border);
-}
-.skel-card__body { padding: var(--ds-space-5); }
 
-/* ── Empty state ─────────────────────────────────────────────────────────── */
+.skel-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+
+.skel-card-head-left {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.skel-card-body {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-5);
+}
+
+.skel-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  border-top: 1px solid var(--ds-border-subtle);
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
 .empty-panel {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
-  box-shadow: var(--ds-shadow-xs);
-  padding: var(--ds-space-5);
+  padding: var(--ds-space-8) var(--ds-space-5);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   gap: var(--ds-space-2);
 }
+
 .empty-icon {
-  width: 64px; height: 64px;
-  border-radius: var(--ds-radius-circle);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   background: var(--ds-bg-alt);
   border: 1px solid var(--ds-border);
   color: var(--ds-ink-muted);
@@ -121,12 +161,14 @@
   font-size: var(--ds-text-2xl);
   margin-bottom: var(--ds-space-2);
 }
+
 .empty-title {
   font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
   margin: 0;
 }
+
 .empty-text {
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-muted);
@@ -135,119 +177,341 @@
   line-height: 1.6;
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════════
    CONTRACT CARD
-════════════════════════════════════════════════════════════════════════════ */
-.contrato-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+═══════════════════════════════════════════════════════════════════════════ */
+
+.ccard {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
+  border-top: 4px solid var(--ds-gold);
   border-radius: var(--ds-radius-xl);
   box-shadow: var(--ds-shadow-xs);
   overflow: hidden;
   transition: box-shadow var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.contrato-card::before {
-  content: '';
-  display: block;
-  height: 3px;
-  background: var(--ds-gold);
-}
-.contrato-card:hover { box-shadow: var(--ds-shadow-md); }
-.contrato-card.panel-open {
-  border-color: var(--ds-gold-soft);
-  box-shadow: var(--ds-shadow-md);
-}
-.contrato-card__body { padding: var(--ds-space-4) var(--ds-space-5); }
 
-/* ── Número de expediente ────────────────────────────────────────────────── */
-.exp-num {
+.ccard:hover       { box-shadow: var(--ds-shadow-md); }
+.ccard--signing    { border-color: var(--ds-gold-soft); box-shadow: var(--ds-shadow-md); }
+
+/* Accent stripe por estado */
+.ccard--generado     { border-top-color: var(--ds-warning); }
+.ccard--firmado      { border-top-color: var(--ds-success); }
+.ccard--en_ejecucion { border-top-color: var(--ds-info); }
+.ccard--completado   { border-top-color: var(--ds-success); opacity: 0.95; }
+.ccard--cancelado    { border-top-color: var(--ds-border-strong); }
+
+/* ── Card head ────────────────────────────────────────────────────────────── */
+.ccard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  flex-wrap: wrap;
+}
+
+.ccard-head-ids {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+.ccard-num {
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-wide);
   background: var(--ds-gold-faint);
   color: var(--ds-gold-active);
-  padding: 0.15em 0.55em;
+  padding: 0.2em 0.6em;
   border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-gold-soft);
+  white-space: nowrap;
 }
 
-/* ── Badges de estado ────────────────────────────────────────────────────── */
-.badge-generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
-.badge-firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
-.badge-en-ejecucion { background: var(--ds-info-soft);    color: var(--ds-info); }
-.badge-completado   { background: var(--ds-success-soft); color: var(--ds-success); }
-.badge-cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
-
-/* ── Campos de información ───────────────────────────────────────────────── */
-.info-label {
-  font-size: var(--ds-text-2xs);
-  font-weight: var(--ds-weight-bold);
-  letter-spacing: var(--ds-tracking-widest);
-  text-transform: uppercase;
-  color: var(--ds-ink-muted);
-  margin-bottom: 0.2rem;
-}
-.info-value   { font-size: var(--ds-text-sm); color: var(--ds-ink); }
-.price-val    { font-size: var(--ds-text-base); font-weight: var(--ds-weight-bold); color: var(--ds-gold-active); }
-.signed-date  { color: var(--ds-success); font-weight: var(--ds-weight-semibold); }
-
-/* ── Botón descargar PDF ─────────────────────────────────────────────────── */
-.btn-download {
+.ccard-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--ds-space-2);
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.25em 0.75em;
+  border-radius: var(--ds-radius-pill);
+  white-space: nowrap;
+}
+
+.ccard-badge--generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.ccard-badge--firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
+.ccard-badge--en_ejecucion { background: var(--ds-info-soft);    color: var(--ds-info); }
+.ccard-badge--completado   { background: var(--ds-success-soft); color: var(--ds-success); }
+.ccard-badge--cancelado    { background: var(--ds-bg-alt); color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
+
+/* ── Download button ──────────────────────────────────────────────────────── */
+.btn-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
   background: transparent;
   border: 1px solid var(--ds-border-strong);
   color: var(--ds-ink-secondary);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-medium);
-  padding: 0.4em 1em;
+  padding: 0.35em 0.9em;
   border-radius: var(--ds-radius-md);
   cursor: pointer;
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out),
               color var(--ds-duration-fast) var(--ds-ease-out);
+  white-space: nowrap;
 }
-.btn-download:hover:not(:disabled) {
+
+.btn-dl:hover:not(:disabled) {
   background: var(--ds-bg-alt);
   border-color: var(--ds-border-strong);
   color: var(--ds-ink);
 }
-.btn-download:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ── Botón ver contrato PDF ──────────────────────────────────────────────── */
-.btn-view-pdf {
+.btn-dl:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Card body ────────────────────────────────────────────────────────────── */
+.ccard-body {
+  padding: var(--ds-space-5);
+}
+
+.ccard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  gap: var(--ds-space-5);
+  align-items: start;
+}
+
+.ccard-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+
+.ccard-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ccard-lbl {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+
+.ccard-val {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  line-height: var(--ds-leading-snug);
+}
+
+.ccard-val--service {
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-medium);
+}
+
+.ccard-val--bold { font-weight: var(--ds-weight-semibold); }
+
+/* ── Constructor contact ──────────────────────────────────────────────────── */
+.ccard-contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+
+.ccard-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  text-decoration: none;
+  transition: color var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.ccard-contact-link:hover { color: var(--ds-gold-active); }
+
+/* ── Pricing column ───────────────────────────────────────────────────────── */
+.ccard-price-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-3) var(--ds-space-4);
+}
+
+.ccard-price-lbl {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-gold-active);
+  opacity: 0.75;
+}
+
+.ccard-price-val {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-gold-active);
+  line-height: 1.1;
+}
+
+/* ── Conditions (plazo / garantía / inicio) ───────────────────────────────── */
+.ccard-conditions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+
+.ccard-condition {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-sm);
+}
+
+.ccard-condition > i { margin-top: 2px; flex-shrink: 0; }
+
+.ccard-cond-lbl {
+  display: block;
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  opacity: 0.7;
+}
+
+.ccard-cond-val {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+
+/* ── Work description ─────────────────────────────────────────────────────── */
+.ccard-desc {
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ccard-desc-text {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-relaxed);
+  margin: 0;
+}
+
+/* ── Card footer ──────────────────────────────────────────────────────────── */
+.ccard-foot {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  background: var(--ds-bg);
+  border-top: 1px solid var(--ds-border-subtle);
+  flex-wrap: wrap;
+}
+
+.ccard-dates {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: var(--ds-space-2);
-  width: 100%;
+}
+
+.ccard-date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
+.ccard-date strong {
+  color: var(--ds-ink-secondary);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.ccard-date--signed       { color: var(--ds-success); }
+.ccard-date--signed strong { color: var(--ds-success); }
+
+.ccard-date-sep {
+  color: var(--ds-border-strong);
+  font-size: var(--ds-text-xs);
+}
+
+.ccard-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+/* ── View PDF button ──────────────────────────────────────────────────────── */
+.btn-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
   background: var(--ds-gold-faint);
   border: 1.5px solid var(--ds-gold-soft);
   color: var(--ds-gold-active);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
-  padding: 0.6em 1.25em;
+  padding: 0.4em 1em;
   border-radius: var(--ds-radius-md);
   cursor: pointer;
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-view-pdf:hover     { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
-.btn-view-pdf--open     { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   VISOR PDF INLINE
-════════════════════════════════════════════════════════════════════════════ */
-.pdf-viewer-wrap {
-  margin-top: var(--ds-space-3);
-  border: 1px solid var(--ds-border);
+.btn-pdf:hover   { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
+.btn-pdf--open   { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
+
+/* ── Sign button ──────────────────────────────────────────────────────────── */
+.btn-sign {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  background: var(--ds-gold);
+  border: none;
+  color: var(--ds-surface);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.4em 1.1em;
   border-radius: var(--ds-radius-md);
-  overflow: hidden;
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.btn-sign:hover { background: var(--ds-gold-active); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PDF VIEWER
+═══════════════════════════════════════════════════════════════════════════ */
+
+.pdf-viewer-wrap {
+  border-top: 1px solid var(--ds-border);
   animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
 }
 
@@ -256,20 +520,23 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--ds-space-3);
-  padding: var(--ds-space-2) var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-5);
   background: var(--ds-bg-alt);
   border-bottom: 1px solid var(--ds-border);
   flex-wrap: wrap;
 }
 
 .pdf-viewer-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink-muted);
   letter-spacing: var(--ds-tracking-wide);
 }
 
-.pdf-viewer-download {
+.pdf-viewer-dl {
   font-size: var(--ds-text-xs);
   padding: 0.3em 0.8em;
 }
@@ -283,43 +550,19 @@
   background: var(--ds-bg-alt);
 }
 
-/* ── Fila de firma ───────────────────────────────────────────────────────── */
-.sign-row {
-  padding-top: var(--ds-space-3);
-  margin-top: var(--ds-space-3);
-  border-top: 1px solid var(--ds-border);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   SIGN PANEL
+═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Botón firmar ────────────────────────────────────────────────────────── */
-.btn-sign {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  background: transparent;
-  border: 1.5px solid var(--ds-gold);
-  color: var(--ds-gold-active);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-semibold);
-  padding: 0.45em 1.1em;
-  border-radius: var(--ds-radius-md);
-  cursor: pointer;
-  transition: background var(--ds-duration-fast) var(--ds-ease-out),
-              border-color var(--ds-duration-fast) var(--ds-ease-out);
-}
-.btn-sign:hover { background: var(--ds-gold-faint); border-color: var(--ds-gold-hover, var(--ds-gold)); }
-
-/* ════════════════════════════════════════════════════════════════════════════
-   PANEL DE FIRMA
-════════════════════════════════════════════════════════════════════════════ */
 .sign-panel {
   background: var(--ds-gold-faint);
   border-top: 2px solid var(--ds-gold-soft);
-  padding: var(--ds-space-4) var(--ds-space-5);
+  padding: var(--ds-space-5);
   animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -327,19 +570,22 @@
   display: flex;
   align-items: flex-start;
   gap: var(--ds-space-3);
-  padding-bottom: var(--ds-space-3);
+  margin-bottom: var(--ds-space-4);
 }
+
 .sign-panel-icon {
-  width: 36px; height: 36px;
+  width: 36px;
+  height: 36px;
   background: var(--ds-gold-soft);
   color: var(--ds-gold-active);
-  border-radius: var(--ds-radius-circle);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--ds-text-base);
   flex-shrink: 0;
 }
+
 .sign-panel-title {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-base);
@@ -347,29 +593,31 @@
   color: var(--ds-ink);
   margin: 0 0 var(--ds-space-1);
 }
+
 .sign-panel-sub {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
   margin: 0;
 }
 
-/* ── Resumen de términos ─────────────────────────────────────────────────── */
 .sign-summary {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ds-space-2);
+  gap: var(--ds-space-3);
   background: var(--ds-surface);
   border: 1px solid var(--ds-gold-soft);
   border-radius: var(--ds-radius-md);
   padding: var(--ds-space-3) var(--ds-space-4);
   margin-bottom: var(--ds-space-3);
 }
+
 .sign-summary-item {
   display: flex;
   flex-direction: column;
   min-width: 110px;
   flex: 1;
 }
+
 .sign-summary-label {
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
@@ -378,13 +626,13 @@
   color: var(--ds-ink-muted);
   margin-bottom: 0.15rem;
 }
+
 .sign-summary-value {
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
 }
 
-/* ── Texto legal ─────────────────────────────────────────────────────────── */
 .sign-legal-text {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
@@ -392,7 +640,6 @@
   margin-bottom: var(--ds-space-3);
 }
 
-/* ── Checkbox personalizado ──────────────────────────────────────────────── */
 .sign-checkbox-label {
   display: flex;
   align-items: flex-start;
@@ -404,8 +651,10 @@
   margin-bottom: var(--ds-space-4);
   user-select: none;
 }
+
 .sign-checkbox {
-  width: 20px; height: 20px;
+  width: 20px;
+  height: 20px;
   border: 2px solid var(--ds-gold);
   border-radius: var(--ds-radius-sm);
   background: var(--ds-surface);
@@ -414,17 +663,17 @@
   justify-content: center;
   flex-shrink: 0;
   margin-top: 1px;
-  transition: background var(--ds-duration-fast) var(--ds-ease-out),
-              border-color var(--ds-duration-fast) var(--ds-ease-out);
   font-size: var(--ds-text-xs);
   color: var(--ds-surface);
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
+
 .sign-checkbox.checked {
   background: var(--ds-gold);
   border-color: var(--ds-gold);
 }
 
-/* ── Acciones de firma ───────────────────────────────────────────────────── */
 .sign-actions {
   display: flex;
   align-items: center;
@@ -447,6 +696,7 @@
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               opacity var(--ds-duration-fast) var(--ds-ease-out);
 }
+
 .btn-sign-confirm:hover:not(:disabled) { background: var(--ds-gold-active); }
 .btn-sign-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 
@@ -457,23 +707,47 @@
   cursor: pointer;
   color: var(--ds-ink-muted);
   font-size: var(--ds-text-sm);
-  text-decoration: none;
-  transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.sign-cancel-link:hover:not(:disabled) { color: var(--ds-ink-secondary); text-decoration: underline; }
+
+.sign-cancel-link:hover:not(:disabled) {
+  color: var(--ds-ink-secondary);
+  text-decoration: underline;
+}
+
 .sign-cancel-link:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 767.98px) {
-  .cl-title             { font-size: var(--ds-text-2xl); }
-  .contrato-card__body  { padding: var(--ds-space-4); }
-  .sign-panel           { padding: var(--ds-space-4); }
-  .pdf-viewer-frame     { height: 70vh; }
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 1199px) {
+  .ccard-grid { grid-template-columns: 1fr 1fr 1fr; gap: var(--ds-space-4); }
 }
 
-@media (max-width: 575.98px) {
-  .pdf-viewer-toolbar   { flex-direction: column; align-items: flex-start; }
-  .pdf-viewer-frame     { height: 60vh; }
+@media (max-width: 991px) {
+  .ccard-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ccard-col--pricing { grid-column: 1 / -1; flex-direction: row; gap: var(--ds-space-4); align-items: start; }
+  .ccard-price-box    { min-width: 180px; }
+}
+
+@media (max-width: 767px) {
+  .cl-page            { padding: var(--ds-space-4); }
+  .cl-title           { font-size: var(--ds-text-2xl); }
+  .ccard-grid         { grid-template-columns: 1fr; gap: var(--ds-space-4); }
+  .ccard-col--pricing { flex-direction: column; }
+  .ccard-body         { padding: var(--ds-space-4); }
+  .ccard-foot         { padding: var(--ds-space-3) var(--ds-space-4); }
+  .ccard-head         { padding: var(--ds-space-3) var(--ds-space-4); }
+  .sign-panel         { padding: var(--ds-space-4); }
+  .pdf-viewer-frame   { height: 70vh; }
+  .skel-card-body     { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 575px) {
+  .ccard-foot         { flex-direction: column; align-items: stretch; }
+  .ccard-actions      { flex-direction: column; }
+  .btn-pdf, .btn-sign { width: 100%; justify-content: center; }
+  .pdf-viewer-toolbar { flex-direction: column; align-items: flex-start; }
+  .pdf-viewer-frame   { height: 60vh; }
 }
 
 @media (prefers-reduced-motion: reduce) {

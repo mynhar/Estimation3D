@@ -29,17 +29,17 @@
 
 .lang-btn:hover {
   background: rgba(212,185,110,.14);
-  color: #D4B96E;
+  color: var(--ds-gold);
 }
 
 .lang-btn--active {
-  background: #D4B96E;
-  color: #1A1A1A;
+  background: var(--ds-gold);
+  color: var(--ds-ink);
   font-weight: 800;
 }
 .lang-btn--active:hover {
-  background: #C4A55A;
-  color: #1A1A1A;
+  background: var(--ds-gold-hover);
+  color: var(--ds-ink);
 }
 
 /* Modo compacto: sidebar colapsado — muestra solo el activo */

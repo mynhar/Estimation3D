@@ -192,6 +192,14 @@ export class OfertaRepository {
     if (error) throw new Error(error.message);
   }
 
+  async eliminarConCascada(ofertaId: string, expedienteId: string): Promise<void> {
+    const { error } = await this.db.rpc('eliminar_oferta_admin', {
+      p_oferta_id:     ofertaId,
+      p_expediente_id: expedienteId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
   async restoreEstadoEstimado(expedienteId: string): Promise<void> {
     const { error } = await this.db
       .from('expediente')

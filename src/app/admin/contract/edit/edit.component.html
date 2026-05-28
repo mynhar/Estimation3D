@@ -1,0 +1,515 @@
+<section class="contract-detail">
+
+  <!-- ── ENCABEZADO ──────────────────────────────────────────────────────── -->
+  <div class="detail-header">
+    <button class="btn-back" type="button" (click)="volver()">
+      <i class="bi bi-arrow-left"></i>
+      {{ 'common.back' | translate }}
+    </button>
+    <div class="header-title">
+      <h1 class="page-title">{{ 'admin_contract_detail.title' | translate }}</h1>
+      @if (contrato(); as c) {
+        <span class="expediente-badge">{{ c.expediente_numero }}</span>
+      }
+    </div>
+
+    @if (!cargando() && !error() && puedeCompletar) {
+      <button
+        class="btn-completar"
+        type="button"
+        [disabled]="completando()"
+        (click)="iniciarCompletar()"
+      >
+        <i class="bi bi-check2-circle"></i>
+        {{ 'admin_contract_detail.completar_btn' | translate }}
+      </button>
+    }
+
+    @if (!cargando() && !error() && puedeEjecutar) {
+      <button
+        class="btn-ejecutar"
+        type="button"
+        [disabled]="ejecutando()"
+        (click)="iniciarEjecutar()"
+      >
+        <i class="bi bi-play-circle"></i>
+        {{ 'admin_contract_detail.ejecutar_btn' | translate }}
+      </button>
+    }
+
+    @if (!cargando() && !error() && puedeFirmar) {
+      <button
+        class="btn-firmar"
+        type="button"
+        [disabled]="firmando()"
+        (click)="iniciarFirmar()"
+      >
+        <i class="bi bi-pen"></i>
+        {{ 'admin_contract_detail.firmar_btn' | translate }}
+      </button>
+    }
+
+    @if (!cargando() && !error() && puedeCancel) {
+      <button
+        class="btn-cancelar"
+        type="button"
+        [disabled]="cancelando()"
+        (click)="iniciarCancelar()"
+      >
+        <i class="bi bi-x-circle"></i>
+        {{ 'admin_contract_detail.cancelar_btn' | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- ── CONFIRMACIÓN CANCELAR ──────────────────────────────────────────── -->
+  @if (confirmandoCancelar()) {
+    <div class="confirm-panel" role="alert">
+      <div class="confirm-panel__body">
+        <i class="bi bi-exclamation-triangle confirm-panel__icon"></i>
+        <div>
+          <p class="confirm-panel__title">{{ 'admin_contract_detail.cancelar_confirm_title' | translate }}</p>
+          <p class="confirm-panel__desc">{{ 'admin_contract_detail.cancelar_confirm_desc' | translate }}</p>
+          @if (errorCancelar()) {
+            <p class="confirm-panel__error">{{ errorCancelar() }}</p>
+          }
+        </div>
+      </div>
+      <div class="confirm-panel__actions">
+        <button
+          class="btn-confirm-yes"
+          type="button"
+          [disabled]="cancelando()"
+          (click)="confirmarCancelar()"
+        >
+          @if (cancelando()) {
+            <span class="spinner-xs"></span>
+          }
+          {{ 'admin_contract_detail.cancelar_confirm_ok' | translate }}
+        </button>
+        <button
+          class="btn-confirm-no"
+          type="button"
+          [disabled]="cancelando()"
+          (click)="cancelarConfirmacion()"
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── CONFIRMACIÓN COMPLETAR ────────────────────────────────────────── -->
+  @if (confirmandoCompletar()) {
+    <div class="confirm-panel confirm-panel--completar" role="alert">
+      <div class="confirm-panel__body">
+        <i class="bi bi-check2-circle confirm-panel__icon confirm-panel__icon--completar"></i>
+        <div>
+          <p class="confirm-panel__title confirm-panel__title--completar">{{ 'admin_contract_detail.completar_confirm_title' | translate }}</p>
+          <p class="confirm-panel__desc confirm-panel__desc--completar">{{ 'admin_contract_detail.completar_confirm_desc' | translate }}</p>
+          @if (errorCompletar()) {
+            <p class="confirm-panel__error">{{ errorCompletar() }}</p>
+          }
+        </div>
+      </div>
+      <div class="confirm-panel__actions">
+        <button
+          class="btn-confirm-completar"
+          type="button"
+          [disabled]="completando()"
+          (click)="confirmarCompletar()"
+        >
+          @if (completando()) {
+            <span class="spinner-xs"></span>
+          }
+          {{ 'admin_contract_detail.completar_confirm_ok' | translate }}
+        </button>
+        <button
+          class="btn-confirm-no"
+          type="button"
+          [disabled]="completando()"
+          (click)="cancelarCompletacion()"
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── CONFIRMACIÓN EJECUTAR ─────────────────────────────────────────── -->
+  @if (confirmandoEjecutar()) {
+    <div class="confirm-panel confirm-panel--ejecutar" role="alert">
+      <div class="confirm-panel__body">
+        <i class="bi bi-play-circle confirm-panel__icon confirm-panel__icon--ejecutar"></i>
+        <div>
+          <p class="confirm-panel__title confirm-panel__title--ejecutar">{{ 'admin_contract_detail.ejecutar_confirm_title' | translate }}</p>
+          <p class="confirm-panel__desc confirm-panel__desc--ejecutar">{{ 'admin_contract_detail.ejecutar_confirm_desc' | translate }}</p>
+          @if (errorEjecutar()) {
+            <p class="confirm-panel__error">{{ errorEjecutar() }}</p>
+          }
+        </div>
+      </div>
+      <div class="confirm-panel__actions">
+        <button
+          class="btn-confirm-ejecutar"
+          type="button"
+          [disabled]="ejecutando()"
+          (click)="confirmarEjecutar()"
+        >
+          @if (ejecutando()) {
+            <span class="spinner-xs"></span>
+          }
+          {{ 'admin_contract_detail.ejecutar_confirm_ok' | translate }}
+        </button>
+        <button
+          class="btn-confirm-no"
+          type="button"
+          [disabled]="ejecutando()"
+          (click)="cancelarEjecucion()"
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── CONFIRMACIÓN FIRMAR ───────────────────────────────────────────── -->
+  @if (confirmandoFirmar()) {
+    <div class="confirm-panel confirm-panel--firm" role="alert">
+      <div class="confirm-panel__body">
+        <i class="bi bi-pen confirm-panel__icon confirm-panel__icon--firm"></i>
+        <div>
+          <p class="confirm-panel__title confirm-panel__title--firm">{{ 'admin_contract_detail.firmar_confirm_title' | translate }}</p>
+          <p class="confirm-panel__desc confirm-panel__desc--firm">{{ 'admin_contract_detail.firmar_confirm_desc' | translate }}</p>
+          @if (errorFirmar()) {
+            <p class="confirm-panel__error">{{ errorFirmar() }}</p>
+          }
+        </div>
+      </div>
+      <div class="confirm-panel__actions">
+        <button
+          class="btn-confirm-firm"
+          type="button"
+          [disabled]="firmando()"
+          (click)="confirmarFirmar()"
+        >
+          @if (firmando()) {
+            <span class="spinner-xs spinner-xs--firm"></span>
+          }
+          {{ 'admin_contract_detail.firmar_confirm_ok' | translate }}
+        </button>
+        <button
+          class="btn-confirm-no"
+          type="button"
+          [disabled]="firmando()"
+          (click)="cancelarFirmacion()"
+        >
+          {{ 'common.cancel' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── SKELETON ────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-wrap">
+      <div class="skeleton-section">
+        <div class="sk-line sk-title"></div>
+        <div class="sk-line sk-medium"></div>
+        <div class="sk-line sk-short"></div>
+      </div>
+      <div class="skeleton-section">
+        <div class="sk-line sk-title"></div>
+        <div class="sk-line sk-medium"></div>
+        <div class="sk-line sk-medium"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ── ERROR ──────────────────────────────────────────────────────────── -->
+  @if (error(); as msg) {
+    <div class="alert-error" role="alert">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ msg }}
+    </div>
+  }
+
+  <!-- ── DETALLE ─────────────────────────────────────────────────────────── -->
+  @if (!cargando() && !error() && contrato(); as c) {
+
+    <!-- ── Fila superior: expediente + partes + trabajos | contrato + oferta -->
+    <div class="detail-body">
+
+      <!-- Col izquierda -->
+      <div class="col-main">
+
+        <!-- EXPEDIENTE -->
+        <div class="detail-card">
+          <h2 class="card-section-title">
+            <i class="bi bi-folder2-open"></i>
+            {{ 'admin_contract_detail.section_expediente' | translate }}
+          </h2>
+          <dl class="info-grid">
+            <dt>{{ 'admin_contract_detail.numero' | translate }}</dt>
+            <dd>{{ c.expediente_numero }}</dd>
+
+            <dt>{{ 'admin_contract_detail.servicio' | translate }}</dt>
+            <dd>{{ servicioNombre(c) }}</dd>
+
+            @if (servicioDesc(c)) {
+              <dt>{{ 'admin_contract_detail.servicio_desc' | translate }}</dt>
+              <dd class="text-muted-sm">{{ servicioDesc(c) }}</dd>
+            }
+
+            <dt>{{ 'admin_contract_detail.estado_exp' | translate }}</dt>
+            <dd>
+              <span class="badge-estado" [class]="badgeExpediente(c.expediente_estado)">
+                {{ ('state.' + c.expediente_estado) | translate }}
+              </span>
+            </dd>
+
+            <dt>{{ 'admin_contract_detail.direccion' | translate }}</dt>
+            <dd>{{ c.direccion }}</dd>
+
+            <dt>{{ 'admin_contract_detail.localidad' | translate }}</dt>
+            <dd>
+              {{ c.canton }}
+              @if (c.distrito) { – {{ c.distrito }} }
+              , {{ c.provincia }}
+            </dd>
+          </dl>
+        </div>
+
+        <!-- PARTES -->
+        <div class="detail-card">
+          <h2 class="card-section-title">
+            <i class="bi bi-people"></i>
+            {{ 'admin_contract_detail.section_partes' | translate }}
+          </h2>
+
+          <div class="partes-grid">
+
+            <!-- Cliente -->
+            <div class="parte-block">
+              <p class="parte-label">{{ 'admin_contract_detail.cliente' | translate }}</p>
+              <p class="parte-value">{{ c.cliente_nombre }}</p>
+              @if (c.cliente_telefono && c.cliente_telefono !== '—') {
+                <p class="parte-contact">
+                  <i class="bi bi-telephone"></i> {{ c.cliente_telefono }}
+                </p>
+              }
+              @if (c.cliente_email && c.cliente_email !== '—') {
+                <p class="parte-contact">
+                  <i class="bi bi-envelope"></i> {{ c.cliente_email }}
+                </p>
+              }
+            </div>
+
+            <!-- Constructor -->
+            <div class="parte-block">
+              <p class="parte-label">{{ 'admin_contract_detail.constructor' | translate }}</p>
+              <p class="parte-value">{{ c.constructor_nombre }}</p>
+              @if (c.constructor_telefono && c.constructor_telefono !== '—') {
+                <p class="parte-contact">
+                  <i class="bi bi-telephone"></i> {{ c.constructor_telefono }}
+                </p>
+              }
+              @if (c.constructor_email && c.constructor_email !== '—') {
+                <p class="parte-contact">
+                  <i class="bi bi-envelope"></i> {{ c.constructor_email }}
+                </p>
+              }
+            </div>
+
+            <!-- Estimador -->
+            @if (c.estimador_nombre) {
+              <div class="parte-block">
+                <p class="parte-label">{{ 'admin_contract_detail.estimador' | translate }}</p>
+                <p class="parte-value">{{ c.estimador_nombre }}</p>
+                @if (c.estimador_telefono) {
+                  <p class="parte-contact">
+                    <i class="bi bi-telephone"></i> {{ c.estimador_telefono }}
+                  </p>
+                }
+                @if (c.estimador_email) {
+                  <p class="parte-contact">
+                    <i class="bi bi-envelope"></i> {{ c.estimador_email }}
+                  </p>
+                }
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- DESCRIPCIÓN DE TRABAJOS -->
+        @if (c.descripcion_trabajo) {
+          <div class="detail-card">
+            <h2 class="card-section-title">
+              <i class="bi bi-card-text"></i>
+              {{ 'admin_contract_detail.section_trabajos' | translate }}
+            </h2>
+            <p class="descripcion-texto">{{ c.descripcion_trabajo }}</p>
+          </div>
+        }
+
+      </div>
+
+      <!-- Col derecha -->
+      <div class="col-aside">
+
+        <!-- CONTRATO -->
+        <div class="detail-card aside-card">
+          <h2 class="card-section-title">
+            <i class="bi bi-file-earmark-text"></i>
+            {{ 'admin_contract_detail.section_contrato' | translate }}
+          </h2>
+          <dl class="info-grid">
+            <dt>{{ 'admin_contract_detail.estado_contrato' | translate }}</dt>
+            <dd>
+              <span class="badge-estado" [class]="badgeContrato(c.estado)">
+                @switch (c.estado) {
+                  @case ('generado')     { {{ 'admin_contract.contrato_generado'     | translate }} }
+                  @case ('firmado')      { {{ 'admin_contract.contrato_firmado'      | translate }} }
+                  @case ('en_ejecucion') { {{ 'admin_contract.contrato_en_ejecucion' | translate }} }
+                  @case ('completado')   { {{ 'admin_contract.contrato_completado'   | translate }} }
+                  @default               { {{ c.estado }} }
+                }
+              </span>
+            </dd>
+
+            <dt>{{ 'admin_contract_detail.precio' | translate }}</dt>
+            <dd class="precio-valor">{{ formatPrecio(c.precio_final) }}</dd>
+
+            @if (c.garantia_anos != null) {
+              <dt>{{ 'admin_contract_detail.garantia' | translate }}</dt>
+              <dd>{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}</dd>
+            }
+
+            <dt>{{ 'admin_contract_detail.generado_en' | translate }}</dt>
+            <dd>{{ formatFecha(c.generado_en) }}</dd>
+
+            @if (c.firmado_en) {
+              <dt>{{ 'admin_contract_detail.firmado_en' | translate }}</dt>
+              <dd>{{ formatFecha(c.firmado_en) }}</dd>
+            }
+          </dl>
+        </div>
+
+        <!-- OFERTA -->
+        <div class="detail-card aside-card">
+          <h2 class="card-section-title">
+            <i class="bi bi-tag"></i>
+            {{ 'admin_contract_detail.section_oferta' | translate }}
+          </h2>
+          <dl class="info-grid">
+            @if (c.oferta_fecha_inicio) {
+              <dt>{{ 'admin_contract_detail.fecha_inicio' | translate }}</dt>
+              <dd>{{ formatFecha(c.oferta_fecha_inicio) }}</dd>
+            }
+            <dt>{{ 'admin_contract_detail.plazo' | translate }}</dt>
+            <dd>{{ formatPlazo(c.plazo_semanas_min, c.plazo_semanas_max) }}</dd>
+          </dl>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PDF (ancho completo) ──────────────────────────────────────────── -->
+    <div class="pdf-section detail-card" [class]="'pdf-' + pdfTamano()">
+      <div class="pdf-header">
+        <h2 class="card-section-title mb-0">
+          <i class="bi bi-file-pdf"></i>
+          {{ 'admin_contract_detail.section_pdf' | translate }}
+        </h2>
+
+        <div class="pdf-controls">
+          <!-- Selector de idioma -->
+          <div class="lang-selector" role="group" [attr.aria-label]="'admin_contract_detail.pdf_lang' | translate">
+            @for (lang of LANGS; track lang) {
+              <button
+                class="lang-chip"
+                [class.lang-chip--active]="langPdf() === lang"
+                type="button"
+                (click)="verPdf(lang)"
+                [disabled]="generandoPdf()"
+              >
+                {{ ('admin_contract_detail.lang_' + lang) | translate }}
+              </button>
+            }
+          </div>
+
+          <!-- Ampliar / Reducir (sólo cuando visible y con PDF) -->
+          @if (pdfTamano() !== 'oculto' && pdfUrl()) {
+            <button
+              class="btn-ctrl"
+              type="button"
+              (click)="toggleTamano()"
+              [title]="(pdfTamano() === 'grande' ? 'admin_contract_detail.reducir_pdf' : 'admin_contract_detail.ampliar_pdf') | translate"
+            >
+              @if (pdfTamano() === 'grande') {
+                <i class="bi bi-arrows-angle-contract"></i>
+              } @else {
+                <i class="bi bi-arrows-angle-expand"></i>
+              }
+            </button>
+          }
+
+          <!-- Contraer / Mostrar -->
+          <button
+            class="btn-ctrl"
+            type="button"
+            (click)="toggleVisibilidad()"
+            [title]="(pdfTamano() === 'oculto' ? 'admin_contract_detail.mostrar_pdf' : 'admin_contract_detail.ocultar_pdf') | translate"
+          >
+            @if (pdfTamano() === 'oculto') {
+              <i class="bi bi-chevron-down"></i>
+            } @else {
+              <i class="bi bi-chevron-up"></i>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuerpo del PDF (oculto cuando pdfTamano === 'oculto') -->
+      @if (pdfTamano() !== 'oculto') {
+        @if (!pdfUrl() && !generandoPdf()) {
+          <!-- Estado inicial: selección de idioma -->
+          <div class="pdf-prompt">
+            <i class="bi bi-file-earmark-pdf pdf-prompt-icon"></i>
+            <p class="pdf-prompt-text">{{ 'admin_contract_detail.pdf_prompt' | translate }}</p>
+            <div class="lang-selector lang-selector--large">
+              @for (lang of LANGS; track lang) {
+                <button
+                  class="lang-chip lang-chip--large"
+                  type="button"
+                  (click)="verPdf(lang)"
+                >
+                  {{ ('admin_contract_detail.lang_' + lang) | translate }}
+                  <span class="lang-chip-label">{{ lang.toUpperCase() }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (generandoPdf()) {
+          <div class="pdf-loading">
+            <span class="spinner-md"></span>
+            {{ 'admin_contract_detail.pdf_generando' | translate }}
+          </div>
+        }
+
+        @if (pdfUrl() && !generandoPdf()) {
+          <iframe
+            class="pdf-frame"
+            [src]="pdfUrl()"
+            title="Contrato PDF"
+          ></iframe>
+        }
+      }
+    </div>
+
+  }
+
+</section>
