@@ -206,10 +206,18 @@
                     ? ('contract_list.close_pdf' | translate)
                     : ('contract_list.view_pdf' | translate) }}
               </button>
-              @if (c.estado === 'generado' && confirmandoId() !== c.id) {
+              @if (c.estado === 'generado' && confirmandoId() !== c.id && confirmCancelId() !== c.id) {
                 <button class="btn-sign" type="button" (click)="abrirPanelFirma(c.id)">
                   <i class="bi bi-pen" aria-hidden="true"></i>
                   {{ 'contract_list.sign_btn' | translate }}
+                </button>
+              }
+              @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
+                <button class="btn-cancel-action" type="button"
+                        [disabled]="cancelandoId() === c.id"
+                        (click)="abrirPanelCancelacion(c.id)">
+                  <i class="bi bi-x-circle" aria-hidden="true"></i>
+                  {{ 'contract_list.cancel_btn' | translate }}
                 </button>
               }
             </div>
@@ -313,6 +321,41 @@
                 </button>
               </div>
 
+            </div>
+          }
+
+          <!-- ── Panel de cancelación ────────────────────────────────────── -->
+          @if (confirmCancelId() === c.id) {
+            <div class="cancel-panel">
+              <div class="cancel-panel-header">
+                <span class="cancel-panel-icon">
+                  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                </span>
+                <div>
+                  <p class="cancel-panel-title">{{ 'contract_list.cancel_title' | translate }}</p>
+                  <p class="cancel-panel-sub">{{ 'contract_list.cancel_subtitle' | translate }}</p>
+                </div>
+              </div>
+              <p class="cancel-panel-desc">{{ 'contract_list.cancel_desc' | translate }}</p>
+              <div class="cancel-actions">
+                <button class="btn-cancel-confirm"
+                        type="button"
+                        [disabled]="cancelandoId() === c.id"
+                        (click)="confirmarCancelacion(c)">
+                  @if (cancelandoId() === c.id) {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    {{ 'contract_list.cancelling' | translate }}
+                  } @else {
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    {{ 'contract_list.cancel_confirm' | translate }}
+                  }
+                </button>
+                <button class="cancel-close-link" type="button"
+                        [disabled]="cancelandoId() === c.id"
+                        (click)="cerrarPanelCancelacion()">
+                  {{ 'contract_list.cancel_close' | translate }}
+                </button>
+              </div>
             </div>
           }
 

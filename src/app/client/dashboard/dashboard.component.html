@@ -64,6 +64,9 @@
               <span class="exp-card__service">{{ servicioNombre(exp.servicio) }}</span>
             }
             <span class="exp-card__date">
+              <i class="bi bi-folder-plus"></i>{{ formatFecha(exp.creado_en) }}
+            </span>
+            <span class="exp-card__date exp-card__date--visit">
               <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
             </span>
           </div>
@@ -322,6 +325,105 @@
         <p class="exp-state-desc mt-4 mb-0">
           <i class="bi bi-info-circle me-2"></i>{{ ('state_desc.' + exp.estado) | translate }}
         </p>
+
+        <!-- ── Fechas del expediente ──────────────────────────────────────── -->
+        <div class="exp-divider mt-4"></div>
+        <p class="dates-section__label mt-4 mb-3">{{ 'dashboard_client.key_dates' | translate }}</p>
+
+        <div class="dates-grid">
+
+          <!-- Creado -->
+          <div class="date-item">
+            <span class="date-item__key">
+              <i class="bi bi-folder-plus" aria-hidden="true"></i>
+              {{ 'timeline.created' | translate }}
+            </span>
+            <span class="date-item__val">{{ formatFecha(exp.creado_en) }}</span>
+          </div>
+
+          <!-- Visita programada -->
+          <div class="date-item">
+            <span class="date-item__key">
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              {{ 'file.visit_date' | translate }}
+            </span>
+            <span class="date-item__val">{{ formatFecha(exp.fecha_visita) }}</span>
+          </div>
+
+          @if (detalleActivo(); as d) {
+
+            <!-- Visita realizada -->
+            @if (d.fecha_visita_real) {
+              <div class="date-item">
+                <span class="date-item__key">
+                  <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                  {{ 'timeline.visit_done' | translate }}
+                </span>
+                <span class="date-item__val">{{ formatFecha(d.fecha_visita_real) }}</span>
+              </div>
+            }
+
+          }
+
+          @if (contratoHistorial(); as c) {
+
+            <!-- Oferta aceptada / contrato generado -->
+            <div class="date-item">
+              <span class="date-item__key">
+                <i class="bi bi-handshake" aria-hidden="true"></i>
+                {{ 'timeline.offer_accepted' | translate }}
+              </span>
+              <span class="date-item__val">{{ formatFecha(c.generado_en) }}</span>
+            </div>
+
+            <!-- Contrato firmado -->
+            @if (c.firmado_en) {
+              <div class="date-item">
+                <span class="date-item__key">
+                  <i class="bi bi-pen" aria-hidden="true"></i>
+                  {{ 'timeline.contract_signed' | translate }}
+                </span>
+                <span class="date-item__val">{{ formatFecha(c.firmado_en) }}</span>
+              </div>
+            }
+
+            <!-- Inicio de obras (fecha_inicio de la oferta) -->
+            @if (c.oferta?.fecha_inicio) {
+              <div class="date-item">
+                <span class="date-item__key">
+                  <i class="bi bi-hammer" aria-hidden="true"></i>
+                  {{ 'timeline.works_started' | translate }}
+                </span>
+                <span class="date-item__val">{{ formatFecha(c.oferta!.fecha_inicio) }}</span>
+              </div>
+            }
+
+            <!-- actualizado_en según estado del contrato -->
+            @if (c.estado === 'en_ejecucion' || c.estado === 'completado' || c.estado === 'cancelado') {
+              <div class="date-item">
+                <span class="date-item__key">
+                  @switch (c.estado) {
+                    @case ('en_ejecucion') {
+                      <i class="bi bi-play-circle" aria-hidden="true"></i>
+                      {{ 'timeline.execution_started' | translate }}
+                    }
+                    @case ('completado') {
+                      <i class="bi bi-check2-all" aria-hidden="true"></i>
+                      {{ 'timeline.contract_completed' | translate }}
+                    }
+                    @case ('cancelado') {
+                      <i class="bi bi-x-circle" aria-hidden="true"></i>
+                      {{ 'timeline.contract_cancelled' | translate }}
+                    }
+                  }
+                </span>
+                <span class="date-item__val">{{ formatFecha(c.actualizado_en) }}</span>
+              </div>
+            }
+
+          }
+
+        </div>
 
       </div>
     }

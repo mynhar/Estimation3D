@@ -104,7 +104,13 @@
       "Bash(powershell -Command \"\\(Get-Item 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css'\\).Length; \\(Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css' -Raw\\).Length\")",
       "Bash(powershell -Command \"\\(Get-Content 'c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css'\\).Count\")",
       "Bash(git -C c:\\\\desarrollo\\\\estimation3d-A18-v01 diff --stat HEAD)",
-      "PowerShell(Set-Location \"c:\\\\desarrollo\\\\estimation3d-A18-v01\"; \\(Get-Item \"src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css\"\\).Length / 1KB)"
+      "PowerShell(Set-Location \"c:\\\\desarrollo\\\\estimation3d-A18-v01\"; \\(Get-Item \"src\\\\app\\\\admin\\\\offer\\\\edit\\\\edit.component.css\"\\).Length / 1KB)",
+      "Bash(Get-Content supabase/migrations/20260528_fix_rpc_aceptar_oferta.sql)",
+      "Bash(grep -oP \"\\(?<=\\\\{ \\)[\\\\w, ]+\\(?= \\\\}\\)\")",
+      "Bash(grep -q 'export type __TRACKED_VAR__' src/app/types/supabase.ts)",
+      "Bash(node -e \"const j=require\\('./src/assets/i18n/es.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline,dashboard_client:{timeline_title:j.dashboard_client?.timeline_title,timeline_empty:j.dashboard_client?.timeline_empty}},null,2\\)\\)\")",
+      "Bash(node -e \"const j=require\\('./src/assets/i18n/en.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline},null,2\\)\\)\")",
+      "Bash(node -e \"const j=require\\('./src/assets/i18n/fr.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline},null,2\\)\\)\")"
     ],
     "additionalDirectories": [
       "\\tmp"

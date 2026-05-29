@@ -191,14 +191,23 @@
     "no_documents": "Aucun document disponible pour le moment.",
     "timeline_title": "Historique",
     "timeline_empty": "Aucun événement à afficher pour le moment.",
-    "progress_label": "Progression du dossier"
+    "progress_label": "Progression du dossier",
+    "key_dates": "Dates du dossier"
   },
   "timeline": {
     "created": "Dossier créé",
     "estimator_assigned": "Estimateur assigné",
     "visit_scheduled": "Visite programmée",
     "visit_done": "Visite effectuée",
-    "tour_available": "Tour 3D disponible"
+    "estimated": "Estimation complétée",
+    "tour_available": "Tour 3D disponible",
+    "offer_received": "Offre reçue",
+    "offer_accepted": "Offre acceptée",
+    "contract_signed": "Contrat signé",
+    "works_started": "Début des travaux",
+    "execution_started": "Travaux commencés",
+    "contract_completed": "Contrat complété",
+    "contract_cancelled": "Contrat annulé"
   },
   "dashboard_builder": {
     "title": "Tableau de bord",
@@ -409,7 +418,13 @@
     "cancel_confirm_text": "Le contrat généré sera supprimé et toutes les offres reviendront à l’état en attente.",
     "cancel_confirm_btn": "Oui, annuler",
     "cancelling": "Annulation…",
-    "success_cancelled": "Contrat annulé. Le dossier est à nouveau ouvert aux offres."
+    "success_cancelled": "Contrat annulé. Le dossier est à nouveau ouvert aux offres.",
+    "reject_btn": "Rejeter cette offre",
+    "reject_title": "Rejeter l'offre acceptée ?",
+    "reject_text": "Le contrat généré sera supprimé. Le dossier reviendra à l'état estimé.",
+    "reject_confirm": "Oui, rejeter",
+    "rejecting": "Rejet en cours…",
+    "success_rejected": "Offre rejetée. Le dossier est revenu à l'état estimé."
   },
   "make_offer": {
     "editing_badge": "Modification de l'offre",
@@ -1100,7 +1115,16 @@
     "close_pdf": "Fermer le PDF",
     "pdf_preview": "Aperçu PDF",
     "location": "Emplacement",
-    "work_description": "Description des travaux"
+    "work_description": "Description des travaux",
+    "cancel_btn": "Annuler le contrat",
+    "cancel_title": "Annuler ce contrat",
+    "cancel_subtitle": "Cette action est irréversible",
+    "cancel_desc": "En annulant, le contrat sera résilié. L'offre du constructeur sélectionné passera à «refusée», les autres offres du dossier reviendront à «en attente» et le dossier repassera à «en offre» s'il reste d'autres offres, ou à «estimé» dans le cas contraire.",
+    "cancel_confirm": "Oui, annuler le contrat",
+    "cancel_close": "Non, conserver le contrat",
+    "cancelling": "Annulation en cours…",
+    "success_cancelled": "Contrat annulé avec succès.",
+    "err_cancel": "Impossible d'annuler le contrat. Veuillez réessayer."
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

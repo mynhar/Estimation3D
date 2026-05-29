@@ -13,24 +13,25 @@
   </div>
 }
 
-<div class="container-xl py-5 px-3 px-md-4 bo-wrap">
+<div class="container-xl py-5 px-3 px-md-4">
 
   <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="skel-header mb-4" aria-hidden="true">
-      <div class="skel skel--circle-sm"></div>
-      <div class="d-flex flex-column gap-2 flex-grow-1">
-        <div class="d-flex gap-2">
-          <div class="skel skel--num"></div>
+
+    <div class="exp-header mb-5" aria-hidden="true">
+      <div class="skel skel--back-btn flex-shrink-0"></div>
+      <div class="exp-header__body">
+        <div class="skel skel--eyebrow mb-2"></div>
+        <div class="skel skel--title-lg mb-3"></div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="skel skel--num-chip"></div>
           <div class="skel skel--badge-sm"></div>
+          <div class="skel skel--pill d-none d-sm-block"></div>
+          <div class="skel skel--pill d-none d-sm-block"></div>
         </div>
-        <div class="skel skel--servicio"></div>
-      </div>
-      <div class="d-flex gap-2">
-        <div class="skel skel--pill"></div>
-        <div class="skel skel--pill"></div>
       </div>
     </div>
+
     <div class="row g-4" aria-hidden="true">
       <div class="col-lg-8">
         <div class="skel-card mb-4">
@@ -54,27 +55,31 @@
           <div class="skel skel--section-title"></div>
           <div class="skel skel--badge-sm"></div>
         </div>
-        <div class="skel-card">
-          <div class="skel-card__body">
-            <div class="d-flex justify-content-between mb-3 gap-3">
-              <div class="skel skel--price"></div>
-              <div class="skel skel--badge-sm"></div>
+        <div class="offers-grid">
+          @for (_ of [1,2]; track $index) {
+            <div class="skel-card">
+              <div class="skel-card__body">
+                <div class="d-flex justify-content-between mb-3 gap-3">
+                  <div class="skel skel--price"></div>
+                  <div class="skel skel--badge-sm"></div>
+                </div>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <div class="skel skel--label mb-2"></div>
+                    <div class="skel skel--value"></div>
+                  </div>
+                  <div class="col-sm-3">
+                    <div class="skel skel--label mb-2"></div>
+                    <div class="skel skel--value"></div>
+                  </div>
+                  <div class="col-sm-3">
+                    <div class="skel skel--label mb-2"></div>
+                    <div class="skel skel--value"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <div class="skel skel--label mb-2"></div>
-                <div class="skel skel--value"></div>
-              </div>
-              <div class="col-sm-3">
-                <div class="skel skel--label mb-2"></div>
-                <div class="skel skel--value"></div>
-              </div>
-              <div class="col-sm-3">
-                <div class="skel skel--label mb-2"></div>
-                <div class="skel skel--value"></div>
-              </div>
-            </div>
-          </div>
+          }
         </div>
       </div>
       <div class="col-lg-4">
@@ -87,7 +92,7 @@
           </div>
         </div>
         <div class="accept-card">
-          <div class="accept-hint" aria-hidden="true">
+          <div class="accept-hint">
             <div class="skel skel--circle-lg mb-3"></div>
             <div class="skel skel--label" style="width:55%"></div>
           </div>
@@ -114,48 +119,46 @@
   <!-- ── Contenido ──────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- Encabezado ──────────────────────────────────────────────────────────── -->
-    <header class="exp-header mb-4">
-      <div class="exp-header__left">
-        <button class="btn-back" type="button" (click)="volver()"
-                [title]="'common.back' | translate">
-          <i class="bi bi-arrow-left" aria-hidden="true"></i>
-        </button>
-        <div>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="exp-num">{{ expediente()!.numero }}</span>
-            <span class="badge rounded-pill px-3 py-1 {{ expedienteBadgeClass(expediente()!.estado) }}">
-              {{ ('state.' + expediente()!.estado) | translate }}
+    <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+    <header class="exp-header mb-5">
+      <button class="btn-back flex-shrink-0" type="button" (click)="volver()"
+              [title]="'common.back' | translate">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      </button>
+
+      <div class="exp-header__body">
+        <span class="eyebrow mb-1 d-block">{{ 'role.client' | translate }}</span>
+        <h1 class="exp-title">{{ servicioNombre() }}</h1>
+        <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+          <span class="exp-num">{{ expediente()!.numero }}</span>
+          <span class="badge rounded-pill px-3 py-1 {{ expedienteBadgeClass(expediente()!.estado) }}">
+            {{ ('state.' + expediente()!.estado) | translate }}
+          </span>
+          @if (ofertas().length > 0) {
+            <span class="kpi-pill kpi-pill--ofertas">
+              <i class="bi bi-people me-1" aria-hidden="true"></i>
+              {{ ofertas().length }} {{ 'common.offers_count' | translate }}
             </span>
-          </div>
-          <p class="exp-servicio-label mb-0">{{ servicioNombre() }}</p>
+          }
+          @if (estimacion()?.costo_estimado != null) {
+            <span class="kpi-pill kpi-pill--costo">
+              <i class="bi bi-calculator me-1" aria-hidden="true"></i>
+              {{ formatCosto(estimacion()!.costo_estimado!) }}
+            </span>
+          }
         </div>
-      </div>
-      <div class="exp-header__kpis">
-        @if (ofertas().length > 0) {
-          <span class="kpi-pill kpi-pill--ofertas">
-            <i class="bi bi-people me-1" aria-hidden="true"></i>
-            {{ ofertas().length }} {{ 'common.offers_count' | translate }}
-          </span>
-        }
-        @if (estimacion()?.costo_estimado != null) {
-          <span class="kpi-pill kpi-pill--costo">
-            <i class="bi bi-calculator me-1" aria-hidden="true"></i>
-            {{ formatCosto(estimacion()!.costo_estimado!) }}
-          </span>
-        }
       </div>
     </header>
 
-    <!-- Grid principal ───────────────────────────────────────────────────────── -->
+    <!-- ── Grid principal ─────────────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
-      <!-- ═══ LEFT: Informe del estimador + Ofertas ═══════════════════════════ -->
-      <div class="col-lg-8">
+      <!-- ═══ LEFT: Informe del estimador + Ofertas ════════════════════════ -->
+      <div class="col-lg-8 d-flex flex-column gap-4">
 
-        <!-- Informe del estimador ──────────────────────────────────────────── -->
+        <!-- Informe del estimador ────────────────────────────────────────── -->
         @if (estimacion()) {
-          <div class="detail-card mb-4">
+          <div class="detail-card">
             <div class="detail-card__head">
               <i class="bi bi-clipboard-check me-2 icon-gold" aria-hidden="true"></i>
               <span class="detail-card__head-title">{{ 'file.estimator_report' | translate }}</span>
@@ -179,7 +182,6 @@
                 }
               </div>
 
-              <!-- Costo aproximado -->
               @if (estimacion()!.costo_estimado !== null) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'file.estimated_cost' | translate }}</p>
@@ -200,7 +202,6 @@
                 </div>
               }
 
-              <!-- Tour virtual -->
               @if (urlsTour.length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">
@@ -218,17 +219,14 @@
                       }
                       <div class="ratio ratio-16x9 rounded-3 overflow-hidden">
                         <iframe [src]="getSafeUrl(url)"
-                                allowfullscreen
-                                allow="xr-spatial-tracking"
-                                title="Tour virtual Matterport">
-                        </iframe>
+                                allowfullscreen allow="xr-spatial-tracking"
+                                title="Tour virtual Matterport"></iframe>
                       </div>
                     </div>
                   }
                 </div>
               }
 
-              <!-- Fotos del sitio -->
               @if (fotosExp().length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'file.site_photos' | translate }}</p>
@@ -246,7 +244,6 @@
                 </div>
               }
 
-              <!-- Videos del estimador -->
               @if (videosExp().length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'builder_offer.videos' | translate }}</p>
@@ -294,7 +291,6 @@
                 </div>
               }
 
-              <!-- Documentos técnicos del estimador -->
               @if (documentosExp().length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'file.technical_docs' | translate }}</p>
@@ -322,144 +318,151 @@
           </div>
         }
 
-        <!-- Sección de ofertas ──────────────────────────────────────────────── -->
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <h2 class="offers-section-title mb-0">{{ 'builder_offer.title' | translate }}</h2>
-          <span class="offers-count-badge">{{ ofertas().length }}</span>
-        </div>
-
-        @if (exitoMsg()) {
-          <div class="status-msg status-msg--success mb-3" role="status">
-            <i class="bi bi-check-circle flex-shrink-0" aria-hidden="true"></i>
-            {{ exitoMsg() | translate }}
-          </div>
-        }
-        @if (errorMsg() && !cargando()) {
-          <div class="status-msg status-msg--danger mb-3" role="alert">
-            {{ errorMsg() | translate }}
-          </div>
-        }
-
-        @if (ofertas().length === 0) {
-          <div class="empty-panel empty-panel--sm">
-            <i class="bi bi-inbox icon-empty" aria-hidden="true"></i>
-            <p class="empty-panel__title">{{ 'builder_offer.no_offers' | translate }}</p>
-            <p class="empty-panel__text">{{ 'builder_offer.no_offers_text' | translate }}</p>
-          </div>
-
-        } @else {
-          <div class="offers-grid">
-            @for (oferta of ofertas(); track oferta.id; let i = $index) {
-              <div class="offer-card"
-                   [class.offer-card--selected]="esSeleccionada(oferta.id)"
-                   [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
-                   [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
-                   (click)="seleccionar(oferta.id)">
-                <div class="offer-card__body">
-
-                  <!-- Top: orden + estado -->
-                  <div class="offer-card__top">
-                    <span class="offer-card__index">#{{ i + 1 }}</span>
-                    <div class="d-flex align-items-center gap-1">
-                      @if (esSeleccionada(oferta.id)) {
-                        <span class="selected-badge">
-                          <i class="bi bi-check2" aria-hidden="true"></i>
-                        </span>
-                      }
-                      <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
-                        {{ ofertaLabel(oferta.estado) | translate }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Precio -->
-                  <div class="offer-card__price-block">
-                    <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
-                    <p class="offer-price-label mb-0">{{ 'builder_offer.total_price' | translate }}</p>
-                  </div>
-
-                  <!-- Constructor -->
-                  <div class="offer-card__section">
-                    <p class="offer-meta-label">{{ 'offers_received.builder' | translate }}</p>
-                    <p class="offer-builder-name mb-0">{{ oferta.constructor_nombre }}</p>
-                    @if (oferta.constructor_telefono) {
-                      <a href="tel:{{ oferta.constructor_telefono }}"
-                         class="offer-contact d-block mt-1"
-                         (click)="$event.stopPropagation()">
-                        <i class="bi bi-telephone me-1" aria-hidden="true"></i>
-                        {{ oferta.constructor_telefono }}
-                      </a>
-                    }
-                  </div>
-
-                  <!-- Plazos y fechas -->
-                  <div class="offer-card__meta-grid">
-                    <div class="offer-meta-item">
-                      <span class="offer-meta-label">{{ 'offers_received.deadline' | translate }}</span>
-                      <span class="offer-meta-value">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</span>
-                    </div>
-                    <div class="offer-meta-item">
-                      <span class="offer-meta-label">{{ 'offer.start_date' | translate }}</span>
-                      <span class="offer-meta-value">{{ formatFecha(oferta.fecha_inicio) }}</span>
-                    </div>
-                    @if (oferta.garantia_anos) {
-                      <div class="offer-meta-item">
-                        <span class="offer-meta-label">{{ 'offer.warranty' | translate }}</span>
-                        <span class="offer-meta-value">{{ oferta.garantia_anos }} {{ 'offer.years' | translate }}</span>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Descripción -->
-                  @if (oferta.descripcion) {
-                    <div class="offer-card__section">
-                      <p class="offer-meta-label">{{ 'builder_offer.approach' | translate }}</p>
-                      <p class="offer-desc mb-0">{{ oferta.descripcion }}</p>
-                    </div>
-                  }
-
-                  <!-- Video -->
-                  @if (oferta.videos.length > 0) {
-                    <div class="offer-card__section" (click)="$event.stopPropagation()">
-                      @for (v of oferta.videos; track v.id) {
-                        <button class="offer-video-btn w-100" type="button"
-                                [class.offer-video-btn--active]="videoOfertaUrl(oferta.id) !== null"
-                                (click)="toggleVideoOferta(oferta.id, v)">
-                          <i class="bi me-1" aria-hidden="true"
-                             [class.bi-stop-circle]="videoOfertaUrl(oferta.id) !== null"
-                             [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"></i>
-                          {{ videoOfertaUrl(oferta.id) !== null
-                              ? ('builder_offer.close_video' | translate)
-                              : ('builder_offer.view_video' | translate) }}
-                        </button>
-                      }
-                      @if (videoOfertaUrl(oferta.id) !== null) {
-                        <video class="offer-video-el mt-2" controls autoplay
-                               [src]="videoOfertaUrl(oferta.id)!">
-                          Tu navegador no soporta reproducción de video.
-                        </video>
-                      }
-                    </div>
-                  }
-
-                  <!-- Documentos -->
-                  @if (oferta.documentos.length > 0) {
-                    <div class="offer-docs" (click)="$event.stopPropagation()">
-                      @for (d of oferta.documentos; track d.id) {
-                        <button class="offer-doc-chip" type="button" (click)="verDocumento(d)">
-                          <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
-                          <span class="offer-doc-chip__name">{{ d.nombre_archivo }}</span>
-                          <span class="offer-doc-chip__size">{{ formatTamano(d.tamano_bytes) }}</span>
-                        </button>
-                      }
-                    </div>
-                  }
-
-                </div><!-- /offer-card__body -->
-              </div><!-- /offer-card -->
+        <!-- ── Sección de ofertas ──────────────────────────────────────────── -->
+        <div>
+          <div class="offers-section-header mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <h2 class="offers-section-title mb-0">{{ 'builder_offer.title' | translate }}</h2>
+              <span class="offers-count-badge">{{ ofertas().length }}</span>
+            </div>
+            @if (ofertas().length > 0) {
+              <p class="offers-section-hint mb-0">{{ 'builder_offer.select_hint_text' | translate }}</p>
             }
           </div>
-        }
+
+          @if (exitoMsg()) {
+            <div class="status-msg status-msg--success mb-3" role="status">
+              <i class="bi bi-check-circle flex-shrink-0" aria-hidden="true"></i>
+              {{ exitoMsg() | translate }}
+            </div>
+          }
+          @if (errorMsg() && !cargando()) {
+            <div class="status-msg status-msg--danger mb-3" role="alert">
+              {{ errorMsg() | translate }}
+            </div>
+          }
+
+          @if (ofertas().length === 0) {
+            <div class="empty-panel empty-panel--sm">
+              <i class="bi bi-inbox icon-empty" aria-hidden="true"></i>
+              <p class="empty-panel__title">{{ 'builder_offer.no_offers' | translate }}</p>
+              <p class="empty-panel__text">{{ 'builder_offer.no_offers_text' | translate }}</p>
+            </div>
+
+          } @else {
+            <div class="offers-grid">
+              @for (oferta of ofertas(); track oferta.id; let i = $index) {
+                <div class="offer-card"
+                     [class.offer-card--selected]="esSeleccionada(oferta.id)"
+                     [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
+                     [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
+                     (click)="seleccionar(oferta.id)">
+                  <div class="offer-card__body">
+
+                    <!-- Top: orden + estado -->
+                    <div class="offer-card__top">
+                      <span class="offer-card__index">#{{ i + 1 }}</span>
+                      <div class="d-flex align-items-center gap-1">
+                        @if (esSeleccionada(oferta.id)) {
+                          <span class="selected-badge">
+                            <i class="bi bi-check2" aria-hidden="true"></i>
+                          </span>
+                        }
+                        <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
+                          {{ ofertaLabel(oferta.estado) | translate }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="offer-card__price-block">
+                      <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
+                      <p class="offer-price-label mb-0">{{ 'builder_offer.total_price' | translate }}</p>
+                    </div>
+
+                    <!-- Constructor -->
+                    <div class="offer-card__section">
+                      <p class="offer-meta-label">{{ 'offers_received.builder' | translate }}</p>
+                      <p class="offer-builder-name mb-0">{{ oferta.constructor_nombre }}</p>
+                      @if (oferta.constructor_telefono) {
+                        <a href="tel:{{ oferta.constructor_telefono }}"
+                           class="offer-contact d-block mt-1"
+                           (click)="$event.stopPropagation()">
+                          <i class="bi bi-telephone me-1" aria-hidden="true"></i>
+                          {{ oferta.constructor_telefono }}
+                        </a>
+                      }
+                    </div>
+
+                    <!-- Plazos y fechas -->
+                    <div class="offer-card__meta-grid">
+                      <div class="offer-meta-item">
+                        <span class="offer-meta-label">{{ 'offers_received.deadline' | translate }}</span>
+                        <span class="offer-meta-value">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</span>
+                      </div>
+                      <div class="offer-meta-item">
+                        <span class="offer-meta-label">{{ 'offer.start_date' | translate }}</span>
+                        <span class="offer-meta-value">{{ formatFecha(oferta.fecha_inicio) }}</span>
+                      </div>
+                      @if (oferta.garantia_anos) {
+                        <div class="offer-meta-item">
+                          <span class="offer-meta-label">{{ 'offer.warranty' | translate }}</span>
+                          <span class="offer-meta-value">{{ oferta.garantia_anos }} {{ 'offer.years' | translate }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Descripción -->
+                    @if (oferta.descripcion) {
+                      <div class="offer-card__section">
+                        <p class="offer-meta-label">{{ 'builder_offer.approach' | translate }}</p>
+                        <p class="offer-desc mb-0">{{ oferta.descripcion }}</p>
+                      </div>
+                    }
+
+                    <!-- Video -->
+                    @if (oferta.videos.length > 0) {
+                      <div class="offer-card__section" (click)="$event.stopPropagation()">
+                        @for (v of oferta.videos; track v.id) {
+                          <button class="offer-video-btn w-100" type="button"
+                                  [class.offer-video-btn--active]="videoOfertaUrl(oferta.id) !== null"
+                                  (click)="toggleVideoOferta(oferta.id, v)">
+                            <i class="bi me-1" aria-hidden="true"
+                               [class.bi-stop-circle]="videoOfertaUrl(oferta.id) !== null"
+                               [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"></i>
+                            {{ videoOfertaUrl(oferta.id) !== null
+                                ? ('builder_offer.close_video' | translate)
+                                : ('builder_offer.view_video' | translate) }}
+                          </button>
+                        }
+                        @if (videoOfertaUrl(oferta.id) !== null) {
+                          <video class="offer-video-el mt-2" controls autoplay
+                                 [src]="videoOfertaUrl(oferta.id)!">
+                            Tu navegador no soporta reproducción de video.
+                          </video>
+                        }
+                      </div>
+                    }
+
+                    <!-- Documentos -->
+                    @if (oferta.documentos.length > 0) {
+                      <div class="offer-docs" (click)="$event.stopPropagation()">
+                        @for (d of oferta.documentos; track d.id) {
+                          <button class="offer-doc-chip" type="button" (click)="verDocumento(d)">
+                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            <span class="offer-doc-chip__name">{{ d.nombre_archivo }}</span>
+                            <span class="offer-doc-chip__size">{{ formatTamano(d.tamano_bytes) }}</span>
+                          </button>
+                        }
+                      </div>
+                    }
+
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
 
       </div><!-- /col-lg-8 -->
 
@@ -507,7 +510,9 @@
 
             @if (!ofertaSeleccionada()) {
               <div class="accept-hint">
-                <i class="bi bi-hand-index-thumb icon-accept-hint" aria-hidden="true"></i>
+                <div class="accept-hint__icon" aria-hidden="true">
+                  <i class="bi bi-hand-index-thumb"></i>
+                </div>
                 <p class="accept-hint__title">{{ 'builder_offer.select_hint_title' | translate }}</p>
                 <p class="accept-hint__text">{{ 'builder_offer.select_hint_text' | translate }}</p>
               </div>
@@ -515,7 +520,6 @@
             } @else {
               <p class="accept-section-label">{{ 'builder_offer.selected_title' | translate }}</p>
 
-              <!-- Preview de la oferta seleccionada -->
               <div class="selected-preview mb-4">
                 <p class="selected-preview__price">
                   {{ formatCosto(ofertaSeleccionada()!.precio) }}
@@ -558,53 +562,51 @@
               @if (yaContratado() && ofertaSeleccionada()!.estado !== 'aceptada') {
                 <p class="accept-replace-warn">{{ 'builder_offer.replace_warning' | translate }}</p>
               }
+
+              @if (yaContratado() && ofertaSeleccionada()!.estado === 'aceptada') {
+                <div class="mt-3">
+                  @if (!confirmandoRechazo()) {
+                    <button class="btn-reject-outline" type="button"
+                            [disabled]="aceptando() || rechazando()"
+                            (click)="confirmandoRechazo.set(true)">
+                      <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+                      {{ 'builder_offer.reject_btn' | translate }}
+                    </button>
+                  } @else {
+                    <div class="reject-confirm-panel">
+                      <p class="reject-confirm-panel__title">
+                        <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+                        {{ 'builder_offer.reject_title' | translate }}
+                      </p>
+                      <p class="reject-confirm-panel__text">
+                        {{ 'builder_offer.reject_text' | translate }}
+                      </p>
+                      <div class="d-flex gap-2">
+                        <button class="btn-reject-confirm flex-grow-1" type="button"
+                                [disabled]="rechazando()"
+                                (click)="rechazarOferta()">
+                          @if (rechazando()) {
+                            <span class="spinner-border spinner-border-sm me-1"
+                                  role="status" aria-hidden="true"></span>
+                          }
+                          {{ rechazando()
+                              ? ('builder_offer.rejecting' | translate)
+                              : ('builder_offer.reject_confirm' | translate) }}
+                        </button>
+                        <button class="btn-outline-sm" type="button"
+                                [disabled]="rechazando()"
+                                (click)="confirmandoRechazo.set(false)">
+                          {{ 'common.back' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             }
 
           </div>
 
-          <!-- Cancelar contrato -->
-          @if (yaContratado()) {
-            <div class="mt-3">
-              @if (!confirmandoCancelacion()) {
-                <button class="btn-cancel-outline" type="button"
-                        [disabled]="aceptando()"
-                        (click)="confirmandoCancelacion.set(true)">
-                  <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
-                  {{ 'builder_offer.cancel_contract' | translate }}
-                </button>
-              } @else {
-                <div class="cancel-confirm-panel">
-                  <p class="cancel-confirm-panel__title">
-                    <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
-                    {{ 'builder_offer.cancel_confirm_title' | translate }}
-                  </p>
-                  <p class="cancel-confirm-panel__text">
-                    {{ 'builder_offer.cancel_confirm_text' | translate }}
-                  </p>
-                  <div class="d-flex gap-2">
-                    <button class="btn-danger-confirm flex-grow-1" type="button"
-                            [disabled]="cancelando()"
-                            (click)="cancelarContrato()">
-                      @if (cancelando()) {
-                        <span class="spinner-border spinner-border-sm me-1"
-                              role="status" aria-hidden="true"></span>
-                      }
-                      {{ cancelando()
-                          ? ('builder_offer.cancelling' | translate)
-                          : ('builder_offer.cancel_confirm_btn' | translate) }}
-                    </button>
-                    <button class="btn-outline-sm" type="button"
-                            [disabled]="cancelando()"
-                            (click)="confirmandoCancelacion.set(false)">
-                      {{ 'common.back' | translate }}
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Volver -->
           <div class="mt-3">
             <button class="btn-nav-back" type="button" (click)="volver()">
               <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
@@ -615,7 +617,7 @@
         </div>
       </div><!-- /col-lg-4 -->
 
-    </div><!-- /row -->
+    </div>
 
   }
 

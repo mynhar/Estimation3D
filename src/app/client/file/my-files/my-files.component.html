@@ -1,29 +1,36 @@
-<div class="container-xl py-5 px-3 px-md-4 mf-wrap">
+<div class="container-xl py-5 px-3 px-md-4">
 
   <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
   <header class="mf-header mb-5">
     <div class="mf-header__text">
+      <span class="eyebrow mb-2 d-block">{{ 'role.client' | translate }}</span>
       <h1 class="mf-title">{{ 'file.my_files' | translate }}</h1>
       @if (!cargando()) {
-        <p class="mf-lead">
+        <div class="mf-stats d-flex align-items-center flex-wrap gap-2 mt-2">
           @if (expedientes().length === 0) {
-            {{ 'file.no_files_yet' | translate }}
+            <span class="mf-stat-text">{{ 'file.no_files_yet' | translate }}</span>
           } @else {
-            {{ countTodos() }} {{ countTodos() !== 1 ? ('common.files_plural' | translate) : ('common.file_singular' | translate) }}
+            <span class="mf-stat-text">
+              {{ countTodos() }}&nbsp;{{ countTodos() !== 1 ? ('common.files_plural' | translate) : ('common.file_singular' | translate) }}
+            </span>
             @if (countActivos() > 0) {
-              <span class="mf-stat-sep">·</span>
-              <span class="mf-stat mf-stat--gold">{{ countActivos() }} {{ 'file.active' | translate }}</span>
+              <span class="mf-pill mf-pill--gold">
+                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+                {{ countActivos() }} {{ 'file.active' | translate }}
+              </span>
             }
             @if (countFinalizados() > 0) {
-              <span class="mf-stat-sep">·</span>
-              <span class="mf-stat mf-stat--green">{{ countFinalizados() }} {{ 'file.finished' | translate }}</span>
+              <span class="mf-pill mf-pill--green">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                {{ countFinalizados() }} {{ 'file.finished' | translate }}
+              </span>
             }
           }
-        </p>
+        </div>
       }
     </div>
     <a routerLink="/client/file/create"
-       class="btn btn-primary mf-header__cta flex-shrink-0">
+       class="btn btn-primary btn-lg mf-header__cta flex-shrink-0">
       <i class="bi bi-plus-lg" aria-hidden="true"></i>
       <span class="d-none d-sm-inline">{{ 'file.new_file' | translate }}</span>
       <span class="d-sm-none">{{ 'common.new' | translate }}</span>
@@ -32,8 +39,8 @@
 
   <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="row g-3 row-cols-1 row-cols-md-2" aria-hidden="true">
-      @for (_ of [1,2,3,4]; track $index) {
+    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3" aria-hidden="true">
+      @for (_ of [1,2,3,4,5,6]; track $index) {
         <div class="col">
           <div class="skel-card h-100">
             <div class="skel skel-card__accent"></div>
@@ -42,15 +49,14 @@
                 <div class="skel skel--num"></div>
                 <div class="skel skel--badge-sm"></div>
               </div>
-              <div class="skel skel--title mb-2"></div>
+              <div class="skel skel--title mb-1"></div>
+              <div class="skel skel--title skel--title-short mb-3"></div>
               <div class="skel skel--date mb-4"></div>
               <hr class="skel-divider my-3">
               <div class="skel-pipeline mb-3">
                 @for (dot of [1,2,3,4,5]; track dot) {
                   <div class="skel skel--dot"></div>
-                  @if (dot < 5) {
-                    <div class="skel skel--connector"></div>
-                  }
+                  @if (dot < 5) { <div class="skel skel--connector"></div> }
                 }
               </div>
               <div class="skel skel--hint mb-4"></div>
@@ -69,7 +75,7 @@
       </div>
       <p class="empty-title">{{ 'file.no_files_title' | translate }}</p>
       <p class="empty-text">{{ 'file.no_files_3d_text' | translate }}</p>
-      <a routerLink="/client/file/create" class="btn btn-primary px-4 mt-2">
+      <a routerLink="/client/file/create" class="btn btn-primary px-5 mt-2">
         <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>{{ 'dashboard_client.create_first' | translate }}
       </a>
     </div>
@@ -107,7 +113,7 @@
       }
     </div>
 
-    <!-- Sin resultados con el filtro activo -->
+    <!-- Sin resultados con filtro activo -->
     @if (expedientesFiltrados().length === 0) {
       <div class="empty-panel empty-panel--filter">
         <div class="empty-icon empty-icon--muted">
@@ -115,14 +121,15 @@
         </div>
         <p class="empty-title">{{ 'common.no_results' | translate }}</p>
         <p class="empty-text">{{ 'file.no_match' | translate }}</p>
-        <button class="btn btn-outline-secondary mt-2" (click)="filtro.set('todos')">
+        <button class="btn btn-outline-secondary mt-2 px-4" (click)="filtro.set('todos')">
           <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.clear_filter' | translate }}
         </button>
       </div>
 
     <!-- Grid de expedientes -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-md-2">
+
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
         @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
             <div class="file-card h-100"
@@ -130,34 +137,36 @@
                  [class.file-card--oferta]="exp.estado === 'en_oferta'"
                  [style.--acento]="estadoCfg(exp.estado).color">
 
-              <!-- Barra de color lateral -->
+              <!-- Barra lateral de color de estado -->
               <div class="file-accent" aria-hidden="true"></div>
 
               <div class="file-body d-flex flex-column">
 
                 <!-- Número + badge de estado -->
-                <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                   <span class="file-num">{{ exp.numero }}</span>
-                  <span class="file-badge badge {{ estadoCfg(exp.estado).clase }}">
+                  <span class="badge file-badge {{ estadoCfg(exp.estado).clase }}">
                     <i class="bi {{ estadoCfg(exp.estado).icono }} me-1" aria-hidden="true"></i>
                     {{ ('state.' + exp.estado) | translate }}
                   </span>
                 </div>
 
-                <!-- Servicio -->
-                <p class="file-servicio mb-1">{{ servicioNombre(exp.servicio) }}</p>
+                <!-- Nombre del servicio — título editorial -->
+                <p class="file-servicio mb-2">{{ servicioNombre(exp.servicio) }}</p>
 
                 <!-- Fecha de visita -->
                 <p class="file-fecha mb-0">
                   <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
-                  {{ 'file.visit_date' | translate }}: {{ formatFecha(exp.fecha_visita) }}
+                  {{ formatFecha(exp.fecha_visita) }}
                 </p>
 
                 <hr class="file-divider my-3" />
 
                 <!-- Pipeline de progreso -->
                 @if (exp.estado !== 'cancelado') {
-                  <div class="pipeline mb-3" role="list" [attr.aria-label]="'file.pipeline_label' | translate">
+                  <div class="pipeline mb-3"
+                       role="list"
+                       [attr.aria-label]="'file.pipeline_label' | translate">
                     @for (step of PIPELINE; let i = $index; track step.label) {
                       @if (i > 0) {
                         <div class="pipeline__connector"
@@ -179,11 +188,12 @@
                   </div>
                 } @else {
                   <div class="cancelado-tag mb-3">
-                    <i class="bi bi-x-circle me-2" aria-hidden="true"></i>{{ 'file.cancelled' | translate }}
+                    <i class="bi bi-x-circle me-2" aria-hidden="true"></i>
+                    {{ 'file.cancelled' | translate }}
                   </div>
                 }
 
-                <!-- Hint contextual del siguiente paso -->
+                <!-- Hint contextual -->
                 <div class="file-hint mt-auto">
                   <p class="file-hint__text mb-0">
                     <i class="bi {{ estadoCfg(exp.estado).icono }} me-1" aria-hidden="true"
@@ -192,34 +202,35 @@
                   </p>
                 </div>
 
-                <!-- Descripción (2 líneas) -->
+                <!-- Descripción breve (2 líneas) -->
                 @if (exp.descripcion) {
                   <p class="file-desc mt-2 mb-0">{{ exp.descripcion }}</p>
                 }
 
-                <!-- CTA: ver expediente -->
-                <a [routerLink]="['/client/file/my-file', exp.id]"
-                   class="btn btn-outline-primary btn-sm w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
-                  <i class="bi bi-folder2-open" aria-hidden="true"></i>{{ 'file.see_file' | translate }}
-                </a>
-
-                <!-- CTA: revisar ofertas (estado en_oferta) -->
-                @if (exp.estado === 'en_oferta') {
-                  <a routerLink="/client/offers-received"
-                     class="file-cta-oferta w-100 mt-2 d-flex align-items-center justify-content-center gap-2">
-                    <i class="bi bi-eye" aria-hidden="true"></i>
-                    {{ 'file.review_offers_received' | translate }}
-                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                <!-- Acciones -->
+                <div class="file-actions mt-3">
+                  <a [routerLink]="['/client/file/my-file', exp.id]"
+                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-folder2-open" aria-hidden="true"></i>
+                    {{ 'file.see_file' | translate }}
                   </a>
-                }
 
-                <!-- Tag: contratado -->
-                @if (exp.estado === 'contratado') {
-                  <div class="contratado-tag mt-2 d-flex align-items-center justify-content-center gap-2 py-2">
-                    <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
-                    {{ 'file.contracted_active' | translate }}
-                  </div>
-                }
+                  @if (exp.estado === 'en_oferta') {
+                    <a routerLink="/client/offers-received"
+                       class="file-cta-oferta w-100 mt-2 d-flex align-items-center justify-content-center gap-2">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                      {{ 'file.review_offers_received' | translate }}
+                      <i class="bi bi-arrow-right ms-auto" aria-hidden="true"></i>
+                    </a>
+                  }
+
+                  @if (exp.estado === 'contratado') {
+                    <div class="contratado-tag mt-2 d-flex align-items-center justify-content-center gap-2 py-2">
+                      <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                      {{ 'file.contracted_active' | translate }}
+                    </div>
+                  }
+                </div>
 
               </div>
             </div>
@@ -233,6 +244,7 @@
         [pageSize]="POR_PAGINA"
         (pageChange)="paginaActual.set($event)">
       </app-pagination>
+
     }
 
   }

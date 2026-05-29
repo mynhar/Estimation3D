@@ -53,6 +53,21 @@ export interface TimelineEvento {
   tipo:       string;
 }
 
+interface OfertaHistorialItem {
+  id:        string;
+  creado_en: string;
+  estado:    string;
+}
+
+interface ContratoHistorialItem {
+  id:             string;
+  estado:         string;
+  generado_en:    string;
+  firmado_en:     string | null;
+  actualizado_en: string;
+  oferta:         { fecha_inicio: string | null } | null;
+}
+
 // Priority sort: most urgent states first
 function estadoPriority(e: ExpedienteCliente): number {
   const p: Record<string, number> = {
@@ -97,6 +112,10 @@ export class DashboardComponent implements OnInit {
   tourUrls    = signal<string[]>([]);
   videos      = signal<ArchivoRow[]>([]);
   mediaActiva = signal<number>(0);
+
+  // Historia del expediente activo
+  ofertasHistorial  = signal<OfertaHistorialItem[]>([]);
+  contratoHistorial = signal<ContratoHistorialItem | null>(null);
 
   readonly FASES = FASES;
 
@@ -158,26 +177,97 @@ export class DashboardComponent implements OnInit {
   timelineEventos = computed((): TimelineEvento[] => {
     const d = this.detalleActivo();
     if (!d) return [];
-    const events: TimelineEvento[] = [
-      { fecha: d.creado_en, tipo: 'creacion', icon: 'bi-folder-plus', titulo: 'timeline.created' },
-    ];
+
+    const events: TimelineEvento[] = [];
+
+    // ── 1. Expediente creado ──────────────────────────────────────────────
+    events.push({ fecha: d.creado_en, tipo: 'creacion', icon: 'bi-folder-plus', titulo: 'timeline.created' });
+
+    // ── 2. Estimador asignado ─────────────────────────────────────────────
     if (d.estimador_nombre) {
       events.push({
         fecha: d.fecha_visita, tipo: 'asignacion', icon: 'bi-person-check',
         titulo: 'timeline.estimator_assigned', subtitulo: d.estimador_nombre,
       });
     }
+
+    // ── 3. Visita / estimación realizada ──────────────────────────────────
     if (d.fecha_visita_real) {
-      events.push({ fecha: d.fecha_visita_real, tipo: 'visita', icon: 'bi-camera', titulo: 'timeline.visit_done' });
+      events.push({
+        fecha: d.fecha_visita_real, tipo: 'visita_real',
+        icon: 'bi-calendar-check', titulo: 'timeline.visit_done',
+      });
     } else if (d.fecha_visita && d.estimador_nombre) {
-      events.push({ fecha: d.fecha_visita, tipo: 'visita_prog', icon: 'bi-calendar-check', titulo: 'timeline.visit_scheduled' });
+      events.push({
+        fecha: d.fecha_visita, tipo: 'visita_prog',
+        icon: 'bi-calendar-check', titulo: 'timeline.visit_scheduled',
+      });
     }
+
+    // ── 4. Tour / videos disponibles ─────────────────────────────────────
     if (this.tourUrls().length > 0 || this.videos().length > 0) {
       events.push({
         fecha: d.fecha_visita_real ?? d.fecha_visita, tipo: 'tour',
         icon: 'bi-camera-video', titulo: 'timeline.tour_available',
       });
     }
+
+    // ── 5. Ofertas recibidas (una por oferta) ─────────────────────────────
+    const ofertas = this.ofertasHistorial();
+    for (let i = 0; i < ofertas.length; i++) {
+      events.push({
+        fecha: ofertas[i].creado_en,
+        tipo:  `oferta_${i}`,
+        icon:  'bi-chat-square-quote',
+        titulo: 'timeline.offer_received',
+        subtitulo: `#${i + 1}`,
+      });
+    }
+
+    // ── 6. Contrato (oferta aceptada → firmado → ejecución → fin) ────────
+    const contrato = this.contratoHistorial();
+    if (contrato) {
+      events.push({
+        fecha: contrato.generado_en, tipo: 'oferta_aceptada',
+        icon: 'bi-handshake', titulo: 'timeline.offer_accepted',
+      });
+
+      if (contrato.firmado_en) {
+        events.push({
+          fecha: contrato.firmado_en, tipo: 'contrato_firmado',
+          icon: 'bi-pen', titulo: 'timeline.contract_signed',
+        });
+      }
+
+      if (contrato.oferta?.fecha_inicio) {
+        events.push({
+          fecha: contrato.oferta.fecha_inicio, tipo: 'inicio_obras',
+          icon: 'bi-hammer', titulo: 'timeline.works_started',
+        });
+      }
+
+      if (contrato.estado === 'en_ejecucion') {
+        events.push({
+          fecha: contrato.actualizado_en, tipo: 'ejecucion_iniciada',
+          icon: 'bi-play-circle', titulo: 'timeline.execution_started',
+        });
+      }
+
+      if (contrato.estado === 'completado') {
+        events.push({
+          fecha: contrato.actualizado_en, tipo: 'contrato_completado',
+          icon: 'bi-check2-all', titulo: 'timeline.contract_completed',
+        });
+      }
+
+      if (contrato.estado === 'cancelado') {
+        events.push({
+          fecha: contrato.actualizado_en, tipo: 'contrato_cancelado',
+          icon: 'bi-x-circle', titulo: 'timeline.contract_cancelled',
+        });
+      }
+    }
+
     return events.sort((a, b) =>
       new Date(b.fecha ?? '').getTime() - new Date(a.fecha ?? '').getTime()
     );
@@ -415,6 +505,8 @@ export class DashboardComponent implements OnInit {
     this.detalleActivo.set(null);
     this.tourUrls.set([]);
     this.videos.set([]);
+    this.ofertasHistorial.set([]);
+    this.contratoHistorial.set(null);
     this.calExpandido.set(false);
     await this.cargarDetalle(id);
   }
@@ -422,10 +514,12 @@ export class DashboardComponent implements OnInit {
   private async cargarDetalle(id: string) {
     this.cargandoDetalle.set(true);
     this.mediaActiva.set(0);
+
     const [detalleResult, vidsResult] = await Promise.allSettled([
       this.expedienteService.getVistaParaCliente(id),
       this.archivoService.listarPorExpediente(id),
     ]);
+
     if (detalleResult.status === 'fulfilled') {
       this.detalleActivo.set(detalleResult.value);
       this.tourUrls.set(EstimacionService.parseUrls(detalleResult.value.url_tour));
@@ -438,6 +532,27 @@ export class DashboardComponent implements OnInit {
       console.error('[Dashboard videos]', (vidsResult.reason as any)?.message);
       this.videos.set([]);
     }
+
+    // Historial: ofertas y contrato del expediente
+    const db = this.auth.client;
+    const [ofertasRes, contratoRes] = await Promise.all([
+      db.from('oferta')
+        .select('id, creado_en, estado')
+        .eq('expediente_id', id)
+        .order('creado_en', { ascending: true }),
+      db.from('contrato')
+        .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
+        .eq('expediente_id', id)
+        .maybeSingle(),
+    ]);
+
+    this.ofertasHistorial.set(
+      ofertasRes.error ? [] : ((ofertasRes.data ?? []) as OfertaHistorialItem[])
+    );
+    this.contratoHistorial.set(
+      contratoRes.error ? null : (contratoRes.data as ContratoHistorialItem | null)
+    );
+
     this.calInicializar();
     this.cargandoDetalle.set(false);
   }

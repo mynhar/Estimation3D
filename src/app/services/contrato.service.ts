@@ -108,7 +108,7 @@ export class ContratoService {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -132,6 +132,7 @@ export class ContratoService {
       const ofe = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
       return {
         id:                 c.id,
+        expediente_id:      c.expediente_id                  ?? '',
         expediente_numero:  c.expediente?.numero             ?? '—',
         servicio_nombre:    svc?.nombre_es                   ?? '—',
         servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
@@ -190,6 +191,14 @@ export class ContratoService {
 
   async cancelarContrato(expedienteId: string): Promise<void> {
     const { error } = await this.db.rpc('cancelar_contrato', { p_expediente_id: expedienteId });
+    if (error) throw new Error(error.message);
+  }
+
+  async rechazarOferta(expedienteId: string, ofertaId: string): Promise<void> {
+    const { error } = await this.db.rpc('rechazar_oferta', {
+      p_expediente_id: expedienteId,
+      p_oferta_id:     ofertaId,
+    });
     if (error) throw new Error(error.message);
   }
 

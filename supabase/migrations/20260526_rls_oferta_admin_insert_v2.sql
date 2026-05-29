@@ -11,6 +11,8 @@
 --
 -- The admin path (no constructor_id = auth.uid() requirement) is preserved
 -- so that administrators can create offers on behalf of any constructor.
+-- APPLIED DIRECTLY (2026-05-28): migration skipped by supabase push due to
+-- version conflict; SQL was executed via db query.
 
 DROP POLICY IF EXISTS "oferta_insert" ON oferta;
 

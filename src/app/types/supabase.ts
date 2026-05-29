@@ -1,6 +1,3 @@
-// Generado con: npx supabase gen types typescript --linked
-// Regenerar cuando cambien las migraciones en supabase/migrations/
-
 export type Json =
   | string
   | number
@@ -10,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -494,6 +493,36 @@ export type Database = {
         }
         Relationships: []
       }
+      Type_Service: {
+        Row: {
+          created_at: string
+          created_user: string | null
+          id: number
+          protocolo: string | null
+          service: string
+          updated_at: string | null
+          updated_user: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_user?: string | null
+          id?: number
+          protocolo?: string | null
+          service: string
+          updated_at?: string | null
+          updated_user?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_user?: string | null
+          id?: number
+          protocolo?: string | null
+          service?: string
+          updated_at?: string | null
+          updated_user?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -508,14 +537,6 @@ export type Database = {
         Returns: undefined
       }
       cancelar_contrato_admin: {
-        Args: { p_contrato_id: string }
-        Returns: undefined
-      }
-      firmar_contrato_admin: {
-        Args: { p_contrato_id: string }
-        Returns: undefined
-      }
-      iniciar_ejecucion_contrato_admin: {
         Args: { p_contrato_id: string }
         Returns: undefined
       }
@@ -534,11 +555,16 @@ export type Database = {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
       }
-      firmar_contrato: {
+      firmar_contrato: { Args: { p_contrato_id: string }; Returns: undefined }
+      firmar_contrato_admin: {
         Args: { p_contrato_id: string }
         Returns: undefined
       }
       get_rol_usuario: { Args: never; Returns: string }
+      iniciar_ejecucion_contrato_admin: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
       marcar_contratado: {
         Args: { p_expediente_id: string }
         Returns: undefined
@@ -546,6 +572,10 @@ export type Database = {
       mi_rol: {
         Args: never
         Returns: Database["public"]["Enums"]["rol_usuario"]
+      }
+      rechazar_oferta: {
+        Args: { p_expediente_id: string; p_oferta_id: string }
+        Returns: undefined
       }
     }
     Enums: {
@@ -588,6 +618,7 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
@@ -600,16 +631,21 @@ export type Tables<
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
     ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends { Row: infer R }
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
       ? R
       : never
     : never
@@ -623,14 +659,18 @@ export type TablesInsert<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Insert: infer I }
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
       ? I
       : never
     : never
@@ -644,14 +684,18 @@ export type TablesUpdate<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Update: infer U }
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
       ? U
       : never
     : never
@@ -665,30 +709,81 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
-// ── Aliases de conveniencia ───────────────────────────────────────────────────
-// Uso: DbArchivo, DbExpediente, etc. en lugar de Tables<'archivo'>
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
-export type DbArchivo      = Tables<'archivo'>
-export type DbContrato     = Tables<'contrato'>
-export type DbEstimacion   = Tables<'estimacion'>
-export type DbExpediente   = Tables<'expediente'>
-export type DbLocalizacion = Tables<'localizacion'>
-export type DbOferta       = Tables<'oferta'>
-export type DbPerfil       = Tables<'perfil'>
-export type DbServicio     = Tables<'servicio'>
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      estado_contrato: [
+        "generado",
+        "firmado",
+        "en_ejecucion",
+        "completado",
+        "cancelado",
+      ],
+      estado_expediente: [
+        "nuevo",
+        "en_estimacion",
+        "estimado",
+        "en_oferta",
+        "adjudicado",
+        "contratado",
+        "cancelado",
+      ],
+      estado_oferta: ["pendiente", "aceptada", "rechazada"],
+      proveedor_auth: ["email", "google"],
+      rol_usuario: ["cliente", "estimador", "constructor", "administrador"],
+      tipo_archivo: ["foto", "video", "documento", "contrato_pdf"],
+      tipo_inmueble: [
+        "casa",
+        "apartamento",
+        "edificio",
+        "local_comercial",
+        "otro",
+      ],
+      tipo_servicio: [
+        "descontaminacion_moho",
+        "desamiantado",
+        "danos_por_agua",
+        "demolicion_interior",
+        "aislamiento",
+        "fundacion_dren_frances",
+      ],
+    },
+  },
+} as const
 
-// ── Aliases de Enums ──────────────────────────────────────────────────────────
-export type EstadoExpediente = Enums<'estado_expediente'>
-export type EstadoOferta     = Enums<'estado_oferta'>
-export type EstadoContrato   = Enums<'estado_contrato'>
-export type RolUsuario       = Enums<'rol_usuario'>
-export type TipoArchivo      = Enums<'tipo_archivo'>
-export type TipoInmueble     = Enums<'tipo_inmueble'>
-export type TipoServicio     = Enums<'tipo_servicio'>
-export type ProveedorAuth    = Enums<'proveedor_auth'>
+// ── Alias de conveniencia ─────────────────────────────────────────────────────
+export type RolUsuario       = Database['public']['Enums']['rol_usuario']
+export type EstadoOferta     = Database['public']['Enums']['estado_oferta']
+export type EstadoExpediente = Database['public']['Tables']['expediente']['Row']['estado']
+export type TipoInmueble     = Database['public']['Enums']['tipo_inmueble']
+export type TipoArchivo      = Database['public']['Enums']['tipo_archivo']
+export type ProveedorAuth    = Database['public']['Enums']['proveedor_auth']
+export type DbPerfil         = Database['public']['Tables']['perfil']['Row']

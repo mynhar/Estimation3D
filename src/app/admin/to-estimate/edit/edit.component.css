@@ -523,7 +523,7 @@
 
 /* ── Danger zone ──────────────────────────────────────────────────────────── */
 .fued-danger-zone {
-  border-top: 1px solid var(--ds-danger-faint, #fce8e8);
+  border-top: 1px solid var(--ds-danger-soft);
   margin-top: var(--ds-space-4);
   padding-top: var(--ds-space-4);
   display: flex; flex-direction: column; gap: var(--ds-space-2);
@@ -542,18 +542,18 @@
 .fued-btn-danger {
   display: inline-flex; align-items: center; gap: var(--ds-space-2);
   padding: var(--ds-space-2) var(--ds-space-3);
-  border: 1px solid var(--ds-danger, #c0392b); border-radius: var(--ds-radius-md);
-  background: transparent; color: var(--ds-danger, #c0392b);
+  border: 1px solid var(--ds-danger); border-radius: var(--ds-radius-md);
+  background: transparent; color: var(--ds-danger);
   font-family: var(--ds-font-body); font-size: var(--ds-text-sm);
   cursor: pointer; transition: var(--ds-transition-color);
 }
-.fued-btn-danger:hover { background: var(--ds-danger-faint, #fce8e8); }
+.fued-btn-danger:hover { background: var(--ds-danger-soft); }
 .fued-btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
 .fued-btn-danger-confirm {
   display: inline-flex; align-items: center; gap: var(--ds-space-2);
   padding: var(--ds-space-2) var(--ds-space-3);
   border: none; border-radius: var(--ds-radius-md);
-  background: var(--ds-danger, #c0392b); color: #fff;
+  background: var(--ds-danger); color: var(--ds-ink-inverse);
   font-family: var(--ds-font-body); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold);
   cursor: pointer; transition: opacity 0.15s;
 }

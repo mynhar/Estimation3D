@@ -52,8 +52,8 @@ export class BuilderOfferComponent implements OnInit {
   errorMsg                = signal('');
   exitoMsg                = signal('');
   aceptando               = signal(false);
-  cancelando              = signal(false);
-  confirmandoCancelacion  = signal(false);
+  rechazando              = signal(false);
+  confirmandoRechazo      = signal(false);
 
   // ── Selección de oferta ───────────────────────────────────────────────────
   ofertaSeleccionadaId = signal<string | null>(null);
@@ -147,27 +147,24 @@ export class BuilderOfferComponent implements OnInit {
     this.exitoMsg.set('');
 
     try {
-      // 1 — Cambiar estado expediente + oferta
+      // 1 — Capturar ruta del PDF anterior antes de que el RPC elimine el contrato
+      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.expedienteId);
+      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+
+      // 2 — Cambiar estado expediente + oferta + reemplazar contrato en DB (via RPC)
       await this.ofertaService.aceptarOferta(this.expedienteId, ofertaId);
 
-      // 2 — Eliminar contrato anterior si existe
-      const contratoExistente = await this.contratoService.buscarPorExpediente(this.expedienteId);
-      if (contratoExistente) {
-        await this.contratoService.eliminarContrato(contratoExistente.id, contratoExistente.url_pdf);
+      // 3 — Eliminar PDF anterior del storage (best-effort: el flujo no se interrumpe si falla)
+      if (urlPdfAnterior) {
+        await this.contratoService.eliminarPdfStorage(urlPdfAnterior).catch(() => {});
       }
 
-      // 3 — Crear nuevo registro en tabla contrato
-      const contratoId = await this.contratoService.crearContrato({
-        expediente_id:       this.expedienteId,
-        oferta_id:           ofertaId,
-        cliente_id:          userId,
-        constructor_id:      oferta.constructor_id,
-        precio_final:        oferta.precio,
-        garantia_anos:       oferta.garantia_anos,
-        descripcion_trabajo: oferta.descripcion,
-      });
+      // 4 — Obtener el nuevo contrato creado por el RPC
+      const contratoRow = await this.contratoService.buscarPorExpediente(this.expedienteId);
+      if (!contratoRow) throw new Error('No se pudo obtener el contrato generado.');
+      const contratoId = contratoRow.id;
 
-      // 4 — Generar PDF
+      // 5 — Generar PDF
       const lang = this.translate.currentLang ?? 'fr';
       const fechaGenerado = new Intl.DateTimeFormat(
         lang === 'en' ? 'en-CA' : lang === 'fr' ? 'fr-CA' : 'es-CR',
@@ -197,15 +194,12 @@ export class BuilderOfferComponent implements OnInit {
         lang,
       });
 
-      // 5 — Subir PDF, guardar ruta y marcar expediente como contratado
+      // 6 — Subir PDF y guardar ruta en el contrato
       const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoId);
-      await Promise.all([
-        this.contratoService.actualizarUrlPdf(contratoId, urlPdf),
-        this.expedienteService.marcarContratado(this.expedienteId),
-      ]);
+      await this.contratoService.actualizarUrlPdf(contratoId, urlPdf);
 
-      // 6 — Actualizar estado local sin recargar
-      this.expediente.update(e => e ? { ...e, estado: 'contratado' } : e);
+      // 7 — Actualizar estado local sin recargar
+      this.expediente.update(e => e ? { ...e, estado: 'adjudicado' } : e);
       this.ofertas.update(list =>
         list.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }))
       );
@@ -219,36 +213,42 @@ export class BuilderOfferComponent implements OnInit {
     }
   }
 
-  // ── Cancelación de contrato ───────────────────────────────────────────────
+  // ── Rechazo de oferta aceptada ────────────────────────────────────────────
 
-  async cancelarContrato() {
-    this.cancelando.set(true);
+  async rechazarOferta() {
+    const ofertaId = this.ofertaSeleccionadaId();
+    if (!ofertaId) return;
+
+    this.rechazando.set(true);
     this.errorMsg.set('');
     this.exitoMsg.set('');
 
     try {
-      // 1 — Obtener ruta del PDF antes de borrarlo del storage
+      // 1 — Capturar ruta del PDF antes de que el RPC elimine el contrato
       const contrato = await this.contratoService.buscarPorExpediente(this.expedienteId);
+      const urlPdf   = contrato?.url_pdf ?? null;
 
-      // 2 — Cancelar en BD: elimina contrato, resetea ofertas, expediente → en_oferta
-      await this.contratoService.cancelarContrato(this.expedienteId);
+      // 2 — Rechazar oferta: oferta → rechazada, expediente → estimado, elimina contrato en DB
+      await this.contratoService.rechazarOferta(this.expedienteId, ofertaId);
 
-      // 3 — Eliminar PDF del storage (best-effort: fallo no es crítico)
-      if (contrato?.url_pdf) {
-        await this.contratoService.eliminarPdfStorage(contrato.url_pdf).catch(() => {});
+      // 3 — Eliminar PDF del storage (best-effort)
+      if (urlPdf) {
+        await this.contratoService.eliminarPdfStorage(urlPdf).catch(() => {});
       }
 
       // 4 — Actualizar estado local sin recargar
-      this.expediente.update(e => e ? { ...e, estado: 'en_oferta' } : e);
-      this.ofertas.update(list => list.map(o => ({ ...o, estado: 'pendiente' })));
+      this.expediente.update(e => e ? { ...e, estado: 'estimado' } : e);
+      this.ofertas.update(list =>
+        list.map(o => o.id === ofertaId ? { ...o, estado: 'rechazada' } : o)
+      );
       this.ofertaSeleccionadaId.set(null);
-      this.confirmandoCancelacion.set(false);
-      this.exitoMsg.set('builder_offer.success_cancelled');
+      this.confirmandoRechazo.set(false);
+      this.exitoMsg.set('builder_offer.success_rejected');
     } catch (e: any) {
-      console.error('[BuilderOffer] cancelarContrato:', e.message);
+      console.error('[BuilderOffer] rechazarOferta:', e.message);
       this.errorMsg.set(e.message);
     } finally {
-      this.cancelando.set(false);
+      this.rechazando.set(false);
     }
   }
 

@@ -716,6 +716,125 @@
 
 .sign-cancel-link:disabled { opacity: 0.55; cursor: not-allowed; }
 
+/* ── Cancel action button (footer) ───────────────────────────────────────── */
+.btn-cancel-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  background: transparent;
+  border: 1px solid var(--ds-danger);
+  color: var(--ds-danger);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  padding: 0.4em 1em;
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              color var(--ds-duration-fast) var(--ds-ease-out);
+  white-space: nowrap;
+}
+
+.btn-cancel-action:hover:not(:disabled) {
+  background: var(--ds-danger-soft);
+}
+
+.btn-cancel-action:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CANCEL PANEL
+═══════════════════════════════════════════════════════════════════════════ */
+
+.cancel-panel {
+  background: var(--ds-danger-soft);
+  border-top: 2px solid var(--ds-danger);
+  padding: var(--ds-space-5);
+  animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.cancel-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-3);
+}
+
+.cancel-panel-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--ds-danger);
+  color: var(--ds-ink-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ds-text-base);
+  flex-shrink: 0;
+}
+
+.cancel-panel-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-danger);
+  margin: 0 0 var(--ds-space-1);
+}
+
+.cancel-panel-sub {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+  opacity: 0.8;
+  margin: 0;
+}
+
+.cancel-panel-desc {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-relaxed);
+  margin: 0 0 var(--ds-space-4);
+}
+
+.cancel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+  flex-wrap: wrap;
+}
+
+.btn-cancel-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  background: var(--ds-danger);
+  border: none;
+  color: var(--ds-ink-inverse);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.55em 1.4em;
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+  transition: filter var(--ds-duration-fast) var(--ds-ease-out),
+              opacity var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.btn-cancel-confirm:hover:not(:disabled) { filter: brightness(0.9); }
+.btn-cancel-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.cancel-close-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-sm);
+}
+
+.cancel-close-link:hover:not(:disabled) {
+  color: var(--ds-ink-secondary);
+  text-decoration: underline;
+}
+
+.cancel-close-link:disabled { opacity: 0.55; cursor: not-allowed; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 1199px) {
   .ccard-grid { grid-template-columns: 1fr 1fr 1fr; gap: var(--ds-space-4); }
@@ -743,11 +862,14 @@
 }
 
 @media (max-width: 575px) {
-  .ccard-foot         { flex-direction: column; align-items: stretch; }
-  .ccard-actions      { flex-direction: column; }
-  .btn-pdf, .btn-sign { width: 100%; justify-content: center; }
-  .pdf-viewer-toolbar { flex-direction: column; align-items: flex-start; }
-  .pdf-viewer-frame   { height: 60vh; }
+  .ccard-foot                          { flex-direction: column; align-items: stretch; }
+  .ccard-actions                       { flex-direction: column; }
+  .btn-pdf, .btn-sign, .btn-cancel-action { width: 100%; justify-content: center; }
+  .pdf-viewer-toolbar                  { flex-direction: column; align-items: flex-start; }
+  .pdf-viewer-frame                    { height: 60vh; }
+  .cancel-panel                        { padding: var(--ds-space-4); }
+  .cancel-actions                      { flex-direction: column; align-items: stretch; }
+  .btn-cancel-confirm                  { justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

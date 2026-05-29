@@ -686,7 +686,7 @@
 
 .fued-btn-del-confirm:hover:not(:disabled) {
   background: var(--ds-danger);
-  color: #fff;
+  color: var(--ds-ink-inverse);
 }
 
 .fued-btn-del-cancel {

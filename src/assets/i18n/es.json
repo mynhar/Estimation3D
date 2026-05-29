@@ -191,14 +191,23 @@
     "no_documents": "Sin documentos disponibles por el momento.",
     "timeline_title": "Historial",
     "timeline_empty": "Sin eventos por mostrar por el momento.",
-    "progress_label": "Progreso del expediente"
+    "progress_label": "Progreso del expediente",
+    "key_dates": "Fechas del expediente"
   },
   "timeline": {
     "created": "Expediente creado",
     "estimator_assigned": "Estimador asignado",
     "visit_scheduled": "Visita programada",
     "visit_done": "Visita realizada",
-    "tour_available": "Tour 3D disponible"
+    "estimated": "Estimación completada",
+    "tour_available": "Tour 3D disponible",
+    "offer_received": "Oferta recibida",
+    "offer_accepted": "Oferta aceptada",
+    "contract_signed": "Contrato firmado",
+    "works_started": "Inicio de obras",
+    "execution_started": "Ejecución iniciada",
+    "contract_completed": "Contrato completado",
+    "contract_cancelled": "Contrato cancelado"
   },
   "dashboard_builder": {
     "title": "Dashboard",
@@ -409,7 +418,13 @@
     "cancel_confirm_text": "Se eliminará el contrato generado y todas las ofertas volverán al estado pendiente.",
     "cancel_confirm_btn": "Sí, cancelar",
     "cancelling": "Cancelando…",
-    "success_cancelled": "Contrato cancelado. El expediente está nuevamente en oferta."
+    "success_cancelled": "Contrato cancelado. El expediente está nuevamente en oferta.",
+    "reject_btn": "Rechazar esta oferta",
+    "reject_title": "¿Rechazar la oferta aceptada?",
+    "reject_text": "Se eliminará el contrato generado. El expediente volverá al estado estimado.",
+    "reject_confirm": "Sí, rechazar",
+    "rejecting": "Rechazando…",
+    "success_rejected": "Oferta rechazada. El expediente ha vuelto al estado estimado."
   },
   "make_offer": {
     "editing_badge": "Modificación de oferta",
@@ -1100,7 +1115,16 @@
     "close_pdf": "Cerrar PDF",
     "pdf_preview": "Vista previa PDF",
     "location": "Ubicación",
-    "work_description": "Descripción del trabajo"
+    "work_description": "Descripción del trabajo",
+    "cancel_btn": "Cancelar contrato",
+    "cancel_title": "Cancelar este contrato",
+    "cancel_subtitle": "Esta acción no se puede deshacer",
+    "cancel_desc": "Al cancelar, el contrato quedará anulado. La oferta del constructor seleccionado pasará a «rechazada», las demás ofertas del expediente volverán a «pendiente» y el expediente regresará a «en oferta» si aún hay otras ofertas disponibles, o a «estimado» si no las hay.",
+    "cancel_confirm": "Sí, cancelar contrato",
+    "cancel_close": "No, mantener contrato",
+    "cancelling": "Cancelando…",
+    "success_cancelled": "Contrato cancelado correctamente.",
+    "err_cancel": "No se pudo cancelar el contrato. Intenta de nuevo."
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

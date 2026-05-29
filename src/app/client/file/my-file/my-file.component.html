@@ -1,19 +1,19 @@
-<div class="container-xl py-4 px-3 px-md-4 page-wrap">
+<div class="container-xl py-5 px-3 px-md-4">
 
   <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="exp-header mb-4" aria-hidden="true">
-      <div class="exp-header__left">
-        <div class="skel skel--back-btn"></div>
-        <div>
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <div class="skel skel--num-chip"></div>
-            <div class="skel skel--badge"></div>
-          </div>
-          <div class="skel skel--service"></div>
+    <div class="exp-header mb-5" aria-hidden="true">
+      <div class="skel skel--back-btn flex-shrink-0"></div>
+      <div class="exp-header__body">
+        <div class="skel skel--eyebrow mb-2"></div>
+        <div class="skel skel--title-lg mb-3"></div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="skel skel--num-chip"></div>
+          <div class="skel skel--badge"></div>
+          <div class="skel skel--date d-none d-sm-block"></div>
         </div>
       </div>
-      <div class="skel skel--hint d-none d-md-block"></div>
+      <div class="skel skel--hint d-none d-lg-block"></div>
     </div>
 
     <div class="exp-progress mb-4">
@@ -40,12 +40,19 @@
     </div>
 
     <div class="row g-4 align-items-start">
-      <div class="col-lg-7 d-flex flex-column gap-4">
+      <div class="col-lg-8 d-flex flex-column gap-4">
         <div class="detail-card">
           <div class="detail-card__head"><div class="skel skel--section-lbl"></div></div>
           <div class="detail-card__body">
             <div class="row g-3">
-              @for (_ of [1,2,3,4,5,6]; track $index) {
+              @for (_ of [1,2,3,4]; track $index) {
+                <div class="col-sm-6 col-xl-3">
+                  <div class="skel skel--field-lbl mb-2"></div>
+                  <div class="skel skel--field-val"></div>
+                </div>
+              }
+              <div class="col-12"><div class="skel" style="height:1px;"></div></div>
+              @for (_ of [1,2]; track $index) {
                 <div class="col-sm-6">
                   <div class="skel skel--field-lbl mb-2"></div>
                   <div class="skel skel--field-val"></div>
@@ -68,11 +75,11 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-5">
+      <div class="col-lg-4">
         <div class="detail-card">
           <div class="detail-card__head"><div class="skel skel--section-lbl"></div></div>
           <div class="detail-card__body">
-            <div class="d-flex align-items-center gap-3 mb-5">
+            <div class="d-flex align-items-center gap-3 mb-4">
               <div class="skel skel--avatar"></div>
               <div class="flex-grow-1">
                 <div class="skel skel--field-val mb-2"></div>
@@ -107,25 +114,30 @@
 
   } @else {
 
-    <!-- ── Encabezado ──────────────────────────────────────────────────────── -->
-    <header class="exp-header mb-4">
-      <div class="exp-header__left">
-        <button class="btn-back" type="button" (click)="volver()"
-                [title]="'file.back_to_files' | translate">
-          <i class="bi bi-arrow-left" aria-hidden="true"></i>
-        </button>
-        <div>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="exp-num">{{ detalle()!.numero }}</span>
-            <span class="badge rounded-pill px-3 py-1 {{ estadoCfg(detalle()!.estado).clase }}">
-              <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-1" aria-hidden="true"></i>
-              {{ ('state.' + detalle()!.estado) | translate }}
-            </span>
-          </div>
-          <p class="exp-servicio mt-1 mb-0">{{ servicioNombre }}</p>
+    <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+    <header class="exp-header mb-5">
+      <button class="btn-back flex-shrink-0" type="button" (click)="volver()"
+              [title]="'file.back_to_files' | translate">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      </button>
+
+      <div class="exp-header__body">
+        <span class="eyebrow mb-1 d-block">{{ 'role.client' | translate }}</span>
+        <h1 class="exp-title">{{ servicioNombre }}</h1>
+        <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+          <span class="exp-num">{{ detalle()!.numero }}</span>
+          <span class="badge rounded-pill px-3 py-1 {{ estadoCfg(detalle()!.estado).clase }}">
+            <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-1" aria-hidden="true"></i>
+            {{ ('state.' + detalle()!.estado) | translate }}
+          </span>
+          <span class="exp-date">
+            <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+            {{ formatFecha(detalle()!.creado_en) }}
+          </span>
         </div>
       </div>
-      <div class="hint-chip">
+
+      <div class="exp-header__hint d-none d-lg-flex">
         <i class="bi {{ estadoCfg(detalle()!.estado).icono }} me-2" aria-hidden="true"></i>
         {{ ('state_desc.' + detalle()!.estado) | translate }}
       </div>
@@ -222,22 +234,33 @@
     <div class="row g-4 align-items-start">
 
       <!-- ═══ Izquierda: Datos + Estimación ════════════════════════════════ -->
-      <div class="col-lg-7 d-flex flex-column gap-4">
+      <div class="col-lg-8 d-flex flex-column gap-4">
 
         <!-- Datos del expediente -->
         <div class="detail-card">
           <div class="detail-card__head">
+            <i class="bi bi-folder2 section-label__icon me-2" aria-hidden="true"></i>
             <span class="section-label">{{ 'file.data' | translate }}</span>
           </div>
           <div class="detail-card__body">
             <div class="row g-3">
-              <div class="col-sm-6">
+
+              <!-- 4 campos clave en una fila a partir de xl -->
+              <div class="col-sm-6 col-xl-3">
                 <p class="info-label">{{ 'file.service' | translate }}</p>
-                <p class="info-value">{{ servicioNombre }}</p>
+                <p class="info-value fw-semibold">{{ servicioNombre }}</p>
               </div>
-              <div class="col-sm-6">
+              <div class="col-sm-6 col-xl-3">
                 <p class="info-label">{{ 'file.number' | translate }}</p>
                 <p class="info-value font-monospace">{{ detalle()!.numero }}</p>
+              </div>
+              <div class="col-sm-6 col-xl-3">
+                <p class="info-label">{{ 'file.request_date' | translate }}</p>
+                <p class="info-value">{{ formatFecha(detalle()!.creado_en) }}</p>
+              </div>
+              <div class="col-sm-6 col-xl-3">
+                <p class="info-label">{{ 'file.visit_date' | translate }}</p>
+                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
               </div>
 
               <div class="col-12"><hr class="detail-divider" /></div>
@@ -253,16 +276,6 @@
                 <p class="info-value">{{ detalle()!.referencia || '—' }}</p>
               </div>
 
-              <div class="col-12"><hr class="detail-divider" /></div>
-
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'file.visit_date' | translate }}</p>
-                <p class="info-value">{{ formatFecha(detalle()!.fecha_visita) }}</p>
-              </div>
-              <div class="col-sm-6">
-                <p class="info-label">{{ 'file.request_date' | translate }}</p>
-                <p class="info-value">{{ formatFecha(detalle()!.creado_en) }}</p>
-              </div>
             </div>
           </div>
         </div>
@@ -271,6 +284,7 @@
         @if (detalle()!.estimador_nombre) {
           <div class="detail-card">
             <div class="detail-card__head">
+              <i class="bi bi-clipboard2-pulse section-label__icon me-2" aria-hidden="true"></i>
               <span class="section-label">{{ 'file.estimator_report' | translate }}</span>
             </div>
             <div class="detail-card__body">
@@ -393,6 +407,7 @@
         } @else {
           <div class="detail-card">
             <div class="detail-card__head">
+              <i class="bi bi-clipboard2-pulse section-label__icon me-2" aria-hidden="true"></i>
               <span class="section-label">{{ 'file.estimator_report' | translate }}</span>
             </div>
             <div class="detail-card__body">
@@ -404,20 +419,21 @@
           </div>
         }
 
-      </div><!-- /col-lg-7 -->
+      </div><!-- /col-lg-8 -->
 
       <!-- ═══ Derecha: Constructor + Acciones ══════════════════════════════ -->
-      <div class="col-lg-5">
+      <div class="col-lg-4">
         <div class="sidebar-sticky d-flex flex-column gap-4">
 
           @if (ofertaAceptada()) {
             <div class="detail-card">
               <div class="detail-card__head">
+                <i class="bi bi-person-badge section-label__icon me-2" aria-hidden="true"></i>
                 <span class="section-label">{{ 'offer.selected_builder' | translate }}</span>
               </div>
               <div class="detail-card__body">
 
-                <div class="constructor-chip mb-4">
+                <div class="constructor-chip mb-3">
                   <div class="constructor-avatar" aria-hidden="true">
                     <i class="bi bi-person-badge"></i>
                   </div>
@@ -431,13 +447,14 @@
                   </div>
                 </div>
 
-                <hr class="detail-divider mb-4" />
+                <div class="precio-block">
+                  <p class="info-label mb-1">{{ 'offer.agreed_price' | translate }}</p>
+                  <p class="precio-valor mb-0">{{ formatCosto(ofertaAceptada()!.precio) }}</p>
+                </div>
+
+                <hr class="detail-divider my-4" />
 
                 <div class="row g-3">
-                  <div class="col-12">
-                    <p class="info-label">{{ 'offer.agreed_price' | translate }}</p>
-                    <p class="precio-valor mb-0">{{ formatCosto(ofertaAceptada()!.precio) }}</p>
-                  </div>
                   <div class="col-6">
                     <p class="info-label">{{ 'offer.deadline' | translate }}</p>
                     <p class="info-value">
@@ -509,7 +526,7 @@
           </button>
 
         </div>
-      </div><!-- /col-lg-5 -->
+      </div><!-- /col-lg-4 -->
 
     </div>
 

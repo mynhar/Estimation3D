@@ -1,6 +1,3 @@
-/* ── Wrapper ──────────────────────────────────────────────────────────────── */
-.bo-wrap { max-width: 1100px; }
-
 /* ════════════════════════════════════════════════════════════════════════════
    SKELETON — shimmer
 ════════════════════════════════════════════════════════════════════════════ */
@@ -22,6 +19,10 @@
   display: block;
 }
 
+.skel--back-btn     { width: 32px;  height: 32px;  border-radius: var(--ds-radius-circle); flex-shrink: 0; }
+.skel--eyebrow      { width: 80px;  height: 10px; }
+.skel--title-lg     { width: 55%;   height: 36px; }
+.skel--num-chip     { width: 90px;  height: 22px; border-radius: var(--ds-radius-sm); }
 .skel--circle-sm    { width: 32px; height: 32px; border-radius: var(--ds-radius-circle); flex-shrink: 0; }
 .skel--circle-lg    { width: 52px; height: 52px; border-radius: var(--ds-radius-circle); }
 .skel--num          { width: 90px; height: 18px; }
@@ -33,25 +34,6 @@
 .skel--costo        { height: 52px; border-radius: var(--ds-radius-md); }
 .skel--price        { height: 28px; width: 48%; }
 .skel--section-title { height: 20px; width: 38%; }
-
-.skel-header {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-xl);
-  padding: var(--ds-space-4) var(--ds-space-5);
-  overflow: hidden;
-  position: relative;
-}
-.skel-header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--ds-border);
-}
 
 .skel-card {
   background: var(--ds-surface);
@@ -114,35 +96,29 @@
 ════════════════════════════════════════════════════════════════════════════ */
 .exp-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
   gap: var(--ds-space-3);
   flex-wrap: wrap;
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-xl);
-  padding: var(--ds-space-4) var(--ds-space-5);
-  box-shadow: var(--ds-shadow-xs);
-  overflow: hidden;
-  position: relative;
+  padding-bottom: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
 }
-.exp-header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--ds-gold);
+.exp-header__body { flex: 1; min-width: 0; }
+
+.exp-title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  line-height: var(--ds-leading-tight);
+  letter-spacing: var(--ds-tracking-tight);
+  margin: 0;
 }
-.exp-header__left {
-  display: flex;
+
+.exp-date {
+  display: inline-flex;
   align-items: center;
-  gap: var(--ds-space-3);
-}
-.exp-header__kpis {
-  display: flex;
-  gap: var(--ds-space-2);
-  flex-wrap: wrap;
-  align-items: center;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
 }
 
 .btn-back {
@@ -157,6 +133,7 @@
   cursor: pointer;
   font-size: var(--ds-text-sm);
   flex-shrink: 0;
+  margin-top: 0.35rem;
   transition: background var(--ds-duration-fast) var(--ds-ease-out);
 }
 .btn-back:hover { background: var(--ds-gold-soft); }
@@ -165,16 +142,13 @@
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-bold);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   background: var(--ds-gold-faint);
   color: var(--ds-gold-active);
-  padding: 0.15em 0.55em;
+  padding: 0.2em 0.6em;
   border-radius: var(--ds-radius-sm);
-}
-.exp-servicio-label {
-  font-size: var(--ds-text-sm);
-  color: var(--ds-ink-muted);
-  margin-top: var(--ds-space-1);
+  border: 1px solid rgba(212,185,110,.3);
+  white-space: nowrap;
 }
 
 .kpi-pill {
@@ -425,6 +399,19 @@
   padding: 0 7px;
 }
 
+/* ── Cabecera de sección de ofertas ──────────────────────────────────────── */
+.offers-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+.offers-section-hint {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
 /* ── Mensajes de estado ──────────────────────────────────────────────────── */
 .status-msg {
   display: flex;
@@ -668,6 +655,15 @@
   align-items: center;
   gap: var(--ds-space-2);
 }
+.accept-hint__icon {
+  width: 52px; height: 52px;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--ds-text-2xl);
+  color: var(--ds-gold-active);
+}
 .accept-hint__title {
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
@@ -719,25 +715,6 @@
   color: var(--ds-ink-muted);
 }
 
-/* ── Confirmación de cancelación ─────────────────────────────────────────── */
-.cancel-confirm-panel {
-  background: var(--ds-danger-soft);
-  border: 1px solid rgba(180, 80, 80, 0.25);
-  border-radius: var(--ds-radius-xl);
-  padding: var(--ds-space-3) var(--ds-space-4);
-}
-.cancel-confirm-panel__title {
-  font-weight: var(--ds-weight-semibold);
-  font-size: var(--ds-text-sm);
-  color: var(--ds-danger);
-  margin-bottom: var(--ds-space-1);
-}
-.cancel-confirm-panel__text {
-  font-size: var(--ds-text-xs);
-  color: var(--ds-ink-muted);
-  margin-bottom: var(--ds-space-3);
-}
-
 /* ════════════════════════════════════════════════════════════════════════════
    BOTONES DEL SISTEMA
 ════════════════════════════════════════════════════════════════════════════ */
@@ -764,7 +741,7 @@
 .btn-accept:hover:not(:disabled) { background: var(--ds-gold-active); box-shadow: var(--ds-shadow-md); }
 .btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Secundario con borde (cancelar confirmación, volver) */
+/* Secundario con borde (volver, acciones secundarias) */
 .btn-outline-sm {
   appearance: none;
   display: inline-flex;
@@ -802,8 +779,8 @@
 }
 .btn-icon-sm:hover { border-color: var(--ds-border-strong); color: var(--ds-ink); }
 
-/* Cancelar contrato (borde danger) */
-.btn-cancel-outline {
+/* Rechazar oferta aceptada (borde danger) */
+.btn-reject-outline {
   appearance: none;
   display: flex;
   align-items: center;
@@ -821,11 +798,30 @@
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-cancel-outline:hover:not(:disabled) { background: var(--ds-danger-soft); border-color: var(--ds-danger); }
-.btn-cancel-outline:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-reject-outline:hover:not(:disabled) { background: var(--ds-danger-soft); border-color: var(--ds-danger); }
+.btn-reject-outline:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Confirmar cancelación (danger relleno) */
-.btn-danger-confirm {
+/* Panel de confirmación de rechazo */
+.reject-confirm-panel {
+  background: var(--ds-danger-soft);
+  border: 1px solid rgba(180, 80, 80, 0.25);
+  border-radius: var(--ds-radius-xl);
+  padding: var(--ds-space-3) var(--ds-space-4);
+}
+.reject-confirm-panel__title {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-danger);
+  margin-bottom: var(--ds-space-1);
+}
+.reject-confirm-panel__text {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin-bottom: var(--ds-space-3);
+}
+
+/* Confirmar rechazo (danger relleno) */
+.btn-reject-confirm {
   appearance: none;
   display: flex;
   align-items: center;
@@ -835,13 +831,14 @@
   background: var(--ds-danger);
   border: none;
   border-radius: var(--ds-radius-md);
-  color: var(--ds-surface);
+  color: var(--ds-ink-inverse);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   cursor: pointer;
-  transition: opacity var(--ds-duration-fast) var(--ds-ease-out);
+  transition: filter var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-danger-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-reject-confirm:hover:not(:disabled) { filter: brightness(0.9); }
+.btn-reject-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Cerrar reproductor de video */
 .btn-close-player {
@@ -935,8 +932,12 @@
   .sidebar-sticky { position: static; }
 }
 
+@media (max-width: 767.98px) {
+  .exp-title { font-size: var(--ds-text-2xl); }
+}
+
 @media (max-width: 575.98px) {
-  .exp-header { padding: var(--ds-space-3) var(--ds-space-4); }
-  .offer-price { font-size: var(--ds-text-xl); }
-  .detail-card__body { padding: var(--ds-space-4); }
+  .exp-title          { font-size: var(--ds-text-xl); }
+  .offer-price        { font-size: var(--ds-text-xl); }
+  .detail-card__body  { padding: var(--ds-space-4); }
 }

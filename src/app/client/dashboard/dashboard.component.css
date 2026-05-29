@@ -321,6 +321,46 @@
 }
 .fase-connector--done { background: var(--ds-success); }
 
+/* ── Key dates grid ───────────────────────────────────────────────────────── */
+.dates-section__label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+}
+.dates-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--ds-space-3) var(--ds-space-5);
+}
+.date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.date-item__key {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-ink-muted);
+}
+.date-item__key i { font-size: 0.65rem; flex-shrink: 0; }
+.date-item__val {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+}
+
+/* exp-card creado_en date (slightly more muted) */
+.exp-card__date--visit {
+  color: var(--ds-ink-secondary);
+}
+
 /* ── Media card ───────────────────────────────────────────────────────────── */
 .media-card {
   position: relative;
@@ -974,4 +1014,7 @@
   .media-video  { min-height: 240px; }
   .media-placeholder__body { min-height: 480px; padding: var(--ds-space-8) var(--ds-space-4); }
   .timeline-list::before { left: calc(var(--ds-space-5) + 15px); }
+}
+@media (max-width: 575.98px) {
+  .dates-grid { grid-template-columns: 1fr; }
 }

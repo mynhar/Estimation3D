@@ -191,14 +191,23 @@
     "no_documents": "No documents available yet.",
     "timeline_title": "History",
     "timeline_empty": "No events to display yet.",
-    "progress_label": "File progress"
+    "progress_label": "File progress",
+    "key_dates": "Key dates"
   },
   "timeline": {
     "created": "File created",
     "estimator_assigned": "Estimator assigned",
     "visit_scheduled": "Visit scheduled",
     "visit_done": "Visit completed",
-    "tour_available": "3D tour available"
+    "estimated": "Estimation completed",
+    "tour_available": "3D tour available",
+    "offer_received": "Offer received",
+    "offer_accepted": "Offer accepted",
+    "contract_signed": "Contract signed",
+    "works_started": "Start of works",
+    "execution_started": "Work started",
+    "contract_completed": "Contract completed",
+    "contract_cancelled": "Contract cancelled"
   },
   "dashboard_builder": {
     "title": "Dashboard",
@@ -409,7 +418,13 @@
     "cancel_confirm_text": "The generated contract will be deleted and all offers will return to pending status.",
     "cancel_confirm_btn": "Yes, cancel",
     "cancelling": "Cancelling…",
-    "success_cancelled": "Contract cancelled. The file is open for offers again."
+    "success_cancelled": "Contract cancelled. The file is open for offers again.",
+    "reject_btn": "Reject this offer",
+    "reject_title": "Reject the accepted offer?",
+    "reject_text": "The generated contract will be deleted. The file will return to estimated status.",
+    "reject_confirm": "Yes, reject",
+    "rejecting": "Rejecting…",
+    "success_rejected": "Offer rejected. The file has returned to estimated status."
   },
   "make_offer": {
     "editing_badge": "Editing offer",
@@ -1100,7 +1115,16 @@
     "close_pdf": "Close PDF",
     "pdf_preview": "PDF preview",
     "location": "Location",
-    "work_description": "Work description"
+    "work_description": "Work description",
+    "cancel_btn": "Cancel contract",
+    "cancel_title": "Cancel this contract",
+    "cancel_subtitle": "This action cannot be undone",
+    "cancel_desc": "Cancelling will void this contract. The selected builder's offer will be marked as «rejected», all other offers on the file will return to «pending», and the file will revert to «in offer» if other offers remain, or to «estimated» if there are none.",
+    "cancel_confirm": "Yes, cancel contract",
+    "cancel_close": "No, keep contract",
+    "cancelling": "Cancelling…",
+    "success_cancelled": "Contract cancelled successfully.",
+    "err_cancel": "Could not cancel the contract. Please try again."
   },
   "footer": {
     "rights_fr": "Tous droits réservés",

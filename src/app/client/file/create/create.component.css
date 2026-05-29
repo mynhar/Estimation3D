@@ -6,7 +6,6 @@
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
-  /* Gold top stripe from card-premium::before */
 }
 
 .progress-pill {
@@ -22,15 +21,71 @@
   white-space: nowrap;
 }
 
-/* ── Progress bars ───────────────────────────────────────────────────────── */
-.create-progress,
-.sidebar-progress {
-  height: 8px;
+/* ── Step tracker ────────────────────────────────────────────────────────── */
+.step-tracker {
+  display: flex;
+  align-items: flex-start;
+}
+
+.step-tracker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex-shrink: 0;
+}
+
+.step-tracker__connector {
+  flex: 1;
+  height: 2px;
+  background: var(--ds-border);
+  margin-top: calc(0.875rem - 1px);
+  min-width: var(--ds-space-3);
+  border-radius: 1px;
+  transition: background var(--ds-duration-slow) var(--ds-ease-out);
+}
+.step-tracker__connector--done { background: var(--ds-success); }
+
+.step-tracker__circle {
+  width: 1.75rem; height: 1.75rem;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-surface);
+  border: 2px solid var(--ds-border);
+  color: var(--ds-ink-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-bold);
+  flex-shrink: 0;
+  transition: background var(--ds-duration-base) var(--ds-ease-out),
+              border-color var(--ds-duration-base) var(--ds-ease-out),
+              color var(--ds-duration-base) var(--ds-ease-out);
+}
+.step-tracker__item--done .step-tracker__circle {
+  background: var(--ds-success);
+  border-color: var(--ds-success);
+  color: var(--ds-surface-elevated);
+}
+
+.step-tracker__label {
+  font-size: var(--ds-text-2xs);
+  color: var(--ds-ink-muted);
+  text-align: center;
+  white-space: nowrap;
+  max-width: 7rem;
+  line-height: 1.2;
+}
+.step-tracker__item--done .step-tracker__label {
+  color: var(--ds-ink-secondary);
+  font-weight: var(--ds-weight-medium);
+}
+
+/* ── Progress bar ────────────────────────────────────────────────────────── */
+.create-progress {
+  height: 4px;
   border-radius: var(--ds-radius-sm);
   background: var(--ds-gold-faint);
 }
-.create-progress .progress-bar,
-.sidebar-progress .progress-bar {
+.create-progress .progress-bar {
   border-radius: var(--ds-radius-sm);
   background: var(--ds-gold) !important;
   transition: width var(--ds-duration-slow) var(--ds-ease-out);
@@ -42,7 +97,6 @@
   overflow: hidden;
   position: relative;
 }
-/* Suppress Bootstrap .card:hover lift — sections are not interactive cards */
 .section-card:hover {
   box-shadow: var(--ds-shadow-xs);
   transform: none;
@@ -60,7 +114,6 @@
 .section-card--done::before { background: var(--ds-success); }
 
 .section-header {
-  /* Bootstrap .card-header already applies transparent bg + var(--ds-border) bottom */
   transition: background var(--ds-duration-base) var(--ds-ease-out);
 }
 
@@ -221,7 +274,6 @@
 
 /* ── GPS section ─────────────────────────────────────────────────────────── */
 .gps-toggle {
-  width: 100%;
   display: flex;
   align-items: center;
   gap: var(--ds-space-2);
@@ -234,6 +286,8 @@
   font-size: var(--ds-text-sm);
   text-align: left;
   transition: var(--ds-transition-color);
+  height: 100%;
+  min-height: 2.625rem;
 }
 .gps-toggle:hover {
   background: var(--ds-gold-faint);
@@ -264,61 +318,22 @@
   margin-top: var(--ds-space-1);
 }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
-.sidebar-sticky { position: sticky; top: var(--ds-space-5); }
-
-.sidebar-step__circle {
-  width: 1.75rem; height: 1.75rem;
-  border-radius: var(--ds-radius-circle);
-  background: var(--ds-bg-alt);
-  border: 1px solid var(--ds-border);
-  color: var(--ds-ink-muted);
-  font-size: var(--ds-text-xs);
-  font-weight: var(--ds-weight-bold);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: background var(--ds-duration-base) var(--ds-ease-out),
-              border-color var(--ds-duration-base) var(--ds-ease-out),
-              color var(--ds-duration-base) var(--ds-ease-out);
-}
-.sidebar-step__circle--done {
-  background: var(--ds-success);
-  border-color: var(--ds-success);
-  color: var(--ds-surface-elevated);
-}
-
-/* ── Process list ────────────────────────────────────────────────────────── */
-.process-list {
-  list-style: none;
-  padding: 0; margin: 0;
-}
-.process-list__item {
+/* ── Actions card — "¿Qué pasa después?" horizontal ─────────────────────── */
+.process-row {
   display: flex;
-  align-items: flex-start;
   gap: var(--ds-space-3);
-  padding-bottom: var(--ds-space-4);
-  position: relative;
 }
-.process-list__item::before {
-  content: '';
-  position: absolute;
-  left: 5px; top: 14px;
-  width: 2px; bottom: 0;
-  background: var(--ds-border);
+.process-row__item {
+  flex: 1;
+  padding: var(--ds-space-3);
+  border-left: 3px solid var(--ds-gold);
+  background: var(--ds-gold-faint);
+  border-radius: 0 var(--ds-radius-md) var(--ds-radius-md) 0;
 }
-.process-list__item--last { padding-bottom: 0; }
-.process-list__item--last::before { display: none; }
-
-.process-list__dot {
-  width: 12px; height: 12px;
-  border-radius: var(--ds-radius-circle);
-  background: var(--ds-gold);
-  flex-shrink: 0;
-  margin-top: 4px;
-  position: relative;
-  z-index: 1;
+.process-row__item--last {
+  border-left-color: var(--ds-success);
+  background: var(--ds-success-soft);
 }
-.process-list__dot--last { background: var(--ds-success); }
 
 /* ── Mobile sticky action bar ────────────────────────────────────────────── */
 .form-actions-mobile {
@@ -329,7 +344,6 @@
   justify-content: space-between;
   gap: var(--ds-space-3);
   padding: var(--ds-space-3) var(--ds-space-4);
-  /* rgba needed for backdrop glassmorphism — matches --ds-surface (#FBFAF6) */
   background: rgba(251, 250, 246, 0.96);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -348,6 +362,7 @@
   .tipo-btn { min-width: 60px; padding: 0.5rem 0.625rem; }
   .tipo-btn__label { font-size: 0.6rem; }
   .progress-pill { display: none; }
+  .step-tracker__connector { min-width: var(--ds-space-2); }
 }
 @media (max-width: 767px) {
   .create-header h4 { font-size: var(--ds-text-lg); }

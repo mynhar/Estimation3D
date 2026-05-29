@@ -194,15 +194,15 @@
 }
 .badge-adjudicado { background: var(--ds-success-soft); color: var(--ds-success); }
 .badge-contratado { background: var(--ds-info-soft);    color: var(--ds-info); }
-.badge-en-oferta  { background: #fef9ee; color: #a8873d; border: 1px solid #f0d88a; }
+.badge-en-oferta  { background: var(--ds-gold-faint); color: var(--ds-gold-active); border: 1px solid var(--ds-gold-soft); }
 .badge-estimado   { background: var(--ds-bg-alt); color: var(--ds-ink-muted); }
 
 /* ── Status badges — contrato ─────────────────────────────────────────────── */
 .badge-contrato-generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
 .badge-contrato-firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
-.badge-contrato-en-ejecucion { background: #ecfdf5; color: #059669; border: 1px solid #6ee7b7; }
-.badge-contrato-completado   { background: #eef2ff; color: #4f46e5; border: 1px solid #a5b4fc; }
-.badge-contrato-cancelado    { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.badge-contrato-en-ejecucion { background: var(--ds-success-soft); color: var(--ds-success); border: 1px solid var(--ds-success); }
+.badge-contrato-completado   { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info); }
+.badge-contrato-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger); }
 
 /* ── Action button ────────────────────────────────────────────────────────── */
 .action-btn {

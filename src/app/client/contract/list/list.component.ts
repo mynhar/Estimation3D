@@ -28,10 +28,12 @@ export class ContractListComponent implements OnInit {
   contratos = signal<ContratoListItem[]>([]);
   cargando  = signal(true);
 
-  descargando   = signal<string | null>(null);
-  firmandoId    = signal<string | null>(null);
-  confirmandoId = signal<string | null>(null);
-  aceptado      = signal(false);
+  descargando      = signal<string | null>(null);
+  firmandoId       = signal<string | null>(null);
+  confirmandoId    = signal<string | null>(null);
+  aceptado         = signal(false);
+  confirmCancelId  = signal<string | null>(null);
+  cancelandoId     = signal<string | null>(null);
 
   // ── PDF viewer ────────────────────────────────────────────────────────────
   pdfVistaId  = signal<string | null>(null);
@@ -49,10 +51,41 @@ export class ContractListComponent implements OnInit {
     }
   }
 
+  // ── Cancelación ───────────────────────────────────────────────────────────
+
+  abrirPanelCancelacion(id: string): void {
+    this.confirmCancelId.set(id);
+    this.confirmandoId.set(null);
+    this.aceptado.set(false);
+  }
+
+  cerrarPanelCancelacion(): void {
+    this.confirmCancelId.set(null);
+  }
+
+  async confirmarCancelacion(c: ContratoListItem): Promise<void> {
+    if (this.cancelandoId()) return;
+    this.cancelandoId.set(c.id);
+    try {
+      await this.contratoService.cancelarContrato(c.expediente_id);
+      this.contratos.update(list =>
+        list.map(item => item.id === c.id ? { ...item, estado: 'cancelado' } : item)
+      );
+      this.cerrarPanelCancelacion();
+      this.toast.show(this.translate.instant('contract_list.success_cancelled'), 'success');
+    } catch (e: any) {
+      console.error('[ContractList] cancelarContrato:', e.message);
+      this.toast.show(this.translate.instant('contract_list.err_cancel'), 'danger');
+    } finally {
+      this.cancelandoId.set(null);
+    }
+  }
+
   // ── Firma ─────────────────────────────────────────────────────────────────
 
   abrirPanelFirma(id: string): void {
     this.confirmandoId.set(id);
+    this.confirmCancelId.set(null);
     this.aceptado.set(false);
   }
 

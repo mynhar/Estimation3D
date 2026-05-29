@@ -1,11 +1,12 @@
-<div class="container-xl py-5 px-3 px-md-4 or-wrap">
+<div class="container-xl py-5 px-3 px-md-4">
 
   <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
   <header class="or-header mb-5">
     <div class="or-header__text">
+      <span class="eyebrow mb-2 d-block">{{ 'role.client' | translate }}</span>
       <h1 class="or-title">{{ 'nav.offres_recues' | translate }}</h1>
       @if (!cargando()) {
-        <p class="or-lead">{{ 'offers_received.subtitle' | translate }}</p>
+        <p class="or-lead mt-1 mb-0">{{ 'offers_received.subtitle' | translate }}</p>
       }
     </div>
     @if (!cargando() && pendientes().length > 0) {
@@ -25,8 +26,8 @@
       <div class="skel skel--dot-sm"></div>
       <div class="skel skel--label"></div>
     </div>
-    <div class="row g-3 row-cols-1 row-cols-md-2" aria-hidden="true">
-      @for (_ of [1,2]; track $index) {
+    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3" aria-hidden="true">
+      @for (_ of [1,2,3]; track $index) {
         <div class="col">
           <div class="skel-card">
             <div class="skel skel-card__accent"></div>
@@ -38,7 +39,7 @@
                   <div class="skel skel--badge-sm"></div>
                 </div>
               </div>
-              <div class="skel skel--title mb-1"></div>
+              <div class="skel skel--service mb-2"></div>
               <div class="skel skel--desc mb-3"></div>
               <div class="skel skel--meta mb-1"></div>
               <div class="skel skel--meta mb-3"></div>
@@ -67,21 +68,17 @@
     <!-- Banner de urgencia -->
     @if (pendientes().length > 0) {
       <div class="urgency-banner mb-4">
-        <div class="urgency-banner__icon">
-          <i class="bi bi-bell" aria-hidden="true"></i>
-        </div>
-        <div class="urgency-banner__content">
-          <p class="urgency-banner__title mb-0">
-            @if (pendientes().length === 1) {
-              {{ 'offers_received.banner_single' | translate }}
-            } @else {
-              {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
-            }
-          </p>
-          <p class="urgency-banner__sub mb-0">
-            {{ 'dashboard_client.compare_text' | translate }}
-          </p>
-        </div>
+        <p class="urgency-banner__title mb-1">
+          <i class="bi bi-bell-fill me-2" aria-hidden="true"></i>
+          @if (pendientes().length === 1) {
+            {{ 'offers_received.banner_single' | translate }}
+          } @else {
+            {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
+          }
+        </p>
+        <p class="urgency-banner__sub mb-0">
+          {{ 'dashboard_client.compare_text' | translate }}
+        </p>
       </div>
     }
 
@@ -95,7 +92,7 @@
         <span class="section-count">{{ pendientes().length }}</span>
       </div>
 
-      <div class="row g-3 row-cols-1 row-cols-md-2 mb-5">
+      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3 mb-5">
         @for (exp of pendientes(); track exp.id) {
           <div class="col">
             <div class="offer-card offer-card--pending h-100"
@@ -117,7 +114,7 @@
                   </div>
                 </div>
 
-                <!-- Servicio -->
+                <!-- Servicio — titular editorial -->
                 <p class="exp-servicio mb-1">{{ servicioNombre(exp) }}</p>
                 @if (servicioDescripcion(exp)) {
                   <p class="exp-servicio-desc mb-2">{{ servicioDescripcion(exp) }}</p>
@@ -145,11 +142,11 @@
                 </p>
 
                 <!-- CTA principal -->
-                <button class="offer-cta mt-auto w-100 d-flex align-items-center justify-content-center gap-2"
+                <button class="offer-cta mt-auto w-100 d-flex align-items-center gap-2"
                         (click)="ver(exp.id)">
                   <i class="bi bi-eye" aria-hidden="true"></i>
                   {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
-                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  <i class="bi bi-arrow-right ms-auto" aria-hidden="true"></i>
                 </button>
 
               </div>

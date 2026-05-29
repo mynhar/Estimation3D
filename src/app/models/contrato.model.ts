@@ -1,6 +1,7 @@
 export interface ContratoListItem {
   // ── campos visuales ───────────────────────────────────────────────────────
   id:                 string;
+  expediente_id:      string;
   expediente_numero:  string;
   servicio_nombre:    string;
   servicio_nombre_en: string;
