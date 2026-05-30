@@ -119,7 +119,11 @@
       "Read(//c/Users/Harold Bonilla Lopez/.claude/skills/hallmark/references/genres/**)",
       "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/genres/**)",
       "Read(//c/Users/Harold Bonilla Lopez/.claude/skills/hallmark/references/**)",
-      "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/**)"
+      "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/**)",
+      "Bash(npm --version)",
+      "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-a18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('configurations:', Object.keys\\(b.configurations || {}\\)\\);\")",
+      "Bash(node -e \"const a=require\\('./angular.json'\\); console.log\\(Object.keys\\(a.projects\\)\\);\")",
+      "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-A18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('outputPath:', b.options?.outputPath\\);\")"
     ],
     "additionalDirectories": [
       "\\tmp"
