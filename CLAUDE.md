@@ -6,25 +6,43 @@ Este archivo se carga automáticamente al abrir el proyecto en Claude Code. Defi
 
 ## Regla principal
 
-Antes de cualquier trabajo de UI, lee y respeta estrictamente **[`./DESIGN_GUIDELINES.md`](./DESIGN_GUIDELINES.md)**. Ese archivo es la fuente de verdad para diseño, tokens, componentes y convenciones del proyecto.
+Para construir, auditar o rediseñar UI, usa la skill **`hallmark`**. Hallmark aplica su disciplina de diseño (slop-test gates, variedad estructural, reglas anti-AI-slop) **sobre** el sistema de este proyecto, que está **bloqueado**.
+
+Fuentes de verdad, en orden:
+
+1. **[`./DESIGN_GUIDELINES.md`](./DESIGN_GUIDELINES.md)** — guía detallada: tokens, paleta, utilidades, patrones, convenciones. Léela antes de cualquier trabajo de UI.
+2. **[`./design.md`](./design.md)** — archivo de bloqueo que Hallmark lee primero. Defiere a él: **no** elegir temas, paletas ni tipografías nuevas.
+3. `src/styles/tokens.css` — los tokens reales viven aquí con nombres `var(--ds-...)`. Úsalos; nunca inventes nombres `--color-*`.
 
 ---
 
 ## Stack del proyecto
 
 - **Framework**: Angular 18 (standalone components, signals, nuevo control flow)
-- **Estilos**: Bootstrap 5.3 + CSS plano
+- **Estilos**: Bootstrap 5.3 + CSS plano (NO SCSS, NO Tailwind)
 - **Sistema de diseño**: tokens CSS en `src/styles/tokens.css`
 - **Tipografías**: Fraunces (títulos) + DM Sans (cuerpo)
-- **Iconos**: line/stroke (Lucide recomendado)
+- **Iconos**: line/stroke (Lucide / Phosphor recomendados)
+- **Skill de diseño**: `hallmark` (bloqueada a `design.md` + `DESIGN_GUIDELINES.md`)
+
+---
+
+## Skill de diseño: Hallmark
+
+- Por defecto: pedir construir/diseñar algo → Hallmark sigue su flujo ciñéndose a `design.md` y `DESIGN_GUIDELINES.md`.
+- `hallmark audit <archivo>` → revisa UI existente contra anti-patrones, sin editar.
+- `hallmark redesign <archivo>` → rediseña dentro de los límites del proyecto, conservando rutas, copy e identidad.
+- **Importante**: Hallmark genera HTML/CSS por defecto. En este proyecto SIEMPRE debe entregar **componentes Angular 18 standalone**, no markup suelto ni JSX.
+- No emitir un nuevo `design.md`: ya existe y el sistema está bloqueado.
 
 ---
 
 ## Antes de generar código
 
-1. Lee `DESIGN_GUIDELINES.md` si vas a tocar UI.
-2. Identifica qué tokens CSS (`var(--ds-...)`) y qué utilidades del sistema vas a usar.
-3. Si la tarea es ambigua, pregunta antes de asumir una dirección estética.
+1. Lee `DESIGN_GUIDELINES.md` y `design.md` si vas a tocar UI.
+2. Usa la skill `hallmark` para el trabajo de interfaz.
+3. Identifica qué tokens CSS (`var(--ds-...)`) y qué utilidades del sistema vas a usar.
+4. Si la tarea es ambigua, pregunta antes de asumir una dirección estética.
 
 ---
 
@@ -38,26 +56,30 @@ Antes de cualquier trabajo de UI, lee y respeta estrictamente **[`./DESIGN_GUIDE
 - `track` obligatorio en `@for`
 
 ### Estilos
-- Usa tokens CSS del sistema, nunca hex sueltos
-- CSS plano por componente (no SCSS)
+- Usa tokens CSS del sistema (`var(--ds-...)`), nunca hex sueltos
+- CSS plano por componente (no SCSS), selector raíz `:host`
 - Bootstrap personalizado: usa sus clases (`.btn`, `.card`, `.row`, etc.) sin sobrescribirlas innecesariamente
 
 ### Identidad visual
-- Fondo beige `#F5F3EE`, tarjetas crema `#FBFAF6`, tinta `#1A1A1A`, acento dorado `#D4B96E`
+- Fondo beige `#F5F3EE`, alterno `#EFEDE6`, tarjetas crema `#FBFAF6`, tinta `#1A1A1A`, acento dorado `#D4B96E`
 - Tipografía: Fraunces para títulos, DM Sans para cuerpo
 - Iconos line/stroke, nunca filled
 - Bordes redondeados sutiles (4–12 px máximo)
 - Espaciado generoso
 
 ### Prohibiciones
-- Fondos negros
+- Fondos negros / `#000`
+- Bootstrap defaults sin override (`#0d6efd`, `#6c757d`)
 - Gradientes morado-rosa
 - Fuentes Inter, Roboto, Arial como principales
-- Emojis decorativos en UI
+- Iconos filled / emojis decorativos en UI
+- Sombras con `rgba(0,0,0,..)` (usar `rgba(26,26,26,..)` o tokens)
+- `border-radius` > 12px en UI
 - NgModules nuevos
 - `*ngIf` / `*ngFor` / `*ngSwitch` en código nuevo
 - Decoradores `@Input()` / `@Output()` en código nuevo
 - UI genérica sin postura estética
+- Que Hallmark elija un tema/paleta nuevos (sistema bloqueado en `design.md`)
 
 ---
 
@@ -65,7 +87,7 @@ Antes de cualquier trabajo de UI, lee y respeta estrictamente **[`./DESIGN_GUIDE
 
 ```
 src/
-├── index.html
+├── index.html                  ← fuentes de Google aquí
 ├── styles.css                  ← overrides puntuales (mantener mínimo)
 ├── styles/
 │   ├── tokens.css              ← sistema de tokens
@@ -98,10 +120,12 @@ ng generate component shared/ui/nombre \
 
 - [ ] Standalone + `OnPush`
 - [ ] `input()` / `signal()` (no `@Input()`)
-- [ ] `@if` / `@for` (no `*ngIf` / `*ngFor`)
-- [ ] Tokens CSS (no hex sueltos)
+- [ ] `@if` / `@for` con `track` (no `*ngIf` / `*ngFor`)
+- [ ] Tokens CSS `var(--ds-...)` (no hex sueltos)
 - [ ] HTML semántico
-- [ ] Estados: hover, focus, active, disabled
+- [ ] Estados: hover, focus, active, disabled, loading
+- [ ] Contraste WCAG AA (4.5:1)
 - [ ] Iconos line/stroke
 - [ ] Sin fondos negros, sin emojis decorativos
+- [ ] Conforme a `design.md` y `DESIGN_GUIDELINES.md` (sistema bloqueado)
 - [ ] Dirección estética intencional, no genérica

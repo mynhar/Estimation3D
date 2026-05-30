@@ -1,6 +1,6 @@
-<!-- ══════════════════════════════════════════════════════════════
+﻿<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      LIGHTBOX
-══════════════════════════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" (click)="cerrarFoto()">
     <button class="lightbox-close" type="button" (click)="cerrarFoto()"
@@ -13,22 +13,22 @@
   </div>
 }
 
-<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
+<div class="page-wrapper">
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: CARGANDO
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   @if (cargando()) {
     <div class="page-loading">
       <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
-        <span class="visually-hidden">Cargando…</span>
+        <span class="visually-hidden">Cargandoâ€¦</span>
       </div>
       <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: NO ENCONTRADO
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else if (!detalle()) {
     <div class="empty-wrap">
       <div class="card card-premium text-center px-4 py-5">
@@ -47,12 +47,12 @@
       </div>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        CONTENIDO PRINCIPAL
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else {
 
-    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <header class="page-header card card-premium mb-4 fade-up">
       <div class="card-body px-4 px-lg-5 py-4">
         <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
@@ -95,15 +95,15 @@
       </div>
     </header>
 
-    <!-- ── Main grid ────────────────────────────────────────────────────────── -->
+    <!-- â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="row g-4 align-items-start">
 
-      <!-- ════════════════════════════════════════════════════════════
-           COLUMNA IZQUIERDA — Info del expediente + Media
-      ════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA IZQUIERDA â€” Info del expediente + Media
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-5 d-flex flex-column gap-3 fade-up" style="--delay:80ms">
 
-        <!-- Info del expediente ─────────────────────────────────────────────── -->
+        <!-- Info del expediente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card">
 
           <div class="info-card__header">
@@ -151,8 +151,8 @@
               <p class="context-label">{{ 'make_offer.scheduled_visit' | translate }}</p>
               <p class="context-value mb-0">
                 {{ formatFecha(detalle()!.fecha_visita) }}
-                @if (formatHora(detalle()!.fecha_visita) !== '—') {
-                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita) }}</span>
+                @if (formatHora(detalle()!.fecha_visita) !== 'â€”') {
+                  <span class="context-time">Â· {{ formatHora(detalle()!.fecha_visita) }}</span>
                 }
               </p>
             </div>
@@ -168,8 +168,8 @@
               <p class="context-label">{{ 'make_offer.estimator_visit' | translate }}</p>
               <p class="context-value mb-0">
                 {{ formatFecha(detalle()!.fecha_visita_real) }}
-                @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
-                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
+                @if (formatHora(detalle()!.fecha_visita_real) !== 'â€”') {
+                  <span class="context-time">Â· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
                 }
               </p>
             </div>
@@ -196,7 +196,7 @@
               <span class="cost-summary__value">
                 @if (detalle()!.costo_estimado_max && detalle()!.costo_estimado_max !== detalle()!.costo_estimado) {
                   {{ detalle()!.costo_estimado | number:'1.0-0' }}
-                  – {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
+                  â€“ {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
                 } @else {
                   {{ detalle()!.costo_estimado | number:'1.0-0' }} CAD
                 }
@@ -206,7 +206,7 @@
 
         </div>
 
-        <!-- Media tabulada ──────────────────────────────────────────────────── -->
+        <!-- Media tabulada â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card overflow-hidden">
 
           <div class="media-tabs">
@@ -324,14 +324,14 @@
 
       </div><!-- /col izquierda -->
 
-      <!-- ════════════════════════════════════════════════════════════
-           COLUMNA DERECHA — Formulario de oferta
-      ════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA DERECHA â€” Formulario de oferta
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-7 fade-up" style="--delay:160ms">
         <div class="sidebar-sticky">
           <div class="form-card">
 
-            <!-- ── Encabezado del formulario con progreso ─────────────────── -->
+            <!-- â”€â”€ Encabezado del formulario con progreso â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
             <div class="form-card__header">
               <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="form-card__title">
@@ -356,7 +356,7 @@
 
             <div class="form-card__body">
 
-              <!-- ── Precio ─────────────────────────────────────────────────── -->
+              <!-- â”€â”€ Precio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="form-field mb-5">
                 <label class="form-field__label">
                   <i class="bi bi-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
@@ -376,7 +376,7 @@
                 }
               </div>
 
-              <!-- ── Plazos + Garantía ──────────────────────────────────────── -->
+              <!-- â”€â”€ Plazos + GarantÃ­a â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="form-field mb-5">
                 <label class="form-field__label">
                   <i class="bi bi-clock me-1"></i>{{ 'make_offer.project_times' | translate }}
@@ -411,7 +411,7 @@
                 </div>
               </div>
 
-              <!-- ── Fecha de inicio ────────────────────────────────────────── -->
+              <!-- â”€â”€ Fecha de inicio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="form-field mb-5">
                 <label class="form-field__label">
                   <i class="bi bi-calendar-event me-1"></i>{{ 'make_offer.start_date' | translate }}
@@ -420,7 +420,7 @@
                 <input type="date" class="form-control" [(ngModel)]="fechaInicio" />
               </div>
 
-              <!-- ── Descripción ────────────────────────────────────────────── -->
+              <!-- â”€â”€ DescripciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="form-field mb-5">
                 <label class="form-field__label">
                   <i class="bi bi-text-paragraph me-1"></i>{{ 'make_offer.approach_desc' | translate }}
@@ -432,7 +432,7 @@
                 <p class="field-hint">{{ descripcion.trim().length }} {{ 'common.chars' | translate }}</p>
               </div>
 
-              <!-- ── Adjuntos ───────────────────────────────────────────────── -->
+              <!-- â”€â”€ Adjuntos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="form-field mb-5">
                 <label class="form-field__label">
                   <i class="bi bi-paperclip me-1"></i>{{ 'make_offer.attachments' | translate }}
@@ -518,7 +518,7 @@
                 </div>
               </div>
 
-              <!-- ── Checklist de completitud ──────────────────────────────── -->
+              <!-- â”€â”€ Checklist de completitud â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="checklist mb-4">
                 <div class="checklist__item" [class.checklist__item--done]="!!precio && precio > 0">
                   <i class="bi" [class.bi-check-circle-fill]="!!precio && precio > 0"
@@ -551,7 +551,7 @@
                 }
               </div>
 
-              <!-- ── Feedback ─────────────────────────────────────────────── -->
+              <!-- â”€â”€ Feedback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               @if (errorEnvio()) {
                 <div class="feedback-msg feedback-msg--error mb-3">
                   <i class="bi bi-exclamation-circle flex-shrink-0"></i>
@@ -565,7 +565,7 @@
                 </div>
               }
 
-              <!-- ── Acciones ──────────────────────────────────────────────── -->
+              <!-- â”€â”€ Acciones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
               <div class="d-flex flex-column gap-2">
 
                 <button class="btn-send" type="button"
@@ -605,3 +605,4 @@
   }
 
 </div>
+

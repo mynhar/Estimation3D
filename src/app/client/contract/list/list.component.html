@@ -1,12 +1,11 @@
+<!-- Hallmark · genre: editorial · design-system: design.md · designed-as-app
+     pre-emit critique: P5 H5 E5 S5 R5 V4 -->
 <div class="cl-page">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
   <header class="cl-header">
     <div class="cl-header-text">
-      <p class="cl-eyebrow">
-        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
-        {{ 'role.client' | translate }}
-      </p>
+      <p class="cl-eyebrow">{{ 'role.client' | translate }}</p>
       <h1 class="cl-title">{{ 'contract_list.title' | translate }}</h1>
       @if (!cargando()) {
         <p class="cl-lead">{{ 'contract_list.subtitle' | translate }}</p>
@@ -14,13 +13,19 @@
     </div>
     @if (!cargando() && contratos().length > 0) {
       <span class="kpi-pill">
-        <i class="bi bi-file-earmark-check" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+          <path d="m9 15 2 2 4-4"/>
+        </svg>
         {{ contratos().length }} {{ 'contract_list.count' | translate }}
       </span>
     }
   </header>
 
-  <!-- ── Skeleton ─────────────────────────────────────────────────────────── -->
+  <!-- ── Skeleton ────────────────────────────────────────────────────── -->
   @if (cargando()) {
     <div class="cl-list" aria-hidden="true">
       @for (_ of [1,2]; track $index) {
@@ -45,17 +50,23 @@
       }
     </div>
 
-  <!-- ── Sin contratos ────────────────────────────────────────────────────── -->
+  <!-- ── Sin contratos ───────────────────────────────────────────────── -->
   } @else if (contratos().length === 0) {
     <div class="empty-panel">
       <div class="empty-icon">
-        <i class="bi bi-file-earmark-x" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+          <path d="m14.5 12.5-5 5"/><path d="m9.5 12.5 5 5"/>
+        </svg>
       </div>
       <p class="empty-title">{{ 'contract_list.empty_title' | translate }}</p>
       <p class="empty-text">{{ 'contract_list.empty_text' | translate }}</p>
     </div>
 
-  <!-- ── Lista de contratos ─────────────────────────────────────────────── -->
+  <!-- ── Lista de contratos ──────────────────────────────────────────── -->
   } @else {
     <div class="cl-list">
       @for (c of contratos(); track c.id) {
@@ -63,34 +74,73 @@
         <article class="ccard ccard--{{ c.estado }}"
                  [class.ccard--signing]="confirmandoId() === c.id">
 
-          <!-- ── Head: identificación | descarga ────────────────────────── -->
+          <!-- ── Head: identificación | descarga ───────────────────── -->
           <div class="ccard-head">
             <div class="ccard-head-ids">
               <span class="ccard-num">{{ c.expediente_numero }}</span>
               <span class="ccard-badge ccard-badge--{{ c.estado }}">
                 @switch (c.estado) {
-                  @case ('firmado')      { <i class="bi bi-patch-check" aria-hidden="true"></i> }
-                  @case ('en_ejecucion') { <i class="bi bi-hammer" aria-hidden="true"></i> }
-                  @case ('completado')   { <i class="bi bi-check-circle" aria-hidden="true"></i> }
-                  @case ('cancelado')    { <i class="bi bi-x-circle" aria-hidden="true"></i> }
-                  @default               { <i class="bi bi-hourglass-split" aria-hidden="true"></i> }
+                  @case ('firmado') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+                      <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                  }
+                  @case ('en_ejecucion') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                  }
+                  @case ('completado') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                    </svg>
+                  }
+                  @case ('cancelado') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+                    </svg>
+                  }
+                  @default {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  }
                 }
                 {{ ('contract_list.status_' + c.estado) | translate }}
               </span>
             </div>
+
             <button class="btn-dl" type="button"
                     [disabled]="descargando() === c.id"
                     (click)="descargarPdf(c)">
               @if (descargando() === c.id) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <i class="bi bi-download" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" x2="12" y1="15" y2="3"/>
+                </svg>
               }
               {{ 'contract_list.download_pdf' | translate }}
             </button>
           </div>
 
-          <!-- ── Body: grid de datos ─────────────────────────────────────── -->
+          <!-- ── Body: grid de datos ────────────────────────────────── -->
           <div class="ccard-body">
             <div class="ccard-grid">
 
@@ -109,7 +159,7 @@
                 </div>
               </div>
 
-              <!-- Col 2: Constructor -->
+              <!-- Col 2: Constructor + contacto -->
               <div class="ccard-col">
                 <div class="ccard-field">
                   <span class="ccard-lbl">{{ 'contract_list.contractor' | translate }}</span>
@@ -117,51 +167,47 @@
                 </div>
                 <div class="ccard-contact">
                   <a class="ccard-contact-link" href="tel:{{ c.constructor_telefono }}">
-                    <i class="bi bi-telephone" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
                     {{ c.constructor_telefono }}
                   </a>
                   <a class="ccard-contact-link" href="mailto:{{ c.constructor_email }}">
-                    <i class="bi bi-envelope" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
                     {{ c.constructor_email }}
                   </a>
                 </div>
               </div>
 
-              <!-- Col 3: Precio + condiciones -->
+              <!-- Col 3: Precio + condiciones compactas -->
               <div class="ccard-col ccard-col--pricing">
                 <div class="ccard-price-box">
                   <span class="ccard-price-lbl">{{ 'contract_list.price' | translate }}</span>
                   <span class="ccard-price-val">{{ formatPrecio(c.precio_final) }}</span>
                 </div>
-                <div class="ccard-conditions">
+
+                <!-- Condiciones como dl 2-columnas — más compacto y espacialmente eficiente -->
+                <dl class="ccard-conditions">
                   @if (formatPlazo(c) !== '—') {
-                    <div class="ccard-condition">
-                      <i class="bi bi-clock" aria-hidden="true"></i>
-                      <div>
-                        <span class="ccard-cond-lbl">{{ 'offer.deadline' | translate }}</span>
-                        <span class="ccard-cond-val">{{ formatPlazo(c) }}</span>
-                      </div>
-                    </div>
+                    <dt class="ccard-cond-lbl">{{ 'offer.deadline' | translate }}</dt>
+                    <dd class="ccard-cond-val">{{ formatPlazo(c) }}</dd>
                   }
                   @if (c.garantia_anos != null) {
-                    <div class="ccard-condition">
-                      <i class="bi bi-shield-check" aria-hidden="true"></i>
-                      <div>
-                        <span class="ccard-cond-lbl">{{ 'offer.warranty' | translate }}</span>
-                        <span class="ccard-cond-val">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</span>
-                      </div>
-                    </div>
+                    <dt class="ccard-cond-lbl">{{ 'offer.warranty' | translate }}</dt>
+                    <dd class="ccard-cond-val">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</dd>
                   }
                   @if (c.fecha_inicio) {
-                    <div class="ccard-condition">
-                      <i class="bi bi-calendar" aria-hidden="true"></i>
-                      <div>
-                        <span class="ccard-cond-lbl">{{ 'offer.start_date' | translate }}</span>
-                        <span class="ccard-cond-val">{{ formatFecha(c.fecha_inicio) }}</span>
-                      </div>
-                    </div>
+                    <dt class="ccard-cond-lbl">{{ 'offer.start_date' | translate }}</dt>
+                    <dd class="ccard-cond-val">{{ formatFecha(c.fecha_inicio) }}</dd>
                   }
-                </div>
+                </dl>
               </div>
 
             </div><!-- /ccard-grid -->
@@ -176,59 +222,104 @@
 
           </div><!-- /ccard-body -->
 
-          <!-- ── Footer: fechas | acciones ───────────────────────────────── -->
+          <!-- ── Footer: fechas | acciones ──────────────────────────── -->
           <div class="ccard-foot">
             <div class="ccard-dates">
               <span class="ccard-date">
-                <i class="bi bi-calendar2" aria-hidden="true"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                  <line x1="16" x2="16" y1="2" y2="6"/>
+                  <line x1="8" x2="8" y1="2" y2="6"/>
+                  <line x1="3" x2="21" y1="10" y2="10"/>
+                </svg>
                 {{ 'contract_list.generated_on' | translate }}:
                 <strong>{{ formatFecha(c.generado_en) }}</strong>
               </span>
               @if (c.firmado_en) {
                 <span class="ccard-date-sep" aria-hidden="true">·</span>
                 <span class="ccard-date ccard-date--signed">
-                  <i class="bi bi-patch-check" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
                   {{ 'contract_list.signed_on' | translate }}:
                   <strong>{{ formatFecha(c.firmado_en) }}</strong>
                 </span>
               }
             </div>
+
             <div class="ccard-actions">
-              <button class="btn-pdf"
-                      type="button"
+              <!-- Ver / cerrar PDF inline -->
+              <button class="btn-pdf" type="button"
                       [class.btn-pdf--open]="pdfVistaId() === c.id"
                       (click)="togglePdf(c)">
-                <i class="bi"
-                   [class.bi-file-earmark-pdf]="pdfVistaId() !== c.id"
-                   [class.bi-chevron-up]="pdfVistaId() === c.id"
-                   aria-hidden="true"></i>
+                @if (pdfVistaId() === c.id) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                  </svg>
+                }
                 {{ pdfVistaId() === c.id
                     ? ('contract_list.close_pdf' | translate)
                     : ('contract_list.view_pdf' | translate) }}
               </button>
+
+              <!-- Firmar (solo estado generado) -->
               @if (c.estado === 'generado' && confirmandoId() !== c.id && confirmCancelId() !== c.id) {
                 <button class="btn-sign" type="button" (click)="abrirPanelFirma(c.id)">
-                  <i class="bi bi-pen" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9"/>
+                    <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
+                    <path d="m15 5 3 3"/>
+                  </svg>
                   {{ 'contract_list.sign_btn' | translate }}
                 </button>
               }
+
+              <!-- Cancelar -->
               @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
                 <button class="btn-cancel-action" type="button"
                         [disabled]="cancelandoId() === c.id"
                         (click)="abrirPanelCancelacion(c.id)">
-                  <i class="bi bi-x-circle" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+                  </svg>
                   {{ 'contract_list.cancel_btn' | translate }}
                 </button>
               }
             </div>
           </div><!-- /ccard-foot -->
 
-          <!-- ── Visor PDF inline ─────────────────────────────────────────── -->
+          <!-- ── Visor PDF inline ────────────────────────────────────── -->
           @if (pdfVistaId() === c.id) {
             <div class="pdf-viewer-wrap">
               <div class="pdf-viewer-toolbar">
                 <span class="pdf-viewer-label">
-                  <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                  </svg>
                   {{ 'contract_list.pdf_preview' | translate }} · {{ c.expediente_numero }}
                 </span>
                 <button class="btn-dl pdf-viewer-dl" type="button"
@@ -237,7 +328,13 @@
                   @if (descargando() === c.id) {
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   } @else {
-                    <i class="bi bi-download" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" x2="12" y1="15" y2="3"/>
+                    </svg>
                   }
                   {{ 'contract_list.download_pdf' | translate }}
                 </button>
@@ -250,13 +347,19 @@
             </div>
           }
 
-          <!-- ── Panel de firma ───────────────────────────────────────────── -->
+          <!-- ── Panel de firma ─────────────────────────────────────── -->
           @if (confirmandoId() === c.id) {
             <div class="sign-panel">
 
               <div class="sign-panel-header">
-                <span class="sign-panel-icon">
-                  <i class="bi bi-pen" aria-hidden="true"></i>
+                <span class="sign-panel-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
+                    <path d="m15 5 3 3"/>
+                  </svg>
                 </span>
                 <div>
                   <p class="sign-panel-title">{{ 'contract_list.sign_title' | translate }}</p>
@@ -295,7 +398,11 @@
                 <span class="sign-checkbox" [class.checked]="aceptado()"
                       role="checkbox" [attr.aria-checked]="aceptado()">
                   @if (aceptado()) {
-                    <i class="bi bi-check-lg" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
                   }
                 </span>
                 <span>{{ 'contract_list.sign_terms_label' | translate }}</span>
@@ -310,7 +417,13 @@
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     {{ 'contract_list.signing' | translate }}
                   } @else {
-                    <i class="bi bi-pen" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20h9"/>
+                      <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
+                      <path d="m15 5 3 3"/>
+                    </svg>
                     {{ 'contract_list.sign_btn_confirm' | translate }}
                   }
                 </button>
@@ -324,12 +437,18 @@
             </div>
           }
 
-          <!-- ── Panel de cancelación ────────────────────────────────────── -->
+          <!-- ── Panel de cancelación ───────────────────────────────── -->
           @if (confirmCancelId() === c.id) {
             <div class="cancel-panel">
               <div class="cancel-panel-header">
-                <span class="cancel-panel-icon">
-                  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <span class="cancel-panel-icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/>
+                    <line x1="12" x2="12" y1="9" y2="13"/>
+                    <line x1="12" x2="12.01" y1="17" y2="17"/>
+                  </svg>
                 </span>
                 <div>
                   <p class="cancel-panel-title">{{ 'contract_list.cancel_title' | translate }}</p>
@@ -346,7 +465,12 @@
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     {{ 'contract_list.cancelling' | translate }}
                   } @else {
-                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+                    </svg>
                     {{ 'contract_list.cancel_confirm' | translate }}
                   }
                 </button>

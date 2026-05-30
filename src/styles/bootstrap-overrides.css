@@ -234,12 +234,12 @@ h6, .h6 { font-size: var(--ds-text-lg); }
 .card:hover {
   box-shadow: var(--ds-shadow-md);
 }
-.card-body    { padding: var(--ds-space-6); }
+.card-body    { padding: var(--ds-space-5); }
 .card-header,
 .card-footer  {
   background-color: transparent;
   border-color: var(--ds-border);
-  padding: var(--ds-space-5) var(--ds-space-6);
+  padding: var(--ds-space-4) var(--ds-space-5);
 }
 .card-title {
   font-family: var(--ds-font-display);
@@ -404,10 +404,10 @@ h6, .h6 { font-size: var(--ds-text-lg); }
   text-transform: uppercase;
   color: var(--ds-ink-muted);
   border-bottom: 2px solid var(--ds-border-strong);
-  padding: var(--ds-space-4) var(--ds-space-5);
+  padding: var(--ds-space-3) var(--ds-space-4);
 }
 .table tbody td {
-  padding: var(--ds-space-4) var(--ds-space-5);
+  padding: var(--ds-space-3) var(--ds-space-4);
   vertical-align: middle;
 }
 

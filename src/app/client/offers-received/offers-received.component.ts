@@ -27,17 +27,6 @@ export class OffersReceivedComponent implements OnInit {
   pendientes  = computed(() => this.expedientes().filter(e => e.estado === 'en_oferta'));
   gestionados = computed(() => this.expedientes().filter(e => e.estado !== 'en_oferta'));
 
-  private readonly ESTADO_COLOR: Record<string, string> = {
-    en_oferta:  '#d97706',
-    adjudicado: '#ea580c',
-    contratado: '#16a34a',
-    cancelado:  '#94a3b8',
-  };
-
-  estadoColor(estado: string): string {
-    return this.ESTADO_COLOR[estado] ?? '#94a3b8';
-  }
-
   servicioNombre(exp: ExpedienteConOfertas): string {
     const lang = this.translate.currentLang;
     if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;

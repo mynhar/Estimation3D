@@ -1,4 +1,7 @@
-<!-- ── Lightbox ──────────────────────────────────────────────────────────────── -->
+<!-- Hallmark · genre: editorial · design-system: design.md · designed-as-app
+     pre-emit critique: P5 H5 E5 S5 R5 V4 -->
+
+<!-- ── Lightbox ──────────────────────────────────────────────────── -->
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" role="dialog" aria-modal="true"
        [attr.aria-label]="'file.photo_enlarged' | translate"
@@ -7,18 +10,22 @@
       <img [src]="fotoAmpliada()!" class="lightbox-img" alt="" />
       <button class="lightbox-close" type="button" (click)="cerrarFoto()"
               [title]="'common.close' | translate">
-        <i class="bi bi-x-lg" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+        </svg>
       </button>
     </div>
   </div>
 }
 
-<div class="container-xl py-5 px-3 px-md-4">
+<div class="page-wrapper">
 
-  <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
+  <!-- ── Skeleton de carga ─────────────────────────────────────── -->
   @if (cargando()) {
 
-    <div class="exp-header mb-5" aria-hidden="true">
+    <div class="exp-header mb-4" aria-hidden="true">
       <div class="skel skel--back-btn flex-shrink-0"></div>
       <div class="exp-header__body">
         <div class="skel skel--eyebrow mb-2"></div>
@@ -100,30 +107,44 @@
       </div>
     </div>
 
-  <!-- ── Error / no encontrado ─────────────────────────────────────────────── -->
+  <!-- ── Error / no encontrado ──────────────────────────────────── -->
   } @else if (!expediente()) {
     <div class="page-error">
       <div class="page-error__icon">
-        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/>
+          <line x1="12" x2="12" y1="9" y2="13"/>
+          <line x1="12" x2="12.01" y1="17" y2="17"/>
+        </svg>
       </div>
       <p class="page-error__title">{{ 'file.not_found' | translate }}</p>
       @if (errorMsg()) {
         <p class="page-error__msg">{{ errorMsg() | translate }}</p>
       }
       <button class="btn-outline-sm" type="button" (click)="volver()">
-        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+        </svg>
         {{ 'common.back' | translate }}
       </button>
     </div>
 
-  <!-- ── Contenido ──────────────────────────────────────────────────────────── -->
+  <!-- ── Contenido ──────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
+    <!-- ── Encabezado editorial ────────────────────────────────── -->
     <header class="exp-header mb-5">
       <button class="btn-back flex-shrink-0" type="button" (click)="volver()"
               [title]="'common.back' | translate">
-        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+        </svg>
       </button>
 
       <div class="exp-header__body">
@@ -136,13 +157,23 @@
           </span>
           @if (ofertas().length > 0) {
             <span class="kpi-pill kpi-pill--ofertas">
-              <i class="bi bi-people me-1" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
               {{ ofertas().length }} {{ 'common.offers_count' | translate }}
             </span>
           }
           @if (estimacion()?.costo_estimado != null) {
             <span class="kpi-pill kpi-pill--costo">
-              <i class="bi bi-calculator me-1" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" x2="12" y1="2" y2="22"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
               {{ formatCosto(estimacion()!.costo_estimado!) }}
             </span>
           }
@@ -150,17 +181,24 @@
       </div>
     </header>
 
-    <!-- ── Grid principal ─────────────────────────────────────────────────── -->
+    <!-- ── Grid principal ──────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
-      <!-- ═══ LEFT: Informe del estimador + Ofertas ════════════════════════ -->
+      <!-- ══ LEFT: Informe del estimador + Ofertas ══════════════ -->
       <div class="col-lg-8 d-flex flex-column gap-4">
 
-        <!-- Informe del estimador ────────────────────────────────────────── -->
+        <!-- Informe del estimador ──────────────────────────────── -->
         @if (estimacion()) {
           <div class="detail-card">
             <div class="detail-card__head">
-              <i class="bi bi-clipboard-check me-2 icon-gold" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="icon-gold me-2" aria-hidden="true">
+                <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <path d="m9 14 2 2 4-4"/>
+              </svg>
               <span class="detail-card__head-title">{{ 'file.estimator_report' | translate }}</span>
             </div>
             <div class="detail-card__body">
@@ -192,7 +230,12 @@
                       <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado!) }}</p>
                     </div>
                     @if (estimacion()!.costo_estimado_max !== null) {
-                      <i class="bi bi-arrow-right icon-muted" aria-hidden="true"></i>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round"
+                           class="icon-muted" aria-hidden="true">
+                        <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                      </svg>
                       <div>
                         <p class="costo-tag mb-0">{{ 'file.max' | translate }}</p>
                         <p class="costo-valor mb-0">{{ formatCosto(estimacion()!.costo_estimado_max!) }}</p>
@@ -205,7 +248,14 @@
               @if (urlsTour.length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">
-                  <i class="bi bi-badge-3d me-1" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       class="me-1" aria-hidden="true">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" x2="12" y1="22.08" y2="12"/>
+                  </svg>
                   {{ 'builder_offer.virtual_tour' | translate }}
                 </p>
                 <div class="tour-grid">
@@ -213,7 +263,13 @@
                     <div class="tour-grid__item">
                       @if (urlsTour.length > 1) {
                         <p class="tour-video-label">
-                          <i class="bi bi-camera-video me-1" aria-hidden="true"></i>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round"
+                               class="me-1" aria-hidden="true">
+                            <path d="m22 8-6 4 6 4V8z"/>
+                            <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                          </svg>
                           {{ 'estimator_file.tour_video_n' | translate:{ n: $index + 1 } }}
                         </p>
                       }
@@ -237,7 +293,14 @@
                       <img [src]="publicUrl(f.url_storage)"
                            class="photo-thumb__img" [alt]="f.nombre_archivo" />
                       <div class="photo-thumb__overlay" aria-hidden="true">
-                        <i class="bi bi-zoom-in"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"/>
+                          <line x1="21" x2="16.65" y1="21" y2="16.65"/>
+                          <line x1="11" x2="11" y1="8" y2="14"/>
+                          <line x1="8" x2="14" y1="11" y2="11"/>
+                        </svg>
                       </div>
                     </button>
                   }
@@ -252,7 +315,11 @@
                     <div class="file-row"
                          [class.file-row--playing]="videoExpUrl() === publicUrl(v.url_storage)">
                       <div class="file-row__icon file-row__icon--video">
-                        <i class="bi bi-play-circle" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+                        </svg>
                       </div>
                       <div class="file-row__info">
                         <p class="file-row__name">{{ v.nombre_archivo }}</p>
@@ -265,14 +332,29 @@
                                 [title]="videoExpUrl() === publicUrl(v.url_storage)
                                          ? ('common.close' | translate)
                                          : ('builder_offer.play' | translate)">
-                          <i class="bi" aria-hidden="true"
-                             [class.bi-stop-circle]="videoExpUrl() === publicUrl(v.url_storage)"
-                             [class.bi-play]="videoExpUrl() !== publicUrl(v.url_storage)"></i>
+                          @if (videoExpUrl() === publicUrl(v.url_storage)) {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9"/>
+                            </svg>
+                          } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                          }
                         </button>
                         <button class="btn-icon-sm" type="button"
                                 (click)="verDocumento(v)"
                                 [title]="'common.open' | translate">
-                          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -282,7 +364,11 @@
                           Tu navegador no soporta reproducción de video.
                         </video>
                         <button class="btn-close-player" type="button" (click)="toggleVideoExp(v)">
-                          <i class="bi bi-x me-1" aria-hidden="true"></i>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                          </svg>
                           {{ 'my_offer.close_player' | translate }}
                         </button>
                       </div>
@@ -298,15 +384,27 @@
                   @for (d of documentosExp(); track d.id) {
                     <div class="file-row">
                       <div class="file-row__icon file-row__icon--doc">
-                        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                          <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                        </svg>
                       </div>
                       <div class="file-row__info">
                         <p class="file-row__name">{{ d.nombre_archivo }}</p>
                         <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
                       </div>
                       <div class="file-row__actions">
-                        <button class="btn-icon-sm" type="button" (click)="verDocumento(d)">
-                          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        <button class="btn-icon-sm" type="button" (click)="verDocumento(d)"
+                                [title]="'common.open' | translate">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -318,7 +416,7 @@
           </div>
         }
 
-        <!-- ── Sección de ofertas ──────────────────────────────────────────── -->
+        <!-- ── Sección de ofertas ──────────────────────────────── -->
         <div>
           <div class="offers-section-header mb-3">
             <div class="d-flex align-items-center gap-2">
@@ -332,7 +430,12 @@
 
           @if (exitoMsg()) {
             <div class="status-msg status-msg--success mb-3" role="status">
-              <i class="bi bi-check-circle flex-shrink-0" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="flex-shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+              </svg>
               {{ exitoMsg() | translate }}
             </div>
           }
@@ -344,7 +447,13 @@
 
           @if (ofertas().length === 0) {
             <div class="empty-panel empty-panel--sm">
-              <i class="bi bi-inbox icon-empty" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="icon-empty" aria-hidden="true">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+              </svg>
               <p class="empty-panel__title">{{ 'builder_offer.no_offers' | translate }}</p>
               <p class="empty-panel__text">{{ 'builder_offer.no_offers_text' | translate }}</p>
             </div>
@@ -356,16 +465,24 @@
                      [class.offer-card--selected]="esSeleccionada(oferta.id)"
                      [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
                      [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
-                     (click)="seleccionar(oferta.id)">
+                     role="button" tabindex="0"
+                     (click)="seleccionar(oferta.id)"
+                     (keydown.enter)="seleccionar(oferta.id)"
+                     (keydown.space)="$event.preventDefault(); seleccionar(oferta.id)">
                   <div class="offer-card__body">
 
-                    <!-- Top: orden + estado -->
+                    <!-- Top: orden + badge -->
                     <div class="offer-card__top">
                       <span class="offer-card__index">#{{ i + 1 }}</span>
                       <div class="d-flex align-items-center gap-1">
                         @if (esSeleccionada(oferta.id)) {
                           <span class="selected-badge">
-                            <i class="bi bi-check2" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                              <path d="M20 6 9 17l-5-5"/>
+                            </svg>
                           </span>
                         }
                         <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
@@ -386,15 +503,20 @@
                       <p class="offer-builder-name mb-0">{{ oferta.constructor_nombre }}</p>
                       @if (oferta.constructor_telefono) {
                         <a href="tel:{{ oferta.constructor_telefono }}"
-                           class="offer-contact d-block mt-1"
+                           class="offer-contact d-flex align-items-center gap-1 mt-1"
                            (click)="$event.stopPropagation()">
-                          <i class="bi bi-telephone me-1" aria-hidden="true"></i>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                               aria-hidden="true">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                          </svg>
                           {{ oferta.constructor_telefono }}
                         </a>
                       }
                     </div>
 
-                    <!-- Plazos y fechas -->
+                    <!-- Plazos y fechas — 2 columnas -->
                     <div class="offer-card__meta-grid">
                       <div class="offer-meta-item">
                         <span class="offer-meta-label">{{ 'offers_received.deadline' | translate }}</span>
@@ -427,12 +549,22 @@
                           <button class="offer-video-btn w-100" type="button"
                                   [class.offer-video-btn--active]="videoOfertaUrl(oferta.id) !== null"
                                   (click)="toggleVideoOferta(oferta.id, v)">
-                            <i class="bi me-1" aria-hidden="true"
-                               [class.bi-stop-circle]="videoOfertaUrl(oferta.id) !== null"
-                               [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"></i>
-                            {{ videoOfertaUrl(oferta.id) !== null
-                                ? ('builder_offer.close_video' | translate)
-                                : ('builder_offer.view_video' | translate) }}
+                            @if (videoOfertaUrl(oferta.id) !== null) {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                   fill="none" stroke="currentColor" stroke-width="1.5"
+                                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9"/>
+                              </svg>
+                              {{ 'builder_offer.close_video' | translate }}
+                            } @else {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                   fill="none" stroke="currentColor" stroke-width="1.5"
+                                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m22 8-6 4 6 4V8z"/>
+                                <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                              </svg>
+                              {{ 'builder_offer.view_video' | translate }}
+                            }
                           </button>
                         }
                         @if (videoOfertaUrl(oferta.id) !== null) {
@@ -449,7 +581,14 @@
                       <div class="offer-docs" (click)="$event.stopPropagation()">
                         @for (d of oferta.documentos; track d.id) {
                           <button class="offer-doc-chip" type="button" (click)="verDocumento(d)">
-                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                              <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                              <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                            </svg>
                             <span class="offer-doc-chip__name">{{ d.nombre_archivo }}</span>
                             <span class="offer-doc-chip__size">{{ formatTamano(d.tamano_bytes) }}</span>
                           </button>
@@ -466,14 +605,19 @@
 
       </div><!-- /col-lg-8 -->
 
-      <!-- ═══ RIGHT: Sidebar ════════════════════════════════════════════════ -->
+      <!-- ══ RIGHT: Sidebar ══════════════════════════════════════ -->
       <div class="col-lg-4">
         <div class="sidebar-sticky">
 
           <!-- Datos del expediente -->
           <div class="detail-card mb-3">
             <div class="detail-card__head">
-              <i class="bi bi-folder2 me-2 icon-gold" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="icon-gold me-2" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
               <span class="detail-card__head-title">{{ 'my_offer.section_file' | translate }}</span>
             </div>
             <div class="detail-card__body">
@@ -511,7 +655,13 @@
             @if (!ofertaSeleccionada()) {
               <div class="accept-hint">
                 <div class="accept-hint__icon" aria-hidden="true">
-                  <i class="bi bi-hand-index-thumb"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 9 5 12 1.774-5.226L21 14 9 9z"/>
+                    <path d="m16.071 16.071 4.243 4.243"/>
+                    <path d="m7.188 2.239.742 2.839 2.709-.569-2.251 1.988 1.132 2.591L7.558 7.552l-2.372 2.118.529-2.949-2.894-.462 2.373-2.118-.956-2.989z"/>
+                  </svg>
                 </div>
                 <p class="accept-hint__title">{{ 'builder_offer.select_hint_title' | translate }}</p>
                 <p class="accept-hint__text">{{ 'builder_offer.select_hint_text' | translate }}</p>
@@ -524,22 +674,44 @@
                 <p class="selected-preview__price">
                   {{ formatCosto(ofertaSeleccionada()!.precio) }}
                 </p>
-                <p class="selected-preview__name mb-1">
+                <p class="selected-preview__name mb-2">
                   {{ ofertaSeleccionada()!.constructor_nombre }}
                 </p>
-                <p class="selected-preview__meta mb-0">
-                  <i class="bi bi-clock me-1" aria-hidden="true"></i>
-                  {{ formatPlazo(ofertaSeleccionada()!.plazo_semanas_min, ofertaSeleccionada()!.plazo_semanas_max) }}
-                  &nbsp;·&nbsp;
-                  <i class="bi bi-calendar me-1" aria-hidden="true"></i>
-                  {{ 'offers_received.start' | translate }}
-                  {{ formatFecha(ofertaSeleccionada()!.fecha_inicio) }}
-                </p>
+                <div class="selected-preview__meta-row">
+                  <span class="selected-preview__chip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ formatPlazo(ofertaSeleccionada()!.plazo_semanas_min, ofertaSeleccionada()!.plazo_semanas_max) }}
+                  </span>
+                  <span class="selected-preview__chip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                      <line x1="16" x2="16" y1="2" y2="6"/>
+                      <line x1="8" x2="8" y1="2" y2="6"/>
+                      <line x1="3" x2="21" y1="10" y2="10"/>
+                    </svg>
+                    {{ 'offers_received.start' | translate }} {{ formatFecha(ofertaSeleccionada()!.fecha_inicio) }}
+                  </span>
+                </div>
               </div>
 
               @if (yaContratado() && ofertaSeleccionada()!.estado === 'aceptada') {
                 <div class="status-msg status-msg--success mb-3">
-                  <i class="bi bi-trophy flex-shrink-0" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       class="flex-shrink-0" aria-hidden="true">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+                  </svg>
                   {{ 'builder_offer.already_accepted' | translate }}
                 </div>
               }
@@ -552,7 +724,11 @@
                         role="status" aria-hidden="true"></span>
                   {{ 'builder_offer.processing' | translate }}
                 } @else {
-                  <i class="bi bi-check-circle" aria-hidden="true"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
+                  </svg>
                   {{ yaContratado()
                       ? ('builder_offer.change_btn' | translate)
                       : ('builder_offer.accept_btn' | translate) }}
@@ -569,13 +745,25 @@
                     <button class="btn-reject-outline" type="button"
                             [disabled]="aceptando() || rechazando()"
                             (click)="confirmandoRechazo.set(true)">
-                      <i class="bi bi-x-circle me-1" aria-hidden="true"></i>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
+                      </svg>
                       {{ 'builder_offer.reject_btn' | translate }}
                     </button>
                   } @else {
                     <div class="reject-confirm-panel">
                       <p class="reject-confirm-panel__title">
-                        <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             class="me-1" aria-hidden="true">
+                          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/>
+                          <line x1="12" x2="12" y1="9" y2="13"/>
+                          <line x1="12" x2="12.01" y1="17" y2="17"/>
+                        </svg>
                         {{ 'builder_offer.reject_title' | translate }}
                       </p>
                       <p class="reject-confirm-panel__text">
@@ -609,7 +797,11 @@
 
           <div class="mt-3">
             <button class="btn-nav-back" type="button" (click)="volver()">
-              <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+              </svg>
               {{ 'my_offer.back_btn' | translate }}
             </button>
           </div>

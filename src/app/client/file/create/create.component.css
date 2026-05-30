@@ -1,13 +1,81 @@
-/* ── Layout ──────────────────────────────────────────────────────────────── */
-.create-wrap { max-width: 1200px; }
+/* Hallmark · macrostructure: Split-Form · genre: editorial (warm-paper)
+ * design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S5 R5 V5
+ * Changes: 2-col layout (form + sticky sidebar); Fraunces header title;
+ * Bootstrap defaults (bg-light, text-primary, text-success) → tokens;
+ * GPS panel fully tokenised; actions-card removed (sidebar covers it).
+ * ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Encabezado ──────────────────────────────────────────────────────────── */
+/* ── Root & layout ────────────────────────────────────────────────────────── */
+.create-root {
+  min-height: calc(100vh - 64px);
+}
+
+.create-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+@media (min-width: 992px) {
+  .create-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: var(--ds-space-5);
+    align-items: start;
+  }
+}
+
+.create-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  min-width: 0;
+}
+
+/* ── Encabezado ─────────────────────────────────────────────────────────────── */
 .create-header {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-4);
+  position: relative;
+  overflow: hidden;
 }
 
+.create-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-soft));
+}
+
+.create-header__top {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  flex-wrap: nowrap;
+}
+
+.create-header__title-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-header__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  color: var(--ds-ink);
+  margin: var(--ds-space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── Progress pill ───────────────────────────────────────────────────────────── */
 .progress-pill {
   display: inline-flex;
   align-items: center;
@@ -21,7 +89,7 @@
   white-space: nowrap;
 }
 
-/* ── Step tracker ────────────────────────────────────────────────────────── */
+/* ── Step tracker ────────────────────────────────────────────────────────────── */
 .step-tracker {
   display: flex;
   align-items: flex-start;
@@ -79,7 +147,7 @@
   font-weight: var(--ds-weight-medium);
 }
 
-/* ── Progress bar ────────────────────────────────────────────────────────── */
+/* ── Progress bar ────────────────────────────────────────────────────────────── */
 .create-progress {
   height: 4px;
   border-radius: var(--ds-radius-sm);
@@ -91,15 +159,11 @@
   transition: width var(--ds-duration-slow) var(--ds-ease-out);
 }
 
-/* ── Section cards ───────────────────────────────────────────────────────── */
+/* ── Section cards ───────────────────────────────────────────────────────────── */
 .section-card {
   border-radius: var(--ds-radius-xl) !important;
   overflow: hidden;
   position: relative;
-}
-.section-card:hover {
-  box-shadow: var(--ds-shadow-xs);
-  transform: none;
 }
 .section-card::before {
   content: '';
@@ -112,10 +176,6 @@
   pointer-events: none;
 }
 .section-card--done::before { background: var(--ds-success); }
-
-.section-header {
-  transition: background var(--ds-duration-base) var(--ds-ease-out);
-}
 
 .section-num {
   display: inline-flex;
@@ -142,13 +202,12 @@
   color: var(--ds-ink);
 }
 
-/* ── Step done badge ─────────────────────────────────────────────────────── */
 .step-done-badge {
   background: var(--ds-success-soft) !important;
   color: var(--ds-success) !important;
 }
 
-/* ── Loading state ───────────────────────────────────────────────────────── */
+/* ── Loading state ───────────────────────────────────────────────────────────── */
 .loading-state {
   display: flex;
   align-items: center;
@@ -159,7 +218,7 @@
 }
 .loading-state .spinner-border { color: var(--ds-gold); }
 
-/* ── Service cards ───────────────────────────────────────────────────────── */
+/* ── Service cards ───────────────────────────────────────────────────────────── */
 .service-card {
   display: block;
   padding: var(--ds-space-4);
@@ -180,6 +239,8 @@
   background: var(--ds-gold-faint);
   box-shadow: var(--ds-shadow-gold);
 }
+.service-card:focus-within { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
+
 .service-icon {
   width: 2.25rem; height: 2.25rem;
   border-radius: var(--ds-radius-circle);
@@ -205,12 +266,9 @@
   color: var(--ds-ink-secondary);
   line-height: 1.4;
 }
-.service-check {
-  color: var(--ds-gold-active);
-  font-size: 1rem;
-}
+.service-check { color: var(--ds-gold-active); font-size: 1rem; }
 
-/* ── Tipo de inmueble ────────────────────────────────────────────────────── */
+/* ── Tipo de inmueble ────────────────────────────────────────────────────────── */
 .tipo-group {
   display: flex;
   flex-wrap: wrap;
@@ -237,7 +295,7 @@
   box-shadow: var(--ds-shadow-gold);
 }
 
-/* ── Country tag ─────────────────────────────────────────────────────────── */
+/* ── Country tag ─────────────────────────────────────────────────────────────── */
 .country-tag {
   display: inline-flex;
   align-items: center;
@@ -251,7 +309,7 @@
   font-weight: var(--ds-weight-semibold);
 }
 
-/* ── Visit note ──────────────────────────────────────────────────────────── */
+/* ── Visit note ──────────────────────────────────────────────────────────────── */
 .visit-note {
   background: var(--ds-info-soft);
   border: 1px solid var(--ds-info) !important;
@@ -259,7 +317,7 @@
 }
 .visit-note i { color: var(--ds-info); }
 
-/* ── Char counter ────────────────────────────────────────────────────────── */
+/* ── Char counter ────────────────────────────────────────────────────────────── */
 .char-counter {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
@@ -272,7 +330,7 @@
   font-weight: var(--ds-weight-semibold);
 }
 
-/* ── GPS section ─────────────────────────────────────────────────────────── */
+/* ── GPS section (fully tokenised — no Bootstrap bg-light) ──────────────────── */
 .gps-toggle {
   display: flex;
   align-items: center;
@@ -295,12 +353,20 @@
   color: var(--ds-gold-active);
 }
 .gps-toggle:hover .gps-chevron { color: var(--ds-gold-active); }
+.gps-toggle:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
+
 .gps-chevron {
   font-size: var(--ds-text-xs);
   color: var(--ds-border-strong);
   transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
+
+/* GPS panel — no Bootstrap bg-light */
 .gps-panel {
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4);
   animation: slideDown var(--ds-duration-base) var(--ds-ease-out);
 }
 @keyframes slideDown {
@@ -308,7 +374,16 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Validation messages ─────────────────────────────────────────────────── */
+/* GPS location alert — token-based, no alert-warning Bootstrap default */
+.create-alert-warn {
+  background: var(--ds-warning-soft);
+  border: 1px solid var(--ds-warning);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-ink);
+}
+.create-alert-warn i { color: var(--ds-warning); }
+
+/* ── Validation messages ─────────────────────────────────────────────────────── */
 .invalid-msg {
   display: flex;
   align-items: center;
@@ -318,25 +393,217 @@
   margin-top: var(--ds-space-1);
 }
 
-/* ── Actions card — "¿Qué pasa después?" horizontal ─────────────────────── */
-.process-row {
-  display: flex;
+/* ══════════════════════════════════════════════════════════════════════════════
+   SIDEBAR — panel sticky de información y acciones (solo desktop)
+   ══════════════════════════════════════════════════════════════════════════════ */
+.create-sidebar {
+  flex-direction: column;
   gap: var(--ds-space-3);
+  position: sticky;
+  top: var(--ds-space-4);
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ds-border) transparent;
 }
-.process-row__item {
-  flex: 1;
-  padding: var(--ds-space-3);
-  border-left: 3px solid var(--ds-gold);
-  background: var(--ds-gold-faint);
-  border-radius: 0 var(--ds-radius-md) var(--ds-radius-md) 0;
-}
-.process-row__item--last {
-  border-left-color: var(--ds-success);
-  background: var(--ds-success-soft);
+.create-sidebar::-webkit-scrollbar { width: 4px; }
+.create-sidebar::-webkit-scrollbar-track { background: transparent; }
+.create-sidebar::-webkit-scrollbar-thumb {
+  background: var(--ds-border);
+  border-radius: var(--ds-radius-pill);
 }
 
-/* ── Mobile sticky action bar ────────────────────────────────────────────── */
-.form-actions-mobile {
+/* Sidebar card */
+.csd-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  padding: var(--ds-space-5);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.csd-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-soft));
+}
+
+/* ── Step checklist ─────────────────────────────────────────────────────────── */
+.csd-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-4);
+}
+
+.csd-step {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.csd-step__circle {
+  width: 1.75rem; height: 1.75rem;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-bg-alt);
+  border: 2px solid var(--ds-border);
+  color: var(--ds-ink-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-bold);
+  flex-shrink: 0;
+  transition: background var(--ds-duration-base) var(--ds-ease-out),
+              border-color var(--ds-duration-base) var(--ds-ease-out),
+              color var(--ds-duration-base) var(--ds-ease-out);
+}
+.csd-step--done .csd-step__circle {
+  background: var(--ds-success);
+  border-color: var(--ds-success);
+  color: var(--ds-surface-elevated);
+}
+
+.csd-step__label {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  transition: color var(--ds-duration-base) var(--ds-ease-out);
+}
+.csd-step--done .csd-step__label {
+  color: var(--ds-ink);
+  font-weight: var(--ds-weight-medium);
+}
+
+/* ── Sidebar progress bar ───────────────────────────────────────────────────── */
+.csd-progress-track {
+  height: 5px;
+  background: var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+  margin-bottom: var(--ds-space-4);
+}
+.csd-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ds-gold-soft), var(--ds-gold), var(--ds-gold-active));
+  border-radius: var(--ds-radius-pill);
+  transition: width 0.8s var(--ds-ease-out);
+}
+
+/* ── Sidebar error ──────────────────────────────────────────────────────────── */
+.csd-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+  border: 1px solid var(--ds-danger);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  margin-bottom: var(--ds-space-3);
+  line-height: var(--ds-leading-snug);
+}
+.csd-error i { flex-shrink: 0; margin-top: 1px; }
+
+/* ── Sidebar actions ────────────────────────────────────────────────────────── */
+.csd-actions { display: flex; flex-direction: column; }
+
+.csd-privacy {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  justify-content: center;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: var(--ds-space-3) 0 0;
+}
+.csd-privacy i { color: var(--ds-success); }
+
+/* ── Process info card ──────────────────────────────────────────────────────── */
+.csd-card__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  margin: 0 0 var(--ds-space-4);
+}
+
+/* Vertical process timeline */
+.csd-process {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.csd-proc-item {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 0 var(--ds-space-3);
+  position: relative;
+  padding-bottom: var(--ds-space-4);
+}
+.csd-proc-item--last { padding-bottom: 0; }
+
+/* Connector line between dots */
+.csd-proc-item:not(.csd-proc-item--last)::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 26px;
+  bottom: 0;
+  width: 2px;
+  background: var(--ds-border);
+}
+
+.csd-proc-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  color: var(--ds-gold-active);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-regular);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+  grid-row: 1;
+}
+.csd-proc-num--success {
+  background: var(--ds-success-soft);
+  border-color: var(--ds-success);
+  color: var(--ds-success);
+}
+
+.csd-proc-body {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.csd-proc-title {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  margin: 0 0 var(--ds-space-1);
+  line-height: var(--ds-leading-snug);
+}
+.csd-proc-desc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  line-height: var(--ds-leading-relaxed);
+  margin: 0;
+}
+
+/* ── Mobile sticky bar ───────────────────────────────────────────────────────── */
+.create-actions-mobile {
   position: fixed;
   bottom: 0; left: 0; right: 0;
   display: flex;
@@ -353,17 +620,22 @@
 }
 .pb-mobile-bar { padding-bottom: 5rem; }
 
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
 @media (max-width: 575px) {
-  .create-header { padding: var(--ds-space-4) !important; }
-  .create-header h4 { font-size: var(--ds-text-base); }
-  .card-body { padding: var(--ds-space-4) !important; }
-  .section-header { padding: var(--ds-space-3) var(--ds-space-4) !important; }
-  .tipo-btn { min-width: 60px; padding: 0.5rem 0.625rem; }
-  .tipo-btn__label { font-size: 0.6rem; }
-  .progress-pill { display: none; }
+  .create-header        { padding: var(--ds-space-4) !important; }
+  .create-header__title { font-size: var(--ds-text-xl); }
+  .card-body            { padding: var(--ds-space-4) !important; }
+  .section-header       { padding: var(--ds-space-3) var(--ds-space-4) !important; }
+  .tipo-btn             { min-width: 60px; padding: 0.5rem 0.625rem; }
+  .tipo-btn__label      { font-size: 0.6rem; }
+  .progress-pill        { display: none; }
   .step-tracker__connector { min-width: var(--ds-space-2); }
 }
 @media (max-width: 767px) {
-  .create-header h4 { font-size: var(--ds-text-lg); }
+  .create-header__title { font-size: var(--ds-text-lg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gps-panel { animation: none; }
+  .csd-progress-fill { transition: none; }
 }

@@ -5,6 +5,259 @@
    ============================================================ */
 
 /* ============================================================
+   PAGE WRAPPER — Contenedor estándar para todas las vistas
+   Sustituye la mezcla de container-xl/container-fluid + py-5/py-4
+   <div class="page-wrapper"> ... </div>
+   ============================================================ */
+.page-wrapper {
+  width: 100%;
+  padding: var(--ds-space-4) var(--ds-space-3);
+}
+@media (min-width: 768px) {
+  .page-wrapper { padding: var(--ds-space-4) var(--ds-space-4); }
+}
+@media (min-width: 1200px) {
+  .page-wrapper { padding: var(--ds-space-5) var(--ds-space-5); }
+}
+
+/* ============================================================
+   PAGE HEADER — Encabezado estándar de página
+   ============================================================ */
+.page-header {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  padding: var(--ds-space-4);
+  margin-bottom: var(--ds-space-4);
+  box-shadow: var(--ds-shadow-xs);
+}
+@media (min-width: 768px) {
+  .page-header { padding: var(--ds-space-4) var(--ds-space-5); }
+}
+.page-eyebrow {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-gold-active);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  margin-bottom: var(--ds-space-2);
+}
+.page-eyebrow i { font-size: 0.7rem; }
+
+/* ============================================================
+   STATUS BADGE — Sistema unificado de badges de estado
+   Reemplaza las variantes inconsistentes por rol/componente
+   Uso: <span class="status-badge status-badge--nuevo">Nuevo</span>
+   ============================================================ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2em 0.7em;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  white-space: nowrap;
+  border: 1px solid transparent;
+  letter-spacing: 0.01em;
+}
+
+.status-badge--nuevo         { background: var(--ds-info-soft);    color: var(--ds-info);    border-color: var(--ds-info-soft); }
+.status-badge--en_estimacion { background: var(--ds-warning-soft); color: var(--ds-warning); border-color: var(--ds-warning-soft); }
+.status-badge--estimado      { background: var(--ds-gold-faint);   color: var(--ds-gold-active); border-color: var(--ds-gold-soft); }
+.status-badge--en_oferta     { background: var(--ds-primary-bg-subtle, #F7EFD9); color: var(--ds-ink); border-color: var(--ds-gold-soft); }
+.status-badge--adjudicado    { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--contratado    { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--cancelado     { background: var(--ds-danger-soft);  color: var(--ds-danger);  border-color: var(--ds-danger-soft); }
+.status-badge--pendiente     { background: var(--ds-warning-soft); color: var(--ds-warning); border-color: var(--ds-warning-soft); }
+.status-badge--aceptada      { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--rechazada     { background: var(--ds-danger-soft);  color: var(--ds-danger);  border-color: var(--ds-danger-soft); }
+.status-badge--firmado       { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--en_ejecucion  { background: var(--ds-info-soft);    color: var(--ds-info);    border-color: var(--ds-info-soft); }
+.status-badge--completado    { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--activo        { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success-soft); }
+.status-badge--inactivo      { background: var(--ds-danger-soft);  color: var(--ds-danger);  border-color: var(--ds-danger-soft); }
+
+/* ============================================================
+   KPI PILL — Métrica compacta en headers
+   <span class="kpi-pill"><i class="bi bi-folder2"></i> 42 expedientes</span>
+   ============================================================ */
+.kpi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  white-space: nowrap;
+}
+.kpi-pill i { color: var(--ds-gold-active); font-size: 0.8rem; }
+
+/* ============================================================
+   EMPTY STATE — Estandarizado
+   ============================================================ */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-8) var(--ds-space-4);
+  color: var(--ds-ink-muted);
+}
+.empty-state__icon {
+  width: 56px;
+  height: 56px;
+  background: var(--ds-gold-faint);
+  border: 1px solid var(--ds-gold-soft);
+  border-radius: var(--ds-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--ds-gold-active);
+  flex-shrink: 0;
+}
+.empty-state__icon--danger {
+  background: var(--ds-danger-soft);
+  border-color: var(--ds-danger-soft);
+  color: var(--ds-danger);
+}
+.empty-state__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  margin: 0;
+}
+.empty-state__desc {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  max-width: 360px;
+  margin: 0;
+}
+.empty-state--table {
+  padding: var(--ds-space-6) var(--ds-space-4);
+}
+.empty-state--table .empty-state__icon { width: 44px; height: 44px; font-size: 1.25rem; }
+
+/* ============================================================
+   TABLE CARD — Contenedor de tabla con sombra y bordes
+   ============================================================ */
+.table-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+}
+.table-footer {
+  border-top: 1px solid var(--ds-border);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-bg-alt);
+}
+
+/* ============================================================
+   FILTER BAR — Barra de filtros unificada
+   ============================================================ */
+.filter-bar {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xs);
+  margin-bottom: var(--ds-space-3);
+}
+.filter-bar__search {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+.filter-bar__chips {
+  padding: var(--ds-space-2) var(--ds-space-4);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+.search-icon { background: var(--ds-bg-alt); border-color: var(--ds-border); color: var(--ds-ink-muted); }
+.search-input { background: var(--ds-bg-alt) !important; border-left: none; }
+.search-clear { background: none; border: none; color: var(--ds-ink-muted); padding: 0 var(--ds-space-2); }
+.search-clear:hover { color: var(--ds-danger); }
+
+.status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+  flex: 1;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  background: transparent;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+  white-space: nowrap;
+}
+.status-chip:hover {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold-soft);
+  color: var(--ds-ink);
+}
+.status-chip--active {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink);
+  font-weight: var(--ds-weight-semibold);
+}
+.status-chip__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-ink-muted);
+}
+.status-chip--active .status-chip__count {
+  background: var(--ds-gold-soft);
+  color: var(--ds-ink);
+}
+.btn-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  padding: 0.25rem 0.75rem;
+  border: none;
+  background: none;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  cursor: pointer;
+  border-radius: var(--ds-radius-pill);
+  transition: color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+  white-space: nowrap;
+}
+.btn-clear-filters:hover { color: var(--ds-danger); background: var(--ds-danger-soft); }
+
+/* ============================================================
    EYEBROW (etiqueta sobre títulos)
    <span class="eyebrow">Sección 01</span>
    ============================================================ */

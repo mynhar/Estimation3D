@@ -110,7 +110,16 @@
       "Bash(grep -q 'export type __TRACKED_VAR__' src/app/types/supabase.ts)",
       "Bash(node -e \"const j=require\\('./src/assets/i18n/es.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline,dashboard_client:{timeline_title:j.dashboard_client?.timeline_title,timeline_empty:j.dashboard_client?.timeline_empty}},null,2\\)\\)\")",
       "Bash(node -e \"const j=require\\('./src/assets/i18n/en.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline},null,2\\)\\)\")",
-      "Bash(node -e \"const j=require\\('./src/assets/i18n/fr.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline},null,2\\)\\)\")"
+      "Bash(node -e \"const j=require\\('./src/assets/i18n/fr.json'\\); console.log\\(JSON.stringify\\({timeline:j.timeline},null,2\\)\\)\")",
+      "Bash(Select-String -Pattern \"environment\")",
+      "Bash(git rm *)",
+      "PowerShell(git -C \"c:\\\\desarrollo\\\\estimation3d-A18-v01\" rm --cached src/environments/environment.ts src/environments/environment.production.ts 2>&1)",
+      "Read(//c/Users/Harold Bonilla Lopez/.claude/skills/hallmark/references/verbs/**)",
+      "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/verbs/**)",
+      "Read(//c/Users/Harold Bonilla Lopez/.claude/skills/hallmark/references/genres/**)",
+      "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/genres/**)",
+      "Read(//c/Users/Harold Bonilla Lopez/.claude/skills/hallmark/references/**)",
+      "Read(//c/Users/Harold Bonilla Lopez/.agents/skills/hallmark/references/**)"
     ],
     "additionalDirectories": [
       "\\tmp"

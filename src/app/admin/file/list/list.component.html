@@ -14,12 +14,7 @@
         @if (!cargando() && !error()) {
           <span class="kpi-pill">
             <i class="bi bi-folder2"></i>
-            @if (hayFiltros()) {
-              {{ expedientesFiltrados().length }} / {{ total }}
-            } @else {
-              {{ total }}
-            }
-            {{ 'admin_file.count' | translate }}
+            {{ totalItems() }} {{ 'admin_file.count' | translate }}
           </span>
         }
         <a routerLink="/admin/file/create" class="btn btn-primary btn-sm">
@@ -79,7 +74,7 @@
                  [value]="busqueda()"
                  (input)="setBusqueda($event)">
           @if (busqueda()) {
-            <button class="btn search-clear" type="button" (click)="busqueda.set('')"
+            <button class="btn search-clear" type="button" (click)="clearBusqueda()"
                     [title]="'common.clear' | translate">
               <i class="bi bi-x-lg"></i>
             </button>
@@ -93,15 +88,15 @@
           @for (estado of estados; track estado) {
             <button type="button" class="status-chip"
                     [class.status-chip--active]="filtroEstado() === estado"
-                    (click)="filtroEstado.set(estado)">
+                    (click)="setFiltroEstado(estado)">
               <span class="status-chip__label">
                 {{ estado === 'todos'
                     ? ('common.all' | translate)
                     : (('admin_file.status_' + estado) | translate) }}
               </span>
-              <span class="status-chip__count">
-                {{ estado === 'todos' ? total : (estadoCounts()[estado] || 0) }}
-              </span>
+              @if (estado === 'todos') {
+                <span class="status-chip__count">{{ totalItems() }}</span>
+              }
             </button>
           }
         </div>
@@ -131,7 +126,7 @@
           </thead>
           <tbody>
 
-            @for (e of expedientesPaginados(); track e.id) {
+            @for (e of expedientes(); track e.id) {
               <tr class="table-row">
 
                 <!-- Número -->
@@ -226,10 +221,10 @@
       </div>
 
       <!-- ── Paginación ───────────────────────────────────────────────────── -->
-      @if (expedientesFiltrados().length > 0) {
+      @if (totalItems() > POR_PAGINA) {
         <div class="table-footer">
           <app-pagination
-            [total]="expedientesFiltrados().length"
+            [total]="totalItems()"
             [page]="paginaActual()"
             [pageSize]="POR_PAGINA"
             (pageChange)="paginaActual.set($event)">

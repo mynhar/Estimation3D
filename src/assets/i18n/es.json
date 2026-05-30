@@ -224,6 +224,7 @@
     "success_rate": "Tasa de éxito",
     "distribution": "Distribución",
     "quick_actions": "Acciones rápidas",
+    "find_projects": "Explorar expedientes disponibles",
     "progress_meaning": "¿Qué significa el progreso?",
     "start_label": "Inicio",
     "ref_35": "Oferta pendiente — esperando decisión del cliente",
@@ -354,7 +355,8 @@
     "section_managed": "Ya gestionados",
     "section_pending": "Pendientes de revisión",
     "banner_plural": "Tienes {{count}} proyectos con ofertas pendientes de revisión.",
-    "pending_plural": "pendientes"
+    "pending_plural": "pendientes",
+    "total_label": "expedientes"
   },
   "my_offers": {
     "title": "Mis ofertas",

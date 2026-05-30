@@ -1,8 +1,8 @@
-<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
+﻿<div class="page-wrapper">
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        HEADER EDITORIAL
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <header class="card card-premium mb-4 fade-up">
     <div class="card-body px-4 px-lg-5 py-4 d-flex align-items-start justify-content-between gap-4 flex-wrap">
       <div>
@@ -40,20 +40,20 @@
     </div>
   </header>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: CARGANDO
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   @if (cargando()) {
     <div class="page-loading">
       <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
-        <span class="visually-hidden">Cargando…</span>
+        <span class="visually-hidden">Cargandoâ€¦</span>
       </div>
       <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: SIN EXPEDIENTES
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else if (expedientes().length === 0) {
     <div class="empty-wrap fade-up">
       <div class="card card-premium text-center px-4 px-lg-5 py-5">
@@ -65,12 +65,12 @@
       </div>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        CON DATOS
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else {
 
-    <!-- ── Barra de filtros ──────────────────────────────────────────────── -->
+    <!-- â”€â”€ Barra de filtros â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="filter-bar mb-3 fade-up" style="--delay:80ms">
 
       <div class="filter-search">
@@ -140,7 +140,7 @@
 
     </div>
 
-    <!-- ── Conteo de resultados ──────────────────────────────────────────── -->
+    <!-- â”€â”€ Conteo de resultados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     @if (hayFiltros()) {
       <p class="results-count mb-3 fade-up">
         <i class="bi bi-funnel me-1"></i>
@@ -151,7 +151,7 @@
       </p>
     }
 
-    <!-- ── Sin resultados tras filtro ───────────────────────────────────── -->
+    <!-- â”€â”€ Sin resultados tras filtro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     @if (expedientesFiltrados().length === 0) {
       <div class="empty-wrap fade-up">
         <div class="card card-premium text-center px-4 px-lg-5 py-5">
@@ -168,9 +168,9 @@
         </div>
       </div>
 
-    <!-- ── Cuadrícula de expedientes ─────────────────────────────────────── -->
+    <!-- â”€â”€ CuadrÃ­cula de expedientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3 fade-up" style="--delay:120ms">
+      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 fade-up" style="--delay:120ms">
 
         @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
@@ -182,7 +182,7 @@
 
               <div class="file-card__body d-flex flex-column">
 
-                <!-- ── Fila 1: número + estado + reciente ────────────────── -->
+                <!-- â”€â”€ Fila 1: nÃºmero + estado + reciente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
                   <span class="file-num">{{ exp.numero }}</span>
 
@@ -203,10 +203,10 @@
                   }
                 </div>
 
-                <!-- ── Servicio (título) ──────────────────────────────────── -->
+                <!-- â”€â”€ Servicio (tÃ­tulo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <h3 class="file-servicio mb-3">{{ servicioNombre(exp) }}</h3>
 
-                <!-- ── Ubicación ─────────────────────────────────────────── -->
+                <!-- â”€â”€ UbicaciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div class="file-location mb-auto">
                   <div class="d-flex align-items-start gap-2 mb-1">
                     <i class="bi bi-geo-alt file-location__icon"></i>
@@ -214,16 +214,16 @@
                   </div>
                   <div class="d-flex align-items-start gap-2">
                     <i class="bi bi-signpost file-location__icon"></i>
-                    <span class="file-location__detail">{{ exp.distrito }} · {{ exp.direccion }}</span>
+                    <span class="file-location__detail">{{ exp.distrito }} Â· {{ exp.direccion }}</span>
                   </div>
                 </div>
 
-                <!-- ── Estimación de costo ───────────────────────────────── -->
+                <!-- â”€â”€ EstimaciÃ³n de costo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 @if (exp.costo_estimado) {
                   <div class="file-cost mt-3">
                     @if (exp.costo_estimado_max && exp.costo_estimado_max > exp.costo_estimado) {
                       <span class="file-cost__value">
-                        {{ formatPrecio(exp.costo_estimado) }} – {{ formatPrecio(exp.costo_estimado_max) }}
+                        {{ formatPrecio(exp.costo_estimado) }} â€“ {{ formatPrecio(exp.costo_estimado_max) }}
                       </span>
                     } @else {
                       <span class="file-cost__value">{{ formatPrecio(exp.costo_estimado) }}</span>
@@ -233,7 +233,7 @@
 
                 <hr class="file-divider my-3">
 
-                <!-- ── Slots de competencia + fecha ─────────────────────── -->
+                <!-- â”€â”€ Slots de competencia + fecha â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 <div class="d-flex align-items-center justify-content-between mb-3">
                   <div class="d-flex align-items-center gap-2">
                     <div class="slot-track">
@@ -251,7 +251,7 @@
                   </span>
                 </div>
 
-                <!-- ── CTA ──────────────────────────────────────────────── -->
+                <!-- â”€â”€ CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 @if (tieneOferta(exp.id)) {
                   <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold
                                  d-flex align-items-center justify-content-center gap-2"
@@ -285,7 +285,7 @@
         (pageChange)="paginaActual.set($event)">
       </app-pagination>
 
-      <!-- ── Leyenda ────────────────────────────────────────────────────── -->
+      <!-- â”€â”€ Leyenda â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="legend-bar mt-4">
         <span class="legend-bar__title">{{ 'available_files.legend_title' | translate }}</span>
         <span class="legend-item">
@@ -307,3 +307,5 @@
   }
 
 </div>
+
+

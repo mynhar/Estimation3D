@@ -51,10 +51,10 @@ export class AdminDashboardComponent implements OnInit {
     return items.slice(start, start + this.TL_POR_PAGINA);
   });
 
-  private _resetPagina = effect(() => {
-    this.filtroTimeline();
+  setFiltroTimeline(key: string): void {
+    this.filtroTimeline.set(key);
     this.paginaTl.set(1);
-  });
+  }
 
   funnelExp = computed((): FunnelItem[] => {
     const s = this.stats();

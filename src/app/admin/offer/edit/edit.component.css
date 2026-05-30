@@ -1693,7 +1693,7 @@
   font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-medium);
-  color: #fff;
+  color: var(--ds-ink-inverse);
   cursor: pointer;
   transition: all var(--ds-duration-fast) var(--ds-ease-out);
 }

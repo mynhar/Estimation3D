@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
@@ -13,13 +13,14 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
-export class AdminFileListComponent implements OnInit {
+export class AdminFileListComponent {
   private expedienteService = inject(ExpedienteService);
   private translate         = inject(TranslateService);
 
-  private _expedientes = signal<ExpedienteAdmin[]>([]);
-  cargando = signal(true);
-  error    = signal<string | null>(null);
+  expedientes  = signal<ExpedienteAdmin[]>([]);
+  totalItems   = signal(0);
+  cargando     = signal(true);
+  error        = signal<string | null>(null);
 
   busqueda     = signal('');
   filtroEstado = signal('todos');
@@ -29,52 +30,35 @@ export class AdminFileListComponent implements OnInit {
     'en_oferta', 'adjudicado', 'contratado', 'cancelado',
   ];
 
-  // ── Paginación ─────────────────────────────────────────────────────────────
   readonly POR_PAGINA = 15;
   paginaActual = signal(1);
-
-  expedientesFiltrados = computed(() => {
-    const q      = this.busqueda().toLowerCase().trim();
-    const estado = this.filtroEstado();
-
-    return this._expedientes().filter(e => {
-      if (estado !== 'todos' && e.estado !== estado) return false;
-      if (q && !`${e.numero} ${this.servicioNombre(e)} ${e.cliente_nombre}`
-                .toLowerCase().includes(q)) return false;
-      return true;
-    });
-  });
-
-  expedientesPaginados = computed(() => {
-    const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
-    return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
-  });
 
   hayFiltros = computed(() =>
     this.busqueda() !== '' || this.filtroEstado() !== 'todos'
   );
 
-  estadoCounts = computed(() => {
-    const counts: Record<string, number> = {};
-    for (const e of this._expedientes()) {
-      counts[e.estado] = (counts[e.estado] ?? 0) + 1;
-    }
-    return counts;
-  });
-
-  get total(): number { return this._expedientes().length; }
-
   constructor() {
+    // Carga server-side cuando cambia cualquier parámetro de búsqueda o página
     effect(() => {
-      this.busqueda();
-      this.filtroEstado();
-      this.paginaActual.set(1);
-    }, { allowSignalWrites: true });
+      const page     = this.paginaActual();
+      const estado   = this.filtroEstado();
+      const busqueda = this.busqueda();
+      untracked(() => this.cargar(page, estado, busqueda));
+    });
   }
 
-  async ngOnInit() {
+  private async cargar(page: number, estado: string, busqueda: string): Promise<void> {
+    this.cargando.set(true);
+    this.error.set(null);
     try {
-      this._expedientes.set(await this.expedienteService.getExpedientesAdmin());
+      const result = await this.expedienteService.getExpedientesAdmin({
+        page,
+        pageSize: this.POR_PAGINA,
+        estado,
+        busqueda,
+      });
+      this.expedientes.set(result.items);
+      this.totalItems.set(result.total);
     } catch (e: any) {
       this.error.set(e.message);
     } finally {
@@ -82,13 +66,25 @@ export class AdminFileListComponent implements OnInit {
     }
   }
 
+  setBusqueda(e: Event) {
+    this.busqueda.set((e.target as HTMLInputElement).value);
+    this.paginaActual.set(1);
+  }
+
+  clearBusqueda() {
+    this.busqueda.set('');
+    this.paginaActual.set(1);
+  }
+
+  setFiltroEstado(estado: string) {
+    this.filtroEstado.set(estado);
+    this.paginaActual.set(1);
+  }
+
   limpiarFiltros() {
     this.busqueda.set('');
     this.filtroEstado.set('todos');
-  }
-
-  setBusqueda(e: Event) {
-    this.busqueda.set((e.target as HTMLInputElement).value);
+    this.paginaActual.set(1);
   }
 
   servicioNombre(exp: ExpedienteAdmin): string {

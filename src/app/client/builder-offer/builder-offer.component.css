@@ -1,3 +1,7 @@
+/* Hallmark · genre: editorial · design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ */
+
 /* ════════════════════════════════════════════════════════════════════════════
    SKELETON — shimmer
 ════════════════════════════════════════════════════════════════════════════ */
@@ -147,7 +151,7 @@
   color: var(--ds-gold-active);
   padding: 0.2em 0.6em;
   border-radius: var(--ds-radius-sm);
-  border: 1px solid rgba(212,185,110,.3);
+  border: 1px solid var(--ds-gold-soft);
   white-space: nowrap;
 }
 
@@ -261,7 +265,7 @@
 /* ── Photo grid ──────────────────────────────────────────────────────────── */
 .photos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--ds-space-2);
 }
 .photo-thumb {
@@ -292,7 +296,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  color: var(--ds-surface);
+  color: var(--ds-ink-inverse);
   opacity: 0;
   transition: opacity var(--ds-duration-base) var(--ds-ease-out),
               background var(--ds-duration-base) var(--ds-ease-out);
@@ -444,7 +448,7 @@
 /* ── Offers grid ─────────────────────────────────────────────────────────── */
 .offers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: var(--ds-space-4);
 }
 
@@ -528,24 +532,22 @@
 .offer-contact:hover { text-decoration: underline; }
 
 .offer-card__meta-grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-2);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ds-space-2) var(--ds-space-4);
   border-top: 1px solid var(--ds-border);
   padding-top: var(--ds-space-3);
   margin-top: var(--ds-space-3);
 }
 .offer-meta-item {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--ds-space-2);
+  flex-direction: column;
+  gap: var(--ds-space-1);
 }
 .offer-meta-value {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-secondary);
   font-weight: var(--ds-weight-medium);
-  text-align: right;
 }
 
 .offer-desc {
@@ -710,16 +712,30 @@
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
 }
-.selected-preview__meta {
+.selected-preview__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-2);
+}
+.selected-preview__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  padding: 0.25em 0.6em;
+  white-space: nowrap;
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
    BOTONES DEL SISTEMA
 ════════════════════════════════════════════════════════════════════════════ */
 
-/* Acción principal: aceptar oferta */
+/* Acción principal: aceptar oferta — texto ink sobre fondo dorado (WCAG AA) */
 .btn-accept {
   appearance: none;
   display: flex;
@@ -731,14 +747,26 @@
   background: var(--ds-gold);
   border: none;
   border-radius: var(--ds-radius-md);
-  color: var(--ds-surface);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
   font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-semibold);
   cursor: pointer;
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              transform  var(--ds-duration-fast) var(--ds-ease-out),
               box-shadow var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-accept:hover:not(:disabled) { background: var(--ds-gold-active); box-shadow: var(--ds-shadow-md); }
+.btn-accept:hover:not(:disabled) {
+  background: var(--ds-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-gold);
+}
+.btn-accept:active:not(:disabled) {
+  background: var(--ds-gold-active);
+  transform: translateY(0);
+  box-shadow: none;
+}
+.btn-accept:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
 .btn-accept:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Secundario con borde (volver, acciones secundarias) */
@@ -892,8 +920,8 @@
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1080;
-  background: rgba(26, 20, 12, 0.88);
+  z-index: var(--ds-z-modal);
+  background: rgba(26, 26, 26, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;

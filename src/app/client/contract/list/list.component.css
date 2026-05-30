@@ -1,3 +1,8 @@
+/* Hallmark · genre: editorial · design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ * Conditions redesigned to dl 2-col key-value; WCAG btn color fixes applied.
+ */
+
 /* ── Root ─────────────────────────────────────────────────────────────────── */
 :host { display: block; }
 
@@ -149,17 +154,16 @@
 }
 
 .empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  width: 68px;
+  height: 68px;
+  border-radius: var(--ds-radius-circle);
   background: var(--ds-bg-alt);
   border: 1px solid var(--ds-border);
   color: var(--ds-ink-muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--ds-text-2xl);
-  margin-bottom: var(--ds-space-2);
+  margin-bottom: var(--ds-space-3);
 }
 
 .empty-title {
@@ -369,37 +373,30 @@
   line-height: 1.1;
 }
 
-/* ── Conditions (plazo / garantía / inicio) ───────────────────────────────── */
+/* ── Conditions — dl 2-col key-value grid (compacto, sin iconos) ─────────── */
 .ccard-conditions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ds-space-1) var(--ds-space-3);
+  align-items: baseline;
+  margin: 0;
 }
-
-.ccard-condition {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ds-space-2);
-  color: var(--ds-ink-muted);
-  font-size: var(--ds-text-sm);
-}
-
-.ccard-condition > i { margin-top: 2px; flex-shrink: 0; }
 
 .ccard-cond-lbl {
-  display: block;
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-wide);
   text-transform: uppercase;
   color: var(--ds-ink-muted);
-  opacity: 0.7;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .ccard-cond-val {
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
+  margin: 0;
 }
 
 /* ── Work description ─────────────────────────────────────────────────────── */
@@ -488,23 +485,38 @@
 .btn-pdf:hover   { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
 .btn-pdf--open   { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
 
-/* ── Sign button ──────────────────────────────────────────────────────────── */
+/* ── Sign button — ink sobre dorado (WCAG AA) ─────────────────────────────── */
 .btn-sign {
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-1);
   background: var(--ds-gold);
   border: none;
-  color: var(--ds-surface);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   padding: 0.4em 1.1em;
   border-radius: var(--ds-radius-md);
   cursor: pointer;
-  transition: background var(--ds-duration-fast) var(--ds-ease-out);
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              transform  var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
 }
 
-.btn-sign:hover { background: var(--ds-gold-active); }
+.btn-sign:hover:not(:disabled) {
+  background: var(--ds-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-gold);
+}
+
+.btn-sign:active:not(:disabled) {
+  background: var(--ds-gold-active);
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-sign:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PDF VIEWER
@@ -574,15 +586,14 @@
 }
 
 .sign-panel-icon {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: var(--ds-gold-soft);
   color: var(--ds-gold-active);
-  border-radius: 50%;
+  border-radius: var(--ds-radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--ds-text-base);
   flex-shrink: 0;
 }
 
@@ -663,8 +674,7 @@
   justify-content: center;
   flex-shrink: 0;
   margin-top: 1px;
-  font-size: var(--ds-text-xs);
-  color: var(--ds-surface);
+  color: var(--ds-ink);
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
               border-color var(--ds-duration-fast) var(--ds-ease-out);
 }
@@ -672,6 +682,7 @@
 .sign-checkbox.checked {
   background: var(--ds-gold);
   border-color: var(--ds-gold);
+  color: var(--ds-ink);
 }
 
 .sign-actions {
@@ -681,23 +692,37 @@
   flex-wrap: wrap;
 }
 
+/* btn-sign-confirm — ink sobre dorado (WCAG AA) */
 .btn-sign-confirm {
   display: inline-flex;
   align-items: center;
   gap: var(--ds-space-2);
   background: var(--ds-gold);
   border: none;
-  color: var(--ds-surface);
+  color: var(--ds-ink);
+  font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   padding: 0.55em 1.4em;
   border-radius: var(--ds-radius-md);
   cursor: pointer;
   transition: background var(--ds-duration-fast) var(--ds-ease-out),
-              opacity var(--ds-duration-fast) var(--ds-ease-out);
+              transform  var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
 }
 
-.btn-sign-confirm:hover:not(:disabled) { background: var(--ds-gold-active); }
+.btn-sign-confirm:hover:not(:disabled) {
+  background: var(--ds-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-gold);
+}
+
+.btn-sign-confirm:active:not(:disabled) {
+  background: var(--ds-gold-active);
+  transform: translateY(0);
+}
+
+.btn-sign-confirm:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
 .btn-sign-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .sign-cancel-link {
@@ -759,15 +784,14 @@
 }
 
 .cancel-panel-icon {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: var(--ds-danger);
   color: var(--ds-ink-inverse);
-  border-radius: 50%;
+  border-radius: var(--ds-radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--ds-text-base);
   flex-shrink: 0;
 }
 

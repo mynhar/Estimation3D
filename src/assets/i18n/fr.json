@@ -224,6 +224,7 @@
     "success_rate": "Taux de succès",
     "distribution": "Distribution",
     "quick_actions": "Actions rapides",
+    "find_projects": "Explorer les dossiers disponibles",
     "progress_meaning": "Que signifie la progression ?",
     "start_label": "Début",
     "ref_35": "Offre en attente — décision du client attendue",
@@ -354,7 +355,8 @@
     "section_managed": "Déjà gérés",
     "section_pending": "En attente de révision",
     "banner_plural": "Vous avez {{count}} projets avec des offres en attente de révision.",
-    "pending_plural": "en attente"
+    "pending_plural": "en attente",
+    "total_label": "dossiers"
   },
   "my_offers": {
     "title": "Mes offres",

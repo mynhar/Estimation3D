@@ -1,16 +1,4 @@
 import { Routes } from '@angular/router';
-import { LandingPageComponent } from './landing-page/landing-page.component';
-import { LoginComponent } from './login/login.component';
-import { DashboardComponent } from './client/dashboard/dashboard.component';
-import { FileCreateComponent } from './client/file/create/create.component';
-import { MyFilesComponent } from './client/file/my-files/my-files.component';
-import { FilesToBeEstimatedComponent } from './estimator/files-to-be-estimated/files-to-be-estimated.component';
-import { FilesUnderEstimationComponent } from './estimator/files-under-estimation/files-under-estimation.component';
-import { FileUnderEstimationComponent } from './estimator/file-under-estimation/file-under-estimation.component';
-import { EstimatedFilesComponent } from './estimator/estimated-files/estimated-files.component';
-import { EstimatedFileComponent } from './estimator/estimated-file/estimated-file.component';
-import { FileToBeEstimatedComponent } from './estimator/file-to-be-estimated/file-to-be-estimated.component';
-import { EstimatorDashboardComponent } from './estimator/dashboard/dashboard.component';
 import {
   adminGuard,
   authGuard,
@@ -19,218 +7,207 @@ import {
   guestGuard,
   wildcardGuard,
 } from './auth.guard';
-import { AdminDashboardComponent } from './admin/dashboard/dashboard.component';
-import { AdminFileComponent } from './admin/file/file.component';
-import { AdminOfferListComponent } from './admin/offer/list/list.component';
-import { AdminOfferEditComponent } from './admin/offer/edit/edit.component';
-import { AdminContractListComponent } from './admin/contract/list/list.component';
-import { AdminContractEditComponent } from './admin/contract/edit/edit.component';
-import { AdminServiceTypesComponent } from './admin/service-types/service-types.component';
-import { AdminUserComponent } from './admin/user/user.component';
-import { AdminUserCreateComponent } from './admin/user/create/create.component';
-import { AdminUserEditComponent } from './admin/user/edit/edit.component';
-import { AvailableFilesComponent } from './builder/available-files/available-files.component';
-import { MakeOfferComponent } from './builder/make-offer/make-offer.component';
-import { MyOffersComponent } from './builder/my-offers/my-offers.component';
-import { MyOfferComponent } from './builder/my-offer/my-offer.component';
-import { BuilderDashboardComponent } from './builder/dashboard/dashboard.component';
-import { OffersReceivedComponent } from './client/offers-received/offers-received.component';
-import { BuilderOfferComponent } from './client/builder-offer/builder-offer.component';
-import { PerfilComponent } from './client/perfil/perfil.component';
-import { MyFileComponent } from './client/file/my-file/my-file.component';
-import { ContractListComponent } from './client/contract/list/list.component';
-import { AdminFileCreateComponent } from './admin/file/create/create.component';
-import { AdminFileEditComponent } from './admin/file/edit/edit.component';
-import { AdminServiceTypeEditComponent } from './admin/service-types/edit/edit.component';
-import { AdminServiceTypeCreateComponent } from './admin/service-types/create/create.component';
-import { AdminToEstimateListComponent } from './admin/to-estimate/list/list.component';
-import { AdminToEstimateEditComponent } from './admin/to-estimate/edit/edit.component';
 
 export const routes: Routes = [
-  { path: '', component: LandingPageComponent, canActivate: [guestGuard] },
-  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  // ── Público ──────────────────────────────────────────────────────────────
+  {
+    path: '',
+    loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent),
+    canActivate: [guestGuard],
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.component').then(m => m.LoginComponent),
+    canActivate: [guestGuard],
+  },
+
+  // ── Cliente ───────────────────────────────────────────────────────────────
   {
     path: 'client/dashboard',
-    component: DashboardComponent,
+    loadComponent: () => import('./client/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/file/create',
-    component: FileCreateComponent,
+    loadComponent: () => import('./client/file/create/create.component').then(m => m.FileCreateComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/file/my-files',
-    component: MyFilesComponent,
+    loadComponent: () => import('./client/file/my-files/my-files.component').then(m => m.MyFilesComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/file/my-file/:id',
-    component: MyFileComponent,
+    loadComponent: () => import('./client/file/my-file/my-file.component').then(m => m.MyFileComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/offers-received',
-    component: OffersReceivedComponent,
+    loadComponent: () => import('./client/offers-received/offers-received.component').then(m => m.OffersReceivedComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/builder-offer/:id',
-    component: BuilderOfferComponent,
+    loadComponent: () => import('./client/builder-offer/builder-offer.component').then(m => m.BuilderOfferComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/contracts',
-    component: ContractListComponent,
+    loadComponent: () => import('./client/contract/list/list.component').then(m => m.ContractListComponent),
     canActivate: [authGuard],
   },
   {
     path: 'client/perfil',
-    component: PerfilComponent,
+    loadComponent: () => import('./client/perfil/perfil.component').then(m => m.PerfilComponent),
     canActivate: [authGuard],
   },
+
+  // ── Estimador ─────────────────────────────────────────────────────────────
   {
     path: 'estimator/dashboard',
-    component: EstimatorDashboardComponent,
+    loadComponent: () => import('./estimator/dashboard/dashboard.component').then(m => m.EstimatorDashboardComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/files-to-be-estimated',
-    component: FilesToBeEstimatedComponent,
+    loadComponent: () => import('./estimator/files-to-be-estimated/files-to-be-estimated.component').then(m => m.FilesToBeEstimatedComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/file-to-be-estimated/:id',
-    component: FileToBeEstimatedComponent,
+    loadComponent: () => import('./estimator/file-to-be-estimated/file-to-be-estimated.component').then(m => m.FileToBeEstimatedComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/files-under-estimation',
-    component: FilesUnderEstimationComponent,
+    loadComponent: () => import('./estimator/files-under-estimation/files-under-estimation.component').then(m => m.FilesUnderEstimationComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/file-under-estimation/:id',
-    component: FileUnderEstimationComponent,
+    loadComponent: () => import('./estimator/file-under-estimation/file-under-estimation.component').then(m => m.FileUnderEstimationComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/estimated-files',
-    component: EstimatedFilesComponent,
+    loadComponent: () => import('./estimator/estimated-files/estimated-files.component').then(m => m.EstimatedFilesComponent),
     canActivate: [estimatorGuard],
   },
   {
     path: 'estimator/estimated-file/:id',
-    component: EstimatedFileComponent,
+    loadComponent: () => import('./estimator/estimated-file/estimated-file.component').then(m => m.EstimatedFileComponent),
     canActivate: [estimatorGuard],
   },
 
+  // ── Constructor ───────────────────────────────────────────────────────────
   {
     path: 'builder/dashboard',
-    component: BuilderDashboardComponent,
+    loadComponent: () => import('./builder/dashboard/dashboard.component').then(m => m.BuilderDashboardComponent),
     canActivate: [constructorGuard],
   },
   {
     path: 'builder/available-files',
-    component: AvailableFilesComponent,
+    loadComponent: () => import('./builder/available-files/available-files.component').then(m => m.AvailableFilesComponent),
     canActivate: [constructorGuard],
   },
   {
     path: 'builder/make-offer/:id',
-    component: MakeOfferComponent,
+    loadComponent: () => import('./builder/make-offer/make-offer.component').then(m => m.MakeOfferComponent),
     canActivate: [constructorGuard],
   },
   {
     path: 'builder/my-offers',
-    component: MyOffersComponent,
+    loadComponent: () => import('./builder/my-offers/my-offers.component').then(m => m.MyOffersComponent),
     canActivate: [constructorGuard],
   },
   {
     path: 'builder/my-offer/:id',
-    component: MyOfferComponent,
+    loadComponent: () => import('./builder/my-offer/my-offer.component').then(m => m.MyOfferComponent),
     canActivate: [constructorGuard],
   },
 
+  // ── Administrador ─────────────────────────────────────────────────────────
   {
     path: 'admin/dashboard',
-    component: AdminDashboardComponent,
+    loadComponent: () => import('./admin/dashboard/dashboard.component').then(m => m.AdminDashboardComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/file',
-    component: AdminFileComponent,
+    loadComponent: () => import('./admin/file/file.component').then(m => m.AdminFileComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/file/create',
-    component: AdminFileCreateComponent,
+    loadComponent: () => import('./admin/file/create/create.component').then(m => m.AdminFileCreateComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/file/edit/:id',
-    component: AdminFileEditComponent,
+    loadComponent: () => import('./admin/file/edit/edit.component').then(m => m.AdminFileEditComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/offer',
-    component: AdminOfferListComponent,
+    loadComponent: () => import('./admin/offer/list/list.component').then(m => m.AdminOfferListComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/offer/edit/:id',
-    component: AdminOfferEditComponent,
+    loadComponent: () => import('./admin/offer/edit/edit.component').then(m => m.AdminOfferEditComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/contract',
-    component: AdminContractListComponent,
+    loadComponent: () => import('./admin/contract/list/list.component').then(m => m.AdminContractListComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/contract/edit/:id',
-    component: AdminContractEditComponent,
+    loadComponent: () => import('./admin/contract/edit/edit.component').then(m => m.AdminContractEditComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/service-type',
-    component: AdminServiceTypesComponent,
+    loadComponent: () => import('./admin/service-types/service-types.component').then(m => m.AdminServiceTypesComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/service-type/create',
-    component: AdminServiceTypeCreateComponent,
+    loadComponent: () => import('./admin/service-types/create/create.component').then(m => m.AdminServiceTypeCreateComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/service-type/edit/:id',
-    component: AdminServiceTypeEditComponent,
+    loadComponent: () => import('./admin/service-types/edit/edit.component').then(m => m.AdminServiceTypeEditComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/to-estimate',
-    component: AdminToEstimateListComponent,
+    loadComponent: () => import('./admin/to-estimate/list/list.component').then(m => m.AdminToEstimateListComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/to-estimate/edit/:id',
-    component: AdminToEstimateEditComponent,
+    loadComponent: () => import('./admin/to-estimate/edit/edit.component').then(m => m.AdminToEstimateEditComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/user',
-    component: AdminUserComponent,
+    loadComponent: () => import('./admin/user/user.component').then(m => m.AdminUserComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/user/create',
-    component: AdminUserCreateComponent,
+    loadComponent: () => import('./admin/user/create/create.component').then(m => m.AdminUserCreateComponent),
     canActivate: [adminGuard],
   },
   {
     path: 'admin/user/edit/:id',
-    component: AdminUserEditComponent,
+    loadComponent: () => import('./admin/user/edit/edit.component').then(m => m.AdminUserEditComponent),
     canActivate: [adminGuard],
   },
 
-  { path: '**', canActivate: [wildcardGuard], component: LandingPageComponent },
+  { path: '**', canActivate: [wildcardGuard], loadComponent: () => import('./landing-page/landing-page.component').then(m => m.LandingPageComponent) },
 ];

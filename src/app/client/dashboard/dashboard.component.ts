@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy, Component, ElementRef, OnInit,
-  ViewChild, computed, inject, signal,
+  computed, inject, signal, viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -12,6 +12,10 @@ import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoRow, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
+import {
+  ContratoHistorialItem,
+  OfertaHistorialItem,
+} from '../../services/expediente.service';
 
 // ── 5 visual phases for the progress bar ─────────────────────────────────────
 
@@ -53,21 +57,6 @@ export interface TimelineEvento {
   tipo:       string;
 }
 
-interface OfertaHistorialItem {
-  id:        string;
-  creado_en: string;
-  estado:    string;
-}
-
-interface ContratoHistorialItem {
-  id:             string;
-  estado:         string;
-  generado_en:    string;
-  firmado_en:     string | null;
-  actualizado_en: string;
-  oferta:         { fecha_inicio: string | null } | null;
-}
-
 // Priority sort: most urgent states first
 function estadoPriority(e: ExpedienteCliente): number {
   const p: Record<string, number> = {
@@ -86,8 +75,8 @@ function estadoPriority(e: ExpedienteCliente): number {
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
-  @ViewChild('matterportIframe') matterportIframe?: ElementRef<HTMLIFrameElement>;
-  @ViewChild('mediaVideo')       mediaVideo?:       ElementRef<HTMLVideoElement>;
+  private matterportIframe = viewChild<ElementRef<HTMLIFrameElement>>('matterportIframe');
+  private mediaVideo       = viewChild<ElementRef<HTMLVideoElement>>('mediaVideo');
 
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
@@ -438,6 +427,13 @@ export class DashboardComponent implements OnInit {
     return s.nombre_fr || s.nombre_es || '';
   }
 
+  servicioNombreVista(d: ExpedienteVistaCliente): string {
+    const lang = this.currentLang();
+    if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
+    if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
+    return d.servicio_nombre;
+  }
+
   isFaseDone(idx: number): boolean   { return this.faseActual() > idx + 1; }
   isFaseActive(idx: number): boolean { return this.faseActual() === idx + 1; }
 
@@ -461,10 +457,10 @@ export class DashboardComponent implements OnInit {
 
   solicitarFullscreen() {
     if (this.activaEsTour()) {
-      const el = this.matterportIframe?.nativeElement as HTMLIFrameElement & { requestFullscreen?: () => void };
+      const el = this.matterportIframe()?.nativeElement as HTMLIFrameElement & { requestFullscreen?: () => void };
       if (el?.requestFullscreen) el.requestFullscreen();
     } else {
-      const el = this.mediaVideo?.nativeElement;
+      const el = this.mediaVideo()?.nativeElement;
       if (el?.requestFullscreen) el.requestFullscreen();
     }
   }
@@ -534,24 +530,14 @@ export class DashboardComponent implements OnInit {
     }
 
     // Historial: ofertas y contrato del expediente
-    const db = this.auth.client;
-    const [ofertasRes, contratoRes] = await Promise.all([
-      db.from('oferta')
-        .select('id, creado_en, estado')
-        .eq('expediente_id', id)
-        .order('creado_en', { ascending: true }),
-      db.from('contrato')
-        .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
-        .eq('expediente_id', id)
-        .maybeSingle(),
-    ]);
-
-    this.ofertasHistorial.set(
-      ofertasRes.error ? [] : ((ofertasRes.data ?? []) as OfertaHistorialItem[])
-    );
-    this.contratoHistorial.set(
-      contratoRes.error ? null : (contratoRes.data as ContratoHistorialItem | null)
-    );
+    try {
+      const historial = await this.expedienteService.getHistorialExpediente(id);
+      this.ofertasHistorial.set(historial.ofertas);
+      this.contratoHistorial.set(historial.contrato);
+    } catch {
+      this.ofertasHistorial.set([]);
+      this.contratoHistorial.set(null);
+    }
 
     this.calInicializar();
     this.cargandoDetalle.set(false);

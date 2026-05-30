@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { AuthSupabaseService } from './auth-supabase.service';
 import {
   ExpedienteAdmin,
   ExpedienteCliente,
@@ -24,6 +25,21 @@ import {
 } from '../data';
 import { OfertaRaw } from '../data/oferta.repository';
 
+export interface OfertaHistorialItem {
+  id:        string;
+  creado_en: string;
+  estado:    string;
+}
+
+export interface ContratoHistorialItem {
+  id:             string;
+  estado:         string;
+  generado_en:    string;
+  firmado_en:     string | null;
+  actualizado_en: string;
+  oferta:         { fecha_inicio: string | null } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ExpedienteService {
   private expedienteRepo  = inject(ExpedienteRepository);
@@ -32,6 +48,8 @@ export class ExpedienteService {
   private servicioRepo    = inject(ServicioRepository);
   private estimacionRepo  = inject(EstimacionRepository);
   private ofertaRepo      = inject(OfertaRepository);
+  private auth            = inject(AuthSupabaseService);
+  private get db()        { return this.auth.client; }
 
   // ── Módulo cliente ────────────────────────────────────────────────────────
 
@@ -412,9 +430,14 @@ export class ExpedienteService {
     });
   }
 
-  async getExpedientesAdmin(): Promise<ExpedienteAdmin[]> {
-    const exps = await this.expedienteRepo.findAll();
-    if (!exps.length) return [];
+  async getExpedientesAdmin(options: {
+    page:      number;
+    pageSize:  number;
+    estado?:   string;
+    busqueda?: string;
+  }): Promise<{ items: ExpedienteAdmin[]; total: number }> {
+    const { data: exps, count } = await this.expedienteRepo.findAllPaginated(options);
+    if (!exps.length) return { items: [], total: count };
 
     const servicioIds   = [...new Set(exps.map(e => e.servicio_id).filter(Boolean))];
     const expedienteIds = exps.map(e => e.id);
@@ -430,7 +453,7 @@ export class ExpedienteService {
       this.ofertaRepo.findAceptadasByExpedienteIds(expedienteIds),
     ]);
 
-    return exps.map(e => {
+    const items = exps.map(e => {
       const svc       = servicios.find(s => s.id === e.servicio_id);
       const cliente   = perfiles.find(p => p.id === e.cliente_id);
       const estimador = e.estimador_id ? perfiles.find(p => p.id === e.estimador_id) : null;
@@ -451,6 +474,8 @@ export class ExpedienteService {
         oferta_fecha_inicio: oferta?.fecha_inicio      ?? null,
       } as ExpedienteAdmin;
     });
+
+    return { items, total: count };
   }
 
   async getExpedientesConOfertasAdmin(): Promise<ExpedienteConOfertaAdmin[]> {
@@ -582,5 +607,32 @@ export class ExpedienteService {
 
   async liberar(expedienteId: string): Promise<void> {
     return this.expedienteRepo.liberar(expedienteId);
+  }
+
+  // ── Historial del dashboard de cliente ───────────────────────────────────
+
+  async getHistorialExpediente(expedienteId: string): Promise<{
+    ofertas:  OfertaHistorialItem[];
+    contrato: ContratoHistorialItem | null;
+  }> {
+    const [ofertasRes, contratoRes] = await Promise.all([
+      this.db
+        .from('oferta')
+        .select('id, creado_en, estado')
+        .eq('expediente_id', expedienteId)
+        .order('creado_en', { ascending: true }),
+      this.db
+        .from('contrato')
+        .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
+        .eq('expediente_id', expedienteId)
+        .maybeSingle(),
+    ]);
+
+    if (ofertasRes.error) throw new Error(ofertasRes.error.message);
+
+    return {
+      ofertas:  (ofertasRes.data ?? []) as OfertaHistorialItem[],
+      contrato: contratoRes.error ? null : (contratoRes.data as ContratoHistorialItem | null),
+    };
   }
 }

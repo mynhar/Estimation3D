@@ -1,587 +1,637 @@
-<div class="container-xl py-5 px-3 px-md-4 dash-root">
+<!-- Hallmark · macrostructure: Workbench · genre: editorial (warm-paper)
+     design-system: design.md · designed-as-app
+     pre-emit critique: P5 H5 E5 S5 R5 V5 -->
+<div class="page-wrapper dash-root">
 
-  <!-- ── Welcome ────────────────────────────────────────────────────────── -->
-  <header class="dash-welcome mb-5">
-    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-      <div>
-        <span class="eyebrow">{{ 'role.client' | translate }}</span>
-        <h1 class="dash-welcome__title title-editorial mt-1">
-          {{ 'dashboard_client.welcome' | translate }}<em>{{ bienvenida ? ', ' + bienvenida : '' }}</em>
-        </h1>
-      </div>
-      <a routerLink="/client/file/create"
-         class="btn btn-primary btn-lg flex-shrink-0 align-self-start mt-2">
-        <i class="bi bi-plus me-2"></i>{{ 'file.new_file' | translate }}
-      </a>
+  <!-- ══════════════════════════════════════════════════════════
+       HEADER EDITORIAL
+       ══════════════════════════════════════════════════════════ -->
+  <header class="dash-header">
+    <div class="dash-header__left">
+      <p class="page-eyebrow">
+        <i class="bi bi-person-circle" aria-hidden="true"></i>
+        {{ 'role.client' | translate }}
+      </p>
+      <h1 class="dash-header__title">
+        {{ 'dashboard_client.welcome' | translate }}<em class="dash-header__name">{{ bienvenida ? ', ' + bienvenida : '' }}</em>
+      </h1>
     </div>
+    <a routerLink="/client/file/create" class="btn btn-primary">
+      <i class="bi bi-plus" aria-hidden="true"></i>
+      {{ 'file.new_file' | translate }}
+    </a>
   </header>
 
-  <!-- ── Cargando ────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       CARGANDO
+       ══════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div>
-      <div class="skel skel--hero mb-4"></div>
-      <div class="skel skel--exp-header mb-4"></div>
-      <div class="row g-3 mb-4">
-        <div class="col-md-4"><div class="skel skel--module"></div></div>
-        <div class="col-md-4"><div class="skel skel--module"></div></div>
-        <div class="col-md-4"><div class="skel skel--module"></div></div>
+    <div class="dash-skeleton">
+      <div class="skel skel--strip"></div>
+      <div class="dash-skel-grid">
+        <div class="skel skel--media-col"></div>
+        <div class="skel skel--detail-col"></div>
       </div>
+      <div class="dash-skel-modules">
+        <div class="skel skel--module"></div>
+        <div class="skel skel--module"></div>
+        <div class="skel skel--module"></div>
+      </div>
+      <div class="skel skel--tl"></div>
     </div>
 
-  <!-- ── Sin expedientes ─────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       SIN EXPEDIENTES
+       ══════════════════════════════════════════════════════════ -->
   } @else if (total() === 0) {
-    <div class="empty-state text-center">
-      <div class="empty-state__icon mx-auto mb-4">
-        <i class="bi bi-folder2-open"></i>
+    <div class="dash-empty">
+      <div class="dash-empty__rings" aria-hidden="true">
+        <div class="dash-empty__ring dash-empty__ring--3"></div>
+        <div class="dash-empty__ring dash-empty__ring--2"></div>
+        <div class="dash-empty__ring dash-empty__ring--1"></div>
+        <div class="dash-empty__icon">
+          <i class="bi bi-folder2-open"></i>
+        </div>
       </div>
-      <h3 class="font-display empty-state__title mb-2">{{ 'dashboard_client.no_files' | translate }}</h3>
-      <p class="empty-state__text mb-5">{{ 'dashboard_client.no_files_text' | translate }}</p>
+      <div class="dash-empty__copy">
+        <h2 class="dash-empty__title">{{ 'dashboard_client.no_files' | translate }}</h2>
+        <p class="dash-empty__desc">{{ 'dashboard_client.no_files_text' | translate }}</p>
+      </div>
       <a routerLink="/client/file/create" class="btn btn-primary">
-        <i class="bi bi-plus me-2"></i>{{ 'dashboard_client.create_first' | translate }}
+        <i class="bi bi-plus" aria-hidden="true"></i>
+        {{ 'dashboard_client.create_first' | translate }}
       </a>
     </div>
 
-  <!-- ── Con expedientes ─────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       CON EXPEDIENTES
+       ══════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- ── Selector de expedientes (siempre visible) ────────────────────── -->
-    <div class="exp-card-strip mb-4" role="tablist" aria-label="Expedientes">
+    <!-- Resumen del portafolio -->
+    <div class="dash-kpi-strip" [attr.aria-label]="'dashboard_client.activity_summary' | translate">
+      <div class="dash-kpi">
+        <span class="dash-kpi__num">{{ total() }}</span>
+        <span class="dash-kpi__lbl">{{ 'common.files_count' | translate }}</span>
+      </div>
+      <span class="dash-kpi__sep" aria-hidden="true"></span>
+      <div class="dash-kpi">
+        <span class="dash-kpi__num">{{ enProceso() }}</span>
+        <span class="dash-kpi__lbl">{{ 'dashboard_client.in_progress' | translate }}</span>
+      </div>
+      <span class="dash-kpi__sep" aria-hidden="true"></span>
+      <div class="dash-kpi">
+        <span class="dash-kpi__num" [class.dash-kpi__num--gold]="conOfertas() > 0">{{ conOfertas() }}</span>
+        <span class="dash-kpi__lbl">{{ 'dashboard_client.pending_offers' | translate }}</span>
+      </div>
+      <span class="dash-kpi__sep" aria-hidden="true"></span>
+      <div class="dash-kpi">
+        <span class="dash-kpi__num" [class.dash-kpi__num--success]="completados() > 0">{{ completados() }}</span>
+        <span class="dash-kpi__lbl">{{ 'dashboard_client.completed' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Banner de ofertas pendientes -->
+    @if (conOfertas() > 0) {
+      <div class="dash-offers-banner" role="alert">
+        <div class="dash-offers-banner__icon" aria-hidden="true">
+          <i class="bi bi-bell"></i>
+        </div>
+        <p class="dash-offers-banner__msg">
+          @if (conOfertas() === 1) {
+            {{ 'dashboard_client.banner_single' | translate }}
+          } @else {
+            {{ 'dashboard_client.banner_plural' | translate: { count: conOfertas() } }}
+          }
+        </p>
+        <a routerLink="/client/offers-received" class="btn btn-primary btn-sm dash-offers-banner__cta">
+          {{ 'dashboard_client.review_offers' | translate }}
+        </a>
+      </div>
+    }
+
+    <!-- Selector horizontal de expedientes -->
+    <div class="dash-exp-strip" role="tablist" aria-label="Expedientes">
       @for (exp of expedientes(); track expId(exp)) {
-        <button
-          class="exp-card"
-          [class.exp-card--active]="expId(exp) === idSeleccionado()"
-          (click)="seleccionarExpediente(expId(exp))"
-          role="tab"
-          [attr.aria-selected]="expId(exp) === idSeleccionado()">
-          <div class="exp-card__top">
-            <span class="exp-card__num font-display">{{ exp.numero }}</span>
+        <button class="dash-exp-card"
+                [class.dash-exp-card--active]="expId(exp) === idSeleccionado()"
+                (click)="seleccionarExpediente(expId(exp))"
+                role="tab"
+                [attr.aria-selected]="expId(exp) === idSeleccionado()">
+          <div class="dash-exp-card__top">
+            <span class="dash-exp-card__num">{{ exp.numero }}</span>
             <span [class]="'estado-badge ' + estadoClaseFor(exp.estado)">
               {{ ('state.' + exp.estado) | translate }}
             </span>
           </div>
-          <div class="exp-card__meta">
-            @if (servicioNombre(exp.servicio)) {
-              <span class="exp-card__service">{{ servicioNombre(exp.servicio) }}</span>
-            }
-            <span class="exp-card__date">
-              <i class="bi bi-folder-plus"></i>{{ formatFecha(exp.creado_en) }}
-            </span>
-            <span class="exp-card__date exp-card__date--visit">
-              <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
-            </span>
-          </div>
-          <div class="exp-card__prog">
-            <div class="exp-card__prog-track">
-              <div class="exp-card__prog-fill" [style.width.%]="progresoPct(exp)"></div>
+          @if (servicioNombre(exp.servicio)) {
+            <p class="dash-exp-card__svc">{{ servicioNombre(exp.servicio) }}</p>
+          }
+          <div class="dash-exp-card__prog">
+            <div class="dash-exp-card__prog-track">
+              <div class="dash-exp-card__prog-fill" [style.width.%]="progresoPct(exp)"></div>
             </div>
-            <span class="exp-card__prog-pct">{{ progresoPct(exp) }}%</span>
+            <span class="dash-exp-card__prog-pct">{{ progresoPct(exp) }}%</span>
           </div>
         </button>
       }
     </div>
 
-    <!-- ── Zona de medios HERO ───────────────────────────────────────────── -->
-    @if (cargandoDetalle()) {
-      <div class="skel skel--hero mb-4"></div>
+    <!-- ══════════════════════════════════════════════════════
+         GRID PRINCIPAL: izquierda (media) | derecha (detalle)
+         ══════════════════════════════════════════════════════ -->
+    <div class="dash-main-grid">
 
-    } @else if (tieneMedia()) {
-      <div class="media-card mb-4">
+      <!-- ── COLUMNA IZQUIERDA — zona de media ────────── -->
+      <div class="dash-left-col">
 
-        <!-- Header -->
-        <div class="media-card__header">
-          <div class="d-flex align-items-center gap-2 min-w-0">
-            <span class="eyebrow">
-              @if (activaEsTour()) {
-                {{ 'file.tour_title' | translate }}
-                @if (tourUrls().length > 1) { &nbsp;{{ mediaActiva() + 1 }} }
-              } @else {
-                {{ 'dashboard_client.video_label' | translate }}&nbsp;{{ mediaActiva() - tourUrls().length + 1 }}
-              }
-            </span>
-            @if (activaEsTour() && tieneTour()) {
-              <span class="tag tag-gold ms-1 flex-shrink-0">{{ 'file.immersive_badge' | translate }}</span>
-            }
-          </div>
-          <button class="btn-fullscreen flex-shrink-0"
-                  (click)="solicitarFullscreen()"
-                  [attr.aria-label]="'dashboard_client.matterport_fullscreen' | translate">
-            <i class="bi bi-fullscreen"></i>
-            <span class="d-none d-sm-inline ms-2">
-              {{ 'dashboard_client.matterport_fullscreen' | translate }}
-            </span>
-          </button>
-        </div>
+        @if (cargandoDetalle()) {
+          <div class="skel skel--fill"></div>
 
-        <!-- Lista de medios (siempre visible) -->
-        <div class="media-playlist" role="tablist">
+        } @else if (tieneMedia()) {
 
-          @for (url of tourUrls(); track url; let i = $index) {
-            <button class="media-pl-item"
-                    [class.media-pl-item--active]="mediaActiva() === i"
-                    (click)="seleccionarMedia(i)"
-                    role="tab"
-                    [attr.aria-selected]="mediaActiva() === i">
-              <div class="media-pl-thumb media-pl-thumb--tour">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/>
-                  <path d="m16 2-2 3h4l-2-3z"/>
-                  <path d="M22 15a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/>
-                  <path d="m16 13 1.5 1.5L20 12"/>
-                </svg>
-              </div>
-              <div class="media-pl-info">
-                <span class="media-pl-label">
-                  {{ 'dashboard_client.tour_label' | translate }}
-                  @if (tourUrls().length > 1) { &nbsp;{{ i + 1 }} }
-                </span>
-                <span class="media-pl-sub tag tag-gold">3D</span>
-              </div>
-            </button>
-          }
+          <div class="dash-media-card">
 
-          @for (v of videos(); track v.id; let i = $index) {
-            <button class="media-pl-item"
-                    [class.media-pl-item--active]="mediaActiva() === tourUrls().length + i"
-                    (click)="seleccionarMedia(tourUrls().length + i)"
-                    role="tab"
-                    [attr.aria-selected]="mediaActiva() === tourUrls().length + i">
-              <div class="media-pl-thumb">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="m15 10 4.553-2.069A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.447.894L15 14"/>
-                  <rect x="2" y="6" width="13" height="12" rx="2"/>
-                </svg>
-              </div>
-              <div class="media-pl-info">
-                <span class="media-pl-label">
-                  {{ 'dashboard_client.video_label' | translate }}&nbsp;{{ i + 1 }}
-                </span>
-                <span class="media-pl-sub">{{ v.nombre_archivo }}</span>
-              </div>
-            </button>
-          }
-
-        </div>
-
-        <!-- Visor -->
-        <div class="media-viewer-wrap">
-
-          <!-- Tip Matterport (primera visita) -->
-          @if (matterportTip() && activaEsTour()) {
-            <div class="matterport-tip">
-              <i class="bi bi-info-circle flex-shrink-0"></i>
-              <span>{{ 'dashboard_client.matterport_tooltip' | translate }}</span>
-              <button class="btn-tip-close ms-auto"
-                      (click)="dismissMatterportTip()"
-                      [attr.aria-label]="'common.close' | translate">
-                <i class="bi bi-x-lg"></i>
+            <!-- Header del media -->
+            <div class="dash-media-card__header">
+              <span class="dash-media-card__label">
+                <i class="bi bi-camera-video" aria-hidden="true"></i>
+                @if (activaEsTour()) {
+                  {{ 'file.tour_title' | translate }}
+                  @if (tourUrls().length > 1) { &nbsp;{{ mediaActiva() + 1 }} }
+                } @else {
+                  {{ 'dashboard_client.video_label' | translate }}&nbsp;{{ mediaActiva() - tourUrls().length + 1 }}
+                }
+                @if (activaEsTour() && tieneTour()) {
+                  <span class="tag tag-gold ms-2">{{ 'file.immersive_badge' | translate }}</span>
+                }
+              </span>
+              <button class="dash-btn-fullscreen"
+                      (click)="solicitarFullscreen()"
+                      [attr.aria-label]="'dashboard_client.matterport_fullscreen' | translate">
+                <i class="bi bi-fullscreen" aria-hidden="true"></i>
+                <span class="d-none d-sm-inline ms-1">{{ 'dashboard_client.matterport_fullscreen' | translate }}</span>
               </button>
             </div>
-          }
 
-          <!-- Iframe Matterport -->
-          @if (activaEsTour() && matterportUrl()) {
-            <iframe
-              #matterportIframe
-              class="media-iframe"
-              [src]="matterportUrl()!"
-              allow="vr; fullscreen; xr-spatial-tracking"
-              allowfullscreen
-              title="Tour Matterport 3D">
-            </iframe>
-          }
-
-          <!-- Reproductor de video -->
-          @if (!activaEsTour() && videoActivoUrl()) {
-            <video
-              #mediaVideo
-              class="media-video"
-              controls
-              preload="metadata"
-              [attr.src]="videoActivoUrl()">
-            </video>
-          }
-
-        </div>
-      </div>
-
-    } @else {
-      <!-- Placeholder: video 3D en preparación -->
-      <div class="media-placeholder mb-4">
-        <div class="media-placeholder__body">
-
-          <!-- Icono animado con anillos -->
-          <div class="media-ph-rings mb-5">
-            <div class="media-ph-ring media-ph-ring--3"></div>
-            <div class="media-ph-ring media-ph-ring--2"></div>
-            <div class="media-ph-ring media-ph-ring--1"></div>
-            <div class="media-ph-icon-wrap">
-              <svg class="media-ph-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m15 10 4.553-2.069A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.447.894L15 14"/>
-                <rect x="2" y="6" width="13" height="12" rx="2"/>
-              </svg>
-              <span class="media-ph-badge">3D</span>
-            </div>
-          </div>
-
-          <!-- Título -->
-          <h4 class="font-display media-placeholder__title mb-3">
-            {{ 'dashboard_client.matterport_coming' | translate }}
-          </h4>
-
-          <!-- Mensaje con fecha interpolada -->
-          @if (expedienteActivo(); as exp) {
-            <p class="media-placeholder__text mb-5">
-              {{ 'dashboard_client.matterport_pending' | translate: { date: formatFecha(exp.fecha_visita) } }}
-            </p>
-          }
-
-          <!-- 3 pasos del proceso -->
-          <div class="media-steps">
-            <div class="media-step">
-              <div class="media-step__num">01</div>
-              <span class="media-step__label">{{ 'dashboard_client.matterport_step1' | translate }}</span>
-            </div>
-            <div class="media-step-arrow"><i class="bi bi-arrow-right"></i></div>
-            <div class="media-step">
-              <div class="media-step__num">02</div>
-              <span class="media-step__label">{{ 'dashboard_client.matterport_step2' | translate }}</span>
-            </div>
-            <div class="media-step-arrow"><i class="bi bi-arrow-right"></i></div>
-            <div class="media-step">
-              <div class="media-step__num">03</div>
-              <span class="media-step__label">{{ 'dashboard_client.matterport_step3' | translate }}</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    }
-
-    <!-- ── Tarjeta encabezado del expediente activo ───────────────────────── -->
-    @if (expedienteActivo(); as exp) {
-      <div class="exp-header-card card-premium mb-4">
-
-        <!-- Top row: referencia + badge de estado -->
-        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-3">
-          <div>
-            <span class="eyebrow mb-1">{{ 'file.exp_abbr' | translate }}</span>
-            <h2 class="exp-ref font-display mt-2 mb-0">{{ exp.numero }}</h2>
-            <div class="exp-meta d-flex align-items-center flex-wrap gap-3 mt-2">
-              @if (servicioNombre(exp.servicio)) {
-                <span class="exp-meta__item">
-                  <i class="bi bi-grid-3x3-gap me-1"></i>{{ servicioNombre(exp.servicio) }}
-                </span>
-              }
-              <span class="exp-meta__item">
-                <i class="bi bi-calendar3 me-1"></i>{{ formatFecha(exp.fecha_visita) }}
-              </span>
-            </div>
-          </div>
-          <span [class]="'estado-badge ' + estadoClase()">
-            {{ ('state.' + exp.estado) | translate }}
-          </span>
-        </div>
-
-        <div class="exp-divider"></div>
-
-        <!-- Progreso en porcentaje -->
-        <div class="exp-pct-row mt-4">
-          <span class="exp-pct-label">{{ 'dashboard_client.progress' | translate }}</span>
-          <span class="exp-pct-value font-display">{{ faseActualPct() }}%</span>
-        </div>
-        <div class="exp-pct-track mt-2">
-          <div class="exp-pct-fill" [style.width.%]="faseActualPct()"></div>
-        </div>
-
-        <!-- Barra de 5 fases -->
-        <div class="fase-bar mt-4"
-             role="list"
-             [attr.aria-label]="'dashboard_client.progress_label' | translate">
-          @for (fase of FASES; track fase.key; let i = $index) {
-            <div class="fase-step"
-                 [class.fase-step--done]="isFaseDone(i)"
-                 [class.fase-step--active]="isFaseActive(i)"
-                 role="listitem">
-              <div class="fase-dot">
-                @if (isFaseDone(i)) {
-                  <i class="bi bi-check-lg"></i>
-                } @else {
-                  <i class="bi {{ fase.icon }}"></i>
+            <!-- Playlist de medios -->
+            @if (tourUrls().length > 1 || videos().length > 0) {
+              <div class="dash-playlist" role="tablist">
+                @for (url of tourUrls(); track url; let i = $index) {
+                  <button class="dash-pl-item"
+                          [class.dash-pl-item--active]="mediaActiva() === i"
+                          (click)="seleccionarMedia(i)"
+                          role="tab"
+                          [attr.aria-selected]="mediaActiva() === i">
+                    <div class="dash-pl-thumb dash-pl-thumb--tour" aria-hidden="true">
+                      <i class="bi bi-badge-3d"></i>
+                    </div>
+                    <div class="dash-pl-info">
+                      <span class="dash-pl-label">{{ 'dashboard_client.tour_label' | translate }}
+                        @if (tourUrls().length > 1) { &nbsp;{{ i + 1 }} }
+                      </span>
+                    </div>
+                  </button>
+                }
+                @for (v of videos(); track v.id; let i = $index) {
+                  <button class="dash-pl-item"
+                          [class.dash-pl-item--active]="mediaActiva() === tourUrls().length + i"
+                          (click)="seleccionarMedia(tourUrls().length + i)"
+                          role="tab"
+                          [attr.aria-selected]="mediaActiva() === tourUrls().length + i">
+                    <div class="dash-pl-thumb" aria-hidden="true">
+                      <i class="bi bi-camera-video"></i>
+                    </div>
+                    <div class="dash-pl-info">
+                      <span class="dash-pl-label">{{ 'dashboard_client.video_label' | translate }}&nbsp;{{ i + 1 }}</span>
+                      <span class="dash-pl-sub">{{ v.nombre_archivo }}</span>
+                    </div>
+                  </button>
                 }
               </div>
-              <span class="fase-label">{{ ('state.' + fase.key) | translate }}</span>
+            }
+
+            <!-- Visor -->
+            <div class="dash-media-viewer">
+              @if (matterportTip() && activaEsTour()) {
+                <div class="dash-matterport-tip">
+                  <i class="bi bi-info-circle" aria-hidden="true"></i>
+                  <span>{{ 'dashboard_client.matterport_tooltip' | translate }}</span>
+                  <button class="dash-tip-close" (click)="dismissMatterportTip()"
+                          [attr.aria-label]="'common.close' | translate">
+                    <i class="bi bi-x-lg" aria-hidden="true"></i>
+                  </button>
+                </div>
+              }
+              @if (activaEsTour() && matterportUrl()) {
+                <iframe #matterportIframe
+                        class="dash-iframe"
+                        [src]="matterportUrl()!"
+                        allow="vr; fullscreen; xr-spatial-tracking"
+                        allowfullscreen
+                        title="Tour Matterport 3D">
+                </iframe>
+              }
+              @if (!activaEsTour() && videoActivoUrl()) {
+                <video #mediaVideo
+                       class="dash-video"
+                       controls
+                       preload="metadata"
+                       [attr.src]="videoActivoUrl()">
+                </video>
+              }
             </div>
-            @if (i < FASES.length - 1) {
-              <div class="fase-connector"
-                   [class.fase-connector--done]="faseActual() > i + 1"></div>
-            }
-          }
-        </div>
 
-        <!-- Descripción del estado actual -->
-        <p class="exp-state-desc mt-4 mb-0">
-          <i class="bi bi-info-circle me-2"></i>{{ ('state_desc.' + exp.estado) | translate }}
-        </p>
-
-        <!-- ── Fechas del expediente ──────────────────────────────────────── -->
-        <div class="exp-divider mt-4"></div>
-        <p class="dates-section__label mt-4 mb-3">{{ 'dashboard_client.key_dates' | translate }}</p>
-
-        <div class="dates-grid">
-
-          <!-- Creado -->
-          <div class="date-item">
-            <span class="date-item__key">
-              <i class="bi bi-folder-plus" aria-hidden="true"></i>
-              {{ 'timeline.created' | translate }}
-            </span>
-            <span class="date-item__val">{{ formatFecha(exp.creado_en) }}</span>
           </div>
 
-          <!-- Visita programada -->
-          <div class="date-item">
-            <span class="date-item__key">
-              <i class="bi bi-calendar3" aria-hidden="true"></i>
-              {{ 'file.visit_date' | translate }}
-            </span>
-            <span class="date-item__val">{{ formatFecha(exp.fecha_visita) }}</span>
-          </div>
+        } @else {
 
-          @if (detalleActivo(); as d) {
-
-            <!-- Visita realizada -->
-            @if (d.fecha_visita_real) {
-              <div class="date-item">
-                <span class="date-item__key">
-                  <i class="bi bi-calendar-check" aria-hidden="true"></i>
-                  {{ 'timeline.visit_done' | translate }}
-                </span>
-                <span class="date-item__val">{{ formatFecha(d.fecha_visita_real) }}</span>
+          <!-- Placeholder: visita 3D en preparación -->
+          <div class="dash-media-placeholder">
+            <div class="dash-ph-rings" aria-hidden="true">
+              <div class="dash-ph-ring dash-ph-ring--3"></div>
+              <div class="dash-ph-ring dash-ph-ring--2"></div>
+              <div class="dash-ph-ring dash-ph-ring--1"></div>
+              <div class="dash-ph-icon">
+                <i class="bi bi-camera-video"></i>
+                <span class="dash-ph-badge">3D</span>
               </div>
+            </div>
+            <h3 class="dash-ph-title">{{ 'dashboard_client.matterport_coming' | translate }}</h3>
+            @if (expedienteActivo(); as exp) {
+              <p class="dash-ph-text">
+                {{ 'dashboard_client.matterport_pending' | translate: { date: formatFecha(exp.fecha_visita) } }}
+              </p>
             }
+            <div class="dash-ph-steps">
+              <div class="dash-ph-step">
+                <div class="dash-ph-step__num">01</div>
+                <span class="dash-ph-step__lbl">{{ 'dashboard_client.matterport_step1' | translate }}</span>
+              </div>
+              <div class="dash-ph-arrow" aria-hidden="true"><i class="bi bi-arrow-right"></i></div>
+              <div class="dash-ph-step">
+                <div class="dash-ph-step__num">02</div>
+                <span class="dash-ph-step__lbl">{{ 'dashboard_client.matterport_step2' | translate }}</span>
+              </div>
+              <div class="dash-ph-arrow" aria-hidden="true"><i class="bi bi-arrow-right"></i></div>
+              <div class="dash-ph-step">
+                <div class="dash-ph-step__num">03</div>
+                <span class="dash-ph-step__lbl">{{ 'dashboard_client.matterport_step3' | translate }}</span>
+              </div>
+            </div>
+          </div>
 
-          }
+        }
 
-          @if (contratoHistorial(); as c) {
+      </div><!-- /dash-left-col -->
 
-            <!-- Oferta aceptada / contrato generado -->
-            <div class="date-item">
-              <span class="date-item__key">
-                <i class="bi bi-handshake" aria-hidden="true"></i>
-                {{ 'timeline.offer_accepted' | translate }}
+      <!-- ── COLUMNA DERECHA — panel de detalle (sin módulos) ───── -->
+      <div class="dash-right-col">
+
+        @if (expedienteActivo(); as exp) {
+          <div class="dash-detail-card">
+
+            <!-- Acento superior -->
+            <div class="dash-detail-card__accent" aria-hidden="true"></div>
+
+            <!-- Top: número + estado -->
+            <div class="dash-detail-card__head">
+              <div>
+                <p class="page-eyebrow" style="margin-bottom:var(--ds-space-1)">
+                  {{ 'file.exp_abbr' | translate }}
+                </p>
+                <h2 class="dash-detail-card__num">{{ exp.numero }}</h2>
+              </div>
+              <span [class]="'estado-badge ' + estadoClase()">
+                {{ ('state.' + exp.estado) | translate }}
               </span>
-              <span class="date-item__val">{{ formatFecha(c.generado_en) }}</span>
             </div>
 
-            <!-- Contrato firmado -->
-            @if (c.firmado_en) {
-              <div class="date-item">
-                <span class="date-item__key">
-                  <i class="bi bi-pen" aria-hidden="true"></i>
-                  {{ 'timeline.contract_signed' | translate }}
+            <!-- Servicio + fecha -->
+            <div class="dash-detail-card__meta">
+              @if (detalleActivo(); as d) {
+                <span class="dash-meta-item">
+                  <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                  {{ servicioNombreVista(d) }}
                 </span>
-                <span class="date-item__val">{{ formatFecha(c.firmado_en) }}</span>
-              </div>
-            }
-
-            <!-- Inicio de obras (fecha_inicio de la oferta) -->
-            @if (c.oferta?.fecha_inicio) {
-              <div class="date-item">
-                <span class="date-item__key">
-                  <i class="bi bi-hammer" aria-hidden="true"></i>
-                  {{ 'timeline.works_started' | translate }}
+              } @else if (servicioNombre(exp.servicio)) {
+                <span class="dash-meta-item">
+                  <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                  {{ servicioNombre(exp.servicio) }}
                 </span>
-                <span class="date-item__val">{{ formatFecha(c.oferta!.fecha_inicio) }}</span>
-              </div>
-            }
+              }
+              <span class="dash-meta-item">
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                {{ formatFecha(exp.fecha_visita) }}
+              </span>
+            </div>
 
-            <!-- actualizado_en según estado del contrato -->
-            @if (c.estado === 'en_ejecucion' || c.estado === 'completado' || c.estado === 'cancelado') {
-              <div class="date-item">
-                <span class="date-item__key">
-                  @switch (c.estado) {
-                    @case ('en_ejecucion') {
-                      <i class="bi bi-play-circle" aria-hidden="true"></i>
-                      {{ 'timeline.execution_started' | translate }}
+            <div class="dash-divider"></div>
+
+            <!-- Progress % -->
+            <div class="dash-detail-card__pct-row">
+              <span class="dash-detail-card__pct-label">{{ 'dashboard_client.progress' | translate }}</span>
+              <span class="dash-detail-card__pct-value">{{ faseActualPct() }}%</span>
+            </div>
+            <div class="dash-pct-track">
+              <div class="dash-pct-fill" [style.width.%]="faseActualPct()"></div>
+            </div>
+
+            <!-- Fase stepper compacto -->
+            <div class="dash-fases"
+                 role="list"
+                 [attr.aria-label]="'dashboard_client.progress_label' | translate">
+              @for (fase of FASES; track fase.key; let i = $index) {
+                <div class="dash-fase"
+                     [class.dash-fase--done]="isFaseDone(i)"
+                     [class.dash-fase--active]="isFaseActive(i)"
+                     role="listitem">
+                  <div class="dash-fase__dot">
+                    @if (isFaseDone(i)) {
+                      <i class="bi bi-check-lg" aria-hidden="true"></i>
+                    } @else {
+                      <i class="bi {{ fase.icon }}" aria-hidden="true"></i>
                     }
-                    @case ('completado') {
-                      <i class="bi bi-check2-all" aria-hidden="true"></i>
-                      {{ 'timeline.contract_completed' | translate }}
-                    }
-                    @case ('cancelado') {
-                      <i class="bi bi-x-circle" aria-hidden="true"></i>
-                      {{ 'timeline.contract_cancelled' | translate }}
-                    }
-                  }
+                  </div>
+                  <span class="dash-fase__label">{{ ('state.' + fase.key) | translate }}</span>
+                </div>
+                @if (i < FASES.length - 1) {
+                  <div class="dash-fase__connector"
+                       [class.dash-fase__connector--done]="faseActual() > i + 1"
+                       aria-hidden="true"></div>
+                }
+              }
+            </div>
+
+            <!-- Descripción del estado -->
+            <div class="dash-state-desc">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              {{ ('state_desc.' + exp.estado) | translate }}
+            </div>
+
+            <div class="dash-divider"></div>
+
+            <!-- Fechas clave -->
+            <p class="dash-dates-label">{{ 'dashboard_client.key_dates' | translate }}</p>
+            <div class="dash-dates">
+
+              <div class="dash-date">
+                <span class="dash-date__key">
+                  <i class="bi bi-folder-plus" aria-hidden="true"></i>
+                  {{ 'timeline.created' | translate }}
                 </span>
-                <span class="date-item__val">{{ formatFecha(c.actualizado_en) }}</span>
+                <span class="dash-date__val">{{ formatFecha(exp.creado_en) }}</span>
               </div>
-            }
 
-          }
+              <div class="dash-date">
+                <span class="dash-date__key">
+                  <i class="bi bi-calendar3" aria-hidden="true"></i>
+                  {{ 'file.visit_date' | translate }}
+                </span>
+                <span class="dash-date__val">{{ formatFecha(exp.fecha_visita) }}</span>
+              </div>
 
-        </div>
+              @if (detalleActivo(); as d) {
+                @if (d.fecha_visita_real) {
+                  <div class="dash-date">
+                    <span class="dash-date__key">
+                      <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                      {{ 'timeline.visit_done' | translate }}
+                    </span>
+                    <span class="dash-date__val">{{ formatFecha(d.fecha_visita_real) }}</span>
+                  </div>
+                }
+              }
 
-      </div>
-    }
+              @if (contratoHistorial(); as c) {
+                <div class="dash-date">
+                  <span class="dash-date__key">
+                    <i class="bi bi-handshake" aria-hidden="true"></i>
+                    {{ 'timeline.offer_accepted' | translate }}
+                  </span>
+                  <span class="dash-date__val">{{ formatFecha(c.generado_en) }}</span>
+                </div>
 
-    <!-- ── 3 módulos ────────────────────────────────────────────────────── -->
-    <div class="row g-3 mb-4">
+                @if (c.firmado_en) {
+                  <div class="dash-date">
+                    <span class="dash-date__key">
+                      <i class="bi bi-pen" aria-hidden="true"></i>
+                      {{ 'timeline.contract_signed' | translate }}
+                    </span>
+                    <span class="dash-date__val">{{ formatFecha(c.firmado_en) }}</span>
+                  </div>
+                }
+
+                @if (c.oferta?.fecha_inicio) {
+                  <div class="dash-date">
+                    <span class="dash-date__key">
+                      <i class="bi bi-hammer" aria-hidden="true"></i>
+                      {{ 'timeline.works_started' | translate }}
+                    </span>
+                    <span class="dash-date__val">{{ formatFecha(c.oferta!.fecha_inicio) }}</span>
+                  </div>
+                }
+
+                @if (c.estado === 'en_ejecucion' || c.estado === 'completado' || c.estado === 'cancelado') {
+                  <div class="dash-date">
+                    <span class="dash-date__key">
+                      @switch (c.estado) {
+                        @case ('en_ejecucion') {
+                          <i class="bi bi-play-circle" aria-hidden="true"></i>
+                          {{ 'timeline.execution_started' | translate }}
+                        }
+                        @case ('completado') {
+                          <i class="bi bi-check2-all" aria-hidden="true"></i>
+                          {{ 'timeline.contract_completed' | translate }}
+                        }
+                        @case ('cancelado') {
+                          <i class="bi bi-x-circle" aria-hidden="true"></i>
+                          {{ 'timeline.contract_cancelled' | translate }}
+                        }
+                      }
+                    </span>
+                    <span class="dash-date__val">{{ formatFecha(c.actualizado_en) }}</span>
+                  </div>
+                }
+              }
+
+            </div><!-- /dash-dates -->
+
+          </div><!-- /dash-detail-card -->
+        }
+
+      </div><!-- /dash-right-col -->
+
+    </div><!-- /dash-main-grid -->
+
+    <!-- ══════════════════════════════════════════════════════
+         MÓDULOS DE ACCIÓN RÁPIDA — franja de ancho completo
+         ══════════════════════════════════════════════════════ -->
+    <div class="dash-modules">
 
       <!-- Próximo paso -->
-      <div class="col-md-4">
-        <div class="module-card h-100">
-          <div class="module-card__header">
+      <div class="dash-module dash-module--action">
+        <div class="dash-module__header">
+          <div class="dash-module__icon dash-module__icon--action" aria-hidden="true">
             <i class="bi bi-arrow-right-circle"></i>
-            <span>{{ 'dashboard_client.next_step' | translate }}</span>
           </div>
-          <div class="module-card__body">
-            @if (expedienteActivo(); as exp) {
-              <p class="module-card__desc mb-0">
-                {{ ('state_desc.' + exp.estado) | translate }}
-              </p>
-              @if (exp.estado === 'en_oferta') {
-                <a routerLink="/client/offers-received"
-                   class="btn btn-primary btn-sm mt-3">
-                  <i class="bi bi-eye me-1"></i>{{ 'dashboard_client.review_offers' | translate }}
-                </a>
-              }
+          <span class="dash-module__title">{{ 'dashboard_client.next_step' | translate }}</span>
+        </div>
+        <div class="dash-module__body">
+          @if (expedienteActivo(); as exp) {
+            <p class="dash-module__desc">{{ ('state_desc.' + exp.estado) | translate }}</p>
+            @if (exp.estado === 'en_oferta') {
+              <a routerLink="/client/offers-received" class="btn btn-primary btn-sm">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+                {{ 'dashboard_client.review_offers' | translate }}
+              </a>
             }
-          </div>
+          }
         </div>
       </div>
 
       <!-- Mensaje del equipo -->
-      <div class="col-md-4">
-        <div class="module-card h-100">
-          <div class="module-card__header">
+      <div class="dash-module dash-module--message">
+        <div class="dash-module__header">
+          <div class="dash-module__icon dash-module__icon--message" aria-hidden="true">
             <i class="bi bi-chat-square"></i>
-            <span>{{ 'dashboard_client.team_message' | translate }}</span>
           </div>
-          <div class="module-card__body module-card__body--empty">
-            <i class="bi bi-chat-square module-card__empty-icon"></i>
-            <p class="module-card__empty-text">{{ 'dashboard_client.no_message' | translate }}</p>
-          </div>
+          <span class="dash-module__title">{{ 'dashboard_client.team_message' | translate }}</span>
+        </div>
+        <div class="dash-module__body dash-module__body--empty">
+          <i class="bi bi-chat-square dash-module__empty-icon" aria-hidden="true"></i>
+          <p class="dash-module__empty-text">{{ 'dashboard_client.no_message' | translate }}</p>
         </div>
       </div>
 
       <!-- Mis documentos -->
-      <div class="col-md-4">
-        <div class="module-card h-100">
-          <div class="module-card__header">
+      <div class="dash-module dash-module--docs">
+        <div class="dash-module__header">
+          <div class="dash-module__icon dash-module__icon--docs" aria-hidden="true">
             <i class="bi bi-folder2"></i>
-            <span>{{ 'dashboard_client.my_documents' | translate }}</span>
           </div>
-          <div class="module-card__body module-card__body--empty">
-            <i class="bi bi-folder2 module-card__empty-icon"></i>
-            <p class="module-card__empty-text">{{ 'dashboard_client.no_documents' | translate }}</p>
-          </div>
+          <span class="dash-module__title">{{ 'dashboard_client.my_documents' | translate }}</span>
+        </div>
+        <div class="dash-module__body dash-module__body--empty">
+          <i class="bi bi-folder2 dash-module__empty-icon" aria-hidden="true"></i>
+          <p class="dash-module__empty-text">{{ 'dashboard_client.no_documents' | translate }}</p>
         </div>
       </div>
 
-    </div>
+    </div><!-- /dash-modules -->
 
-    <!-- ── Historial · Calendario ────────────────────────────────────────── -->
-    <div class="timeline-card">
+    <!-- ══════════════════════════════════════════════════════
+         TIMELINE + CALENDARIO (full width, split interno)
+         ══════════════════════════════════════════════════════ -->
+    <div class="dash-tl-card">
 
-      <div class="timeline-card__header">
-        <span class="eyebrow">
-          <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
-          {{ 'dashboard_client.timeline_title' | translate }}
-        </span>
-      </div>
-
-      @if (timelineEventos().length === 0) {
-        <div class="timeline-empty">
-          <i class="bi bi-clock-history"></i>
-          <p>{{ 'dashboard_client.timeline_empty' | translate }}</p>
+      <!-- Header del timeline -->
+      <div class="dash-tl-head">
+        <div class="dash-tl-head__left">
+          <div class="dash-tl-head__icon" aria-hidden="true">
+            <i class="bi bi-calendar3"></i>
+          </div>
+          <div>
+            <h2 class="dash-tl-title">{{ 'dashboard_client.timeline_title' | translate }}</h2>
+          </div>
         </div>
-      } @else {
 
-        <!-- ── Barra de navegación ──── -->
-        <div class="cal-nav">
+        <!-- Navegación calendario -->
+        <nav class="dash-cal-nav" aria-label="Navegación del calendario">
           @if (calExpandido()) {
-            <button class="cal-nav-btn" type="button" (click)="calPrevYear()"
-                    title="Año anterior" aria-label="Año anterior">
+            <button class="dash-cal-btn" type="button" (click)="calPrevYear()" aria-label="Año anterior">
               <i class="bi bi-chevron-double-left" aria-hidden="true"></i>
             </button>
           }
-          <button class="cal-nav-btn" type="button" (click)="calPrev()"
-                  [title]="calExpandido() ? 'Mes anterior' : 'Semana anterior'"
+          <button class="dash-cal-btn" type="button" (click)="calPrev()"
                   [attr.aria-label]="calExpandido() ? 'Mes anterior' : 'Semana anterior'">
             <i class="bi bi-chevron-left" aria-hidden="true"></i>
           </button>
-          <span class="cal-month-label">{{ calMesLabel() }}</span>
-          <button class="cal-nav-btn" type="button" (click)="calNext()"
-                  [title]="calExpandido() ? 'Mes siguiente' : 'Semana siguiente'"
+          <span class="dash-cal-label">{{ calMesLabel() }}</span>
+          <button class="dash-cal-btn" type="button" (click)="calNext()"
                   [attr.aria-label]="calExpandido() ? 'Mes siguiente' : 'Semana siguiente'">
             <i class="bi bi-chevron-right" aria-hidden="true"></i>
           </button>
           @if (calExpandido()) {
-            <button class="cal-nav-btn" type="button" (click)="calNextYear()"
-                    title="Año siguiente" aria-label="Año siguiente">
+            <button class="dash-cal-btn" type="button" (click)="calNextYear()" aria-label="Año siguiente">
               <i class="bi bi-chevron-double-right" aria-hidden="true"></i>
             </button>
           }
-          <button class="cal-nav-btn cal-nav-btn--expand" type="button"
+          <button class="dash-cal-btn dash-cal-btn--toggle" type="button"
                   (click)="calToggleExpand()"
-                  [title]="calExpandido() ? 'Ver semana' : 'Ver mes completo'"
                   [attr.aria-label]="calExpandido() ? 'Ver semana' : 'Ver mes completo'">
             <i class="bi" aria-hidden="true"
                [class.bi-arrows-angle-expand]="!calExpandido()"
                [class.bi-arrows-angle-contract]="calExpandido()"></i>
           </button>
+        </nav>
+      </div>
+
+      @if (timelineEventos().length === 0) {
+        <div class="dash-tl-empty">
+          <div class="dash-tl-empty__icon" aria-hidden="true">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <p>{{ 'dashboard_client.timeline_empty' | translate }}</p>
         </div>
 
-        <!-- ── Cuadrícula ──── -->
-        <div class="cal-wrap">
-          <div class="cal-weekdays">
-            @for (wd of calWeekdays(); track $index) {
-              <div class="cal-wd">{{ wd }}</div>
-            }
-          </div>
-          <div class="cal-grid" [class.cal-grid--week]="!calExpandido()">
-            @for (dia of calDias(); track $index) {
-              <div class="cal-day"
-                   [class.cal-day--other]="!dia.inMonth"
-                   [class.cal-day--today]="dia.isToday && !dia.isAnchor"
-                   [class.cal-day--event]="dia.eventos.length > 0 && !dia.isAnchor"
-                   [class.cal-day--anchor]="dia.isAnchor">
-                <span class="cal-day-num">{{ dia.day }}</span>
-                @if (dia.eventos.length > 0) {
-                  <span class="cal-dot" aria-hidden="true"></span>
-                }
-              </div>
-            }
-          </div>
-        </div>
+      } @else {
 
-        <!-- ── Lista de eventos ──── -->
-        <ol class="cal-events-list">
-          @for (evt of timelineEventos(); track evt.tipo) {
-            <li class="cal-evt-item">
-              <div class="cal-evt-icon">
-                <i class="bi {{ evt.icon }}" aria-hidden="true"></i>
-              </div>
-              <div class="cal-evt-body">
-                <p class="cal-evt-title mb-0">
-                  {{ evt.titulo | translate }}
-                  @if (evt.subtitulo) {
-                    <span class="cal-evt-sub"> — {{ evt.subtitulo }}</span>
+        <!-- Split interno: calendario | eventos -->
+        <div class="dash-tl-split">
+
+          <!-- Cuadrícula del calendario -->
+          <div class="dash-cal-zone">
+            <div class="dash-cal-weekdays">
+              @for (wd of calWeekdays(); track $index) {
+                <div class="dash-cal-wd">{{ wd }}</div>
+              }
+            </div>
+            <div class="dash-cal-grid" [class.dash-cal-grid--week]="!calExpandido()">
+              @for (dia of calDias(); track $index) {
+                <div class="dash-cal-day"
+                     [class.dash-cal-day--other]="!dia.inMonth"
+                     [class.dash-cal-day--today]="dia.isToday && !dia.isAnchor"
+                     [class.dash-cal-day--event]="dia.eventos.length > 0 && !dia.isAnchor"
+                     [class.dash-cal-day--anchor]="dia.isAnchor">
+                  <span class="dash-cal-day__num">{{ dia.day }}</span>
+                  @if (dia.eventos.length > 0) {
+                    <span class="dash-cal-dot" aria-hidden="true"></span>
                   }
-                </p>
-                <time class="cal-evt-date">{{ formatFecha(evt.fecha) }}</time>
-              </div>
-            </li>
-          }
-        </ol>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Lista de eventos -->
+          <div class="dash-tl-events">
+            <p class="dash-tl-events__label">{{ 'dashboard_client.timeline_title' | translate }}</p>
+            <ol class="dash-evt-list">
+              @for (evt of timelineEventos(); track evt.tipo) {
+                <li class="dash-evt">
+                  <div class="dash-evt__icon">
+                    <i class="bi {{ evt.icon }}" aria-hidden="true"></i>
+                  </div>
+                  <div class="dash-evt__body">
+                    <p class="dash-evt__title">
+                      {{ evt.titulo | translate }}
+                      @if (evt.subtitulo) {
+                        <span class="dash-evt__sub"> — {{ evt.subtitulo }}</span>
+                      }
+                    </p>
+                    <time class="dash-evt__date">{{ formatFecha(evt.fecha) }}</time>
+                  </div>
+                </li>
+              }
+            </ol>
+          </div>
+
+        </div><!-- /dash-tl-split -->
 
       }
-    </div>
 
-  }
+    </div><!-- /dash-tl-card -->
+
+  }<!-- /con expedientes -->
 
 </div>

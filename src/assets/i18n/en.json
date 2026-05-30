@@ -224,6 +224,7 @@
     "success_rate": "Success rate",
     "distribution": "Distribution",
     "quick_actions": "Quick actions",
+    "find_projects": "Explore available files",
     "progress_meaning": "What does progress mean?",
     "start_label": "Start",
     "ref_35": "Pending offer — awaiting client decision",
@@ -354,7 +355,8 @@
     "section_managed": "Managed",
     "section_pending": "Pending review",
     "banner_plural": "You have {{count}} projects with offers pending review.",
-    "pending_plural": "pending"
+    "pending_plural": "pending",
+    "total_label": "files"
   },
   "my_offers": {
     "title": "My offers",

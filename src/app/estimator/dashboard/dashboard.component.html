@@ -1,401 +1,549 @@
-<div class="estd-root">
+﻿<div class="estd-root page-wrapper">
 
-  <!-- ── Encabezado ──────────────────────────────────────────────────────── -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       HEADER â€” eyebrow + bienvenida + pills de estado
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <header class="estd-header">
-    <div class="estd-header__info">
-      <p class="estd-header__eyebrow">
-        <i class="bi bi-clipboard2-pulse"></i>
-        {{ 'role.estimateur' | translate }}
-      </p>
-      <h1 class="estd-header__title">
-        {{ bienvenida
-          ? (('dashboard_client.welcome' | translate) + ', ' + bienvenida)
-          : ('dashboard_estimator.title' | translate) }}
-      </h1>
-      <p class="estd-header__sub">{{ 'dashboard_estimator.subtitle' | translate }}</p>
-    </div>
-    @if (!cargando()) {
-      <div class="estd-header__pills">
-        @if (activos().length > 0) {
-          <span class="estd-pill estd-pill--activo">
-            <i class="bi bi-pencil-square"></i>
-            {{ activos().length }} {{ 'dashboard_estimator.in_progress' | translate }}
-          </span>
-        }
-        @if (disponibles() > 0) {
-          <span class="estd-pill estd-pill--disponible">
-            <i class="bi bi-inbox"></i>
-            {{ disponibles() }} {{ 'common.available' | translate }}
-          </span>
-        }
-        @if (contratados().length > 0) {
-          <span class="estd-pill estd-pill--contratado">
-            <i class="bi bi-check-circle"></i>
-            {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
-          </span>
-        }
+    <div class="estd-header__accent" aria-hidden="true"></div>
+
+    <div class="estd-header__body">
+      <div class="estd-header__info">
+        <p class="page-eyebrow">
+          <i class="bi bi-clipboard2-pulse" aria-hidden="true"></i>
+          {{ 'role.estimateur' | translate }}
+        </p>
+        <h1 class="estd-header__title">
+          {{ bienvenida
+            ? (('dashboard_client.welcome' | translate) + ', ' + bienvenida)
+            : ('dashboard_estimator.title' | translate) }}
+        </h1>
+        <p class="estd-header__sub">{{ 'dashboard_estimator.subtitle' | translate }}</p>
       </div>
-    }
+
+      @if (!cargando()) {
+        <div class="estd-header__stats" aria-label="Estado actual">
+          @if (activos().length > 0) {
+            <div class="estd-hstat estd-hstat--activo">
+              <span class="estd-hstat__n">{{ activos().length }}</span>
+              <span class="estd-hstat__l">{{ 'dashboard_estimator.in_progress' | translate }}</span>
+            </div>
+          }
+          @if (disponibles() > 0) {
+            <div class="estd-hstat estd-hstat--disponible">
+              <span class="estd-hstat__n">{{ disponibles() }}</span>
+              <span class="estd-hstat__l">{{ 'common.available' | translate }}</span>
+            </div>
+          }
+          @if (contratados().length > 0) {
+            <div class="estd-hstat estd-hstat--contratado">
+              <span class="estd-hstat__n">{{ contratados().length }}</span>
+              <span class="estd-hstat__l">{{ 'dashboard_estimator.contracted' | translate }}</span>
+            </div>
+          }
+          @if (montoTotal() > 0) {
+            <div class="estd-hstat estd-hstat--monto">
+              <span class="estd-hstat__n estd-hstat__n--sm">{{ formatPrecio(montoTotal()) }}</span>
+              <span class="estd-hstat__l">{{ 'dashboard_estimator.estimated_value' | translate }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </header>
 
-  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       CARGANDO
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   @if (cargando()) {
-    <div class="estd-loading">
-      <span class="estd-spinner" role="status"></span>
+    <div class="estd-loading" role="status" [attr.aria-label]="'common.loading' | translate">
+      <span class="estd-spinner" aria-hidden="true"></span>
       {{ 'common.loading' | translate }}
     </div>
 
-  <!-- ── Sin datos ────────────────────────────────────────────────────────── -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       SIN DATOS
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else if (expedientes().length === 0 && disponibles() === 0) {
-    <div class="estd-empty">
-      <div class="estd-empty__icon"><i class="bi bi-clipboard2-x"></i></div>
-      <p class="estd-empty__title">{{ 'dashboard_estimator.no_files' | translate }}</p>
-      <p class="estd-empty__text">{{ 'dashboard_estimator.no_files_text' | translate }}</p>
-      <a routerLink="/estimator/files-to-be-estimated" class="estd-btn-cta">
-        <i class="bi bi-inbox"></i>{{ 'nav.a_estimer' | translate }}
+    <div class="estd-empty empty-state">
+      <div class="empty-state__icon">
+        <i class="bi bi-clipboard2-x" aria-hidden="true"></i>
+      </div>
+      <p class="empty-state__title">{{ 'dashboard_estimator.no_files' | translate }}</p>
+      <p class="empty-state__desc">{{ 'dashboard_estimator.no_files_text' | translate }}</p>
+      <a routerLink="/estimator/files-to-be-estimated" class="btn btn-primary btn-sm mt-2">
+        <i class="bi bi-inbox" aria-hidden="true"></i>
+        {{ 'nav.a_estimer' | translate }}
       </a>
     </div>
 
-  <!-- ── Con datos ────────────────────────────────────────────────────────── -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       CONTENIDO PRINCIPAL
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else {
 
-    <!-- KPIs -->
-    <div class="estd-kpis">
+    <!-- KPI strip compacto -->
+    <div class="estd-kpis" role="region" aria-label="KPIs">
 
       <div class="estd-kpi estd-kpi--activo" [class.estd-kpi--pulse]="activos().length > 0">
-        <div class="estd-kpi__icon estd-kpi__icon--activo">
+        <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--activo" aria-hidden="true">
           <i class="bi bi-pencil-square"></i>
         </div>
-        <div class="estd-kpi__text">
-          <p class="estd-kpi__val estd-kpi__val--activo">{{ activos().length }}</p>
+        <div class="estd-kpi__content">
+          <p class="estd-kpi__val">
+            {{ activos().length }}
+          </p>
           <p class="estd-kpi__label">{{ 'state.en_estimacion' | translate }}</p>
         </div>
+        <div class="estd-kpi__indicator estd-kpi__indicator--activo"></div>
+      </div>
+
+      <div class="estd-kpi estd-kpi--disponible">
+        <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--disponible" aria-hidden="true">
+          <i class="bi bi-inbox"></i>
+        </div>
+        <div class="estd-kpi__content">
+          <p class="estd-kpi__val">{{ disponibles() }}</p>
+          <p class="estd-kpi__label">{{ 'common.available' | translate }}</p>
+        </div>
+        <div class="estd-kpi__indicator estd-kpi__indicator--disponible"></div>
       </div>
 
       <div class="estd-kpi estd-kpi--mercado">
-        <div class="estd-kpi__icon estd-kpi__icon--mercado">
+        <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--mercado" aria-hidden="true">
           <i class="bi bi-people"></i>
         </div>
-        <div class="estd-kpi__text">
-          <p class="estd-kpi__val estd-kpi__val--mercado">{{ enMercado().length }}</p>
+        <div class="estd-kpi__content">
+          <p class="estd-kpi__val">{{ enMercado().length }}</p>
           <p class="estd-kpi__label">{{ 'dashboard_estimator.on_market' | translate }}</p>
         </div>
+        <div class="estd-kpi__indicator estd-kpi__indicator--mercado"></div>
       </div>
 
       <div class="estd-kpi estd-kpi--contratado">
-        <div class="estd-kpi__icon estd-kpi__icon--contratado">
+        <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--contratado" aria-hidden="true">
           <i class="bi bi-check-circle"></i>
         </div>
-        <div class="estd-kpi__text">
-          <p class="estd-kpi__val estd-kpi__val--contratado">{{ contratados().length }}</p>
+        <div class="estd-kpi__content">
+          <p class="estd-kpi__val">{{ contratados().length }}</p>
           <p class="estd-kpi__label">{{ 'dashboard_estimator.contracted' | translate }}</p>
         </div>
-      </div>
-
-      <div class="estd-kpi estd-kpi--monto">
-        <div class="estd-kpi__icon estd-kpi__icon--monto">
-          <i class="bi bi-cash-coin"></i>
-        </div>
-        <div class="estd-kpi__text">
-          <p class="estd-kpi__val estd-kpi__val--monto estd-kpi__val--sm">{{ formatPrecio(montoTotal()) }}</p>
-          <p class="estd-kpi__label">{{ 'dashboard_estimator.estimated_value' | translate }}</p>
-        </div>
+        <div class="estd-kpi__indicator estd-kpi__indicator--contratado"></div>
       </div>
 
     </div>
 
-    <!-- Layout principal: estimaciones activas + sidebar -->
+    <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+         LAYOUT: columna principal + sidebar
+         â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="estd-main">
 
-      <!-- Estimaciones activas -->
-      <section class="estd-card">
+      <!-- â”€â”€ Estimaciones activas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <section class="estd-card" aria-labelledby="activas-title">
+
         <div class="estd-card__header">
           <div class="estd-card__header-left">
-            <i class="bi bi-pencil-square"></i>
-            {{ 'dashboard_estimator.active_estimations' | translate }}
-            @if (activos().length > 0) {
-              <span class="estd-count-badge">{{ activos().length }}</span>
-            }
+            <div class="estd-card__header-icon" aria-hidden="true">
+              <i class="bi bi-pencil-square"></i>
+            </div>
+            <div>
+              <h2 class="estd-card__title" id="activas-title">
+                {{ 'dashboard_estimator.active_estimations' | translate }}
+              </h2>
+              @if (activos().length > 0) {
+                <p class="estd-card__subtitle">
+                  {{ activos().length }}
+                  {{ activos().length === 1 ? ('dashboard_estimator.in_progress' | translate) : ('dashboard_estimator.in_progress' | translate) }}
+                </p>
+              }
+            </div>
           </div>
-          <a routerLink="/estimator/files-under-estimation" class="estd-btn-link">
-            {{ 'common.view_all' | translate }}<i class="bi bi-arrow-right"></i>
+          <a routerLink="/estimator/files-under-estimation" class="estd-btn-link" [attr.aria-label]="'common.view_all' | translate">
+            {{ 'common.view_all' | translate }}
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
           </a>
         </div>
+
         <div class="estd-card__body">
+
           @if (activos().length === 0) {
-            <div class="estd-empty-inline">
-              <i class="bi bi-check-circle estd-empty-inline__icon--success"></i>
-              <p class="estd-empty-inline__title">{{ 'dashboard_estimator.no_pending' | translate }}</p>
-              <p class="estd-empty-inline__text">{{ 'dashboard_estimator.take_available_hint' | translate }}</p>
-              <a routerLink="/estimator/files-to-be-estimated" class="estd-btn-cta">
-                <i class="bi bi-inbox"></i>{{ 'dashboard_estimator.see_available_btn' | translate }}
+            <!-- Estado vacÃ­o inline -->
+            <div class="estd-inline-empty">
+              <div class="estd-inline-empty__icon" aria-hidden="true">
+                <i class="bi bi-check-circle"></i>
+              </div>
+              <div class="estd-inline-empty__text">
+                <p class="estd-inline-empty__title">{{ 'dashboard_estimator.no_pending' | translate }}</p>
+                <p class="estd-inline-empty__desc">{{ 'dashboard_estimator.take_available_hint' | translate }}</p>
+              </div>
+              <a routerLink="/estimator/files-to-be-estimated" class="btn btn-primary btn-sm">
+                <i class="bi bi-inbox" aria-hidden="true"></i>
+                {{ 'dashboard_estimator.see_available_btn' | translate }}
                 @if (disponibles() > 0) {
-                  <span class="estd-cta-badge">{{ disponibles() }}</span>
+                  <span class="estd-btn-count" [attr.aria-label]="disponibles() + ' disponibles'">
+                    {{ disponibles() }}
+                  </span>
                 }
               </a>
             </div>
+
           } @else {
+
+            <!-- Grid de cards de trabajo activo -->
             <div class="estd-work-grid">
               @for (exp of activos(); track exp.id) {
                 <article class="estd-work-card"
-                         [style.--estd-card-accent]="cfg(exp.estado ?? '').color">
+                         [style.--card-accent]="cfg(exp.estado ?? '').color"
+                         [attr.aria-label]="exp.numero + ' â€” ' + servicioNombre(exp)">
+
+                  <!-- Top: nÃºmero + urgencia -->
                   <div class="estd-work-card__top">
-                    <span class="estd-work-num">{{ exp.numero }}</span>
-                    <div class="estd-work-badges">
+                    <span class="estd-work-num">
+                      {{ exp.numero }}
+                    </span>
+                    <div class="estd-work-badges" aria-live="polite">
                       @if (urgencia(exp.fecha_visita) === 'vencida') {
-                        <span class="estd-urgency estd-urgency--vencida">
-                          <i class="bi bi-exclamation-triangle"></i>{{ 'common.urgency_expired' | translate }}
+                        <span class="status-badge status-badge--cancelado" role="status">
+                          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                          {{ 'common.urgency_expired' | translate }}
                         </span>
                       } @else if (urgencia(exp.fecha_visita) === 'hoy') {
-                        <span class="estd-urgency estd-urgency--hoy">
-                          <i class="bi bi-clock"></i>{{ 'common.urgency_today' | translate }}
+                        <span class="status-badge status-badge--en_estimacion" role="status">
+                          <i class="bi bi-clock" aria-hidden="true"></i>
+                          {{ 'common.urgency_today' | translate }}
                         </span>
                       } @else if (urgencia(exp.fecha_visita) === 'proxima') {
-                        <span class="estd-urgency estd-urgency--proxima">
-                          <i class="bi bi-calendar-event"></i>{{ 'common.urgency_upcoming' | translate }}
+                        <span class="status-badge status-badge--nuevo" role="status">
+                          <i class="bi bi-calendar-event" aria-hidden="true"></i>
+                          {{ 'common.urgency_upcoming' | translate }}
                         </span>
                       }
                     </div>
                   </div>
 
+                  <!-- Servicio -->
                   <p class="estd-work-service">{{ servicioNombre(exp) }}</p>
+
+                  <!-- Meta: cliente + ubicaciÃ³n -->
                   <div class="estd-work-meta">
-                    <span><i class="bi bi-person"></i>{{ exp.cliente_nombre }}</span>
-                    <span><i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}</span>
+                    <span>
+                      <i class="bi bi-person" aria-hidden="true"></i>
+                      {{ exp.cliente_nombre }}
+                    </span>
+                    <span>
+                      <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                      {{ exp.provincia }}, {{ exp.canton }}
+                    </span>
                   </div>
 
-                  <div class="estd-progress-row">
-                    <div class="estd-progress">
-                      <div class="estd-progress__fill"
+                  <!-- Barra de progreso -->
+                  <div class="estd-progress-wrap" role="progressbar"
+                       [attr.aria-valuenow]="cfg(exp.estado ?? '').pct"
+                       aria-valuemin="0" aria-valuemax="100">
+                    <div class="estd-progress-track">
+                      <div class="estd-progress-fill"
                            [style.width.%]="cfg(exp.estado ?? '').pct"
                            [style.background-color]="cfg(exp.estado ?? '').color"></div>
                     </div>
                     <span class="estd-progress-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
                   </div>
 
+                  <!-- Footer: fecha + CTA -->
                   <div class="estd-work-card__footer">
                     <span class="estd-work-fecha"
                           [class.estd-work-fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
                           [class.estd-work-fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
-                      <i class="bi bi-calendar3"></i>{{ formatFecha(exp.fecha_visita) }}
+                      <i class="bi bi-calendar3" aria-hidden="true"></i>
+                      <time [dateTime]="exp.fecha_visita">{{ formatFecha(exp.fecha_visita) }}</time>
                     </span>
-                    <button class="estd-btn-continue" (click)="irAEstimar(exp.id)">
-                      <i class="bi bi-pencil-square"></i>{{ 'common.continue' | translate }}
+                    <button class="estd-btn-continue" (click)="irAEstimar(exp.id)"
+                            [attr.aria-label]="'common.continue' | translate">
+                      <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                      {{ 'common.continue' | translate }}
                     </button>
                   </div>
+
                 </article>
               }
             </div>
+
           }
         </div>
       </section>
 
-      <!-- Sidebar -->
-      <aside class="estd-col-side">
+      <!-- â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <aside class="estd-sidebar">
 
-        <!-- Distribución -->
+        <!-- Acciones rÃ¡pidas (siempre visible) -->
+        <div class="estd-card estd-card--actions">
+          <div class="estd-card__header">
+            <div class="estd-card__header-left">
+              <div class="estd-card__header-icon" aria-hidden="true">
+                <i class="bi bi-lightning"></i>
+              </div>
+              <h2 class="estd-card__title">{{ 'dashboard_builder.quick_actions' | translate }}</h2>
+            </div>
+          </div>
+          <nav class="estd-card__body estd-actions" aria-label="Acciones rÃ¡pidas">
+            <a routerLink="/estimator/files-to-be-estimated" class="estd-action estd-action--primary">
+              <div class="estd-action__icon" aria-hidden="true">
+                <i class="bi bi-inbox"></i>
+              </div>
+              <div class="estd-action__text">
+                <span class="estd-action__label">{{ 'nav.a_estimer' | translate }}</span>
+                @if (disponibles() > 0) {
+                  <span class="estd-action__hint">{{ disponibles() }} {{ 'common.available' | translate }}</span>
+                }
+              </div>
+              @if (disponibles() > 0) {
+                <span class="estd-action__badge estd-action__badge--primary" aria-hidden="true">
+                  {{ disponibles() }}
+                </span>
+              }
+            </a>
+            <a routerLink="/estimator/files-under-estimation" class="estd-action">
+              <div class="estd-action__icon" aria-hidden="true">
+                <i class="bi bi-pencil-square"></i>
+              </div>
+              <div class="estd-action__text">
+                <span class="estd-action__label">{{ 'dashboard_estimator.active_estimations_link' | translate }}</span>
+                @if (activos().length > 0) {
+                  <span class="estd-action__hint">{{ activos().length }} {{ 'dashboard_estimator.in_progress' | translate }}</span>
+                }
+              </div>
+              @if (activos().length > 0) {
+                <span class="estd-action__badge" aria-hidden="true">{{ activos().length }}</span>
+              }
+            </a>
+            <a routerLink="/estimator/estimated-files" class="estd-action">
+              <div class="estd-action__icon" aria-hidden="true">
+                <i class="bi bi-clipboard-check"></i>
+              </div>
+              <div class="estd-action__text">
+                <span class="estd-action__label">{{ 'nav.completes' | translate }}</span>
+                @if (totalCompletados() > 0) {
+                  <span class="estd-action__hint">{{ totalCompletados() }} {{ 'common.total' | translate }}</span>
+                }
+              </div>
+              @if (totalCompletados() > 0) {
+                <span class="estd-action__badge" aria-hidden="true">{{ totalCompletados() }}</span>
+              }
+            </a>
+          </nav>
+        </div>
+
+        <!-- DistribuciÃ³n + tasa de Ã©xito -->
         @if (expedientes().length > 0) {
           <div class="estd-card">
             <div class="estd-card__header">
               <div class="estd-card__header-left">
-                <i class="bi bi-pie-chart"></i>
-                {{ 'dashboard_builder.distribution' | translate }}
+                <div class="estd-card__header-icon" aria-hidden="true">
+                  <i class="bi bi-pie-chart"></i>
+                </div>
+                <h2 class="estd-card__title">{{ 'dashboard_builder.distribution' | translate }}</h2>
               </div>
+              @if (totalCompletados() > 0) {
+                <div class="estd-success-chip">
+                  <i class="bi bi-trophy" aria-hidden="true"></i>
+                  {{ tasaExito() }}%
+                </div>
+              }
             </div>
-            <div class="estd-card__body estd-card__body--center">
-              <svg width="140" height="140" viewBox="0 0 140 140" aria-hidden="true">
-                <circle cx="70" cy="70" r="54" fill="none" stroke="#e9ecef" stroke-width="18"/>
-                @for (seg of donutSegments(); track seg.label) {
-                  <circle cx="70" cy="70" [attr.r]="R" fill="none"
-                          [attr.stroke]="seg.color" stroke-width="18"
-                          [attr.stroke-dasharray]="seg.dasharray"
-                          [attr.stroke-dashoffset]="seg.dashoffset"
-                          transform="rotate(-90 70 70)"/>
-                }
-                <text x="70" y="66" text-anchor="middle" class="estd-donut-num">{{ expedientes().length }}</text>
-                <text x="70" y="83" text-anchor="middle" class="estd-donut-sub">{{ 'common.total' | translate }}</text>
-              </svg>
-              <div class="estd-legend">
-                @for (e of estadoBreakdown(); track e.key) {
-                  <div class="estd-legend-row">
-                    <div class="estd-legend-row__left">
-                      <span class="estd-legend-dot" [style.background]="e.color"></span>
-                      <span class="estd-legend-label">{{ ('state.' + e.key) | translate }}</span>
-                    </div>
-                    <div class="estd-legend-row__right">
-                      <div class="estd-legend-bar">
-                        <div class="estd-legend-bar__fill"
-                             [style.width.%]="e.pct"
-                             [style.background-color]="e.color"></div>
-                      </div>
-                      <span class="estd-legend-count">{{ e.count }}</span>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-        }
 
-        <!-- Tasa de éxito -->
-        @if (totalCompletados() > 0) {
-          <div class="estd-card">
             <div class="estd-card__body">
-              <p class="estd-rate-label">
-                <i class="bi bi-trophy"></i>{{ 'dashboard_builder.success_rate' | translate }}
-              </p>
-              <div class="estd-rate-content">
-                <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" class="estd-rate-ring">
-                  <circle cx="36" cy="36" r="28" fill="none" stroke="#e9ecef" stroke-width="8"/>
-                  <circle cx="36" cy="36" r="28" fill="none"
-                          stroke="#5B7A4F" stroke-width="8"
-                          [attr.stroke-dasharray]="(tasaExito() / 100 * 175.93) + ' 175.93'"
-                          stroke-dashoffset="0"
-                          transform="rotate(-90 36 36)"/>
-                  <text x="36" y="40" text-anchor="middle"
-                        font-size="14" font-weight="700" fill="#1A1A1A">{{ tasaExito() }}%</text>
-                </svg>
-                <div>
-                  <p class="estd-rate-num">{{ contratados().length }}</p>
-                  <p class="estd-rate-sub">{{ 'dashboard_estimator.contracted' | translate }}</p>
-                  <p class="estd-rate-sub">
+
+              <!-- Donut + leyenda lado a lado -->
+              <div class="estd-dist-layout">
+
+                <div class="estd-donut-wrap" aria-hidden="true">
+                  <svg width="112" height="112" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="54" fill="none"
+                            stroke="var(--ds-border)" stroke-width="18"/>
+                    @for (seg of donutSegments(); track seg.label) {
+                      <circle cx="70" cy="70" [attr.r]="R" fill="none"
+                              [attr.stroke]="seg.color" stroke-width="18"
+                              [attr.stroke-dasharray]="seg.dasharray"
+                              [attr.stroke-dashoffset]="seg.dashoffset"
+                              transform="rotate(-90 70 70)"/>
+                    }
+                    <text x="70" y="65" text-anchor="middle"
+                          class="estd-donut__num">{{ expedientes().length }}</text>
+                    <text x="70" y="81" text-anchor="middle"
+                          class="estd-donut__sub">{{ 'common.total' | translate }}</text>
+                  </svg>
+                </div>
+
+                <div class="estd-legend" role="list">
+                  @for (e of estadoBreakdown(); track e.key) {
+                    <div class="estd-legend-item" role="listitem">
+                      <div class="estd-legend-item__left">
+                        <span class="estd-legend-dot"
+                              [style.background]="e.color"
+                              aria-hidden="true"></span>
+                        <span class="estd-legend-label">{{ ('state.' + e.key) | translate }}</span>
+                      </div>
+                      <div class="estd-legend-item__right">
+                        <div class="estd-legend-bar" aria-hidden="true">
+                          <div class="estd-legend-bar__fill"
+                               [style.width.%]="e.pct"
+                               [style.background]="e.color"></div>
+                        </div>
+                        <span class="estd-legend-count" [attr.aria-label]="e.count + ' expedientes'">
+                          {{ e.count }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+              </div>
+
+              <!-- Tasa de Ã©xito integrada (cuando hay contratados) -->
+              @if (totalCompletados() > 0) {
+                <div class="estd-rate-strip">
+                  <div class="estd-rate-strip__bar-wrap" aria-hidden="true">
+                    <div class="estd-rate-strip__bar">
+                      <div class="estd-rate-strip__fill"
+                           [style.width.%]="tasaExito()"></div>
+                    </div>
+                    <span class="estd-rate-strip__pct">{{ tasaExito() }}%</span>
+                  </div>
+                  <p class="estd-rate-strip__label">
+                    <i class="bi bi-trophy" aria-hidden="true"></i>
+                    {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
                     {{ 'common.of' | translate }} {{ totalCompletados() }}
                     {{ 'dashboard_estimator.estimated_lc' | translate }}
                   </p>
                 </div>
-              </div>
+              }
+
             </div>
           </div>
         }
-
-        <!-- Acciones rápidas -->
-        <div class="estd-card">
-          <div class="estd-card__body">
-            <p class="estd-actions-label">
-              <i class="bi bi-lightning"></i>{{ 'dashboard_builder.quick_actions' | translate }}
-            </p>
-            <div class="estd-actions">
-              <a routerLink="/estimator/files-to-be-estimated" class="estd-action estd-action--primary">
-                <i class="bi bi-inbox"></i>
-                <span>{{ 'nav.a_estimer' | translate }}</span>
-                @if (disponibles() > 0) {
-                  <span class="estd-action-badge estd-action-badge--light">{{ disponibles() }}</span>
-                }
-              </a>
-              <a routerLink="/estimator/files-under-estimation" class="estd-action">
-                <i class="bi bi-pencil-square"></i>
-                <span>{{ 'dashboard_estimator.active_estimations_link' | translate }}</span>
-                @if (activos().length > 0) {
-                  <span class="estd-action-badge">{{ activos().length }}</span>
-                }
-              </a>
-              <a routerLink="/estimator/estimated-files" class="estd-action">
-                <i class="bi bi-clipboard-check"></i>
-                <span>{{ 'nav.completes' | translate }}</span>
-                @if (totalCompletados() > 0) {
-                  <span class="estd-action-badge">{{ totalCompletados() }}</span>
-                }
-              </a>
-            </div>
-          </div>
-        </div>
 
       </aside>
     </div>
 
-    <!-- Pipeline post-estimación -->
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+         PIPELINE POST-ESTIMACIÃ“N
+         â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
     @if (postEstimacion().length > 0) {
-      <section class="estd-card">
+      <section class="estd-card" aria-labelledby="pipeline-title">
 
         <div class="estd-card__header estd-card__header--pipeline">
-          <div>
-            <div class="estd-card__header-left">
+          <div class="estd-card__header-left">
+            <div class="estd-card__header-icon" aria-hidden="true">
               <i class="bi bi-diagram-3"></i>
-              {{ 'dashboard_estimator.post_tracking' | translate }}
             </div>
-            <p class="estd-pipeline-sub">{{ 'dashboard_estimator.post_tracking_text' | translate }}</p>
+            <div>
+              <h2 class="estd-card__title" id="pipeline-title">
+                {{ 'dashboard_estimator.post_tracking' | translate }}
+              </h2>
+              <p class="estd-card__subtitle">
+                {{ 'dashboard_estimator.post_tracking_text' | translate }}
+              </p>
+            </div>
           </div>
-          <div class="estd-pipeline-summary">
+          <div class="estd-pipeline-pills">
             @if (enMercado().length > 0) {
-              <span class="estd-pill estd-pill--mercado">
-                <i class="bi bi-people"></i>{{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
+              <span class="kpi-pill">
+                <i class="bi bi-people" aria-hidden="true"></i>
+                {{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
               </span>
             }
             @if (contratados().length > 0) {
-              <span class="estd-pill estd-pill--contratado">
-                <i class="bi bi-trophy"></i>{{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
+              <span class="kpi-pill" style="background:var(--ds-success-soft);border-color:var(--ds-success)">
+                <i class="bi bi-trophy" aria-hidden="true"></i>
+                {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
               </span>
             }
           </div>
         </div>
 
-        <div class="estd-pipeline-legend">
+        <!-- Leyenda del pipeline -->
+        <div class="estd-pipe-legend" aria-hidden="true">
           @for (step of pipelineSteps; track step; let last = $last) {
-            <div class="estd-pipeline-legend__step">
-              <span class="estd-pipeline-legend__dot" [style.background]="cfg(step).color"></span>
-              <span class="estd-pipeline-legend__label">{{ ('state.' + step) | translate }}</span>
+            <div class="estd-pipe-legend__step">
+              <span class="estd-pipe-legend__dot"
+                    [style.background]="cfg(step).color"></span>
+              <span class="estd-pipe-legend__label">
+                {{ ('state.' + step) | translate }}
+              </span>
             </div>
             @if (!last) {
-              <i class="bi bi-chevron-right estd-pipeline-legend__arrow"></i>
+              <i class="bi bi-chevron-right estd-pipe-legend__arrow" aria-hidden="true"></i>
             }
           }
         </div>
 
-        @for (exp of postEstimacion(); track exp.id) {
-          <div class="estd-pipeline-row"
-               [class.estd-pipeline-row--contratado]="exp.estado === 'contratado'"
-               [class.estd-pipeline-row--cancelado]="exp.estado === 'cancelado'">
+        <!-- Filas del pipeline -->
+        <div class="estd-pipeline-list" role="list">
+          @for (exp of postEstimacion(); track exp.id) {
+            <div class="estd-pipe-row"
+                 [class.estd-pipe-row--contratado]="exp.estado === 'contratado'"
+                 [class.estd-pipe-row--cancelado]="exp.estado === 'cancelado'"
+                 role="listitem">
 
-            <div class="estd-pipeline-info">
-              <div class="estd-pipeline-info__top">
-                <span class="estd-pipe-num">{{ exp.numero }}</span>
-                @if (exp.estado === 'contratado') {
-                  <i class="bi bi-trophy estd-trophy-icon"></i>
-                }
-              </div>
-              <p class="estd-pipe-service">{{ servicioNombre(exp) }}</p>
-              <p class="estd-pipe-meta">
-                <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
-                <span class="estd-pipe-sep">·</span>
-                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
-              </p>
-            </div>
-
-            <div class="estd-pipeline-track">
-              @if (exp.estado !== 'cancelado') {
-                <div class="estd-p-dots">
-                  @for (step of pipelineSteps; track step; let last = $last) {
-                    <span class="estd-p-dot"
-                          [class.estd-p-dot--done]="stepDone(exp.estado ?? '', step)"
-                          [class.estd-p-dot--active]="stepActive(exp.estado ?? '', step)"
-                          [style.--step-color]="cfg(step).color"
-                          [title]="('state.' + step) | translate">
-                    </span>
-                    @if (!last) {
-                      <span class="estd-p-line"
-                            [class.estd-p-line--done]="stepDone(exp.estado ?? '', step)">
-                      </span>
-                    }
+              <!-- Info del expediente -->
+              <div class="estd-pipe-info">
+                <div class="estd-pipe-info__head">
+                  <span class="estd-pipe-num">{{ exp.numero }}</span>
+                  @if (exp.estado === 'contratado') {
+                    <i class="bi bi-trophy estd-pipe-trophy" aria-label="Contratado" title="Contratado"></i>
                   }
                 </div>
-                <span class="estd-pipe-badge"
-                      [style.background-color]="cfg(exp.estado ?? '').color + '18'"
-                      [style.color]="cfg(exp.estado ?? '').color"
-                      [style.border-color]="cfg(exp.estado ?? '').color + '40'">
-                  <i class="bi {{ cfg(exp.estado ?? '').icon }}"></i>
-                  {{ ('state.' + (exp.estado ?? '')) | translate }}
-                </span>
-              } @else {
-                <span class="estd-pipe-badge estd-pipe-badge--cancelado">{{ 'state.cancelado' | translate }}</span>
-              }
+                <p class="estd-pipe-service">{{ servicioNombre(exp) }}</p>
+                <p class="estd-pipe-meta">
+                  <i class="bi bi-person" aria-hidden="true"></i>
+                  {{ exp.cliente_nombre }}
+                  <span class="estd-pipe-sep" aria-hidden="true">Â·</span>
+                  <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                  {{ exp.provincia }}, {{ exp.canton }}
+                </p>
+              </div>
+
+              <!-- Track de progreso -->
+              <div class="estd-pipe-track">
+                @if (exp.estado !== 'cancelado') {
+                  <div class="estd-p-dots" role="progressbar"
+                       [attr.aria-label]="('state.' + exp.estado) | translate">
+                    @for (step of pipelineSteps; track step; let last = $last) {
+                      <span class="estd-p-dot"
+                            [class.estd-p-dot--done]="stepDone(exp.estado ?? '', step)"
+                            [class.estd-p-dot--active]="stepActive(exp.estado ?? '', step)"
+                            [style.--step-color]="cfg(step).color"
+                            [title]="('state.' + step) | translate">
+                      </span>
+                      @if (!last) {
+                        <span class="estd-p-line"
+                              [class.estd-p-line--done]="stepDone(exp.estado ?? '', step)">
+                        </span>
+                      }
+                    }
+                  </div>
+                  <span class="estd-pipe-badge"
+                        [style.background-color]="cfg(exp.estado ?? '').color + '18'"
+                        [style.color]="cfg(exp.estado ?? '').color"
+                        [style.border-color]="cfg(exp.estado ?? '').color + '40'">
+                    <i class="bi {{ cfg(exp.estado ?? '').icon }}" aria-hidden="true"></i>
+                    {{ ('state.' + (exp.estado ?? '')) | translate }}
+                  </span>
+                } @else {
+                  <span class="estd-pipe-badge estd-pipe-badge--cancelado">
+                    {{ 'state.cancelado' | translate }}
+                  </span>
+                }
+              </div>
+
+              <!-- AcciÃ³n ver -->
+              <button class="estd-btn-eye"
+                      (click)="irAVer(exp.id)"
+                      [attr.aria-label]="('common.view' | translate) + ' ' + exp.numero">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+              </button>
+
             </div>
-
-            <button class="estd-btn-icon" (click)="irAVer(exp.id)" [title]="'common.view' | translate">
-              <i class="bi bi-eye"></i>
-            </button>
-
-          </div>
-        }
+          }
+        </div>
 
       </section>
     }
@@ -403,3 +551,4 @@
   }
 
 </div>
+

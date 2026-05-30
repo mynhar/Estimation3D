@@ -1,228 +1,305 @@
-<div class="container-xl py-5 px-3 px-md-4">
+<!-- Hallmark · macrostructure: Long Document · genre: editorial (warm-paper)
+     design-system: design.md · designed-as-app
+     pre-emit critique: P5 H5 E5 S5 R5 V5 -->
+<div class="page-wrapper or-root">
 
-  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
-  <header class="or-header mb-5">
-    <div class="or-header__text">
-      <span class="eyebrow mb-2 d-block">{{ 'role.client' | translate }}</span>
+  <!-- ══════════════════════════════════════════════════════════
+       ENCABEZADO — tarjeta editorial con acento dorado
+       ══════════════════════════════════════════════════════════ -->
+  <header class="or-page-header">
+    <div class="or-page-header__text">
+      <p class="page-eyebrow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        {{ 'role.client' | translate }}
+      </p>
       <h1 class="or-title">{{ 'nav.offres_recues' | translate }}</h1>
       @if (!cargando()) {
-        <p class="or-lead mt-1 mb-0">{{ 'offers_received.subtitle' | translate }}</p>
+        <p class="or-lead">{{ 'offers_received.subtitle' | translate }}</p>
       }
     </div>
-    @if (!cargando() && pendientes().length > 0) {
-      <span class="pending-pill flex-shrink-0">
-        <i class="bi bi-bell me-1" aria-hidden="true"></i>
-        {{ pendientes().length }}
-        {{ pendientes().length !== 1
-            ? ('offers_received.pending_plural' | translate)
-            : ('offers_received.pending_singular' | translate) }}
-      </span>
+
+    @if (!cargando() && expedientes().length > 0) {
+      <div class="or-page-header__stats">
+        <div class="stat-block">
+          <span class="stat-block__val">{{ expedientes().length }}</span>
+          <span class="stat-block__lbl">{{ 'offers_received.total_label' | translate }}</span>
+        </div>
+        @if (pendientes().length > 0) {
+          <div class="stat-block stat-block--gold">
+            <span class="stat-block__val">{{ pendientes().length }}</span>
+            <span class="stat-block__lbl">
+              {{ pendientes().length !== 1
+                  ? ('offers_received.pending_plural' | translate)
+                  : ('offers_received.pending_singular' | translate) }}
+            </span>
+          </div>
+        }
+      </div>
     }
   </header>
 
-  <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       SKELETON DE CARGA
+       ══════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="skel-section-label mb-3" aria-hidden="true">
+    <div class="skel-section-label" aria-hidden="true">
       <div class="skel skel--dot-sm"></div>
       <div class="skel skel--label"></div>
     </div>
-    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3" aria-hidden="true">
+    <div class="or-card-grid" aria-hidden="true">
       @for (_ of [1,2,3]; track $index) {
-        <div class="col">
-          <div class="skel-card">
-            <div class="skel skel-card__accent"></div>
-            <div class="skel-card__body">
-              <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
-                <div class="skel skel--num"></div>
-                <div class="d-flex gap-2">
-                  <div class="skel skel--pill"></div>
-                  <div class="skel skel--badge-sm"></div>
-                </div>
+        <div class="skel-card">
+          <div class="skel skel-card__top-bar"></div>
+          <div class="skel-card__body">
+            <div class="skel-card__head-row">
+              <div class="skel skel--num"></div>
+              <div class="skel-card__pills">
+                <div class="skel skel--pill"></div>
+                <div class="skel skel--badge-sm"></div>
               </div>
-              <div class="skel skel--service mb-2"></div>
-              <div class="skel skel--desc mb-3"></div>
-              <div class="skel skel--meta mb-1"></div>
-              <div class="skel skel--meta mb-3"></div>
-              <hr class="skel-divider my-3">
-              <div class="skel skel--date mb-4"></div>
-              <div class="skel skel--btn"></div>
             </div>
+            <div class="skel skel--service"></div>
+            <div class="skel skel--desc"></div>
+            <div class="skel skel--meta"></div>
+            <div class="skel skel--meta"></div>
+            <div class="skel skel--btn"></div>
           </div>
         </div>
       }
     </div>
 
-  <!-- ── Sin datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       SIN DATOS
+       ══════════════════════════════════════════════════════════ -->
   } @else if (expedientes().length === 0) {
     <div class="empty-panel">
-      <div class="empty-icon">
-        <i class="bi bi-envelope-open" aria-hidden="true"></i>
+      <div class="empty-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+        </svg>
       </div>
       <p class="empty-title">{{ 'offers_received.empty_title' | translate }}</p>
       <p class="empty-text">{{ 'offers_received.empty_text' | translate }}</p>
     </div>
 
-  <!-- ── Con datos ─────────────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       CON DATOS
+       ══════════════════════════════════════════════════════════ -->
   } @else {
 
-    <!-- Banner de urgencia -->
+    <!-- Strip de urgencia -->
     @if (pendientes().length > 0) {
-      <div class="urgency-banner mb-4">
-        <p class="urgency-banner__title mb-1">
-          <i class="bi bi-bell-fill me-2" aria-hidden="true"></i>
-          @if (pendientes().length === 1) {
-            {{ 'offers_received.banner_single' | translate }}
-          } @else {
-            {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
-          }
-        </p>
-        <p class="urgency-banner__sub mb-0">
-          {{ 'dashboard_client.compare_text' | translate }}
-        </p>
+      <div class="urgency-strip" role="status">
+        <div class="urgency-strip__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+        </div>
+        <div class="urgency-strip__text">
+          <p class="urgency-strip__title">
+            @if (pendientes().length === 1) {
+              {{ 'offers_received.banner_single' | translate }}
+            } @else {
+              {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
+            }
+          </p>
+          <p class="urgency-strip__sub">{{ 'dashboard_client.compare_text' | translate }}</p>
+        </div>
       </div>
     }
 
-    <!-- ════════════════════════════════════════════════════════════════════════
-         SECCIÓN 1 · Pendientes de revisión (en_oferta)
-    ════════════════════════════════════════════════════════════════════════════ -->
+    <!-- ══ SECCIÓN 1 · Pendientes de revisión ══════════════════ -->
     @if (pendientes().length > 0) {
-      <div class="section-label mb-3">
-        <span class="section-dot section-dot--amber"></span>
-        {{ 'offers_received.section_pending' | translate }}
-        <span class="section-count">{{ pendientes().length }}</span>
-      </div>
+      <section class="or-section">
+        <div class="section-label">
+          <span class="section-dot section-dot--amber"></span>
+          {{ 'offers_received.section_pending' | translate }}
+          <span class="section-count">{{ pendientes().length }}</span>
+        </div>
 
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3 mb-5">
-        @for (exp of pendientes(); track exp.id) {
-          <div class="col">
-            <div class="offer-card offer-card--pending h-100"
-                 [style.--acento]="estadoColor(exp.estado)">
-              <div class="offer-accent" aria-hidden="true"></div>
-              <div class="offer-body d-flex flex-column">
+        <div class="or-card-grid">
+          @for (exp of pendientes(); track exp.id) {
+            <article class="offer-card offer-card--pending">
 
-                <!-- Número + conteo + badge -->
-                <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
-                  <span class="exp-num">{{ exp.numero }}</span>
-                  <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <span class="offers-pill">
-                      <i class="bi bi-people me-1" aria-hidden="true"></i>
-                      {{ ofertasTip(exp.total_ofertas) }}
-                    </span>
-                    <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
-                      {{ estadoTexto(exp.estado) }}
-                    </span>
-                  </div>
+              <!-- Head: número + pills -->
+              <div class="offer-card__head">
+                <span class="exp-num">{{ exp.numero }}</span>
+                <div class="offer-card__pills">
+                  <span class="offers-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    {{ ofertasTip(exp.total_ofertas) }}
+                  </span>
+                  <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
+                    {{ estadoTexto(exp.estado) }}
+                  </span>
                 </div>
+              </div>
 
-                <!-- Servicio — titular editorial -->
-                <p class="exp-servicio mb-1">{{ servicioNombre(exp) }}</p>
+              <!-- Body: contenido + CTA -->
+              <div class="offer-card__body">
+
+                <!-- Servicio -->
+                <p class="exp-servicio">{{ servicioNombre(exp) }}</p>
                 @if (servicioDescripcion(exp)) {
-                  <p class="exp-servicio-desc mb-2">{{ servicioDescripcion(exp) }}</p>
+                  <p class="exp-servicio-desc">{{ servicioDescripcion(exp) }}</p>
                 }
 
                 <!-- Ubicación -->
-                <p class="exp-meta mb-1">
-                  <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
-                  <span>{{ exp.direccion }}{{ exp.referencia ? ' · ' + exp.referencia : '' }}</span>
-                </p>
-                <p class="exp-meta mb-0">
-                  <i class="bi bi-map me-1" aria-hidden="true"></i>
-                  {{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
-                </p>
-
-                <hr class="offer-divider my-3" />
+                <div class="exp-meta-block">
+                  <p class="exp-meta">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true" class="exp-meta__icon">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    {{ exp.direccion }}{{ exp.referencia ? ' · ' + exp.referencia : '' }}
+                  </p>
+                  <p class="exp-meta">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true" class="exp-meta__icon">
+                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                    </svg>
+                    {{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
+                  </p>
+                </div>
 
                 <!-- Fecha de visita -->
-                <p class="exp-fecha mb-0">
-                  <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+                <p class="exp-fecha">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                       aria-hidden="true" class="exp-fecha__icon">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                    <line x1="16" x2="16" y1="2" y2="6"/>
+                    <line x1="8" x2="8" y1="2" y2="6"/>
+                    <line x1="3" x2="21" y1="10" y2="10"/>
+                  </svg>
                   {{ 'file.visit_date' | translate }}: {{ formatFecha(exp.fecha_visita) }}
                   @if (formatHora(exp.fecha_visita)) {
-                    <span class="exp-hora ms-1">· {{ formatHora(exp.fecha_visita) }}</span>
+                    <span class="exp-hora">&nbsp;· {{ formatHora(exp.fecha_visita) }}</span>
                   }
                 </p>
 
                 <!-- CTA principal -->
-                <button class="offer-cta mt-auto w-100 d-flex align-items-center gap-2"
-                        (click)="ver(exp.id)">
-                  <i class="bi bi-eye" aria-hidden="true"></i>
-                  {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
-                  <i class="bi bi-arrow-right ms-auto" aria-hidden="true"></i>
+                <button class="offer-cta" type="button" (click)="ver(exp.id)">
+                  <span class="offer-cta__left">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                       aria-hidden="true">
+                    <path d="M5 12h14"/>
+                    <path d="m12 5 7 7-7 7"/>
+                  </svg>
                 </button>
 
-              </div>
-            </div>
-          </div>
-        }
-      </div>
+              </div><!-- /offer-card__body -->
+            </article>
+          }
+        </div>
+      </section>
     }
 
-    <!-- ════════════════════════════════════════════════════════════════════════
-         SECCIÓN 2 · Ya gestionados (adjudicado / contratado / cancelado)
-    ════════════════════════════════════════════════════════════════════════════ -->
+    <!-- ══ SECCIÓN 2 · Ya gestionados ══════════════════════════ -->
     @if (gestionados().length > 0) {
       @if (pendientes().length > 0) {
-        <div class="section-separator mb-4"></div>
+        <div class="section-separator" role="separator"></div>
       }
-      <div class="section-label mb-3">
-        <span class="section-dot section-dot--green"></span>
-        {{ 'offers_received.section_managed' | translate }}
-        <span class="section-count">{{ gestionados().length }}</span>
-      </div>
+      <section class="or-section">
+        <div class="section-label">
+          <span class="section-dot section-dot--green"></span>
+          {{ 'offers_received.section_managed' | translate }}
+          <span class="section-count">{{ gestionados().length }}</span>
+        </div>
 
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
-        @for (exp of gestionados(); track exp.id) {
-          <div class="col">
-            <div class="offer-card offer-card--managed h-100"
-                 [style.--acento]="estadoColor(exp.estado)">
-              <div class="offer-accent" aria-hidden="true"></div>
-              <div class="offer-body d-flex flex-column">
+        <div class="managed-list">
+          @for (exp of gestionados(); track exp.id) {
+            <button class="managed-row" type="button" (click)="ver(exp.id)">
 
-                <!-- Número + badge -->
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
-                  <span class="exp-num">{{ exp.numero }}</span>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="offers-pill offers-pill--muted">
-                      <i class="bi bi-people me-1" aria-hidden="true"></i>
-                      {{ ofertasLabel(exp.total_ofertas) }}
-                    </span>
-                    <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
-                      {{ estadoTexto(exp.estado) }}
-                    </span>
-                  </div>
-                </div>
+              <span class="managed-row__num">{{ exp.numero }}</span>
 
-                <!-- Servicio -->
-                <p class="exp-servicio exp-servicio--sm mb-1">{{ servicioNombre(exp) }}</p>
-                @if (servicioDescripcion(exp)) {
-                  <p class="exp-servicio-desc mb-2">{{ servicioDescripcion(exp) }}</p>
-                }
+              <span class="managed-row__info">
+                <span class="managed-row__service">{{ servicioNombre(exp) }}</span>
+                <span class="managed-row__location">{{ exp.provincia }}, {{ exp.canton }}</span>
+              </span>
 
-                <!-- Ubicación compacta -->
-                <p class="exp-meta mb-0">
-                  <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
-                  {{ exp.provincia }}, {{ exp.canton }}
-                </p>
+              <span class="managed-row__date">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                     aria-hidden="true">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                  <line x1="16" x2="16" y1="2" y2="6"/>
+                  <line x1="8" x2="8" y1="2" y2="6"/>
+                  <line x1="3" x2="21" y1="10" y2="10"/>
+                </svg>
+                {{ formatFecha(exp.fecha_visita) }}
+              </span>
 
-                <!-- Fecha -->
-                <p class="exp-fecha mt-1 mb-0">
-                  <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
-                  {{ formatFecha(exp.fecha_visita) }}
-                </p>
+              <span class="managed-row__offers">
+                <span class="offers-pill offers-pill--muted">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                       aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  {{ ofertasLabel(exp.total_ofertas) }}
+                </span>
+              </span>
 
-                <!-- CTA secundario -->
-                <button class="btn btn-outline-secondary btn-sm mt-auto w-100 d-flex align-items-center justify-content-center gap-2"
-                        (click)="ver(exp.id)">
-                  <i class="bi bi-eye" aria-hidden="true"></i>
-                  {{ 'common.see_detail' | translate }}
-                </button>
+              <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
+                {{ estadoTexto(exp.estado) }}
+              </span>
 
-              </div>
-            </div>
-          </div>
-        }
-      </div>
+              <span class="managed-row__chevron" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </span>
+
+            </button>
+          }
+        </div>
+      </section>
     }
 
-  }
+  }<!-- /con datos -->
 
 </div>

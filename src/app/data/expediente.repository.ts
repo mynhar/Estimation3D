@@ -71,6 +71,35 @@ export class ExpedienteRepository {
     return (data ?? []) as ExpedienteRaw[];
   }
 
+  async findAllPaginated(options: {
+    page:      number;
+    pageSize:  number;
+    estado?:   string;
+    busqueda?: string;
+  }): Promise<{ data: ExpedienteRaw[]; count: number }> {
+    const offset = (options.page - 1) * options.pageSize;
+
+    let query = this.db
+      .from('expediente')
+      .select(
+        'id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id',
+        { count: 'exact' },
+      )
+      .order('creado_en', { ascending: false })
+      .range(offset, offset + options.pageSize - 1);
+
+    if (options.estado && options.estado !== 'todos') {
+      query = query.eq('estado', options.estado as EstadoExpediente);
+    }
+    if (options.busqueda?.trim()) {
+      query = query.ilike('numero', `%${options.busqueda.trim()}%`);
+    }
+
+    const { data, error, count } = await query;
+    if (error) throw new Error(error.message);
+    return { data: (data ?? []) as ExpedienteRaw[], count: count ?? 0 };
+  }
+
   async findByFiltro(options: {
     estado?:       EstadoExpediente;
     estados?:      EstadoExpediente[];

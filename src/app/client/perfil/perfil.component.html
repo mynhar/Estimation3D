@@ -1,13 +1,13 @@
-<div class="container-xl py-5 px-3 px-md-4 perfil-wrap">
+﻿<div class="container-xl py-5 px-3 px-md-4 perfil-wrap">
 
-  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
-  <header class="perfil-header mb-5">
+  <!-- â”€â”€ Encabezado editorial â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <header class="perfil-header mb-4">
     <span class="eyebrow">{{ 'profile.eyebrow' | translate }}</span>
     <h1 class="perfil-title">{{ 'profile.title' | translate }}</h1>
     <p class="perfil-lead">{{ 'profile.subtitle' | translate }}</p>
   </header>
 
-  <!-- ── Skeleton mientras carga ───────────────────────────────────────────── -->
+  <!-- â”€â”€ Skeleton mientras carga â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   @if (cargando()) {
     <div class="row g-4 g-lg-5 align-items-start" aria-hidden="true">
 
@@ -53,13 +53,13 @@
 
     </div>
 
-  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Contenido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   } @else {
     <div class="row g-4 g-lg-5 align-items-start">
 
-      <!-- ════════════════════════════════════════════════════════════════════
-           COLUMNA IZQUIERDA · Identidad
-           ════════════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA IZQUIERDA Â· Identidad
+           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-4">
         <div class="identity-card">
           <div class="identity-body text-center">
@@ -129,7 +129,7 @@
                 <span class="account-row__icon" aria-hidden="true"><i class="bi bi-calendar3"></i></span>
                 <div>
                   <p class="account-row__label">{{ 'profile.member_since' | translate }}</p>
-                  <p class="account-row__value">{{ memberSince || '—' }}</p>
+                  <p class="account-row__value">{{ memberSince || 'â€”' }}</p>
                 </div>
               </div>
               <div class="account-row">
@@ -160,9 +160,9 @@
         </div>
       </div>
 
-      <!-- ════════════════════════════════════════════════════════════════════
-           COLUMNA DERECHA · Formulario
-           ════════════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA DERECHA Â· Formulario
+           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-8">
         <div class="form-card">
 
@@ -220,7 +220,7 @@
                        maxlength="80" autocomplete="family-name" />
               </div>
 
-              <!-- Teléfono -->
+              <!-- TelÃ©fono -->
               <div class="col-sm-6">
                 <label class="form-label" for="telefono-input">{{ 'common.phone' | translate }}</label>
                 <div class="input-group">
@@ -296,3 +296,4 @@
   }
 
 </div>
+

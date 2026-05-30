@@ -14,12 +14,12 @@ interface EstadoCfg {
 }
 
 const ESTADO_CFG: Record<string, EstadoCfg> = {
-  en_estimacion: { color: '#6366f1', label: 'En estimación', icon: 'bi-pencil-square',     pct: 30  },
-  estimado:      { color: '#0d6efd', label: 'Estimado',       icon: 'bi-clipboard-check',   pct: 55  },
-  en_oferta:     { color: '#d97706', label: 'En oferta',      icon: 'bi-people',            pct: 70  },
-  adjudicado:    { color: '#ea580c', label: 'Adjudicado',     icon: 'bi-award',             pct: 85  },
-  contratado:    { color: '#16a34a', label: 'Contratado',     icon: 'bi-check-circle-fill', pct: 100 },
-  cancelado:     { color: '#94a3b8', label: 'Cancelado',      icon: 'bi-x-circle',          pct: 0   },
+  en_estimacion: { color: '#4A6B7A', label: 'En estimación', icon: 'bi-pencil-square',     pct: 30  },  /* --ds-info */
+  estimado:      { color: '#B0964A', label: 'Estimado',       icon: 'bi-clipboard-check',   pct: 55  },  /* --ds-gold-active */
+  en_oferta:     { color: '#B8862E', label: 'En oferta',      icon: 'bi-people',            pct: 70  },  /* --ds-warning */
+  adjudicado:    { color: '#8B6914', label: 'Adjudicado',     icon: 'bi-award',             pct: 85  },  /* --ds-warning dark */
+  contratado:    { color: '#5B7A4F', label: 'Contratado',     icon: 'bi-check-circle-fill', pct: 100 },  /* --ds-success */
+  cancelado:     { color: '#7A7770', label: 'Cancelado',      icon: 'bi-x-circle',          pct: 0   },  /* --ds-ink-muted */
 };
 
 const PIPELINE_STEPS: string[] = [

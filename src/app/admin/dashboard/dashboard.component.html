@@ -1,156 +1,180 @@
-<div class="dash">
+<div class="adm-root">
 
-  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
-  <header class="dash-header">
+  <!-- ══════════════════════════════════════════════════════════
+       HEADER — sticky, KPI band inline
+       ══════════════════════════════════════════════════════════ -->
+  <header class="adm-header">
 
-    <div class="dash-hdr-left">
-      <p class="dash-eyebrow">
-        <i class="bi bi-shield-check"></i>
+    <div class="adm-header__left">
+      <p class="page-eyebrow">
+        <i class="bi bi-shield-check" aria-hidden="true"></i>
         {{ 'admin_dashboard.eyebrow' | translate }}
       </p>
-      <h1 class="dash-title">{{ 'admin_dashboard.title' | translate }}</h1>
+      <h1 class="adm-header__title">{{ 'admin_dashboard.title' | translate }}</h1>
     </div>
 
     @if (!cargando() && !error() && stats()) {
-      <div class="kpi-band">
-        <div class="kpi-inline">
-          <span class="kpi-n">{{ stats()!.expedientes.total }}</span>
-          <span class="kpi-l">{{ 'admin_dashboard.kpi_exp' | translate }}</span>
+      <div class="adm-kpi-band" role="region" aria-label="Métricas principales">
+        <div class="adm-kpi">
+          <span class="adm-kpi__n">{{ stats()!.expedientes.total }}</span>
+          <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_exp' | translate }}</span>
         </div>
-        <div class="kpi-sep"></div>
-        <div class="kpi-inline">
-          <span class="kpi-n">{{ stats()!.estimaciones.total }}</span>
-          <span class="kpi-l">{{ 'admin_dashboard.kpi_est' | translate }}</span>
+        <div class="adm-kpi-sep" aria-hidden="true"></div>
+        <div class="adm-kpi">
+          <span class="adm-kpi__n">{{ stats()!.estimaciones.total }}</span>
+          <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_est' | translate }}</span>
         </div>
-        <div class="kpi-sep"></div>
-        <div class="kpi-inline">
-          <span class="kpi-n">{{ stats()!.ofertas.constructoresActivos }}</span>
-          <span class="kpi-l">{{ 'admin_dashboard.kpi_con' | translate }}</span>
+        <div class="adm-kpi-sep" aria-hidden="true"></div>
+        <div class="adm-kpi">
+          <span class="adm-kpi__n">{{ stats()!.ofertas.constructoresActivos }}</span>
+          <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_con' | translate }}</span>
         </div>
-        <div class="kpi-sep"></div>
-        <div class="kpi-inline">
-          <span class="kpi-n kpi-n--gold">{{ formatPrecio(stats()!.contratos.valorTotal) }}</span>
-          <span class="kpi-l">{{ 'admin_dashboard.mini_contract_value' | translate }}</span>
+        <div class="adm-kpi-sep" aria-hidden="true"></div>
+        <div class="adm-kpi">
+          <span class="adm-kpi__n adm-kpi__n--gold">{{ formatPrecio(stats()!.contratos.valorTotal) }}</span>
+          <span class="adm-kpi__l">{{ 'admin_dashboard.mini_contract_value' | translate }}</span>
         </div>
       </div>
     }
 
-    <div class="dash-hdr-right">
+    <div class="adm-header__right">
       @if (refreshedAt()) {
-        <span class="refresh-ts">
-          <i class="bi bi-clock"></i>{{ refreshedAt() }}
+        <span class="adm-refresh-ts">
+          <i class="bi bi-clock" aria-hidden="true"></i>
+          {{ refreshedAt() }}
         </span>
       }
-      <button class="btn-refresh" (click)="recargar()" [disabled]="cargando()">
-        <i class="bi bi-arrow-clockwise"></i>
+      <button class="adm-btn-refresh" (click)="recargar()" [disabled]="cargando()"
+              [attr.aria-label]="'admin_dashboard.refresh' | translate">
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
         {{ 'admin_dashboard.refresh' | translate }}
       </button>
     </div>
 
   </header>
 
-  <!-- ── BODY ───────────────────────────────────────────────────────────── -->
-  <div class="dash-body">
+  <!-- ══════════════════════════════════════════════════════════
+       BODY
+       ══════════════════════════════════════════════════════════ -->
+  <div class="adm-body page-wrapper">
 
-    <!-- Skeleton -->
+    <!-- ── Skeleton ────────────────────────────────────────── -->
     @if (cargando()) {
-      <div class="dash-grid">
-        <div class="skel-panel skel-panel--exp"></div>
-        <div class="skel-panel skel-panel--est"></div>
-        <div class="skel-panel skel-panel--con"></div>
-        <div class="skel-panel skel-panel--ctr"></div>
+      <div class="adm-grid">
+        <div class="adm-skel adm-skel--exp"></div>
+        <div class="adm-skel adm-skel--est"></div>
+        <div class="adm-skel adm-skel--con"></div>
+        <div class="adm-skel adm-skel--ctr"></div>
       </div>
-      <div class="skel-panel skel-panel--tl"></div>
+      <div class="adm-skel adm-skel--tl"></div>
 
-    <!-- Error -->
+    <!-- ── Error ───────────────────────────────────────────── -->
     } @else if (error()) {
-      <div class="error-banner">
-        <i class="bi bi-exclamation-triangle-fill"></i>
+      <div class="adm-error" role="alert">
+        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
         <span>{{ error() }}</span>
-        <button class="btn-refresh" style="margin-left:auto" (click)="recargar()">
-          <i class="bi bi-arrow-clockwise"></i>
+        <button class="adm-btn-refresh adm-btn-refresh--inline"
+                (click)="recargar()"
+                [attr.aria-label]="'admin_dashboard.retry' | translate">
+          <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
           {{ 'admin_dashboard.retry' | translate }}
         </button>
       </div>
 
-    <!-- Contenido -->
+    <!-- ── Contenido ───────────────────────────────────────── -->
     } @else {
 
-      <!-- ── Grid principal ─────────────────────────────────────────────── -->
-      <div class="dash-grid">
+      <!-- Grid de 4 paneles -->
+      <div class="adm-grid" role="region" aria-label="Paneles de métricas">
 
-        <!-- ── Expedientes ──────────────────────────────────────────────── -->
-        <section class="panel panel--exp">
-          <div class="panel-hdr panel-hdr--exp">
-            <i class="bi bi-folder2-open"></i>
-            {{ 'admin_dashboard.panel_exp' | translate }}
-            <span class="panel-hdr-badge">
-              {{ stats()!.expedientes.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
-            </span>
+        <!-- ── EXPEDIENTES ───────────────────────────────── -->
+        <section class="adm-panel adm-panel--exp" aria-labelledby="panel-exp-title">
+          <div class="adm-panel__header adm-panel__header--exp">
+            <div class="adm-panel__header-icon adm-panel__header-icon--exp" aria-hidden="true">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <div class="adm-panel__header-text">
+              <h2 class="adm-panel__title" id="panel-exp-title">
+                {{ 'admin_dashboard.panel_exp' | translate }}
+              </h2>
+              <p class="adm-panel__subtitle">
+                {{ stats()!.expedientes.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
+              </p>
+            </div>
           </div>
-          <div class="panel-body">
-            <div class="funnel">
+
+          <div class="adm-panel__body">
+            <div class="adm-funnel" role="list">
               @for (item of funnelExp(); track item.estado) {
-                <div class="funnel-row">
-                  <div class="funnel-lbl">
-                    <span class="fdot fdot--exp-{{ item.estado }}"></span>
-                    <span class="funnel-estado">{{ 'admin_file.status_' + item.estado | translate }}</span>
+                <div class="adm-funnel-row" role="listitem">
+                  <div class="adm-funnel-label">
+                    <span class="adm-dot adm-dot--exp-{{ item.estado }}" aria-hidden="true"></span>
+                    <span class="adm-funnel-name">{{ 'admin_file.status_' + item.estado | translate }}</span>
                   </div>
-                  <div class="funnel-track">
-                    <div class="funnel-fill funnel-fill--exp-{{ item.estado }}"
+                  <div class="adm-funnel-track" role="progressbar"
+                       [attr.aria-valuenow]="barWidth(item.count, stats()!.expedientes.total)"
+                       aria-valuemin="0" aria-valuemax="100">
+                    <div class="adm-funnel-fill adm-funnel-fill--exp-{{ item.estado }}"
                          [style.width.%]="barWidth(item.count, stats()!.expedientes.total)"></div>
                   </div>
-                  <span class="funnel-num">{{ item.count }}</span>
+                  <span class="adm-funnel-num">{{ item.count }}</span>
                 </div>
               }
               @if (expCancelados() > 0) {
-                <div class="funnel-sep"></div>
-                <div class="funnel-row funnel-row--muted">
-                  <div class="funnel-lbl">
-                    <span class="fdot fdot--cancelado"></span>
-                    <span class="funnel-estado">{{ 'admin_file.status_cancelado' | translate }}</span>
+                <div class="adm-funnel-sep" aria-hidden="true"></div>
+                <div class="adm-funnel-row adm-funnel-row--muted" role="listitem">
+                  <div class="adm-funnel-label">
+                    <span class="adm-dot adm-dot--cancelado" aria-hidden="true"></span>
+                    <span class="adm-funnel-name">{{ 'admin_file.status_cancelado' | translate }}</span>
                   </div>
-                  <div class="funnel-track">
-                    <div class="funnel-fill funnel-fill--cancelado"
+                  <div class="adm-funnel-track">
+                    <div class="adm-funnel-fill adm-funnel-fill--cancelado"
                          [style.width.%]="barWidth(expCancelados(), stats()!.expedientes.total)"></div>
                   </div>
-                  <span class="funnel-num">{{ expCancelados() }}</span>
+                  <span class="adm-funnel-num">{{ expCancelados() }}</span>
                 </div>
               }
             </div>
           </div>
         </section>
 
-        <!-- ── Estimaciones ─────────────────────────────────────────────── -->
-        <section class="panel panel--est">
-          <div class="panel-hdr panel-hdr--est">
-            <i class="bi bi-clipboard-data"></i>
-            {{ 'admin_dashboard.panel_est' | translate }}
-            <span class="panel-hdr-badge">
-              {{ stats()!.estimaciones.total }} {{ 'admin_dashboard.panel_completed_suffix' | translate }}
-            </span>
+        <!-- ── ESTIMACIONES ──────────────────────────────── -->
+        <section class="adm-panel adm-panel--est" aria-labelledby="panel-est-title">
+          <div class="adm-panel__header adm-panel__header--est">
+            <div class="adm-panel__header-icon adm-panel__header-icon--est" aria-hidden="true">
+              <i class="bi bi-clipboard-data"></i>
+            </div>
+            <div class="adm-panel__header-text">
+              <h2 class="adm-panel__title" id="panel-est-title">
+                {{ 'admin_dashboard.panel_est' | translate }}
+              </h2>
+              <p class="adm-panel__subtitle">
+                {{ stats()!.estimaciones.total }} {{ 'admin_dashboard.panel_completed_suffix' | translate }}
+              </p>
+            </div>
           </div>
-          <div class="panel-body">
 
-            <div class="stat-row mb-3">
-              <div class="stat-box">
-                <div class="stat-n">{{ expSinAsignar() }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_unassigned' | translate }}</div>
+          <div class="adm-panel__body">
+
+            <div class="adm-stat-row">
+              <div class="adm-stat-box">
+                <span class="adm-stat__n">{{ expSinAsignar() }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_unassigned' | translate }}</span>
               </div>
-              <div class="stat-box">
-                <div class="stat-n">{{ expEnEstimacion() }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_in_progress' | translate }}</div>
+              <div class="adm-stat-box">
+                <span class="adm-stat__n">{{ expEnEstimacion() }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_in_progress' | translate }}</span>
               </div>
-              <div class="stat-box">
-                <div class="stat-n">{{ stats()!.estimaciones.total }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_completed' | translate }}</div>
+              <div class="adm-stat-box adm-stat-box--highlight">
+                <span class="adm-stat__n adm-stat__n--accent">{{ stats()!.estimaciones.total }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_completed' | translate }}</span>
               </div>
             </div>
 
             @if (stats()!.estimaciones.promedioMin) {
-              <div class="cost-band mb-3">
-                <span class="cost-band__lbl">{{ 'admin_dashboard.cost_avg' | translate }}</span>
-                <span class="cost-band__val">
+              <div class="adm-cost-band">
+                <span class="adm-cost-band__lbl">{{ 'admin_dashboard.cost_avg' | translate }}</span>
+                <span class="adm-cost-band__val">
                   {{ formatPrecio(stats()!.estimaciones.promedioMin) }}
                   @if (stats()!.estimaciones.promedioMax) {
                     &nbsp;–&nbsp;{{ formatPrecio(stats()!.estimaciones.promedioMax) }}
@@ -159,73 +183,80 @@
               </div>
             }
 
-            <div class="funnel">
-              <div class="funnel-row">
-                <div class="funnel-lbl">
-                  <span class="fdot fdot--exp-nuevo"></span>
-                  <span class="funnel-estado">{{ 'admin_dashboard.est_label_unassigned' | translate }}</span>
+            <div class="adm-funnel" role="list">
+              <div class="adm-funnel-row" role="listitem">
+                <div class="adm-funnel-label">
+                  <span class="adm-dot adm-dot--exp-nuevo" aria-hidden="true"></span>
+                  <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_unassigned' | translate }}</span>
                 </div>
-                <div class="funnel-track">
-                  <div class="funnel-fill funnel-fill--exp-nuevo"
+                <div class="adm-funnel-track">
+                  <div class="adm-funnel-fill adm-funnel-fill--exp-nuevo"
                        [style.width.%]="barWidth(expSinAsignar(), stats()!.expedientes.total)"></div>
                 </div>
-                <span class="funnel-num">{{ expSinAsignar() }}</span>
+                <span class="adm-funnel-num">{{ expSinAsignar() }}</span>
               </div>
-              <div class="funnel-row">
-                <div class="funnel-lbl">
-                  <span class="fdot fdot--exp-en_estimacion"></span>
-                  <span class="funnel-estado">{{ 'admin_dashboard.est_label_in_estimation' | translate }}</span>
+              <div class="adm-funnel-row" role="listitem">
+                <div class="adm-funnel-label">
+                  <span class="adm-dot adm-dot--exp-en_estimacion" aria-hidden="true"></span>
+                  <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_in_estimation' | translate }}</span>
                 </div>
-                <div class="funnel-track">
-                  <div class="funnel-fill funnel-fill--exp-en_estimacion"
+                <div class="adm-funnel-track">
+                  <div class="adm-funnel-fill adm-funnel-fill--exp-en_estimacion"
                        [style.width.%]="barWidth(expEnEstimacion(), stats()!.expedientes.total)"></div>
                 </div>
-                <span class="funnel-num">{{ expEnEstimacion() }}</span>
+                <span class="adm-funnel-num">{{ expEnEstimacion() }}</span>
               </div>
-              <div class="funnel-row">
-                <div class="funnel-lbl">
-                  <span class="fdot fdot--exp-contratado"></span>
-                  <span class="funnel-estado">{{ 'admin_dashboard.est_label_estimated' | translate }}</span>
+              <div class="adm-funnel-row" role="listitem">
+                <div class="adm-funnel-label">
+                  <span class="adm-dot adm-dot--exp-contratado" aria-hidden="true"></span>
+                  <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_estimated' | translate }}</span>
                 </div>
-                <div class="funnel-track">
-                  <div class="funnel-fill funnel-fill--exp-contratado"
+                <div class="adm-funnel-track">
+                  <div class="adm-funnel-fill adm-funnel-fill--exp-contratado"
                        [style.width.%]="barWidth(stats()!.estimaciones.total, stats()!.expedientes.total)"></div>
                 </div>
-                <span class="funnel-num">{{ stats()!.estimaciones.total }}</span>
+                <span class="adm-funnel-num">{{ stats()!.estimaciones.total }}</span>
               </div>
             </div>
 
           </div>
         </section>
 
-        <!-- ── Contratos ─────────────────────────────────────────────────── -->
-        <section class="panel panel--ctr">
-          <div class="panel-hdr panel-hdr--ctr">
-            <i class="bi bi-file-earmark-check"></i>
-            {{ 'admin_dashboard.panel_ctr' | translate }}
-            <span class="panel-hdr-badge">
-              {{ stats()!.contratos.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
-            </span>
+        <!-- ── CONTRATOS ─────────────────────────────────── -->
+        <section class="adm-panel adm-panel--ctr" aria-labelledby="panel-ctr-title">
+          <div class="adm-panel__header adm-panel__header--ctr">
+            <div class="adm-panel__header-icon adm-panel__header-icon--ctr" aria-hidden="true">
+              <i class="bi bi-file-earmark-check"></i>
+            </div>
+            <div class="adm-panel__header-text">
+              <h2 class="adm-panel__title" id="panel-ctr-title">
+                {{ 'admin_dashboard.panel_ctr' | translate }}
+              </h2>
+              <p class="adm-panel__subtitle">
+                {{ stats()!.contratos.total }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
+              </p>
+            </div>
           </div>
-          <div class="panel-body">
 
-            <div class="valor-box mb-4">
-              <div class="valor-box__num">{{ formatPrecio(stats()!.contratos.valorTotal) }}</div>
-              <div class="valor-box__lbl">{{ 'admin_dashboard.mini_contract_value' | translate }}</div>
+          <div class="adm-panel__body">
+
+            <div class="adm-valor-box">
+              <span class="adm-valor__n">{{ formatPrecio(stats()!.contratos.valorTotal) }}</span>
+              <span class="adm-valor__l">{{ 'admin_dashboard.mini_contract_value' | translate }}</span>
             </div>
 
-            <div class="funnel">
+            <div class="adm-funnel" role="list">
               @for (item of funnelCtr(); track item.estado) {
-                <div class="funnel-row">
-                  <div class="funnel-lbl">
-                    <span class="fdot fdot--ctr-{{ item.estado }}"></span>
-                    <span class="funnel-estado">{{ 'admin_dashboard.contract_' + item.estado | translate }}</span>
+                <div class="adm-funnel-row" role="listitem">
+                  <div class="adm-funnel-label">
+                    <span class="adm-dot adm-dot--ctr-{{ item.estado }}" aria-hidden="true"></span>
+                    <span class="adm-funnel-name">{{ 'admin_dashboard.contract_' + item.estado | translate }}</span>
                   </div>
-                  <div class="funnel-track">
-                    <div class="funnel-fill funnel-fill--ctr-{{ item.estado }}"
+                  <div class="adm-funnel-track">
+                    <div class="adm-funnel-fill adm-funnel-fill--ctr-{{ item.estado }}"
                          [style.width.%]="barWidth(item.count, stats()!.contratos.total)"></div>
                   </div>
-                  <span class="funnel-num">{{ item.count }}</span>
+                  <span class="adm-funnel-num">{{ item.count }}</span>
                 </div>
               }
             </div>
@@ -233,44 +264,51 @@
           </div>
         </section>
 
-        <!-- ── Constructores & Ofertas ───────────────────────────────────── -->
-        <section class="panel panel--con">
-          <div class="panel-hdr panel-hdr--con">
-            <i class="bi bi-person-workspace"></i>
-            {{ 'admin_dashboard.panel_con' | translate }}
-            <span class="panel-hdr-badge">
-              {{ stats()!.ofertas.constructoresActivos }} {{ 'admin_dashboard.panel_active_suffix' | translate }}
-            </span>
+        <!-- ── CONSTRUCTORES & OFERTAS ───────────────────── -->
+        <section class="adm-panel adm-panel--con" aria-labelledby="panel-con-title">
+          <div class="adm-panel__header adm-panel__header--con">
+            <div class="adm-panel__header-icon adm-panel__header-icon--con" aria-hidden="true">
+              <i class="bi bi-person-workspace"></i>
+            </div>
+            <div class="adm-panel__header-text">
+              <h2 class="adm-panel__title" id="panel-con-title">
+                {{ 'admin_dashboard.panel_con' | translate }}
+              </h2>
+              <p class="adm-panel__subtitle">
+                {{ stats()!.ofertas.constructoresActivos }} {{ 'admin_dashboard.panel_active_suffix' | translate }}
+              </p>
+            </div>
           </div>
-          <div class="panel-body">
 
-            <div class="stat-row mb-3">
-              <div class="stat-box">
-                <div class="stat-n">{{ stats()!.ofertas.constructoresActivos }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_builders' | translate }}</div>
+          <div class="adm-panel__body">
+
+            <div class="adm-stat-row">
+              <div class="adm-stat-box">
+                <span class="adm-stat__n">{{ stats()!.ofertas.constructoresActivos }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_builders' | translate }}</span>
               </div>
-              <div class="stat-box">
-                <div class="stat-n">{{ stats()!.ofertas.total }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_offers_total' | translate }}</div>
+              <div class="adm-stat-box">
+                <span class="adm-stat__n">{{ stats()!.ofertas.total }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_offers_total' | translate }}</span>
               </div>
-              <div class="stat-box">
-                <div class="stat-n">{{ stats()!.expedientes.porEstado['en_oferta'] ?? 0 }}</div>
-                <div class="stat-l">{{ 'admin_dashboard.mini_files_on_offer' | translate }}</div>
+              <div class="adm-stat-box">
+                <span class="adm-stat__n">{{ stats()!.expedientes.porEstado['en_oferta'] }}</span>
+                <span class="adm-stat__l">{{ 'admin_dashboard.mini_files_on_offer' | translate }}</span>
               </div>
             </div>
 
-            <div class="funnel">
+            <div class="adm-funnel" role="list">
               @for (item of funnelOfe(); track item.estado) {
-                <div class="funnel-row">
-                  <div class="funnel-lbl">
-                    <span class="fdot fdot--ofe-{{ item.estado }}"></span>
-                    <span class="funnel-estado">{{ 'state.' + item.estado | translate }}</span>
+                <div class="adm-funnel-row" role="listitem">
+                  <div class="adm-funnel-label">
+                    <span class="adm-dot adm-dot--ofe-{{ item.estado }}" aria-hidden="true"></span>
+                    <span class="adm-funnel-name">{{ 'state.' + item.estado | translate }}</span>
                   </div>
-                  <div class="funnel-track">
-                    <div class="funnel-fill funnel-fill--ofe-{{ item.estado }}"
+                  <div class="adm-funnel-track">
+                    <div class="adm-funnel-fill adm-funnel-fill--ofe-{{ item.estado }}"
                          [style.width.%]="barWidth(item.count, stats()!.ofertas.total)"></div>
                   </div>
-                  <span class="funnel-num">{{ item.count }}</span>
+                  <span class="adm-funnel-num">{{ item.count }}</span>
                 </div>
               }
             </div>
@@ -278,25 +316,29 @@
           </div>
         </section>
 
-      </div><!-- /dash-grid -->
+      </div><!-- /adm-grid -->
 
-      <!-- ── Timeline ───────────────────────────────────────────────────── -->
+      <!-- ── Timeline ──────────────────────────────────────── -->
       @defer (on viewport) {
-        <div class="tl-card">
+        <section class="adm-tl" aria-labelledby="tl-title">
 
-          <div class="tl-head">
-            <div>
-              <h5 class="tl-title">
+          <div class="adm-tl__head">
+            <div class="adm-tl__head-left">
+              <div class="adm-tl__head-icon" aria-hidden="true">
                 <i class="bi bi-clock-history"></i>
-                {{ 'admin_dashboard.tl_title' | translate }}
-              </h5>
-              <p class="tl-subtitle">{{ 'admin_dashboard.tl_subtitle' | translate }}</p>
+              </div>
+              <div>
+                <h2 class="adm-tl__title" id="tl-title">
+                  {{ 'admin_dashboard.tl_title' | translate }}
+                </h2>
+                <p class="adm-tl__subtitle">{{ 'admin_dashboard.tl_subtitle' | translate }}</p>
+              </div>
             </div>
-            <nav class="tl-filters" [attr.aria-label]="'admin_dashboard.tl_title' | translate">
+            <nav class="adm-tl__filters" [attr.aria-label]="'admin_dashboard.tl_title' | translate">
               @for (f of timelineFiltros; track f.key) {
-                <button class="tl-filter"
-                        [class.active]="filtroTimeline() === f.key"
-                        (click)="filtroTimeline.set(f.key)">
+                <button class="adm-tl-filter"
+                        [class.adm-tl-filter--active]="filtroTimeline() === f.key"
+                        (click)="setFiltroTimeline(f.key)">
                   {{ f.labelKey | translate }}
                 </button>
               }
@@ -304,40 +346,50 @@
           </div>
 
           @if (cargandoTimeline()) {
-            <div class="tl-empty">
-              <span class="spinner-border spinner-border-sm text-muted" role="status"></span>
+            <div class="adm-tl__empty">
+              <span class="adm-spinner" role="status" [attr.aria-label]="'common.loading' | translate"></span>
             </div>
+
           } @else if (timelineFiltrada().length === 0) {
-            <div class="tl-empty">
-              <i class="bi bi-clock-history tl-empty-icon"></i>
+            <div class="adm-tl__empty">
+              <div class="adm-tl__empty-icon" aria-hidden="true">
+                <i class="bi bi-clock-history"></i>
+              </div>
               <p>{{ 'admin_dashboard.tl_empty' | translate }}</p>
             </div>
+
           } @else {
-            <ul class="tl-list">
+            <ul class="adm-tl__list">
               @for (ev of timelinePaginada(); track ev.id) {
-                <li class="tl-event">
-                  <div class="tl-dot tl-dot--{{ ev.tipo }}">
+                <li class="adm-tl__event">
+
+                  <div class="adm-tl__dot adm-tl__dot--{{ ev.tipo }}" aria-hidden="true">
                     <i class="{{ tipoIcon(ev.tipo) }}"></i>
                   </div>
-                  <div class="tl-content">
-                    <div class="tl-desc">
-                      <span class="tl-ref">{{ ev.referencia }}</span>
+
+                  <div class="adm-tl__content">
+                    <p class="adm-tl__desc">
+                      <span class="adm-tl__ref">{{ ev.referencia }}</span>
                       {{ ev.descKey | translate }}
-                      @if (ev.precio) { · {{ ev.precio }} }
-                    </div>
-                    <div class="tl-meta">
-                      <i class="bi bi-person"></i>{{ ev.autor }}
-                      <span class="tl-sep">·</span>
-                      {{ formatTs(ev.timestamp) }}
-                    </div>
+                      @if (ev.precio) { <span class="adm-tl__price">· {{ ev.precio }}</span> }
+                    </p>
+                    <p class="adm-tl__meta">
+                      <i class="bi bi-person" aria-hidden="true"></i>
+                      {{ ev.autor }}
+                      <span class="adm-tl__sep" aria-hidden="true">·</span>
+                      <time>{{ formatTs(ev.timestamp) }}</time>
+                    </p>
                   </div>
-                  <span class="tl-badge tl-badge--{{ ev.tipo }}">
+
+                  <span class="adm-tl__badge adm-tl__badge--{{ ev.tipo }}">
                     {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
                   </span>
+
                 </li>
               }
             </ul>
-            <div class="tl-footer">
+
+            <div class="adm-tl__footer">
               <app-pagination
                 [total]="timelineFiltrada().length"
                 [page]="paginaTl()"
@@ -347,15 +399,16 @@
             </div>
           }
 
-        </div>
+        </section>
+
       } @placeholder {
-        <div class="tl-placeholder">
-          <span class="spinner-border spinner-border-sm text-muted" role="status"></span>
+        <div class="adm-tl-placeholder">
+          <span class="adm-spinner" role="status"></span>
           <span>{{ 'admin_dashboard.tl_loading' | translate }}</span>
         </div>
       }
 
     }<!-- /contenido -->
 
-  </div><!-- /dash-body -->
-</div><!-- /dash -->
+  </div><!-- /adm-body -->
+</div><!-- /adm-root -->

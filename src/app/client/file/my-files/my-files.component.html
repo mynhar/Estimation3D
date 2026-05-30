@@ -1,231 +1,259 @@
-<div class="container-xl py-5 px-3 px-md-4">
+<!-- Hallmark · macrostructure: Catalogue-Grid · genre: editorial (warm-paper)
+     design-system: design.md · designed-as-app
+     pre-emit critique: P5 H5 E5 S5 R5 V5
+     Change: filter-bar merged into header (eliminates duplicate stats);
+     grid → 4 cols at xl; empty states scoped to mf-empty. -->
+<div class="page-wrapper mf-root">
 
-  <!-- ── Encabezado editorial ──────────────────────────────────────────────── -->
-  <header class="mf-header mb-5">
-    <div class="mf-header__text">
-      <span class="eyebrow mb-2 d-block">{{ 'role.client' | translate }}</span>
-      <h1 class="mf-title">{{ 'file.my_files' | translate }}</h1>
-      @if (!cargando()) {
-        <div class="mf-stats d-flex align-items-center flex-wrap gap-2 mt-2">
-          @if (expedientes().length === 0) {
-            <span class="mf-stat-text">{{ 'file.no_files_yet' | translate }}</span>
-          } @else {
-            <span class="mf-stat-text">
-              {{ countTodos() }}&nbsp;{{ countTodos() !== 1 ? ('common.files_plural' | translate) : ('common.file_singular' | translate) }}
-            </span>
-            @if (countActivos() > 0) {
-              <span class="mf-pill mf-pill--gold">
-                <i class="bi bi-lightning-charge" aria-hidden="true"></i>
-                {{ countActivos() }} {{ 'file.active' | translate }}
-              </span>
-            }
-            @if (countFinalizados() > 0) {
-              <span class="mf-pill mf-pill--green">
-                <i class="bi bi-check2-circle" aria-hidden="true"></i>
-                {{ countFinalizados() }} {{ 'file.finished' | translate }}
-              </span>
-            }
-          }
-        </div>
-      }
+  <!-- ══════════════════════════════════════════════════════════
+       HEADER EDITORIAL — título + filtros en un solo bloque
+       ══════════════════════════════════════════════════════════ -->
+  <header class="mf-header">
+    <div class="mf-header__accent" aria-hidden="true"></div>
+
+    <!-- Fila superior: eyebrow + título + CTA -->
+    <div class="mf-header__top">
+      <div class="mf-header__info">
+        <p class="page-eyebrow">
+          <i class="bi bi-person-circle" aria-hidden="true"></i>
+          {{ 'role.client' | translate }}
+        </p>
+        <h1 class="mf-header__title">{{ 'file.my_files' | translate }}</h1>
+      </div>
+
+      <a routerLink="/client/file/create" class="btn btn-primary mf-header__cta">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        <span class="d-none d-sm-inline">{{ 'file.new_file' | translate }}</span>
+        <span class="d-sm-none">{{ 'common.new' | translate }}</span>
+      </a>
     </div>
-    <a routerLink="/client/file/create"
-       class="btn btn-primary btn-lg mf-header__cta flex-shrink-0">
-      <i class="bi bi-plus-lg" aria-hidden="true"></i>
-      <span class="d-none d-sm-inline">{{ 'file.new_file' | translate }}</span>
-      <span class="d-sm-none">{{ 'common.new' | translate }}</span>
-    </a>
+
+    <!-- Fila inferior: chips de filtro (actúan también como KPIs) -->
+    @if (!cargando() && expedientes().length > 0) {
+      <div class="mf-header__filter-row"
+           role="group"
+           [attr.aria-label]="'file.filter_label' | translate">
+        <div class="status-chips">
+
+          <button class="status-chip"
+                  [class.status-chip--active]="filtro() === 'todos'"
+                  (click)="filtro.set('todos')">
+            <i class="bi bi-grid-2x2" aria-hidden="true"></i>
+            {{ 'common.all' | translate }}
+            <span class="status-chip__count">{{ countTodos() }}</span>
+          </button>
+
+          <button class="status-chip mf-chip--activos"
+                  [class.status-chip--active]="filtro() === 'activos'"
+                  (click)="filtro.set('activos')">
+            <i class="bi bi-lightning-charge" aria-hidden="true"></i>
+            {{ 'file.active' | translate }}
+            <span class="status-chip__count">{{ countActivos() }}</span>
+          </button>
+
+          <button class="status-chip mf-chip--finalizados"
+                  [class.status-chip--active]="filtro() === 'finalizados'"
+                  (click)="filtro.set('finalizados')">
+            <i class="bi bi-check2-circle" aria-hidden="true"></i>
+            {{ 'file.finished' | translate }}
+            <span class="status-chip__count">{{ countFinalizados() }}</span>
+          </button>
+
+        </div>
+
+        @if (filtro() !== 'todos') {
+          <span class="mf-filter-info">
+            {{ 'common.showing' | translate }}
+            {{ expedientesFiltrados().length }}
+            {{ 'common.of' | translate }}
+            {{ countTodos() }}
+          </span>
+        }
+      </div>
+
+    } @else if (!cargando()) {
+      <!-- Sin expedientes: hint sutil debajo del título -->
+      <div class="mf-header__hint">
+        <span class="mf-stat-text">{{ 'file.no_files_yet' | translate }}</span>
+      </div>
+    }
+
   </header>
 
-  <!-- ── Skeleton de carga ──────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       SKELETON — shimmer de 8 cards (4 col en xl)
+       ══════════════════════════════════════════════════════════ -->
   @if (cargando()) {
-    <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3" aria-hidden="true">
-      @for (_ of [1,2,3,4,5,6]; track $index) {
+    <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4"
+         aria-hidden="true">
+      @for (_ of [1,2,3,4,5,6,7,8]; track $index) {
         <div class="col">
-          <div class="skel-card h-100">
-            <div class="skel skel-card__accent"></div>
-            <div class="skel-card__body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="skel skel--num"></div>
-                <div class="skel skel--badge-sm"></div>
+          <div class="mf-skel-card h-100">
+            <div class="mf-skel-card__bar"></div>
+            <div class="mf-skel-card__body">
+              <div class="mf-skel-row mf-skel-row--between">
+                <div class="mf-skel mf-skel--num"></div>
+                <div class="mf-skel mf-skel--badge"></div>
               </div>
-              <div class="skel skel--title mb-1"></div>
-              <div class="skel skel--title skel--title-short mb-3"></div>
-              <div class="skel skel--date mb-4"></div>
-              <hr class="skel-divider my-3">
-              <div class="skel-pipeline mb-3">
-                @for (dot of [1,2,3,4,5]; track dot) {
-                  <div class="skel skel--dot"></div>
-                  @if (dot < 5) { <div class="skel skel--connector"></div> }
+              <div class="mf-skel mf-skel--title"></div>
+              <div class="mf-skel mf-skel--title mf-skel--short"></div>
+              <div class="mf-skel mf-skel--date"></div>
+              <div class="mf-skel-divider"></div>
+              <div class="mf-skel-pipeline">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <div class="mf-skel mf-skel--dot"></div>
+                  @if (i < 5) { <div class="mf-skel mf-skel--line"></div> }
                 }
               </div>
-              <div class="skel skel--hint mb-4"></div>
-              <div class="skel skel--btn"></div>
+              <div class="mf-skel mf-skel--hint"></div>
+              <div class="mf-skel mf-skel--btn"></div>
             </div>
           </div>
         </div>
       }
     </div>
 
-  <!-- ── Sin expedientes ───────────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       SIN EXPEDIENTES
+       ══════════════════════════════════════════════════════════ -->
   } @else if (expedientes().length === 0) {
-    <div class="empty-panel">
-      <div class="empty-icon">
-        <i class="bi bi-folder2-open" aria-hidden="true"></i>
+    <div class="mf-empty">
+      <div class="mf-empty__rings" aria-hidden="true">
+        <div class="mf-empty__ring mf-empty__ring--3"></div>
+        <div class="mf-empty__ring mf-empty__ring--2"></div>
+        <div class="mf-empty__ring mf-empty__ring--1"></div>
+        <div class="mf-empty__icon">
+          <i class="bi bi-folder2-open"></i>
+        </div>
       </div>
-      <p class="empty-title">{{ 'file.no_files_title' | translate }}</p>
-      <p class="empty-text">{{ 'file.no_files_3d_text' | translate }}</p>
-      <a routerLink="/client/file/create" class="btn btn-primary px-5 mt-2">
-        <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>{{ 'dashboard_client.create_first' | translate }}
+      <div class="mf-empty__copy">
+        <h2 class="mf-empty__title">{{ 'file.no_files_title' | translate }}</h2>
+        <p class="mf-empty__desc">{{ 'file.no_files_3d_text' | translate }}</p>
+      </div>
+      <a routerLink="/client/file/create" class="btn btn-primary">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        {{ 'dashboard_client.create_first' | translate }}
       </a>
     </div>
 
-  <!-- ── Lista de expedientes ──────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════
+       GRID DE EXPEDIENTES
+       ══════════════════════════════════════════════════════════ -->
   } @else {
-
-    <!-- Barra de filtros -->
-    <div class="filter-bar mb-4" role="group" [attr.aria-label]="'file.filter_label' | translate">
-      <button class="chip-btn"
-              [class.chip-btn--active]="filtro() === 'todos'"
-              (click)="filtro.set('todos')">
-        <i class="bi bi-grid-2x2" aria-hidden="true"></i>
-        {{ 'common.all' | translate }}
-        <span class="chip-count">{{ countTodos() }}</span>
-      </button>
-      <button class="chip-btn chip-btn--gold"
-              [class.chip-btn--active]="filtro() === 'activos'"
-              (click)="filtro.set('activos')">
-        <i class="bi bi-lightning-charge" aria-hidden="true"></i>
-        {{ 'file.active' | translate }}
-        <span class="chip-count">{{ countActivos() }}</span>
-      </button>
-      <button class="chip-btn chip-btn--green"
-              [class.chip-btn--active]="filtro() === 'finalizados'"
-              (click)="filtro.set('finalizados')">
-        <i class="bi bi-check2-circle" aria-hidden="true"></i>
-        {{ 'file.finished' | translate }}
-        <span class="chip-count">{{ countFinalizados() }}</span>
-      </button>
-      @if (filtro() !== 'todos') {
-        <span class="filter-info ms-auto">
-          {{ 'common.showing' | translate }} {{ expedientesFiltrados().length }} {{ 'common.of' | translate }} {{ countTodos() }}
-        </span>
-      }
-    </div>
 
     <!-- Sin resultados con filtro activo -->
     @if (expedientesFiltrados().length === 0) {
-      <div class="empty-panel empty-panel--filter">
-        <div class="empty-icon empty-icon--muted">
-          <i class="bi bi-funnel" aria-hidden="true"></i>
+      <div class="mf-empty mf-empty--filter">
+        <div class="mf-empty__icon mf-empty__icon--sm">
+          <i class="bi bi-funnel"></i>
         </div>
-        <p class="empty-title">{{ 'common.no_results' | translate }}</p>
-        <p class="empty-text">{{ 'file.no_match' | translate }}</p>
-        <button class="btn btn-outline-secondary mt-2 px-4" (click)="filtro.set('todos')">
-          <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.clear_filter' | translate }}
+        <div class="mf-empty__copy">
+          <h2 class="mf-empty__title mf-empty__title--sm">{{ 'common.no_results' | translate }}</h2>
+          <p class="mf-empty__desc">{{ 'file.no_match' | translate }}</p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" (click)="filtro.set('todos')">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+          {{ 'common.clear_filter' | translate }}
         </button>
       </div>
 
-    <!-- Grid de expedientes -->
+    <!-- Grid 1 → 2 → 3 → 4 columnas -->
     } @else {
 
-      <div class="row g-3 row-cols-1 row-cols-md-2 row-cols-xl-3">
+      <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
         @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
-            <div class="file-card h-100"
-                 [class.file-card--cancelado]="exp.estado === 'cancelado'"
-                 [class.file-card--oferta]="exp.estado === 'en_oferta'"
-                 [style.--acento]="estadoCfg(exp.estado).color">
+            <article class="mf-card h-100"
+                     [class.mf-card--cancelado]="exp.estado === 'cancelado'"
+                     [class.mf-card--oferta]="exp.estado === 'en_oferta'"
+                     [style.--acento]="estadoCfg(exp.estado).color">
 
               <!-- Barra lateral de color de estado -->
-              <div class="file-accent" aria-hidden="true"></div>
+              <div class="mf-card__bar" aria-hidden="true"></div>
 
-              <div class="file-body d-flex flex-column">
+              <div class="mf-card__body">
 
-                <!-- Número + badge de estado -->
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                  <span class="file-num">{{ exp.numero }}</span>
-                  <span class="badge file-badge {{ estadoCfg(exp.estado).clase }}">
-                    <i class="bi {{ estadoCfg(exp.estado).icono }} me-1" aria-hidden="true"></i>
+                <!-- Número + badge -->
+                <div class="mf-card__head">
+                  <span class="mf-card__num">{{ exp.numero }}</span>
+                  <span class="status-badge {{ estadoCfg(exp.estado).clase }}">
+                    <i class="bi {{ estadoCfg(exp.estado).icono }}" aria-hidden="true"></i>
                     {{ ('state.' + exp.estado) | translate }}
                   </span>
                 </div>
 
-                <!-- Nombre del servicio — título editorial -->
-                <p class="file-servicio mb-2">{{ servicioNombre(exp.servicio) }}</p>
+                <!-- Servicio -->
+                <p class="mf-card__service">{{ servicioNombre(exp.servicio) }}</p>
 
                 <!-- Fecha de visita -->
-                <p class="file-fecha mb-0">
-                  <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+                <p class="mf-card__date">
+                  <i class="bi bi-calendar3" aria-hidden="true"></i>
                   {{ formatFecha(exp.fecha_visita) }}
                 </p>
 
-                <hr class="file-divider my-3" />
+                <div class="mf-card__divider" aria-hidden="true"></div>
 
                 <!-- Pipeline de progreso -->
                 @if (exp.estado !== 'cancelado') {
-                  <div class="pipeline mb-3"
+                  <div class="mf-pipeline"
                        role="list"
                        [attr.aria-label]="'file.pipeline_label' | translate">
                     @for (step of PIPELINE; let i = $index; track step.label) {
                       @if (i > 0) {
-                        <div class="pipeline__connector"
-                             [class.pipeline__connector--done]="connectorBlue(exp.estado, i)"
-                             aria-hidden="true">
-                        </div>
+                        <div class="mf-pipe-line"
+                             [class.mf-pipe-line--done]="connectorBlue(exp.estado, i)"
+                             aria-hidden="true"></div>
                       }
-                      <div class="pipeline__node" role="listitem"
-                           [class.pipeline__node--done]="dotActive(exp.estado, i) && !dotCurrent(exp.estado, i)"
-                           [class.pipeline__node--current]="dotCurrent(exp.estado, i)">
-                        <div class="pipeline__dot" aria-hidden="true">
+                      <div class="mf-pipe-node" role="listitem"
+                           [class.mf-pipe-node--done]="dotActive(exp.estado, i) && !dotCurrent(exp.estado, i)"
+                           [class.mf-pipe-node--current]="dotCurrent(exp.estado, i)">
+                        <div class="mf-pipe-dot" aria-hidden="true">
                           @if (dotActive(exp.estado, i) && !dotCurrent(exp.estado, i)) {
-                            <i class="bi bi-check-lg pipeline__check"></i>
+                            <i class="bi bi-check-lg mf-pipe-check"></i>
                           }
                         </div>
-                        <span class="pipeline__lbl">{{ step.label | translate }}</span>
+                        <span class="mf-pipe-lbl">{{ step.label | translate }}</span>
                       </div>
                     }
                   </div>
+
                 } @else {
-                  <div class="cancelado-tag mb-3">
-                    <i class="bi bi-x-circle me-2" aria-hidden="true"></i>
+                  <div class="mf-card__cancelled">
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
                     {{ 'file.cancelled' | translate }}
                   </div>
                 }
 
                 <!-- Hint contextual -->
-                <div class="file-hint mt-auto">
-                  <p class="file-hint__text mb-0">
-                    <i class="bi {{ estadoCfg(exp.estado).icono }} me-1" aria-hidden="true"
-                       [style.color]="estadoCfg(exp.estado).color"></i>
-                    {{ ('state_hint.' + exp.estado) | translate }}
-                  </p>
+                <div class="mf-card__hint">
+                  <i class="bi {{ estadoCfg(exp.estado).icono }}" aria-hidden="true"
+                     [style.color]="estadoCfg(exp.estado).color"></i>
+                  <p class="mf-card__hint-text">{{ ('state_hint.' + exp.estado) | translate }}</p>
                 </div>
 
-                <!-- Descripción breve (2 líneas) -->
+                <!-- Descripción breve -->
                 @if (exp.descripcion) {
-                  <p class="file-desc mt-2 mb-0">{{ exp.descripcion }}</p>
+                  <p class="mf-card__desc">{{ exp.descripcion }}</p>
                 }
 
                 <!-- Acciones -->
-                <div class="file-actions mt-3">
+                <div class="mf-card__actions">
                   <a [routerLink]="['/client/file/my-file', exp.id]"
-                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                     class="btn btn-outline-primary btn-sm mf-card__btn-main">
                     <i class="bi bi-folder2-open" aria-hidden="true"></i>
                     {{ 'file.see_file' | translate }}
                   </a>
 
                   @if (exp.estado === 'en_oferta') {
-                    <a routerLink="/client/offers-received"
-                       class="file-cta-oferta w-100 mt-2 d-flex align-items-center justify-content-center gap-2">
+                    <a routerLink="/client/offers-received" class="mf-card__btn-offer">
                       <i class="bi bi-eye" aria-hidden="true"></i>
                       {{ 'file.review_offers_received' | translate }}
-                      <i class="bi bi-arrow-right ms-auto" aria-hidden="true"></i>
+                      <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
                   }
 
                   @if (exp.estado === 'contratado') {
-                    <div class="contratado-tag mt-2 d-flex align-items-center justify-content-center gap-2 py-2">
+                    <div class="mf-card__contracted">
                       <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
                       {{ 'file.contracted_active' | translate }}
                     </div>
@@ -233,7 +261,7 @@
                 </div>
 
               </div>
-            </div>
+            </article>
           </div>
         }
       </div>

@@ -1,6 +1,6 @@
-<!-- ══════════════════════════════════════════════════════════════
+﻿<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      LIGHTBOX
-══════════════════════════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 @if (fotoAmpliada()) {
   <div class="lightbox-overlay" (click)="cerrarFoto()">
     <button class="lightbox-close" type="button" (click)="cerrarFoto()"
@@ -13,22 +13,22 @@
   </div>
 }
 
-<div class="container-xl py-4 py-lg-5 px-3 px-md-4 px-lg-5">
+<div class="page-wrapper">
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: CARGANDO
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   @if (cargando()) {
     <div class="page-loading">
       <div class="spinner-border spinner-border-sm me-2" style="color:var(--ds-gold)" role="status">
-        <span class="visually-hidden">Cargando…</span>
+        <span class="visually-hidden">Cargandoâ€¦</span>
       </div>
       <span class="text-ink-muted">{{ 'common.loading' | translate }}</span>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        ESTADO: NO ENCONTRADO
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else if (!detalle()) {
     <div class="empty-wrap">
       <div class="card card-premium text-center px-4 py-5">
@@ -47,12 +47,12 @@
       </div>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        CONTENIDO PRINCIPAL
-  ══════════════════════════════════════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   } @else {
 
-    <!-- ── Header ──────────────────────────────────────────────────────────── -->
+    <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <header class="card card-premium mb-4 fade-up"
             [class.header--accepted]="detalle()!.estado === 'aceptada'"
             [class.header--rejected]="detalle()!.estado === 'rechazada'">
@@ -99,15 +99,15 @@
       </div>
     </header>
 
-    <!-- ── Main grid ────────────────────────────────────────────────────────── -->
+    <!-- â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="row g-4 align-items-start">
 
-      <!-- ════════════════════════════════════════════════════════════
-           COLUMNA IZQUIERDA — Contexto del expediente + Media + Descripción + Adjuntos
-      ════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA IZQUIERDA â€” Contexto del expediente + Media + DescripciÃ³n + Adjuntos
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-7 d-flex flex-column gap-3 fade-up" style="--delay:80ms">
 
-        <!-- ── Contexto del expediente ──────────────────────────────────────── -->
+        <!-- â”€â”€ Contexto del expediente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card">
           <div class="info-card__header">
             <span class="section-heading">
@@ -130,7 +130,7 @@
             <div class="context-content">
               <p class="context-label">{{ 'common.address' | translate }}</p>
               <p class="context-value mb-1">{{ detalle()!.canton }}, {{ detalle()!.provincia }}</p>
-              <p class="context-sub mb-0">{{ detalle()!.distrito }} · {{ detalle()!.direccion }}</p>
+              <p class="context-sub mb-0">{{ detalle()!.distrito }} Â· {{ detalle()!.direccion }}</p>
               @if (detalle()!.referencia) {
                 <p class="context-sub mb-0">{{ detalle()!.referencia }}</p>
               }
@@ -145,8 +145,8 @@
               <p class="context-label">{{ 'my_offer.scheduled_visit' | translate }}</p>
               <p class="context-value mb-0">
                 {{ formatFecha(detalle()!.fecha_visita) }}
-                @if (formatHora(detalle()!.fecha_visita) !== '—') {
-                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita) }}</span>
+                @if (formatHora(detalle()!.fecha_visita) !== 'â€”') {
+                  <span class="context-time">Â· {{ formatHora(detalle()!.fecha_visita) }}</span>
                 }
               </p>
             </div>
@@ -160,8 +160,8 @@
               <p class="context-label">{{ 'my_offer.estimator_visit' | translate }}</p>
               <p class="context-value mb-0">
                 {{ formatFecha(detalle()!.fecha_visita_real) }}
-                @if (formatHora(detalle()!.fecha_visita_real) !== '—') {
-                  <span class="context-time">· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
+                @if (formatHora(detalle()!.fecha_visita_real) !== 'â€”') {
+                  <span class="context-time">Â· {{ formatHora(detalle()!.fecha_visita_real) }}</span>
                 }
               </p>
             </div>
@@ -179,7 +179,7 @@
           }
         </div>
 
-        <!-- ── Archivos del expediente ──────────────────────────────────────── -->
+        <!-- â”€â”€ Archivos del expediente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card overflow-hidden">
 
           <div class="media-tabs">
@@ -295,7 +295,7 @@
 
         </div>
 
-        <!-- ── Descripción del enfoque ──────────────────────────────────────── -->
+        <!-- â”€â”€ DescripciÃ³n del enfoque â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card">
           <div class="info-card__header">
             <span class="section-heading">
@@ -303,11 +303,11 @@
             </span>
           </div>
           <div class="p-4">
-            <p class="desc-text">{{ detalle()!.descripcion || '—' }}</p>
+            <p class="desc-text">{{ detalle()!.descripcion || 'â€”' }}</p>
           </div>
         </div>
 
-        <!-- ── Adjuntos de la oferta ────────────────────────────────────────── -->
+        <!-- â”€â”€ Adjuntos de la oferta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card overflow-hidden">
           <div class="info-card__header">
             <span class="section-heading">
@@ -391,13 +391,13 @@
 
       </div><!-- /col izquierda -->
 
-      <!-- ════════════════════════════════════════════════════════════
-           COLUMNA DERECHA — Resumen de la oferta (sticky)
-      ════════════════════════════════════════════════════════════ -->
+      <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+           COLUMNA DERECHA â€” Resumen de la oferta (sticky)
+      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
       <div class="col-lg-5 fade-up" style="--delay:160ms">
         <div class="sidebar-sticky">
 
-          <!-- ── Tarjeta de resumen ───────────────────────────────────────── -->
+          <!-- â”€â”€ Tarjeta de resumen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
           <div class="summary-card mb-3"
                [class.summary-card--accepted]="detalle()!.estado === 'aceptada'"
                [class.summary-card--rejected]="detalle()!.estado === 'rechazada'"
@@ -428,7 +428,7 @@
 
               <hr class="summary-divider">
 
-              <!-- Métricas clave -->
+              <!-- MÃ©tricas clave -->
               <div class="metrics-grid">
                 <div class="metric-item">
                   <span class="metric-item__label">
@@ -494,7 +494,7 @@
             </div>
           </div>
 
-          <!-- ── Acciones ─────────────────────────────────────────────────── -->
+          <!-- â”€â”€ Acciones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
           <div class="d-flex flex-column gap-2">
             @if (detalle()!.estado === 'pendiente') {
               <button class="btn-edit" type="button" (click)="editarOferta()">
@@ -515,3 +515,4 @@
   }
 
 </div>
+

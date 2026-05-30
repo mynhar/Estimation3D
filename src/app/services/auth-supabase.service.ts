@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
 
 export type PerfilCache = {
@@ -16,40 +17,45 @@ export type PerfilCache = {
 })
 export class AuthSupabaseService {
   private supabase: SupabaseClient<Database>;
-  private userSubject = new BehaviorSubject<User | null>(null);
-  private initializedSubject = new BehaviorSubject<boolean>(false);
-  private perfilEditadoSubject  = new Subject<{ nombre: string; apellido: string }>();
-  private avatarActualizadoSubject = new Subject<string>();
+  private router = inject(Router);
+
+  // Signals — fuente de verdad del estado de autenticación
+  private userSig        = signal<User | null>(null);
+  private initializedSig = signal<boolean>(false);
+  private rolSig         = signal<RolUsuario | null | undefined>(undefined);
+  private perfilCacheSig = signal<PerfilCache | null>(null);
 
   // Caché de rol y perfil — evita re-queries en cada navegación guardada
   private lastUserId: string | null = null;
-  private rolSubject         = new BehaviorSubject<RolUsuario | null | undefined>(undefined);
-  private perfilCacheSubject = new BehaviorSubject<PerfilCache | null>(null);
 
-  user$        = this.userSubject.asObservable();
-  initialized$ = this.initializedSubject.asObservable();
-  rol$         = this.rolSubject.asObservable();
-  perfilCache$ = this.perfilCacheSubject.asObservable();
+  // Subjects para eventos puntuales (no son estado, no tienen valor inicial)
+  private perfilEditadoSubject     = new Subject<{ nombre: string; apellido: string }>();
+  private avatarActualizadoSubject = new Subject<string>();
 
-  // Mantenidos para compatibilidad con componentes que los usen directamente
-  perfilEditado$      = this.perfilEditadoSubject.asObservable();
-  avatarActualizado$  = this.avatarActualizadoSubject.asObservable();
+  // Observables públicos derivados de signals (compatibilidad con guards y componentes)
+  user$        = toObservable(this.userSig);
+  initialized$ = toObservable(this.initializedSig);
+  rol$         = toObservable(this.rolSig);
+  perfilCache$ = toObservable(this.perfilCacheSig);
+
+  perfilEditado$     = this.perfilEditadoSubject.asObservable();
+  avatarActualizado$ = this.avatarActualizadoSubject.asObservable();
 
   notificarEdicionPerfil(nombre: string, apellido: string): void {
     this.perfilEditadoSubject.next({ nombre, apellido });
-    const current = this.perfilCacheSubject.value;
-    if (current) this.perfilCacheSubject.next({ ...current, nombre, apellido });
+    const current = this.perfilCacheSig();
+    if (current) this.perfilCacheSig.set({ ...current, nombre, apellido });
   }
 
   notificarEdicionAvatar(url: string): void {
     this.avatarActualizadoSubject.next(url);
-    const current = this.perfilCacheSubject.value;
-    if (current) this.perfilCacheSubject.next({ ...current, avatar_url: url || null });
+    const current = this.perfilCacheSig();
+    if (current) this.perfilCacheSig.set({ ...current, avatar_url: url || null });
   }
 
   get client(): SupabaseClient<Database> { return this.supabase; }
 
-  constructor(private router: Router) {
+  constructor() {
     this.supabase = createClient<Database>(
       environment.supabase.url,
       environment.supabase.anonKey,
@@ -64,17 +70,17 @@ export class AuthSupabaseService {
 
     this.supabase.auth.onAuthStateChange((event, session) => {
       const user = session?.user ?? null;
-      this.userSubject.next(user);
+      this.userSig.set(user);
 
-      if (!this.initializedSubject.value) {
-        this.initializedSubject.next(true);
+      if (!this.initializedSig()) {
+        this.initializedSig.set(true);
       }
 
       if (user) {
         // Solo re-carga si cambia el usuario (evita re-queries en TOKEN_REFRESHED, etc.)
         if (user.id !== this.lastUserId) {
           this.lastUserId = user.id;
-          this.rolSubject.next(undefined); // señal de "cargando"
+          this.rolSig.set(undefined); // señal de "cargando"
           this.cargarPerfilCache(user.id);
         }
 
@@ -89,8 +95,8 @@ export class AuthSupabaseService {
         }
       } else {
         this.lastUserId = null;
-        this.rolSubject.next(null);
-        this.perfilCacheSubject.next(null);
+        this.rolSig.set(null);
+        this.perfilCacheSig.set(null);
       }
     });
   }
@@ -111,12 +117,12 @@ export class AuthSupabaseService {
       } else {
         console.error('[Auth] cargarPerfilCache error:', error.message);
       }
-      this.rolSubject.next(null);
+      this.rolSig.set(null);
       return;
     }
 
-    this.rolSubject.next(data?.rol ?? null);
-    this.perfilCacheSubject.next({
+    this.rolSig.set(data?.rol ?? null);
+    this.perfilCacheSig.set({
       nombre:     data?.nombre     ?? '',
       apellido:   data?.apellido   ?? '',
       avatar_url: data?.avatar_url ?? null,

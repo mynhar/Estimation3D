@@ -1,0 +1,34 @@
+[
+  {
+    "date": "2026-05-29",
+    "macrostructure": "Workbench (app-shell · 8/4 detail page)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/file/my-file · rediseño · SVG Lucide, Gate-57 tour chrome fix, @switch dynamic icons, WCAG offer-cta, photo overlay"
+  },
+  {
+    "date": "2026-05-29",
+    "macrostructure": "Workbench (app-shell · full-width card list)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/contract/list · rediseño · SVG Lucide, WCAG btn-sign fix, conditions dl 2-col, border-radius tokens"
+  },
+  {
+    "date": "2026-05-29",
+    "macrostructure": "Workbench (app-shell · 8/4 split)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/builder-offer · rediseño · icons SVG Lucide, btn-accept WCAG fix, offers grid auto-fit, photo grid 100px, meta-grid 2col"
+  },
+  {
+    "date": "2026-05-29",
+    "macrostructure": "Workbench (app-shell)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/offers-received · rediseño · dos patrones: cards pendientes + rows gestionados"
+  }
+]

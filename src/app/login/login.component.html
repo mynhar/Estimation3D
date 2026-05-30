@@ -1,32 +1,63 @@
 <div class="lg-root">
 
-  <!-- ── Panel izquierdo ──────────────────────────────────────────────────── -->
-  <aside class="lg-side">
+  <!-- ── Panel izquierdo (oscuro — editorial) ──────────────────────────────── -->
+  <aside class="lg-side" aria-label="Información de la plataforma">
+
+    <!-- Fondo punteado decorativo -->
+    <div class="lg-side__bg" aria-hidden="true"></div>
 
     <div class="lg-side__body">
 
-      <div class="lg-side__brand">
-        <span class="lg-logo">Estimation3D</span>
-        <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+      <!-- Brand -->
+      <div class="lg-brand">
+        <div class="lg-brand__icon" aria-hidden="true">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+          <span class="lg-logo">Estimation3D</span>
+          <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+        </div>
       </div>
 
-      <ul class="lg-points">
+      <!-- Headline editorial -->
+      <div class="lg-side__headline">
+        <h2 class="lg-side__title">
+          {{ 'landing.title' | translate }}
+        </h2>
+        <p class="lg-side__lead">{{ 'landing.subtitle' | translate }}</p>
+      </div>
+
+      <!-- Trust points -->
+      <ul class="lg-points" role="list">
         <li class="lg-point">
-          <span class="lg-point__icon"><i class="bi bi-box" aria-hidden="true"></i></span>
+          <span class="lg-point__icon" aria-hidden="true">
+            <i class="bi bi-box"></i>
+          </span>
           <span>{{ 'landing.badge_3d' | translate }}</span>
         </li>
         <li class="lg-point">
-          <span class="lg-point__icon"><i class="bi bi-patch-check" aria-hidden="true"></i></span>
+          <span class="lg-point__icon" aria-hidden="true">
+            <i class="bi bi-patch-check"></i>
+          </span>
           <span>{{ 'landing.badge_verified' | translate }}</span>
         </li>
         <li class="lg-point">
-          <span class="lg-point__icon"><i class="bi bi-gift" aria-hidden="true"></i></span>
+          <span class="lg-point__icon" aria-hidden="true">
+            <i class="bi bi-globe"></i>
+          </span>
+          <span>FR · EN · ES</span>
+        </li>
+        <li class="lg-point">
+          <span class="lg-point__icon" aria-hidden="true">
+            <i class="bi bi-gift"></i>
+          </span>
           <span>{{ 'landing.badge_free' | translate }}</span>
         </li>
       </ul>
 
     </div>
 
+    <!-- Decoración: anillos dorados en la esquina -->
     <div class="lg-side__deco" aria-hidden="true">
       <div class="lg-deco-ring lg-deco-ring--1"></div>
       <div class="lg-deco-ring lg-deco-ring--2"></div>
@@ -35,7 +66,7 @@
 
   </aside>
 
-  <!-- ── Panel derecho ────────────────────────────────────────────────────── -->
+  <!-- ── Panel derecho (formulario) ──────────────────────────────────────── -->
   <main class="lg-panel">
 
     <!-- Barra superior -->
@@ -58,8 +89,31 @@
 
       <!-- Logo visible solo en móvil -->
       <div class="lg-mobile-brand">
-        <span class="lg-logo">Estimation3D</span>
-        <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+        <div class="lg-mobile-brand__icon" aria-hidden="true">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+          <span class="lg-logo">Estimation3D</span>
+          <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Encabezado del formulario -->
+      <div class="lg-form-head">
+        <h1 class="lg-form-title">
+          @if (vista() === 'login') {
+            {{ 'auth.sign_in' | translate }}
+          } @else {
+            {{ 'auth.sign_up' | translate }}
+          }
+        </h1>
+        <p class="lg-form-sub">
+          @if (vista() === 'login') {
+            {{ 'landing.eyebrow' | translate }}
+          } @else {
+            {{ 'landing.badge_free' | translate }}
+          }
+        </p>
       </div>
 
       <!-- Tabs -->
@@ -68,12 +122,14 @@
                 [class.lg-tab--active]="vista() === 'login'"
                 [attr.aria-selected]="vista() === 'login'"
                 (click)="cambiarVista('login')">
+          <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
           {{ 'auth.sign_in' | translate }}
         </button>
         <button type="button" role="tab" class="lg-tab"
                 [class.lg-tab--active]="vista() === 'registro'"
                 [attr.aria-selected]="vista() === 'registro'"
                 (click)="cambiarVista('registro')">
+          <i class="bi bi-person-plus" aria-hidden="true"></i>
           {{ 'auth.sign_up' | translate }}
         </button>
       </div>
@@ -81,27 +137,37 @@
       <!-- ═══ FORMULARIO LOGIN ═══════════════════════════════════════════════ -->
       @if (vista() === 'login') {
 
-        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate class="lg-form">
 
           <div class="lg-field">
-            <label class="lg-field__label">{{ 'common.email' | translate }}</label>
-            <input type="email" class="lg-field__input"
-                   formControlName="email"
-                   [placeholder]="'auth.email_placeholder' | translate"
-                   autocomplete="email"
-                   [class.lg-field__input--error]="campoInvalido(loginForm, 'email')">
+            <label class="lg-field__label" [for]="'login-email'">
+              {{ 'common.email' | translate }}
+            </label>
+            <div class="lg-field__input-wrap">
+              <i class="bi bi-envelope lg-field__icon" aria-hidden="true"></i>
+              <input id="login-email" type="email" class="lg-field__input lg-field__input--icon"
+                     formControlName="email"
+                     [placeholder]="'auth.email_placeholder' | translate"
+                     autocomplete="email"
+                     [class.lg-field__input--error]="campoInvalido(loginForm, 'email')">
+            </div>
           </div>
 
           <div class="lg-field">
-            <label class="lg-field__label">{{ 'common.password' | translate }}</label>
+            <label class="lg-field__label" [for]="'login-pw'">
+              {{ 'common.password' | translate }}
+            </label>
             <div class="lg-field__wrap">
-              <input [type]="mostrarPassword ? 'text' : 'password'"
-                     class="lg-field__input lg-field__input--pw"
+              <i class="bi bi-lock lg-field__icon" aria-hidden="true"></i>
+              <input id="login-pw"
+                     [type]="mostrarPassword ? 'text' : 'password'"
+                     class="lg-field__input lg-field__input--pw lg-field__input--icon"
                      formControlName="password"
                      placeholder="••••••••"
                      autocomplete="current-password"
                      [class.lg-field__input--error]="campoInvalido(loginForm, 'password')">
               <button type="button" class="lg-field__eye"
+                      [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
                       (click)="mostrarPassword = !mostrarPassword">
                 <i class="bi" aria-hidden="true"
                    [class.bi-eye]="!mostrarPassword"
@@ -111,7 +177,7 @@
           </div>
 
           @if (errorLogin()) {
-            <div class="lg-alert">
+            <div class="lg-alert" role="alert">
               <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
               {{ errorLogin() | translate }}
             </div>
@@ -129,8 +195,8 @@
           <span>{{ 'auth.or_divider' | translate }}</span>
         </div>
 
-        <button type="button" class="lg-btn lg-btn--outline" (click)="loginWithGoogle()">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
+        <button type="button" class="lg-btn lg-btn--google" (click)="loginWithGoogle()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18" aria-hidden="true" focusable="false">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
@@ -146,71 +212,89 @@
 
         @if (registroExitoso()) {
 
-          <div class="lg-success">
+          <div class="lg-success" role="status">
             <div class="lg-success__icon">
               <i class="bi bi-check-lg" aria-hidden="true"></i>
             </div>
-            <p class="lg-success__text">{{ 'auth.register_success' | translate }}</p>
+            <h2 class="lg-success__title">{{ 'auth.register_success' | translate }}</h2>
           </div>
 
         } @else {
 
-          <form [formGroup]="registroForm" (ngSubmit)="onRegistro()" novalidate>
+          <form [formGroup]="registroForm" (ngSubmit)="onRegistro()" novalidate class="lg-form">
 
             <div class="lg-field-row">
               <div class="lg-field">
                 <label class="lg-field__label">
-                  {{ 'common.name' | translate }} <span class="lg-req">*</span>
+                  {{ 'common.name' | translate }} <span class="lg-req" aria-hidden="true">*</span>
                 </label>
                 <input type="text" class="lg-field__input"
                        formControlName="nombre"
                        [placeholder]="'profile.name_placeholder' | translate"
-                       [class.lg-field__input--error]="campoInvalido(registroForm, 'nombre')">
+                       [class.lg-field__input--error]="campoInvalido(registroForm, 'nombre')"
+                       [attr.aria-invalid]="campoInvalido(registroForm, 'nombre')">
                 @if (campoInvalido(registroForm, 'nombre')) {
-                  <span class="lg-field__error">{{ 'admin_users.name_required' | translate }}</span>
+                  <span class="lg-field__error" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    {{ 'admin_users.name_required' | translate }}
+                  </span>
                 }
               </div>
 
               <div class="lg-field">
                 <label class="lg-field__label">
-                  {{ 'common.lastname' | translate }} <span class="lg-req">*</span>
+                  {{ 'common.lastname' | translate }} <span class="lg-req" aria-hidden="true">*</span>
                 </label>
                 <input type="text" class="lg-field__input"
                        formControlName="apellido"
                        [placeholder]="'profile.lastname_placeholder' | translate"
-                       [class.lg-field__input--error]="campoInvalido(registroForm, 'apellido')">
+                       [class.lg-field__input--error]="campoInvalido(registroForm, 'apellido')"
+                       [attr.aria-invalid]="campoInvalido(registroForm, 'apellido')">
                 @if (campoInvalido(registroForm, 'apellido')) {
-                  <span class="lg-field__error">{{ 'admin_users.lastname_required' | translate }}</span>
+                  <span class="lg-field__error" role="alert">
+                    <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                    {{ 'admin_users.lastname_required' | translate }}
+                  </span>
                 }
               </div>
             </div>
 
             <div class="lg-field">
               <label class="lg-field__label">
-                {{ 'common.email' | translate }} <span class="lg-req">*</span>
+                {{ 'common.email' | translate }} <span class="lg-req" aria-hidden="true">*</span>
               </label>
-              <input type="email" class="lg-field__input"
-                     formControlName="email"
-                     [placeholder]="'auth.email_placeholder' | translate"
-                     autocomplete="email"
-                     [class.lg-field__input--error]="campoInvalido(registroForm, 'email')">
+              <div class="lg-field__input-wrap">
+                <i class="bi bi-envelope lg-field__icon" aria-hidden="true"></i>
+                <input type="email" class="lg-field__input lg-field__input--icon"
+                       formControlName="email"
+                       [placeholder]="'auth.email_placeholder' | translate"
+                       autocomplete="email"
+                       [class.lg-field__input--error]="campoInvalido(registroForm, 'email')"
+                       [attr.aria-invalid]="campoInvalido(registroForm, 'email')">
+              </div>
               @if (campoInvalido(registroForm, 'email')) {
-                <span class="lg-field__error">{{ 'admin_users.email_invalid' | translate }}</span>
+                <span class="lg-field__error" role="alert">
+                  <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                  {{ 'admin_users.email_invalid' | translate }}
+                </span>
               }
             </div>
 
             <div class="lg-field">
               <label class="lg-field__label">
-                {{ 'common.password' | translate }} <span class="lg-req">*</span>
+                {{ 'common.password' | translate }} <span class="lg-req" aria-hidden="true">*</span>
               </label>
               <div class="lg-field__wrap">
+                <i class="bi bi-lock lg-field__icon" aria-hidden="true"></i>
                 <input [type]="mostrarPassword ? 'text' : 'password'"
-                       class="lg-field__input lg-field__input--pw"
+                       class="lg-field__input lg-field__input--pw lg-field__input--icon"
                        formControlName="password"
                        [placeholder]="'validation.password_hint' | translate"
                        autocomplete="new-password"
-                       [class.lg-field__input--error]="campoInvalido(registroForm, 'password')">
+                       [class.lg-field__input--error]="campoInvalido(registroForm, 'password')"
+                       [attr.aria-invalid]="campoInvalido(registroForm, 'password')">
                 <button type="button" class="lg-field__eye"
+                        [attr.aria-label]="mostrarPassword ? 'Ocultar' : 'Mostrar'"
                         (click)="mostrarPassword = !mostrarPassword">
                   <i class="bi" aria-hidden="true"
                      [class.bi-eye]="!mostrarPassword"
@@ -218,37 +302,46 @@
                 </button>
               </div>
               @if (campoInvalido(registroForm, 'password')) {
-                <ul class="lg-pw-rules">
-                  @if (fr['password'].errors?.['pwMin'])     { <li>{{ 'validation.pw_min'     | translate }}</li> }
-                  @if (fr['password'].errors?.['pwUpper'])   { <li>{{ 'validation.pw_upper'   | translate }}</li> }
-                  @if (fr['password'].errors?.['pwLower'])   { <li>{{ 'validation.pw_lower'   | translate }}</li> }
-                  @if (fr['password'].errors?.['pwDigit'])   { <li>{{ 'validation.pw_digit'   | translate }}</li> }
-                  @if (fr['password'].errors?.['pwSpecial']) { <li>{{ 'validation.pw_special' | translate }}</li> }
+                <ul class="lg-pw-rules" role="list" aria-label="Requisitos de contraseña">
+                  @if (fr['password'].errors?.['pwMin'])     { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_min'     | translate }}</li> }
+                  @if (fr['password'].errors?.['pwUpper'])   { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_upper'   | translate }}</li> }
+                  @if (fr['password'].errors?.['pwLower'])   { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_lower'   | translate }}</li> }
+                  @if (fr['password'].errors?.['pwDigit'])   { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_digit'   | translate }}</li> }
+                  @if (fr['password'].errors?.['pwSpecial']) { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_special' | translate }}</li> }
                 </ul>
               }
             </div>
 
             <div class="lg-field">
               <label class="lg-field__label">
-                {{ 'common.phone' | translate }} <span class="lg-req">*</span>
+                {{ 'common.phone' | translate }} <span class="lg-req" aria-hidden="true">*</span>
               </label>
-              <input type="tel" class="lg-field__input"
-                     formControlName="telefono"
-                     placeholder="+1 514-000-0000"
-                     [class.lg-field__input--error]="campoInvalido(registroForm, 'telefono')">
+              <div class="lg-field__input-wrap">
+                <i class="bi bi-telephone lg-field__icon" aria-hidden="true"></i>
+                <input type="tel" class="lg-field__input lg-field__input--icon"
+                       formControlName="telefono"
+                       placeholder="+1 514-000-0000"
+                       [class.lg-field__input--error]="campoInvalido(registroForm, 'telefono')"
+                       [attr.aria-invalid]="campoInvalido(registroForm, 'telefono')">
+              </div>
               @if (campoInvalido(registroForm, 'telefono')) {
-                <span class="lg-field__error">{{ 'auth.phone_required' | translate }}</span>
+                <span class="lg-field__error" role="alert">
+                  <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+                  {{ 'auth.phone_required' | translate }}
+                </span>
               }
             </div>
 
             <div class="lg-field">
               <label class="lg-field__label">{{ 'auth.role_label' | translate }}</label>
-              <input type="text" class="lg-field__input lg-field__input--readonly"
-                     [value]="('role.' + rolRegistro()) | translate" readonly>
+              <div class="lg-role-display">
+                <i class="bi bi-person-badge lg-role-display__icon" aria-hidden="true"></i>
+                <span>{{ ('role.' + rolRegistro()) | translate }}</span>
+              </div>
             </div>
 
             @if (errorRegistro()) {
-              <div class="lg-alert">
+              <div class="lg-alert" role="alert">
                 <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
                 {{ errorRegistro() | translate }}
               </div>

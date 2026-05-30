@@ -16,20 +16,60 @@ Guía de diseño y código para este proyecto. Cualquier UI nueva o modificada d
 
 ## 2. Identidad visual
 
-### Paleta obligatoria
+### Paleta completa
+
+La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan **todos** los tokens de color disponibles. Usa siempre el token, nunca el hex suelto.
+
+**Superficies**
 
 | Token CSS | Hex | Uso |
 |-----------|-----|-----|
 | `--ds-bg` | `#F5F3EE` | Fondo principal de la app (beige cálido) |
 | `--ds-bg-alt` | `#EFEDE6` | Secciones alternas |
 | `--ds-surface` | `#FBFAF6` | Tarjetas, paneles (crema) |
+| `--ds-surface-elevated` | `#FFFFFF` | Modales, overlays (máxima elevación) |
+| `--ds-overlay` | `rgba(26,26,26,0.4)` | Backdrops detrás de modales |
+
+**Tinta / Texto**
+
+| Token CSS | Hex | Uso |
+|-----------|-----|-----|
 | `--ds-ink` | `#1A1A1A` | Texto principal |
 | `--ds-ink-secondary` | `#4A4A4A` | Texto secundario |
-| `--ds-ink-muted` | `#7A7770` | Captions, hints |
-| `--ds-gold` | `#D4B96E` | Acento dorado (premium) |
+| `--ds-ink-muted` | `#7A7770` | Texto terciario, captions, hints |
+| `--ds-ink-on-accent` | `#1A1A1A` | Texto sobre fondo dorado |
+| `--ds-ink-inverse` | `#FBFAF6` | Texto sobre fondos oscuros (raro) |
+
+**Acento dorado (premium)**
+
+| Token CSS | Hex | Uso |
+|-----------|-----|-----|
+| `--ds-gold` | `#D4B96E` | Dorado principal: CTAs, focus, realces |
 | `--ds-gold-hover` | `#C2A85C` | Hover de botones dorados |
-| `--ds-gold-active` | `#B0964A` | Estados activos, enlaces hover |
-| `--ds-border` | `#E8E5DC` | Bordes estándar |
+| `--ds-gold-active` | `#B0964A` | Estados activos/pressed, enlaces hover |
+| `--ds-gold-soft` | `#EBD9A8` | Fondos sutiles, highlights |
+| `--ds-gold-faint` | `#F7EFD9` | Backgrounds muy suaves |
+
+**Bordes y separadores**
+
+| Token CSS | Hex | Uso |
+|-----------|-----|-----|
+| `--ds-border` | `#E8E5DC` | Borde estándar |
+| `--ds-border-strong` | `#D4D0C2` | Bordes de énfasis |
+| `--ds-border-subtle` | `#EFEDE6` | Separadores muy sutiles |
+
+**Estados semánticos** (en armonía con la paleta, NO usar los de Bootstrap)
+
+| Token CSS | Hex | Uso |
+|-----------|-----|-----|
+| `--ds-success` | `#5B7A4F` | Verde oliva (éxito) |
+| `--ds-success-soft` | `#E4ECDF` | Fondo de alertas de éxito |
+| `--ds-warning` | `#B8862E` | Mostaza (advertencia) |
+| `--ds-warning-soft` | `#F4E8CC` | Fondo de advertencias |
+| `--ds-danger` | `#A14545` | Borgoña (error) |
+| `--ds-danger-soft` | `#EFD9D9` | Fondo de errores |
+| `--ds-info` | `#4A6B7A` | Azul pizarra (información) |
+| `--ds-info-soft` | `#DBE5E9` | Fondo de avisos informativos |
 
 ### Reglas no negociables de color
 
@@ -43,16 +83,57 @@ Guía de diseño y código para este proyecto. Cualquier UI nueva o modificada d
 
 - **Títulos** (`h1`–`h6`, `.display-*`, `.card-title`): Fraunces serif
 - **Cuerpo** (texto general, botones, formularios): DM Sans
+- **Monoespaciada** (código, datos tabulares): DM Mono (`--ds-font-mono`)
 - **NUNCA**: Inter, Roboto, Arial, Open Sans, system fonts como principales
 - **Eyebrow** (etiquetas pequeñas sobre títulos): DM Sans uppercase, `letter-spacing: 0.18em`, dorado activo
 
+**Familias**
+
+| Token CSS | Valor | Uso |
+|-----------|-------|-----|
+| `--ds-font-display` | `'Fraunces', ...serif` | Títulos |
+| `--ds-font-body` | `'DM Sans', ...sans-serif` | Cuerpo, UI |
+| `--ds-font-mono` | `'DM Mono', ...monospace` | Código, datos |
+
+**Escala tipográfica** (base 16px)
+
+| Token CSS | Tamaño | px | Uso típico |
+|-----------|--------|----|----|
+| `--ds-text-2xs` | `0.6875rem` | 11px | Eyebrows, labels |
+| `--ds-text-xs` | `0.75rem` | 12px | Captions |
+| `--ds-text-sm` | `0.875rem` | 14px | Texto auxiliar |
+| `--ds-text-base` | `1rem` | 16px | Cuerpo |
+| `--ds-text-lg` | `1.125rem` | 18px | Lead |
+| `--ds-text-xl` | `1.375rem` | 22px | h5 |
+| `--ds-text-2xl` | `1.75rem` | 28px | h4, card-title |
+| `--ds-text-3xl` | `2.25rem` | 36px | h3 |
+| `--ds-text-4xl` | `3rem` | 48px | h2 |
+| `--ds-text-5xl` | `4rem` | 64px | h1 |
+| `--ds-text-display` | `5.5rem` | 88px | Hero |
+
+**Pesos**: `--ds-weight-regular` (400) · `--ds-weight-medium` (500) · `--ds-weight-semibold` (600) · `--ds-weight-bold` (700)
+
+**Interlineado**: `--ds-leading-tight` (1.1, títulos) · `--ds-leading-snug` (1.25) · `--ds-leading-normal` (1.5, cuerpo) · `--ds-leading-relaxed` (1.65)
+
+**Tracking**: `--ds-tracking-tight` (-0.02em) · `--ds-tracking-normal` (0) · `--ds-tracking-wide` (0.04em) · `--ds-tracking-widest` (0.18em, eyebrows)
+
 ### Bordes y radios
 
-- **Botones e inputs**: `4-6px` (`var(--ds-radius-md)`)
+- **Botones e inputs**: `6px` (`var(--ds-radius-md)`)
 - **Cards**: `8px` (`var(--ds-radius-lg)`)
 - **Modales**: `12px` (`var(--ds-radius-xl)`)
 - **Tags, chips, badges**: pill (`var(--ds-radius-pill)`)
 - **PROHIBIDO**: radios mayores a 12px en elementos UI (no botones blob, no cards muy redondeadas)
+
+| Token CSS | Valor | Uso |
+|-----------|-------|-----|
+| `--ds-radius-none` | `0` | Sin redondeo |
+| `--ds-radius-sm` | `4px` | Elementos compactos |
+| `--ds-radius-md` | `6px` | Botones, inputs (default) |
+| `--ds-radius-lg` | `8px` | Cards |
+| `--ds-radius-xl` | `12px` | Modales (máximo en UI) |
+| `--ds-radius-pill` | `999px` | Tags, chips, badges |
+| `--ds-radius-circle` | `50%` | Avatares |
 
 ### Espaciado
 
@@ -60,6 +141,16 @@ Guía de diseño y código para este proyecto. Cualquier UI nueva o modificada d
 - Secciones: `padding-block: 4rem` mínimo, `6-8rem` en hero o secciones destacadas.
 - Cards: `padding: 2rem` mínimo en body.
 - Usa los tokens `--ds-space-*` (escala de 4px hasta 128px).
+
+| Token | px | · | Token | px |
+|-------|----|----|-------|----|
+| `--ds-space-0` | 0 | · | `--ds-space-7` | 40px |
+| `--ds-space-1` | 4px | · | `--ds-space-8` | 48px |
+| `--ds-space-2` | 8px | · | `--ds-space-9` | 64px |
+| `--ds-space-3` | 12px | · | `--ds-space-10` | 80px |
+| `--ds-space-4` | 16px | · | `--ds-space-11` | 96px |
+| `--ds-space-5` | 24px | · | `--ds-space-12` | 128px |
+| `--ds-space-6` | 32px | · | | |
 
 ### Iconos
 
@@ -73,6 +164,29 @@ Guía de diseño y código para este proyecto. Cualquier UI nueva o modificada d
 - Suaves y cálidas. Usar tokens `--ds-shadow-*` que ya están basados en `rgba(26, 26, 26, ...)`, NO en negro puro.
 - En cards: shadow-xs por defecto, shadow-md en hover.
 - Botones primarios en hover: `var(--ds-shadow-gold)`.
+
+| Token CSS | Uso |
+|-----------|-----|
+| `--ds-shadow-xs` | Elevación mínima (cards en reposo) |
+| `--ds-shadow-sm` | Elementos ligeramente elevados |
+| `--ds-shadow-md` | Hover de cards, dropdowns |
+| `--ds-shadow-lg` | Popovers, paneles flotantes |
+| `--ds-shadow-xl` | Modales |
+| `--ds-shadow-gold` | Hover de botón primario (resplandor dorado) |
+| `--ds-focus-ring` | Anillo de foco dorado accesible (`:focus-visible`) |
+
+### Motion y transiciones
+
+- Usa siempre los tokens, nunca `300ms ease` por reflejo.
+- Curvas: `--ds-ease-out` (entradas, la mayoría) · `--ds-ease-in-out` (bucles, ida y vuelta).
+- Duraciones: `--ds-duration-fast` (150ms) · `--ds-duration-base` (250ms) · `--ds-duration-slow` (400ms).
+- Atajo: `--ds-transition-color` para hovers de color/fondo/borde.
+- `prefers-reduced-motion` ya está cubierto globalmente en `tokens.css`.
+
+### Elevación y layout (z-index, containers)
+
+- **z-index** — usa la escala, nunca números mágicos: `--ds-z-base` (1) · `--ds-z-dropdown` (100) · `--ds-z-sticky` (200) · `--ds-z-overlay` (900) · `--ds-z-modal` (1000) · `--ds-z-toast` (1100).
+- **Anchos de container**: `--ds-container-sm` (640px) · `--ds-container-md` (768px) · `--ds-container-lg` (1024px) · `--ds-container-xl` (1280px) · `--ds-container-2xl` (1440px). El `.container` de Bootstrap limita a 1200px para el contenido general.
 
 ---
 
@@ -393,6 +507,8 @@ ng test
 - Estilos sin tokens CSS (no `color: #1A1A1A`, sí `color: var(--ds-ink)`)
 - UI genérica sin postura estética
 - Hex de Bootstrap defaults (`#0d6efd`, `#6c757d`, etc.)
+- Colores de estado de Bootstrap (`.text-success`, `.bg-danger`...) — usa los tokens `--ds-success/warning/danger/info`
+- `z-index` con números mágicos — usa la escala `--ds-z-*`
 - `border-radius` mayor a 12px en elementos UI
 - Sombras con `rgba(0, 0, 0, ...)` — usa `rgba(26, 26, 26, ...)` o los tokens
 - Densidad agresiva (`padding: 0.25rem`) sin justificación
