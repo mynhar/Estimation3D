@@ -41,6 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Entornos con claves reales (nunca al repositorio)
+# Entorno de desarrollo local (tiene claves reales)
 src/environments/environment.ts
-src/environments/environment.production.ts
+
+# environment.production.ts se versiona como placeholder sin claves.
+# scripts/set-env.js lo sobreescribe en CI/CD con valores reales
+# inyectados desde las variables de entorno de Vercel.

@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "npm run build",
+  "buildCommand": "node scripts/set-env.js && npm run build",
   "outputDirectory": "dist/estimation3d-a18-v01/browser",
   "installCommand": "npm install",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
