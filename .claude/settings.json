@@ -123,7 +123,10 @@
       "Bash(npm --version)",
       "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-a18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('configurations:', Object.keys\\(b.configurations || {}\\)\\);\")",
       "Bash(node -e \"const a=require\\('./angular.json'\\); console.log\\(Object.keys\\(a.projects\\)\\);\")",
-      "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-A18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('outputPath:', b.options?.outputPath\\);\")"
+      "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-A18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('outputPath:', b.options?.outputPath\\);\")",
+      "Bash(not exist *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ],
     "additionalDirectories": [
       "\\tmp"
