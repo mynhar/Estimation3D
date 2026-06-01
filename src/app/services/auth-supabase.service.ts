@@ -297,7 +297,8 @@ export class AuthSupabaseService {
     if (existente?.perfil_completo === true) return; // ya está completo
 
     const campos: TablesUpdate<'perfil'> = {
-      avatar_url: avatarUrl || null,
+      avatar_url:      avatarUrl || null,
+      perfil_completo: true,
     };
 
     // Solo actualizar nombre/apellido si Google los proveyó
