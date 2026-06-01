@@ -135,7 +135,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/file',
-    loadComponent: () => import('./admin/file/file.component').then(m => m.AdminFileComponent),
+    loadComponent: () => import('./admin/file/list/list.component').then(m => m.AdminFileListComponent),
     canActivate: [adminGuard],
   },
   {
@@ -170,7 +170,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/service-type',
-    loadComponent: () => import('./admin/service-types/service-types.component').then(m => m.AdminServiceTypesComponent),
+    loadComponent: () => import('./admin/service-types/list/list.component').then(m => m.AdminServiceTypeListComponent),
     canActivate: [adminGuard],
   },
   {
@@ -195,7 +195,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/user',
-    loadComponent: () => import('./admin/user/user.component').then(m => m.AdminUserComponent),
+    loadComponent: () => import('./admin/user/list/list.component').then(m => m.AdminUserListComponent),
     canActivate: [adminGuard],
   },
   {
