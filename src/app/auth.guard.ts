@@ -48,7 +48,7 @@ export const estimatorGuard: CanActivateFn = async () => {
   const rol = await resolverRol(auth);
   return rol && ROLES_ESTIMADOR.includes(rol)
     ? true
-    : router.createUrlTree(['/client/dashboard']);
+    : router.createUrlTree([await auth.getHomeRoute()]);
 };
 
 export const constructorGuard: CanActivateFn = async () => {
@@ -59,7 +59,7 @@ export const constructorGuard: CanActivateFn = async () => {
   const rol = await resolverRol(auth);
   return rol && ROLES_CONSTRUCTOR.includes(rol)
     ? true
-    : router.createUrlTree(['/client/dashboard']);
+    : router.createUrlTree([await auth.getHomeRoute()]);
 };
 
 export const adminGuard: CanActivateFn = async () => {
@@ -70,7 +70,7 @@ export const adminGuard: CanActivateFn = async () => {
   const rol = await resolverRol(auth);
   return rol && ROLES_ADMINISTRADOR.includes(rol)
     ? true
-    : router.createUrlTree(['/client/dashboard']);
+    : router.createUrlTree([await auth.getHomeRoute()]);
 };
 
 export const wildcardGuard: CanActivateFn = async () => {
