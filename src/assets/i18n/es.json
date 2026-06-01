@@ -1278,5 +1278,12 @@
     "tl_event_ofe_sent": "Oferta enviada",
     "tl_event_ctr_generated": "Contrato generado",
     "tl_event_ctr_signed": "Contrato firmado"
+  },
+
+  "http": {
+    "offline":      "Sin conexión. Verifica tu red e intenta de nuevo.",
+    "unauthorized": "Tu sesión ha expirado. Inicia sesión nuevamente.",
+    "forbidden":    "No tienes permiso para realizar esta acción.",
+    "server_error": "Error del servidor. Intenta de nuevo más tarde."
   }
 }

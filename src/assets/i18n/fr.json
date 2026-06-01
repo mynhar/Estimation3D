@@ -1278,5 +1278,12 @@
     "tl_event_ofe_sent": "Offre soumise",
     "tl_event_ctr_generated": "Contrat généré",
     "tl_event_ctr_signed": "Contrat signé"
+  },
+
+  "http": {
+    "offline":      "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
+    "unauthorized": "Votre session a expiré. Veuillez vous reconnecter.",
+    "forbidden":    "Vous n'avez pas la permission d'effectuer cette action.",
+    "server_error": "Erreur serveur. Veuillez réessayer plus tard."
   }
 }
