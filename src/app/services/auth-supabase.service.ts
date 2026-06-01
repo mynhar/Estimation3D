@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom, filter, take, timeout, catchError, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
 
@@ -254,11 +254,14 @@ export class AuthSupabaseService {
   // Ruta de inicio según rol del usuario
   // ----------------------------------------------------------
   async getHomeRoute(): Promise<string> {
-    const { data: { user } } = await this.supabase.auth.getUser();
-    if (!user) return '/login';
-    const { data } = await this.supabase
-      .from('perfil').select('rol').eq('id', user.id).single();
-    const rol = data?.rol;
+    const rol = await firstValueFrom(
+      this.rol$.pipe(
+        filter((r): r is RolUsuario | null => r !== undefined),
+        take(1),
+        timeout(8_000),
+        catchError(() => of(null)),
+      )
+    );
     if (rol === 'administrador') return '/admin/dashboard';
     if (rol === 'constructor')   return '/builder/dashboard';
     if (rol === 'estimador')     return '/estimator/dashboard';
