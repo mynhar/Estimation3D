@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthSupabaseService } from './auth-supabase.service';
 import {
   ExpedienteAdmin,
   ExpedienteCliente,
@@ -22,23 +21,12 @@ import {
   ServicioRepository,
   EstimacionRepository,
   OfertaRepository,
+  ContratoRepository,
 } from '../data';
-import { OfertaRaw } from '../data/oferta.repository';
-
-export interface OfertaHistorialItem {
-  id:        string;
-  creado_en: string;
-  estado:    string;
-}
-
-export interface ContratoHistorialItem {
-  id:             string;
-  estado:         string;
-  generado_en:    string;
-  firmado_en:     string | null;
-  actualizado_en: string;
-  oferta:         { fecha_inicio: string | null } | null;
-}
+import { OfertaRaw, OfertaHistorialItem } from '../data/oferta.repository';
+import { ContratoHistorialItem } from '../data/contrato.repository';
+export type { OfertaHistorialItem } from '../data/oferta.repository';
+export type { ContratoHistorialItem } from '../data/contrato.repository';
 
 @Injectable({ providedIn: 'root' })
 export class ExpedienteService {
@@ -48,8 +36,7 @@ export class ExpedienteService {
   private servicioRepo    = inject(ServicioRepository);
   private estimacionRepo  = inject(EstimacionRepository);
   private ofertaRepo      = inject(OfertaRepository);
-  private auth            = inject(AuthSupabaseService);
-  private get db()        { return this.auth.client; }
+  private contratoRepo    = inject(ContratoRepository);
 
   // ── Módulo cliente ────────────────────────────────────────────────────────
 
@@ -615,24 +602,10 @@ export class ExpedienteService {
     ofertas:  OfertaHistorialItem[];
     contrato: ContratoHistorialItem | null;
   }> {
-    const [ofertasRes, contratoRes] = await Promise.all([
-      this.db
-        .from('oferta')
-        .select('id, creado_en, estado')
-        .eq('expediente_id', expedienteId)
-        .order('creado_en', { ascending: true }),
-      this.db
-        .from('contrato')
-        .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
-        .eq('expediente_id', expedienteId)
-        .maybeSingle(),
+    const [ofertas, contrato] = await Promise.all([
+      this.ofertaRepo.findHistorialByExpedienteId(expedienteId),
+      this.contratoRepo.findHistorialByExpedienteId(expedienteId),
     ]);
-
-    if (ofertasRes.error) throw new Error(ofertasRes.error.message);
-
-    return {
-      ofertas:  (ofertasRes.data ?? []) as OfertaHistorialItem[],
-      contrato: contratoRes.error ? null : (contratoRes.data as ContratoHistorialItem | null),
-    };
+    return { ofertas, contrato };
   }
 }

@@ -35,6 +35,12 @@ export type OfertaConExpediente = OfertaRaw & {
   } | null;
 };
 
+export type OfertaHistorialItem = {
+  id:        string;
+  creado_en: string;
+  estado:    string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class OfertaRepository {
   private auth = inject(AuthSupabaseService);
@@ -224,5 +230,15 @@ export class OfertaRepository {
       p_oferta_id:     ofertaId,
     });
     if (error) throw new Error(error.message);
+  }
+
+  async findHistorialByExpedienteId(expedienteId: string): Promise<OfertaHistorialItem[]> {
+    const { data, error } = await this.db
+      .from('oferta')
+      .select('id, creado_en, estado')
+      .eq('expediente_id', expedienteId)
+      .order('creado_en', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as OfertaHistorialItem[];
   }
 }

@@ -1,4 +1,5 @@
 export * from './expediente.repository';
+export * from './contrato.repository';
 export * from './oferta.repository';
 export * from './localizacion.repository';
 export * from './perfil.repository';
