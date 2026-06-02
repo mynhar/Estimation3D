@@ -63,7 +63,7 @@ export class ExpedienteService {
     return exps.map(e => {
       const svc = servicios.find(s => s.id === e.servicio_id) ?? null;
       return {
-        id:           e.id as unknown as number,
+        id:           e.id,
         numero:       e.numero,
         estado:       e.estado,
         fecha_visita: e.fecha_visita,

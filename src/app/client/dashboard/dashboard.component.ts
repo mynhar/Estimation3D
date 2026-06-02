@@ -409,7 +409,7 @@ export class DashboardComponent implements OnInit {
       ?? '';
   }
 
-  expId(exp: ExpedienteCliente): string { return String(exp.id); }
+  expId(exp: ExpedienteCliente): string { return exp.id; }
 
   progresoPct(exp: ExpedienteCliente): number {
     return Math.round((FASE_MAP[exp.estado] ?? 0) / 5 * 100);

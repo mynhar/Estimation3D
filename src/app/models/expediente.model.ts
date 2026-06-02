@@ -199,7 +199,7 @@ export interface ExpedienteDetalleCliente {
 
 /** Forma usada en la vista del cliente (resultado de join anidado de Supabase). */
 export interface ExpedienteCliente {
-  id: number;
+  id: string;
   numero: string;
   estado: string;
   fecha_visita: string;
