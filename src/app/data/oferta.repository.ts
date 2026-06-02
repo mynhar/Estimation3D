@@ -232,6 +232,14 @@ export class OfertaRepository {
     if (error) throw new Error(error.message);
   }
 
+  async rechazar(expedienteId: string, ofertaId: string): Promise<void> {
+    const { error } = await this.db.rpc('rechazar_oferta', {
+      p_expediente_id: expedienteId,
+      p_oferta_id:     ofertaId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
   async findHistorialByExpedienteId(expedienteId: string): Promise<OfertaHistorialItem[]> {
     const { data, error } = await this.db
       .from('oferta')
