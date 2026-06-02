@@ -48,6 +48,11 @@ export class EstimacionService {
     );
   }
 
+  async getMontoTotalPorEstimador(estimadorId: string): Promise<number> {
+    const costos = await this.estimacionRepo.findCostosByEstimadorId(estimadorId);
+    return costos.reduce((sum, v) => sum + v, 0);
+  }
+
   async guardar(
     expedienteId: string,
     estimadorId:  string,

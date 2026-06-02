@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
+import { EstimacionService } from '../../services/estimacion.service';
 import { ExpedienteRow, ESTADOS_ESTIMADO } from '../../models';
 
 interface EstadoCfg {
@@ -40,6 +41,7 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
 export class EstimatorDashboardComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
+  private estimacionService = inject(EstimacionService);
   private translate         = inject(TranslateService);
   private router            = inject(Router);
 
@@ -129,25 +131,18 @@ export class EstimatorDashboardComponent implements OnInit {
     if (!userId) { this.cargando.set(false); return; }
 
     try {
-      const [allMine, nuevos, estimacionesRes] = await Promise.all([
+      const [allMine, nuevos, montoTotal] = await Promise.all([
         this.expedienteService.getExpedienteRows({
           estados:     (['en_estimacion', ...ESTADOS_ESTIMADO] as import('../../types/supabase').EstadoExpediente[]),
           estimadorId: userId,
         }),
         this.expedienteService.getExpedienteRows({ estado: 'nuevo' }),
-        this.auth.client
-          .from('estimacion')
-          .select('costo_estimado')
-          .eq('estimador_id', userId)
-          .not('costo_estimado', 'is', null),
+        this.estimacionService.getMontoTotalPorEstimador(userId),
       ]);
 
       this.expedientes.set(allMine);
       this.disponibles.set(nuevos.length);
-      this.montoTotal.set(
-        (estimacionesRes.data ?? [])
-          .reduce((s: number, e: any) => s + (e.costo_estimado ?? 0), 0)
-      );
+      this.montoTotal.set(montoTotal);
     } catch (e: any) {
       console.error('[EstimatorDashboard]', e.message);
     } finally {

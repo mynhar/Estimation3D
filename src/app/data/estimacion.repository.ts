@@ -103,6 +103,16 @@ export class EstimacionRepository {
     if (error) throw new Error(error.message);
   }
 
+  async findCostosByEstimadorId(estimadorId: string): Promise<number[]> {
+    const { data, error } = await this.db
+      .from('estimacion')
+      .select('costo_estimado')
+      .eq('estimador_id', estimadorId)
+      .not('costo_estimado', 'is', null);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((r: { costo_estimado: number | null }) => r.costo_estimado ?? 0);
+  }
+
   async delete(expedienteId: string): Promise<void> {
     const { error } = await this.db
       .from('estimacion')
