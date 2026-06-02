@@ -1,24 +1,36 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 export type Lang = 'fr' | 'en' | 'es';
 
+const LANGS: Lang[] = ['fr', 'en', 'es'];
+
+function readStoredLang(): Lang {
+  try {
+    const v = localStorage.getItem('lang') as Lang | null;
+    return v && LANGS.includes(v) ? v : 'fr';
+  } catch {
+    return 'fr';
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class LangService {
-  readonly langs: Lang[] = ['fr', 'en', 'es'];
+  private translate = inject(TranslateService);
+
+  readonly langs   = LANGS;
   readonly current = signal<Lang>('fr');
 
-  constructor(private translate: TranslateService) {
-    const saved = (localStorage.getItem('lang') ?? 'fr') as Lang;
-    const initial: Lang = this.langs.includes(saved) ? saved : 'fr';
+  constructor() {
+    const initial = readStoredLang();
     this.current.set(initial);
-    translate.setDefaultLang('fr');
-    translate.use(initial);
+    this.translate.setDefaultLang('fr');
+    this.translate.use(initial);
   }
 
   set(lang: Lang): void {
     this.translate.use(lang);
     this.current.set(lang);
-    localStorage.setItem('lang', lang);
+    try { localStorage.setItem('lang', lang); } catch { /* private mode */ }
   }
 }
