@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import { ContratoPdfData } from '../models';
 
 const L: Record<string, Record<string, string>> = {
