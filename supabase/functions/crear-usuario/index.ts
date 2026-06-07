@@ -38,8 +38,9 @@ Deno.serve(async (req: Request) => {
       .eq('id', user.id)
       .single();
 
-    if (perfil?.rol !== 'administrador') {
-      return json({ error: 'Acceso denegado: se requiere rol administrador' }, 403);
+    const callerRol = perfil?.rol;
+    if (callerRol !== 'administrador' && callerRol !== 'estimador') {
+      return json({ error: 'Acceso denegado: se requiere rol administrador o estimador' }, 403);
     }
 
     // 3. Leer y validar cuerpo
@@ -48,6 +49,11 @@ Deno.serve(async (req: Request) => {
 
     if (!email || !password || !nombre || !apellido || !rol) {
       return json({ error: 'Campos requeridos: email, password, nombre, apellido, rol' }, 400);
+    }
+
+    // El estimador solo puede crear clientes
+    if (callerRol === 'estimador' && rol !== 'cliente') {
+      return json({ error: 'Acceso denegado: el estimador solo puede crear usuarios con rol cliente' }, 403);
     }
 
     const perfil_completo = !!(nombre && apellido && telefono && avatar_url);

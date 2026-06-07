@@ -307,9 +307,15 @@
               </span>
             </div>
 
-            <!-- Servicio + fecha -->
+            <!-- Cliente + Servicio + fecha -->
             <div class="dash-detail-card__meta">
               @if (detalleActivo(); as d) {
+                @if (d.cliente_nombre) {
+                  <span class="dash-meta-item">
+                    <i class="bi bi-person" aria-hidden="true"></i>
+                    {{ d.cliente_nombre }}
+                  </span>
+                }
                 <span class="dash-meta-item">
                   <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
                   {{ servicioNombreVista(d) }}

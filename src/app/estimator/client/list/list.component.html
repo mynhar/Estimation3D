@@ -1,0 +1,229 @@
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <div class="list-page-header mb-4">
+    <div>
+      <span class="eyebrow">
+        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+        {{ 'role.estimador' | translate }}
+      </span>
+      <div class="d-flex align-items-center gap-3 mt-1">
+        <h1 class="list-page-header__title">{{ 'nav.clientes' | translate }}</h1>
+        @if (!cargando()) {
+          <span class="kpi-pill">
+            {{ clientesFiltrados().length }}
+            @if (hayFiltros()) { <span class="kpi-sep">/</span> {{ totalClientes }} }
+          </span>
+        }
+      </div>
+    </div>
+    <a routerLink="/estimator/client/create" class="btn btn-primary">
+      <i class="bi bi-person-plus me-1" aria-hidden="true"></i>{{ 'admin_users.create_client_btn' | translate }}
+    </a>
+  </div>
+
+  <!-- ── Skeleton ──────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="card filter-card mb-3" aria-hidden="true">
+      <div class="skel skel--field mb-3"></div>
+      <div class="d-flex gap-2 flex-wrap">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="skel skel--chip"></div>
+        }
+      </div>
+    </div>
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="table table-admin align-middle mb-0">
+          <thead><tr>
+            <th style="width:48px"></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--md"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
+            <th class="text-center"><div class="skel skel--line skel--sm mx-auto" style="width:48px"></div></th>
+            <th style="width:52px"></th>
+          </tr></thead>
+          <tbody>
+            @for (_ of [1,2,3,4,5,6]; track $index) {
+              <tr>
+                <td><div class="skel skel--avatar"></div></td>
+                <td><div class="skel skel--line skel--md"></div></td>
+                <td><div class="skel skel--line skel--md"></div></td>
+                <td><div class="skel skel--line skel--sm"></div></td>
+                <td><div class="skel skel--line skel--lg"></div></td>
+                <td><div class="skel skel--chip"></div></td>
+                <td class="text-center"><div class="skel skel--icon mx-auto"></div></td>
+                <td></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  <!-- ── Error ─────────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="error-alert" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <span>{{ error() }}</span>
+    </div>
+
+  <!-- ── Contenido ─────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Filtros -->
+    <div class="card filter-card mb-3">
+
+      <!-- Búsqueda -->
+      <div class="search-wrap mb-3">
+        <span class="search-icon"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input type="text" class="search-input"
+               [placeholder]="'admin_users.search_placeholder' | translate"
+               [value]="busqueda()"
+               (input)="setBusqueda($event)">
+        @if (busqueda()) {
+          <button class="search-clear" type="button" (click)="busqueda.set('')">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-row">
+
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.provider_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (p of proveedores; track p) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroProveedor() === p"
+                      (click)="filtroProveedor.set(p)">
+                @if (p === 'google') { <i class="bi bi-google me-1" aria-hidden="true"></i> }
+                @if (p === 'email')  { <i class="bi bi-envelope me-1" aria-hidden="true"></i> }
+                {{ p === 'todos' ? ('common.all' | translate) : p }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.status_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (a of estadosActivo; track a) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroActivo() === a"
+                      [class.filter-chip--active-yes]="filtroActivo() === a && a === 'activo'"
+                      [class.filter-chip--active-no]="filtroActivo() === a && a === 'inactivo'"
+                      (click)="filtroActivo.set(a)">
+                {{ a === 'todos' ? ('common.all' | translate) : a === 'activo' ? ('common.active' | translate) : ('common.inactive' | translate) }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (hayFiltros()) {
+          <button type="button" class="filter-clear" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>{{ 'common.clear_filters' | translate }}
+          </button>
+        }
+
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="table table-admin table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width:48px"></th>
+              <th>{{ 'admin_users.col_name' | translate }}</th>
+              <th>{{ 'admin_users.col_lastname' | translate }}</th>
+              <th>{{ 'admin_users.col_phone' | translate }}</th>
+              <th>{{ 'admin_users.col_email' | translate }}</th>
+              <th>{{ 'admin_users.col_provider' | translate }}</th>
+              <th class="text-center">{{ 'admin_users.col_active' | translate }}</th>
+              <th class="text-center" style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (clientesFiltrados().length === 0) {
+              <tr>
+                <td colspan="8">
+                  <div class="empty-state">
+                    @if (hayFiltros()) {
+                      <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
+                      <span>{{ 'admin_users.no_results' | translate }}</span>
+                      <button type="button" class="btn btn-sm btn-outline-secondary"
+                              (click)="limpiarFiltros()">
+                        {{ 'common.clear_filters' | translate }}
+                      </button>
+                    } @else {
+                      <i class="bi bi-people empty-state__icon" aria-hidden="true"></i>
+                      <span>{{ 'admin_users.no_data' | translate }}</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (u of clientesPaginados(); track u.id) {
+                <tr>
+                  <td>
+                    @if (u.avatar_url) {
+                      <img [src]="u.avatar_url" [alt]="u.nombre"
+                           class="user-avatar rounded-circle"
+                           referrerpolicy="no-referrer">
+                    } @else {
+                      <div class="user-avatar-fallback rounded-circle">
+                        {{ avatarFallback(u) }}
+                      </div>
+                    }
+                  </td>
+                  <td class="fw-medium">{{ u.nombre }}</td>
+                  <td>{{ u.apellido }}</td>
+                  <td class="text-ink-muted">{{ u.telefono ?? '—' }}</td>
+                  <td class="user-email">{{ u.email ?? '—' }}</td>
+                  <td>
+                    <span class="provider-badge">
+                      @if (u.proveedor === 'google') {
+                        <i class="bi bi-google" aria-hidden="true"></i>
+                      } @else {
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                      }
+                      {{ u.proveedor }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    @if (u.activo) {
+                      <i class="bi bi-check-circle status-icon status-icon--active" aria-hidden="true"></i>
+                    } @else {
+                      <i class="bi bi-x-circle status-icon status-icon--inactive" aria-hidden="true"></i>
+                    }
+                  </td>
+                  <td class="text-center">
+                    <a [routerLink]="['/estimator/client/edit', u.id]"
+                       class="btn-icon-edit" [title]="'admin_users.edit_client_title' | translate">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="table-card__footer">
+        <app-pagination
+          [total]="clientesFiltrados().length"
+          [page]="paginaActual()"
+          [pageSize]="POR_PAGINA"
+          (pageChange)="paginaActual.set($event)">
+        </app-pagination>
+      </div>
+    </div>
+
+  }
+
+</div>

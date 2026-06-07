@@ -65,6 +65,26 @@ export const routes: Routes = [
 
   // ── Estimador ─────────────────────────────────────────────────────────────
   {
+    path: 'estimator/client/list',
+    loadComponent: () => import('./estimator/client/list/list.component').then(m => m.EstimatorClientListComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
+    path: 'estimator/client/create',
+    loadComponent: () => import('./estimator/client/create/create.component').then(m => m.EstimatorClientCreateComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
+    path: 'estimator/client/edit/:id',
+    loadComponent: () => import('./estimator/client/edit/edit.component').then(m => m.EstimatorClientEditComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
+    path: 'estimator/file/create',
+    loadComponent: () => import('./estimator/file/create/create.component').then(m => m.EstimatorFileCreateComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
     path: 'estimator/dashboard',
     loadComponent: () => import('./estimator/dashboard/dashboard.component').then(m => m.EstimatorDashboardComponent),
     canActivate: [estimatorGuard],

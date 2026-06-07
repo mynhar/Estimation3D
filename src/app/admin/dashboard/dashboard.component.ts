@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
+import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AdminDashboardService, DashboardStats, TimelineEvent } from './admin-dashboard.service';
 
@@ -18,7 +20,11 @@ interface FunnelItem { estado: string; count: number }
   styleUrl:    './dashboard.component.css',
 })
 export class AdminDashboardComponent implements OnInit {
-  private svc = inject(AdminDashboardService);
+  private svc  = inject(AdminDashboardService);
+  private auth = inject(AuthSupabaseService);
+
+  user   = toSignal(this.auth.user$);
+  perfil = signal<{ nombre: string | null; apellido: string | null } | null>(null);
 
   stats            = signal<DashboardStats | null>(null);
   timeline         = signal<TimelineEvent[]>([]);
@@ -78,7 +84,27 @@ export class AdminDashboardComponent implements OnInit {
   expSinAsignar = computed(() => this.stats()?.expedientes.porEstado['nuevo'] ?? 0);
   expEnEstimacion = computed(() => this.stats()?.expedientes.porEstado['en_estimacion'] ?? 0);
 
-  async ngOnInit() { await this.cargar(); }
+  get bienvenida(): string {
+    const p = this.perfil();
+    if (p?.nombre) {
+      return [p.nombre, p.apellido].filter(Boolean).join(' ');
+    }
+    const u = this.user();
+    return u?.user_metadata?.['full_name'] ?? u?.email?.split('@')[0] ?? '';
+  }
+
+  async ngOnInit() {
+    const userId = this.user()?.id;
+    if (userId) {
+      const { data } = await this.auth.client
+        .from('perfil')
+        .select('nombre, apellido')
+        .eq('id', userId)
+        .single();
+      if (data) this.perfil.set(data);
+    }
+    await this.cargar();
+  }
 
   async recargar() {
     this.cargando.set(true);

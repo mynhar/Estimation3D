@@ -1,0 +1,135 @@
+/* ── Page header ─────────────────────────────────────────── */
+.form-page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+}
+.form-page-header__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  margin: var(--ds-space-1) 0 0;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-gold-active);
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  color: var(--ds-ink-muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: var(--ds-transition-color),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-back:hover {
+  color: var(--ds-ink);
+  border-color: var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-xs);
+}
+
+/* ── Form card ───────────────────────────────────────────── */
+.form-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border) !important;
+  border-radius: var(--ds-radius-lg) !important;
+  box-shadow: var(--ds-shadow-xs);
+}
+.form-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  border-top: 1px solid var(--ds-border);
+}
+
+/* ── Form sections ───────────────────────────────────────── */
+.form-section__header {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+  margin-bottom: var(--ds-space-4);
+}
+.form-section-divider {
+  height: 1px;
+  background: var(--ds-border);
+  margin: var(--ds-space-5) 0;
+}
+.req-star { color: var(--ds-danger); }
+
+/* ── Input readonly ──────────────────────────────────────── */
+.form-control-readonly {
+  background: var(--ds-bg-alt) !important;
+  color: var(--ds-ink-muted) !important;
+  cursor: default;
+}
+
+/* ── Avatar upload ───────────────────────────────────────── */
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-4);
+}
+.avatar-upload-wrap {
+  cursor: pointer;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+.avatar-upload-wrap:hover .avatar-placeholder,
+.avatar-upload-wrap:hover .avatar-img { opacity: 0.8; }
+.avatar-upload-wrap.uploading {
+  cursor: default;
+  pointer-events: none;
+}
+.avatar-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+.avatar-placeholder {
+  width: 64px;
+  height: 64px;
+  background: var(--ds-gold-faint);
+  border: 1px dashed var(--ds-gold-soft);
+  color: var(--ds-gold-active);
+  font-size: 1.25rem;
+}
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--ds-overlay);
+}
+
+/* ── Form focus ──────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ds-gold);
+  box-shadow: var(--ds-focus-ring);
+}
+.form-check-input:checked {
+  background-color: var(--ds-success);
+  border-color: var(--ds-success);
+}

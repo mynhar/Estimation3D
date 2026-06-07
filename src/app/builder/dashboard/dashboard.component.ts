@@ -49,6 +49,7 @@ export class BuilderDashboardComponent implements OnInit {
   private translate     = inject(TranslateService);
 
   user     = toSignal(this.auth.user$);
+  perfil   = signal<{ nombre: string | null; apellido: string | null } | null>(null);
   ofertas  = signal<OfertaDashboard[]>([]);
   cargando = signal(true);
 
@@ -149,8 +150,12 @@ export class BuilderDashboardComponent implements OnInit {
   }
 
   get bienvenida(): string {
+    const p = this.perfil();
+    if (p?.nombre) {
+      return [p.nombre, p.apellido].filter(Boolean).join(' ');
+    }
     const u = this.user();
-    return u?.user_metadata?.['full_name']?.split(' ')[0] ?? u?.email?.split('@')[0] ?? '';
+    return u?.user_metadata?.['full_name'] ?? u?.email?.split('@')[0] ?? '';
   }
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
@@ -158,6 +163,13 @@ export class BuilderDashboardComponent implements OnInit {
     const userId = this.user()?.id;
     if (!userId) return;
     try {
+      const { data: perfilData } = await this.auth.client
+        .from('perfil')
+        .select('nombre, apellido')
+        .eq('id', userId)
+        .single();
+      if (perfilData) this.perfil.set(perfilData);
+
       this.ofertas.set(await this.ofertaService.getMisOfertasDashboard(userId));
     } catch (e: any) {
       console.error('[BuilderDashboard]', e.message);

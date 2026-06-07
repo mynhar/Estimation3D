@@ -20,6 +20,7 @@
     "contrats": "Contrats",
     "types_service": "Types de service",
     "utilisateurs": "Utilisateurs",
+    "clientes": "Clients",
     "mon_profil": "Mon profil",
     "deconnexion": "Se déconnecter",
     "ouvrir_menu": "Ouvrir le menu",
@@ -660,6 +661,9 @@
   "admin_users": {
     "title": "Utilisateurs",
     "create_btn": "Créer un utilisateur",
+    "create_client_btn": "Créer un client",
+    "create_client_title": "Créer un client",
+    "edit_client_title": "Modifier le client",
     "search_placeholder": "Rechercher par prénom, nom ou courriel…",
     "role_filter": "Rôle",
     "provider_filter": "Fournisseur",

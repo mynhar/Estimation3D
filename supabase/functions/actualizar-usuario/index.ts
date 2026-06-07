@@ -26,23 +26,39 @@ Deno.serve(async (req: Request) => {
     const { data: { user }, error: userError } = await adminClient.auth.getUser(token);
     if (userError || !user) return json({ error: 'Token inválido o expirado' }, 401);
 
-    // Verificar rol administrador
+    // Verificar rol
     const { data: caller } = await adminClient
       .from('perfil')
       .select('rol')
       .eq('id', user.id)
       .single();
 
-    if (caller?.rol !== 'administrador') {
-      return json({ error: 'Acceso denegado: se requiere rol administrador' }, 403);
+    const callerRol = caller?.rol;
+    if (callerRol !== 'administrador' && callerRol !== 'estimador') {
+      return json({ error: 'Acceso denegado: se requiere rol administrador o estimador' }, 403);
     }
 
     // Leer cuerpo
     const body = await req.json();
-    const { id, nombre, apellido, telefono, avatar_url, rol, activo, email, password } = body;
+    const { id, nombre, apellido, telefono, avatar_url, activo, email, password } = body;
+    let { rol } = body;
 
     if (!id || !nombre || !apellido || !rol) {
       return json({ error: 'Campos requeridos: id, nombre, apellido, rol' }, 400);
+    }
+
+    // El estimador solo puede editar clientes y no puede cambiar su rol
+    if (callerRol === 'estimador') {
+      const { data: target } = await adminClient
+        .from('perfil')
+        .select('rol')
+        .eq('id', id)
+        .single();
+
+      if (target?.rol !== 'cliente') {
+        return json({ error: 'Acceso denegado: el estimador solo puede editar usuarios con rol cliente' }, 403);
+      }
+      rol = 'cliente';
     }
 
     // Actualizar email y/o contraseña en auth.users (solo si se enviaron)

@@ -126,10 +126,25 @@
       "Bash(node -e \"const a=require\\('./angular.json'\\); const b=a.projects['estimation3d-A18-v01'].architect.build; console.log\\('defaultConfiguration:', b.defaultConfiguration\\); console.log\\('outputPath:', b.options?.outputPath\\);\")",
       "Bash(not exist *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(Select-String -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\assets\\\\i18n\\\\es.json\" -Pattern \"error|network|offline|connexion|auth|session\" -i)",
+      "Bash(mkdir -p c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\core\\\\interceptors)",
+      "Bash(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\" -Recurse -File)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(Out-String)",
+      "PowerShell(tree \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\" -L 2 2>$null)",
+      "PowerShell(head -50)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\admin\" -Recurse | Where-Object { $_.PSIsContainer } | Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\client\" -Recurse | Where-Object { $_.PSIsContainer } | Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\" -Recurse | Where-Object { $_.PSIsContainer } | Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\builder\" -Recurse | Where-Object { $_.PSIsContainer } | Sort-Object FullName)",
+      "PowerShell(@\\(Get-Content c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\estimator\\\\dashboard\\\\dashboard.component.ts | Select-String -Pattern \"ESTADO_CFG\" -Context 10\\).Count)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\desarrollo\\\\estimation3d-A18-v01\\\\src\\\\app\\\\components\" -File | Select-Object Name, @{Name=\"FullPath\"; Expression={$_.FullName}})",
+      "mcp__claude_ai_Supabase__deploy_edge_function"
     ],
     "additionalDirectories": [
-      "\\tmp"
+      "\\tmp",
+      "c:\\desarrollo\\estimation3d-A18-v01"
     ]
   }
 }

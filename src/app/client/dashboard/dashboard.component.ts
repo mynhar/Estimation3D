@@ -90,6 +90,7 @@ export class DashboardComponent implements OnInit {
     { initialValue: this.translate.currentLang || 'fr' },
   );
 
+  perfil          = signal<{ nombre: string | null; apellido: string | null } | null>(null);
   expedientes     = signal<ExpedienteCliente[]>([]);
   cargando        = signal(true);
   idSeleccionado  = signal<string | null>(null);
@@ -403,10 +404,12 @@ export class DashboardComponent implements OnInit {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   get bienvenida(): string {
+    const p = this.perfil();
+    if (p?.nombre) {
+      return [p.nombre, p.apellido].filter(Boolean).join(' ');
+    }
     const u = this.user();
-    return u?.user_metadata?.['full_name']?.split(' ')[0]
-      ?? u?.email?.split('@')[0]
-      ?? '';
+    return u?.user_metadata?.['full_name'] ?? u?.email?.split('@')[0] ?? '';
   }
 
   expId(exp: ExpedienteCliente): string { return exp.id; }
@@ -476,6 +479,13 @@ export class DashboardComponent implements OnInit {
     const userId = this.user()?.id;
     if (!userId) return;
     try {
+      const { data: perfilData } = await this.auth.client
+        .from('perfil')
+        .select('nombre, apellido')
+        .eq('id', userId)
+        .single();
+      if (perfilData) this.perfil.set(perfilData);
+
       const exps = await this.expedienteService.getMisExpedientes(userId);
       exps.sort((a, b) => estadoPriority(a) - estadoPriority(b)
         || new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
