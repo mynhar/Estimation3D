@@ -193,7 +193,26 @@
     "timeline_title": "Historial",
     "timeline_empty": "Sin eventos por mostrar por el momento.",
     "progress_label": "Progreso del expediente",
-    "key_dates": "Fechas del expediente"
+    "key_dates": "Fechas del expediente",
+    "estimator_report": "Informe del estimador",
+    "estimator_label": "Estimador",
+    "estimator_info": "Información del estimador",
+    "cost_estimate": "Costo estimado",
+    "estimator_notes": "Notas del estimador",
+    "estimation_pending": "Estimación en proceso…",
+    "constructor_section": "Constructor seleccionado",
+    "constructor_label": "Constructor",
+    "contract_price": "Precio final",
+    "contract_warranty": "Garantía",
+    "contract_status": "Estado del contrato",
+    "work_description": "Descripción del trabajo",
+    "view_contract": "Ver contrato",
+    "photos": "Fotos",
+    "documents_label": "Documentos",
+    "avance_expediente": "Avance del expediente",
+    "avance_contrato": "Avance del contrato",
+    "contrato_pendiente": "El contrato estará disponible cuando se seleccione un constructor.",
+    "contrato_cancelado": "Este contrato ha sido cancelado."
   },
   "timeline": {
     "created": "Expediente creado",
@@ -303,7 +322,23 @@
     "filter_label": "Filtrar expedientes",
     "no_match": "Ningún expediente coincide con el filtro seleccionado.",
     "review_offers_received": "Revisar ofertas recibidas",
-    "contracted_active": "Contrato activo"
+    "contracted_active": "Contrato activo",
+    "constructor_docs": "Documentos del constructor",
+    "constructor_videos": "Videos del constructor",
+    "no_constructor_docs": "Sin documentos del constructor",
+    "no_constructor_videos": "Sin videos del constructor",
+    "my_uploads": "Mis archivos",
+    "client_files_hint": "Agregue fotos, videos o documentos a su expediente.",
+    "add_photos": "Agregar fotos",
+    "add_videos": "Agregar videos",
+    "add_docs": "Agregar documentos",
+    "uploading": "Subiendo…",
+    "upload_error": "Error al subir",
+    "my_fotos": "Mis fotos",
+    "my_videos": "Mis videos",
+    "my_docs": "Mis documentos",
+    "contract": "Contrato",
+    "photo_viewer": "Visor de fotos"
   },
   "offer": {
     "price": "Precio",
@@ -357,7 +392,10 @@
     "section_pending": "Pendientes de revisión",
     "banner_plural": "Tienes {{count}} proyectos con ofertas pendientes de revisión.",
     "pending_plural": "pendientes",
-    "total_label": "expedientes"
+    "total_label": "expedientes",
+    "col_contractor": "Contratista",
+    "col_price": "Precio",
+    "col_status": "Estado"
   },
   "my_offers": {
     "title": "Mis ofertas",
@@ -1215,7 +1253,6 @@
     "err_create": "Error al crear el servicio.",
     "success_created": "Servicio creado correctamente."
   },
-
   "admin_dashboard": {
     "eyebrow": "Vista general",
     "title": "Dashboard",
@@ -1223,25 +1260,20 @@
     "refresh": "Actualizar",
     "refreshed_at": "Actualizado a las",
     "retry": "Reintentar",
-
     "kpi_exp": "Expedientes",
     "kpi_est": "Estimaciones",
     "kpi_con": "Constructores",
     "kpi_ctr": "Contratos",
-
     "kpi_sub_cancelled": "cancelados",
     "kpi_sub_unassigned": "sin asignar",
     "kpi_sub_offers_sent": "ofertas enviadas",
-
     "panel_exp": "Embudo de expedientes",
     "panel_est": "Estimaciones",
     "panel_con": "Constructores y ofertas",
     "panel_ctr": "Contratos",
-
     "panel_total_suffix": "total",
     "panel_completed_suffix": "completados",
     "panel_active_suffix": "activos",
-
     "mini_unassigned": "Sin asignar",
     "mini_in_progress": "En estimación",
     "mini_completed": "Estimadas",
@@ -1250,24 +1282,19 @@
     "mini_files_on_offer": "En proceso de oferta",
     "mini_total_contracts": "Contratos totales",
     "mini_contract_value": "Valor total activo",
-
     "cost_avg": "Costo promedio estimado",
-
     "est_label_unassigned": "Sin asignar",
     "est_label_in_estimation": "En estimación",
     "est_label_estimated": "Estimados",
-
     "contract_generado": "Generado",
     "contract_firmado": "Firmado",
     "contract_en_ejecucion": "En ejecución",
     "contract_completado": "Completado",
     "contract_cancelado": "Cancelado",
-
     "tipo_expediente": "Expediente",
     "tipo_estimacion": "Estimación",
     "tipo_oferta": "Oferta",
     "tipo_contrato": "Contrato",
-
     "tl_title": "Actividad reciente",
     "tl_subtitle": "Últimos eventos del sistema en todos los procesos.",
     "tl_filter_exp": "Expedientes",
@@ -1276,18 +1303,29 @@
     "tl_filter_ctr": "Contratos",
     "tl_empty": "No hay eventos para mostrar.",
     "tl_loading": "Cargando actividad…",
-
     "tl_event_exp_created": "Expediente creado",
     "tl_event_est_created": "Estimación registrada",
     "tl_event_ofe_sent": "Oferta enviada",
     "tl_event_ctr_generated": "Contrato generado",
     "tl_event_ctr_signed": "Contrato firmado"
   },
-
   "http": {
-    "offline":      "Sin conexión. Verifica tu red e intenta de nuevo.",
+    "offline": "Sin conexión. Verifica tu red e intenta de nuevo.",
     "unauthorized": "Tu sesión ha expirado. Inicia sesión nuevamente.",
-    "forbidden":    "No tienes permiso para realizar esta acción.",
+    "forbidden": "No tienes permiso para realizar esta acción.",
     "server_error": "Error del servidor. Intenta de nuevo más tarde."
+  },
+  "contrato_estado": {
+    "generado": "Contrato generado",
+    "firmado": "Contrato firmado",
+    "en_ejecucion": "En ejecución",
+    "completado": "Trabajos completados",
+    "cancelado": "Cancelado"
+  },
+  "contrato_estado_desc": {
+    "generado": "Su contrato está listo para revisar.",
+    "firmado": "Contrato firmado. Los trabajos comenzarán pronto.",
+    "en_ejecucion": "Los trabajos están en curso.",
+    "completado": "Los trabajos han sido completados."
   }
 }

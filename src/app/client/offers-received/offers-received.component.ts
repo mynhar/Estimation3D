@@ -4,7 +4,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
-import { ExpedienteConOfertas, ESTADO_BADGE_OFERTA_RECIBIDA } from '../../models';
+import {
+  ExpedienteConOfertas,
+  OfertaResumen,
+  ESTADO_BADGE_OFERTA_RECIBIDA,
+  ESTADO_BADGE_OFERTA,
+  ESTADO_LABEL_OFERTA,
+} from '../../models';
 
 @Component({
   selector: 'app-offers-received',
@@ -92,6 +98,30 @@ export class OffersReceivedComponent implements OnInit {
 
   estadoClase(estado: string): string {
     return ESTADO_BADGE_OFERTA_RECIBIDA[estado]?.clase ?? 'bg-secondary';
+  }
+
+  ofertaEstadoTexto(estado: string): string {
+    return ESTADO_LABEL_OFERTA[estado] ?? estado;
+  }
+
+  ofertaEstadoClase(estado: string): string {
+    return ESTADO_BADGE_OFERTA[estado] ?? 'bg-secondary-subtle text-secondary';
+  }
+
+  ofertaAceptada(exp: ExpedienteConOfertas): OfertaResumen | null {
+    return exp.ofertas.find(o => o.estado === 'aceptada') ?? null;
+  }
+
+  formatPrecio(precio: number): string {
+    const locale = this.translate.currentLang === 'fr' ? 'fr-CA'
+                 : this.translate.currentLang === 'en' ? 'en-CA'
+                 : 'es-CR';
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'CAD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(precio);
   }
 
   ver(id: string) {

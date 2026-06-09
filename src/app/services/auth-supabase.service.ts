@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User, RealtimeChannel } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Subject, firstValueFrom, filter, take, timeout, catchError, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -27,6 +27,7 @@ export class AuthSupabaseService {
 
   // Caché de rol y perfil — evita re-queries en cada navegación guardada
   private lastUserId: string | null = null;
+  private perfilChannel: RealtimeChannel | null = null;
 
   // Subjects para eventos puntuales (no son estado, no tienen valor inicial)
   private perfilEditadoSubject     = new Subject<{ nombre: string; apellido: string }>();
@@ -82,6 +83,7 @@ export class AuthSupabaseService {
           this.lastUserId = user.id;
           this.rolSig.set(undefined); // señal de "cargando"
           this.cargarPerfilCache(user.id);
+          this.suscribirCambiosPerfil(user.id);
         }
 
         // Google OAuth: sincronizar perfil y redirigir solo desde login/landing
@@ -97,6 +99,7 @@ export class AuthSupabaseService {
         this.lastUserId = null;
         this.rolSig.set(null);
         this.perfilCacheSig.set(null);
+        this.cancelarSuscripcionPerfil();
       }
     });
   }
@@ -321,6 +324,31 @@ export class AuthSupabaseService {
           rol:       'cliente',
           ...campos,
         });
+    }
+  }
+
+  // ----------------------------------------------------------
+  // Realtime: re-carga el caché cuando el perfil cambia en otra
+  // pestaña o por acción del administrador.
+  // Requiere que la tabla `perfil` tenga Realtime habilitado en Supabase.
+  // ----------------------------------------------------------
+  private suscribirCambiosPerfil(userId: string): void {
+    this.cancelarSuscripcionPerfil();
+
+    this.perfilChannel = this.supabase
+      .channel(`perfil-own-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'perfil', filter: `id=eq.${userId}` },
+        () => this.cargarPerfilCache(userId)
+      )
+      .subscribe();
+  }
+
+  private cancelarSuscripcionPerfil(): void {
+    if (this.perfilChannel) {
+      this.supabase.removeChannel(this.perfilChannel);
+      this.perfilChannel = null;
     }
   }
 

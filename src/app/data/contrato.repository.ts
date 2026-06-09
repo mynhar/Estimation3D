@@ -11,6 +11,17 @@ export type ContratoHistorialItem = {
   oferta:         { fecha_inicio: string | null } | null;
 };
 
+export type ContratoClienteView = {
+  id:                  string;
+  precio_final:        number;
+  garantia_anos:       number | null;
+  estado:              string;
+  generado_en:         string;
+  firmado_en:          string | null;
+  url_pdf:             string | null;
+  descripcion_trabajo: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class ContratoRepository {
   private auth = inject(AuthSupabaseService);
@@ -24,6 +35,16 @@ export class ContratoRepository {
       .maybeSingle();
     if (error) return null;
     return data as ContratoHistorialItem | null;
+  }
+
+  async findForClientByExpedienteId(expedienteId: string): Promise<ContratoClienteView | null> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select('id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo')
+      .eq('expediente_id', expedienteId)
+      .maybeSingle();
+    if (error) return null;
+    return data as ContratoClienteView | null;
   }
 
   async findSimpleByExpedienteId(expedienteId: string): Promise<{ id: string; url_pdf: string | null } | null> {

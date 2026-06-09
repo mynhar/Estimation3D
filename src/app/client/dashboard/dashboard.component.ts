@@ -38,6 +38,18 @@ const FASE_MAP: Record<string, number> = {
   cancelado:     0,
 };
 
+interface ContratoClienteInfo {
+  id:                   string;
+  precio_final:         number;
+  garantia_anos:        number | null;
+  estado:               string;
+  url_pdf:              string | null;
+  descripcion_trabajo:  string;
+  constructor_nombre:   string;
+  constructor_telefono: string | null;
+  constructor_email:    string | null;
+}
+
 // Token-based CSS class per estado
 const ESTADO_CLASE: Record<string, string> = {
   nuevo:         'estado-badge--nuevo',
@@ -47,6 +59,18 @@ const ESTADO_CLASE: Record<string, string> = {
   adjudicado:    'estado-badge--adjudicado',
   contratado:    'estado-badge--contratado',
   cancelado:     'estado-badge--cancelado',
+};
+
+// Avance contrato — pasos y porcentajes
+const CONTRATO_PASOS = [
+  { key: 'generado',     pct: 25,  icon: 'bi-file-earmark-text' },
+  { key: 'firmado',      pct: 50,  icon: 'bi-pen'               },
+  { key: 'en_ejecucion', pct: 75,  icon: 'bi-tools'             },
+  { key: 'completado',   pct: 100, icon: 'bi-house-check'       },
+] as const;
+
+const CONTRATO_PCT: Record<string, number> = {
+  generado: 25, firmado: 50, en_ejecucion: 75, completado: 100, cancelado: 0,
 };
 
 export interface TimelineEvento {
@@ -107,7 +131,14 @@ export class DashboardComponent implements OnInit {
   ofertasHistorial  = signal<OfertaHistorialItem[]>([]);
   contratoHistorial = signal<ContratoHistorialItem | null>(null);
 
-  readonly FASES = FASES;
+  fotosExp         = signal<ArchivoRow[]>([]);
+  documentosExp    = signal<ArchivoRow[]>([]);
+  contratoCompleto = signal<ContratoClienteInfo | null>(null);
+  contratoPdfUrl   = signal<string | null>(null);
+  eliminando       = signal<string | null>(null);
+
+  readonly FASES          = FASES;
+  readonly CONTRATO_PASOS = CONTRATO_PASOS;
 
   // ── KPI computed ──────────────────────────────────────────────────────────
 
@@ -154,6 +185,19 @@ export class DashboardComponent implements OnInit {
   tieneTour    = computed(() => this.tourUrls().length > 0);
   tieneVideos  = computed(() => this.videos().length > 0);
   tieneMedia   = computed(() => this.tieneTour() || this.tieneVideos());
+
+  tieneEstimacion = computed(() => !!this.detalleActivo()?.estimador_nombre);
+  tieneContrato   = computed(() => !!this.contratoCompleto());
+  todosDocs       = computed(() => [...this.fotosExp(), ...this.documentosExp()]);
+
+  // ── Avance computed ───────────────────────────────────────────────────────
+
+  expCancelado = computed(() => this.expedienteActivo()?.estado === 'cancelado');
+
+  contratoAvancePct = computed((): number => {
+    const ct = this.contratoCompleto();
+    return ct ? (CONTRATO_PCT[ct.estado] ?? 0) : 0;
+  });
 
   videoActivoUrl = computed((): string | null => {
     if (this.activaEsTour()) return null;
@@ -440,6 +484,14 @@ export class DashboardComponent implements OnInit {
   isFaseDone(idx: number): boolean   { return this.faseActual() > idx + 1; }
   isFaseActive(idx: number): boolean { return this.faseActual() === idx + 1; }
 
+  contratoPasoEstado(key: string): 'done' | 'active' | 'pending' {
+    const pct     = this.contratoAvancePct();
+    const pasoPct = CONTRATO_PCT[key] ?? 0;
+    if (pct > pasoPct)          return 'done';
+    if (pct === pasoPct && pct > 0) return 'active';
+    return 'pending';
+  }
+
   formatFecha(valor: string | null | undefined): string {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
@@ -456,6 +508,44 @@ export class DashboardComponent implements OnInit {
 
   seleccionarMedia(idx: number) {
     this.mediaActiva.set(idx);
+  }
+
+  formatPrecio(precio: number): string {
+    // Use locales where CAD renders as "CA$" or "$CA" — never plain "$" which looks like USD
+    const locale = this.translate.currentLang === 'fr' ? 'fr-FR'
+                 : this.translate.currentLang === 'en' ? 'en-US'
+                 : 'es-CR';
+    return new Intl.NumberFormat(locale, {
+      style: 'currency', currency: 'CAD',
+      minimumFractionDigits: 0, maximumFractionDigits: 0,
+    }).format(precio);
+  }
+
+  formatGarantia(anos: number | null): string {
+    if (!anos) return '—';
+    const lang = this.translate.currentLang;
+    if (lang === 'fr') return anos === 1 ? '1 an'  : `${anos} ans`;
+    if (lang === 'en') return anos === 1 ? '1 year' : `${anos} years`;
+    return anos === 1 ? '1 año' : `${anos} años`;
+  }
+
+  contratoEstadoTexto(estado: string): string {
+    const map: Record<string, Record<string, string>> = {
+      fr: { generado: 'Généré', firmado: 'Signé', en_ejecucion: 'En cours', completado: 'Complété', cancelado: 'Annulé' },
+      en: { generado: 'Generated', firmado: 'Signed', en_ejecucion: 'In progress', completado: 'Completed', cancelado: 'Cancelled' },
+      es: { generado: 'Generado', firmado: 'Firmado', en_ejecucion: 'En ejecución', completado: 'Completado', cancelado: 'Cancelado' },
+    };
+    return map[this.translate.currentLang]?.[estado] ?? estado;
+  }
+
+  mimeIcon(mime: string): string {
+    if (mime.startsWith('image/')) return 'bi-image';
+    if (mime.includes('pdf'))      return 'bi-file-earmark-pdf';
+    return 'bi-file-earmark';
+  }
+
+  docUrl(archivo: ArchivoRow): string {
+    return this.archivoService.publicUrl(archivo.url_storage);
   }
 
   solicitarFullscreen() {
@@ -511,19 +601,46 @@ export class DashboardComponent implements OnInit {
     this.detalleActivo.set(null);
     this.tourUrls.set([]);
     this.videos.set([]);
+    this.fotosExp.set([]);
+    this.documentosExp.set([]);
+    this.contratoCompleto.set(null);
+    this.contratoPdfUrl.set(null);
+    this.eliminando.set(null);
     this.ofertasHistorial.set([]);
     this.contratoHistorial.set(null);
     this.calExpandido.set(false);
     await this.cargarDetalle(id);
   }
 
+  async eliminarArchivo(archivo: ArchivoRow): Promise<void> {
+    this.eliminando.set(archivo.id);
+    try {
+      await this.archivoService.eliminar(archivo);
+      const id = this.idSeleccionado() ?? this.expedienteActivo()?.id;
+      if (!id) return;
+      const archivos = await this.archivoService.cargarTodos(id);
+      this.videos.set(archivos.videos);
+      this.fotosExp.set(archivos.fotos);
+      this.documentosExp.set(archivos.documentos);
+    } catch (e: any) {
+      console.error('[Dashboard delete]', e.message);
+    } finally {
+      this.eliminando.set(null);
+    }
+  }
+
   private async cargarDetalle(id: string) {
     this.cargandoDetalle.set(true);
     this.mediaActiva.set(0);
 
-    const [detalleResult, vidsResult] = await Promise.allSettled([
+    const [detalleResult, vidsResult, contratoResult] = await Promise.allSettled([
       this.expedienteService.getVistaParaCliente(id),
-      this.archivoService.listarPorExpediente(id),
+      this.archivoService.cargarTodos(id),
+      this.auth.client
+        .from('contrato')
+        .select('id, precio_final, garantia_anos, estado, url_pdf, descripcion_trabajo, constructor:constructor_id ( nombre, apellido, telefono, email )')
+        .eq('expediente_id', id)
+        .maybeSingle() as unknown as Promise<{ data: any; error: any }>,
     ]);
 
     if (detalleResult.status === 'fulfilled') {
@@ -534,9 +651,43 @@ export class DashboardComponent implements OnInit {
     }
     if (vidsResult.status === 'fulfilled') {
       this.videos.set(vidsResult.value.videos);
+      this.fotosExp.set(vidsResult.value.fotos);
+      this.documentosExp.set(vidsResult.value.documentos);
     } else {
       console.error('[Dashboard videos]', (vidsResult.reason as any)?.message);
       this.videos.set([]);
+      this.fotosExp.set([]);
+      this.documentosExp.set([]);
+    }
+
+    if (contratoResult.status === 'fulfilled' && !contratoResult.value.error) {
+      const cd = contratoResult.value.data;
+      if (cd) {
+        this.contratoCompleto.set({
+          id:                   cd.id,
+          precio_final:         cd.precio_final,
+          garantia_anos:        cd.garantia_anos,
+          estado:               cd.estado,
+          url_pdf:              cd.url_pdf,
+          descripcion_trabajo:  cd.descripcion_trabajo,
+          constructor_nombre:   cd.constructor
+            ? `${cd.constructor.nombre} ${cd.constructor.apellido}`.trim()
+            : '—',
+          constructor_telefono: cd.constructor?.telefono ?? null,
+          constructor_email:    cd.constructor?.email    ?? null,
+        });
+        if (cd.url_pdf) {
+          this.auth.client.storage
+            .from('contratos')
+            .createSignedUrl(cd.url_pdf, 3600)
+            .then(({ data }) => this.contratoPdfUrl.set(data?.signedUrl ?? null))
+            .catch(() => {});
+        }
+      } else {
+        this.contratoCompleto.set(null);
+      }
+    } else {
+      this.contratoCompleto.set(null);
     }
 
     // Historial: ofertas y contrato del expediente

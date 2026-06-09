@@ -577,7 +577,7 @@
                 </div>
               }
 
-              @if (fotos().length > 0) {
+              @if (otrosFotos().length > 0) {
                 <hr class="detail-divider my-4" />
                 <div class="d-flex align-items-center gap-2 mb-3">
                   <p class="section-label mb-0">
@@ -591,10 +591,10 @@
                     </svg>
                     {{ 'file.site_photos' | translate }}
                   </p>
-                  <span class="archivo-count">{{ fotos().length }}</span>
+                  <span class="archivo-count">{{ otrosFotos().length }}</span>
                 </div>
                 <div class="photos-grid">
-                  @for (foto of fotos(); track foto.id) {
+                  @for (foto of otrosFotos(); track foto.id) {
                     <button type="button" class="photo-thumb"
                             (click)="abrirFoto(foto)"
                             [attr.aria-label]="foto.nombre_archivo">
@@ -616,7 +616,7 @@
                 </div>
               }
 
-              @if (documentos().length > 0) {
+              @if (otrosDocs().length > 0) {
                 <hr class="detail-divider my-4" />
                 <div class="d-flex align-items-center gap-2 mb-3">
                   <p class="section-label mb-0">
@@ -630,10 +630,10 @@
                     </svg>
                     {{ 'file.technical_docs' | translate }}
                   </p>
-                  <span class="archivo-count">{{ documentos().length }}</span>
+                  <span class="archivo-count">{{ otrosDocs().length }}</span>
                 </div>
                 <div class="doc-list">
-                  @for (doc of documentos(); track doc.id) {
+                  @for (doc of otrosDocs(); track doc.id) {
                     <div class="file-row">
                       <div class="file-row__icon" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -650,6 +650,53 @@
                       </div>
                       <div class="file-row__actions">
                         <a [href]="publicUrl(doc.url_storage)" target="_blank" rel="noopener"
+                           class="btn-file-open">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                            <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                          </svg>
+                          {{ 'common.open' | translate }}
+                        </a>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (otrosVideos().length > 0) {
+                <hr class="detail-divider my-4" />
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <p class="section-label mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         class="section-label__icon me-1" aria-hidden="true">
+                      <path d="m22 8-6 4 6 4V8z"/>
+                      <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                    </svg>
+                    {{ 'file.my_videos' | translate }}
+                  </p>
+                  <span class="archivo-count">{{ otrosVideos().length }}</span>
+                </div>
+                <div class="doc-list">
+                  @for (v of otrosVideos(); track v.id) {
+                    <div class="file-row">
+                      <div class="file-row__icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m22 8-6 4 6 4V8z"/>
+                          <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                        </svg>
+                      </div>
+                      <div class="file-row__info">
+                        <p class="file-row__name">{{ v.nombre_archivo }}</p>
+                        <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                      </div>
+                      <div class="file-row__actions">
+                        <a [href]="publicUrl(v.url_storage)" target="_blank" rel="noopener"
                            class="btn-file-open">
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                fill="none" stroke="currentColor" stroke-width="1.5"
@@ -693,6 +740,276 @@
             </div>
           </div>
         }
+
+        <!-- Mis archivos — subida de archivos del cliente -->
+        <div class="detail-card">
+          <div class="detail-card__head">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 class="section-label__icon me-2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+            <span class="section-label">{{ 'file.my_uploads' | translate }}</span>
+          </div>
+          <div class="detail-card__body">
+            <p class="upload-hint mb-4">{{ 'file.client_files_hint' | translate }}</p>
+
+            @if (errorSubida()) {
+              <div class="pending-notice mb-4" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     class="me-2 flex-shrink-0" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" x2="9" y1="9" y2="15"/>
+                  <line x1="9" x2="15" y1="9" y2="15"/>
+                </svg>
+                {{ errorSubida() }}
+              </div>
+            }
+
+            <div class="upload-actions">
+              <!-- Fotos -->
+              <label class="upload-btn" [class.upload-btn--busy]="subiendo() !== null">
+                @if (subiendo() === 'foto') {
+                  <span class="upload-spinner" aria-hidden="true"></span>
+                  {{ 'file.uploading' | translate }}
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                    <circle cx="9" cy="9" r="2"/>
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                  </svg>
+                  {{ 'file.add_photos' | translate }}
+                }
+                <input type="file" accept="image/*" class="visually-hidden"
+                       [disabled]="subiendo() !== null"
+                       (change)="subirArchivo('foto', $event)">
+              </label>
+
+              <!-- Videos -->
+              <label class="upload-btn" [class.upload-btn--busy]="subiendo() !== null">
+                @if (subiendo() === 'video') {
+                  <span class="upload-spinner" aria-hidden="true"></span>
+                  {{ 'file.uploading' | translate }}
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m22 8-6 4 6 4V8z"/>
+                    <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                  </svg>
+                  {{ 'file.add_videos' | translate }}
+                }
+                <input type="file" accept="video/*" class="visually-hidden"
+                       [disabled]="subiendo() !== null"
+                       (change)="subirArchivo('video', $event)">
+              </label>
+
+              <!-- Documentos -->
+              <label class="upload-btn" [class.upload-btn--busy]="subiendo() !== null">
+                @if (subiendo() === 'documento') {
+                  <span class="upload-spinner" aria-hidden="true"></span>
+                  {{ 'file.uploading' | translate }}
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                  </svg>
+                  {{ 'file.add_docs' | translate }}
+                }
+                <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" class="visually-hidden"
+                       [disabled]="subiendo() !== null"
+                       (change)="subirArchivo('documento', $event)">
+              </label>
+            </div>
+
+            <!-- ── Fotos del cliente ─── -->
+            @if (misFotos().length > 0) {
+              <hr class="detail-divider my-4" />
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <p class="section-label mb-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       class="section-label__icon me-1" aria-hidden="true">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                    <circle cx="9" cy="9" r="2"/>
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                  </svg>
+                  {{ 'file.my_fotos' | translate }}
+                </p>
+                <span class="archivo-count">{{ misFotos().length }}</span>
+              </div>
+              <div class="photos-grid">
+                @for (foto of misFotos(); track foto.id) {
+                  <div class="photo-thumb photo-thumb--client">
+                    <img [src]="publicUrl(foto.url_storage)" [alt]="foto.nombre_archivo"
+                         class="photo-thumb__img" (click)="abrirFoto(foto)" />
+                    <button type="button" class="thumb-delete"
+                            [disabled]="eliminando() !== null"
+                            (click)="eliminarArchivo(foto)"
+                            [title]="'common.delete' | translate">
+                      @if (eliminando() === foto.id) {
+                        <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6"/><path d="M14 11v6"/>
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ── Videos del cliente ─── -->
+            @if (misVideos().length > 0) {
+              <hr class="detail-divider my-4" />
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <p class="section-label mb-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       class="section-label__icon me-1" aria-hidden="true">
+                    <path d="m22 8-6 4 6 4V8z"/>
+                    <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                  </svg>
+                  {{ 'file.my_videos' | translate }}
+                </p>
+                <span class="archivo-count">{{ misVideos().length }}</span>
+              </div>
+              <div class="doc-list">
+                @for (v of misVideos(); track v.id) {
+                  <div class="file-row">
+                    <div class="file-row__icon" aria-hidden="true">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m22 8-6 4 6 4V8z"/>
+                        <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                      </svg>
+                    </div>
+                    <div class="file-row__info">
+                      <p class="file-row__name">{{ v.nombre_archivo }}</p>
+                      <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                    </div>
+                    <div class="file-row__actions">
+                      <a [href]="publicUrl(v.url_storage)" target="_blank" rel="noopener"
+                         class="btn-file-open">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                          <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                        </svg>
+                        {{ 'common.open' | translate }}
+                      </a>
+                      <button type="button" class="btn-file-delete"
+                              [disabled]="eliminando() !== null"
+                              (click)="eliminarArchivo(v)"
+                              [title]="'common.delete' | translate">
+                        @if (eliminando() === v.id) {
+                          <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                          </svg>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ── Documentos del cliente ─── -->
+            @if (misDocs().length > 0) {
+              <hr class="detail-divider my-4" />
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <p class="section-label mb-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="1.5"
+                       stroke-linecap="round" stroke-linejoin="round"
+                       class="section-label__icon me-1" aria-hidden="true">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                  </svg>
+                  {{ 'file.my_docs' | translate }}
+                </p>
+                <span class="archivo-count">{{ misDocs().length }}</span>
+              </div>
+              <div class="doc-list">
+                @for (doc of misDocs(); track doc.id) {
+                  <div class="file-row">
+                    <div class="file-row__icon" aria-hidden="true">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                        <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                      </svg>
+                    </div>
+                    <div class="file-row__info">
+                      <p class="file-row__name">{{ doc.nombre_archivo }}</p>
+                      <p class="file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                    </div>
+                    <div class="file-row__actions">
+                      <a [href]="publicUrl(doc.url_storage)" target="_blank" rel="noopener"
+                         class="btn-file-open">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                          <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                        </svg>
+                        {{ 'common.open' | translate }}
+                      </a>
+                      <button type="button" class="btn-file-delete"
+                              [disabled]="eliminando() !== null"
+                              (click)="eliminarArchivo(doc)"
+                              [title]="'common.delete' | translate">
+                        @if (eliminando() === doc.id) {
+                          <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                          </svg>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        </div>
 
       </div><!-- /col-lg-8 -->
 
@@ -791,6 +1108,102 @@
                   }
                 </div>
 
+                @if (ofertaAceptada()!.documentos.length > 0) {
+                  <hr class="detail-divider my-4" />
+                  <div class="d-flex align-items-center gap-2 mb-3">
+                    <p class="section-label mb-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round"
+                           class="section-label__icon me-1" aria-hidden="true">
+                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                        <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                      </svg>
+                      {{ 'file.constructor_docs' | translate }}
+                    </p>
+                    <span class="archivo-count">{{ ofertaAceptada()!.documentos.length }}</span>
+                  </div>
+                  <div class="doc-list">
+                    @for (doc of ofertaAceptada()!.documentos; track doc.id) {
+                      <div class="file-row">
+                        <div class="file-row__icon" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                            <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                            <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+                          </svg>
+                        </div>
+                        <div class="file-row__info">
+                          <p class="file-row__name">{{ doc.nombre_archivo }}</p>
+                          <p class="file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                        </div>
+                        <div class="file-row__actions">
+                          <a [href]="publicUrl(doc.url_storage)" target="_blank" rel="noopener"
+                             class="btn-file-open">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                              <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                            </svg>
+                            {{ 'common.open' | translate }}
+                          </a>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (ofertaAceptada()!.videos.length > 0) {
+                  <hr class="detail-divider my-4" />
+                  <div class="d-flex align-items-center gap-2 mb-3">
+                    <p class="section-label mb-0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="1.5"
+                           stroke-linecap="round" stroke-linejoin="round"
+                           class="section-label__icon me-1" aria-hidden="true">
+                        <path d="m22 8-6 4 6 4V8z"/>
+                        <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                      </svg>
+                      {{ 'file.constructor_videos' | translate }}
+                    </p>
+                    <span class="archivo-count">{{ ofertaAceptada()!.videos.length }}</span>
+                  </div>
+                  <div class="doc-list">
+                    @for (v of ofertaAceptada()!.videos; track v.id) {
+                      <div class="file-row">
+                        <div class="file-row__icon" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="1.5"
+                               stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m22 8-6 4 6 4V8z"/>
+                            <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+                          </svg>
+                        </div>
+                        <div class="file-row__info">
+                          <p class="file-row__name">{{ v.nombre_archivo }}</p>
+                          <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                        </div>
+                        <div class="file-row__actions">
+                          <a [href]="publicUrl(v.url_storage)" target="_blank" rel="noopener"
+                             class="btn-file-open">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                              <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+                            </svg>
+                            {{ 'common.open' | translate }}
+                          </a>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
               </div>
             </div>
 
@@ -833,6 +1246,85 @@
               </div>
               <p class="pending-card__title">{{ 'file.no_builder' | translate }}</p>
               <p class="pending-card__text mb-0">{{ 'file.waiting_offers' | translate }}</p>
+            </div>
+          }
+
+          @if (contrato()) {
+            <div class="detail-card">
+              <div class="detail-card__head">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.5"
+                     stroke-linecap="round" stroke-linejoin="round"
+                     class="section-label__icon me-2" aria-hidden="true">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                  <path d="m9 15 2 2 4-4"/>
+                </svg>
+                <span class="section-label">{{ 'file.contract' | translate }}</span>
+              </div>
+              <div class="detail-card__body">
+
+                <div class="mb-3">
+                  <p class="info-label mb-2">{{ 'dashboard_client.contract_status' | translate }}</p>
+                  <span class="badge rounded-pill px-3 py-1
+                    {{ contrato()!.estado === 'firmado' || contrato()!.estado === 'completado'
+                        ? 'bg-success-subtle text-success'
+                        : contrato()!.estado === 'cancelado'
+                          ? 'bg-secondary-subtle text-secondary'
+                          : 'bg-warning-subtle text-warning-emphasis' }}">
+                    {{ ('contrato_estado.' + contrato()!.estado) | translate }}
+                  </span>
+                </div>
+
+                <div class="precio-block mb-3">
+                  <p class="info-label mb-1">{{ 'dashboard_client.contract_price' | translate }}</p>
+                  <p class="precio-valor mb-0">{{ formatCosto(contrato()!.precio_final) }}</p>
+                </div>
+
+                @if (contrato()!.garantia_anos !== null) {
+                  <div class="mb-3">
+                    <p class="info-label">{{ 'offer.warranty' | translate }}</p>
+                    <p class="info-value">{{ contrato()!.garantia_anos }} {{ 'offer.years' | translate }}</p>
+                  </div>
+                }
+
+                <hr class="detail-divider" />
+
+                <div class="row g-3 mt-1">
+                  <div class="col-12">
+                    <p class="info-label">{{ 'admin_contract_detail.generado_en' | translate }}</p>
+                    <p class="info-value">{{ formatFecha(contrato()!.generado_en) }}</p>
+                  </div>
+                  @if (contrato()!.firmado_en) {
+                    <div class="col-12">
+                      <p class="info-label">{{ 'admin_contract_detail.firmado_en' | translate }}</p>
+                      <p class="info-value">{{ formatFecha(contrato()!.firmado_en) }}</p>
+                    </div>
+                  }
+                </div>
+
+                @if (contrato()!.descripcion_trabajo) {
+                  <hr class="detail-divider my-3" />
+                  <p class="info-label">{{ 'dashboard_client.work_description' | translate }}</p>
+                  <p class="descripcion-block mb-0">{{ contrato()!.descripcion_trabajo }}</p>
+                }
+
+                @if (contratoPdfUrl()) {
+                  <hr class="detail-divider my-3" />
+                  <a [href]="contratoPdfUrl()!" target="_blank" rel="noopener"
+                     class="btn-file-open w-100 justify-content-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" x2="12" y1="15" y2="3"/>
+                    </svg>
+                    {{ 'contract_list.view_pdf' | translate }}
+                  </a>
+                }
+
+              </div>
             </div>
           }
 

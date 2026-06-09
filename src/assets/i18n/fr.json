@@ -193,7 +193,26 @@
     "timeline_title": "Historique",
     "timeline_empty": "Aucun événement à afficher pour le moment.",
     "progress_label": "Progression du dossier",
-    "key_dates": "Dates du dossier"
+    "key_dates": "Dates du dossier",
+    "estimator_report": "Rapport de l'estimateur",
+    "estimator_label": "Estimateur",
+    "estimator_info": "Informations de l'estimateur",
+    "cost_estimate": "Coût estimé",
+    "estimator_notes": "Notes de l'estimateur",
+    "estimation_pending": "L'estimation est en cours…",
+    "constructor_section": "Constructeur sélectionné",
+    "constructor_label": "Constructeur",
+    "contract_price": "Prix final",
+    "contract_warranty": "Garantie",
+    "contract_status": "État du contrat",
+    "work_description": "Description des travaux",
+    "view_contract": "Voir le contrat",
+    "photos": "Photos",
+    "documents_label": "Documents",
+    "avance_expediente": "Avancement du dossier",
+    "avance_contrato": "Avancement du contrat",
+    "contrato_pendiente": "Le contrat sera disponible une fois un constructeur sélectionné.",
+    "contrato_cancelado": "Ce contrat a été annulé."
   },
   "timeline": {
     "created": "Dossier créé",
@@ -303,7 +322,23 @@
     "filter_label": "Filtrer les dossiers",
     "no_match": "Aucun dossier ne correspond au filtre sélectionné.",
     "review_offers_received": "Voir les offres reçues",
-    "contracted_active": "Contrat actif"
+    "contracted_active": "Contrat actif",
+    "constructor_docs": "Documents du constructeur",
+    "constructor_videos": "Vidéos du constructeur",
+    "no_constructor_docs": "Aucun document joint par le constructeur",
+    "no_constructor_videos": "Aucune vidéo jointe par le constructeur",
+    "my_uploads": "Mes fichiers",
+    "client_files_hint": "Ajoutez des photos, vidéos ou documents à votre dossier.",
+    "add_photos": "Ajouter des photos",
+    "add_videos": "Ajouter des vidéos",
+    "add_docs": "Ajouter des documents",
+    "uploading": "Téléversement…",
+    "upload_error": "Erreur lors du téléversement",
+    "my_fotos": "Mes photos",
+    "my_videos": "Mes vidéos",
+    "my_docs": "Mes documents",
+    "contract": "Contrat",
+    "photo_viewer": "Visionneuse de photos"
   },
   "offer": {
     "price": "Prix",
@@ -357,7 +392,10 @@
     "section_pending": "En attente de révision",
     "banner_plural": "Vous avez {{count}} projets avec des offres en attente de révision.",
     "pending_plural": "en attente",
-    "total_label": "dossiers"
+    "total_label": "dossiers",
+    "col_contractor": "Entrepreneur",
+    "col_price": "Prix",
+    "col_status": "Statut"
   },
   "my_offers": {
     "title": "Mes offres",
@@ -1215,7 +1253,6 @@
     "err_create": "Erreur lors de la création du service.",
     "success_created": "Service créé avec succès."
   },
-
   "admin_dashboard": {
     "eyebrow": "Vue d'ensemble",
     "title": "Tableau de bord",
@@ -1223,25 +1260,20 @@
     "refresh": "Actualiser",
     "refreshed_at": "Mis à jour à",
     "retry": "Réessayer",
-
     "kpi_exp": "Dossiers",
     "kpi_est": "Estimations",
     "kpi_con": "Entrepreneurs",
     "kpi_ctr": "Contrats",
-
     "kpi_sub_cancelled": "annulés",
     "kpi_sub_unassigned": "non assignés",
     "kpi_sub_offers_sent": "offres envoyées",
-
     "panel_exp": "Entonnoir des dossiers",
     "panel_est": "Estimations",
     "panel_con": "Entrepreneurs et offres",
     "panel_ctr": "Contrats",
-
     "panel_total_suffix": "total",
     "panel_completed_suffix": "complétés",
     "panel_active_suffix": "actifs",
-
     "mini_unassigned": "Non assignés",
     "mini_in_progress": "En estimation",
     "mini_completed": "Estimés",
@@ -1250,24 +1282,19 @@
     "mini_files_on_offer": "En cours d'offre",
     "mini_total_contracts": "Contrats totaux",
     "mini_contract_value": "Valeur totale active",
-
     "cost_avg": "Coût moyen estimé",
-
     "est_label_unassigned": "Non assignés",
     "est_label_in_estimation": "En estimation",
     "est_label_estimated": "Estimés",
-
     "contract_generado": "Généré",
     "contract_firmado": "Signé",
     "contract_en_ejecucion": "En cours",
     "contract_completado": "Complété",
     "contract_cancelado": "Annulé",
-
     "tipo_expediente": "Dossier",
     "tipo_estimacion": "Estimation",
     "tipo_oferta": "Offre",
     "tipo_contrato": "Contrat",
-
     "tl_title": "Activité récente",
     "tl_subtitle": "Derniers événements système sur tous les processus.",
     "tl_filter_exp": "Dossiers",
@@ -1276,18 +1303,29 @@
     "tl_filter_ctr": "Contrats",
     "tl_empty": "Aucun événement à afficher.",
     "tl_loading": "Chargement de l'activité…",
-
     "tl_event_exp_created": "Dossier créé",
     "tl_event_est_created": "Estimation enregistrée",
     "tl_event_ofe_sent": "Offre soumise",
     "tl_event_ctr_generated": "Contrat généré",
     "tl_event_ctr_signed": "Contrat signé"
   },
-
   "http": {
-    "offline":      "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
+    "offline": "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
     "unauthorized": "Votre session a expiré. Veuillez vous reconnecter.",
-    "forbidden":    "Vous n'avez pas la permission d'effectuer cette action.",
+    "forbidden": "Vous n'avez pas la permission d'effectuer cette action.",
     "server_error": "Erreur serveur. Veuillez réessayer plus tard."
+  },
+  "contrato_estado": {
+    "generado": "Contrat généré",
+    "firmado": "Contrat signé",
+    "en_ejecucion": "En cours",
+    "completado": "Travaux complétés",
+    "cancelado": "Annulé"
+  },
+  "contrato_estado_desc": {
+    "generado": "Votre contrat est prêt à être examiné.",
+    "firmado": "Le contrat est signé. Les travaux vont commencer.",
+    "en_ejecucion": "Les travaux sont en cours.",
+    "completado": "Les travaux sont terminés."
   }
 }

@@ -224,6 +224,16 @@ export const ESTADO_BADGE_CLIENTE: Record<string, { texto: string; clase: string
   cancelado:  { texto: 'Cancelado',  clase: 'bg-secondary' },
 };
 
+/** Oferta resumida para mostrar dentro de un expediente (vista cliente). */
+export interface OfertaResumen {
+  id:                 string;
+  constructor_nombre: string;
+  precio:             number;
+  estado:             string;
+  plazo_semanas_min:  number | null;
+  plazo_semanas_max:  number | null;
+}
+
 /** Forma aplanada para la vista de ofertas recibidas (módulo cliente). */
 export interface ExpedienteConOfertas {
   id: string;
@@ -242,6 +252,7 @@ export interface ExpedienteConOfertas {
   canton: string;
   distrito: string;
   total_ofertas: number;
+  ofertas: OfertaResumen[];
 }
 
 /** Mapa estado → { texto, clase } para la vista de ofertas recibidas (cliente). */

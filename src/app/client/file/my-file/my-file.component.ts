@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { OfertaService } from '../../../services/oferta.service';
-import { ArchivoService } from '../../../services/archivo.service';
+import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../../models';
+import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
+import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 
 
 @Component({
@@ -22,16 +24,34 @@ export class MyFileComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private ofertaService     = inject(OfertaService);
   private archivoService    = inject(ArchivoService);
+  private auth              = inject(AuthSupabaseService);
+  private contratoRepo      = inject(ContratoRepository);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
+
+  private expedienteId = '';
 
   detalle        = signal<ExpedienteVistaCliente | null>(null);
   ofertaAceptada = signal<OfertaConConstructor | null>(null);
   fotos          = signal<ArchivoRow[]>([]);
+  videos         = signal<ArchivoRow[]>([]);
   documentos     = signal<ArchivoRow[]>([]);
+  contrato       = signal<ContratoClienteView | null>(null);
   fotoAmpliada   = signal<string | null>(null);
   cargando       = signal(true);
   errorMsg       = signal('');
+  subiendo        = signal<TipoArchivo | null>(null);
+  errorSubida     = signal('');
+  contratoPdfUrl  = signal<string | null>(null);
+  currentUserId   = signal<string | null>(null);
+  eliminando      = signal<string | null>(null);
+
+  misFotos    = computed(() => this.fotos().filter(f => f.subido_por === this.currentUserId()));
+  misVideos   = computed(() => this.videos().filter(f => f.subido_por === this.currentUserId()));
+  misDocs     = computed(() => this.documentos().filter(f => f.subido_por === this.currentUserId()));
+  otrosFotos  = computed(() => this.fotos().filter(f => f.subido_por !== this.currentUserId()));
+  otrosVideos = computed(() => this.videos().filter(f => f.subido_por !== this.currentUserId()));
+  otrosDocs   = computed(() => this.documentos().filter(f => f.subido_por !== this.currentUserId()));
 
   readonly ESTADO_CFG: Record<string, { clase: string; icono: string }> = {
     nuevo:         { clase: 'bg-primary-subtle text-primary',            icono: 'bi-inbox' },
@@ -93,22 +113,71 @@ export class MyFileComponent implements OnInit {
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando.set(false); return; }
+    this.expedienteId = id;
 
     try {
-      const [detalle, ofertas, archivos] = await Promise.all([
+      const [detalle, ofertas, archivos, contrato, { data: { user } }] = await Promise.all([
         this.expedienteService.getVistaParaCliente(id),
         this.ofertaService.getOfertasDeExpediente(id),
         this.archivoService.cargarTodos(id),
+        this.contratoRepo.findForClientByExpedienteId(id),
+        this.auth.client.auth.getUser(),
       ]);
+      this.currentUserId.set(user?.id ?? null);
       this.detalle.set(detalle);
       this.ofertaAceptada.set(ofertas.find(o => o.estado === 'aceptada') ?? null);
       this.fotos.set(archivos.fotos);
+      this.videos.set(archivos.videos);
       this.documentos.set(archivos.documentos);
+      this.contrato.set(contrato);
+      if (contrato?.url_pdf) {
+        this.contratoRepo.getSignedUrl(contrato.url_pdf)
+          .then(url => this.contratoPdfUrl.set(url))
+          .catch(() => {});
+      }
     } catch (e: any) {
       console.error('[MyFile]', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  async subirArchivo(tipo: TipoArchivo, event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file  = input.files?.[0];
+    const uid   = this.currentUserId();
+    if (!file || !this.expedienteId || !uid) return;
+
+    this.subiendo.set(tipo);
+    this.errorSubida.set('');
+    try {
+      await this.archivoService.subir(this.expedienteId, tipo, file, uid);
+      const archivos = await this.archivoService.cargarTodos(this.expedienteId);
+      this.fotos.set(archivos.fotos);
+      this.videos.set(archivos.videos);
+      this.documentos.set(archivos.documentos);
+      input.value = '';
+    } catch (e: any) {
+      this.errorSubida.set(e.message ?? 'upload_error');
+    } finally {
+      this.subiendo.set(null);
+    }
+  }
+
+  async eliminarArchivo(archivo: ArchivoRow): Promise<void> {
+    this.eliminando.set(archivo.id);
+    this.errorSubida.set('');
+    try {
+      await this.archivoService.eliminar(archivo);
+      const archivos = await this.archivoService.cargarTodos(this.expedienteId);
+      this.fotos.set(archivos.fotos);
+      this.videos.set(archivos.videos);
+      this.documentos.set(archivos.documentos);
+    } catch (e: any) {
+      this.errorSubida.set(e.message ?? 'delete_error');
+    } finally {
+      this.eliminando.set(null);
     }
   }
 

@@ -622,6 +622,109 @@
   color: var(--ds-gold-active);
 }
 
+/* ── Zona de subida de archivos del cliente ─────────────────────────────── */
+.upload-hint {
+  font-size: var(--ds-text-sm); color: var(--ds-ink-muted);
+}
+
+.upload-actions {
+  display: flex; flex-wrap: wrap; gap: var(--ds-space-2);
+}
+
+.upload-btn {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-ink-secondary);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium);
+  cursor: pointer;
+  transition:
+    border-color var(--ds-duration-fast) var(--ds-ease-out),
+    background   var(--ds-duration-fast) var(--ds-ease-out),
+    color        var(--ds-duration-fast) var(--ds-ease-out);
+}
+.upload-btn:hover:not(.upload-btn--busy) {
+  border-color: var(--ds-gold-soft);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+}
+.upload-btn--busy { opacity: 0.6; cursor: not-allowed; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.upload-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--ds-border-strong);
+  border-top-color: var(--ds-gold);
+  border-radius: var(--ds-radius-circle);
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+.upload-spinner--xs {
+  width: 10px; height: 10px;
+  border-width: 1.5px;
+}
+
+/* ── Miniatura del cliente — con botón de eliminar ────────────────────── */
+.photo-thumb--client {
+  position: relative;
+  cursor: pointer;
+}
+.photo-thumb--client .photo-thumb__img {
+  cursor: pointer;
+}
+.thumb-delete {
+  position: absolute; top: 4px; right: 4px;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ds-surface-overlay, rgba(251,250,246,.90));
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-circle);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--ds-duration-fast) var(--ds-ease-out),
+              color   var(--ds-duration-fast) var(--ds-ease-out);
+  padding: 0;
+}
+.photo-thumb--client:hover .thumb-delete,
+.photo-thumb--client:focus-within .thumb-delete { opacity: 1; }
+.thumb-delete:hover { color: var(--ds-danger, #c0392b); }
+.thumb-delete:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
+.thumb-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Botón de eliminar en file-row ──────────────────────────────────── */
+.btn-file-delete {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1);
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-ink-muted);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  cursor: pointer;
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              color        var(--ds-duration-fast) var(--ds-ease-out),
+              background   var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-file-delete:hover {
+  border-color: var(--ds-danger, #c0392b);
+  color: var(--ds-danger, #c0392b);
+  background: rgba(192,57,43,.06);
+}
+.btn-file-delete:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
+.btn-file-delete:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 991.98px) {
   .sidebar-sticky { position: static; }

@@ -3,6 +3,7 @@ import {
   ExpedienteAdmin,
   ExpedienteCliente,
   ExpedienteConOfertas,
+  OfertaResumen,
   ExpedienteConOfertaAdmin,
   ExpedienteDetalleCliente,
   ExpedienteParaEdicion,
@@ -143,18 +144,33 @@ export class ExpedienteService {
     const [servicios, locs, ofertasRaw] = await Promise.all([
       this.servicioRepo.findByIdsCompleto(servicioIds),
       this.localizacionRepo.findByExpedienteIds(expedienteIds),
-      this.ofertaRepo.findCountByExpedienteIds(expedienteIds),
+      this.ofertaRepo.findByExpedienteIds(expedienteIds),
     ]);
 
-    const countMap = new Map<string, number>();
-    for (const o of ofertasRaw) {
-      const key = String(o.expediente_id);
-      countMap.set(key, (countMap.get(key) ?? 0) + 1);
-    }
+    const constructorIds = [...new Set(ofertasRaw.map(o => o.constructor_id))];
+    const constructores  = constructorIds.length
+      ? await this.perfilRepo.findByIds(constructorIds)
+      : [];
 
     return exps.map(e => {
       const svc = servicios.find(s => s.id === e.servicio_id);
       const loc = locs.find(l => l.expediente_id === e.id);
+
+      const ofertas: OfertaResumen[] = ofertasRaw
+        .filter(o => o.expediente_id === e.id)
+        .sort((a, b) => a.precio - b.precio)
+        .map(o => {
+          const cons = constructores.find(c => c.id === o.constructor_id);
+          return {
+            id:                 o.id,
+            constructor_nombre: cons ? `${cons.nombre} ${cons.apellido}`.trim() : '—',
+            precio:             o.precio,
+            estado:             o.estado,
+            plazo_semanas_min:  o.plazo_semanas_min,
+            plazo_semanas_max:  o.plazo_semanas_max,
+          };
+        });
+
       return {
         id:              e.id,
         numero:          e.numero,
@@ -171,7 +187,8 @@ export class ExpedienteService {
         provincia:  loc?.provincia  ?? '—',
         canton:     loc?.canton     ?? '—',
         distrito:   loc?.distrito   ?? '—',
-        total_ofertas: countMap.get(String(e.id)) ?? 0,
+        total_ofertas: ofertas.length,
+        ofertas,
       } as ExpedienteConOfertas;
     });
   }

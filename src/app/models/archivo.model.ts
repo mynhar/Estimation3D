@@ -6,4 +6,5 @@ export interface ArchivoRow {
   url_storage: string;
   mime_type: string;
   tamano_bytes: number;
+  subido_por?: string;
 }

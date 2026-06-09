@@ -193,7 +193,26 @@
     "timeline_title": "History",
     "timeline_empty": "No events to display yet.",
     "progress_label": "File progress",
-    "key_dates": "Key dates"
+    "key_dates": "Key dates",
+    "estimator_report": "Estimator Report",
+    "estimator_label": "Estimator",
+    "estimator_info": "Estimator information",
+    "cost_estimate": "Estimated cost",
+    "estimator_notes": "Estimator notes",
+    "estimation_pending": "Estimation in progress…",
+    "constructor_section": "Selected builder",
+    "constructor_label": "Builder",
+    "contract_price": "Final price",
+    "contract_warranty": "Warranty",
+    "contract_status": "Contract status",
+    "work_description": "Work description",
+    "view_contract": "View contract",
+    "photos": "Photos",
+    "documents_label": "Documents",
+    "avance_expediente": "File progress",
+    "avance_contrato": "Contract progress",
+    "contrato_pendiente": "Contract will be available once a builder is selected.",
+    "contrato_cancelado": "This contract has been cancelled."
   },
   "timeline": {
     "created": "File created",
@@ -303,7 +322,23 @@
     "filter_label": "Filter files",
     "no_match": "No files match the selected filter.",
     "review_offers_received": "Review received offers",
-    "contracted_active": "Contract active"
+    "contracted_active": "Contract active",
+    "constructor_docs": "Constructor documents",
+    "constructor_videos": "Constructor videos",
+    "no_constructor_docs": "No documents attached by the constructor",
+    "no_constructor_videos": "No videos attached by the constructor",
+    "my_uploads": "My files",
+    "client_files_hint": "Add photos, videos or documents to your file.",
+    "add_photos": "Add photos",
+    "add_videos": "Add videos",
+    "add_docs": "Add documents",
+    "uploading": "Uploading…",
+    "upload_error": "Upload error",
+    "my_fotos": "My photos",
+    "my_videos": "My videos",
+    "my_docs": "My documents",
+    "contract": "Contract",
+    "photo_viewer": "Photo viewer"
   },
   "offer": {
     "price": "Price",
@@ -357,7 +392,10 @@
     "section_pending": "Pending review",
     "banner_plural": "You have {{count}} projects with offers pending review.",
     "pending_plural": "pending",
-    "total_label": "files"
+    "total_label": "files",
+    "col_contractor": "Contractor",
+    "col_price": "Price",
+    "col_status": "Status"
   },
   "my_offers": {
     "title": "My offers",
@@ -1215,7 +1253,6 @@
     "err_create": "Error creating the service.",
     "success_created": "Service created successfully."
   },
-
   "admin_dashboard": {
     "eyebrow": "Overview",
     "title": "Dashboard",
@@ -1223,25 +1260,20 @@
     "refresh": "Refresh",
     "refreshed_at": "Updated at",
     "retry": "Retry",
-
     "kpi_exp": "Files",
     "kpi_est": "Estimates",
     "kpi_con": "Contractors",
     "kpi_ctr": "Contracts",
-
     "kpi_sub_cancelled": "cancelled",
     "kpi_sub_unassigned": "unassigned",
     "kpi_sub_offers_sent": "offers sent",
-
     "panel_exp": "File funnel",
     "panel_est": "Estimates",
     "panel_con": "Contractors & offers",
     "panel_ctr": "Contracts",
-
     "panel_total_suffix": "total",
     "panel_completed_suffix": "completed",
     "panel_active_suffix": "active",
-
     "mini_unassigned": "Unassigned",
     "mini_in_progress": "In estimation",
     "mini_completed": "Estimated",
@@ -1250,24 +1282,19 @@
     "mini_files_on_offer": "In offer process",
     "mini_total_contracts": "Total contracts",
     "mini_contract_value": "Total active value",
-
     "cost_avg": "Average estimated cost",
-
     "est_label_unassigned": "Unassigned",
     "est_label_in_estimation": "In estimation",
     "est_label_estimated": "Estimated",
-
     "contract_generado": "Generated",
     "contract_firmado": "Signed",
     "contract_en_ejecucion": "In progress",
     "contract_completado": "Completed",
     "contract_cancelado": "Cancelled",
-
     "tipo_expediente": "File",
     "tipo_estimacion": "Estimate",
     "tipo_oferta": "Offer",
     "tipo_contrato": "Contract",
-
     "tl_title": "Recent activity",
     "tl_subtitle": "Latest system events across all processes.",
     "tl_filter_exp": "Files",
@@ -1276,18 +1303,29 @@
     "tl_filter_ctr": "Contracts",
     "tl_empty": "No events to display.",
     "tl_loading": "Loading activity…",
-
     "tl_event_exp_created": "File created",
     "tl_event_est_created": "Estimate recorded",
     "tl_event_ofe_sent": "Offer submitted",
     "tl_event_ctr_generated": "Contract generated",
     "tl_event_ctr_signed": "Contract signed"
   },
-
   "http": {
-    "offline":      "No internet connection. Check your network and try again.",
+    "offline": "No internet connection. Check your network and try again.",
     "unauthorized": "Your session has expired. Please sign in again.",
-    "forbidden":    "You don't have permission to perform this action.",
+    "forbidden": "You don't have permission to perform this action.",
     "server_error": "Server error. Please try again later."
+  },
+  "contrato_estado": {
+    "generado": "Contract generated",
+    "firmado": "Contract signed",
+    "en_ejecucion": "In progress",
+    "completado": "Work completed",
+    "cancelado": "Cancelled"
+  },
+  "contrato_estado_desc": {
+    "generado": "Your contract is ready to review.",
+    "firmado": "Contract signed. Work will begin soon.",
+    "en_ejecucion": "Work is currently in progress.",
+    "completado": "All work has been completed."
   }
 }

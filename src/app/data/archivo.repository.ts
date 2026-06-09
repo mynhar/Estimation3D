@@ -27,7 +27,7 @@ export class ArchivoRepository {
   async findByExpedienteId(expedienteId: string, tipo?: TipoArchivo): Promise<ArchivoRow[]> {
     const query = this.db
       .from('archivo')
-      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes')
+      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes, subido_por')
       .eq('expediente_id', expedienteId)
       .order('creado_en', { ascending: false });
     const { data } = await (tipo ? query.eq('tipo', tipo) : query);
