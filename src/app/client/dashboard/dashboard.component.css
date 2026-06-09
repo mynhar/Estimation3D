@@ -1702,94 +1702,25 @@
 }
 .dash-doc-link:hover { color: var(--ds-gold-active); }
 
-/* ── Delete controls ──────────────────────────────────────────────────── */
-@keyframes dash-spin { to { transform: rotate(360deg); } }
-.dash-del-spinner {
-  display: inline-block;
-  width: 10px; height: 10px;
-  border: 1.5px solid var(--ds-border-strong);
-  border-top-color: var(--ds-gold);
-  border-radius: 50%;
-  animation: dash-spin 0.75s linear infinite;
-  flex-shrink: 0;
-}
-
-/* Photo thumbnail — deletable variant */
-.dash-foto-wrap {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: var(--ds-radius-md);
-  overflow: hidden;
-  border: 1px solid var(--ds-border);
-  transition: border-color var(--ds-duration-fast) var(--ds-ease-out);
-}
-.dash-foto-wrap:hover { border-color: var(--ds-gold); }
-.dash-foto-wrap .dash-foto-thumb {
-  border: none;
-  border-radius: 0;
-  width: 100%; height: 100%;
-}
-.dash-foto-del {
-  position: absolute; top: 3px; right: 3px;
-  width: 20px; height: 20px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border-strong);
-  border-radius: 50%;
-  color: var(--ds-ink-muted);
-  cursor: pointer;
-  opacity: 0;
-  padding: 0;
-  transition: opacity var(--ds-duration-fast) var(--ds-ease-out),
-              color   var(--ds-duration-fast) var(--ds-ease-out);
-}
-.dash-foto-wrap:hover .dash-foto-del,
-.dash-foto-wrap:focus-within .dash-foto-del { opacity: 1; }
-.dash-foto-del:hover { color: var(--ds-danger, #c0392b); }
-.dash-foto-del:focus-visible { opacity: 1; outline: 2px solid var(--ds-gold); outline-offset: 2px; }
-.dash-foto-del:disabled { opacity: 0.35; cursor: not-allowed; }
-
-/* Doc list — inline delete */
-.dash-doc-del {
-  display: inline-flex; align-items: center;
-  width: 22px; height: 22px; padding: 0;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-sm);
-  color: var(--ds-ink-muted);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
-              color        var(--ds-duration-fast) var(--ds-ease-out);
-}
-.dash-doc-del:hover { border-color: var(--ds-danger, #c0392b); color: var(--ds-danger, #c0392b); }
-.dash-doc-del:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
-.dash-doc-del:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* Playlist row — delete sibling */
-.dash-pl-row {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-1);
-  flex-shrink: 0;
-}
-.dash-pl-row .dash-pl-item { flex: 1; min-width: 0; }
-.dash-pl-del {
-  display: flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; padding: 0;
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-sm);
-  color: var(--ds-ink-muted);
-  cursor: pointer;
-  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
-              color        var(--ds-duration-fast) var(--ds-ease-out);
-}
-.dash-pl-del:hover { border-color: var(--ds-danger, #c0392b); color: var(--ds-danger, #c0392b); }
-.dash-pl-del:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
-.dash-pl-del:disabled { opacity: 0.4; cursor: not-allowed; }
+/* ── Delete controls ─────────────────────────────────────── */
+@keyframes dash-spin{to{transform:rotate(360deg)}}
+.dash-del-spinner{display:inline-block;width:10px;height:10px;border:1.5px solid var(--ds-border-strong);border-top-color:var(--ds-gold);border-radius:50%;animation:dash-spin .75s linear infinite;flex-shrink:0}
+.dash-foto-wrap{position:relative;aspect-ratio:1;border-radius:var(--ds-radius-md);overflow:hidden;border:1px solid var(--ds-border);transition:border-color var(--ds-duration-fast) var(--ds-ease-out)}
+.dash-foto-wrap:hover{border-color:var(--ds-gold)}
+.dash-foto-wrap .dash-foto-thumb{border:none;border-radius:0;width:100%;height:100%}
+.dash-foto-del{position:absolute;top:3px;right:3px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--ds-surface);border:1px solid var(--ds-border-strong);border-radius:50%;color:var(--ds-ink-muted);cursor:pointer;opacity:0;padding:0;transition:opacity var(--ds-duration-fast) var(--ds-ease-out),color var(--ds-duration-fast) var(--ds-ease-out)}
+.dash-foto-wrap:hover .dash-foto-del,.dash-foto-wrap:focus-within .dash-foto-del{opacity:1}
+.dash-foto-del:hover{color:var(--ds-danger,#c0392b)}
+.dash-foto-del:focus-visible{opacity:1;outline:2px solid var(--ds-gold);outline-offset:2px}
+.dash-foto-del:disabled{opacity:.35;cursor:not-allowed}
+.dash-doc-del,.dash-pl-del{display:inline-flex;align-items:center;justify-content:center;padding:0;background:transparent;border:1px solid var(--ds-border);border-radius:var(--ds-radius-sm);color:var(--ds-ink-muted);cursor:pointer;flex-shrink:0;transition:border-color var(--ds-duration-fast) var(--ds-ease-out),color var(--ds-duration-fast) var(--ds-ease-out)}
+.dash-doc-del{width:22px;height:22px}
+.dash-pl-del{width:26px;height:26px}
+.dash-doc-del:hover,.dash-pl-del:hover{border-color:var(--ds-danger,#c0392b);color:var(--ds-danger,#c0392b)}
+.dash-doc-del:focus-visible,.dash-pl-del:focus-visible{outline:2px solid var(--ds-gold);outline-offset:2px}
+.dash-doc-del:disabled,.dash-pl-del:disabled{opacity:.4;cursor:not-allowed}
+.dash-pl-row{display:flex;align-items:center;gap:var(--ds-space-1);flex-shrink:0}
+.dash-pl-row .dash-pl-item{flex:1;min-width:0}
 
 /* ══════════════════════════════════════════════════════════════════════════
    CALENDAR STRIP — full-width week/month row
