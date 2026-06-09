@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { DbPerfil, RolUsuario, ProveedorAuth } from '../../../types/supabase';
@@ -25,6 +25,7 @@ const ROL_BADGE_CLASS: Record<string, string> = {
 export class AdminUserListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);
   private translate = inject(TranslateService);
+  private route     = inject(ActivatedRoute);
 
   private _usuarios = signal<DbPerfil[]>([]);
   cargando = signal(true);
@@ -83,6 +84,11 @@ export class AdminUserListComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    const rolParam = this.route.snapshot.queryParamMap.get('rol');
+    if (rolParam && (this.roles as string[]).includes(rolParam)) {
+      this.filtroRol.set(rolParam as RolUsuario);
+    }
+
     try {
       const { data, error } = await this.auth.client
         .from('perfil')

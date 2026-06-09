@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
@@ -15,13 +16,14 @@ interface FunnelItem { estado: string; count: number }
   selector: 'app-admin-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, PaginationComponent],
+  imports: [TranslatePipe, PaginationComponent, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl:    './dashboard.component.css',
 })
 export class AdminDashboardComponent implements OnInit {
-  private svc  = inject(AdminDashboardService);
-  private auth = inject(AuthSupabaseService);
+  private svc    = inject(AdminDashboardService);
+  private auth   = inject(AuthSupabaseService);
+  private router = inject(Router);
 
   user   = toSignal(this.auth.user$);
   perfil = signal<{ nombre: string | null; apellido: string | null } | null>(null);
@@ -163,6 +165,12 @@ export class AdminDashboardComponent implements OnInit {
       contrato:   'bi bi-file-earmark-text',
     };
     return m[tipo] ?? 'bi bi-circle';
+  }
+
+  onTimelineClick(ev: TimelineEvent): void {
+    if (ev.tipo === 'expediente' && ev.entityId) {
+      this.router.navigate(['/admin/file/edit', ev.entityId]);
+    }
   }
 
 }

@@ -229,6 +229,7 @@
 .table-row {
   transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
 }
+.table-row--clickable { cursor: pointer; }
 .table-row:hover {
   background: var(--ds-gold-faint) !important;
 }

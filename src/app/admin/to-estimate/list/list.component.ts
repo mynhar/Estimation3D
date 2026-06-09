@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteParaEstimar } from '../../../models';
@@ -24,6 +24,7 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 export class AdminToEstimateListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private translate         = inject(TranslateService);
+  private router            = inject(Router);
 
   private _expedientes = signal<ExpedienteParaEstimar[]>([]);
   cargando = signal(true);
@@ -121,6 +122,10 @@ export class AdminToEstimateListComponent implements OnInit {
 
   editRoute(exp: ExpedienteParaEstimar): string[] {
     return ['/admin/to-estimate/edit', exp.id];
+  }
+
+  irAEditar(id: string): void {
+    this.router.navigate(['/admin/to-estimate/edit', id]);
   }
 
   formatFecha(valor: string | null): string {

@@ -19,20 +19,20 @@
 
     @if (!cargando() && !error() && stats()) {
       <div class="adm-kpi-band" role="region" aria-label="Métricas principales">
-        <div class="adm-kpi">
+        <a class="adm-kpi adm-kpi--link" routerLink="/admin/file">
           <span class="adm-kpi__n">{{ stats()!.expedientes.total }}</span>
           <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_exp' | translate }}</span>
-        </div>
+        </a>
         <div class="adm-kpi-sep" aria-hidden="true"></div>
-        <div class="adm-kpi">
+        <a class="adm-kpi adm-kpi--link" routerLink="/admin/to-estimate">
           <span class="adm-kpi__n">{{ stats()!.estimaciones.total }}</span>
           <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_est' | translate }}</span>
-        </div>
+        </a>
         <div class="adm-kpi-sep" aria-hidden="true"></div>
-        <div class="adm-kpi">
+        <a class="adm-kpi adm-kpi--link" routerLink="/admin/user" [queryParams]="{rol: 'constructor'}">
           <span class="adm-kpi__n">{{ stats()!.ofertas.constructoresActivos }}</span>
           <span class="adm-kpi__l">{{ 'admin_dashboard.kpi_con' | translate }}</span>
-        </div>
+        </a>
         <div class="adm-kpi-sep" aria-hidden="true"></div>
         <div class="adm-kpi">
           <span class="adm-kpi__n adm-kpi__n--gold">{{ formatPrecio(stats()!.contratos.valorTotal) }}</span>
@@ -365,7 +365,9 @@
           } @else {
             <ul class="adm-tl__list">
               @for (ev of timelinePaginada(); track ev.id) {
-                <li class="adm-tl__event">
+                <li class="adm-tl__event"
+                    [class.adm-tl__event--clickable]="ev.tipo === 'expediente' && !!ev.entityId"
+                    (click)="onTimelineClick(ev)">
 
                   <div class="adm-tl__dot adm-tl__dot--{{ ev.tipo }}" aria-hidden="true">
                     <i class="{{ tipoIcon(ev.tipo) }}"></i>
@@ -385,9 +387,14 @@
                     </p>
                   </div>
 
-                  <span class="adm-tl__badge adm-tl__badge--{{ ev.tipo }}">
-                    {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
-                  </span>
+                  <div class="adm-tl__event-right">
+                    <span class="adm-tl__badge adm-tl__badge--{{ ev.tipo }}">
+                      {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
+                    </span>
+                    @if (ev.tipo === 'expediente' && ev.entityId) {
+                      <i class="bi bi-arrow-right adm-tl__nav-icon" aria-hidden="true"></i>
+                    }
+                  </div>
 
                 </li>
               }

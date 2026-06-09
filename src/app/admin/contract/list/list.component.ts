@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
 import { ContratoAdminListItem } from '../../../models';
@@ -24,6 +24,7 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 export class AdminContractListComponent implements OnInit {
   private contratoService = inject(ContratoService);
   private translate       = inject(TranslateService);
+  private router          = inject(Router);
 
   private _contratos = signal<ContratoAdminListItem[]>([]);
   cargando = signal(true);
@@ -147,5 +148,9 @@ export class AdminContractListComponent implements OnInit {
     return new Intl.NumberFormat('fr-CA', {
       style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(precio);
+  }
+
+  irAEditar(id: string): void {
+    this.router.navigate(['/admin/contract/edit', id]);
   }
 }

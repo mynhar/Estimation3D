@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteAdmin } from '../../../models';
@@ -16,6 +16,7 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 export class AdminFileListComponent {
   private expedienteService = inject(ExpedienteService);
   private translate         = inject(TranslateService);
+  private router            = inject(Router);
 
   expedientes  = signal<ExpedienteAdmin[]>([]);
   totalItems   = signal(0);
@@ -122,5 +123,9 @@ export class AdminFileListComponent {
     return new Intl.NumberFormat('fr-CA', {
       style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(valor);
+  }
+
+  irAEditar(id: string): void {
+    this.router.navigate(['/admin/file/edit', id]);
   }
 }

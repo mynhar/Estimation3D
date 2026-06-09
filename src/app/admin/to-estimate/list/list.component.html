@@ -127,7 +127,7 @@
           <tbody>
 
             @for (e of expedientesPaginados(); track e.id) {
-              <tr class="table-row">
+              <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
 
                 <!-- Número -->
                 <td class="col-num">
@@ -182,7 +182,7 @@
                 </td>
 
                 <!-- Acciones -->
-                <td class="col-actions">
+                <td class="col-actions" (click)="$event.stopPropagation()">
                   <a [routerLink]="editRoute(e)"
                      class="action-btn"
                      [title]="'to_estimate.edit_btn' | translate">

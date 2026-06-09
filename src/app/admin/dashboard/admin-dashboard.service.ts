@@ -16,6 +16,7 @@ export interface TimelineEvent {
   precio?:   string;
   autor:     string;
   referencia: string;
+  entityId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -105,6 +106,7 @@ export class AdminDashboardService {
         id: `exp-${e.id}`, timestamp: e.creado_en, tipo: 'expediente',
         descKey: 'admin_dashboard.tl_event_exp_created',
         autor: nombre(e.cliente), referencia: e.numero,
+        entityId: e.id,
       });
     }
 

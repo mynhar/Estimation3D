@@ -131,7 +131,7 @@
           <tbody>
 
             @for (c of contratosPaginados(); track c.contrato_id) {
-              <tr class="table-row">
+              <tr class="table-row table-row--clickable" (click)="irAEditar(c.contrato_id)">
 
                 <!-- Número expediente -->
                 <td class="col-num">
@@ -205,7 +205,7 @@
                 </td>
 
                 <!-- Acciones -->
-                <td class="col-actions">
+                <td class="col-actions" (click)="$event.stopPropagation()">
                   <a [routerLink]="['/admin/contract/edit', c.contrato_id]"
                      class="action-btn"
                      [title]="'admin_contract.ver_btn' | translate">
