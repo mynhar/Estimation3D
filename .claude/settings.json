@@ -144,7 +144,18 @@
       "Bash(node -e \"const f = require\\('./src/assets/i18n/fr.json'\\); const keys = Object.keys\\(f.dashboard_client || {}\\); console.log\\(JSON.stringify\\(keys, null, 2\\)\\);\")",
       "Bash(node -e \"const f = require\\('./src/assets/i18n/fr.json'\\); console.log\\('state:', JSON.stringify\\(f.state, null, 2\\)\\); console.log\\('state_desc:', JSON.stringify\\(f.state_desc, null, 2\\)\\);\")",
       "Bash(node -e \"const f = require\\('./src/assets/i18n/fr.json'\\); console.log\\('contrato_estado:', JSON.stringify\\(f.contrato_estado, null, 2\\)\\); console.log\\('contrato:', JSON.stringify\\(f.contrato, null, 2\\)\\);\")",
-      "Bash(Sort-Object FullName)"
+      "Bash(Sort-Object FullName)",
+      "Bash(xargs grep -l \"console\\\\.\\\\\\(log\\\\|error\\\\|warn\\\\\\)\")",
+      "Bash(pandoc --version)",
+      "Bash(pandoc c:/tmp/requerimientos_estimation3d.md -o c:/tmp/Requerimientos_Estimation3D.docx --from markdown --to docx --toc --toc-depth=3 --highlight-style=tango -V lang=es)",
+      "PowerShell(Get-Command pandoc -ErrorAction SilentlyContinue)",
+      "PowerShell($f = Get-Item \"c:\\\\tmp\\\\Requerimientos_Estimation3D.docx\"; \"$\\($f.Name\\)  —  $\\([math]::Round\\($f.Length/1KB, 1\\)\\) KB\")",
+      "Bash(Get-ChildItem -Path . -Depth 2)",
+      "mcp__claude_ai_Supabase__list_migrations",
+      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['monitoring'], indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['construction_monitoring'], indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); m=d.get\\('monitoring',{}\\); print\\('inicio_real_lbl' in m, 'eventos_title' in m, 'tipo_visitante_inspector' in m\\)\")"
     ],
     "additionalDirectories": [
       "\\tmp",

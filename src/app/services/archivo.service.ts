@@ -3,6 +3,11 @@ import { ArchivoRow } from '../models';
 import { ArchivoRepository } from '../data';
 
 export type TipoArchivo = 'foto' | 'video' | 'documento';
+export type ReporteMediaTipo = 'reporte_foto' | 'reporte_video' | 'reporte_documento';
+
+export interface ReporteArchivoRow extends ArchivoRow {
+  tipo: ReporteMediaTipo;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ArchivoService {
@@ -82,9 +87,57 @@ export class ArchivoService {
     }
   }
 
+  async cargarPorReporte(reporteId: string): Promise<{
+    fotos:      ReporteArchivoRow[];
+    videos:     ReporteArchivoRow[];
+    documentos: ReporteArchivoRow[];
+  }> {
+    const rows = await this.archivoRepo.findByReporteId(reporteId);
+    const cast = rows as unknown as ReporteArchivoRow[];
+    return {
+      fotos:      cast.filter(r => r.tipo === 'reporte_foto'),
+      videos:     cast.filter(r => r.tipo === 'reporte_video'),
+      documentos: cast.filter(r => r.tipo === 'reporte_documento'),
+    };
+  }
+
+  async subirParaReporte(
+    seguimientoId: string,
+    reporteId:     string,
+    tipo:          ReporteMediaTipo,
+    file:          File,
+    userId:        string,
+  ): Promise<void> {
+    const subDir      = tipo.replace('reporte_', '');
+    const storagePath = `reportes/${seguimientoId}/${reporteId}/${subDir}/${Date.now()}_${file.name}`;
+    await this.archivoRepo.uploadToStorage(storagePath, file);
+    try {
+      await this.archivoRepo.insert({
+        tipo:           tipo as any,
+        nombre_archivo: file.name,
+        url_storage:    storagePath,
+        mime_type:      file.type || 'application/octet-stream',
+        tamano_bytes:   file.size,
+        subido_por:     userId,
+        reporte_id:     reporteId,
+      });
+    } catch (err) {
+      await this.archivoRepo.removeFromStorage([storagePath]);
+      throw err;
+    }
+  }
+
   async eliminar(archivo: ArchivoRow): Promise<void> {
     await this.archivoRepo.removeFromStorage([archivo.url_storage]);
     await this.archivoRepo.deleteById(archivo.id);
+  }
+
+  async eliminarPorReporte(reporteId: string): Promise<void> {
+    const rows = await this.archivoRepo.findByReporteId(reporteId);
+    if (rows.length) {
+      await this.archivoRepo.removeFromStorage(rows.map(r => r.url_storage));
+      await this.archivoRepo.deleteByReporteId(reporteId);
+    }
   }
 
   async eliminarTodos(expedienteId: string): Promise<void> {

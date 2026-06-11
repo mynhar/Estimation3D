@@ -15,6 +15,7 @@ export type ArchivoInsertData = {
   subido_por:     string;
   oferta_id?:     string;
   expediente_id?: string;
+  reporte_id?:    string;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,16 @@ export class ArchivoRepository {
   private get db() { return this.auth.client; }
 
   // ── DB queries ──────────────────────────────────────────────────────────────
+
+  async findByReporteId(reporteId: string): Promise<(ArchivoRow & { tipo: string })[]> {
+    const { data, error } = await this.db
+      .from('archivo')
+      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes, subido_por, tipo')
+      .eq('reporte_id', reporteId)
+      .order('creado_en', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as (ArchivoRow & { tipo: string })[];
+  }
 
   async findByExpedienteId(expedienteId: string, tipo?: TipoArchivo): Promise<ArchivoRow[]> {
     const query = this.db
@@ -81,6 +92,11 @@ export class ArchivoRepository {
 
   async deleteByOfertaId(ofertaId: string): Promise<void> {
     const { error } = await this.db.from('archivo').delete().eq('oferta_id', ofertaId);
+    if (error) throw new Error(error.message);
+  }
+
+  async deleteByReporteId(reporteId: string): Promise<void> {
+    const { error } = await this.db.from('archivo').delete().eq('reporte_id', reporteId);
     if (error) throw new Error(error.message);
   }
 

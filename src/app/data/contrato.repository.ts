@@ -97,6 +97,47 @@ export class ContratoRepository {
     return data;
   }
 
+  async findDetalleByIdForConstructor(contratoId: string, constructorId: string): Promise<any> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        expediente:expediente_id (
+          id, numero, estado, estimador_id,
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
+          localizacion ( direccion, provincia, canton, distrito )
+        ),
+        cliente:cliente_id ( nombre, apellido, telefono, email ),
+        constructor:constructor_id ( nombre, apellido, telefono, email ),
+        oferta:oferta_id ( id, fecha_inicio, plazo_semanas_min, plazo_semanas_max )
+      `)
+      .eq('id', contratoId)
+      .eq('constructor_id', constructorId)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async findByConstructorId(constructorId: string): Promise<any[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        expediente:expediente_id (
+          numero,
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
+          localizacion ( direccion, provincia, canton )
+        ),
+        cliente:cliente_id ( nombre, apellido ),
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+      `)
+      .eq('constructor_id', constructorId)
+      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
+      .order('actualizado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
   async findAllAdmin(): Promise<any[]> {
     const { data, error } = await this.db
       .from('contrato')

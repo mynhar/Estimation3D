@@ -12,33 +12,59 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      actividad_servicio: {
+        Row: {
+          activo: boolean
+          codigo: string
+          creado_en: string
+          fase_id: string | null
+          id: string
+          nombre_en: string
+          nombre_es: string
+          nombre_fr: string
+          servicio_id: number
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          creado_en?: string
+          fase_id?: string | null
+          id?: string
+          nombre_en: string
+          nombre_es: string
+          nombre_fr: string
+          servicio_id: number
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          creado_en?: string
+          fase_id?: string | null
+          id?: string
+          nombre_en?: string
+          nombre_es?: string
+          nombre_fr?: string
+          servicio_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actividad_servicio_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "fase_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "actividad_servicio_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archivo: {
         Row: {
           creado_en: string
@@ -48,6 +74,7 @@ export type Database = {
           mime_type: string
           nombre_archivo: string
           oferta_id: string | null
+          reporte_id: string | null
           subido_por: string
           tamano_bytes: number | null
           tipo: Database["public"]["Enums"]["tipo_archivo"]
@@ -61,6 +88,7 @@ export type Database = {
           mime_type: string
           nombre_archivo: string
           oferta_id?: string | null
+          reporte_id?: string | null
           subido_por: string
           tamano_bytes?: number | null
           tipo: Database["public"]["Enums"]["tipo_archivo"]
@@ -74,6 +102,7 @@ export type Database = {
           mime_type?: string
           nombre_archivo?: string
           oferta_id?: string | null
+          reporte_id?: string | null
           subido_por?: string
           tamano_bytes?: number | null
           tipo?: Database["public"]["Enums"]["tipo_archivo"]
@@ -99,6 +128,13 @@ export type Database = {
             columns: ["oferta_id"]
             isOneToOne: false
             referencedRelation: "oferta"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archivo_reporte_id_fkey"
+            columns: ["reporte_id"]
+            isOneToOne: false
+            referencedRelation: "reporte_diario"
             referencedColumns: ["id"]
           },
           {
@@ -305,6 +341,113 @@ export type Database = {
           },
         ]
       }
+      fase_servicio: {
+        Row: {
+          activo: boolean
+          codigo: string
+          creado_en: string
+          descripcion_en: string | null
+          descripcion_es: string | null
+          descripcion_fr: string | null
+          id: string
+          nombre_en: string
+          nombre_es: string
+          nombre_fr: string
+          orden: number
+          servicio_id: number
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          creado_en?: string
+          descripcion_en?: string | null
+          descripcion_es?: string | null
+          descripcion_fr?: string | null
+          id?: string
+          nombre_en: string
+          nombre_es: string
+          nombre_fr: string
+          orden: number
+          servicio_id: number
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          creado_en?: string
+          descripcion_en?: string | null
+          descripcion_es?: string | null
+          descripcion_fr?: string | null
+          id?: string
+          nombre_en?: string
+          nombre_es?: string
+          nombre_fr?: string
+          orden?: number
+          servicio_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fase_servicio_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspeccion: {
+        Row: {
+          actualizado_en: string
+          creado_en: string
+          creado_por: string
+          estado: Database["public"]["Enums"]["estado_inspeccion"]
+          fecha: string
+          hora: string
+          id: string
+          motivo: string | null
+          seguimiento_id: string
+          tipo_visitante: Database["public"]["Enums"]["tipo_visitante"]
+        }
+        Insert: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por: string
+          estado?: Database["public"]["Enums"]["estado_inspeccion"]
+          fecha: string
+          hora: string
+          id?: string
+          motivo?: string | null
+          seguimiento_id: string
+          tipo_visitante: Database["public"]["Enums"]["tipo_visitante"]
+        }
+        Update: {
+          actualizado_en?: string
+          creado_en?: string
+          creado_por?: string
+          estado?: Database["public"]["Enums"]["estado_inspeccion"]
+          fecha?: string
+          hora?: string
+          id?: string
+          motivo?: string | null
+          seguimiento_id?: string
+          tipo_visitante?: Database["public"]["Enums"]["tipo_visitante"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspeccion_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspeccion_seguimiento_id_fkey"
+            columns: ["seguimiento_id"]
+            isOneToOne: false
+            referencedRelation: "seguimiento_obra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       localizacion: {
         Row: {
           canton: string
@@ -457,6 +600,218 @@ export type Database = {
         }
         Relationships: []
       }
+      reporte_actividad: {
+        Row: {
+          actividad_id: string
+          creado_en: string
+          id: string
+          reporte_id: string
+        }
+        Insert: {
+          actividad_id: string
+          creado_en?: string
+          id?: string
+          reporte_id: string
+        }
+        Update: {
+          actividad_id?: string
+          creado_en?: string
+          id?: string
+          reporte_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporte_actividad_actividad_id_fkey"
+            columns: ["actividad_id"]
+            isOneToOne: false
+            referencedRelation: "actividad_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporte_actividad_reporte_id_fkey"
+            columns: ["reporte_id"]
+            isOneToOne: false
+            referencedRelation: "reporte_diario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reporte_diario: {
+        Row: {
+          actualizado_en: string
+          constructor_id: string
+          creado_en: string
+          descripcion: string | null
+          fase_id: string | null
+          fecha: string
+          hora_fin: string | null
+          hora_inicio: string
+          horas_trabajadas: number
+          id: string
+          porcentaje_acumulado: number | null
+          porcentaje_avance_dia: number
+          seguimiento_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          constructor_id: string
+          creado_en?: string
+          descripcion?: string | null
+          fase_id?: string | null
+          fecha: string
+          hora_fin?: string | null
+          hora_inicio?: string
+          horas_trabajadas?: number
+          id?: string
+          porcentaje_acumulado?: number | null
+          porcentaje_avance_dia?: number
+          seguimiento_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          constructor_id?: string
+          creado_en?: string
+          descripcion?: string | null
+          fase_id?: string | null
+          fecha?: string
+          hora_fin?: string | null
+          hora_inicio?: string
+          horas_trabajadas?: number
+          id?: string
+          porcentaje_acumulado?: number | null
+          porcentaje_avance_dia?: number
+          seguimiento_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporte_diario_constructor_id_fkey"
+            columns: ["constructor_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporte_diario_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "fase_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reporte_diario_seguimiento_id_fkey"
+            columns: ["seguimiento_id"]
+            isOneToOne: false
+            referencedRelation: "seguimiento_obra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reporte_zona: {
+        Row: {
+          creado_en: string
+          descripcion: string | null
+          id: string
+          porcentaje_avance: number | null
+          reporte_id: string
+          zona: string
+        }
+        Insert: {
+          creado_en?: string
+          descripcion?: string | null
+          id?: string
+          porcentaje_avance?: number | null
+          reporte_id: string
+          zona: string
+        }
+        Update: {
+          creado_en?: string
+          descripcion?: string | null
+          id?: string
+          porcentaje_avance?: number | null
+          reporte_id?: string
+          zona?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reporte_zona_reporte_id_fkey"
+            columns: ["reporte_id"]
+            isOneToOne: false
+            referencedRelation: "reporte_diario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seguimiento_obra: {
+        Row: {
+          actualizado_en: string
+          constructor_id: string
+          contrato_id: string
+          creado_en: string
+          estado: Database["public"]["Enums"]["estado_seguimiento"]
+          expediente_id: string
+          fase_actual_id: string | null
+          fecha_fin_real: string | null
+          fecha_inicio_real: string | null
+          id: string
+          porcentaje_avance: number
+        }
+        Insert: {
+          actualizado_en?: string
+          constructor_id: string
+          contrato_id: string
+          creado_en?: string
+          estado?: Database["public"]["Enums"]["estado_seguimiento"]
+          expediente_id: string
+          fase_actual_id?: string | null
+          fecha_fin_real?: string | null
+          fecha_inicio_real?: string | null
+          id?: string
+          porcentaje_avance?: number
+        }
+        Update: {
+          actualizado_en?: string
+          constructor_id?: string
+          contrato_id?: string
+          creado_en?: string
+          estado?: Database["public"]["Enums"]["estado_seguimiento"]
+          expediente_id?: string
+          fase_actual_id?: string | null
+          fecha_fin_real?: string | null
+          fecha_inicio_real?: string | null
+          id?: string
+          porcentaje_avance?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seguimiento_obra_constructor_id_fkey"
+            columns: ["constructor_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seguimiento_obra_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: true
+            referencedRelation: "contrato"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seguimiento_obra_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seguimiento_obra_fase_actual_id_fkey"
+            columns: ["fase_actual_id"]
+            isOneToOne: false
+            referencedRelation: "fase_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       servicio: {
         Row: {
           activo: boolean
@@ -490,36 +845,6 @@ export type Database = {
           nombre_en?: string
           nombre_es?: string
           nombre_fr?: string
-        }
-        Relationships: []
-      }
-      Type_Service: {
-        Row: {
-          created_at: string
-          created_user: string | null
-          id: number
-          protocolo: string | null
-          service: string
-          updated_at: string | null
-          updated_user: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_user?: string | null
-          id?: number
-          protocolo?: string | null
-          service: string
-          updated_at?: string | null
-          updated_user?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_user?: string | null
-          id?: number
-          protocolo?: string | null
-          service?: string
-          updated_at?: string | null
-          updated_user?: string | null
         }
         Relationships: []
       }
@@ -560,6 +885,7 @@ export type Database = {
         Args: { p_contrato_id: string }
         Returns: undefined
       }
+      fn_rol_actual: { Args: never; Returns: string }
       get_rol_usuario: { Args: never; Returns: string }
       iniciar_ejecucion_contrato_admin: {
         Args: { p_contrato_id: string }
@@ -593,10 +919,23 @@ export type Database = {
         | "adjudicado"
         | "contratado"
         | "cancelado"
+      estado_inspeccion: "programada" | "realizada" | "cancelada"
       estado_oferta: "pendiente" | "aceptada" | "rechazada"
+      estado_seguimiento:
+        | "no_iniciado"
+        | "en_progreso"
+        | "pausado"
+        | "completado"
       proveedor_auth: "email" | "google"
       rol_usuario: "cliente" | "estimador" | "constructor" | "administrador"
-      tipo_archivo: "foto" | "video" | "documento" | "contrato_pdf"
+      tipo_archivo:
+        | "foto"
+        | "video"
+        | "documento"
+        | "contrato_pdf"
+        | "reporte_foto"
+        | "reporte_video"
+        | "reporte_documento"
       tipo_inmueble:
         | "casa"
         | "apartamento"
@@ -610,6 +949,7 @@ export type Database = {
         | "demolicion_interior"
         | "aislamiento"
         | "fundacion_dren_frances"
+      tipo_visitante: "inspector" | "dueno"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -734,10 +1074,19 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// ── Aliases de conveniencia usados en todo el proyecto ────────────────────────
+export type DbPerfil        = Database["public"]["Tables"]["perfil"]["Row"]
+export type RolUsuario      = Database["public"]["Enums"]["rol_usuario"]
+export type ProveedorAuth   = Database["public"]["Enums"]["proveedor_auth"]
+export type EstadoExpediente= Database["public"]["Enums"]["estado_expediente"]
+export type EstadoOferta    = Database["public"]["Enums"]["estado_oferta"]
+export type EstadoContrato  = Database["public"]["Enums"]["estado_contrato"]
+export type TipoInmueble    = Database["public"]["Enums"]["tipo_inmueble"]
+export type TipoArchivo     = Database["public"]["Enums"]["tipo_archivo"]
+export type TipoServicio    = Database["public"]["Enums"]["tipo_servicio"]
+export type EstadoSeguimiento = Database["public"]["Enums"]["estado_seguimiento"]
+
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       estado_contrato: [
@@ -756,10 +1105,25 @@ export const Constants = {
         "contratado",
         "cancelado",
       ],
+      estado_inspeccion: ["programada", "realizada", "cancelada"],
       estado_oferta: ["pendiente", "aceptada", "rechazada"],
+      estado_seguimiento: [
+        "no_iniciado",
+        "en_progreso",
+        "pausado",
+        "completado",
+      ],
       proveedor_auth: ["email", "google"],
       rol_usuario: ["cliente", "estimador", "constructor", "administrador"],
-      tipo_archivo: ["foto", "video", "documento", "contrato_pdf"],
+      tipo_archivo: [
+        "foto",
+        "video",
+        "documento",
+        "contrato_pdf",
+        "reporte_foto",
+        "reporte_video",
+        "reporte_documento",
+      ],
       tipo_inmueble: [
         "casa",
         "apartamento",
@@ -775,15 +1139,7 @@ export const Constants = {
         "aislamiento",
         "fundacion_dren_frances",
       ],
+      tipo_visitante: ["inspector", "dueno"],
     },
   },
 } as const
-
-// ── Alias de conveniencia ─────────────────────────────────────────────────────
-export type RolUsuario       = Database['public']['Enums']['rol_usuario']
-export type EstadoOferta     = Database['public']['Enums']['estado_oferta']
-export type EstadoExpediente = Database['public']['Tables']['expediente']['Row']['estado']
-export type TipoInmueble     = Database['public']['Enums']['tipo_inmueble']
-export type TipoArchivo      = Database['public']['Enums']['tipo_archivo']
-export type ProveedorAuth    = Database['public']['Enums']['proveedor_auth']
-export type DbPerfil         = Database['public']['Tables']['perfil']['Row']

@@ -99,6 +99,29 @@ export interface ContratoAdminListItem {
   oferta_fecha_inicio: string | null;
 }
 
+export interface ContratoConstructorListItem {
+  id:                 string;
+  expediente_id:      string;
+  expediente_numero:  string;
+  servicio_nombre:    string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
+  cliente_nombre:     string;
+  precio_final:       number;
+  garantia_anos:      number | null;
+  estado:             string;
+  generado_en:        string;
+  firmado_en:         string | null;
+  actualizado_en:     string;
+  url_pdf:            string | null;
+  fecha_inicio:       string | null;
+  plazo_semanas_min:  number | null;
+  plazo_semanas_max:  number | null;
+  direccion:          string;
+  provincia:          string;
+  canton:             string;
+}
+
 export interface ContratoPdfData {
   contratoId:          string;
   expedienteNumero:    string;

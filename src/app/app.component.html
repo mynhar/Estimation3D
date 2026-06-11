@@ -111,6 +111,13 @@
             <i class="bi bi-list-ul sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.mes_offres' | translate }}</span>
           </a>
+          <a class="sidebar-item" routerLink="/builder/construction-monitoring/list"
+             routerLinkActive="active-link"
+             [title]="'nav.suivi_chantier' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-tools sidebar-item__icon" aria-hidden="true"></i>
+            <span class="sidebar-item__label">{{ 'nav.suivi_chantier' | translate }}</span>
+          </a>
         }
 
         <!-- ── Estimador ────────────────────────────────────────────────── -->

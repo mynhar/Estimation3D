@@ -1,0 +1,730 @@
+<!-- Loading -->
+@if (cargando()) {
+  <div class="mon-loading">
+    <div class="mon-loading__spinner"></div>
+  </div>
+}
+
+<!-- Error -->
+@if (!cargando() && error()) {
+  <div class="mon-error">
+    <i class="bi bi-exclamation-triangle"></i>
+    <p>{{ error() }}</p>
+    <button class="mon-btn mon-btn--outline" (click)="volver()">
+      {{ 'construction_monitoring.title' | translate }}
+    </button>
+  </div>
+}
+
+<!-- Content -->
+@if (!cargando() && !error() && contrato(); as c) {
+  <div class="mon-wrap">
+
+    <!-- ── Compact header ── -->
+    <header class="mon-header">
+
+      <!-- Row 1: nav + identity + badges -->
+      <div class="mon-header__nav">
+        <button class="mon-btn mon-btn--ghost mon-btn--sm" (click)="volver()">
+          <i class="bi bi-arrow-left"></i>
+          <span class="mon-header__back-lbl">{{ 'construction_monitoring.title' | translate }}</span>
+        </button>
+
+        <div class="mon-header__id">
+          <h1 class="mon-header__number">{{ c.expediente_numero }}</h1>
+          <span class="mon-header__service">{{ servicioNombre(c) }}</span>
+        </div>
+
+        <div class="mon-header__meta">
+          <span><i class="bi bi-person"></i> {{ c.cliente_nombre }}</span>
+          <span class="mon-header__meta-sep">·</span>
+          <span><i class="bi bi-geo-alt"></i> {{ c.canton }}, {{ c.provincia }}</span>
+          <span class="mon-header__meta-sep">·</span>
+          <span><i class="bi bi-tools"></i> {{ c.constructor_nombre }}</span>
+        </div>
+
+        <div class="mon-header__right">
+          <span class="mon-header__price">{{ formatPrecio(c.precio_final) }}</span>
+          <div class="mon-header__badges">
+            <span class="mon-badge" [class]="badgeContrato(c.estado)">
+              {{ ('construction_monitoring.estado_' + c.estado) | translate }}
+            </span>
+            @if (c.expediente_estado) {
+              <span class="mon-badge" [class]="badgeExpediente(c.expediente_estado)">
+                {{ ('construction_monitoring.estado_' + c.expediente_estado) | translate }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: progress + KPIs -->
+      <div class="mon-header__stats">
+        <div class="mon-header__progress">
+          <div class="mon-progress__labels">
+            <span>{{ 'monitoring.avance_global' | translate }}</span>
+            <strong class="mon-progress__pct">{{ avanceGlobal() }}%</strong>
+          </div>
+          <div class="mon-progress__track">
+            <span class="mon-progress__fill" [style.width.%]="avanceGlobal()"></span>
+          </div>
+        </div>
+        <div class="mon-header__kpis">
+          <div class="mon-hkpi">
+            <strong>{{ diasTrabajados() }}</strong>
+            <span>{{ 'monitoring.kpi_dias' | translate }}</span>
+          </div>
+          <div class="mon-hkpi">
+            <strong>{{ horasTotales() }}</strong>
+            <span>{{ 'monitoring.kpi_horas' | translate }}</span>
+          </div>
+          <div class="mon-hkpi">
+            <strong>{{ faseOrdinalActual() }}/{{ fases().length }}</strong>
+            <span>{{ 'monitoring.kpi_fases' | translate }}</span>
+          </div>
+          @if (seguimiento()?.fecha_inicio_real) {
+            <div class="mon-hkpi">
+              <strong class="mon-hkpi__date">{{ formatFecha(seguimiento()!.fecha_inicio_real) }}</strong>
+              <span>{{ 'monitoring.inicio_real_lbl' | translate }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Row 3: state timeline -->
+      <div class="mon-timeline">
+        @for (paso of PASOS; track paso.key) {
+          <div class="mon-timeline__step"
+               [class.is-done]="pasoActivo(paso.key)"
+               [class.is-current]="esPasoActual(paso.key)"
+               [class.is-cancelled]="cancelado()">
+            <div class="mon-timeline__dot">
+              <i class="bi" [class]="paso.icon"></i>
+            </div>
+            <span class="mon-timeline__label">
+              {{ ('construction_monitoring.estado_' + paso.key) | translate }}
+            </span>
+          </div>
+          @if (!$last) {
+            <div class="mon-timeline__line" [class.is-done]="pasoActivo(paso.key)"></div>
+          }
+        }
+      </div>
+    </header>
+
+    <!-- Status banners (full-width, below header) -->
+    @if (cancelado()) {
+      <div class="mon-banner mon-banner--cancelled">
+        <i class="bi bi-x-circle"></i>
+        {{ 'monitoring.contrato_cancelado' | translate }}
+      </div>
+    }
+    @if (completado()) {
+      <div class="mon-banner mon-banner--completed">
+        <i class="bi bi-check2-circle"></i>
+        {{ 'monitoring.obra_completada' | translate }}
+      </div>
+    }
+
+    <!-- ── 3-column workbench body ── -->
+    <div class="mon-body">
+
+      <!-- ── Col 1: Daily form + Media ── -->
+      <div class="mon-col mon-col--form">
+
+        <div class="mon-panel">
+          <div class="mon-panel__head">
+            <i class="bi bi-clipboard-check"></i>
+            <span>{{ 'monitoring.reporte_title' | translate }}</span>
+            <span class="mon-panel__today">{{ todayLabel() }}</span>
+          </div>
+          <div class="mon-panel__body">
+
+            <div class="mon-field">
+              <label class="mon-label">{{ 'monitoring.fecha_reporte' | translate }}</label>
+              <input class="mon-input mon-input--date" type="date"
+                     [value]="fechaReporte()"
+                     [max]="fechaHoy"
+                     (change)="setFechaReporte($event)"
+                     [disabled]="guardando()">
+            </div>
+
+            <div class="mon-form-row">
+              <div class="mon-field">
+                <label class="mon-label">{{ 'monitoring.hora_inicio' | translate }}</label>
+                <input class="mon-input" type="time"
+                       [value]="horaInicio()"
+                       (change)="setHoraInicio($event)"
+                       [disabled]="!puedeGuardar()">
+              </div>
+              <div class="mon-field">
+                <label class="mon-label">
+                  {{ 'monitoring.horas_trabajadas' | translate }}
+                  <span class="mon-hint">{{ 'monitoring.horas_hint' | translate }}</span>
+                </label>
+                <input class="mon-input" type="number" min="0" max="24" step="0.5"
+                       [value]="horasTrabajadas()"
+                       (change)="setHorasTrab($event)"
+                       [disabled]="!puedeGuardar()">
+              </div>
+            </div>
+
+            <div class="mon-field">
+              <label class="mon-label">
+                {{ 'monitoring.avance_dia' | translate }}
+                <span class="mon-hint">{{ 'monitoring.avance_dia_hint' | translate }}</span>
+              </label>
+              <div class="mon-slider-row">
+                <input type="range" class="mon-slider" min="0" [max]="maxAvanceDia()"
+                       [value]="avanceDia()"
+                       (input)="setAvanceDia($event)"
+                       [disabled]="!puedeGuardar()">
+                <strong class="mon-slider-val">{{ avanceDia() }}%</strong>
+              </div>
+              <p class="mon-hint mon-hint--block">
+                {{ 'monitoring.avance_acumulado' | translate }}: <strong>{{ avancePreview() }}%</strong>
+                @if (maxAvanceDia() < 100) {
+                  &nbsp;·&nbsp;
+                  {{ 'monitoring.avance_restante' | translate }}: <strong>{{ maxAvanceDia() - avanceDia() }}%</strong>
+                }
+              </p>
+            </div>
+
+            @if (fases().length > 0) {
+              <div class="mon-field">
+                <label class="mon-label">
+                  {{ 'monitoring.fase_label' | translate }}
+                  <span class="mon-hint">{{ 'monitoring.fase_hint' | translate }}</span>
+                </label>
+                <div class="mon-phase-list">
+                  @for (fase of fases(); track fase.id) {
+                    <div class="mon-phase"
+                         [class.is-done]="faseOrdinalActual() > fase.orden"
+                         [class.is-current]="faseId() === fase.id"
+                         (click)="puedeGuardar() && setFase(fase.id)"
+                         [attr.aria-disabled]="!puedeGuardar()">
+                      <div class="mon-phase__dot">
+                        @if (faseOrdinalActual() > fase.orden) {
+                          <i class="bi bi-check-lg"></i>
+                        } @else {
+                          <span>{{ fase.orden }}</span>
+                        }
+                      </div>
+                      <span class="mon-phase__label">{{ faseName(fase) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (actividades().length > 0) {
+              <div class="mon-field">
+                <label class="mon-label">
+                  {{ 'monitoring.actividades_label' | translate }}
+                  <span class="mon-hint">{{ 'monitoring.actividades_hint' | translate }}</span>
+                </label>
+                <div class="mon-chips">
+                  @for (act of actividades(); track act.id) {
+                    <button class="mon-chip"
+                            [class.is-on]="actividadesOn().has(act.id)"
+                            (click)="puedeGuardar() && toggleActividad(act.id)"
+                            [disabled]="!puedeGuardar()">
+                      {{ actividadName(act) }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="mon-field">
+              <label class="mon-label">
+                {{ 'monitoring.zona_label' | translate }}
+                <span class="mon-hint">{{ 'monitoring.zona_hint' | translate }}</span>
+              </label>
+              <div class="mon-form-row">
+                <input class="mon-input" type="text"
+                       [placeholder]="'monitoring.zona_desc_placeholder' | translate"
+                       [value]="zonaDesc()"
+                       (input)="setZonaDesc($event)"
+                       [disabled]="!puedeGuardar()">
+                <input class="mon-input mon-input--short" type="number" min="0" max="100"
+                       [placeholder]="'%'"
+                       [value]="zonaPct() ?? ''"
+                       (input)="setZonaPct($event)"
+                       [disabled]="!puedeGuardar()">
+              </div>
+            </div>
+
+            <div class="mon-field">
+              <label class="mon-label">
+                {{ 'monitoring.notas_label' | translate }}
+                <span class="mon-hint">{{ 'monitoring.notas_hint' | translate }}</span>
+              </label>
+              <textarea class="mon-textarea"
+                        [placeholder]="'monitoring.notas_placeholder' | translate"
+                        [value]="notas()"
+                        (input)="setNotas($event)"
+                        [disabled]="!puedeGuardar()"></textarea>
+            </div>
+
+            @if (puedeGuardar()) {
+              <button class="mon-btn mon-btn--primary"
+                      (click)="guardarReporte()"
+                      [disabled]="guardando()">
+                @if (guardando()) { <span class="mon-spinner"></span> }
+                {{ 'monitoring.guardar_btn' | translate }}
+              </button>
+            }
+
+            @if (guardado()) {
+              <div class="mon-alert mon-alert--success">
+                <i class="bi bi-check2-circle"></i>
+                {{ 'monitoring.guardado_msg' | translate }}
+              </div>
+            }
+            @if (errorGuardar()) {
+              <div class="mon-alert mon-alert--error">
+                <i class="bi bi-exclamation-triangle"></i>
+                {{ errorGuardar() }}
+              </div>
+            }
+            @if (c.estado === 'firmado') {
+              <div class="mon-note">
+                <i class="bi bi-info-circle"></i>
+                {{ 'monitoring.nota_inicio' | translate }}
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- Media -->
+        <div class="mon-panel mon-panel--media">
+          <div class="mon-panel__head">
+            <i class="bi bi-images"></i>
+            <span>{{ 'monitoring.media_title' | translate }}</span>
+          </div>
+          <div class="mon-panel__body">
+
+            @if (errorMedia()) {
+              <div class="mon-alert mon-alert--error" style="margin-bottom:var(--ds-space-3)">
+                <i class="bi bi-exclamation-triangle"></i> {{ errorMedia() }}
+              </div>
+            }
+            @if (!reporteHoy()) {
+              <p class="mon-media-hint-top">
+                <i class="bi bi-info-circle"></i>
+                {{ 'monitoring.media_save_first' | translate }}
+              </p>
+            }
+
+            <!-- Fotos -->
+            <div class="mon-media-section">
+              <div class="mon-media-head">
+                <span class="mon-media-label">
+                  <i class="bi bi-image"></i>
+                  {{ 'monitoring.media_fotos' | translate }}
+                  @if (mediaFotos().length) {
+                    <span class="mon-media-count">{{ mediaFotos().length }}</span>
+                  }
+                </span>
+                <label class="mon-btn mon-btn--sm mon-btn--outline mon-btn--upload"
+                       [class.is-loading]="subiendoFoto()"
+                       [class.is-disabled]="!reporteHoy()">
+                  @if (subiendoFoto()) { <span class="mon-spinner mon-spinner--sm"></span> }
+                  @else { <i class="bi bi-plus-lg"></i> }
+                  <input type="file" accept="image/*" multiple hidden
+                         (change)="subirMedia($event, 'reporte_foto')"
+                         [disabled]="subiendoFoto() || !reporteHoy()">
+                </label>
+              </div>
+              @if (mediaFotos().length > 0) {
+                <div class="mon-media-strip">
+                  @for (foto of mediaFotos(); track foto.id) {
+                    <div class="mon-thumb mon-thumb--foto" (click)="abrirMedia(foto)">
+                      <img [src]="publicUrl(foto.url_storage)" [alt]="foto.nombre_archivo" loading="lazy">
+                      <button class="mon-thumb__del" type="button"
+                              (click)="$event.stopPropagation(); eliminarMedia(foto)">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Videos -->
+            <div class="mon-media-section">
+              <div class="mon-media-head">
+                <span class="mon-media-label">
+                  <i class="bi bi-camera-video"></i>
+                  {{ 'monitoring.media_videos' | translate }}
+                  @if (mediaVideos().length) {
+                    <span class="mon-media-count">{{ mediaVideos().length }}</span>
+                  }
+                </span>
+                <label class="mon-btn mon-btn--sm mon-btn--outline mon-btn--upload"
+                       [class.is-loading]="subiendoVid()"
+                       [class.is-disabled]="!reporteHoy()">
+                  @if (subiendoVid()) { <span class="mon-spinner mon-spinner--sm"></span> }
+                  @else { <i class="bi bi-plus-lg"></i> }
+                  <input type="file" accept="video/*" multiple hidden
+                         (change)="subirMedia($event, 'reporte_video')"
+                         [disabled]="subiendoVid() || !reporteHoy()">
+                </label>
+              </div>
+              @if (mediaVideos().length > 0) {
+                <div class="mon-media-strip">
+                  @for (video of mediaVideos(); track video.id) {
+                    <div class="mon-thumb mon-thumb--video" (click)="abrirMedia(video)">
+                      <i class="bi bi-play-circle-fill mon-thumb__play-icon"></i>
+                      <span class="mon-thumb__filename">{{ video.nombre_archivo }}</span>
+                      <button class="mon-thumb__del" type="button"
+                              (click)="$event.stopPropagation(); eliminarMedia(video)">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Documentos -->
+            <div class="mon-media-section mon-media-section--last">
+              <div class="mon-media-head">
+                <span class="mon-media-label">
+                  <i class="bi bi-file-earmark-text"></i>
+                  {{ 'monitoring.media_docs' | translate }}
+                  @if (mediaDocs().length) {
+                    <span class="mon-media-count">{{ mediaDocs().length }}</span>
+                  }
+                </span>
+                <label class="mon-btn mon-btn--sm mon-btn--outline mon-btn--upload"
+                       [class.is-loading]="subiendoDoc()"
+                       [class.is-disabled]="!reporteHoy()">
+                  @if (subiendoDoc()) { <span class="mon-spinner mon-spinner--sm"></span> }
+                  @else { <i class="bi bi-plus-lg"></i> }
+                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                         multiple hidden
+                         (change)="subirMedia($event, 'reporte_documento')"
+                         [disabled]="subiendoDoc() || !reporteHoy()">
+                </label>
+              </div>
+              @if (mediaDocs().length > 0) {
+                <div class="mon-media-strip">
+                  @for (doc of mediaDocs(); track doc.id) {
+                    <div class="mon-thumb mon-thumb--doc" (click)="abrirMedia(doc)">
+                      <i class="bi bi-file-earmark-text mon-thumb__doc-icon"></i>
+                      <span class="mon-thumb__filename">{{ doc.nombre_archivo }}</span>
+                      <button class="mon-thumb__del" type="button"
+                              (click)="$event.stopPropagation(); eliminarMedia(doc)">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /col-form -->
+
+      <!-- ── Col 2: Event log ── -->
+      <div class="mon-col mon-col--events">
+        <div class="mon-panel mon-panel--fill">
+          <div class="mon-panel__head">
+            <i class="bi bi-clock-history"></i>
+            <span>{{ 'monitoring.eventos_title' | translate }}</span>
+          </div>
+          <div class="mon-panel__body mon-panel__body--scroll">
+            @if (reportesRecientes().length > 0) {
+              <div class="mon-events">
+                @for (r of reportesRecientes(); track r.id) {
+                  <div class="mon-event"
+                       [class.is-selected]="r.fecha === fechaReporte()"
+                       (click)="seleccionarEvento(r)">
+                    <div class="mon-event__when">
+                      <span class="mon-event__when-day">{{ inspDia(r.fecha) }}</span>
+                      <small class="mon-event__when-mes">{{ inspMes(r.fecha) }}</small>
+                    </div>
+                    <div class="mon-event__body">
+                      <div class="mon-event__row">
+                        <span class="mon-event__acum">{{ r.porcentaje_acumulado ?? avanceGlobal() }}%</span>
+                        <span class="mon-event__delta">+{{ r.porcentaje_avance_dia }}%</span>
+                      </div>
+                      @if (faseNameById(r.fase_id)) {
+                        <p class="mon-event__fase">
+                          <i class="bi bi-layers"></i>
+                          {{ faseNameById(r.fase_id) }}
+                        </p>
+                      }
+                      @if (r.descripcion) {
+                        <p class="mon-event__desc">{{ r.descripcion }}</p>
+                      }
+                    </div>
+                    <button class="mon-event__del" type="button"
+                            [disabled]="eliminandoReporteId() !== null"
+                            (click)="$event.stopPropagation(); eliminarEvento(r)">
+                      @if (eliminandoReporteId() === r.id) {
+                        <span class="mon-spinner mon-spinner--sm"></span>
+                      } @else {
+                        <i class="bi bi-trash3"></i>
+                      }
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="mon-insp-empty">
+                <i class="bi bi-clock"></i>
+                {{ 'monitoring.eventos_none' | translate }}
+              </p>
+            }
+          </div>
+        </div>
+      </div><!-- /col-events -->
+
+      <!-- ── Col 3: Calendar + Inspections + Contract ── -->
+      <div class="mon-col mon-col--sidebar">
+
+        <!-- Inspections + Calendar -->
+        <div class="mon-panel">
+          <div class="mon-panel__head">
+            <i class="bi bi-calendar-week"></i>
+            <span>{{ 'monitoring.inspecciones_title' | translate }}</span>
+            <button class="mon-btn mon-btn--sm mon-btn--outline" style="margin-left:auto"
+                    (click)="calVisible.set(!calVisible())">
+              {{ 'monitoring.ver_agenda' | translate }}
+            </button>
+          </div>
+          <div class="mon-panel__body">
+
+            @if (inspecciones().length > 0) {
+              <ul class="mon-insp-list">
+                @for (insp of inspecciones(); track insp.id) {
+                  <li class="mon-insp-item">
+                    <div class="mon-insp-item__when">
+                      <span class="mon-insp-item__when-day">{{ inspDia(insp.fecha) }}</span>
+                      <small class="mon-insp-item__when-mes">{{ inspMes(insp.fecha) }}</small>
+                    </div>
+                    <div class="mon-insp-item__info">
+                      <span class="mon-insp-item__tipo">
+                        {{ ('monitoring.tipo_visitante_' + insp.tipo_visitante) | translate }}
+                        &nbsp;·&nbsp; {{ insp.hora.substring(0,5) }}
+                      </span>
+                      @if (insp.motivo) {
+                        <span class="mon-insp-item__motivo">{{ insp.motivo }}</span>
+                      }
+                    </div>
+                    <button class="mon-insp-item__del" type="button"
+                            [disabled]="eliminandoInspId() !== null"
+                            (click)="eliminarInspeccion(insp)">
+                      @if (eliminandoInspId() === insp.id) {
+                        <span class="mon-spinner mon-spinner--sm"></span>
+                      } @else {
+                        <i class="bi bi-trash3"></i>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="mon-insp-empty">
+                <i class="bi bi-calendar-x"></i>
+                {{ 'monitoring.insp_none' | translate }}
+              </p>
+            }
+
+            @if (puedeGuardar()) {
+              <button class="mon-btn mon-btn--sm mon-btn--agenda"
+                      (click)="agendarInspeccion()">
+                <i class="bi" [class]="agendaVisible() ? 'bi-x-lg' : 'bi-plus-lg'"></i>
+                {{ 'monitoring.agendar_visita' | translate }}
+              </button>
+            }
+
+            @if (agendaVisible()) {
+              <div class="mon-agenda-form">
+                <div class="mon-field">
+                  <label class="mon-label">{{ 'monitoring.tipo_visitante_label' | translate }}</label>
+                  <div class="mon-tipo-row">
+                    <button class="mon-tipo-btn"
+                            [class.is-active]="nuevaInspTipo() === 'inspector'"
+                            (click)="setNuevaInspTipo('inspector')">
+                      <i class="bi bi-person-badge"></i>
+                      {{ 'monitoring.tipo_visitante_inspector' | translate }}
+                    </button>
+                    <button class="mon-tipo-btn"
+                            [class.is-active]="nuevaInspTipo() === 'dueno'"
+                            (click)="setNuevaInspTipo('dueno')">
+                      <i class="bi bi-house-door"></i>
+                      {{ 'monitoring.tipo_visitante_dueno' | translate }}
+                    </button>
+                  </div>
+                </div>
+                <div class="mon-form-row">
+                  <div class="mon-field">
+                    <label class="mon-label">{{ 'monitoring.visita_fecha' | translate }}</label>
+                    <input class="mon-input" type="date"
+                           [value]="nuevaInspFecha()"
+                           [min]="fechaHoy"
+                           (change)="setNuevaInspFecha($event)">
+                  </div>
+                  <div class="mon-field">
+                    <label class="mon-label">{{ 'monitoring.visita_hora' | translate }}</label>
+                    <input class="mon-input" type="time"
+                           [value]="nuevaInspHora()"
+                           (change)="setNuevaInspHora($event)">
+                  </div>
+                </div>
+                <div class="mon-field">
+                  <label class="mon-label">{{ 'monitoring.visita_motivo' | translate }}</label>
+                  <input class="mon-input" type="text"
+                         [placeholder]="'monitoring.visita_motivo_placeholder' | translate"
+                         [value]="nuevaInspMotivo()"
+                         (input)="setNuevaInspMotivo($event)">
+                </div>
+                @if (errorInsp()) {
+                  <div class="mon-alert mon-alert--error">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ errorInsp()! | translate }}
+                  </div>
+                }
+                <div class="mon-agenda-actions">
+                  <button class="mon-btn mon-btn--primary mon-btn--sm"
+                          (click)="guardarInspeccion()"
+                          [disabled]="guardandoInsp()">
+                    @if (guardandoInsp()) { <span class="mon-spinner mon-spinner--sm"></span> }
+                    {{ 'monitoring.visita_guardar_btn' | translate }}
+                  </button>
+                  <button class="mon-btn mon-btn--outline mon-btn--sm"
+                          (click)="cancelarAgenda()">
+                    {{ 'monitoring.visita_cancelar' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (calVisible()) {
+              <div class="mon-cal">
+                <p class="mon-cal__month">{{ mesLabel() }}</p>
+                <div class="mon-cal__grid">
+                  @for (h of CAL_HEADERS; track h) {
+                    <div class="mon-cal__hdr">{{ h }}</div>
+                  }
+                  @for (dia of calDias(); track dia.num + '-' + dia.tipo) {
+                    <div class="mon-cal__day"
+                         [class.is-empty]="dia.tipo === 'vacio'"
+                         [class.is-worked]="dia.tipo === 'trabajado'"
+                         [class.is-today]="dia.tipo === 'hoy'"
+                         [class.is-inspeccion]="dia.tipo === 'inspeccion'">
+                      @if (dia.tipo !== 'vacio') { {{ dia.num }} }
+                    </div>
+                  }
+                </div>
+                <div class="mon-cal__legend">
+                  <span class="mon-cal__legend-dot mon-cal__legend-dot--worked"></span>
+                  {{ 'monitoring.dias_trabajados' | translate }}
+                  &nbsp;·&nbsp;
+                  <span class="mon-cal__legend-dot mon-cal__legend-dot--today"></span>
+                  {{ 'monitoring.hoy' | translate }}
+                  @if (fechasInspeccionMes().size > 0) {
+                    &nbsp;·&nbsp;
+                    <span class="mon-cal__legend-dot mon-cal__legend-dot--insp"></span>
+                    {{ 'monitoring.cal_inspeccion' | translate }}
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- Contract details + PDF -->
+        <div class="mon-panel">
+          <div class="mon-panel__head">
+            <i class="bi bi-file-text"></i>
+            <span>{{ 'monitoring.section_contrato' | translate }}</span>
+          </div>
+          <div class="mon-panel__body mon-panel__body--compact">
+            <dl class="mon-dl">
+              <dt>{{ 'monitoring.numero' | translate }}</dt>
+              <dd>{{ c.expediente_numero }}</dd>
+              <dt>{{ 'monitoring.precio' | translate }}</dt>
+              <dd>{{ formatPrecio(c.precio_final) }}</dd>
+              @if (c.plazo_semanas_min || c.plazo_semanas_max) {
+                <dt>{{ 'monitoring.plazo' | translate }}</dt>
+                <dd>{{ formatPlazo(c.plazo_semanas_min, c.plazo_semanas_max) }}</dd>
+              }
+              @if (c.garantia_anos) {
+                <dt>{{ 'monitoring.garantia' | translate }}</dt>
+                <dd>{{ c.garantia_anos }} {{ 'monitoring.garantia_anos_lbl' | translate }}</dd>
+              }
+              @if (c.direccion) {
+                <dt>{{ 'monitoring.direccion' | translate }}</dt>
+                <dd>{{ c.direccion }}, {{ c.canton }}</dd>
+              }
+            </dl>
+
+            <div class="mon-pdf-section">
+              <p class="mon-pdf-section__label">{{ 'monitoring.section_pdf' | translate }}</p>
+              <div class="mon-pdf-langs">
+                @for (lang of LANGS; track lang) {
+                  <button class="mon-btn mon-btn--sm"
+                          [class.is-active]="langPdf() === lang"
+                          (click)="verPdf(lang)">
+                    {{ lang.toUpperCase() }}
+                  </button>
+                }
+              </div>
+              @if (generandoPdf()) {
+                <div class="mon-pdf-loading">
+                  <span class="mon-spinner"></span>
+                </div>
+              }
+              @if (pdfVisible() && pdfUrl() && !generandoPdf()) {
+                <div class="mon-pdf-viewer" [class.is-large]="pdfGrande()">
+                  <div class="mon-pdf-viewer__toolbar">
+                    <button class="mon-btn mon-btn--sm mon-btn--outline"
+                            (click)="pdfGrande.set(!pdfGrande())">
+                      <i class="bi" [class]="pdfGrande() ? 'bi-arrows-angle-contract' : 'bi-arrows-angle-expand'"></i>
+                    </button>
+                    <button class="mon-btn mon-btn--sm mon-btn--outline"
+                            (click)="pdfVisible.set(false)">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                  <iframe [src]="pdfUrl()" class="mon-pdf-viewer__frame"></iframe>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /col-sidebar -->
+
+    </div><!-- /mon-body -->
+
+  </div><!-- /mon-wrap -->
+
+  <!-- ── Media viewer overlay ── -->
+  @if (mediaViewer()) {
+    <div class="mon-viewer-overlay" (click)="cerrarViewer()">
+      <div class="mon-viewer" (click)="$event.stopPropagation()">
+        <div class="mon-viewer__toolbar">
+          <span class="mon-viewer__name">{{ mediaViewer()!.nombre }}</span>
+          <button class="mon-viewer__close" type="button" (click)="cerrarViewer()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        @if (mediaViewer()!.tipo === 'foto') {
+          <img class="mon-viewer__img" [src]="mediaViewer()!.url" [alt]="mediaViewer()!.nombre">
+        } @else {
+          <video class="mon-viewer__video" [src]="mediaViewer()!.url" controls autoplay></video>
+        }
+      </div>
+    </div>
+  }
+}

@@ -146,6 +146,16 @@ export const routes: Routes = [
     loadComponent: () => import('./builder/my-offer/my-offer.component').then(m => m.MyOfferComponent),
     canActivate: [constructorGuard],
   },
+  {
+    path: 'builder/construction-monitoring/list',
+    loadComponent: () => import('./builder/construction-monitoring/list/list.component').then(m => m.ConstructionMonitoringListComponent),
+    canActivate: [constructorGuard],
+  },
+  {
+    path: 'builder/construction-monitoring/monitoring/:id',
+    loadComponent: () => import('./builder/construction-monitoring/monitoring/monitoring.component').then(m => m.ConstructionMonitoringComponent),
+    canActivate: [constructorGuard],
+  },
 
   // ── Administrador ─────────────────────────────────────────────────────────
   {

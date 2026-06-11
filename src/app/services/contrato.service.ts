@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ContratoAdminDetalle, ContratoAdminListItem, ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
+import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
 import { ContratoRepository } from '../data/contrato.repository';
 import { OfertaRepository } from '../data/oferta.repository';
 import { generarContratoPdfBlob } from '../shared/contrato-pdf';
@@ -174,6 +174,90 @@ export class ContratoService {
       plazo_semanas_min:    ofe?.plazo_semanas_min ?? null,
       plazo_semanas_max:    ofe?.plazo_semanas_max ?? null,
     };
+  }
+
+  // ── Constructor: detalle de un contrato ─────────────────────────────────
+
+  async getContratoMonitoringById(contratoId: string, constructorId: string): Promise<ContratoAdminDetalle> {
+    const c   = await this.contratoRepo.findDetalleByIdForConstructor(contratoId, constructorId);
+    const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
+    const svc = exp?.servicio    ? (Array.isArray(exp.servicio)    ? exp.servicio[0]    : exp.servicio)    : null;
+    const loc = exp?.localizacion ? (Array.isArray(exp.localizacion) ? exp.localizacion[0] : exp.localizacion) : null;
+    const cli = Array.isArray(c.cliente)     ? c.cliente[0]     : c.cliente;
+    const con = Array.isArray(c.constructor) ? c.constructor[0] : c.constructor;
+    const ofe = Array.isArray(c.oferta)      ? c.oferta[0]      : c.oferta;
+
+    return {
+      id:                   c.id,
+      precio_final:         c.precio_final,
+      garantia_anos:        c.garantia_anos        ?? null,
+      estado:               c.estado,
+      generado_en:          c.generado_en          ?? '',
+      firmado_en:           c.firmado_en           ?? null,
+      url_pdf:              c.url_pdf              ?? null,
+      descripcion_trabajo:  c.descripcion_trabajo  ?? '',
+      expediente_id:        exp?.id                ?? '',
+      expediente_numero:    exp?.numero            ?? '—',
+      expediente_estado:    exp?.estado            ?? '',
+      servicio_nombre:      svc?.nombre_es         ?? '—',
+      servicio_nombre_en:   svc?.nombre_en ?? svc?.nombre_es ?? '—',
+      servicio_nombre_fr:   svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+      servicio_desc:        svc?.descripcion_es    ?? '',
+      servicio_desc_en:     svc?.descripcion_en    ?? '',
+      servicio_desc_fr:     svc?.descripcion_fr    ?? '',
+      direccion:            loc?.direccion         ?? '—',
+      provincia:            loc?.provincia         ?? '—',
+      canton:               loc?.canton            ?? '—',
+      distrito:             loc?.distrito          ?? null,
+      cliente_nombre:       cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+      cliente_telefono:     cli?.telefono          ?? '—',
+      cliente_email:        cli?.email             ?? '—',
+      constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
+      constructor_telefono: con?.telefono          ?? '—',
+      constructor_email:    con?.email             ?? '—',
+      estimador_nombre:     null,
+      estimador_telefono:   null,
+      estimador_email:      null,
+      oferta_id:            ofe?.id                ?? '',
+      oferta_fecha_inicio:  ofe?.fecha_inicio      ?? null,
+      plazo_semanas_min:    ofe?.plazo_semanas_min ?? null,
+      plazo_semanas_max:    ofe?.plazo_semanas_max ?? null,
+    };
+  }
+
+  // ── Constructor: listar contratos propios ───────────────────────────────
+
+  async getContratosConstructor(constructorId: string): Promise<ContratoConstructorListItem[]> {
+    const rows = await this.contratoRepo.findByConstructorId(constructorId);
+    return rows.map((c: any) => {
+      const svc    = c.expediente?.servicio;
+      const locArr = c.expediente?.localizacion;
+      const loc    = Array.isArray(locArr) ? locArr[0] : locArr;
+      const cli    = c.cliente;
+      const ofe    = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
+      return {
+        id:                 c.id,
+        expediente_id:      c.expediente_id       ?? '',
+        expediente_numero:  c.expediente?.numero  ?? '—',
+        servicio_nombre:    svc?.nombre_es        ?? '—',
+        servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
+        servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+        cliente_nombre:     cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+        precio_final:       c.precio_final,
+        garantia_anos:      c.garantia_anos       ?? null,
+        estado:             c.estado,
+        generado_en:        c.generado_en         ?? '',
+        firmado_en:         c.firmado_en          ?? null,
+        actualizado_en:     c.actualizado_en      ?? '',
+        url_pdf:            c.url_pdf             ?? null,
+        fecha_inicio:       ofe?.fecha_inicio     ?? null,
+        plazo_semanas_min:  ofe?.plazo_semanas_min ?? null,
+        plazo_semanas_max:  ofe?.plazo_semanas_max ?? null,
+        direccion:          loc?.direccion        ?? '—',
+        provincia:          loc?.provincia        ?? '—',
+        canton:             loc?.canton           ?? '—',
+      } as ContratoConstructorListItem;
+    });
   }
 
   // ── Admin: listar contratos ──────────────────────────────────────────────
