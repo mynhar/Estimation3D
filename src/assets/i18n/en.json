@@ -1205,7 +1205,8 @@
     "exp_asignado_estimador": "File {{numero}} has been assigned to you. Check your files to estimate.",
     "ofe_aceptada": "Your offer was accepted! Go to My Offers to view the details.",
     "ofe_rechazada": "Your offer was not selected. The client chose another proposal.",
-    "ofe_pendiente": "Your offer has returned to pending status."
+    "ofe_pendiente": "Your offer has returned to pending status.",
+    "contrato_en_ejecucion": "Work has started! Follow your project's progress."
   },
   "admin_service_types": {
     "title": "Service types",
@@ -1443,5 +1444,31 @@
     "no_data_hint": "Your construction sites will appear here once a contract is signed with a client.",
     "estado_contratado": "Under contract",
     "estado_adjudicado": "Awarded"
+  },
+  "client_monitoring": {
+    "eyebrow": "Real-time tracking",
+    "title": "Construction monitoring",
+    "subtitle": "Detailed work progress for each of your files.",
+    "empty_title": "No work in progress",
+    "empty_hint": "Tracking will appear here once the builder starts the work.",
+    "avance_global": "Overall site progress",
+    "kpi_actualizacion": "Last update",
+    "kpi_estimado": "Estimated time (builder)",
+    "kpi_llegada_fecha": "Arrival date on site",
+    "kpi_llegada_hora": "Arrival time",
+    "kpi_horas_dia": "Hours worked (day)",
+    "semanas": "wk",
+    "fases_title": "Work phases",
+    "sin_fases": "No phases defined for this service.",
+    "actividades_title": "Activity list",
+    "sin_actividades": "No activities defined for this service.",
+    "zonas_title": "Breakdown by zone",
+    "sin_zonas": "No zones recorded yet.",
+    "eventos_title": "Site event log",
+    "sin_eventos": "No reports recorded yet.",
+    "inspecciones_title": "Next inspection",
+    "sin_inspecciones": "No inspection scheduled.",
+    "media_title": "Today's photos",
+    "sin_media": "No files."
   }
 }

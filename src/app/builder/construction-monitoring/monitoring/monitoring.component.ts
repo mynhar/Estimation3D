@@ -402,6 +402,14 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
           : Promise.resolve(),
       ]);
 
+      // Primer reporte sobre un contrato firmado → arranca la ejecución de la obra.
+      // El RPC es idempotente: si ya está en ejecución no hace nada.
+      const contratoActual = this.contrato();
+      if (contratoActual?.estado === 'firmado') {
+        await this.contratoService.iniciarEjecucionContrato(contratoActual.id);
+        this.contrato.set({ ...contratoActual, estado: 'en_ejecucion' });
+      }
+
       // Update reporteHoy with the just-saved row — do NOT call cargarDatosSeguimiento
       // because that always reloads for today's date and would overwrite the form.
       // Also sync avanceDia from the DB value: the BEFORE trigger may have clamped it.

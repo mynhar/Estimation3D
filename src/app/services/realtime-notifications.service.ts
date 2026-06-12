@@ -7,6 +7,7 @@ import { ToastService } from './toast.service';
 
 type ExpRow = { id: string; estado: string; numero: string };
 type OfeRow = { id: string; estado: string; expediente_id: string };
+type CtrRow = { id: string; estado: string; expediente_id: string };
 
 @Injectable({ providedIn: 'root' })
 export class RealtimeNotificationsService implements OnDestroy {
@@ -25,6 +26,7 @@ export class RealtimeNotificationsService implements OnDestroy {
 
     if (rol === 'cliente') {
       this.channels.push(this.chanExpedienteCliente(userId));
+      this.channels.push(this.chanContratoCliente(userId));
     }
     if (rol === 'estimador') {
       this.channels.push(this.chanExpedienteEstimador(userId));
@@ -55,6 +57,17 @@ export class RealtimeNotificationsService implements OnDestroy {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'expediente', filter: `cliente_id=eq.${userId}` },
         payload => this.onExpedienteUpdate(payload),
+      )
+      .subscribe();
+  }
+
+  private chanContratoCliente(userId: string): RealtimeChannel {
+    return this.auth.client
+      .channel(`ctr-cli-${userId}`)
+      .on<CtrRow>(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'contrato', filter: `cliente_id=eq.${userId}` },
+        payload => this.onContratoUpdate(payload),
       )
       .subscribe();
   }
@@ -110,6 +123,21 @@ export class RealtimeNotificationsService implements OnDestroy {
     const numero = nuevo.numero ?? '';
     const msg    = this.translate.instant('realtime.exp_asignado_estimador', { numero });
     this.toast.show(msg, 'info', 9000);
+  }
+
+  private onContratoUpdate(payload: RealtimePostgresChangesPayload<CtrRow>): void {
+    const nuevo = payload.new as CtrRow;
+    const viejo = payload.old as Partial<CtrRow>;
+
+    if (!nuevo.estado) return;
+    // Si REPLICA IDENTITY FULL está activo, viejo.estado está disponible.
+    // Solo notificar cuando el estado realmente cambió.
+    if (viejo.estado && nuevo.estado === viejo.estado) return;
+
+    // Por ahora solo interesa el arranque de la obra (firmado → en_ejecucion).
+    if (nuevo.estado !== 'en_ejecucion') return;
+
+    this.toast.show(this.translate.instant('realtime.contrato_en_ejecucion'), 'success', 9000);
   }
 
   private onOfertaUpdate(payload: RealtimePostgresChangesPayload<OfeRow>): void {

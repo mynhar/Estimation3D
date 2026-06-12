@@ -190,6 +190,21 @@ export class SeguimientoRepository {
     if (insErr) throw new Error(insErr.message);
   }
 
+  // Cuenta, por actividad, en cuántos reportes del seguimiento se realizó.
+  // Sirve para mostrar el avance porcentual por actividad (días / total días).
+  async findActividadesAgregadas(seguimientoId: string): Promise<{ actividad_id: string; dias: number }[]> {
+    const { data, error } = await this.db
+      .from('reporte_actividad')
+      .select('actividad_id, reporte_diario!inner(seguimiento_id)')
+      .eq('reporte_diario.seguimiento_id', seguimientoId);
+    if (error) throw new Error(error.message);
+    const counts = new Map<string, number>();
+    for (const row of (data ?? []) as { actividad_id: string }[]) {
+      counts.set(row.actividad_id, (counts.get(row.actividad_id) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([actividad_id, dias]) => ({ actividad_id, dias }));
+  }
+
   // ── Zonas del reporte ─────────────────────────────────────────────────────
 
   async findZonasReporte(reporteId: string): Promise<ReporteZona[]> {

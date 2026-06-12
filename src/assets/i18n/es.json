@@ -1205,7 +1205,8 @@
     "exp_asignado_estimador": "Se te asignó el expediente {{numero}}. Revisa los expedientes a estimar.",
     "ofe_aceptada": "¡Tu oferta fue aceptada! Revisa Mis Ofertas para ver los detalles.",
     "ofe_rechazada": "Tu oferta no fue seleccionada. El cliente eligió otra propuesta.",
-    "ofe_pendiente": "Tu oferta volvió al estado pendiente."
+    "ofe_pendiente": "Tu oferta volvió al estado pendiente.",
+    "contrato_en_ejecucion": "¡La obra ha comenzado! Sigue el avance de tu proyecto."
   },
   "admin_service_types": {
     "title": "Tipos de servicio",
@@ -1443,5 +1444,31 @@
     "no_data_hint": "Sus obras aparecerán aquí cuando se firme un contrato con un cliente.",
     "estado_contratado": "Contratado",
     "estado_adjudicado": "Adjudicado"
+  },
+  "client_monitoring": {
+    "eyebrow": "Seguimiento en tiempo real",
+    "title": "Seguimiento de obra",
+    "subtitle": "Avance detallado de los trabajos de cada uno de sus expedientes.",
+    "empty_title": "Sin obras en curso",
+    "empty_hint": "El seguimiento aparecerá aquí cuando el constructor inicie los trabajos.",
+    "avance_global": "Avance global de la obra",
+    "kpi_actualizacion": "Última actualización",
+    "kpi_estimado": "Tiempo estimado (constructor)",
+    "kpi_llegada_fecha": "Fecha de llegada a la obra",
+    "kpi_llegada_hora": "Hora de llegada",
+    "kpi_horas_dia": "Horas trabajadas (día)",
+    "semanas": "sem.",
+    "fases_title": "Fases de la obra",
+    "sin_fases": "No hay fases definidas para este servicio.",
+    "actividades_title": "Lista de actividades",
+    "sin_actividades": "No hay actividades definidas para este servicio.",
+    "zonas_title": "Desglose por zona",
+    "sin_zonas": "Aún no hay zonas registradas.",
+    "eventos_title": "Flujo de eventos de la obra",
+    "sin_eventos": "Aún no hay reportes registrados.",
+    "inspecciones_title": "Próxima inspección",
+    "sin_inspecciones": "No hay inspecciones programadas.",
+    "media_title": "Fotos de hoy",
+    "sin_media": "Sin archivos."
   }
 }

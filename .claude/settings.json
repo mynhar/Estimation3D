@@ -155,7 +155,10 @@
       "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
       "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['monitoring'], indent=2, ensure_ascii=False\\)\\)\")",
       "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['construction_monitoring'], indent=2, ensure_ascii=False\\)\\)\")",
-      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); m=d.get\\('monitoring',{}\\); print\\('inicio_real_lbl' in m, 'eventos_title' in m, 'tipo_visitante_inspector' in m\\)\")"
+      "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); m=d.get\\('monitoring',{}\\); print\\('inicio_real_lbl' in m, 'eventos_title' in m, 'tipo_visitante_inspector' in m\\)\")",
+      "Bash(sed 's/.*\\\\.//')",
+      "Bash(xargs wc -l)",
+      "Bash(echo \"EXIT: $?\")"
     ],
     "additionalDirectories": [
       "\\tmp",

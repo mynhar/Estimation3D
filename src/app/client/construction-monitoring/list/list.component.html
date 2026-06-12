@@ -1,0 +1,40 @@
+<div class="cm-page">
+
+  <!-- Encabezado de página -->
+  <header class="cm-pagehead">
+    <span class="cm-eyebrow">{{ 'client_monitoring.eyebrow' | translate }}</span>
+    <h1 class="cm-pagetitle">{{ 'client_monitoring.title' | translate }}</h1>
+    <p class="cm-pagesub">{{ 'client_monitoring.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Cargando -->
+  @if (cargando()) {
+    <div class="cm-loading">
+      <span class="cm-spinner"></span>
+    </div>
+  }
+
+  <!-- Error -->
+  @else if (error()) {
+    <div class="cm-alert cm-alert--error">
+      <i class="bi bi-exclamation-triangle"></i>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Vacío -->
+  @else if (obras().length === 0) {
+    <div class="cm-empty">
+      <i class="bi bi-hammer"></i>
+      <p class="cm-empty__title">{{ 'client_monitoring.empty_title' | translate }}</p>
+      <p class="cm-empty__hint">{{ 'client_monitoring.empty_hint' | translate }}</p>
+    </div>
+  }
+
+  <!-- Una tarjeta por obra -->
+  @else {
+    @for (o of obras(); track o.contratoId) {
+      <app-obra-card [obra]="o" />
+    }
+  }
+</div>

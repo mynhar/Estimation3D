@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-06-11",
+    "scope": "app",
+    "macrostructure": "Workbench (full-bleed · hero-metric band + 12-col spine grid)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/construction-monitoring/list · rediseño · full-bleed 100% ancho, avance global como métrica hero (Fraunces), workbench 12-col con Flujo de eventos como espina (5col×2filas) + 2×2 paneles + media full-width, iconos filled→line, eyebrow OFF (gate 66)"
+  },
+  {
     "date": "2026-05-29",
     "macrostructure": "Workbench (app-shell · 8/4 detail page)",
     "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",

@@ -1205,7 +1205,8 @@
     "exp_asignado_estimador": "Le dossier {{numero}} vous a été assigné. Consultez vos dossiers à estimer.",
     "ofe_aceptada": "Votre offre a été acceptée ! Consultez Mes Offres pour voir les détails.",
     "ofe_rechazada": "Votre offre n'a pas été retenue. Le client a choisi une autre proposition.",
-    "ofe_pendiente": "Votre offre est revenue au statut en attente."
+    "ofe_pendiente": "Votre offre est revenue au statut en attente.",
+    "contrato_en_ejecucion": "Les travaux ont commencé ! Suivez l'avancement de votre chantier."
   },
   "admin_service_types": {
     "title": "Types de service",
@@ -1443,5 +1444,31 @@
     "no_data_hint": "Vos chantiers apparaîtront ici lorsqu'un contrat sera signé avec un client.",
     "estado_contratado": "Sous contrat",
     "estado_adjudicado": "Adjugé"
+  },
+  "client_monitoring": {
+    "eyebrow": "Suivi en temps réel",
+    "title": "Suivi de chantier",
+    "subtitle": "Avancement détaillé des travaux de chacun de vos dossiers.",
+    "empty_title": "Aucun chantier en cours",
+    "empty_hint": "Le suivi apparaîtra ici lorsque le constructeur démarrera les travaux.",
+    "avance_global": "Avancement global du chantier",
+    "kpi_actualizacion": "Dernière mise à jour",
+    "kpi_estimado": "Délai estimé (constructeur)",
+    "kpi_llegada_fecha": "Date d'arrivée sur site",
+    "kpi_llegada_hora": "Heure d'arrivée",
+    "kpi_horas_dia": "Heures travaillées (jour)",
+    "semanas": "sem.",
+    "fases_title": "Phases du chantier",
+    "sin_fases": "Aucune phase définie pour ce service.",
+    "actividades_title": "Liste des activités",
+    "sin_actividades": "Aucune activité définie pour ce service.",
+    "zonas_title": "Décomposition par zone",
+    "sin_zonas": "Aucune zone enregistrée pour le moment.",
+    "eventos_title": "Flux d'événements du chantier",
+    "sin_eventos": "Aucun rapport enregistré pour le moment.",
+    "inspecciones_title": "Prochaine inspection",
+    "sin_inspecciones": "Aucune inspection programmée.",
+    "media_title": "Photos du jour",
+    "sin_media": "Aucun fichier."
   }
 }

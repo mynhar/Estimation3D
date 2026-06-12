@@ -1,0 +1,299 @@
+@let o = obra();
+
+<article class="cm-obra">
+
+  <!-- ── Banda de cabecera: identidad · estado · avance hero ── -->
+  <header class="cm-obra__head">
+    <div class="cm-obra__top">
+      <div class="cm-obra__id">
+        <h2 class="cm-obra__number">{{ o.expedienteNumero }}</h2>
+        <span class="cm-obra__service">{{ servicioNombre() }}</span>
+      </div>
+      <span class="cm-badge" [class]="badgeContrato(o.estadoContrato)">
+        {{ ('construction_monitoring.estado_' + o.estadoContrato) | translate }}
+      </span>
+    </div>
+
+    <div class="cm-hero">
+      <!-- Avance global como métrica hero -->
+      <div class="cm-hero__avance">
+        <span class="cm-hero__label">{{ 'client_monitoring.avance_global' | translate }}</span>
+        <strong class="cm-hero__pct">{{ o.avanceGlobal }}<span>%</span></strong>
+        <div class="cm-hero__track">
+          <span class="cm-hero__fill" [style.width.%]="o.avanceGlobal"></span>
+        </div>
+      </div>
+
+      <!-- Estado + KPIs -->
+      <div class="cm-hero__meta">
+        <div class="cm-timeline">
+          @for (paso of PASOS; track paso.key) {
+            <div class="cm-timeline__step"
+                 [class.is-done]="pasoActivo(paso.key)"
+                 [class.is-current]="esPasoActual(paso.key)">
+              <span class="cm-timeline__dot"><i class="bi" [class]="paso.icon"></i></span>
+              <span class="cm-timeline__label">
+                {{ ('construction_monitoring.estado_' + paso.key) | translate }}
+              </span>
+            </div>
+            @if (!$last) {
+              <span class="cm-timeline__line" [class.is-done]="pasoActivo(paso.key)"></span>
+            }
+          }
+        </div>
+
+        <dl class="cm-kpis">
+          <div class="cm-kpi">
+            <dt>{{ 'client_monitoring.kpi_actualizacion' | translate }}</dt>
+            <dd>{{ formatFechaHora(o.ultimaActualizacion) }}</dd>
+          </div>
+          <div class="cm-kpi">
+            <dt>{{ 'client_monitoring.kpi_estimado' | translate }}</dt>
+            <dd>{{ plazoLabel() }}</dd>
+          </div>
+          <div class="cm-kpi">
+            <dt>{{ 'client_monitoring.kpi_llegada_fecha' | translate }}</dt>
+            <dd>{{ formatFecha(selected()?.fecha ?? null) }}</dd>
+          </div>
+          <div class="cm-kpi">
+            <dt>{{ 'client_monitoring.kpi_llegada_hora' | translate }}</dt>
+            <dd>{{ horaCorta(selected()?.hora_inicio ?? null) }}</dd>
+          </div>
+          <div class="cm-kpi">
+            <dt>{{ 'client_monitoring.kpi_horas_dia' | translate }}</dt>
+            <dd>{{ selected()?.horas_trabajadas != null ? selected()!.horas_trabajadas + ' h' : '—' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Workbench ── -->
+  <div class="cm-work">
+
+    <!-- Flujo de eventos — columna espina -->
+    <section class="cm-panel cm-panel--eventos">
+      <div class="cm-panel__head">
+        <i class="bi bi-clock-history"></i>
+        <span>{{ 'client_monitoring.eventos_title' | translate }}</span>
+      </div>
+      <div class="cm-panel__body cm-panel__body--scroll">
+        @if (o.eventos.length > 0) {
+          <ul class="cm-events">
+            @for (ev of o.eventos; track ev.id) {
+              <li>
+                <button class="cm-event" type="button"
+                        [class.is-selected]="ev.id === selected()?.id"
+                        (click)="seleccionarEvento(ev)">
+                  <span class="cm-event__when">
+                    <strong>{{ diaNum(ev.fecha) }}</strong>
+                    <small>{{ mesCorto(ev.fecha) }}</small>
+                  </span>
+                  <span class="cm-event__body">
+                    <span class="cm-event__row">
+                      <span class="cm-event__acum">{{ ev.porcentaje_acumulado ?? o.avanceGlobal }}%</span>
+                      <span class="cm-event__delta">+{{ ev.porcentaje_avance_dia }}%</span>
+                    </span>
+                    @if (faseNameById(ev.fase_id)) {
+                      <span class="cm-event__fase">
+                        <i class="bi bi-layers"></i> {{ faseNameById(ev.fase_id) }}
+                      </span>
+                    }
+                    @if (ev.descripcion) {
+                      <span class="cm-event__desc">{{ ev.descripcion }}</span>
+                    }
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="cm-muted">{{ 'client_monitoring.sin_eventos' | translate }}</p>
+        }
+      </div>
+    </section>
+
+    <!-- Fases de la obra -->
+    <section class="cm-panel cm-panel--fases">
+      <div class="cm-panel__head">
+        <i class="bi bi-layers"></i>
+        <span>{{ 'client_monitoring.fases_title' | translate }}</span>
+      </div>
+      <div class="cm-panel__body">
+        @if (o.fases.length > 0) {
+          @for (f of o.fases; track f.fase.id) {
+            <div class="cm-bar">
+              <div class="cm-bar__top">
+                <span class="cm-bar__name">{{ faseName(f.fase) }}</span>
+                <span class="cm-bar__pct">{{ f.pct }}%</span>
+              </div>
+              <div class="cm-bar__track">
+                <span class="cm-bar__fill" [style.width.%]="f.pct"></span>
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="cm-muted">{{ 'client_monitoring.sin_fases' | translate }}</p>
+        }
+      </div>
+    </section>
+
+    <!-- Próxima inspección -->
+    <section class="cm-panel cm-panel--insp">
+      <div class="cm-panel__body">
+        <app-obra-inspecciones [seguimientoId]="o.seguimientoId" />
+      </div>
+    </section>
+
+    <!-- Lista de actividades -->
+    <section class="cm-panel cm-panel--activ">
+      <div class="cm-panel__head">
+        <i class="bi bi-check2-square"></i>
+        <span>{{ 'client_monitoring.actividades_title' | translate }}</span>
+      </div>
+      <div class="cm-panel__body">
+        @if (o.actividades.length > 0) {
+          @for (a of o.actividades; track a.actividad.id) {
+            <div class="cm-bar" [class.is-off]="!a.hecha">
+              <div class="cm-bar__top">
+                <span class="cm-bar__name">
+                  @if (a.hecha) { <i class="bi bi-check-circle cm-bar__ic"></i> }
+                  @else { <i class="bi bi-circle cm-bar__ic"></i> }
+                  {{ actividadName(a.actividad) }}
+                </span>
+                <span class="cm-bar__pct">{{ a.pct }}%</span>
+              </div>
+              <div class="cm-bar__track">
+                <span class="cm-bar__fill" [style.width.%]="a.pct"></span>
+              </div>
+            </div>
+          }
+        } @else {
+          <p class="cm-muted">{{ 'client_monitoring.sin_actividades' | translate }}</p>
+        }
+      </div>
+    </section>
+
+    <!-- Desglose por zona -->
+    <section class="cm-panel cm-panel--zonas">
+      <div class="cm-panel__head">
+        <i class="bi bi-grid-1x2"></i>
+        <span>{{ 'client_monitoring.zonas_title' | translate }}</span>
+      </div>
+      <div class="cm-panel__body">
+        @if (zonas().length > 0) {
+          @for (z of zonas(); track z.id) {
+            <div class="cm-bar">
+              <div class="cm-bar__top">
+                <span class="cm-bar__name">{{ z.zona }}</span>
+                <span class="cm-bar__pct">{{ z.porcentaje_avance ?? 0 }}%</span>
+              </div>
+              <div class="cm-bar__track">
+                <span class="cm-bar__fill" [style.width.%]="z.porcentaje_avance ?? 0"></span>
+              </div>
+              @if (z.descripcion) {
+                <p class="cm-bar__desc">{{ z.descripcion }}</p>
+              }
+            </div>
+          }
+        } @else {
+          <p class="cm-muted">{{ 'client_monitoring.sin_zonas' | translate }}</p>
+        }
+      </div>
+    </section>
+
+    <!-- Fotos del día seleccionado — banda a todo el ancho -->
+    <section class="cm-panel cm-panel--media">
+      <div class="cm-panel__head">
+        <i class="bi bi-images"></i>
+        <span>{{ 'client_monitoring.media_title' | translate }}</span>
+        @if (selected()?.fecha) {
+          <span class="cm-panel__date">{{ formatFecha(selected()!.fecha) }}</span>
+        }
+        @if (cargandoDia()) { <span class="cm-spinner cm-spinner--sm"></span> }
+      </div>
+      <div class="cm-panel__body cm-media-grid">
+
+        <!-- Fotos -->
+        <div class="cm-media-row">
+          <span class="cm-media-row__label">
+            <i class="bi bi-image"></i> {{ 'monitoring.media_fotos' | translate }}
+            @if (fotos().length) { <span class="cm-media-count">{{ fotos().length }}</span> }
+          </span>
+          @if (fotos().length > 0) {
+            <div class="cm-strip">
+              @for (foto of fotos(); track foto.id) {
+                <button class="cm-thumb cm-thumb--foto" type="button" (click)="abrirMedia(foto)">
+                  <img [src]="publicUrl(foto.url_storage)" [alt]="foto.nombre_archivo" loading="lazy">
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="cm-muted cm-muted--sm">{{ 'client_monitoring.sin_media' | translate }}</p>
+          }
+        </div>
+
+        <!-- Videos -->
+        <div class="cm-media-row">
+          <span class="cm-media-row__label">
+            <i class="bi bi-camera-video"></i> {{ 'monitoring.media_videos' | translate }}
+            @if (videos().length) { <span class="cm-media-count">{{ videos().length }}</span> }
+          </span>
+          @if (videos().length > 0) {
+            <div class="cm-strip">
+              @for (video of videos(); track video.id) {
+                <button class="cm-thumb cm-thumb--video" type="button" (click)="abrirMedia(video)">
+                  <i class="bi bi-play-circle cm-thumb__play"></i>
+                  <span class="cm-thumb__name">{{ video.nombre_archivo }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="cm-muted cm-muted--sm">{{ 'client_monitoring.sin_media' | translate }}</p>
+          }
+        </div>
+
+        <!-- Documentos -->
+        <div class="cm-media-row">
+          <span class="cm-media-row__label">
+            <i class="bi bi-file-earmark-text"></i> {{ 'monitoring.media_docs' | translate }}
+            @if (documentos().length) { <span class="cm-media-count">{{ documentos().length }}</span> }
+          </span>
+          @if (documentos().length > 0) {
+            <div class="cm-strip">
+              @for (doc of documentos(); track doc.id) {
+                <a class="cm-thumb cm-thumb--doc" [href]="publicUrl(doc.url_storage)" target="_blank" rel="noopener">
+                  <i class="bi bi-file-earmark-text cm-thumb__doc"></i>
+                  <span class="cm-thumb__name">{{ doc.nombre_archivo }}</span>
+                </a>
+              }
+            </div>
+          } @else {
+            <p class="cm-muted cm-muted--sm">{{ 'client_monitoring.sin_media' | translate }}</p>
+          }
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /cm-work -->
+</article>
+
+<!-- ── Visor de media ── -->
+@if (mediaViewer(); as mv) {
+  <div class="cm-viewer-overlay" (click)="cerrarViewer()">
+    <div class="cm-viewer" (click)="$event.stopPropagation()">
+      <div class="cm-viewer__bar">
+        <span class="cm-viewer__name">{{ mv.nombre }}</span>
+        <button class="cm-viewer__close" type="button" (click)="cerrarViewer()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      @if (mv.tipo === 'foto') {
+        <img class="cm-viewer__img" [src]="mv.url" [alt]="mv.nombre">
+      } @else {
+        <video class="cm-viewer__video" [src]="mv.url" controls autoplay></video>
+      }
+    </div>
+  </div>
+}

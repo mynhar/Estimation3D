@@ -67,6 +67,10 @@ export class SeguimientoService {
     return this.repo.findZonasReporte(reporteId);
   }
 
+  getActividadesAgregadas(seguimientoId: string): Promise<{ actividad_id: string; dias: number }[]> {
+    return this.repo.findActividadesAgregadas(seguimientoId);
+  }
+
   upsertZona(reporteId: string, zona: string, descripcion: string | null, pct: number | null): Promise<void> {
     return this.repo.upsertZona(reporteId, zona, descripcion, pct);
   }

@@ -250,6 +250,12 @@ export class ContratoRepository {
     if (error) throw new Error(error.message);
   }
 
+  // Constructor adjudicado: transiciona su contrato 'firmado' → 'en_ejecucion'.
+  async iniciarEjecucion(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('iniciar_ejecucion_contrato', { p_contrato_id: contratoId });
+    if (error) throw new Error(error.message);
+  }
+
   async completarAdmin(contratoId: string): Promise<void> {
     const { error } = await this.db.rpc('completar_contrato_admin', { p_contrato_id: contratoId });
     if (error) throw new Error(error.message);

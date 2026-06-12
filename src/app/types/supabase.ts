@@ -887,6 +887,10 @@ export type Database = {
       }
       fn_rol_actual: { Args: never; Returns: string }
       get_rol_usuario: { Args: never; Returns: string }
+      iniciar_ejecucion_contrato: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
       iniciar_ejecucion_contrato_admin: {
         Args: { p_contrato_id: string }
         Returns: undefined

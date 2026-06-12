@@ -1,0 +1,82 @@
+:host {
+  display: block;
+  font-family: var(--ds-font-body);
+  color: var(--ds-ink);
+}
+
+.cm-page {
+  /* Full-bleed: usa el 100% del ancho disponible, con respiración lateral. */
+  width: 100%;
+  margin: 0;
+  padding: var(--ds-space-6) clamp(var(--ds-space-4), 4vw, var(--ds-space-8)) var(--ds-space-9);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-6);
+}
+
+/* ── Encabezado de página ── */
+.cm-pagehead {
+  margin-bottom: var(--ds-space-1);
+  padding-bottom: var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+}
+.cm-eyebrow {
+  display: block;
+  font-size: var(--ds-text-2xs);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  margin-bottom: var(--ds-space-2);
+}
+.cm-pagetitle {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-tight);
+  margin: 0;
+}
+.cm-pagesub {
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-sm);
+  margin: var(--ds-space-2) 0 0;
+}
+
+/* ── Estados de carga / vacío ── */
+.cm-loading { display: flex; justify-content: center; padding: var(--ds-space-9) 0; }
+.cm-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--ds-border);
+  border-top-color: var(--ds-gold);
+  border-radius: var(--ds-radius-circle);
+  animation: cm-spin 0.7s linear infinite;
+}
+@keyframes cm-spin { to { transform: rotate(360deg); } }
+
+.cm-empty {
+  text-align: center;
+  padding: var(--ds-space-9) var(--ds-space-5);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+}
+.cm-empty i { font-size: 2.5rem; color: var(--ds-gold); }
+.cm-empty__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  margin: var(--ds-space-3) 0 var(--ds-space-1);
+}
+.cm-empty__hint { color: var(--ds-ink-muted); font-size: var(--ds-text-sm); margin: 0; }
+
+.cm-alert {
+  display: flex; align-items: center; gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+}
+.cm-alert--error {
+  background: var(--ds-danger-soft);
+  color: var(--ds-danger);
+  border: 1px solid color-mix(in srgb, var(--ds-danger) 25%, transparent);
+}
+.cm-alert p { margin: 0; }

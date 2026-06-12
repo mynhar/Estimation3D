@@ -87,6 +87,11 @@ export class ContratoService {
     return this.contratoRepo.iniciarEjecucionAdmin(contratoId);
   }
 
+  // Constructor adjudicado: inicia la ejecución de su propio contrato.
+  async iniciarEjecucionContrato(contratoId: string): Promise<void> {
+    return this.contratoRepo.iniciarEjecucion(contratoId);
+  }
+
   async completarContratoAdmin(contratoId: string): Promise<void> {
     return this.contratoRepo.completarAdmin(contratoId);
   }
