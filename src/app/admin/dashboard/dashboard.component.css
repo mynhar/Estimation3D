@@ -1,4 +1,6 @@
-/* ══════════════════════════════════════════════════════════════════════════
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P4 H5 E4 S4 R4 V4
+ * ══════════════════════════════════════════════════════════════════════════
    ADMIN DASHBOARD — tokens var(--ds-*) throughout
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -785,3 +787,137 @@
   .adm-funnel-fill { transition: none; }
   .adm-skel        { animation: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SEGUIMIENTO DE OBRA — banda full-width
+   ══════════════════════════════════════════════════════════════════════════ */
+.adm-panel__header-icon--obra { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.adm-panel__header--obra      { border-left: 3px solid var(--ds-gold); }
+
+/* Colores de estado del seguimiento (tokens) */
+.adm-dot--obra-no_iniciado { background: var(--ds-info);        }
+.adm-dot--obra-en_progreso { background: var(--ds-gold-active); }
+.adm-dot--obra-pausado     { background: var(--ds-warning);     }
+.adm-dot--obra-completado  { background: var(--ds-success);     }
+.adm-funnel-fill--obra-no_iniciado { background: var(--ds-info);        }
+.adm-funnel-fill--obra-en_progreso { background: var(--ds-gold-active); }
+.adm-funnel-fill--obra-pausado     { background: var(--ds-warning);     }
+.adm-funnel-fill--obra-completado  { background: var(--ds-success);     }
+
+.adm-obra-body {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: var(--ds-space-5);
+  align-items: center;
+}
+
+/* Avance medio — métrica hero */
+.adm-obra-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-bg);
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--ds-radius-lg);
+}
+.adm-obra-hero__pct {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-regular);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  line-height: 0.9;
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+}
+.adm-obra-hero__pct span { font-size: 0.4em; color: var(--ds-ink-muted); margin-left: 2px; }
+.adm-obra-hero__lbl {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+.adm-obra-hero__track {
+  height: 10px;
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+  margin-top: var(--ds-space-1);
+}
+.adm-obra-hero__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-hover));
+  border-radius: var(--ds-radius-pill);
+  transition: width var(--ds-duration-slow) var(--ds-ease-out);
+}
+
+.adm-obra-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .adm-obra-body { grid-template-columns: 1fr; align-items: stretch; }
+}
+
+/* Estados del seguimiento con su significado */
+.adm-obra-estados { display: flex; flex-direction: column; gap: var(--ds-space-3); }
+.adm-obra-estado { display: flex; gap: var(--ds-space-2); align-items: flex-start; }
+.adm-obra-estado .adm-dot { margin-top: 5px; flex-shrink: 0; }
+.adm-obra-estado__main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.adm-obra-estado__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+.adm-obra-estado__name {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.adm-obra-estado__count {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+}
+.adm-obra-estado__desc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: 0;
+  line-height: var(--ds-leading-snug);
+}
+.adm-obra-estado__track {
+  height: 5px;
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+/* Timeline — eventos de obra */
+.adm-tl__dot--obra   { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.adm-tl__badge--obra { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.adm-tl__avance { font-weight: var(--ds-weight-semibold); color: var(--ds-gold-active); }
+.adm-tl__estado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05em 0.5em;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  margin-left: var(--ds-space-1);
+  background: var(--ds-bg-alt);
+  color: var(--ds-ink-secondary);
+}
+.adm-tl__estado--no_iniciado { background: var(--ds-info-soft);    color: var(--ds-info); }
+.adm-tl__estado--en_progreso { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.adm-tl__estado--pausado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.adm-tl__estado--completado  { background: var(--ds-success-soft); color: var(--ds-success); }

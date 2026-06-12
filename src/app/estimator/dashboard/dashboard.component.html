@@ -130,6 +130,19 @@
         <div class="estd-kpi__indicator estd-kpi__indicator--contratado"></div>
       </div>
 
+      @if (obras().length > 0) {
+        <div class="estd-kpi estd-kpi--obra">
+          <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--obra" aria-hidden="true">
+            <i class="bi bi-hammer"></i>
+          </div>
+          <div class="estd-kpi__content">
+            <p class="estd-kpi__val">{{ obrasEnCurso() }}</p>
+            <p class="estd-kpi__label">{{ 'dashboard_estimator.works_active' | translate }}</p>
+          </div>
+          <div class="estd-kpi__indicator estd-kpi__indicator--obra"></div>
+        </div>
+      }
+
     </div>
 
     <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -191,9 +204,8 @@
             <!-- Grid de cards de trabajo activo -->
             <div class="estd-work-grid">
               @for (exp of activos(); track exp.id) {
-                <article class="estd-work-card"
-                         [style.--card-accent]="cfg(exp.estado ?? '').color"
-                         [attr.aria-label]="exp.numero + ' â€” ' + servicioNombre(exp)">
+                <article [class]="'estd-work-card ' + cfg(exp.estado ?? '').cls"
+                         [attr.aria-label]="exp.numero + ' — ' + servicioNombre(exp)">
 
                   <!-- Top: nÃºmero + urgencia -->
                   <div class="estd-work-card__top">
@@ -241,8 +253,7 @@
                        aria-valuemin="0" aria-valuemax="100">
                     <div class="estd-progress-track">
                       <div class="estd-progress-fill"
-                           [style.width.%]="cfg(exp.estado ?? '').pct"
-                           [style.background-color]="cfg(exp.estado ?? '').color"></div>
+                           [style.width.%]="cfg(exp.estado ?? '').pct"></div>
                     </div>
                     <span class="estd-progress-pct">{{ cfg(exp.estado ?? '').pct }}%</span>
                   </div>
@@ -358,9 +369,9 @@
                   <svg width="112" height="112" viewBox="0 0 140 140">
                     <circle cx="70" cy="70" r="54" fill="none"
                             stroke="var(--ds-border)" stroke-width="18"/>
-                    @for (seg of donutSegments(); track seg.label) {
-                      <circle cx="70" cy="70" [attr.r]="R" fill="none"
-                              [attr.stroke]="seg.color" stroke-width="18"
+                    @for (seg of donutSegments(); track seg.cls) {
+                      <circle class="estd-donut-seg {{ seg.cls }}" cx="70" cy="70" [attr.r]="R" fill="none"
+                              stroke-width="18"
                               [attr.stroke-dasharray]="seg.dasharray"
                               [attr.stroke-dashoffset]="seg.dashoffset"
                               transform="rotate(-90 70 70)"/>
@@ -376,16 +387,13 @@
                   @for (e of estadoBreakdown(); track e.key) {
                     <div class="estd-legend-item" role="listitem">
                       <div class="estd-legend-item__left">
-                        <span class="estd-legend-dot"
-                              [style.background]="e.color"
-                              aria-hidden="true"></span>
+                        <span class="estd-legend-dot {{ e.cls }}" aria-hidden="true"></span>
                         <span class="estd-legend-label">{{ ('state.' + e.key) | translate }}</span>
                       </div>
                       <div class="estd-legend-item__right">
                         <div class="estd-legend-bar" aria-hidden="true">
-                          <div class="estd-legend-bar__fill"
-                               [style.width.%]="e.pct"
-                               [style.background]="e.color"></div>
+                          <div class="estd-legend-bar__fill {{ e.cls }}"
+                               [style.width.%]="e.pct"></div>
                         </div>
                         <span class="estd-legend-count" [attr.aria-label]="e.count + ' expedientes'">
                           {{ e.count }}
@@ -463,8 +471,7 @@
         <div class="estd-pipe-legend" aria-hidden="true">
           @for (step of pipelineSteps; track step; let last = $last) {
             <div class="estd-pipe-legend__step">
-              <span class="estd-pipe-legend__dot"
-                    [style.background]="cfg(step).color"></span>
+              <span class="estd-pipe-legend__dot {{ cfg(step).cls }}"></span>
               <span class="estd-pipe-legend__label">
                 {{ ('state.' + step) | translate }}
               </span>
@@ -507,10 +514,7 @@
                   <div class="estd-p-dots" role="progressbar"
                        [attr.aria-label]="('state.' + exp.estado) | translate">
                     @for (step of pipelineSteps; track step; let last = $last) {
-                      <span class="estd-p-dot"
-                            [class.estd-p-dot--done]="stepDone(exp.estado ?? '', step)"
-                            [class.estd-p-dot--active]="stepActive(exp.estado ?? '', step)"
-                            [style.--step-color]="cfg(step).color"
+                      <span [class]="pDotClass(exp.estado ?? '', step)"
                             [title]="('state.' + step) | translate">
                       </span>
                       @if (!last) {
@@ -520,10 +524,7 @@
                       }
                     }
                   </div>
-                  <span class="estd-pipe-badge"
-                        [style.background-color]="cfg(exp.estado ?? '').color + '18'"
-                        [style.color]="cfg(exp.estado ?? '').color"
-                        [style.border-color]="cfg(exp.estado ?? '').color + '40'">
+                  <span [class]="'estd-pipe-badge ' + cfg(exp.estado ?? '').cls">
                     <i class="bi {{ cfg(exp.estado ?? '').icon }}" aria-hidden="true"></i>
                     {{ ('state.' + (exp.estado ?? '')) | translate }}
                   </span>
@@ -545,6 +546,58 @@
           }
         </div>
 
+      </section>
+    }
+
+    <!-- ══════════════════════════════════════════════════════
+         SEGUIMIENTO DE OBRA — avance de los trabajos
+         ══════════════════════════════════════════════════════ -->
+    @if (obras().length > 0) {
+      <section class="estd-card" aria-labelledby="obra-title">
+        <div class="estd-card__header">
+          <div class="estd-card__header-left">
+            <div class="estd-card__header-icon" aria-hidden="true">
+              <i class="bi bi-hammer"></i>
+            </div>
+            <div>
+              <h2 class="estd-card__title" id="obra-title">{{ 'dashboard_estimator.works_title' | translate }}</h2>
+              <p class="estd-card__subtitle">
+                {{ obrasEnCurso() }} {{ 'dashboard_estimator.works_active' | translate }}
+                &nbsp;·&nbsp; {{ 'dashboard_estimator.works_avg' | translate }} {{ avanceMedio() }}%
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="estd-card__body">
+          <div class="estd-works-grid" role="list">
+            @for (o of obras(); track o.expedienteId) {
+              <button class="estd-work-obra" type="button"
+                      (click)="irAVer(o.expedienteId)"
+                      role="listitem"
+                      [attr.aria-label]="o.numero + ' — ' + servicioObra(o)">
+                <div class="estd-work-obra__top">
+                  <span class="estd-work-num">{{ o.numero }}</span>
+                  <span [class]="'estd-obra-badge ' + obraEstadoCls(o.estado)">
+                    {{ obraEstadoLabel(o.estado) | translate }}
+                  </span>
+                </div>
+                <p class="estd-work-service">{{ servicioObra(o) }}</p>
+                <p class="estd-work-meta-single">
+                  <i class="bi bi-person" aria-hidden="true"></i>
+                  {{ o.clienteNombre }}
+                </p>
+                <div class="estd-obra-avance">
+                  <strong class="estd-obra-pct">{{ o.avance }}<span>%</span></strong>
+                  <div class="estd-obra-track" role="progressbar"
+                       [attr.aria-valuenow]="o.avance" aria-valuemin="0" aria-valuemax="100">
+                    <span class="estd-obra-fill" [style.width.%]="o.avance"></span>
+                  </div>
+                </div>
+              </button>
+            }
+          </div>
+        </div>
       </section>
     }
 

@@ -2,6 +2,42 @@
   {
     "date": "2026-06-11",
     "scope": "app",
+    "macrostructure": "Workbench (admin dashboard · +full-width works panel: hero avg + estado funnel)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "admin/dashboard · rediseño + función · nuevo panel full-width 'Seguimiento de obra' (avance medio hero + total/en progreso/completadas + funnel por estado seguimiento), stats agregadas en AdminDashboardService; admin ya lee seguimiento_obra (sin RLS nueva); 100% tokens"
+  },
+  {
+    "date": "2026-06-11",
+    "scope": "app",
+    "macrostructure": "Workbench (estimator dashboard · +works-tracking band + auto-fit KPIs)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/dashboard · rediseño + función · nueva banda 'Seguimiento de obra' (avance de obras de expedientes que estimó, RLS seguimiento_select_estimador), KPIs auto-fit 100% ancho, todo hex inline→tokens via --estado-color (gate 58)"
+  },
+  {
+    "date": "2026-06-11",
+    "scope": "app",
+    "macrostructure": "Workbench (client dashboard · +obra-avance card in auto-fit avance grid)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/dashboard · rediseño quirúrgico + función · nueva tarjeta 'Avance de la obra' (seguimiento_obra %, última actualización, CTA→monitoring) en rejilla de avance auto-fit (100% ancho/responsive); base ya P5, sin teardown"
+  },
+  {
+    "date": "2026-06-11",
+    "scope": "app",
+    "macrostructure": "Workbench (dashboard · works-tracking band + auto-fit KPIs + offers list/sidebar)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "builder/dashboard · rediseño + función · nueva banda 'Seguimiento de obra' (avance de trabajos en ejecución, link a monitoring), KPIs auto-fit 100% ancho, hex inline→tokens (gate 58), responsive auto-fill works grid"
+  },
+  {
+    "date": "2026-06-11",
+    "scope": "app",
     "macrostructure": "Workbench (full-bleed · hero-metric band + 12-col spine grid)",
     "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
     "theme_axes": "light / serif-display / warm-gold",

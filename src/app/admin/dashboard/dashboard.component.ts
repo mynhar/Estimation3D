@@ -9,6 +9,7 @@ import { AdminDashboardService, DashboardStats, TimelineEvent } from './admin-da
 const EXP_PIPELINE = ['nuevo','en_estimacion','estimado','en_oferta','adjudicado','contratado'] as const;
 const OFE_ESTADOS  = ['pendiente','aceptada','rechazada'] as const;
 const CTR_ESTADOS  = ['generado','firmado','en_ejecucion','completado','cancelado'] as const;
+const OBRA_ESTADOS = ['no_iniciado','en_progreso','pausado','completado'] as const;
 
 interface FunnelItem { estado: string; count: number }
 
@@ -44,6 +45,7 @@ export class AdminDashboardComponent implements OnInit {
     { key: 'estimacion', labelKey: 'admin_dashboard.tl_filter_est' },
     { key: 'oferta',     labelKey: 'admin_dashboard.tl_filter_ofe' },
     { key: 'contrato',   labelKey: 'admin_dashboard.tl_filter_ctr' },
+    { key: 'obra',       labelKey: 'admin_dashboard.tl_filter_obra' },
   ];
 
   timelineFiltrada = computed(() => {
@@ -81,6 +83,17 @@ export class AdminDashboardComponent implements OnInit {
     if (!s) return [];
     return CTR_ESTADOS.map(estado => ({ estado, count: s.contratos.porEstado[estado] ?? 0 }));
   });
+
+  funnelObra = computed((): FunnelItem[] => {
+    const s = this.stats();
+    if (!s) return [];
+    return OBRA_ESTADOS.map(estado => ({ estado, count: s.obras.porEstado[estado] ?? 0 }));
+  });
+
+  obrasTotal       = computed(() => this.stats()?.obras.total ?? 0);
+  obrasEnProgreso  = computed(() => this.stats()?.obras.porEstado['en_progreso'] ?? 0);
+  obrasCompletadas = computed(() => this.stats()?.obras.porEstado['completado'] ?? 0);
+  avanceMedioObra  = computed(() => this.stats()?.obras.avanceMedio ?? 0);
 
   expCancelados = computed(() => this.stats()?.expedientes.porEstado['cancelado'] ?? 0);
   expSinAsignar = computed(() => this.stats()?.expedientes.porEstado['nuevo'] ?? 0);
@@ -163,6 +176,7 @@ export class AdminDashboardComponent implements OnInit {
       estimacion: 'bi bi-clipboard-data',
       oferta:     'bi bi-box',
       contrato:   'bi bi-file-earmark-text',
+      obra:       'bi bi-hammer',
     };
     return m[tipo] ?? 'bi bi-circle';
   }

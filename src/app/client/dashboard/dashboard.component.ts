@@ -11,6 +11,7 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { EstimacionService } from '../../services/estimacion.service';
+import { SeguimientoService } from '../../services/seguimiento.service';
 import { ArchivoRow, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
 import {
   ContratoHistorialItem,
@@ -102,11 +103,12 @@ export class DashboardComponent implements OnInit {
   private matterportIframe = viewChild<ElementRef<HTMLIFrameElement>>('matterportIframe');
   private mediaVideo       = viewChild<ElementRef<HTMLVideoElement>>('mediaVideo');
 
-  private auth              = inject(AuthSupabaseService);
-  private expedienteService = inject(ExpedienteService);
-  private archivoService    = inject(ArchivoService);
-  private translate         = inject(TranslateService);
-  private sanitizer         = inject(DomSanitizer);
+  private auth               = inject(AuthSupabaseService);
+  private expedienteService  = inject(ExpedienteService);
+  private archivoService     = inject(ArchivoService);
+  private seguimientoService = inject(SeguimientoService);
+  private translate          = inject(TranslateService);
+  private sanitizer          = inject(DomSanitizer);
 
   user        = toSignal(this.auth.user$);
   currentLang = toSignal(
@@ -135,6 +137,8 @@ export class DashboardComponent implements OnInit {
   documentosExp    = signal<ArchivoRow[]>([]);
   contratoCompleto = signal<ContratoClienteInfo | null>(null);
   contratoPdfUrl   = signal<string | null>(null);
+  // Seguimiento de obra — avance físico de los trabajos (seguimiento_obra).
+  obra             = signal<{ avance: number; estado: string; actualizadoEn: string } | null>(null);
   eliminando       = signal<string | null>(null);
 
   readonly FASES          = FASES;
@@ -605,6 +609,7 @@ export class DashboardComponent implements OnInit {
     this.documentosExp.set([]);
     this.contratoCompleto.set(null);
     this.contratoPdfUrl.set(null);
+    this.obra.set(null);
     this.eliminando.set(null);
     this.ofertasHistorial.set([]);
     this.contratoHistorial.set(null);
@@ -683,11 +688,29 @@ export class DashboardComponent implements OnInit {
             .then(({ data }) => this.contratoPdfUrl.set(data?.signedUrl ?? null))
             .catch(() => {});
         }
+
+        // Seguimiento de obra: avance físico cuando la obra ya arrancó.
+        if (cd.estado === 'en_ejecucion' || cd.estado === 'completado') {
+          try {
+            const seg = await this.seguimientoService.getSeguimientoByContratoId(cd.id);
+            this.obra.set(seg ? {
+              avance:        cd.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance),
+              estado:        cd.estado,
+              actualizadoEn: seg.actualizado_en,
+            } : null);
+          } catch {
+            this.obra.set(null);
+          }
+        } else {
+          this.obra.set(null);
+        }
       } else {
         this.contratoCompleto.set(null);
+        this.obra.set(null);
       }
     } else {
       this.contratoCompleto.set(null);
+      this.obra.set(null);
     }
 
     // Historial: ofertas y contrato del expediente

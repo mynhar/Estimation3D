@@ -626,6 +626,36 @@
           </div>
         }
 
+        <!-- Avance de la obra (seguimiento físico de los trabajos) -->
+        @if (obra(); as ob) {
+          <div class="dash-avance-card dash-avance-card--obra">
+            <div class="dash-avance-head">
+              <div class="dash-avance-head__text">
+                <p class="page-eyebrow">{{ 'dashboard_client.avance_obra' | translate }}</p>
+                <p class="dash-avance-desc">
+                  {{ ('construction_monitoring.estado_' + ob.estado) | translate }}
+                </p>
+              </div>
+              <span class="dash-avance-pct dash-avance-pct--obra">{{ ob.avance }}<span class="dash-avance-pct__unit">%</span></span>
+            </div>
+
+            <div class="dash-avance-bar">
+              <div class="dash-avance-bar__fill dash-avance-bar__fill--obra" [style.width.%]="ob.avance"></div>
+            </div>
+
+            <div class="dash-obra-foot">
+              <span class="dash-obra-when">
+                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                {{ formatFecha(ob.actualizadoEn) }}
+              </span>
+              <a routerLink="/client/construction-monitoring/list" class="dash-obra-cta">
+                {{ 'dashboard_client.view_monitoring' | translate }}
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        }
+
       </div>
     }
 

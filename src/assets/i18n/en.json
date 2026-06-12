@@ -212,6 +212,8 @@
     "documents_label": "Documents",
     "avance_expediente": "File progress",
     "avance_contrato": "Contract progress",
+    "avance_obra": "Site progress",
+    "view_monitoring": "View tracking",
     "contrato_pendiente": "Contract will be available once a builder is selected.",
     "contrato_cancelado": "This contract has been cancelled."
   },
@@ -251,7 +253,11 @@
     "ref_35": "Pending offer — awaiting client decision",
     "ref_60": "Offer accepted — file in progress",
     "ref_80": "File awarded — contract in progress",
-    "ref_100": "Contract signed — project completed"
+    "ref_100": "Contract signed — project completed",
+    "works_title": "Construction monitoring",
+    "active_works": "active sites",
+    "avg_progress": "average progress",
+    "view_monitoring": "View tracking"
   },
   "dashboard_estimator": {
     "title": "Dashboard",
@@ -273,7 +279,22 @@
     "take_available_hint": "Take a new available file to start estimating.",
     "see_available_btn": "View files",
     "post_tracking": "Post-estimation tracking",
-    "post_tracking_text": "Estimated files and their current progress."
+    "post_tracking_text": "Estimated files and their current progress.",
+    "works_title": "Construction monitoring",
+    "works_active": "active sites",
+    "works_avg": "average progress"
+  },
+  "seguimiento_estado": {
+    "no_iniciado": "Not started",
+    "en_progreso": "In progress",
+    "pausado": "Paused",
+    "completado": "Completed"
+  },
+  "seguimiento_estado_desc": {
+    "no_iniciado": "Contract signed, awaiting the first report.",
+    "en_progreso": "At least one daily report recorded.",
+    "pausado": "Work temporarily halted.",
+    "completado": "100% progress / contract completed."
   },
   "file": {
     "number": "File number",
@@ -1273,6 +1294,12 @@
     "panel_est": "Estimates",
     "panel_con": "Contractors & offers",
     "panel_ctr": "Contracts",
+    "panel_obra": "Construction monitoring",
+    "obra_avg": "Average progress",
+    "obra_total": "Sites",
+    "tl_filter_obra": "Site",
+    "tl_event_obra_report": "site report recorded",
+    "tipo_obra": "Site",
     "panel_total_suffix": "total",
     "panel_completed_suffix": "completed",
     "panel_active_suffix": "active",

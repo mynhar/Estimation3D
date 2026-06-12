@@ -212,6 +212,8 @@
     "documents_label": "Documents",
     "avance_expediente": "Avancement du dossier",
     "avance_contrato": "Avancement du contrat",
+    "avance_obra": "Avancement du chantier",
+    "view_monitoring": "Voir le suivi",
     "contrato_pendiente": "Le contrat sera disponible une fois un constructeur sélectionné.",
     "contrato_cancelado": "Ce contrat a été annulé."
   },
@@ -251,7 +253,11 @@
     "ref_35": "Offre en attente — décision du client attendue",
     "ref_60": "Offre acceptée — dossier en cours",
     "ref_80": "Dossier adjugé — contrat en cours",
-    "ref_100": "Contrat signé — projet complété"
+    "ref_100": "Contrat signé — projet complété",
+    "works_title": "Suivi de chantier",
+    "active_works": "chantiers actifs",
+    "avg_progress": "avancement moyen",
+    "view_monitoring": "Voir le suivi"
   },
   "dashboard_estimator": {
     "title": "Tableau de bord",
@@ -273,7 +279,22 @@
     "take_available_hint": "Prenez un nouveau dossier disponible pour commencer à estimer.",
     "see_available_btn": "Voir les dossiers",
     "post_tracking": "Suivi post-estimation",
-    "post_tracking_text": "Dossiers estimés et leur progression actuelle."
+    "post_tracking_text": "Dossiers estimés et leur progression actuelle.",
+    "works_title": "Suivi de chantier",
+    "works_active": "chantiers actifs",
+    "works_avg": "avancement moyen"
+  },
+  "seguimiento_estado": {
+    "no_iniciado": "Non démarré",
+    "en_progreso": "En cours",
+    "pausado": "En pause",
+    "completado": "Terminé"
+  },
+  "seguimiento_estado_desc": {
+    "no_iniciado": "Contrat signé, en attente du premier rapport.",
+    "en_progreso": "Au moins un rapport quotidien enregistré.",
+    "pausado": "Chantier temporairement arrêté.",
+    "completado": "100 % d'avancement / contrat complété."
   },
   "file": {
     "number": "Numéro de dossier",
@@ -1273,6 +1294,12 @@
     "panel_est": "Estimations",
     "panel_con": "Entrepreneurs et offres",
     "panel_ctr": "Contrats",
+    "panel_obra": "Suivi de chantier",
+    "obra_avg": "Avancement moyen",
+    "obra_total": "Chantiers",
+    "tl_filter_obra": "Chantier",
+    "tl_event_obra_report": "rapport de chantier enregistré",
+    "tipo_obra": "Chantier",
     "panel_total_suffix": "total",
     "panel_completed_suffix": "complétés",
     "panel_active_suffix": "actifs",

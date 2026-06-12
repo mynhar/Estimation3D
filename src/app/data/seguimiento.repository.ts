@@ -56,6 +56,19 @@ export class SeguimientoRepository {
     return { ...rest, servicio_id: exp?.servicio_id ?? null } as SeguimientoObra;
   }
 
+  // Avance de obra por expediente (para el dashboard del estimador).
+  async findResumenByExpedienteIds(
+    expedienteIds: string[],
+  ): Promise<{ expediente_id: string; estado: string; porcentaje_avance: number; actualizado_en: string }[]> {
+    if (!expedienteIds.length) return [];
+    const { data, error } = await this.db
+      .from('seguimiento_obra')
+      .select('expediente_id, estado, porcentaje_avance, actualizado_en')
+      .in('expediente_id', expedienteIds);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as { expediente_id: string; estado: string; porcentaje_avance: number; actualizado_en: string }[];
+  }
+
   async ensureForContrato(contratoId: string, expedienteId: string, constructorId: string): Promise<SeguimientoObra> {
     const existing = await this.findByContratoId(contratoId);
     if (existing) return existing;

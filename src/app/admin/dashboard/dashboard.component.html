@@ -322,6 +322,78 @@
 
       </div><!-- /adm-grid -->
 
+      <!-- ── SEGUIMIENTO DE OBRA — avance de los trabajos ──── -->
+      @if (obrasTotal() > 0) {
+        <section class="adm-panel adm-obra-panel" aria-labelledby="panel-obra-title">
+          <div class="adm-panel__header adm-panel__header--obra">
+            <div class="adm-panel__header-icon adm-panel__header-icon--obra" aria-hidden="true">
+              <i class="bi bi-hammer"></i>
+            </div>
+            <div class="adm-panel__header-text">
+              <h2 class="adm-panel__title" id="panel-obra-title">
+                {{ 'admin_dashboard.panel_obra' | translate }}
+              </h2>
+              <p class="adm-panel__subtitle">
+                {{ obrasTotal() }} {{ 'admin_dashboard.panel_total_suffix' | translate }}
+              </p>
+            </div>
+          </div>
+
+          <div class="adm-panel__body adm-obra-body">
+
+            <!-- Avance medio como métrica hero -->
+            <div class="adm-obra-hero">
+              <span class="adm-obra-hero__pct">{{ avanceMedioObra() }}<span>%</span></span>
+              <span class="adm-obra-hero__lbl">{{ 'admin_dashboard.obra_avg' | translate }}</span>
+              <div class="adm-obra-hero__track" role="progressbar"
+                   [attr.aria-valuenow]="avanceMedioObra()" aria-valuemin="0" aria-valuemax="100">
+                <span class="adm-obra-hero__fill" [style.width.%]="avanceMedioObra()"></span>
+              </div>
+            </div>
+
+            <!-- Desglose -->
+            <div class="adm-obra-right">
+              <div class="adm-stat-row">
+                <div class="adm-stat-box">
+                  <span class="adm-stat__n">{{ obrasTotal() }}</span>
+                  <span class="adm-stat__l">{{ 'admin_dashboard.obra_total' | translate }}</span>
+                </div>
+                <div class="adm-stat-box">
+                  <span class="adm-stat__n">{{ obrasEnProgreso() }}</span>
+                  <span class="adm-stat__l">{{ 'seguimiento_estado.en_progreso' | translate }}</span>
+                </div>
+                <div class="adm-stat-box adm-stat-box--highlight">
+                  <span class="adm-stat__n adm-stat__n--accent">{{ obrasCompletadas() }}</span>
+                  <span class="adm-stat__l">{{ 'seguimiento_estado.completado' | translate }}</span>
+                </div>
+              </div>
+
+              <div class="adm-obra-estados" role="list">
+                @for (item of funnelObra(); track item.estado) {
+                  <div class="adm-obra-estado" role="listitem">
+                    <span class="adm-dot adm-dot--obra-{{ item.estado }}" aria-hidden="true"></span>
+                    <div class="adm-obra-estado__main">
+                      <div class="adm-obra-estado__top">
+                        <span class="adm-obra-estado__name">{{ 'seguimiento_estado.' + item.estado | translate }}</span>
+                        <span class="adm-obra-estado__count">{{ item.count }}</span>
+                      </div>
+                      <p class="adm-obra-estado__desc">{{ 'seguimiento_estado_desc.' + item.estado | translate }}</p>
+                      <div class="adm-obra-estado__track" role="progressbar"
+                           [attr.aria-valuenow]="barWidth(item.count, obrasTotal())"
+                           aria-valuemin="0" aria-valuemax="100">
+                        <div class="adm-funnel-fill adm-funnel-fill--obra-{{ item.estado }}"
+                             [style.width.%]="barWidth(item.count, obrasTotal())"></div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+          </div>
+        </section>
+      }
+
       <!-- ── Timeline ──────────────────────────────────────── -->
       @defer (on viewport) {
         <section class="adm-tl" aria-labelledby="tl-title">
@@ -378,6 +450,14 @@
                       <span class="adm-tl__ref">{{ ev.referencia }}</span>
                       {{ ev.descKey | translate }}
                       @if (ev.precio) { <span class="adm-tl__price">· {{ ev.precio }}</span> }
+                      @if (ev.avance != null) {
+                        <span class="adm-tl__avance">· {{ ev.avance }}%</span>
+                      }
+                      @if (ev.estadoObra) {
+                        <span class="adm-tl__estado adm-tl__estado--{{ ev.estadoObra }}">
+                          {{ 'seguimiento_estado.' + ev.estadoObra | translate }}
+                        </span>
+                      }
                     </p>
                     <p class="adm-tl__meta">
                       <i class="bi bi-person" aria-hidden="true"></i>

@@ -158,7 +158,9 @@
       "Bash(python -c \"import json; d=json.load\\(open\\('c:/desarrollo/estimation3d-A18-v01/src/assets/i18n/fr.json','r',encoding='utf-8'\\)\\); m=d.get\\('monitoring',{}\\); print\\('inicio_real_lbl' in m, 'eventos_title' in m, 'tipo_visitante_inspector' in m\\)\")",
       "Bash(sed 's/.*\\\\.//')",
       "Bash(xargs wc -l)",
-      "Bash(echo \"EXIT: $?\")"
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(awk 'NR>=256 && /^  \"[a-z]/ {print NR\": \"$0}' src/assets/i18n/fr.json)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.hallmark/log.json','utf8'\\)\\); console.log\\('log.json OK'\\)\")"
     ],
     "additionalDirectories": [
       "\\tmp",

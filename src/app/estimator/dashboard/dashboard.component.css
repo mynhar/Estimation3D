@@ -1,4 +1,6 @@
-/* ══════════════════════════════════════════════════════════════════════════
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P4 H5 E4 S4 R4 V4
+ * ══════════════════════════════════════════════════════════════════════════
    ESTIMATOR DASHBOARD — tokens var(--ds-*) throughout, no raw hex
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -133,7 +135,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 .estd-kpis {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--ds-space-3);
 }
 
@@ -977,4 +979,124 @@
   .estd-pipe-row { padding: var(--ds-space-3) var(--ds-space-4); }
 
   .estd-header__stats { display: none; } /* en móvil los stats ya no caben con el título */
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COLOR POR ESTADO — tokens (gate 58), nunca hex inline.
+   Cada clase fija --estado-color; cada contexto lo consume.
+   ══════════════════════════════════════════════════════════════════════════ */
+.is-info        { --estado-color: var(--ds-info);        }
+.is-gold        { --estado-color: var(--ds-gold);        }
+.is-warning     { --estado-color: var(--ds-warning);     }
+.is-gold-strong { --estado-color: var(--ds-gold-active); }
+.is-success     { --estado-color: var(--ds-success);     }
+.is-muted       { --estado-color: var(--ds-ink-muted);   }
+
+.estd-donut-seg        { stroke: var(--estado-color); }
+.estd-legend-dot       { background: var(--estado-color); }
+.estd-legend-bar__fill { background: var(--estado-color); }
+.estd-pipe-legend__dot { background: var(--estado-color); }
+.estd-p-dot            { --step-color: var(--estado-color); }
+.estd-work-card        { --card-accent: var(--estado-color); }
+.estd-progress-fill    { background: var(--card-accent); }
+.estd-pipe-badge:not(.estd-pipe-badge--cancelado) {
+  background: color-mix(in srgb, var(--estado-color) 14%, transparent);
+  color: var(--estado-color);
+  border-color: color-mix(in srgb, var(--estado-color) 38%, transparent);
+}
+
+/* KPI de obra */
+.estd-kpi__icon-wrap--obra { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.estd-kpi__indicator--obra { background: var(--ds-gold); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SEGUIMIENTO DE OBRA — avance de los trabajos
+   ══════════════════════════════════════════════════════════════════════════ */
+.estd-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: var(--ds-space-3);
+}
+.estd-work-obra {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  text-align: left;
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4);
+  cursor: pointer;
+  color: inherit;
+  font-family: var(--ds-font-body);
+  transition: transform var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.estd-work-obra:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ds-shadow-md);
+  border-color: var(--ds-gold-soft);
+}
+.estd-work-obra:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
+.estd-work-obra__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+.estd-work-meta-single {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  margin: 0;
+}
+.estd-work-meta-single i { font-size: 0.7rem; color: var(--ds-ink-muted); }
+
+.estd-obra-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15em 0.6em;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--estado-color) 14%, transparent);
+  color: var(--estado-color);
+}
+.estd-obra-avance {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  margin-top: auto;
+}
+.estd-obra-pct {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  line-height: 1;
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.estd-obra-pct span { font-size: 0.5em; color: var(--ds-ink-muted); }
+.estd-obra-track {
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  background: var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+}
+.estd-obra-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-hover));
+  border-radius: var(--ds-radius-pill);
+  transition: width var(--ds-duration-slow) var(--ds-ease-out);
 }

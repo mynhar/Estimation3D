@@ -6,17 +6,20 @@ export interface DashboardStats {
   estimaciones: { total: number; promedioMin: number | null; promedioMax: number | null };
   ofertas:      { total: number; porEstado: Record<string, number>; constructoresActivos: number };
   contratos:    { total: number; porEstado: Record<string, number>; valorTotal: number };
+  obras:        { total: number; porEstado: Record<string, number>; avanceMedio: number };
 }
 
 export interface TimelineEvent {
-  id:        string;
-  timestamp: string;
-  tipo:      'expediente' | 'estimacion' | 'oferta' | 'contrato';
-  descKey:   string;
-  precio?:   string;
-  autor:     string;
+  id:         string;
+  timestamp:  string;
+  tipo:       'expediente' | 'estimacion' | 'oferta' | 'contrato' | 'obra';
+  descKey:    string;
+  precio?:    string;
+  autor:      string;
   referencia: string;
-  entityId?: string;
+  entityId?:  string;
+  avance?:    number;   // % de avance de la obra (eventos tipo 'obra')
+  estadoObra?: string;  // estado del seguimiento (eventos tipo 'obra')
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,11 +28,12 @@ export class AdminDashboardService {
   private get db() { return this.auth.client; }
 
   async getStats(): Promise<DashboardStats> {
-    const [expsR, estsR, ofersR, ctrsR] = await Promise.all([
+    const [expsR, estsR, ofersR, ctrsR, obrasR] = await Promise.all([
       this.db.from('expediente').select('estado'),
       this.db.from('estimacion').select('costo_estimado, costo_estimado_max'),
       this.db.from('oferta').select('estado, constructor_id'),
       this.db.from('contrato').select('estado, precio_final'),
+      this.db.from('seguimiento_obra').select('estado, porcentaje_avance'),
     ]);
 
     // ── Expedientes ───────────────────────────────────────────────────────────
@@ -64,16 +68,27 @@ export class AdminDashboardService {
       if ((c.estado as string) !== 'cancelado') valorTotal += (c.precio_final ?? 0);
     }
 
+    // ── Obras (seguimiento) ───────────────────────────────────────────────────
+    const obras = obrasR.data ?? [];
+    const obrasPorEstado: Record<string, number> = {};
+    let avanceSum = 0;
+    for (const o of obras) {
+      obrasPorEstado[o.estado as string] = (obrasPorEstado[o.estado as string] ?? 0) + 1;
+      avanceSum += (o.porcentaje_avance as number) ?? 0;
+    }
+    const avanceMedio = obras.length ? Math.round(avanceSum / obras.length) : 0;
+
     return {
       expedientes:  { total: exps.length,  porEstado: expsPorEstado },
       estimaciones: { total: ests.length,  promedioMin, promedioMax },
       ofertas:      { total: ofers.length, porEstado: ofersPorEstado, constructoresActivos: constructores.size },
       contratos:    { total: ctrs.length,  porEstado: ctrsPorEstado, valorTotal },
+      obras:        { total: obras.length, porEstado: obrasPorEstado, avanceMedio },
     };
   }
 
   async getTimeline(): Promise<TimelineEvent[]> {
-    const [expsR, estsR, ofersR, ctrsR] = await Promise.all([
+    const [expsR, estsR, ofersR, ctrsR, repsR] = await Promise.all([
       this.db
         .from('expediente')
         .select('id, numero, creado_en, cliente:cliente_id(nombre, apellido)')
@@ -93,6 +108,11 @@ export class AdminDashboardService {
         .from('contrato')
         .select('id, estado, generado_en, firmado_en, expediente:expediente_id(numero), cliente:cliente_id(nombre, apellido)')
         .order('generado_en', { ascending: false })
+        .limit(25),
+      this.db
+        .from('reporte_diario')
+        .select('id, creado_en, porcentaje_acumulado, constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, expediente:expediente_id(numero))')
+        .order('creado_en', { ascending: false })
         .limit(25),
     ]);
 
@@ -140,6 +160,18 @@ export class AdminDashboardService {
           descKey: 'admin_dashboard.tl_event_ctr_signed', autor, referencia: ref,
         });
       }
+    }
+
+    for (const r of (repsR.data ?? []) as any[]) {
+      const seg = Array.isArray(r.seguimiento) ? r.seguimiento[0] : r.seguimiento;
+      const exp = seg ? (Array.isArray(seg.expediente) ? seg.expediente[0] : seg.expediente) : null;
+      events.push({
+        id: `rep-${r.id}`, timestamp: r.creado_en, tipo: 'obra',
+        descKey: 'admin_dashboard.tl_event_obra_report',
+        autor: nombre(r.constructor), referencia: exp?.numero ?? '—',
+        avance: Math.round(r.porcentaje_acumulado ?? 0),
+        estadoObra: seg?.estado ?? undefined,
+      });
     }
 
     return events.sort((a, b) =>

@@ -71,6 +71,12 @@ export class SeguimientoService {
     return this.repo.findActividadesAgregadas(seguimientoId);
   }
 
+  getResumenByExpedienteIds(
+    expedienteIds: string[],
+  ): Promise<{ expediente_id: string; estado: string; porcentaje_avance: number; actualizado_en: string }[]> {
+    return this.repo.findResumenByExpedienteIds(expedienteIds);
+  }
+
   upsertZona(reporteId: string, zona: string, descripcion: string | null, pct: number | null): Promise<void> {
     return this.repo.upsertZona(reporteId, zona, descripcion, pct);
   }

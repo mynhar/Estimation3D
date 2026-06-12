@@ -5,22 +5,26 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
+import { SeguimientoService } from '../../services/seguimiento.service';
 import { ExpedienteRow, ESTADOS_ESTIMADO } from '../../models';
+import { EstadoExpediente } from '../../types/supabase';
 
+// Config por estado. El color vive en el CSS como clase semántica (token);
+// aquí solo el icono, el % del pipeline y la clase — nunca hex inline.
 interface EstadoCfg {
-  color: string;
   label: string;
   icon:  string;
   pct:   number;
+  cls:   string;
 }
 
 const ESTADO_CFG: Record<string, EstadoCfg> = {
-  en_estimacion: { color: '#4A6B7A', label: 'En estimación', icon: 'bi-pencil-square',     pct: 30  },  /* --ds-info */
-  estimado:      { color: '#B0964A', label: 'Estimado',       icon: 'bi-clipboard-check',   pct: 55  },  /* --ds-gold-active */
-  en_oferta:     { color: '#B8862E', label: 'En oferta',      icon: 'bi-people',            pct: 70  },  /* --ds-warning */
-  adjudicado:    { color: '#8B6914', label: 'Adjudicado',     icon: 'bi-award',             pct: 85  },  /* --ds-warning dark */
-  contratado:    { color: '#5B7A4F', label: 'Contratado',     icon: 'bi-check-circle-fill', pct: 100 },  /* --ds-success */
-  cancelado:     { color: '#7A7770', label: 'Cancelado',      icon: 'bi-x-circle',          pct: 0   },  /* --ds-ink-muted */
+  en_estimacion: { label: 'En estimación', icon: 'bi-pencil-square',   pct: 30,  cls: 'is-info'        },
+  estimado:      { label: 'Estimado',       icon: 'bi-clipboard-check', pct: 55,  cls: 'is-gold'        },
+  en_oferta:     { label: 'En oferta',      icon: 'bi-people',          pct: 70,  cls: 'is-warning'     },
+  adjudicado:    { label: 'Adjudicado',     icon: 'bi-award',           pct: 85,  cls: 'is-gold-strong' },
+  contratado:    { label: 'Contratado',     icon: 'bi-check-circle',    pct: 100, cls: 'is-success'     },
+  cancelado:     { label: 'Cancelado',      icon: 'bi-x-circle',        pct: 0,   cls: 'is-muted'       },
 };
 
 const PIPELINE_STEPS: string[] = [
@@ -29,6 +33,19 @@ const PIPELINE_STEPS: string[] = [
 
 const R             = 54;
 const CIRCUMFERENCE = 2 * Math.PI * R;
+
+// Resumen de una obra (expediente contratado en construcción).
+interface ObraResumen {
+  expedienteId:     string;
+  numero:           string;
+  servicioNombre:   string;
+  servicioNombreEn: string;
+  servicioNombreFr: string;
+  clienteNombre:    string;
+  estado:           string;   // estado del seguimiento_obra
+  avance:           number;
+  actualizadoEn:    string;
+}
 
 @Component({
   selector: 'app-estimator-dashboard',
@@ -39,15 +56,17 @@ const CIRCUMFERENCE = 2 * Math.PI * R;
   styleUrl: './dashboard.component.css',
 })
 export class EstimatorDashboardComponent implements OnInit {
-  private auth              = inject(AuthSupabaseService);
-  private expedienteService = inject(ExpedienteService);
-  private estimacionService = inject(EstimacionService);
-  private translate         = inject(TranslateService);
-  private router            = inject(Router);
+  private auth               = inject(AuthSupabaseService);
+  private expedienteService  = inject(ExpedienteService);
+  private estimacionService  = inject(EstimacionService);
+  private seguimientoService = inject(SeguimientoService);
+  private translate          = inject(TranslateService);
+  private router             = inject(Router);
 
   user        = toSignal(this.auth.user$);
   perfil      = signal<{ nombre: string | null; apellido: string | null } | null>(null);
   expedientes = signal<ExpedienteRow[]>([]);
+  obras       = signal<ObraResumen[]>([]);
   disponibles = signal(0);
   montoTotal  = signal(0);
   cargando    = signal(true);
@@ -58,7 +77,7 @@ export class EstimatorDashboardComponent implements OnInit {
   );
 
   postEstimacion = computed(() =>
-    this.expedientes().filter(e => e.estado != null && ESTADOS_ESTIMADO.includes(e.estado as import('../../types/supabase').EstadoExpediente))
+    this.expedientes().filter(e => e.estado != null && ESTADOS_ESTIMADO.includes(e.estado as EstadoExpediente))
   );
 
   enMercado = computed(() =>
@@ -85,6 +104,13 @@ export class EstimatorDashboardComponent implements OnInit {
     return Math.round(this.contratados().length / base * 100);
   });
 
+  // ── Computed: obra ─────────────────────────────────────────────────────────
+  obrasEnCurso = computed(() => this.obras().filter(o => o.estado !== 'completado').length);
+  avanceMedio  = computed(() => {
+    const o = this.obras();
+    return o.length === 0 ? 0 : Math.round(o.reduce((s, x) => s + x.avance, 0) / o.length);
+  });
+
   // ── Donut SVG ─────────────────────────────────────────────────────────────
   readonly R             = R;
   readonly CIRCUMFERENCE = CIRCUMFERENCE;
@@ -94,14 +120,13 @@ export class EstimatorDashboardComponent implements OnInit {
     const total = this.expedientes().length;
     if (!total) return [];
     let offset = 0;
-    const segs: { label: string; color: string; dasharray: string; dashoffset: number }[] = [];
+    const segs: { cls: string; dasharray: string; dashoffset: number }[] = [];
     for (const key of [...PIPELINE_STEPS, 'cancelado']) {
       const count = this.expedientes().filter(e => e.estado === key).length;
       if (!count) continue;
       const portion = (count / total) * CIRCUMFERENCE;
       segs.push({
-        label:      ESTADO_CFG[key].label,
-        color:      ESTADO_CFG[key].color,
+        cls:        ESTADO_CFG[key].cls,
         dasharray:  `${portion} ${CIRCUMFERENCE}`,
         dashoffset: -offset,
       });
@@ -141,7 +166,7 @@ export class EstimatorDashboardComponent implements OnInit {
 
       const [allMine, nuevos, montoTotal] = await Promise.all([
         this.expedienteService.getExpedienteRows({
-          estados:     (['en_estimacion', ...ESTADOS_ESTIMADO] as import('../../types/supabase').EstadoExpediente[]),
+          estados:     (['en_estimacion', ...ESTADOS_ESTIMADO] as EstadoExpediente[]),
           estimadorId: userId,
         }),
         this.expedienteService.getExpedienteRows({ estado: 'nuevo' }),
@@ -151,8 +176,33 @@ export class EstimatorDashboardComponent implements OnInit {
       this.expedientes.set(allMine);
       this.disponibles.set(nuevos.length);
       this.montoTotal.set(montoTotal);
-    } catch (e: any) {
-      console.error('[EstimatorDashboard]', e.message);
+
+      // Seguimiento de obra: avance de los expedientes contratados en construcción.
+      const contratadosIds = allMine.filter(e => e.estado === 'contratado').map(e => e.id);
+      if (contratadosIds.length) {
+        const resumen = await this.seguimientoService.getResumenByExpedienteIds(contratadosIds);
+        const porExp  = new Map(resumen.map(r => [r.expediente_id, r]));
+        const obras: ObraResumen[] = [];
+        for (const e of allMine) {
+          const seg = porExp.get(e.id);
+          if (!seg) continue;
+          obras.push({
+            expedienteId:     e.id,
+            numero:           e.numero,
+            servicioNombre:   e.servicio_nombre,
+            servicioNombreEn: e.servicio_nombre_en,
+            servicioNombreFr: e.servicio_nombre_fr,
+            clienteNombre:    e.cliente_nombre,
+            estado:           seg.estado,
+            avance:           seg.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance),
+            actualizadoEn:    seg.actualizado_en,
+          });
+        }
+        obras.sort((a, b) => b.actualizadoEn.localeCompare(a.actualizadoEn));
+        this.obras.set(obras);
+      }
+    } catch (e: unknown) {
+      console.error('[EstimatorDashboard]', e instanceof Error ? e.message : String(e));
     } finally {
       this.cargando.set(false);
     }
@@ -163,6 +213,18 @@ export class EstimatorDashboardComponent implements OnInit {
     return ESTADO_CFG[estado] ?? ESTADO_CFG['estimado'];
   }
 
+  obraEstadoCls(estado: string): string {
+    return estado === 'completado'  ? 'is-success'
+         : estado === 'en_progreso' ? 'is-gold-strong'
+         : estado === 'pausado'     ? 'is-warning'
+         : 'is-info';
+  }
+
+  obraEstadoLabel(estado: string): string {
+    // estado del seguimiento → clave i18n
+    return 'seguimiento_estado.' + estado;
+  }
+
   stepDone(currentEstado: string, step: string): boolean {
     const ci = PIPELINE_STEPS.indexOf(currentEstado);
     const si = PIPELINE_STEPS.indexOf(step);
@@ -171,6 +233,14 @@ export class EstimatorDashboardComponent implements OnInit {
 
   stepActive(currentEstado: string, step: string): boolean {
     return currentEstado === step;
+  }
+
+  // Clase completa del punto del pipeline (color por token + done/active).
+  pDotClass(currentEstado: string, step: string): string {
+    let c = 'estd-p-dot ' + this.cfg(step).cls;
+    if (this.stepDone(currentEstado, step))   c += ' estd-p-dot--done';
+    if (this.stepActive(currentEstado, step)) c += ' estd-p-dot--active';
+    return c;
   }
 
   urgencia(fechaVisita: string): 'vencida' | 'hoy' | 'proxima' | null {
@@ -216,6 +286,13 @@ export class EstimatorDashboardComponent implements OnInit {
     if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
     if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
     return exp.servicio_nombre;
+  }
+
+  servicioObra(o: ObraResumen): string {
+    const lang = this.translate.currentLang;
+    if (lang === 'en') return o.servicioNombreEn || o.servicioNombre;
+    if (lang === 'fr') return o.servicioNombreFr || o.servicioNombre;
+    return o.servicioNombre;
   }
 
   irAEstimar(id: string) { this.router.navigate(['/estimator/file-under-estimation', id]); }

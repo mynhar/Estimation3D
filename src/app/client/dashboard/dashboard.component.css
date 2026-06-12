@@ -1742,7 +1742,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 .dash-avance-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--ds-space-4);
 }
 
@@ -1774,6 +1774,41 @@
 
 .dash-avance-card--contrato::before { background: var(--ds-success); }
 .dash-avance-card--empty::before    { background: var(--ds-border); }
+.dash-avance-card--obra::before     { background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-active)); }
+
+/* Avance de la obra — tarjeta de seguimiento físico */
+.dash-avance-pct--obra { color: var(--ds-gold-active); }
+.dash-avance-bar__fill--obra {
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-hover));
+}
+.dash-obra-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-3);
+  flex-wrap: wrap;
+}
+.dash-obra-when {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+.dash-obra-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-gold-active);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: gap var(--ds-duration-fast) var(--ds-ease-out);
+}
+.dash-obra-cta:hover { gap: var(--ds-space-2); }
+.dash-obra-cta:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; border-radius: var(--ds-radius-sm); }
 
 /* Head */
 .dash-avance-head {

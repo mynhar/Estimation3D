@@ -212,6 +212,8 @@
     "documents_label": "Documentos",
     "avance_expediente": "Avance del expediente",
     "avance_contrato": "Avance del contrato",
+    "avance_obra": "Avance de la obra",
+    "view_monitoring": "Ver seguimiento",
     "contrato_pendiente": "El contrato estará disponible cuando se seleccione un constructor.",
     "contrato_cancelado": "Este contrato ha sido cancelado."
   },
@@ -251,7 +253,11 @@
     "ref_35": "Oferta pendiente — esperando decisión del cliente",
     "ref_60": "Oferta aceptada — expediente en proceso",
     "ref_80": "Expediente adjudicado — contrato en curso",
-    "ref_100": "Contrato firmado — proyecto completado"
+    "ref_100": "Contrato firmado — proyecto completado",
+    "works_title": "Seguimiento de obra",
+    "active_works": "obras activas",
+    "avg_progress": "avance medio",
+    "view_monitoring": "Ver seguimiento"
   },
   "dashboard_estimator": {
     "title": "Dashboard",
@@ -273,7 +279,22 @@
     "take_available_hint": "Toma un nuevo expediente disponible para comenzar a estimar.",
     "see_available_btn": "Ver expedientes",
     "post_tracking": "Seguimiento post-estimación",
-    "post_tracking_text": "Expedientes estimados y su progreso actual."
+    "post_tracking_text": "Expedientes estimados y su progreso actual.",
+    "works_title": "Seguimiento de obra",
+    "works_active": "obras en curso",
+    "works_avg": "avance medio"
+  },
+  "seguimiento_estado": {
+    "no_iniciado": "No iniciada",
+    "en_progreso": "En progreso",
+    "pausado": "En pausa",
+    "completado": "Completada"
+  },
+  "seguimiento_estado_desc": {
+    "no_iniciado": "Contrato firmado, aún sin primer reporte.",
+    "en_progreso": "Al menos un reporte diario registrado.",
+    "pausado": "Obra detenida temporalmente.",
+    "completado": "100 % de avance / contrato completado."
   },
   "file": {
     "number": "Número de expediente",
@@ -1273,6 +1294,12 @@
     "panel_est": "Estimaciones",
     "panel_con": "Constructores y ofertas",
     "panel_ctr": "Contratos",
+    "panel_obra": "Seguimiento de obra",
+    "obra_avg": "Avance medio",
+    "obra_total": "Obras",
+    "tl_filter_obra": "Obra",
+    "tl_event_obra_report": "reporte de obra registrado",
+    "tipo_obra": "Obra",
     "panel_total_suffix": "total",
     "panel_completed_suffix": "completados",
     "panel_active_suffix": "activos",
