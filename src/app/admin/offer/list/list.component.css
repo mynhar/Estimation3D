@@ -172,18 +172,18 @@
   display: inline-block;
   min-width: 24px;
   padding: 0.15rem 0.5rem;
-  border-radius: 20px;
+  border-radius: var(--ds-radius-pill);
   font-size: 0.78rem;
   font-weight: 700;
   text-align: center;
-  background: var(--ds-accent-subtle, #fdf6e3);
-  color: var(--ds-accent-dark, #a8873d);
-  border: 1px solid var(--ds-accent, #d4b96e);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  border: 1px solid var(--ds-gold);
 }
 .offers-count--zero {
-  background: var(--ds-bg-subtle, #f0ede6);
-  color: var(--ds-text-muted, #8a8070);
-  border-color: var(--ds-border, #d6d0c4);
+  background: var(--ds-bg-alt);
+  color: var(--ds-ink-muted);
+  border-color: var(--ds-border);
 }
 
 /* ── Expedition number chip ───────────────────────────────────────────────── */

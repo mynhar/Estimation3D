@@ -1,6 +1,6 @@
 .pagination-bar {
   padding: 0.5rem 0.25rem;
-  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  border-top: 1px solid var(--ds-border);
   margin-top: 0.5rem;
 }
 

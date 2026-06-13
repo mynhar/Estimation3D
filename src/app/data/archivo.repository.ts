@@ -35,6 +35,17 @@ export class ArchivoRepository {
     return (data ?? []) as (ArchivoRow & { tipo: string })[];
   }
 
+  async findByReporteIds(reporteIds: string[]): Promise<(ArchivoRow & { tipo: string; reporte_id: string })[]> {
+    if (!reporteIds.length) return [];
+    const { data, error } = await this.db
+      .from('archivo')
+      .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes, subido_por, tipo, reporte_id')
+      .in('reporte_id', reporteIds)
+      .order('creado_en', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as (ArchivoRow & { tipo: string; reporte_id: string })[];
+  }
+
   async findByExpedienteId(expedienteId: string, tipo?: TipoArchivo): Promise<ArchivoRow[]> {
     const query = this.db
       .from('archivo')

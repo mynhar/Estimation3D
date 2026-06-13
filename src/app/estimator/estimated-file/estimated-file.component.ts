@@ -377,16 +377,19 @@ export class EstimatedFileComponent implements OnInit {
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     @page { size: A4; margin: 2cm; }
+    /* Documento PDF independiente (ventana/print propios): NO puede leer
+       var(--ds-*) de la app. El hex aquí es intencional; los valores se
+       mantienen alineados a la paleta canónica de src/styles/tokens.css. */
     :root {
-      --gold:        #D4B96E;
-      --gold-faint:  #FBF7EE;
-      --gold-soft:   #E8D9AA;
-      --ink:         #1A1A1A;
-      --ink-2:       #3D3D3D;
-      --ink-3:       #6B6B6B;
-      --surface:     #FBFAF6;
-      --border:      #E8E5DE;
-      --bg:          #F5F3EE;
+      --gold:        #D4B96E;  /* --ds-gold */
+      --gold-faint:  #F7EFD9;  /* --ds-gold-faint */
+      --gold-soft:   #EBD9A8;  /* --ds-gold-soft */
+      --ink:         #1A1A1A;  /* --ds-ink */
+      --ink-2:       #4A4A4A;  /* --ds-ink-secondary */
+      --ink-3:       #7A7770;  /* --ds-ink-muted */
+      --surface:     #FBFAF6;  /* --ds-surface */
+      --border:      #E8E5DC;  /* --ds-border */
+      --bg:          #F5F3EE;  /* --ds-bg */
       --ff-display:  'Fraunces', Georgia, serif;
       --ff-body:     'DM Sans', system-ui, sans-serif;
     }

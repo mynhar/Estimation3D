@@ -56,6 +56,22 @@ export class SeguimientoRepository {
     return { ...rest, servicio_id: exp?.servicio_id ?? null } as SeguimientoObra;
   }
 
+  // Carga en lote los seguimientos de varios contratos (vista de lista del
+  // cliente). Evita el patrón N+1 de llamar findByContratoId por contrato.
+  async findByContratoIds(contratoIds: string[]): Promise<SeguimientoObra[]> {
+    if (!contratoIds.length) return [];
+    const { data, error } = await this.db
+      .from('seguimiento_obra')
+      .select('*, expediente:expediente_id(servicio_id)')
+      .in('contrato_id', contratoIds);
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((row: any) => {
+      const exp = Array.isArray(row.expediente) ? row.expediente[0] : row.expediente;
+      const { expediente: _exp, ...rest } = row;
+      return { ...rest, servicio_id: exp?.servicio_id ?? null } as SeguimientoObra;
+    });
+  }
+
   // Avance de obra por expediente (para el dashboard del estimador).
   async findResumenByExpedienteIds(
     expedienteIds: string[],
@@ -106,6 +122,31 @@ export class SeguimientoRepository {
     return (data ?? []) as ActividadServicio[];
   }
 
+  // ── Catálogos en lote (varias obras a la vez) ─────────────────────────────
+
+  async findFasesByServicioIds(servicioIds: number[]): Promise<FaseServicio[]> {
+    if (!servicioIds.length) return [];
+    const { data, error } = await this.db
+      .from('fase_servicio')
+      .select('*')
+      .in('servicio_id', servicioIds)
+      .eq('activo', true)
+      .order('orden');
+    if (error) throw new Error(error.message);
+    return (data ?? []) as FaseServicio[];
+  }
+
+  async findActividadesByServicioIds(servicioIds: number[]): Promise<ActividadServicio[]> {
+    if (!servicioIds.length) return [];
+    const { data, error } = await this.db
+      .from('actividad_servicio')
+      .select('*')
+      .in('servicio_id', servicioIds)
+      .eq('activo', true);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ActividadServicio[];
+  }
+
   // ── Reportes diarios ──────────────────────────────────────────────────────
 
   async findReporteByFecha(seguimientoId: string, fecha: string): Promise<ReporteDiario | null> {
@@ -126,6 +167,20 @@ export class SeguimientoRepository {
       .eq('seguimiento_id', seguimientoId)
       .order('fecha', { ascending: false })
       .limit(limit);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ReporteDiario[];
+  }
+
+  // Todos los partes de varios seguimientos, ordenados por fecha desc.
+  // El agrupado por seguimiento y el recorte (recientes/stats/hoy) se hacen
+  // en memoria; sirve a la vista de lista del cliente sin N+1.
+  async findReportesBySeguimientoIds(seguimientoIds: string[]): Promise<ReporteDiario[]> {
+    if (!seguimientoIds.length) return [];
+    const { data, error } = await this.db
+      .from('reporte_diario')
+      .select('*')
+      .in('seguimiento_id', seguimientoIds)
+      .order('fecha', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as ReporteDiario[];
   }
@@ -218,7 +273,42 @@ export class SeguimientoRepository {
     return [...counts.entries()].map(([actividad_id, dias]) => ({ actividad_id, dias }));
   }
 
+  // Agregado de actividades para varios seguimientos a la vez. Devuelve, por
+  // (seguimiento, actividad), en cuántos partes se realizó.
+  async findActividadesAgregadasBySeguimientoIds(
+    seguimientoIds: string[],
+  ): Promise<{ seguimiento_id: string; actividad_id: string; dias: number }[]> {
+    if (!seguimientoIds.length) return [];
+    const { data, error } = await this.db
+      .from('reporte_actividad')
+      .select('actividad_id, reporte_diario!inner(seguimiento_id)')
+      .in('reporte_diario.seguimiento_id', seguimientoIds);
+    if (error) throw new Error(error.message);
+    const counts = new Map<string, number>(); // clave: `${seguimiento_id}|${actividad_id}`
+    for (const row of (data ?? []) as any[]) {
+      const rd = Array.isArray(row.reporte_diario) ? row.reporte_diario[0] : row.reporte_diario;
+      const segId = rd?.seguimiento_id;
+      if (!segId) continue;
+      const key = `${segId}|${row.actividad_id}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([key, dias]) => {
+      const [seguimiento_id, actividad_id] = key.split('|');
+      return { seguimiento_id, actividad_id, dias };
+    });
+  }
+
   // ── Zonas del reporte ─────────────────────────────────────────────────────
+
+  async findZonasByReporteIds(reporteIds: string[]): Promise<ReporteZona[]> {
+    if (!reporteIds.length) return [];
+    const { data, error } = await this.db
+      .from('reporte_zona')
+      .select('*')
+      .in('reporte_id', reporteIds);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ReporteZona[];
+  }
 
   async findZonasReporte(reporteId: string): Promise<ReporteZona[]> {
     const { data, error } = await this.db

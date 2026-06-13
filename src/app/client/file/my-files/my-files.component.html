@@ -166,7 +166,7 @@
             <article class="mf-card h-100"
                      [class.mf-card--cancelado]="exp.estado === 'cancelado'"
                      [class.mf-card--oferta]="exp.estado === 'en_oferta'"
-                     [style.--acento]="estadoCfg(exp.estado).color">
+                     [attr.data-estado]="exp.estado">
 
               <!-- Barra lateral de color de estado -->
               <div class="mf-card__bar" aria-hidden="true"></div>
@@ -226,8 +226,7 @@
 
                 <!-- Hint contextual -->
                 <div class="mf-card__hint">
-                  <i class="bi {{ estadoCfg(exp.estado).icono }}" aria-hidden="true"
-                     [style.color]="estadoCfg(exp.estado).color"></i>
+                  <i class="bi {{ estadoCfg(exp.estado).icono }} mf-card__hint-icon" aria-hidden="true"></i>
                   <p class="mf-card__hint-text">{{ ('state_hint.' + exp.estado) | translate }}</p>
                 </div>
 

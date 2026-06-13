@@ -12,8 +12,8 @@
   --topbar-h:            56px;
 
   /* Sidebar dark palette */
-  --sb-bg:               #2A2420;
-  --sb-bg-deep:          #221E1A;
+  --sb-bg:               var(--ds-dark-surface);
+  --sb-bg-deep:          var(--ds-dark-surface-deep);
 
   /* Text layers on dark surface */
   --sb-text:             rgba(251, 250, 246, 0.46);
@@ -31,8 +31,8 @@
   --sb-transition:       var(--ds-duration-base) var(--ds-ease-out);
 
   /* Danger action (logout) — lightened for dark surface */
-  --sb-danger:           #D47A76;
-  --sb-danger-hover:     #EDAAA7;
+  --sb-danger:           var(--ds-danger-on-dark);
+  --sb-danger-hover:     var(--ds-danger-on-dark-hover);
   --sb-danger-hover-bg:  rgba(168, 74, 70, 0.10);
 }
 

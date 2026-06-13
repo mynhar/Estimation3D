@@ -23,22 +23,22 @@
       @if (!cargando()) {
         <div class="estd-header__stats" aria-label="Estado actual">
           @if (activos().length > 0) {
-            <div class="estd-hstat estd-hstat--activo">
+            <a class="estd-hstat estd-hstat--activo" routerLink="/estimator/files-under-estimation">
               <span class="estd-hstat__n">{{ activos().length }}</span>
               <span class="estd-hstat__l">{{ 'dashboard_estimator.in_progress' | translate }}</span>
-            </div>
+            </a>
           }
           @if (disponibles() > 0) {
-            <div class="estd-hstat estd-hstat--disponible">
+            <a class="estd-hstat estd-hstat--disponible" routerLink="/estimator/files-to-be-estimated">
               <span class="estd-hstat__n">{{ disponibles() }}</span>
               <span class="estd-hstat__l">{{ 'common.available' | translate }}</span>
-            </div>
+            </a>
           }
           @if (contratados().length > 0) {
-            <div class="estd-hstat estd-hstat--contratado">
+            <a class="estd-hstat estd-hstat--contratado" routerLink="/estimator/estimated-files">
               <span class="estd-hstat__n">{{ contratados().length }}</span>
               <span class="estd-hstat__l">{{ 'dashboard_estimator.contracted' | translate }}</span>
-            </div>
+            </a>
           }
           @if (montoTotal() > 0) {
             <div class="estd-hstat estd-hstat--monto">
@@ -84,7 +84,8 @@
     <!-- KPI strip compacto -->
     <div class="estd-kpis" role="region" aria-label="KPIs">
 
-      <div class="estd-kpi estd-kpi--activo" [class.estd-kpi--pulse]="activos().length > 0">
+      <a class="estd-kpi estd-kpi--activo" [class.estd-kpi--pulse]="activos().length > 0"
+         routerLink="/estimator/files-under-estimation">
         <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--activo" aria-hidden="true">
           <i class="bi bi-pencil-square"></i>
         </div>
@@ -95,9 +96,9 @@
           <p class="estd-kpi__label">{{ 'state.en_estimacion' | translate }}</p>
         </div>
         <div class="estd-kpi__indicator estd-kpi__indicator--activo"></div>
-      </div>
+      </a>
 
-      <div class="estd-kpi estd-kpi--disponible">
+      <a class="estd-kpi estd-kpi--disponible" routerLink="/estimator/files-to-be-estimated">
         <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--disponible" aria-hidden="true">
           <i class="bi bi-inbox"></i>
         </div>
@@ -106,9 +107,9 @@
           <p class="estd-kpi__label">{{ 'common.available' | translate }}</p>
         </div>
         <div class="estd-kpi__indicator estd-kpi__indicator--disponible"></div>
-      </div>
+      </a>
 
-      <div class="estd-kpi estd-kpi--mercado">
+      <a class="estd-kpi estd-kpi--mercado" routerLink="/estimator/estimated-files">
         <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--mercado" aria-hidden="true">
           <i class="bi bi-people"></i>
         </div>
@@ -117,9 +118,9 @@
           <p class="estd-kpi__label">{{ 'dashboard_estimator.on_market' | translate }}</p>
         </div>
         <div class="estd-kpi__indicator estd-kpi__indicator--mercado"></div>
-      </div>
+      </a>
 
-      <div class="estd-kpi estd-kpi--contratado">
+      <a class="estd-kpi estd-kpi--contratado" routerLink="/estimator/estimated-files">
         <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--contratado" aria-hidden="true">
           <i class="bi bi-check-circle"></i>
         </div>
@@ -128,10 +129,10 @@
           <p class="estd-kpi__label">{{ 'dashboard_estimator.contracted' | translate }}</p>
         </div>
         <div class="estd-kpi__indicator estd-kpi__indicator--contratado"></div>
-      </div>
+      </a>
 
       @if (obras().length > 0) {
-        <div class="estd-kpi estd-kpi--obra">
+        <button type="button" class="estd-kpi estd-kpi--obra" (click)="scrollAObras()">
           <div class="estd-kpi__icon-wrap estd-kpi__icon-wrap--obra" aria-hidden="true">
             <i class="bi bi-hammer"></i>
           </div>
@@ -140,7 +141,7 @@
             <p class="estd-kpi__label">{{ 'dashboard_estimator.works_active' | translate }}</p>
           </div>
           <div class="estd-kpi__indicator estd-kpi__indicator--obra"></div>
-        </div>
+        </button>
       }
 
     </div>
@@ -553,7 +554,7 @@
          SEGUIMIENTO DE OBRA — avance de los trabajos
          ══════════════════════════════════════════════════════ -->
     @if (obras().length > 0) {
-      <section class="estd-card" aria-labelledby="obra-title">
+      <section id="estd-obra-section" class="estd-card" aria-labelledby="obra-title">
         <div class="estd-card__header">
           <div class="estd-card__header-left">
             <div class="estd-card__header-icon" aria-hidden="true">

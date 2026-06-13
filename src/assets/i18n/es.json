@@ -1227,7 +1227,8 @@
     "ofe_aceptada": "¡Tu oferta fue aceptada! Revisa Mis Ofertas para ver los detalles.",
     "ofe_rechazada": "Tu oferta no fue seleccionada. El cliente eligió otra propuesta.",
     "ofe_pendiente": "Tu oferta volvió al estado pendiente.",
-    "contrato_en_ejecucion": "¡La obra ha comenzado! Sigue el avance de tu proyecto."
+    "contrato_en_ejecucion": "¡La obra ha comenzado! Sigue el avance de tu proyecto.",
+    "obra_arranca": "¡Los trabajos de tu obra {{numero}} han comenzado! Sigue el avance."
   },
   "admin_service_types": {
     "title": "Tipos de servicio",
@@ -1432,6 +1433,7 @@
     "inicio_real_lbl": "Inicio real",
     "tipo_visitante_inspector": "Inspector",
     "tipo_visitante_dueno": "Dueño",
+    "tipo_visitante_estimador": "Estimador",
     "agendar_visita": "Agendar visita",
     "eventos_title": "Flujo de eventos",
     "eventos_none": "Sin reportes registrados",

@@ -1227,7 +1227,8 @@
     "ofe_aceptada": "Your offer was accepted! Go to My Offers to view the details.",
     "ofe_rechazada": "Your offer was not selected. The client chose another proposal.",
     "ofe_pendiente": "Your offer has returned to pending status.",
-    "contrato_en_ejecucion": "Work has started! Follow your project's progress."
+    "contrato_en_ejecucion": "Work has started! Follow your project's progress.",
+    "obra_arranca": "Work on your project {{numero}} has started! Follow the progress."
   },
   "admin_service_types": {
     "title": "Service types",
@@ -1432,6 +1433,7 @@
     "inicio_real_lbl": "Start date",
     "tipo_visitante_inspector": "Inspector",
     "tipo_visitante_dueno": "Owner",
+    "tipo_visitante_estimador": "Estimator",
     "agendar_visita": "Schedule a visit",
     "eventos_title": "Work log",
     "eventos_none": "No reports yet",

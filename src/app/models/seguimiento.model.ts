@@ -57,7 +57,7 @@ export interface ReporteDiario {
 export interface Inspeccion {
   id:             string;
   seguimiento_id: string;
-  tipo_visitante: 'inspector' | 'dueno';
+  tipo_visitante: 'inspector' | 'dueno' | 'estimador';
   fecha:          string;
   hora:           string;
   motivo:         string | null;
@@ -69,7 +69,7 @@ export interface Inspeccion {
 
 export interface InspeccionInput {
   seguimiento_id: string;
-  tipo_visitante: 'inspector' | 'dueno';
+  tipo_visitante: 'inspector' | 'dueno' | 'estimador';
   fecha:          string;
   hora:           string;
   motivo:         string | null;

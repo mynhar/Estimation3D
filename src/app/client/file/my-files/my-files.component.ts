@@ -12,7 +12,6 @@ interface EstadoCfg {
   texto: string;
   clase: string;
   icono: string;
-  color: string;
   pipelineIdx: number;
 }
 
@@ -85,17 +84,17 @@ export class MyFilesComponent implements OnInit {
 
   // ── State config ───────────────────────────────────────────────────────────
   private readonly ESTADO_CFG: Record<string, EstadoCfg> = {
-    nuevo:         { texto: 'Nuevo',        clase: 'status-badge--nuevo',         icono: 'bi-inbox',              color: '#4A6B7A', pipelineIdx: 0 },
-    en_estimacion: { texto: 'En revisión',  clase: 'status-badge--en_estimacion', icono: 'bi-clipboard2-pulse',   color: '#B8862E', pipelineIdx: 1 },
-    estimado:      { texto: 'Estimado',     clase: 'status-badge--estimado',      icono: 'bi-check-circle',       color: '#B0964A', pipelineIdx: 1 },
-    en_oferta:     { texto: 'Con ofertas',  clase: 'status-badge--en_oferta',     icono: 'bi-cash-coin',          color: '#B8862E', pipelineIdx: 2 },
-    adjudicado:    { texto: 'Adjudicado',   clase: 'status-badge--adjudicado',    icono: 'bi-trophy',             color: '#5B7A4F', pipelineIdx: 3 },
-    contratado:    { texto: 'Contratado',   clase: 'status-badge--contratado',    icono: 'bi-file-earmark-check', color: '#5B7A4F', pipelineIdx: 4 },
-    cancelado:     { texto: 'Cancelado',    clase: 'status-badge--cancelado',     icono: 'bi-x-circle',           color: '#7A7770', pipelineIdx: -1 },
+    nuevo:         { texto: 'Nuevo',        clase: 'status-badge--nuevo',         icono: 'bi-inbox',              pipelineIdx: 0 },
+    en_estimacion: { texto: 'En revisión',  clase: 'status-badge--en_estimacion', icono: 'bi-clipboard2-pulse',   pipelineIdx: 1 },
+    estimado:      { texto: 'Estimado',     clase: 'status-badge--estimado',      icono: 'bi-check-circle',       pipelineIdx: 1 },
+    en_oferta:     { texto: 'Con ofertas',  clase: 'status-badge--en_oferta',     icono: 'bi-cash-coin',          pipelineIdx: 2 },
+    adjudicado:    { texto: 'Adjudicado',   clase: 'status-badge--adjudicado',    icono: 'bi-trophy',             pipelineIdx: 3 },
+    contratado:    { texto: 'Contratado',   clase: 'status-badge--contratado',    icono: 'bi-file-earmark-check', pipelineIdx: 4 },
+    cancelado:     { texto: 'Cancelado',    clase: 'status-badge--cancelado',     icono: 'bi-x-circle',           pipelineIdx: -1 },
   };
 
   private readonly FALLBACK_CFG: EstadoCfg = {
-    texto: '—', clase: 'status-badge--cancelado', icono: 'bi-question-circle', color: '#7A7770', pipelineIdx: 0,
+    texto: '—', clase: 'status-badge--cancelado', icono: 'bi-question-circle', pipelineIdx: 0,
   };
 
   // ── State hints (client-friendly next-step messages) ──────────────────────

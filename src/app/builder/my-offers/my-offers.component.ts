@@ -8,12 +8,6 @@ import { OfertaService } from '../../services/oferta.service';
 import { OfertaRow } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
-const ESTADO_COLOR: Record<string, string> = {
-  pendiente: '#B8862E',
-  aceptada:  '#5B7A4F',
-  rechazada: '#A14545',
-};
-
 const ESTADO_ICON: Record<string, string> = {
   pendiente: 'bi-hourglass',
   aceptada:  'bi-check-circle',
@@ -114,7 +108,6 @@ export class MyOffersComponent implements OnInit {
     return o.servicio_nombre;
   }
 
-  estadoColor(estado: string): string { return ESTADO_COLOR[estado] ?? '#adb5bd'; }
   estadoIcon(estado: string):  string { return ESTADO_ICON[estado]  ?? 'bi-circle'; }
 
   formatCosto(valor: number): string {

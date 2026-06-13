@@ -953,7 +953,7 @@ export type Database = {
         | "demolicion_interior"
         | "aislamiento"
         | "fundacion_dren_frances"
-      tipo_visitante: "inspector" | "dueno"
+      tipo_visitante: "inspector" | "dueno" | "estimador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1143,7 +1143,7 @@ export const Constants = {
         "aislamiento",
         "fundacion_dren_frances",
       ],
-      tipo_visitante: ["inspector", "dueno"],
+      tipo_visitante: ["inspector", "dueno", "estimador"],
     },
   },
 } as const

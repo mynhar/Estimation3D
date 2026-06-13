@@ -234,35 +234,46 @@ export class ContratoService {
 
   async getContratosConstructor(constructorId: string): Promise<ContratoConstructorListItem[]> {
     const rows = await this.contratoRepo.findByConstructorId(constructorId);
-    return rows.map((c: any) => {
-      const svc    = c.expediente?.servicio;
-      const locArr = c.expediente?.localizacion;
-      const loc    = Array.isArray(locArr) ? locArr[0] : locArr;
-      const cli    = c.cliente;
-      const ofe    = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
-      return {
-        id:                 c.id,
-        expediente_id:      c.expediente_id       ?? '',
-        expediente_numero:  c.expediente?.numero  ?? '—',
-        servicio_nombre:    svc?.nombre_es        ?? '—',
-        servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
-        servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
-        cliente_nombre:     cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
-        precio_final:       c.precio_final,
-        garantia_anos:      c.garantia_anos       ?? null,
-        estado:             c.estado,
-        generado_en:        c.generado_en         ?? '',
-        firmado_en:         c.firmado_en          ?? null,
-        actualizado_en:     c.actualizado_en      ?? '',
-        url_pdf:            c.url_pdf             ?? null,
-        fecha_inicio:       ofe?.fecha_inicio     ?? null,
-        plazo_semanas_min:  ofe?.plazo_semanas_min ?? null,
-        plazo_semanas_max:  ofe?.plazo_semanas_max ?? null,
-        direccion:          loc?.direccion        ?? '—',
-        provincia:          loc?.provincia        ?? '—',
-        canton:             loc?.canton           ?? '—',
-      } as ContratoConstructorListItem;
-    });
+    return rows.map((c: any) => this.mapContratoListItem(c));
+  }
+
+  // ── Estimador: contratos de los expedientes que estimó ───────────────────
+
+  async getContratosEstimador(estimadorId: string): Promise<ContratoConstructorListItem[]> {
+    const rows = await this.contratoRepo.findByEstimadorId(estimadorId);
+    return rows.map((c: any) => this.mapContratoListItem(c));
+  }
+
+  // Mapea una fila de contrato (con joins expediente/servicio/loc/cliente/oferta)
+  // al item de lista de seguimiento. Compartido por constructor y estimador.
+  private mapContratoListItem(c: any): ContratoConstructorListItem {
+    const svc    = c.expediente?.servicio;
+    const locArr = c.expediente?.localizacion;
+    const loc    = Array.isArray(locArr) ? locArr[0] : locArr;
+    const cli    = c.cliente;
+    const ofe    = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
+    return {
+      id:                 c.id,
+      expediente_id:      c.expediente_id       ?? '',
+      expediente_numero:  c.expediente?.numero  ?? '—',
+      servicio_nombre:    svc?.nombre_es        ?? '—',
+      servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
+      servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+      cliente_nombre:     cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+      precio_final:       c.precio_final,
+      garantia_anos:      c.garantia_anos       ?? null,
+      estado:             c.estado,
+      generado_en:        c.generado_en         ?? '',
+      firmado_en:         c.firmado_en          ?? null,
+      actualizado_en:     c.actualizado_en      ?? '',
+      url_pdf:            c.url_pdf             ?? null,
+      fecha_inicio:       ofe?.fecha_inicio     ?? null,
+      plazo_semanas_min:  ofe?.plazo_semanas_min ?? null,
+      plazo_semanas_max:  ofe?.plazo_semanas_max ?? null,
+      direccion:          loc?.direccion        ?? '—',
+      provincia:          loc?.provincia        ?? '—',
+      canton:             loc?.canton           ?? '—',
+    } as ContratoConstructorListItem;
   }
 
   // ── Admin: listar contratos ──────────────────────────────────────────────

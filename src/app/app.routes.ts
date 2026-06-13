@@ -124,6 +124,16 @@ export const routes: Routes = [
     loadComponent: () => import('./estimator/estimated-file/estimated-file.component').then(m => m.EstimatedFileComponent),
     canActivate: [estimatorGuard],
   },
+  {
+    path: 'estimator/construction-monitoring/list',
+    loadComponent: () => import('./estimator/construction-monitoring/list/list.component').then(m => m.EstimatorConstructionMonitoringListComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
+    path: 'estimator/construction-monitoring/monitoring/:id',
+    loadComponent: () => import('./estimator/construction-monitoring/monitoring/monitoring.component').then(m => m.EstimatorConstructionMonitoringComponent),
+    canActivate: [estimatorGuard],
+  },
 
   // ── Constructor ───────────────────────────────────────────────────────────
   {

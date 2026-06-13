@@ -11,6 +11,7 @@
   --ds-bg-alt:            #EFEDE6;  /* Variante para secciones alternas */
   --ds-surface:           #FBFAF6;  /* Tarjetas, paneles (crema) */
   --ds-surface-elevated:  #FFFFFF;  /* Modales, overlays */
+  --ds-surface-overlay:   rgba(251, 250, 246, 0.9); /* Crema translúcida sobre imágenes */
   --ds-overlay:           rgba(26, 26, 26, 0.4); /* Backdrops */
 
   /* ----------------------------------------------------------
@@ -49,6 +50,16 @@
   --ds-danger-soft:       #EFD9D9;
   --ds-info:              #4A6B7A;  /* Azul pizarra */
   --ds-info-soft:         #DBE5E9;
+
+  /* ----------------------------------------------------------
+     COLOR — Dark chrome (sidebar / panel de login)
+     Inversión oscura cálida intencional contra el área clara.
+     Fuente única para superficies oscuras del shell.
+     ---------------------------------------------------------- */
+  --ds-dark-surface:        #2A2420;  /* Espresso cálido (sidebar, panel login) */
+  --ds-dark-surface-deep:   #221E1A;  /* Variante profunda (gradiente, base) */
+  --ds-danger-on-dark:      #D47A76;  /* Acción peligro sobre superficie oscura */
+  --ds-danger-on-dark-hover:#EDAAA7;  /* Hover del anterior */
 
   /* ----------------------------------------------------------
      TIPOGRAFÍA

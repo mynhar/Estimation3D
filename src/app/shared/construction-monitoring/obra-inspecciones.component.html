@@ -57,6 +57,14 @@
     <div class="oi-field">
       <label class="oi-label">{{ 'monitoring.tipo_visitante_label' | translate }}</label>
       <div class="oi-tipo-row">
+        @if (esEstimador()) {
+          <button class="oi-tipo-btn" type="button"
+                  [class.is-active]="nuevaTipo() === 'estimador'"
+                  (click)="setTipo('estimador')">
+            <i class="bi bi-clipboard-check"></i>
+            {{ 'monitoring.tipo_visitante_estimador' | translate }}
+          </button>
+        }
         <button class="oi-tipo-btn" type="button"
                 [class.is-active]="nuevaTipo() === 'inspector'"
                 (click)="setTipo('inspector')">

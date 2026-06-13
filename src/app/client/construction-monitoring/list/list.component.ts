@@ -11,13 +11,9 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 import { TranslatePipe } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoService } from '../../../services/contrato.service';
-import { SeguimientoService } from '../../../services/seguimiento.service';
-import { ArchivoService, ReporteArchivoRow } from '../../../services/archivo.service';
-import { ContratoListItem } from '../../../models';
-import { ReporteZona } from '../../../data/seguimiento.repository';
-import { ActividadServicio, FaseServicio } from '../../../models/seguimiento.model';
-import { ActividadAvance, FaseAvance, ObraVM } from './obra.model';
-import { ObraCardComponent } from './obra-card.component';
+import { ObraVmService } from '../../../services/obra-vm.service';
+import { ObraVM } from '../../../models';
+import { ObraCardComponent } from '../../../shared/construction-monitoring/obra-card.component';
 
 // Estados de contrato que tienen seguimiento de obra visible para el cliente.
 const ESTADOS_OBRA = ['firmado', 'en_ejecucion', 'completado'];
@@ -31,10 +27,9 @@ const ESTADOS_OBRA = ['firmado', 'en_ejecucion', 'completado'];
   styleUrl: './list.component.css',
 })
 export class ClientConstructionMonitoringListComponent implements OnInit, OnDestroy {
-  private auth               = inject(AuthSupabaseService);
-  private contratoService    = inject(ContratoService);
-  private seguimientoService = inject(SeguimientoService);
-  private archivoService     = inject(ArchivoService);
+  private auth            = inject(AuthSupabaseService);
+  private contratoService = inject(ContratoService);
+  private obraVm          = inject(ObraVmService);
 
   private user = toSignal(this.auth.user$);
 
@@ -44,6 +39,8 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
 
   // Realtime: refresco en vivo al arrancar la obra o registrarse un parte.
   private channels: RealtimeChannel[] = [];
+  private reporteChannel: RealtimeChannel | null = null;
+  private reporteSegKey = '';
   private recargaTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
@@ -53,13 +50,18 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
     if (!userId) { this.cargando.set(false); return; }
 
     await this.cargar(userId, true);
-    this.suscribirRealtime(userId);
+    this.suscribirContrato(userId);
+    this.sincronizarCanalReportes(userId);
   }
 
   ngOnDestroy(): void {
     if (this.recargaTimer) clearTimeout(this.recargaTimer);
     for (const ch of this.channels) this.auth.client.removeChannel(ch);
     this.channels = [];
+    if (this.reporteChannel) {
+      this.auth.client.removeChannel(this.reporteChannel);
+      this.reporteChannel = null;
+    }
   }
 
   private async cargar(userId: string, mostrarSpinner: boolean): Promise<void> {
@@ -68,11 +70,9 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
       const contratos = await this.contratoService.getMisContratos(userId);
       const conObra   = contratos.filter(c => ESTADOS_OBRA.includes(c.estado));
 
-      const vms = await Promise.all(conObra.map(c => this.construirObra(c)));
+      const vms = await this.obraVm.construirObras(conObra);
       this.obras.set(
-        vms
-          .filter((v): v is ObraVM => v !== null)
-          .sort((a, b) => b.ultimaActualizacion.localeCompare(a.ultimaActualizacion)),
+        vms.sort((a, b) => b.ultimaActualizacion.localeCompare(a.ultimaActualizacion)),
       );
       this.error.set(null);
     } catch (e: unknown) {
@@ -84,9 +84,9 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
 
   // ── Realtime ────────────────────────────────────────────────────────────────
 
-  private suscribirRealtime(userId: string): void {
-    // Cambios de estado del contrato (p. ej. arranque firmado → en_ejecucion,
-    // o completado / cancelado, que añaden o quitan obras de la lista).
+  // Cambios de estado del contrato (p. ej. arranque firmado → en_ejecucion,
+  // o completado / cancelado, que añaden o quitan obras de la lista).
+  private suscribirContrato(userId: string): void {
     this.channels.push(
       this.auth.client
         .channel(`cm-list-ctr-${userId}`)
@@ -97,122 +97,40 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
         )
         .subscribe(),
     );
+  }
 
-    // Partes diarios: sin filtro de columna porque reporte_diario no tiene
-    // cliente_id; el RLS de reporte_diario ya limita los eventos a las obras
-    // del cliente. Cualquier evento recibido es relevante.
-    this.channels.push(
-      this.auth.client
-        .channel(`cm-list-rep-${userId}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'reporte_diario' },
-          () => this.programarRecarga(userId),
-        )
-        .subscribe(),
-    );
+  // Partes diarios: el canal se acota a los seguimiento_id de las obras
+  // cargadas (filtro de servidor), evitando escuchar toda la tabla. Se
+  // re-suscribe solo cuando cambia el conjunto de obras.
+  private sincronizarCanalReportes(userId: string): void {
+    const ids = [...new Set(this.obras().map(o => o.seguimientoId))].sort();
+    const key = ids.join(',');
+    if (key === this.reporteSegKey) return;
+    this.reporteSegKey = key;
+
+    if (this.reporteChannel) {
+      this.auth.client.removeChannel(this.reporteChannel);
+      this.reporteChannel = null;
+    }
+    if (!ids.length) return;
+
+    this.reporteChannel = this.auth.client
+      .channel(`cm-list-rep-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reporte_diario', filter: `seguimiento_id=in.(${ids.join(',')})` },
+        () => this.programarRecarga(userId),
+      )
+      .subscribe();
   }
 
   // Agrupa ráfagas de eventos en una sola recarga en segundo plano (sin spinner).
   private programarRecarga(userId: string): void {
     if (this.recargaTimer) clearTimeout(this.recargaTimer);
-    this.recargaTimer = setTimeout(() => {
+    this.recargaTimer = setTimeout(async () => {
       this.recargaTimer = null;
-      void this.cargar(userId, false);
+      await this.cargar(userId, false);
+      this.sincronizarCanalReportes(userId);
     }, 600);
-  }
-
-  private async construirObra(c: ContratoListItem): Promise<ObraVM | null> {
-    const seg = await this.seguimientoService.getSeguimientoByContratoId(c.id);
-    if (!seg) return null;
-
-    const hoyISO = this.fechaISO(new Date());
-
-    const [fasesRaw, actividadesRaw, actsAgg, recientes, reporteHoy, stats] =
-      await Promise.all([
-        seg.servicio_id != null ? this.seguimientoService.getFasesByServicioId(seg.servicio_id)      : Promise.resolve([]),
-        seg.servicio_id != null ? this.seguimientoService.getActividadesByServicioId(seg.servicio_id) : Promise.resolve([]),
-        this.seguimientoService.getActividadesAgregadas(seg.id),
-        this.seguimientoService.getReportesRecientes(seg.id, 6),
-        this.seguimientoService.getReporteByFecha(seg.id, hoyISO),
-        this.seguimientoService.getStatsReportes(seg.id),
-      ]);
-
-    const ultimoReporte = reporteHoy ?? recientes[0] ?? null;
-
-    let zonas: ReporteZona[]            = [];
-    let fotos: ReporteArchivoRow[]      = [];
-    let videos: ReporteArchivoRow[]     = [];
-    let documentos: ReporteArchivoRow[] = [];
-    if (ultimoReporte) {
-      const [z, media] = await Promise.all([
-        this.seguimientoService.getZonasReporte(ultimoReporte.id),
-        this.archivoService.cargarPorReporte(ultimoReporte.id),
-      ]);
-      zonas      = z;
-      fotos      = media.fotos;
-      videos     = media.videos;
-      documentos = media.documentos;
-    }
-
-    const avanceGlobal = c.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance);
-
-    return {
-      contratoId:          c.id,
-      seguimientoId:       seg.id,
-      expedienteNumero:    c.expediente_numero,
-      servicioNombre:      c.servicio_nombre,
-      servicioNombreEn:    c.servicio_nombre_en,
-      servicioNombreFr:    c.servicio_nombre_fr,
-      estadoContrato:      c.estado,
-      avanceGlobal,
-      ultimaActualizacion: seg.actualizado_en,
-      plazoMin:            c.plazo_semanas_min,
-      plazoMax:            c.plazo_semanas_max,
-      llegadaFecha:        ultimoReporte?.fecha ?? null,
-      llegadaHora:         ultimoReporte?.hora_inicio ?? null,
-      horasDia:            ultimoReporte?.horas_trabajadas ?? null,
-      fases:               this.calcularFases(fasesRaw, avanceGlobal),
-      actividades:         this.calcularActividades(actividadesRaw, actsAgg, stats.total_dias),
-      zonas,
-      eventos:             recientes,
-      reporteMediaFecha:   ultimoReporte?.fecha ?? null,
-      fotos, videos, documentos,
-    };
-  }
-
-  // Avance por fase: reparte el avance global entre las fases ordenadas.
-  // Cada fase ocupa un segmento igual; su % es la porción del avance global
-  // que cae dentro de su segmento.
-  private calcularFases(fases: FaseServicio[], avanceGlobal: number): FaseAvance[] {
-    const n = fases.length;
-    if (n === 0) return [];
-    const seg = 100 / n;
-    return fases
-      .slice()
-      .sort((a, b) => a.orden - b.orden)
-      .map((fase, i) => {
-        const lower = i * seg;
-        const pct   = Math.max(0, Math.min(100, ((avanceGlobal - lower) / seg) * 100));
-        return { fase, pct: Math.round(pct) };
-      });
-  }
-
-  // Avance por actividad: porcentaje de días trabajados en que se realizó.
-  private calcularActividades(
-    actividades: ActividadServicio[],
-    agg:         { actividad_id: string; dias: number }[],
-    totalDias:   number,
-  ): ActividadAvance[] {
-    const mapa = new Map(agg.map(a => [a.actividad_id, a.dias]));
-    return actividades.map(actividad => {
-      const dias = mapa.get(actividad.id) ?? 0;
-      const pct  = totalDias > 0 ? Math.round((dias / totalDias) * 100) : 0;
-      return { actividad, dias, pct, hecha: dias > 0 };
-    });
-  }
-
-  private fechaISO(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 }

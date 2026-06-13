@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "color-no-hex": true,
+    "color-named": "never",
+    "declaration-property-value-disallowed-list": {
+      "/^(box-shadow|color|background|background-color|border|border-color)$/": ["/rgba\\(\\s*0\\s*,\\s*0\\s*,\\s*0/"]
+    }
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/**/*.css", "src/styles.css"],
+      "rules": {
+        "color-no-hex": null,
+        "color-named": null
+      }
+    }
+  ]
+}

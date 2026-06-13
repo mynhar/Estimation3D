@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnDestroy,
   effect,
   inject,
   input,
@@ -8,16 +9,18 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ArchivoService, ReporteArchivoRow } from '../../../services/archivo.service';
-import { SeguimientoService } from '../../../services/seguimiento.service';
-import { ReporteZona } from '../../../data/seguimiento.repository';
+import { AuthSupabaseService } from '../../services/auth-supabase.service';
+import { ArchivoService, ReporteArchivoRow } from '../../services/archivo.service';
+import { SeguimientoService } from '../../services/seguimiento.service';
+import { ReporteZona } from '../../data/seguimiento.repository';
 import {
   ActividadServicio,
   FaseServicio,
   ReporteDiario,
-} from '../../../models/seguimiento.model';
-import { ObraVM } from './obra.model';
+} from '../../models/seguimiento.model';
+import { ObraVM } from '../../models';
 import { ObraInspeccionesComponent } from './obra-inspecciones.component';
 
 @Component({
@@ -29,9 +32,10 @@ import { ObraInspeccionesComponent } from './obra-inspecciones.component';
   styleUrl: './obra-card.component.css',
   host: { '(document:keydown.escape)': 'cerrarViewer()' },
 })
-export class ObraCardComponent {
+export class ObraCardComponent implements OnDestroy {
   obra = input.required<ObraVM>();
 
+  private auth               = inject(AuthSupabaseService);
   private archivoService     = inject(ArchivoService);
   private seguimientoService = inject(SeguimientoService);
   private translate          = inject(TranslateService);
@@ -62,6 +66,10 @@ export class ObraCardComponent {
   // manual del usuario) en recargas que no traen un parte nuevo para esta obra.
   private ultimoSembrado: string | null | undefined = undefined;
 
+  // Realtime de la media: suscripción acotada al parte seleccionado.
+  private archivoChannel: RealtimeChannel | null = null;
+  private archivoReporteId: string | null = null;
+
   // ── Ciclo de vida ───────────────────────────────────────────────────────────
 
   constructor() {
@@ -80,6 +88,47 @@ export class ObraCardComponent {
       this.videos.set(o.videos);
       this.documentos.set(o.documentos);
     }, { allowSignalWrites: true });
+
+    // Re-suscribe el canal de media al parte seleccionado en cada cambio, para
+    // reflejar en vivo las fotos/vídeos/documentos que sube/elimina el
+    // constructor en ese día.
+    effect(() => this.sincronizarCanalArchivo(this.selected()?.id ?? null));
+  }
+
+  ngOnDestroy(): void {
+    if (this.archivoChannel) {
+      this.auth.client.removeChannel(this.archivoChannel);
+      this.archivoChannel = null;
+    }
+  }
+
+  private sincronizarCanalArchivo(reporteId: string | null): void {
+    if (reporteId === this.archivoReporteId) return;
+    this.archivoReporteId = reporteId;
+
+    if (this.archivoChannel) {
+      this.auth.client.removeChannel(this.archivoChannel);
+      this.archivoChannel = null;
+    }
+    if (!reporteId) return;
+
+    this.archivoChannel = this.auth.client
+      .channel(`oc-arch-${reporteId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'archivo', filter: `reporte_id=eq.${reporteId}` },
+        () => void this.recargarMediaSeleccion(reporteId),
+      )
+      .subscribe();
+  }
+
+  private async recargarMediaSeleccion(reporteId: string): Promise<void> {
+    // Ignora si el usuario ya cambió de parte mientras llegaba el evento.
+    if (this.selected()?.id !== reporteId) return;
+    const media = await this.archivoService.cargarPorReporte(reporteId);
+    this.fotos.set(media.fotos);
+    this.videos.set(media.videos);
+    this.documentos.set(media.documentos);
   }
 
   // ── Flujo de eventos ──────────────────────────────────────────────────────

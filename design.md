@@ -44,13 +44,23 @@ to it. Amend intentionally — the file is the rule.
 }
 ```
 
+### Dark chrome (sidebar / panel de login)
+El shell usa una inversión oscura cálida intencional (espresso) contra el área
+clara. Los valores viven una sola vez en `tokens.css`; los componentes los
+referencian vía su capa local `--sb-*` / `--lg-*` (nunca hex crudo):
+- `--ds-dark-surface` (#2A2420) · superficie oscura · `--ds-dark-surface-deep` (#221E1A)
+- `--ds-danger-on-dark` (#D47A76) + `--ds-danger-on-dark-hover` (#EDAAA7) · acción peligro sobre oscuro
+- Texto sobre oscuro: variaciones de opacidad de `--ds-ink-inverse` (decisión local del componente).
+
 ## CTA voice
 - Primary · fill `--ds-gold` · texto `--ds-ink` · radius 4–6px · hover translateY(-1px) + shadow-gold
 - Secondary · borde tinta, fondo transparente · mismo radius
 - Outline-primary · borde dorado, fondo transparente
 
 ## Iconography
-- Lucide / Phosphor, line/stroke únicamente, stroke-width 1.5. Nunca filled.
+- **bootstrap-icons** (`bi-*`), variantes line/stroke únicamente. Nunca filled.
+  (El sistema admite Lucide/Phosphor como equivalentes line, pero el stack real
+  usa bootstrap-icons — mantener coherencia con `bi-*`.)
 
 ## Motion stance
 - Sobria: `.fade-up` escalonado (máx 4–6 elementos por vista), `--ds-ease-out`.

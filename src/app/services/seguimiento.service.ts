@@ -71,6 +71,34 @@ export class SeguimientoService {
     return this.repo.findActividadesAgregadas(seguimientoId);
   }
 
+  // ── Lecturas en lote (vista de lista del cliente) ─────────────────────────
+
+  getSeguimientosByContratoIds(contratoIds: string[]): Promise<SeguimientoObra[]> {
+    return this.repo.findByContratoIds(contratoIds);
+  }
+
+  getFasesByServicioIds(servicioIds: number[]): Promise<FaseServicio[]> {
+    return this.repo.findFasesByServicioIds(servicioIds);
+  }
+
+  getActividadesByServicioIds(servicioIds: number[]): Promise<ActividadServicio[]> {
+    return this.repo.findActividadesByServicioIds(servicioIds);
+  }
+
+  getReportesBySeguimientoIds(seguimientoIds: string[]): Promise<ReporteDiario[]> {
+    return this.repo.findReportesBySeguimientoIds(seguimientoIds);
+  }
+
+  getActividadesAgregadasBySeguimientoIds(
+    seguimientoIds: string[],
+  ): Promise<{ seguimiento_id: string; actividad_id: string; dias: number }[]> {
+    return this.repo.findActividadesAgregadasBySeguimientoIds(seguimientoIds);
+  }
+
+  getZonasByReporteIds(reporteIds: string[]): Promise<ReporteZona[]> {
+    return this.repo.findZonasByReporteIds(reporteIds);
+  }
+
   getResumenByExpedienteIds(
     expedienteIds: string[],
   ): Promise<{ expediente_id: string; estado: string; porcentaje_avance: number; actualizado_en: string }[]> {

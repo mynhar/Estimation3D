@@ -1227,7 +1227,8 @@
     "ofe_aceptada": "Votre offre a été acceptée ! Consultez Mes Offres pour voir les détails.",
     "ofe_rechazada": "Votre offre n'a pas été retenue. Le client a choisi une autre proposition.",
     "ofe_pendiente": "Votre offre est revenue au statut en attente.",
-    "contrato_en_ejecucion": "Les travaux ont commencé ! Suivez l'avancement de votre chantier."
+    "contrato_en_ejecucion": "Les travaux ont commencé ! Suivez l'avancement de votre chantier.",
+    "obra_arranca": "Les travaux de votre chantier {{numero}} ont commencé ! Suivez l'avancement."
   },
   "admin_service_types": {
     "title": "Types de service",
@@ -1432,6 +1433,7 @@
     "inicio_real_lbl": "Début réel",
     "tipo_visitante_inspector": "Inspecteur",
     "tipo_visitante_dueno": "Propriétaire",
+    "tipo_visitante_estimador": "Estimateur",
     "agendar_visita": "Planifier une visite",
     "eventos_title": "Journal de chantier",
     "eventos_none": "Aucun rapport enregistré",

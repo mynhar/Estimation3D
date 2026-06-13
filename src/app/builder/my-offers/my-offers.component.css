@@ -78,7 +78,7 @@
 .kpi-card--success { --kpi-color: var(--ds-success); }
 .kpi-card--gold    { --kpi-color: var(--ds-gold); }
 
-.kpi-card--pulse { animation: kpi-pulse 2.5s ease-in-out infinite; }
+.kpi-card--pulse { animation: kpi-pulse 2.5s var(--ds-ease-in-out) infinite; }
 .kpi-card--pulse:hover { animation: none; }
 @keyframes kpi-pulse {
   0%, 100% { box-shadow: var(--ds-shadow-xs); }
@@ -216,7 +216,7 @@
 .offer-card--rejected:hover { opacity: 1; }
 
 /* Pulso sutil en ofertas pendientes */
-.offer-card--pending { animation: offer-pulse 3s ease-in-out infinite; }
+.offer-card--pending { animation: offer-pulse 3s var(--ds-ease-in-out) infinite; }
 .offer-card--pending:hover { animation: none; }
 @keyframes offer-pulse {
   0%, 100% { box-shadow: var(--ds-shadow-xs); }

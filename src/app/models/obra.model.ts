@@ -1,10 +1,10 @@
-import { ReporteArchivoRow } from '../../../services/archivo.service';
-import { ReporteZona } from '../../../data/seguimiento.repository';
+import { ReporteArchivoRow } from '../services/archivo.service';
+import { ReporteZona } from '../data/seguimiento.repository';
 import {
   ActividadServicio,
   FaseServicio,
   ReporteDiario,
-} from '../../../models/seguimiento.model';
+} from './seguimiento.model';
 
 export interface FaseAvance {
   fase: FaseServicio;
@@ -18,7 +18,8 @@ export interface ActividadAvance {
   hecha:     boolean;
 }
 
-// Vista agregada de una obra (un contrato con seguimiento) para el cliente.
+// Vista agregada de una obra (un contrato con seguimiento). Solo lectura.
+// Compartida por las vistas de seguimiento de cliente y estimador.
 export interface ObraVM {
   contratoId:          string;
   seguimientoId:       string;

@@ -155,6 +155,33 @@
 }
 .estd-kpi:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
 
+/* Indicadores interactivos (navegación / scroll al hacer clic) */
+a.estd-kpi,
+button.estd-kpi {
+  width: 100%;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+a.estd-hstat {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+a.estd-hstat:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-sm); }
+a.estd-hstat:focus-visible,
+a.estd-kpi:focus-visible,
+button.estd-kpi:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring), var(--ds-shadow-md);
+}
+
 /* Indicator lateral izquierdo */
 .estd-kpi__indicator {
   position: absolute;

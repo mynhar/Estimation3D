@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   input,
   signal,
@@ -12,9 +13,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuthSupabaseService } from '../../../services/auth-supabase.service';
-import { SeguimientoService } from '../../../services/seguimiento.service';
-import { Inspeccion, InspeccionInput } from '../../../models/seguimiento.model';
+import { AuthSupabaseService } from '../../services/auth-supabase.service';
+import { SeguimientoService } from '../../services/seguimiento.service';
+import { Inspeccion, InspeccionInput } from '../../models/seguimiento.model';
 
 interface CalDia { num: number; tipo: 'vacio' | 'normal' | 'trabajado' | 'hoy' | 'inspeccion'; }
 
@@ -35,10 +36,15 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
   private translate          = inject(TranslateService);
 
   private user = toSignal(this.auth.user$);
+  private rol  = toSignal(this.auth.rol$);
   private lang = toSignal(
     this.translate.onLangChange.pipe(map(e => e.lang)),
     { initialValue: this.translate.currentLang },
   );
+
+  // El estimador puede agendar visitas como 'Estimador'; el botón solo se
+  // muestra para ese rol.
+  esEstimador = computed(() => this.rol() === 'estimador');
 
   // ── Datos ──────────────────────────────────────────────────────────────────
   proximas            = signal<Inspeccion[]>([]);
@@ -51,7 +57,8 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
   eliminandoId  = signal<string | null>(null);
 
   // ── Formulario de agenda ────────────────────────────────────────────────────
-  nuevaTipo   = signal<'inspector' | 'dueno'>('dueno');
+  nuevaTipo   = signal<'inspector' | 'dueno' | 'estimador'>('dueno');
+  private tipoTocado = false;
   nuevaFecha  = signal('');
   nuevaHora   = signal('10:00');
   nuevaMotivo = signal('');
@@ -98,6 +105,16 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
   });
 
   // ── Ciclo de vida ───────────────────────────────────────────────────────────
+
+  constructor() {
+    // Para el estimador, el visitante por defecto es 'Estimador' mientras no lo
+    // cambie manualmente. El rol llega de forma asíncrona, por eso vía effect.
+    effect(() => {
+      if (this.esEstimador() && !this.tipoTocado) {
+        this.nuevaTipo.set('estimador');
+      }
+    }, { allowSignalWrites: true });
+  }
 
   async ngOnInit(): Promise<void> {
     await this.recargar();
@@ -161,7 +178,10 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
     this.errorInsp.set(null);
   }
 
-  setTipo(tipo: 'inspector' | 'dueno') { this.nuevaTipo.set(tipo); }
+  setTipo(tipo: 'inspector' | 'dueno' | 'estimador') {
+    this.tipoTocado = true;
+    this.nuevaTipo.set(tipo);
+  }
   setFecha(e: Event)  { this.nuevaFecha.set((e.target as HTMLInputElement).value); }
   setHora(e: Event)   { this.nuevaHora.set((e.target as HTMLInputElement).value); }
   setMotivo(e: Event) { this.nuevaMotivo.set((e.target as HTMLInputElement).value); }
@@ -190,7 +210,8 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
       this.nuevaFecha.set('');
       this.nuevaHora.set('10:00');
       this.nuevaMotivo.set('');
-      this.nuevaTipo.set('dueno');
+      this.tipoTocado = false;
+      this.nuevaTipo.set(this.esEstimador() ? 'estimador' : 'dueno');
       this.agendaVisible.set(false);
 
       await this.recargar();

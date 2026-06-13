@@ -297,4 +297,11 @@ export class EstimatorDashboardComponent implements OnInit {
 
   irAEstimar(id: string) { this.router.navigate(['/estimator/file-under-estimation', id]); }
   irAVer(id: string)     { this.router.navigate(['/estimator/estimated-file', id]); }
+
+  // La KPI "obras en curso" lleva a la sección de Seguimiento de obra de este
+  // mismo dashboard (el estimador no tiene una ruta de seguimiento propia).
+  scrollAObras(): void {
+    document.getElementById('estd-obra-section')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }

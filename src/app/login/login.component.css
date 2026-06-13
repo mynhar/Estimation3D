@@ -1,7 +1,7 @@
 /* ── Variables del panel oscuro (coherentes con el sidebar) ─────────────── */
 .lg-root {
-  --lg-side-bg:      #2A2420;
-  --lg-side-deep:    #221E1A;
+  --lg-side-bg:      var(--ds-dark-surface);
+  --lg-side-deep:    var(--ds-dark-surface-deep);
   --lg-text:         rgba(251, 250, 246, 0.50);
   --lg-text-hover:   rgba(251, 250, 246, 0.90);
   --lg-text-active:  rgba(251, 250, 246, 0.97);

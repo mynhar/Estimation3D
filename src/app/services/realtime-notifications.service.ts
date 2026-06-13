@@ -125,7 +125,7 @@ export class RealtimeNotificationsService implements OnDestroy {
     this.toast.show(msg, 'info', 9000);
   }
 
-  private onContratoUpdate(payload: RealtimePostgresChangesPayload<CtrRow>): void {
+  private async onContratoUpdate(payload: RealtimePostgresChangesPayload<CtrRow>): Promise<void> {
     const nuevo = payload.new as CtrRow;
     const viejo = payload.old as Partial<CtrRow>;
 
@@ -137,7 +137,21 @@ export class RealtimeNotificationsService implements OnDestroy {
     // Por ahora solo interesa el arranque de la obra (firmado → en_ejecucion).
     if (nuevo.estado !== 'en_ejecucion') return;
 
-    this.toast.show(this.translate.instant('realtime.contrato_en_ejecucion'), 'success', 9000);
+    // Nombrar la obra (nº de expediente) para que el cliente sepa cuál arrancó.
+    let numero = '';
+    if (nuevo.expediente_id) {
+      const { data } = await this.auth.client
+        .from('expediente')
+        .select('numero')
+        .eq('id', nuevo.expediente_id)
+        .single();
+      numero = data?.numero ?? '';
+    }
+
+    const msg = numero
+      ? this.translate.instant('realtime.obra_arranca', { numero })
+      : this.translate.instant('realtime.contrato_en_ejecucion');
+    this.toast.show(msg, 'success', 9000);
   }
 
   private onOfertaUpdate(payload: RealtimePostgresChangesPayload<OfeRow>): void {

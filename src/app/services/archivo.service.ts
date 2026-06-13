@@ -101,6 +101,28 @@ export class ArchivoService {
     };
   }
 
+  // Carga la media de varios partes a la vez y la agrupa por reporte_id.
+  // Cada reporte solicitado tiene su entrada (aunque esté vacía).
+  async cargarPorReportes(reporteIds: string[]): Promise<Map<string, {
+    fotos:      ReporteArchivoRow[];
+    videos:     ReporteArchivoRow[];
+    documentos: ReporteArchivoRow[];
+  }>> {
+    const map = new Map<string, { fotos: ReporteArchivoRow[]; videos: ReporteArchivoRow[]; documentos: ReporteArchivoRow[] }>();
+    for (const id of reporteIds) map.set(id, { fotos: [], videos: [], documentos: [] });
+    if (!reporteIds.length) return map;
+
+    const rows = await this.archivoRepo.findByReporteIds(reporteIds) as unknown as (ReporteArchivoRow & { reporte_id: string })[];
+    for (const r of rows) {
+      const bucket = map.get(r.reporte_id);
+      if (!bucket) continue;
+      if (r.tipo === 'reporte_foto')          bucket.fotos.push(r);
+      else if (r.tipo === 'reporte_video')    bucket.videos.push(r);
+      else if (r.tipo === 'reporte_documento') bucket.documentos.push(r);
+    }
+    return map;
+  }
+
   async subirParaReporte(
     seguimientoId: string,
     reporteId:     string,

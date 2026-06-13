@@ -691,7 +691,7 @@
 }
 .photo-thumb--client:hover .thumb-delete,
 .photo-thumb--client:focus-within .thumb-delete { opacity: 1; }
-.thumb-delete:hover { color: var(--ds-danger, #c0392b); }
+.thumb-delete:hover { color: var(--ds-danger); }
 .thumb-delete:focus-visible {
   opacity: 1;
   outline: 2px solid var(--ds-gold);
@@ -715,8 +715,8 @@
               background   var(--ds-duration-fast) var(--ds-ease-out);
 }
 .btn-file-delete:hover {
-  border-color: var(--ds-danger, #c0392b);
-  color: var(--ds-danger, #c0392b);
+  border-color: var(--ds-danger);
+  color: var(--ds-danger);
   background: rgba(192,57,43,.06);
 }
 .btn-file-delete:focus-visible {

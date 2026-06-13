@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -122,6 +123,11 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   readonly LANGS: LangPdf[] = ['es', 'en', 'fr'];
   private rawBlobUrl: string | null = null;
 
+  // ── Realtime ──────────────────────────────────────────────────────────────
+  private contratoId = '';
+  private channels: RealtimeChannel[] = [];
+  private inspTimer: ReturnType<typeof setTimeout> | null = null;
+
   readonly PASOS = [
     { key: 'firmado',      icon: 'bi-pen'           },
     { key: 'en_ejecucion', icon: 'bi-tools'         },
@@ -217,10 +223,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.contratoId = id;
     try {
       const contrato = await this.contratoService.getContratoMonitoringById(id, userId);
       this.contrato.set(contrato);
       await this.cargarDatosSeguimiento(id, contrato, userId);
+      this.suscribirRealtime();
     } catch (e: any) {
       this.error.set(e.message);
     } finally {
@@ -228,7 +236,80 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() { this.revokeBlobUrl(); }
+  ngOnDestroy() {
+    this.revokeBlobUrl();
+    if (this.inspTimer) clearTimeout(this.inspTimer);
+    for (const ch of this.channels) this.auth.client.removeChannel(ch);
+    this.channels = [];
+  }
+
+  // ── Realtime ──────────────────────────────────────────────────────────────
+  // El constructor es el origen de los partes (refleja sus propias acciones
+  // localmente), pero debe ver en vivo lo que cambian otros: el estado del
+  // contrato (p. ej. admin marca completado/cancelado) y las inspecciones que
+  // agenda el cliente o el estimador. Los refrescos son puntuales para NO pisar
+  // el formulario del día en edición.
+  private suscribirRealtime(): void {
+    this.channels.push(
+      this.auth.client
+        .channel(`bld-cm-ctr-${this.contratoId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'contrato', filter: `id=eq.${this.contratoId}` },
+          () => void this.refrescarEstadoExterno(),
+        )
+        .subscribe(),
+    );
+
+    const segId = this.seguimiento()?.id;
+    if (segId) {
+      this.channels.push(
+        this.auth.client
+          .channel(`bld-cm-insp-${segId}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'inspeccion', filter: `seguimiento_id=eq.${segId}` },
+            () => this.programarRefrescoInspecciones(),
+          )
+          .subscribe(),
+      );
+    }
+  }
+
+  // Re-lee estado del contrato y avance global sin tocar el formulario.
+  private async refrescarEstadoExterno(): Promise<void> {
+    const userId = this.user()?.id;
+    if (!userId || !this.contratoId) return;
+    try {
+      const [contrato, seg] = await Promise.all([
+        this.contratoService.getContratoMonitoringById(this.contratoId, userId),
+        this.seguimientoService.getSeguimientoByContratoId(this.contratoId),
+      ]);
+      this.contrato.set(contrato);
+      if (seg) this.seguimiento.set(seg);
+    } catch { /* silencioso: refresco en segundo plano */ }
+  }
+
+  // Agrupa ráfagas y refresca solo la lista/calendario de inspecciones.
+  private programarRefrescoInspecciones(): void {
+    if (this.inspTimer) clearTimeout(this.inspTimer);
+    this.inspTimer = setTimeout(() => {
+      this.inspTimer = null;
+      void this.refrescarInspecciones();
+    }, 500);
+  }
+
+  private async refrescarInspecciones(): Promise<void> {
+    const seg = this.seguimiento();
+    if (!seg) return;
+    const hoy = new Date();
+    const [proximas, mes] = await Promise.all([
+      this.seguimientoService.getProximasInspecciones(seg.id, 3),
+      this.seguimientoService.getInspeccionesMes(seg.id, hoy.getFullYear(), hoy.getMonth() + 1),
+    ]);
+    this.inspecciones.set(proximas);
+    this.fechasInspeccionMes.set(new Set(mes.map(i => i.fecha)));
+  }
   private revokeBlobUrl() {
     if (this.rawBlobUrl) { URL.revokeObjectURL(this.rawBlobUrl); this.rawBlobUrl = null; }
   }
