@@ -4,6 +4,7 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -106,7 +107,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   // ── Agenda inline form ────────────────────────────────────────────────────
   eliminandoInspId = signal<string | null>(null);
   agendaVisible    = signal(false);
-  nuevaInspTipo    = signal<'inspector' | 'dueno'>('inspector');
+  nuevaInspTipo    = signal<'inspector' | 'dueno' | 'estimador'>('inspector');
   nuevaInspFecha   = signal('');
   nuevaInspHora    = signal('10:00');
   nuevaInspMotivo  = signal('');
@@ -127,6 +128,20 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   private contratoId = '';
   private channels: RealtimeChannel[] = [];
   private inspTimer: ReturnType<typeof setTimeout> | null = null;
+  private ctxTimer: ReturnType<typeof setTimeout> | null = null;
+  // Canal de media acotado al parte actualmente cargado (reporteHoy).
+  private archivoChannel: RealtimeChannel | null = null;
+  private archivoReporteId: string | null = null;
+
+  // Modo administrador: este mismo editor sirve a la ruta admin
+  // (/admin/construction-monitoring/monitoring/:id). El admin no está acotado a
+  // sus propios contratos y opera sobre el constructor real de la obra.
+  esAdmin = false;
+  private listaRuta(): string {
+    return this.esAdmin
+      ? '/admin/construction-monitoring/list'
+      : '/builder/construction-monitoring/list';
+  }
 
   readonly PASOS = [
     { key: 'firmado',      icon: 'bi-pen'           },
@@ -215,17 +230,26 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
 
+  constructor() {
+    // Re-suscribe el canal de media al parte actualmente cargado, para reflejar
+    // en vivo las fotos/vídeos/documentos que añade el otro editor (admin↔constructor).
+    effect(() => this.sincronizarCanalArchivo(this.reporteHoy()?.id ?? null));
+  }
+
   async ngOnInit() {
+    this.esAdmin = this.router.url.includes('/admin/');
     const id     = this.route.snapshot.paramMap.get('id');
     const userId = this.user()?.id;
     if (!id || !userId) {
-      this.router.navigate(['/builder/construction-monitoring/list']);
+      this.router.navigate([this.listaRuta()]);
       return;
     }
 
     this.contratoId = id;
     try {
-      const contrato = await this.contratoService.getContratoMonitoringById(id, userId);
+      const contrato = this.esAdmin
+        ? await this.contratoService.getContratoAdminById(id)
+        : await this.contratoService.getContratoMonitoringById(id, userId);
       this.contrato.set(contrato);
       await this.cargarDatosSeguimiento(id, contrato, userId);
       this.suscribirRealtime();
@@ -239,8 +263,13 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.revokeBlobUrl();
     if (this.inspTimer) clearTimeout(this.inspTimer);
+    if (this.ctxTimer) clearTimeout(this.ctxTimer);
     for (const ch of this.channels) this.auth.client.removeChannel(ch);
     this.channels = [];
+    if (this.archivoChannel) {
+      this.auth.client.removeChannel(this.archivoChannel);
+      this.archivoChannel = null;
+    }
   }
 
   // ── Realtime ──────────────────────────────────────────────────────────────
@@ -273,7 +302,71 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
           )
           .subscribe(),
       );
+
+      // Partes diarios de esta obra: el otro editor (admin↔constructor) puede
+      // registrar/editar/borrar. Refresca SOLO el contexto (KPIs, registro de
+      // eventos, calendario, avance global), nunca el formulario en edición.
+      this.channels.push(
+        this.auth.client
+          .channel(`bld-cm-rep-${segId}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'reporte_diario', filter: `seguimiento_id=eq.${segId}` },
+            () => this.programarRefrescoContexto(),
+          )
+          .subscribe(),
+      );
     }
+  }
+
+  private programarRefrescoContexto(): void {
+    if (this.ctxTimer) clearTimeout(this.ctxTimer);
+    this.ctxTimer = setTimeout(() => {
+      this.ctxTimer = null;
+      void this.refrescarContextoReportes();
+    }, 500);
+  }
+
+  // Refresca el contexto de reportes sin tocar el formulario del día.
+  private async refrescarContextoReportes(): Promise<void> {
+    const c   = this.contrato();
+    const seg = this.seguimiento();
+    if (!c || !seg) return;
+    const hoy = new Date();
+    const [newSeg, stats, fechasMes, recientes] = await Promise.all([
+      this.seguimientoService.getSeguimientoByContratoId(c.id),
+      this.seguimientoService.getStatsReportes(seg.id),
+      this.seguimientoService.getFechasTrabajadasMes(seg.id, hoy.getFullYear(), hoy.getMonth() + 1),
+      this.seguimientoService.getReportesRecientes(seg.id, 8),
+    ]);
+    if (newSeg) this.seguimiento.set(newSeg);
+    this.statsReportes.set(stats);
+    this.fechasTrabajadasMes.set(new Set(fechasMes));
+    this.reportesRecientes.set(recientes);
+  }
+
+  // Canal de media acotado al parte cargado; recarga su media al cambiar.
+  private sincronizarCanalArchivo(reporteId: string | null): void {
+    if (reporteId === this.archivoReporteId) return;
+    this.archivoReporteId = reporteId;
+    if (this.archivoChannel) {
+      this.auth.client.removeChannel(this.archivoChannel);
+      this.archivoChannel = null;
+    }
+    if (!reporteId) return;
+    this.archivoChannel = this.auth.client
+      .channel(`bld-cm-arch-${reporteId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'archivo', filter: `reporte_id=eq.${reporteId}` },
+        () => void this.recargarMediaActual(reporteId),
+      )
+      .subscribe();
+  }
+
+  private async recargarMediaActual(reporteId: string): Promise<void> {
+    if (this.reporteHoy()?.id !== reporteId) return;
+    await this.cargarMedia(reporteId);
   }
 
   // Re-lee estado del contrato y avance global sin tocar el formulario.
@@ -282,7 +375,9 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     if (!userId || !this.contratoId) return;
     try {
       const [contrato, seg] = await Promise.all([
-        this.contratoService.getContratoMonitoringById(this.contratoId, userId),
+        this.esAdmin
+          ? this.contratoService.getContratoAdminById(this.contratoId)
+          : this.contratoService.getContratoMonitoringById(this.contratoId, userId),
         this.seguimientoService.getSeguimientoByContratoId(this.contratoId),
       ]);
       this.contrato.set(contrato);
@@ -321,10 +416,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   ) {
     let seg = await this.seguimientoService.getSeguimientoByContratoId(contratoId);
 
-    // Backfill if trigger didn't fire (contracts created before migration)
+    // Backfill if trigger didn't fire (contracts created before migration).
+    // El seguimiento siempre referencia al constructor real de la obra (no al
+    // admin que pudiera estar registrando en su nombre).
     if (!seg && (contrato.estado === 'firmado' || contrato.estado === 'en_ejecucion')) {
       seg = await this.seguimientoService.ensureSeguimiento(
-        contratoId, contrato.expediente_id, userId,
+        contratoId, contrato.expediente_id, this.esAdmin ? contrato.constructor_id : userId,
       );
     }
 
@@ -387,7 +484,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   }
 
   // ── Navegación ────────────────────────────────────────────────────────────
-  volver() { this.router.navigate(['/builder/construction-monitoring/list']); }
+  volver() { this.router.navigate([this.listaRuta()]); }
 
   // ── Formulario ────────────────────────────────────────────────────────────
   async setFechaReporte(e: Event) {
@@ -466,7 +563,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
 
       const reporte = await this.seguimientoService.upsertReporte({
         seguimiento_id:        seg.id,
-        constructor_id:        userId,
+        constructor_id:        seg.constructor_id,
         fecha:                 hoy,
         hora_inicio:           this.horaInicio(),
         horas_trabajadas:      this.horasTrabajadas(),
@@ -487,7 +584,8 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
       // El RPC es idempotente: si ya está en ejecución no hace nada.
       const contratoActual = this.contrato();
       if (contratoActual?.estado === 'firmado') {
-        await this.contratoService.iniciarEjecucionContrato(contratoActual.id);
+        if (this.esAdmin) await this.contratoService.iniciarEjecucionContratoAdmin(contratoActual.id);
+        else              await this.contratoService.iniciarEjecucionContrato(contratoActual.id);
         this.contrato.set({ ...contratoActual, estado: 'en_ejecucion' });
       }
 
@@ -643,7 +741,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     this.errorInsp.set(null);
   }
 
-  setNuevaInspTipo(tipo: 'inspector' | 'dueno') { this.nuevaInspTipo.set(tipo); }
+  setNuevaInspTipo(tipo: 'inspector' | 'dueno' | 'estimador') { this.nuevaInspTipo.set(tipo); }
   setNuevaInspFecha(e: Event) { this.nuevaInspFecha.set((e.target as HTMLInputElement).value); }
   setNuevaInspHora(e: Event)  { this.nuevaInspHora.set((e.target as HTMLInputElement).value); }
   setNuevaInspMotivo(e: Event){ this.nuevaInspMotivo.set((e.target as HTMLInputElement).value); }

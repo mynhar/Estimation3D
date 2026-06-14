@@ -1457,6 +1457,7 @@
     "col_number": "N°",
     "col_client": "Client",
     "col_service": "Service",
+    "col_constructor": "Constructeur",
     "col_location": "Localisation",
     "col_signed": "Signé le",
     "col_start": "Début",

@@ -1,0 +1,200 @@
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ──────────────────────────────────────────────────────────── -->
+  <header class="page-header p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <p class="page-eyebrow">
+          <i class="bi bi-shield-lock"></i>{{ 'role.administrateur' | translate }}
+        </p>
+        <h4 class="mb-1">{{ 'construction_monitoring.title' | translate }}</h4>
+        <p class="text-muted small mb-0">{{ 'construction_monitoring.subtitle' | translate }}</p>
+      </div>
+      @if (!cargando() && !error()) {
+        <span class="kpi-pill">
+          <i class="bi bi-clipboard-check"></i>
+          {{ total }} {{ 'construction_monitoring.count' | translate }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <!-- ── Skeleton ────────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-wrap">
+      <div class="skeleton-chips mb-3">
+        @for (i of [1,2,3,4,5]; track i) { <div class="skel skel--chip"></div> }
+      </div>
+      <div class="skeleton-table">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton-row">
+            <div class="skel skel--xs"></div>
+            <div class="skel skel--lg"></div>
+            <div class="skel skel--md"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--sm"></div>
+            <div class="skel skel--md"></div>
+          </div>
+        }
+      </div>
+    </div>
+
+  <!-- ── Error ────────────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="empty-state">
+      <div class="empty-state__icon empty-state__icon--danger">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <p class="empty-state__title">{{ 'common.error' | translate }}</p>
+      <p class="empty-state__desc">{{ error() }}</p>
+    </div>
+
+  <!-- ── Contenido ────────────────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- ── Chips de estado ──────────────────────────────────────────────────── -->
+    <div class="status-chips-bar mb-3">
+      <div class="status-chips" role="group">
+        @for (estado of estados; track estado) {
+          <button type="button"
+                  class="status-chip"
+                  [class.status-chip--active]="filtroEstado() === estado"
+                  (click)="filtroEstado.set(estado)">
+            @if (estado !== 'todos') {
+              <i class="bi {{ iconoEstado(estado) }} status-chip__icon"></i>
+            }
+            <span class="status-chip__label">
+              {{ estado === 'todos'
+                  ? ('common.all' | translate)
+                  : (('construction_monitoring.estado_' + estado) | translate) }}
+            </span>
+            <span class="status-chip__count">
+              {{ estado === 'todos' ? total : (estadoCounts()[estado] || 0) }}
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="table table-monitoring align-middle mb-0">
+          <thead>
+            <tr>
+              <th class="col-num">{{ 'construction_monitoring.col_number' | translate }}</th>
+              <th class="col-identity">{{ 'construction_monitoring.col_client' | translate }} / {{ 'construction_monitoring.col_service' | translate }}</th>
+              <th class="col-constructor">{{ 'construction_monitoring.col_constructor' | translate }}</th>
+              <th class="col-location">{{ 'construction_monitoring.col_location' | translate }}</th>
+              <th class="col-date">{{ 'construction_monitoring.col_signed' | translate }}</th>
+              <th class="col-date">{{ 'construction_monitoring.col_start' | translate }}</th>
+              <th class="col-plazo">{{ 'construction_monitoring.col_deadline' | translate }}</th>
+              <th class="col-precio">{{ 'construction_monitoring.col_price' | translate }}</th>
+              <th>{{ 'construction_monitoring.col_status' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            @for (c of contratosPaginados(); track c.id) {
+              <tr class="table-row table-row--clickable" (click)="irAMonitoreo(c.id)">
+
+                <!-- Número expediente -->
+                <td class="col-num">
+                  <span class="exp-num">{{ c.expediente_numero }}</span>
+                </td>
+
+                <!-- Cliente / Servicio -->
+                <td class="col-identity">
+                  <span class="cell-primary">{{ c.cliente_nombre }}</span>
+                  <span class="cell-secondary">{{ servicioNombre(c) }}</span>
+                </td>
+
+                <!-- Constructor: nombre, correo, teléfono -->
+                <td class="col-constructor">
+                  <span class="cell-primary">{{ c.constructor_nombre }}</span>
+                  <span class="cell-secondary"><i class="bi bi-envelope"></i>{{ c.constructor_email }}</span>
+                  <span class="cell-secondary"><i class="bi bi-telephone"></i>{{ c.constructor_telefono }}</span>
+                </td>
+
+                <!-- Localización -->
+                <td class="col-location">
+                  <span class="cell-primary">{{ c.canton }}</span>
+                  <span class="cell-secondary">{{ c.provincia }}</span>
+                </td>
+
+                <!-- Firmado en -->
+                <td class="col-date">
+                  <span class="cell-primary">{{ formatFecha(c.firmado_en) }}</span>
+                </td>
+
+                <!-- Fecha inicio -->
+                <td class="col-date">
+                  <span class="cell-primary">{{ formatFecha(c.fecha_inicio) }}</span>
+                </td>
+
+                <!-- Plazo -->
+                <td class="col-plazo">
+                  <span class="cell-muted">{{ plazoLabel(c) }}</span>
+                </td>
+
+                <!-- Precio -->
+                <td class="col-precio">
+                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                </td>
+
+                <!-- Estado -->
+                <td>
+                  <span class="estado-badge {{ badgeContrato(c.estado) }}">
+                    <i class="bi {{ iconoEstado(c.estado) }}"></i>
+                    {{ ('construction_monitoring.estado_' + c.estado) | translate }}
+                  </span>
+                </td>
+
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="9">
+                  <div class="empty-state empty-state--table">
+                    @if (filtroEstado() !== 'todos') {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-funnel"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'construction_monitoring.no_results' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'construction_monitoring.no_results_hint' | translate }}</p>
+                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="filtroEstado.set('todos')">
+                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+                      </button>
+                    } @else {
+                      <div class="empty-state__icon">
+                        <i class="bi bi-clipboard"></i>
+                      </div>
+                      <p class="empty-state__title">{{ 'construction_monitoring.no_data' | translate }}</p>
+                      <p class="empty-state__desc">{{ 'construction_monitoring.no_data_hint' | translate }}</p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Paginación ──────────────────────────────────────────────────────── -->
+      @if (contratosFiltrados().length > POR_PAGINA) {
+        <div class="table-footer">
+          <app-pagination
+            [total]="contratosFiltrados().length"
+            [page]="paginaActual()"
+            [pageSize]="POR_PAGINA"
+            (pageChange)="paginaActual.set($event)">
+          </app-pagination>
+        </div>
+      }
+
+    </div>
+
+  }
+
+</div>

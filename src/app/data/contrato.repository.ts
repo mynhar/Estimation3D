@@ -81,7 +81,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor_id,
         expediente:expediente_id (
           id, numero, estado, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -155,6 +155,28 @@ export class ContratoRepository {
         oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
       `)
       .eq('expediente.estimador_id', estimadorId)
+      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
+      .order('actualizado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  // Seguimiento de obra (admin): todos los contratos con obra (firmado en
+  // adelante), ordenados por actualizado_en desc.
+  async findAllForMonitoring(): Promise<any[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        expediente:expediente_id (
+          numero,
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
+          localizacion ( direccion, provincia, canton )
+        ),
+        cliente:cliente_id ( nombre, apellido ),
+        constructor:constructor_id ( nombre, apellido, telefono, email ),
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+      `)
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
       .order('actualizado_en', { ascending: false });
     if (error) throw new Error(error.message);

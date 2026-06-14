@@ -168,6 +168,7 @@ export class ContratoService {
       cliente_nombre:       cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
       cliente_telefono:     cli?.telefono          ?? '—',
       cliente_email:        cli?.email             ?? '—',
+      constructor_id:       c.constructor_id        ?? '',
       constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
       constructor_telefono: con?.telefono          ?? '—',
       constructor_email:    con?.email             ?? '—',
@@ -217,6 +218,7 @@ export class ContratoService {
       cliente_nombre:       cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
       cliente_telefono:     cli?.telefono          ?? '—',
       cliente_email:        cli?.email             ?? '—',
+      constructor_id:       constructorId,
       constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
       constructor_telefono: con?.telefono          ?? '—',
       constructor_email:    con?.email             ?? '—',
@@ -244,6 +246,13 @@ export class ContratoService {
     return rows.map((c: any) => this.mapContratoListItem(c));
   }
 
+  // ── Administrador: todos los contratos con seguimiento de obra ────────────
+
+  async getContratosMonitoringAdmin(): Promise<ContratoConstructorListItem[]> {
+    const rows = await this.contratoRepo.findAllForMonitoring();
+    return rows.map((c: any) => this.mapContratoListItem(c));
+  }
+
   // Mapea una fila de contrato (con joins expediente/servicio/loc/cliente/oferta)
   // al item de lista de seguimiento. Compartido por constructor y estimador.
   private mapContratoListItem(c: any): ContratoConstructorListItem {
@@ -251,6 +260,7 @@ export class ContratoService {
     const locArr = c.expediente?.localizacion;
     const loc    = Array.isArray(locArr) ? locArr[0] : locArr;
     const cli    = c.cliente;
+    const con    = c.constructor;
     const ofe    = Array.isArray(c.oferta) ? c.oferta[0] : c.oferta;
     return {
       id:                 c.id,
@@ -260,6 +270,9 @@ export class ContratoService {
       servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
       servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
       cliente_nombre:     cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
+      constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
+      constructor_telefono: con?.telefono ?? '—',
+      constructor_email:    con?.email    ?? '—',
       precio_final:       c.precio_final,
       garantia_anos:      c.garantia_anos       ?? null,
       estado:             c.estado,

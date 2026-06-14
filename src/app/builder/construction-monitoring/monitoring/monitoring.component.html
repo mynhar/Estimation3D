@@ -556,6 +556,14 @@
                       <i class="bi bi-person-badge"></i>
                       {{ 'monitoring.tipo_visitante_inspector' | translate }}
                     </button>
+                    @if (esAdmin) {
+                      <button class="mon-tipo-btn"
+                              [class.is-active]="nuevaInspTipo() === 'estimador'"
+                              (click)="setNuevaInspTipo('estimador')">
+                        <i class="bi bi-clipboard-check"></i>
+                        {{ 'monitoring.tipo_visitante_estimador' | translate }}
+                      </button>
+                    }
                     <button class="mon-tipo-btn"
                             [class.is-active]="nuevaInspTipo() === 'dueno'"
                             (click)="setNuevaInspTipo('dueno')">

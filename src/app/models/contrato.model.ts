@@ -67,6 +67,7 @@ export interface ContratoAdminDetalle {
   cliente_nombre:       string;
   cliente_telefono:     string;
   cliente_email:        string;
+  constructor_id:       string;
   constructor_nombre:   string;
   constructor_telefono: string;
   constructor_email:    string;
@@ -107,6 +108,9 @@ export interface ContratoConstructorListItem {
   servicio_nombre_en: string;
   servicio_nombre_fr: string;
   cliente_nombre:     string;
+  constructor_nombre:   string;
+  constructor_telefono: string;
+  constructor_email:    string;
   precio_final:       number;
   garantia_anos:      number | null;
   estado:             string;

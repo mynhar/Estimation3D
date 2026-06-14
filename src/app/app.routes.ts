@@ -214,6 +214,18 @@ export const routes: Routes = [
     canActivate: [adminGuard],
   },
   {
+    path: 'admin/construction-monitoring/list',
+    loadComponent: () => import('./admin/construction-monitoring/list/list.component').then(m => m.AdminConstructionMonitoringListComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    // Reutiliza el editor del constructor; el componente detecta el modo admin
+    // por la URL y opera sobre el constructor real de la obra.
+    path: 'admin/construction-monitoring/monitoring/:id',
+    loadComponent: () => import('./builder/construction-monitoring/monitoring/monitoring.component').then(m => m.ConstructionMonitoringComponent),
+    canActivate: [adminGuard],
+  },
+  {
     path: 'admin/service-type',
     loadComponent: () => import('./admin/service-types/list/list.component').then(m => m.AdminServiceTypeListComponent),
     canActivate: [adminGuard],
