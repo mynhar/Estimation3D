@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph CLIENTE
+        A1["Crea expediente<br/>(servicio, visita, fotos, ubicacion)"]
+        A2["Revisa ofertas recibidas"]
+        A3["Acepta una oferta"]
+        A4["Firma el contrato"]
+    end
+
+    subgraph ESTIMADOR
+        B1["Toma expediente nuevo<br/>(se asigna estimador)"]
+        B2["Realiza estimacion<br/>(rango de costo + URL tour 3D)"]
+    end
+
+    subgraph CONSTRUCTOR
+        C1["Ve expedientes disponibles<br/>(estimado / en_oferta)"]
+        C2["Envia oferta<br/>(precio, plazo)"]
+        C3["Ejecuta la obra y<br/>sube reportes / % avance"]
+    end
+
+    subgraph ADMINISTRADOR
+        D1["Inicia ejecucion del contrato"]
+        D2["Marca contrato completado"]
+    end
+
+    A1 -->|expediente: nuevo| B1
+    B1 -->|expediente: en_estimacion| B2
+    B2 -->|expediente: estimado| C1
+    C1 --> C2
+    C2 -->|1a oferta to expediente: en_oferta<br/>oferta: pendiente| A2
+    A2 --> A3
+    A3 -->|RPC aceptar_oferta_contrato| ADJ
+    ADJ["expediente: adjudicado<br/>oferta elegida: aceptada · resto: rechazada<br/>+ contrato: generado"] --> A4
+    A4 -->|RPC firmar_contrato| FIRM
+    FIRM["contrato: firmado<br/>expediente: contratado"] --> D1
+    D1 -->|RPC iniciar_ejecucion| EJEC
+    EJEC["contrato: en_ejecucion<br/>seguimiento: en_progreso"] --> C3
+    C3 --> D2
+    D2 -->|RPC completar_contrato| FIN
+    FIN["contrato: completado<br/>seguimiento: completado (100%)"]
+
+    classDef estado fill:#FBFAF6,stroke:#D4B96E,color:#1A1A1A;
+    class ADJ,FIRM,EJEC,FIN estado;

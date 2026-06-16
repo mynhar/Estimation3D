@@ -1,0 +1,15 @@
+stateDiagram-v2
+    [*] --> nuevo: Cliente crea expediente
+    nuevo --> en_estimacion: Estimador lo toma (asignarEstimador)
+    en_estimacion --> nuevo: Estimador libera (liberar)
+    en_estimacion --> estimado: Estimador publica estimacion
+    estimado --> en_oferta: 1a oferta del constructor
+    en_oferta --> adjudicado: Cliente/Admin acepta oferta
+    adjudicado --> contratado: Cliente firma contrato
+    contratado --> [*]: Obra en marcha
+
+    nuevo --> cancelado
+    en_estimacion --> cancelado
+    estimado --> cancelado
+    en_oferta --> cancelado
+    cancelado --> [*]

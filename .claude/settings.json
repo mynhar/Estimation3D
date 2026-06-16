@@ -178,11 +178,23 @@
       "Bash(find src/environments -type f)",
       "Bash(grep -i \"environment\" .gitignore)",
       "mcp__claude_ai_Supabase__get_logs",
-      "Bash(grep -vE \"^\\\\s*//\")"
+      "Bash(grep -vE \"^\\\\s*//\")",
+      "Bash(xargs grep -l \"OLD.rol\\\\|prevent\\\\|admin\\\\|trigger\")",
+      "Bash(cd \"c:/desarrollo/estimation3d-A18-v01\" && grep -n \"Enums:\" src/app/types/supabase.ts && echo \"---\" && sed -n '/Enums: {/,/}/p' src/app/types/supabase.ts | head -40)",
+      "Bash(ls node_modules/.bin/mmdc*)",
+      "Bash(ls ~/.cache/puppeteer)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft/Edge/Application/**)",
+      "Read(//c/Program Files/Google/Chrome/Application/**)",
+      "Read(//c/Program Files \\(x86\\)/Google/Chrome/Application/**)",
+      "Bash(export PUPPETEER_SKIP_DOWNLOAD=true)",
+      "Bash(npm init *)",
+      "Bash(/c/tmp/node_modules/.bin/mmdc -i \"01-flujo-extremo-a-extremo.mmd\" -o \"test.svg\" -p \"/c/tmp/puppeteer.json\" -b \"#F5F3EE\")",
+      "Bash(grep -nE \"^      [a-z_]+: \\\\{$\" src/app/types/supabase.ts)"
     ],
     "additionalDirectories": [
       "\\tmp",
-      "c:\\desarrollo\\estimation3d-A18-v01"
+      "c:\\desarrollo\\estimation3d-A18-v01",
+      "c:\\desarrollo\\estimation3d-A18-v01\\src\\app\\types"
     ]
   }
 }

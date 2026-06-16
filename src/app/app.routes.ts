@@ -63,6 +63,16 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'client/my-documents/list',
+    loadComponent: () => import('./client/my-documents/list/list.component').then(m => m.MyDocumentsListComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'client/history',
+    loadComponent: () => import('./client/history/history.component').then(m => m.HistoryComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'client/perfil',
     loadComponent: () => import('./client/perfil/perfil.component').then(m => m.PerfilComponent),
     canActivate: [authGuard],

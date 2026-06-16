@@ -1,0 +1,132 @@
+<div class="hs-page">
+
+  <!-- Encabezado -->
+  <header class="hs-pagehead">
+    <span class="hs-eyebrow">{{ 'history.eyebrow' | translate }}</span>
+    <h1 class="hs-pagetitle">{{ 'history.title' | translate }}</h1>
+    <p class="hs-pagesub">{{ 'history.subtitle' | translate }}</p>
+  </header>
+
+  @if (cargando()) {
+    <div class="hs-loading"><span class="hs-spinner" aria-hidden="true"></span></div>
+  }
+
+  @else if (error()) {
+    <div class="hs-alert hs-alert--error" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  @else if (expedientes().length === 0) {
+    <div class="hs-empty">
+      <i class="bi bi-clock-history" aria-hidden="true"></i>
+      <p class="hs-empty__title">{{ 'history.empty_title' | translate }}</p>
+      <p class="hs-empty__hint">{{ 'history.empty_hint' | translate }}</p>
+    </div>
+  }
+
+  @else {
+    <div class="hs-accordion">
+      @for (exp of expedientes(); track exp.expedienteId) {
+        <section class="hs-exp">
+
+          <button class="hs-exp__head" type="button"
+                  [attr.aria-expanded]="isExpandido(exp.expedienteId)"
+                  (click)="toggle(exp.expedienteId)">
+            <span class="hs-exp__title">
+              <span class="hs-folder-tile" aria-hidden="true"><i class="bi bi-folder2"></i></span>
+              <span class="hs-exp__num">{{ 'history.dossier' | translate }} {{ exp.numero }}</span>
+            </span>
+            <span class="hs-exp__count" aria-hidden="true">
+              {{ exp.eventos.length }} {{ 'history.events' | translate }}
+            </span>
+            <i class="bi hs-exp__chev"
+               [class.bi-chevron-down]="!isExpandido(exp.expedienteId)"
+               [class.bi-chevron-up]="isExpandido(exp.expedienteId)" aria-hidden="true"></i>
+          </button>
+
+          @if (isExpandido(exp.expedienteId)) {
+            <div class="hs-exp__body">
+
+              <!-- Barra de fases / estado -->
+              @if (esCancelado(exp)) {
+                <div class="hs-cancel">
+                  <i class="bi bi-x-circle" aria-hidden="true"></i>
+                  {{ 'history.cancelled' | translate }}
+                </div>
+              } @else {
+                <ol class="hs-phases" [attr.aria-label]="'history.progress' | translate">
+                  @for (f of fases; track f; let i = $index) {
+                    <li class="hs-phase" [attr.data-state]="estadoFase(exp, i)"
+                        [attr.aria-current]="estadoFase(exp, i) === 'current' ? 'step' : null">
+                      <span class="hs-phase__dot" aria-hidden="true"></span>
+                      <span class="hs-phase__label">{{ ('history.phase_' + f) | translate }}</span>
+                    </li>
+                  }
+                </ol>
+              }
+
+              <!-- Control de colapso de partes -->
+              @if (hayMuchosPartes(exp)) {
+                <button class="hs-partes-toggle" type="button"
+                        [attr.aria-expanded]="!partesColapsados(exp)"
+                        (click)="togglePartes(exp.expedienteId)">
+                  <i class="bi" [class.bi-eye]="partesColapsados(exp)"
+                     [class.bi-eye-slash]="!partesColapsados(exp)" aria-hidden="true"></i>
+                  @if (partesColapsados(exp)) {
+                    {{ 'history.partes_show' | translate:{ n: contarPartes(exp) } }}
+                  } @else {
+                    {{ 'history.partes_hide' | translate }}
+                  }
+                </button>
+              }
+
+              <!-- Cronología agrupada por fecha -->
+              @if (exp.eventos.length === 0) {
+                <p class="hs-exp__empty">{{ 'history.no_events' | translate }}</p>
+              } @else {
+                @for (grupo of grupos(exp); track grupo.label) {
+                  <div class="hs-bucket">
+                    <div class="hs-bucket__label">{{ grupo.label }}</div>
+                    <ol class="hs-timeline">
+                      @for (ev of grupo.eventos; track ev.id) {
+                        <li class="hs-event" [attr.data-cat]="ev.categoria"
+                            [class.hs-event--rutina]="esParte(ev)">
+                          <span class="hs-event__tile" aria-hidden="true">
+                            <i class="bi {{ ev.icono }}"></i>
+                          </span>
+                          <div class="hs-event__body">
+                            <div class="hs-event__top">
+                              <span class="hs-event__title">{{ ev.titulo | translate }}</span>
+                              <span class="hs-event__cat hs-event__cat--{{ ev.categoria }}">
+                                {{ labelCategoria(ev.categoria) | translate }}
+                              </span>
+                            </div>
+                            <div class="hs-event__meta">
+                              <time class="hs-event__date" [attr.aria-label]="formatLargo(ev.fecha)">
+                                {{ formatCorto(ev.fecha) }}
+                              </time>
+                              @if (formatHora(ev.fecha)) {
+                                <span class="hs-event__sep" aria-hidden="true">·</span>
+                                <span>{{ formatHora(ev.fecha) }}</span>
+                              }
+                              @if (ev.detalle) {
+                                <span class="hs-event__sep" aria-hidden="true">·</span>
+                                <span class="hs-event__detail">{{ ev.detalle }}</span>
+                              }
+                            </div>
+                          </div>
+                        </li>
+                      }
+                    </ol>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

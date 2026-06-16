@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -12,7 +13,7 @@ import { ContratoListItem } from '../../../models';
   selector: 'app-contract-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, NgTemplateOutlet],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -38,6 +39,42 @@ export class ContractListComponent implements OnInit {
   // ── PDF viewer ────────────────────────────────────────────────────────────
   pdfVistaId  = signal<string | null>(null);
   pdfBlobUrl  = signal<string | null>(null);
+
+  // ── Agrupación Activos / Finalizados ───────────────────────────────────────
+  finalizadosAbierto = signal(false);
+
+  activos     = computed(() => this.contratos().filter(c => !this.esCerrado(c.estado)));
+  finalizados = computed(() => this.contratos().filter(c =>  this.esCerrado(c.estado)));
+
+  resumen = computed(() => {
+    const cs = this.contratos();
+    return {
+      total:       cs.length,
+      activos:     cs.filter(c => !this.esCerrado(c.estado)).length,
+      completados: cs.filter(c => c.estado === 'completado').length,
+      valor:       cs.filter(c => c.estado !== 'cancelado').reduce((s, c) => s + (c.precio_final ?? 0), 0),
+    };
+  });
+
+  esCerrado(estado: string): boolean { return estado === 'completado' || estado === 'cancelado'; }
+  toggleFinalizados(): void { this.finalizadosAbierto.update(v => !v); }
+
+  iniciales(nombre: string): string {
+    const parts = (nombre ?? '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '—';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  iconoEstado(estado: string): string {
+    switch (estado) {
+      case 'firmado':      return 'bi-patch-check';
+      case 'en_ejecucion': return 'bi-hammer';
+      case 'completado':   return 'bi-check-circle';
+      case 'cancelado':    return 'bi-x-circle';
+      default:             return 'bi-clock-history';  // generado
+    }
+  }
 
   async ngOnInit() {
     const userId = this.user()?.id;

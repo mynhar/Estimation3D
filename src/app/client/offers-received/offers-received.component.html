@@ -1,41 +1,26 @@
-<!-- Hallmark · macrostructure: Long Document · genre: editorial (warm-paper)
-     design-system: design.md · designed-as-app
-     pre-emit critique: P5 H5 E5 S5 R5 V5
-     Redesign v3: precio CAD · badge numérico por expediente pendiente ·
-     managed → tarjetas individuales con borde verde en aceptados ·
-     precio aceptado visible en fila · separación visual mejorada. -->
-<div class="page-wrapper or-root">
+<!-- Hallmark · genre: editorial (warm-paper) · design-system: design.md · designed-as-app
+     Redesign: un solo patrón de tarjeta · resumen compacto de ofertas · CTA protagonista · sin movimiento en bucle. -->
+<div class="or-root">
 
-  <!-- ══════════════════════════════════════════════════════════
-       ENCABEZADO
-       ══════════════════════════════════════════════════════════ -->
-  <header class="or-page-header">
-    <div class="or-page-header__text">
-      <p class="page-eyebrow">
-        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        {{ 'role.client' | translate }}
-      </p>
+  <!-- ── Encabezado ─────────────────────────────────────────────────── -->
+  <header class="or-header">
+    <div class="or-header__text">
+      <p class="or-eyebrow">{{ 'role.client' | translate }}</p>
       <h1 class="or-title">{{ 'nav.offres_recues' | translate }}</h1>
       @if (!cargando()) {
         <p class="or-lead">{{ 'offers_received.subtitle' | translate }}</p>
       }
     </div>
-
     @if (!cargando() && expedientes().length > 0) {
-      <div class="or-page-header__stats">
-        <div class="stat-block">
-          <span class="stat-block__val">{{ expedientes().length }}</span>
-          <span class="stat-block__lbl">{{ 'offers_received.total_label' | translate }}</span>
+      <div class="or-header__stats">
+        <div class="stat">
+          <span class="stat__val">{{ expedientes().length }}</span>
+          <span class="stat__lbl">{{ 'offers_received.total_label' | translate }}</span>
         </div>
         @if (pendientes().length > 0) {
-          <div class="stat-block stat-block--gold">
-            <span class="stat-block__val">{{ pendientes().length }}</span>
-            <span class="stat-block__lbl">
+          <div class="stat stat--gold">
+            <span class="stat__val">{{ pendientes().length }}</span>
+            <span class="stat__lbl">
               {{ pendientes().length !== 1
                   ? ('offers_received.pending_plural' | translate)
                   : ('offers_received.pending_singular' | translate) }}
@@ -46,334 +31,114 @@
     }
   </header>
 
-  <!-- ══════════════════════════════════════════════════════════
-       SKELETON
-       ══════════════════════════════════════════════════════════ -->
+  <!-- ── Skeleton ───────────────────────────────────────────────────── -->
   @if (cargando()) {
-    <div class="skel-section-label" aria-hidden="true">
-      <div class="skel skel--dot-sm"></div>
-      <div class="skel skel--label"></div>
-    </div>
-    <div class="or-exp-panels" aria-hidden="true">
+    <div class="oc-list" aria-hidden="true">
       @for (_ of [1,2,3]; track $index) {
-        <div class="skel-panel">
-          <div class="skel-panel__header">
-            <div class="skel-panel__header-left">
-              <div class="skel skel--index"></div>
-              <div class="skel skel--num"></div>
-            </div>
-            <div class="skel skel--pill"></div>
-          </div>
-          <div class="skel-panel__body">
-            <div class="skel-panel__info">
-              <div class="skel skel--service"></div>
-              <div class="skel skel--desc"></div>
-              <div class="skel skel--meta-block"></div>
-              <div class="skel skel--meta"></div>
-            </div>
-            <div class="skel-panel__right">
-              <div class="skel skel--table-hdr"></div>
-              <div class="skel skel--table-row"></div>
-              <div class="skel skel--table-row"></div>
-              <div class="skel skel--btn"></div>
-            </div>
-          </div>
+        <div class="skel-card">
+          <div class="skel skel--line skel--w70"></div>
+          <div class="skel skel--line skel--w40"></div>
+          <div class="skel skel--block"></div>
+          <div class="skel skel--line skel--w50"></div>
         </div>
       }
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       SIN DATOS
-       ══════════════════════════════════════════════════════════ -->
+  <!-- ── Sin datos ──────────────────────────────────────────────────── -->
   } @else if (expedientes().length === 0) {
     <div class="empty-panel">
-      <div class="empty-icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-          <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-        </svg>
-      </div>
+      <div class="empty-icon" aria-hidden="true"><i class="bi bi-inbox"></i></div>
       <p class="empty-title">{{ 'offers_received.empty_title' | translate }}</p>
       <p class="empty-text">{{ 'offers_received.empty_text' | translate }}</p>
     </div>
 
-  <!-- ══════════════════════════════════════════════════════════
-       CON DATOS
-       ══════════════════════════════════════════════════════════ -->
+  <!-- ── Con datos ──────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- Strip de urgencia -->
-    @if (pendientes().length > 0) {
-      <div class="urgency-strip" role="status">
-        <div class="urgency-strip__icon" aria-hidden="true">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="1.5"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-          </svg>
-        </div>
-        <div class="urgency-strip__text">
-          <p class="urgency-strip__title">
-            @if (pendientes().length === 1) {
-              {{ 'offers_received.banner_single' | translate }}
-            } @else {
-              {{ 'offers_received.banner_plural' | translate: { count: pendientes().length } }}
-            }
-          </p>
-          <p class="urgency-strip__sub">{{ 'dashboard_client.compare_text' | translate }}</p>
-        </div>
-      </div>
-    }
-
-    <!-- ══ SECCIÓN 1 · Pendientes de revisión ══════════════════ -->
     @if (pendientes().length > 0) {
       <section class="or-section">
-        <div class="section-label">
-          <span class="section-dot section-dot--amber"></span>
+        <h2 class="or-section__label">
           {{ 'offers_received.section_pending' | translate }}
-          <span class="section-count">{{ pendientes().length }}</span>
-        </div>
-
-        <div class="or-exp-panels">
-          @for (exp of pendientes(); track exp.id; let i = $index) {
-            <article class="exp-panel exp-panel--pending">
-
-              <!-- Cabecera: badge + número · pills de estado -->
-              <div class="exp-panel__header">
-                <div class="exp-panel__header-left">
-                  <span class="panel-index" aria-hidden="true">{{ i + 1 }}</span>
-                  <span class="exp-num">{{ exp.numero }}</span>
-                </div>
-                <div class="exp-panel__badges">
-                  <span class="offers-pill">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                      <circle cx="9" cy="7" r="4"/>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    {{ ofertasTip(exp.total_ofertas) }}
-                  </span>
-                  <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
-                    {{ estadoTexto(exp.estado) }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Cuerpo: info izquierda · ofertas + CTA derecha -->
-              <div class="exp-panel__body">
-
-                <!-- Columna izquierda: datos del expediente -->
-                <div class="exp-panel__info">
-                  <p class="exp-servicio">{{ servicioNombre(exp) }}</p>
-                  @if (servicioDescripcion(exp)) {
-                    <p class="exp-servicio-desc">{{ servicioDescripcion(exp) }}</p>
-                  }
-                  <div class="exp-meta-block">
-                    <p class="exp-meta">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                           aria-hidden="true" class="exp-meta__icon">
-                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
-                        <circle cx="12" cy="10" r="3"/>
-                      </svg>
-                      {{ exp.direccion }}{{ exp.referencia ? ' · ' + exp.referencia : '' }}
-                    </p>
-                    <p class="exp-meta">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                           aria-hidden="true" class="exp-meta__icon">
-                        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-                      </svg>
-                      {{ exp.provincia }}, {{ exp.canton }}, {{ exp.distrito }}
-                    </p>
-                  </div>
-                  <p class="exp-fecha">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true" class="exp-fecha__icon">
-                      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                      <line x1="16" x2="16" y1="2" y2="6"/>
-                      <line x1="8" x2="8" y1="2" y2="6"/>
-                      <line x1="3" x2="21" y1="10" y2="10"/>
-                    </svg>
-                    {{ 'file.visit_date' | translate }}: {{ formatFecha(exp.fecha_visita) }}
-                    @if (formatHora(exp.fecha_visita)) {
-                      <span class="exp-hora">&nbsp;· {{ formatHora(exp.fecha_visita) }}</span>
-                    }
-                  </p>
-                </div>
-
-                <!-- Columna derecha: tabla de ofertas + CTA -->
-                <div class="exp-panel__right">
-                  @if (exp.ofertas.length > 0) {
-                    <div class="offers-table" role="list" aria-label="Ofertas de contratistas">
-                      <div class="offers-table__header" aria-hidden="true">
-                        <span>{{ 'offers_received.col_contractor' | translate }}</span>
-                        <span>{{ 'offers_received.col_price' | translate }}</span>
-                        <span>{{ 'offers_received.col_status' | translate }}</span>
-                      </div>
-                      @for (oferta of exp.ofertas; track oferta.id; let j = $index) {
-                        <div class="offers-table__row"
-                             [class.offers-table__row--accepted]="oferta.estado === 'aceptada'"
-                             role="listitem">
-                          <span class="offer-rank" aria-hidden="true">{{ j + 1 }}</span>
-                          <span class="offer-constructor">{{ oferta.constructor_nombre }}</span>
-                          <span class="offer-price">{{ formatPrecio(oferta.precio) }}</span>
-                          <span class="badge estado-oferta-badge" [class]="ofertaEstadoClase(oferta.estado)">
-                            {{ ofertaEstadoTexto(oferta.estado) }}
-                          </span>
-                        </div>
-                      }
-                    </div>
-                  }
-                  <button class="offer-cta" type="button" (click)="ver(exp.id)">
-                    <span class="offer-cta__left">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                           aria-hidden="true">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      {{ 'offers_received.see_compare' | translate }} {{ ofertasLabel(exp.total_ofertas) }}
-                    </span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                      <path d="M5 12h14"/>
-                      <path d="m12 5 7 7-7 7"/>
-                    </svg>
-                  </button>
-                </div>
-
-              </div><!-- /exp-panel__body -->
-            </article>
+          <span class="or-section__count">{{ pendientes().length }}</span>
+        </h2>
+        <div class="oc-list">
+          @for (exp of pendientes(); track exp.id) {
+            <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: exp }"></ng-container>
           }
         </div>
       </section>
     }
 
-    <!-- ══ SECCIÓN 2 · Ya gestionados ══════════════════════════ -->
     @if (gestionados().length > 0) {
-      @if (pendientes().length > 0) {
-        <div class="section-separator" role="separator"></div>
-      }
       <section class="or-section">
-        <div class="section-label">
-          <span class="section-dot section-dot--green"></span>
+        <h2 class="or-section__label">
           {{ 'offers_received.section_managed' | translate }}
-          <span class="section-count">{{ gestionados().length }}</span>
-        </div>
-
-        <!-- Tarjetas individuales — separación visual clara entre expedientes -->
-        <div class="managed-cards">
+          <span class="or-section__count">{{ gestionados().length }}</span>
+        </h2>
+        <div class="oc-list">
           @for (exp of gestionados(); track exp.id) {
-            <article class="managed-card" [class.managed-card--accepted]="ofertaAceptada(exp)">
-
-              <!-- Fila de cabecera — navega al detalle -->
-              <button class="managed-row" type="button" (click)="ver(exp.id)">
-
-                <span class="managed-row__num">{{ exp.numero }}</span>
-
-                <span class="managed-row__info">
-                  <span class="managed-row__service">{{ servicioNombre(exp) }}</span>
-                  <span class="managed-row__location">{{ exp.provincia }}, {{ exp.canton }}</span>
-                  @if (ofertaAceptada(exp); as aceptada) {
-                    <span class="managed-row__accepted-price">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11"
-                           viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                           aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                      {{ formatPrecio(aceptada.precio) }}
-                    </span>
-                  }
-                </span>
-
-                <span class="managed-row__date">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                       aria-hidden="true">
-                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                    <line x1="16" x2="16" y1="2" y2="6"/>
-                    <line x1="8" x2="8" y1="2" y2="6"/>
-                    <line x1="3" x2="21" y1="10" y2="10"/>
-                  </svg>
-                  {{ formatFecha(exp.fecha_visita) }}
-                </span>
-
-                <span class="managed-row__offers">
-                  <span class="offers-pill offers-pill--muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                         aria-hidden="true">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                      <circle cx="9" cy="7" r="4"/>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    {{ ofertasLabel(exp.total_ofertas) }}
-                  </span>
-                </span>
-
-                <span class="estado-badge badge" [class]="estadoClase(exp.estado)">
-                  {{ estadoTexto(exp.estado) }}
-                </span>
-
-                <span class="managed-row__chevron" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
-                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                  </svg>
-                </span>
-
-              </button>
-
-              <!-- Tabla de ofertas recibidas -->
-              @if (exp.ofertas.length > 0) {
-                <div class="offers-table offers-table--managed"
-                     role="list" aria-label="Ofertas de contratistas">
-                  <div class="offers-table__header" aria-hidden="true">
-                    <span>{{ 'offers_received.col_contractor' | translate }}</span>
-                    <span>{{ 'offers_received.col_price' | translate }}</span>
-                    <span>{{ 'offers_received.col_status' | translate }}</span>
-                  </div>
-                  @for (oferta of exp.ofertas; track oferta.id; let j = $index) {
-                    <div class="offers-table__row"
-                         [class.offers-table__row--accepted]="oferta.estado === 'aceptada'"
-                         role="listitem">
-                      <span class="offer-rank" aria-hidden="true">{{ j + 1 }}</span>
-                      <span class="offer-constructor">{{ oferta.constructor_nombre }}</span>
-                      <span class="offer-price">{{ formatPrecio(oferta.precio) }}</span>
-                      <span class="badge estado-oferta-badge" [class]="ofertaEstadoClase(oferta.estado)">
-                        {{ ofertaEstadoTexto(oferta.estado) }}
-                      </span>
-                    </div>
-                  }
-                </div>
-              }
-
-            </article>
+            <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: exp }"></ng-container>
           }
         </div>
       </section>
     }
-
-  }<!-- /con datos -->
-
+  }
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Plantilla única de tarjeta de expediente
+═══════════════════════════════════════════════════════════════════════ -->
+<ng-template #card let-exp>
+  <article class="oc oc--{{ exp.estado }}"
+           [class.oc--pending]="exp.estado === 'en_oferta'"
+           [class.oc--accepted]="ofertaAceptada(exp)">
+    <button class="oc__btn" type="button" (click)="ver(exp.id)"
+            [attr.aria-label]="servicioNombre(exp) + ' · ' + exp.numero">
+
+      <div class="oc__head">
+        <div class="oc__id">
+          <h3 class="oc__service">{{ servicioNombre(exp) }}</h3>
+          <p class="oc__sub">
+            <span class="oc__num">{{ exp.numero }}</span>
+            <span class="oc__loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ exp.provincia }}, {{ exp.canton }}</span>
+          </p>
+        </div>
+        <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ estadoTexto(exp.estado) }}</span>
+      </div>
+
+      <!-- Resumen compacto de ofertas -->
+      <div class="oc__offers">
+        @if (ofertaAceptada(exp); as acc) {
+          <span class="oc__accepted">
+            <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+            {{ 'offers_received.accepted_for' | translate }} <strong>{{ formatPrecio(acc.precio) }}</strong>
+          </span>
+        } @else {
+          <span class="oc__count">
+            <i class="bi bi-people" aria-hidden="true"></i>
+            {{ exp.total_ofertas }} {{ (exp.total_ofertas === 1 ? 'offers_received.offer' : 'offers_received.offers') | translate }}
+          </span>
+          @if (hayOfertas(exp)) {
+            <span class="oc__price">
+              {{ 'offers_received.from' | translate }} <strong>{{ formatPrecio(precioMin(exp)) }}</strong>
+              @if (precioMax(exp) > precioMin(exp)) {
+                <span class="oc__price-max">– {{ formatPrecio(precioMax(exp)) }}</span>
+              }
+            </span>
+          }
+        }
+      </div>
+
+      <!-- Pie: fecha + acción -->
+      <div class="oc__foot">
+        <span class="oc__date">
+          <i class="bi bi-calendar3" aria-hidden="true"></i>{{ formatFecha(exp.fecha_visita) }}
+        </span>
+        <span class="oc__cta">
+          {{ (exp.estado === 'en_oferta' ? 'offers_received.cta_choose' : 'offers_received.cta_view') | translate }}
+          <i class="bi bi-arrow-right oc__cta-arrow" aria-hidden="true"></i>
+        </span>
+      </div>
+    </button>
+  </article>
+</ng-template>

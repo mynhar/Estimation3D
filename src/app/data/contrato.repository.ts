@@ -37,6 +37,21 @@ export class ContratoRepository {
     return data as ContratoHistorialItem | null;
   }
 
+  async findHistorialByClienteId(clienteId: string): Promise<{
+    id: string; expediente_id: string; estado: string;
+    generado_en: string; firmado_en: string | null; actualizado_en: string;
+  }[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select('id, expediente_id, estado, generado_en, firmado_en, actualizado_en')
+      .eq('cliente_id', clienteId);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as {
+      id: string; expediente_id: string; estado: string;
+      generado_en: string; firmado_en: string | null; actualizado_en: string;
+    }[];
+  }
+
   async findForClientByExpedienteId(expedienteId: string): Promise<ContratoClienteView | null> {
     const { data, error } = await this.db
       .from('contrato')

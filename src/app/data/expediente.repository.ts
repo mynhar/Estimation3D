@@ -41,6 +41,22 @@ export class ExpedienteRepository {
     return (data ?? []) as ExpedienteRaw[];
   }
 
+  async findHistorialByClienteId(clienteId: string): Promise<{
+    id: string; numero: string; estado: string;
+    creado_en: string; fecha_visita: string; actualizado_en: string;
+  }[]> {
+    const { data, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado, creado_en, fecha_visita, actualizado_en')
+      .eq('cliente_id', clienteId)
+      .order('creado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as {
+      id: string; numero: string; estado: string;
+      creado_en: string; fecha_visita: string; actualizado_en: string;
+    }[];
+  }
+
   async findByClienteIdInEstados(clienteId: string, estados: EstadoExpediente[]): Promise<ExpedienteRaw[]> {
     const { data, error } = await this.db
       .from('expediente')

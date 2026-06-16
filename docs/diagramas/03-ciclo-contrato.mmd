@@ -1,0 +1,18 @@
+stateDiagram-v2
+    [*] --> generado: aceptar_oferta_contrato
+    generado --> firmado: firmar_contrato (Cliente)
+    firmado --> en_ejecucion: iniciar_ejecucion (Admin)
+    en_ejecucion --> completado: completar_contrato (Admin)
+    completado --> [*]
+
+    generado --> cancelado: cancelar_contrato_admin
+    firmado --> cancelado
+    en_ejecucion --> cancelado
+    cancelado --> [*]
+
+    note right of en_ejecucion
+        seguimiento_obra:
+        no_iniciado to en_progreso
+        (pausado) to completado
+        constructor sube reportes y % avance
+    end note

@@ -1,27 +1,12 @@
-<!-- Hallmark · genre: editorial · design-system: design.md · designed-as-app
-     pre-emit critique: P5 H5 E5 S5 R5 V4 -->
+<!-- Hallmark · genre: editorial · design-system: design.md · designed-as-app -->
 <div class="cl-page">
 
   <!-- ── Header ─────────────────────────────────────────────────────── -->
   <header class="cl-header">
-    <div class="cl-header-text">
-      <p class="cl-eyebrow">{{ 'role.client' | translate }}</p>
-      <h1 class="cl-title">{{ 'contract_list.title' | translate }}</h1>
-      @if (!cargando()) {
-        <p class="cl-lead">{{ 'contract_list.subtitle' | translate }}</p>
-      }
-    </div>
-    @if (!cargando() && contratos().length > 0) {
-      <span class="kpi-pill">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-          <path d="m9 15 2 2 4-4"/>
-        </svg>
-        {{ contratos().length }} {{ 'contract_list.count' | translate }}
-      </span>
+    <p class="cl-eyebrow">{{ 'role.client' | translate }}</p>
+    <h1 class="cl-title">{{ 'contract_list.title' | translate }}</h1>
+    @if (!cargando()) {
+      <p class="cl-lead">{{ 'contract_list.subtitle' | translate }}</p>
     }
   </header>
 
@@ -32,10 +17,10 @@
         <div class="skel-card">
           <div class="skel-card-head">
             <div class="skel-card-head-left">
+              <div class="skel skel--avatar"></div>
               <div class="skel skel--num"></div>
-              <div class="skel skel--badge"></div>
             </div>
-            <div class="skel skel--btn"></div>
+            <div class="skel skel--badge"></div>
           </div>
           <div class="skel-card-body">
             <div class="skel skel--col"></div>
@@ -53,439 +38,315 @@
   <!-- ── Sin contratos ───────────────────────────────────────────────── -->
   } @else if (contratos().length === 0) {
     <div class="empty-panel">
-      <div class="empty-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-          <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-          <path d="m14.5 12.5-5 5"/><path d="m9.5 12.5 5 5"/>
-        </svg>
-      </div>
+      <div class="empty-icon"><i class="bi bi-file-earmark-x" aria-hidden="true"></i></div>
       <p class="empty-title">{{ 'contract_list.empty_title' | translate }}</p>
       <p class="empty-text">{{ 'contract_list.empty_text' | translate }}</p>
     </div>
 
-  <!-- ── Lista de contratos ──────────────────────────────────────────── -->
   } @else {
-    <div class="cl-list">
-      @for (c of contratos(); track c.id) {
 
-        <article class="ccard ccard--{{ c.estado }}"
-                 [class.ccard--signing]="confirmandoId() === c.id">
+    <!-- ── Resumen ───────────────────────────────────────────────────── -->
+    <div class="cl-summary">
+      <div class="cl-stat">
+        <span class="cl-stat__num">{{ resumen().total }}</span>
+        <span class="cl-stat__lbl">{{ 'contract_list.summary_total' | translate }}</span>
+      </div>
+      <div class="cl-stat">
+        <span class="cl-stat__num">{{ resumen().activos }}</span>
+        <span class="cl-stat__lbl">{{ 'contract_list.summary_active' | translate }}</span>
+      </div>
+      <div class="cl-stat">
+        <span class="cl-stat__num">{{ resumen().completados }}</span>
+        <span class="cl-stat__lbl">{{ 'contract_list.summary_completed' | translate }}</span>
+      </div>
+      <div class="cl-stat cl-stat--value">
+        <span class="cl-stat__num">{{ formatPrecio(resumen().valor) }}</span>
+        <span class="cl-stat__lbl">{{ 'contract_list.summary_value' | translate }}</span>
+      </div>
+    </div>
 
-          <!-- ── Head: identificación | descarga ───────────────────── -->
-          <div class="ccard-head">
-            <div class="ccard-head-ids">
-              <span class="ccard-num">{{ c.expediente_numero }}</span>
-              <span class="ccard-badge ccard-badge--{{ c.estado }}">
-                @switch (c.estado) {
-                  @case ('firmado') {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
-                      <path d="m9 12 2 2 4-4"/>
-                    </svg>
-                  }
-                  @case ('en_ejecucion') {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                    </svg>
-                  }
-                  @case ('completado') {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>
-                    </svg>
-                  }
-                  @case ('cancelado') {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                    </svg>
-                  }
-                  @default {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                  }
-                }
-                {{ ('contract_list.status_' + c.estado) | translate }}
-              </span>
-            </div>
+    <!-- ── Activos ───────────────────────────────────────────────────── -->
+    @if (activos().length > 0) {
+      <div class="cl-list">
+        @for (c of activos(); track c.id) {
+          <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
+        }
+      </div>
+    }
 
-            <button class="btn-dl" type="button"
-                    [disabled]="descargando() === c.id"
-                    (click)="descargarPdf(c)">
+    <!-- ── Finalizados (colapsable) ──────────────────────────────────── -->
+    @if (finalizados().length > 0) {
+      <section class="cl-finished">
+        <button class="cl-finished__head" type="button"
+                [attr.aria-expanded]="finalizadosAbierto()"
+                (click)="toggleFinalizados()">
+          <i class="bi bi-archive" aria-hidden="true"></i>
+          <span class="cl-finished__title">{{ 'contract_list.section_finished' | translate }}</span>
+          <span class="cl-finished__count">{{ finalizados().length }}</span>
+          <i class="bi cl-finished__chev"
+             [class.bi-chevron-down]="!finalizadosAbierto()"
+             [class.bi-chevron-up]="finalizadosAbierto()" aria-hidden="true"></i>
+        </button>
+        @if (finalizadosAbierto()) {
+          <div class="cl-list cl-list--dim">
+            @for (c of finalizados(); track c.id) {
+              <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Plantilla de tarjeta de contrato (value-led)
+═══════════════════════════════════════════════════════════════════════ -->
+<ng-template #card let-c>
+  <article class="ct ct--{{ c.estado }}"
+           [class.ct--busy]="confirmandoId() === c.id || confirmCancelId() === c.id">
+
+    <!-- Cabecera: identidad del constructor + estado -->
+    <div class="ct__head">
+      <div class="ct__identity">
+        <span class="ct__avatar" aria-hidden="true">{{ iniciales(c.constructor_nombre) }}</span>
+        <div class="ct__id-text">
+          <h3 class="ct__builder">{{ c.constructor_nombre }}</h3>
+          <p class="ct__service">
+            {{ servicioNombre(c) }}
+            <span class="ct__num">{{ c.expediente_numero }}</span>
+          </p>
+        </div>
+      </div>
+      <span class="ct__badge ct__badge--{{ c.estado }}">
+        <i class="bi {{ iconoEstado(c.estado) }}" aria-hidden="true"></i>
+        {{ ('contract_list.status_' + c.estado) | translate }}
+      </span>
+    </div>
+
+    <!-- Cuerpo: cifras clave + contacto -->
+    <div class="ct__body">
+      <div class="ct__facts">
+        <div class="ct__fact ct__fact--price">
+          <span class="ct__fact-val">{{ formatPrecio(c.precio_final) }}</span>
+          <span class="ct__fact-lbl">{{ 'contract_list.price' | translate }}</span>
+        </div>
+        @if (formatPlazo(c) !== '—') {
+          <div class="ct__fact">
+            <span class="ct__fact-val">{{ formatPlazo(c) }}</span>
+            <span class="ct__fact-lbl">{{ 'offer.deadline' | translate }}</span>
+          </div>
+        }
+        @if (c.garantia_anos != null) {
+          <div class="ct__fact">
+            <span class="ct__fact-val">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</span>
+            <span class="ct__fact-lbl">{{ 'offer.warranty' | translate }}</span>
+          </div>
+        }
+        @if (c.fecha_inicio) {
+          <div class="ct__fact">
+            <span class="ct__fact-val">{{ formatFecha(c.fecha_inicio) }}</span>
+            <span class="ct__fact-lbl">{{ 'offer.start_date' | translate }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="ct__meta">
+        <span class="ct__meta-item">
+          <i class="bi bi-geo-alt" aria-hidden="true"></i>
+          {{ c.direccion }}, {{ c.canton }}, {{ c.provincia }}@if (c.distrito) {&nbsp;· {{ c.distrito }}}
+        </span>
+        <a class="ct__meta-item ct__link" href="tel:{{ c.constructor_telefono }}">
+          <i class="bi bi-telephone" aria-hidden="true"></i>{{ c.constructor_telefono }}
+        </a>
+        <a class="ct__meta-item ct__link" href="mailto:{{ c.constructor_email }}">
+          <i class="bi bi-envelope" aria-hidden="true"></i>{{ c.constructor_email }}
+        </a>
+      </div>
+
+      @if (c.descripcion_trabajo) {
+        <p class="ct__desc">{{ c.descripcion_trabajo }}</p>
+      }
+    </div>
+
+    <!-- Footer: fechas + acciones -->
+    <div class="ct__foot">
+      <div class="ct__dates">
+        <span class="ct__date">
+          <i class="bi bi-calendar3" aria-hidden="true"></i>
+          {{ 'contract_list.generated_on' | translate }}: <strong>{{ formatFecha(c.generado_en) }}</strong>
+        </span>
+        @if (c.firmado_en) {
+          <span class="ct__date ct__date--signed">
+            <i class="bi bi-patch-check" aria-hidden="true"></i>
+            {{ 'contract_list.signed_on' | translate }}: <strong>{{ formatFecha(c.firmado_en) }}</strong>
+          </span>
+        }
+      </div>
+
+      <div class="ct__actions">
+        <button class="btn-pdf" type="button"
+                [class.btn-pdf--open]="pdfVistaId() === c.id" (click)="togglePdf(c)">
+          <i class="bi" [class.bi-chevron-up]="pdfVistaId() === c.id"
+             [class.bi-file-earmark-text]="pdfVistaId() !== c.id" aria-hidden="true"></i>
+          {{ pdfVistaId() === c.id ? ('contract_list.close_pdf' | translate) : ('contract_list.view_pdf' | translate) }}
+        </button>
+
+        <button class="btn-dl" type="button"
+                [disabled]="descargando() === c.id" (click)="descargarPdf(c)">
+          @if (descargando() === c.id) {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          } @else {
+            <i class="bi bi-download" aria-hidden="true"></i>
+          }
+          {{ 'contract_list.download_pdf' | translate }}
+        </button>
+
+        @if (c.estado === 'generado' && confirmandoId() !== c.id && confirmCancelId() !== c.id) {
+          <button class="btn-sign" type="button" (click)="abrirPanelFirma(c.id)">
+            <i class="bi bi-pen" aria-hidden="true"></i>
+            {{ 'contract_list.sign_btn' | translate }}
+          </button>
+        }
+
+        @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
+          <button class="btn-cancel-action" type="button"
+                  [disabled]="cancelandoId() === c.id" (click)="abrirPanelCancelacion(c.id)">
+            <i class="bi bi-x-circle" aria-hidden="true"></i>
+            {{ 'contract_list.cancel_btn' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Visor PDF inline -->
+    @if (pdfVistaId() === c.id) {
+      <div class="pdf-viewer-wrap">
+        <div class="pdf-viewer-toolbar">
+          <span class="pdf-viewer-label">
+            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+            {{ 'contract_list.pdf_preview' | translate }} · {{ c.expediente_numero }}
+          </span>
+          <div class="pdf-viewer-tools">
+            <button class="btn-dl pdf-viewer-dl" type="button"
+                    [disabled]="descargando() === c.id" (click)="descargarPdf(c)">
               @if (descargando() === c.id) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="1.5"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" x2="12" y1="15" y2="3"/>
-                </svg>
+                <i class="bi bi-download" aria-hidden="true"></i>
               }
               {{ 'contract_list.download_pdf' | translate }}
             </button>
+            <button class="pdf-viewer-close" type="button"
+                    [title]="'contract_list.close_pdf' | translate"
+                    [attr.aria-label]="'contract_list.close_pdf' | translate"
+                    (click)="togglePdf(c)">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
           </div>
+        </div>
+        <iframe class="pdf-viewer-frame" [src]="safePdfUrl()"
+                [title]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero"
+                [attr.aria-label]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero">
+        </iframe>
+      </div>
+    }
 
-          <!-- ── Body: grid de datos ────────────────────────────────── -->
-          <div class="ccard-body">
-            <div class="ccard-grid">
+    <!-- Panel de firma -->
+    @if (confirmandoId() === c.id) {
+      <div class="sign-panel">
+        <div class="sign-panel-header">
+          <span class="sign-panel-icon" aria-hidden="true"><i class="bi bi-pen"></i></span>
+          <div>
+            <p class="sign-panel-title">{{ 'contract_list.sign_title' | translate }}</p>
+            <p class="sign-panel-sub">{{ 'contract_list.sign_subtitle' | translate }}</p>
+          </div>
+        </div>
 
-              <!-- Col 1: Servicio + Ubicación -->
-              <div class="ccard-col">
-                <div class="ccard-field">
-                  <span class="ccard-lbl">{{ 'contract_list.service' | translate }}</span>
-                  <span class="ccard-val ccard-val--service">{{ servicioNombre(c) }}</span>
-                </div>
-                <div class="ccard-field">
-                  <span class="ccard-lbl">{{ 'contract_list.location' | translate }}</span>
-                  <span class="ccard-val">
-                    {{ c.direccion }},
-                    {{ c.canton }}, {{ c.provincia }}@if (c.distrito) {&nbsp;· {{ c.distrito }}}
-                  </span>
-                </div>
-              </div>
+        <div class="sign-summary">
+          <div class="sign-summary-item">
+            <span class="sign-summary-label">{{ 'contract_list.price' | translate }}</span>
+            <span class="sign-summary-value">{{ formatPrecio(c.precio_final) }}</span>
+          </div>
+          @if (formatPlazo(c) !== '—') {
+            <div class="sign-summary-item">
+              <span class="sign-summary-label">{{ 'offer.deadline' | translate }}</span>
+              <span class="sign-summary-value">{{ formatPlazo(c) }}</span>
+            </div>
+          }
+          @if (c.garantia_anos != null) {
+            <div class="sign-summary-item">
+              <span class="sign-summary-label">{{ 'offer.warranty' | translate }}</span>
+              <span class="sign-summary-value">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</span>
+            </div>
+          }
+          @if (c.fecha_inicio) {
+            <div class="sign-summary-item">
+              <span class="sign-summary-label">{{ 'offer.start_date' | translate }}</span>
+              <span class="sign-summary-value">{{ formatFecha(c.fecha_inicio) }}</span>
+            </div>
+          }
+        </div>
 
-              <!-- Col 2: Constructor + contacto -->
-              <div class="ccard-col">
-                <div class="ccard-field">
-                  <span class="ccard-lbl">{{ 'contract_list.contractor' | translate }}</span>
-                  <span class="ccard-val ccard-val--bold">{{ c.constructor_nombre }}</span>
-                </div>
-                <div class="ccard-contact">
-                  <a class="ccard-contact-link" href="tel:{{ c.constructor_telefono }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                    </svg>
-                    {{ c.constructor_telefono }}
-                  </a>
-                  <a class="ccard-contact-link" href="mailto:{{ c.constructor_email }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <rect width="20" height="16" x="2" y="4" rx="2"/>
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                    </svg>
-                    {{ c.constructor_email }}
-                  </a>
-                </div>
-              </div>
+        <p class="sign-legal-text">{{ 'contract_list.sign_legal_text' | translate }}</p>
 
-              <!-- Col 3: Precio + condiciones compactas -->
-              <div class="ccard-col ccard-col--pricing">
-                <div class="ccard-price-box">
-                  <span class="ccard-price-lbl">{{ 'contract_list.price' | translate }}</span>
-                  <span class="ccard-price-val">{{ formatPrecio(c.precio_final) }}</span>
-                </div>
+        <label class="sign-checkbox-label">
+          <input type="checkbox" class="sign-checkbox-input"
+                 [checked]="aceptado()" (change)="toggleAceptado()" />
+          <span class="sign-checkbox" [class.checked]="aceptado()" aria-hidden="true">
+            @if (aceptado()) { <i class="bi bi-check-lg"></i> }
+          </span>
+          <span>{{ 'contract_list.sign_terms_label' | translate }}</span>
+        </label>
 
-                <!-- Condiciones como dl 2-columnas — más compacto y espacialmente eficiente -->
-                <dl class="ccard-conditions">
-                  @if (formatPlazo(c) !== '—') {
-                    <dt class="ccard-cond-lbl">{{ 'offer.deadline' | translate }}</dt>
-                    <dd class="ccard-cond-val">{{ formatPlazo(c) }}</dd>
-                  }
-                  @if (c.garantia_anos != null) {
-                    <dt class="ccard-cond-lbl">{{ 'offer.warranty' | translate }}</dt>
-                    <dd class="ccard-cond-val">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</dd>
-                  }
-                  @if (c.fecha_inicio) {
-                    <dt class="ccard-cond-lbl">{{ 'offer.start_date' | translate }}</dt>
-                    <dd class="ccard-cond-val">{{ formatFecha(c.fecha_inicio) }}</dd>
-                  }
-                </dl>
-              </div>
-
-            </div><!-- /ccard-grid -->
-
-            <!-- Descripción del trabajo (ancho completo) -->
-            @if (c.descripcion_trabajo) {
-              <div class="ccard-desc">
-                <span class="ccard-lbl">{{ 'contract_list.work_description' | translate }}</span>
-                <p class="ccard-desc-text">{{ c.descripcion_trabajo }}</p>
-              </div>
+        <div class="sign-actions">
+          <button class="btn-sign-confirm" type="button"
+                  [disabled]="!aceptado() || firmandoId() === c.id" (click)="confirmarFirma(c)">
+            @if (firmandoId() === c.id) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ 'contract_list.signing' | translate }}
+            } @else {
+              <i class="bi bi-pen" aria-hidden="true"></i>
+              {{ 'contract_list.sign_btn_confirm' | translate }}
             }
+          </button>
+          <button class="sign-cancel-link" type="button"
+                  [disabled]="firmandoId() === c.id" (click)="cerrarPanelFirma()">
+            {{ 'contract_list.sign_cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    }
 
-          </div><!-- /ccard-body -->
+    <!-- Panel de cancelación -->
+    @if (confirmCancelId() === c.id) {
+      <div class="cancel-panel">
+        <div class="cancel-panel-header">
+          <span class="cancel-panel-icon" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+          <div>
+            <p class="cancel-panel-title">{{ 'contract_list.cancel_title' | translate }}</p>
+            <p class="cancel-panel-sub">{{ 'contract_list.cancel_subtitle' | translate }}</p>
+          </div>
+        </div>
+        <p class="cancel-panel-desc">{{ 'contract_list.cancel_desc' | translate }}</p>
+        <div class="cancel-actions">
+          <button class="btn-cancel-confirm" type="button"
+                  [disabled]="cancelandoId() === c.id" (click)="confirmarCancelacion(c)">
+            @if (cancelandoId() === c.id) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ 'contract_list.cancelling' | translate }}
+            } @else {
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              {{ 'contract_list.cancel_confirm' | translate }}
+            }
+          </button>
+          <button class="cancel-close-link" type="button"
+                  [disabled]="cancelandoId() === c.id" (click)="cerrarPanelCancelacion()">
+            {{ 'contract_list.cancel_close' | translate }}
+          </button>
+        </div>
+      </div>
+    }
 
-          <!-- ── Footer: fechas | acciones ──────────────────────────── -->
-          <div class="ccard-foot">
-            <div class="ccard-dates">
-              <span class="ccard-date">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="1.5"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                  <line x1="16" x2="16" y1="2" y2="6"/>
-                  <line x1="8" x2="8" y1="2" y2="6"/>
-                  <line x1="3" x2="21" y1="10" y2="10"/>
-                </svg>
-                {{ 'contract_list.generated_on' | translate }}:
-                <strong>{{ formatFecha(c.generado_en) }}</strong>
-              </span>
-              @if (c.firmado_en) {
-                <span class="ccard-date-sep" aria-hidden="true">·</span>
-                <span class="ccard-date ccard-date--signed">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    <path d="m9 12 2 2 4-4"/>
-                  </svg>
-                  {{ 'contract_list.signed_on' | translate }}:
-                  <strong>{{ formatFecha(c.firmado_en) }}</strong>
-                </span>
-              }
-            </div>
-
-            <div class="ccard-actions">
-              <!-- Ver / cerrar PDF inline -->
-              <button class="btn-pdf" type="button"
-                      [class.btn-pdf--open]="pdfVistaId() === c.id"
-                      (click)="togglePdf(c)">
-                @if (pdfVistaId() === c.id) {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="18 15 12 9 6 15"/>
-                  </svg>
-                } @else {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-                  </svg>
-                }
-                {{ pdfVistaId() === c.id
-                    ? ('contract_list.close_pdf' | translate)
-                    : ('contract_list.view_pdf' | translate) }}
-              </button>
-
-              <!-- Firmar (solo estado generado) -->
-              @if (c.estado === 'generado' && confirmandoId() !== c.id && confirmCancelId() !== c.id) {
-                <button class="btn-sign" type="button" (click)="abrirPanelFirma(c.id)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 20h9"/>
-                    <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
-                    <path d="m15 5 3 3"/>
-                  </svg>
-                  {{ 'contract_list.sign_btn' | translate }}
-                </button>
-              }
-
-              <!-- Cancelar -->
-              @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
-                <button class="btn-cancel-action" type="button"
-                        [disabled]="cancelandoId() === c.id"
-                        (click)="abrirPanelCancelacion(c.id)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                  </svg>
-                  {{ 'contract_list.cancel_btn' | translate }}
-                </button>
-              }
-            </div>
-          </div><!-- /ccard-foot -->
-
-          <!-- ── Visor PDF inline ────────────────────────────────────── -->
-          @if (pdfVistaId() === c.id) {
-            <div class="pdf-viewer-wrap">
-              <div class="pdf-viewer-toolbar">
-                <span class="pdf-viewer-label">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                    <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-                  </svg>
-                  {{ 'contract_list.pdf_preview' | translate }} · {{ c.expediente_numero }}
-                </span>
-                <button class="btn-dl pdf-viewer-dl" type="button"
-                        [disabled]="descargando() === c.id"
-                        (click)="descargarPdf(c)">
-                  @if (descargando() === c.id) {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" x2="12" y1="15" y2="3"/>
-                    </svg>
-                  }
-                  {{ 'contract_list.download_pdf' | translate }}
-                </button>
-              </div>
-              <iframe class="pdf-viewer-frame"
-                      [src]="safePdfUrl()"
-                      [title]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero"
-                      [attr.aria-label]="('contract_list.pdf_preview' | translate) + ' ' + c.expediente_numero">
-              </iframe>
-            </div>
-          }
-
-          <!-- ── Panel de firma ─────────────────────────────────────── -->
-          @if (confirmandoId() === c.id) {
-            <div class="sign-panel">
-
-              <div class="sign-panel-header">
-                <span class="sign-panel-icon" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20h9"/>
-                    <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
-                    <path d="m15 5 3 3"/>
-                  </svg>
-                </span>
-                <div>
-                  <p class="sign-panel-title">{{ 'contract_list.sign_title' | translate }}</p>
-                  <p class="sign-panel-sub">{{ 'contract_list.sign_subtitle' | translate }}</p>
-                </div>
-              </div>
-
-              <div class="sign-summary">
-                <div class="sign-summary-item">
-                  <span class="sign-summary-label">{{ 'contract_list.price' | translate }}</span>
-                  <span class="sign-summary-value">{{ formatPrecio(c.precio_final) }}</span>
-                </div>
-                @if (formatPlazo(c) !== '—') {
-                  <div class="sign-summary-item">
-                    <span class="sign-summary-label">{{ 'offer.deadline' | translate }}</span>
-                    <span class="sign-summary-value">{{ formatPlazo(c) }}</span>
-                  </div>
-                }
-                @if (c.garantia_anos != null) {
-                  <div class="sign-summary-item">
-                    <span class="sign-summary-label">{{ 'offer.warranty' | translate }}</span>
-                    <span class="sign-summary-value">{{ c.garantia_anos }} {{ 'offer.years' | translate }}</span>
-                  </div>
-                }
-                @if (c.fecha_inicio) {
-                  <div class="sign-summary-item">
-                    <span class="sign-summary-label">{{ 'offer.start_date' | translate }}</span>
-                    <span class="sign-summary-value">{{ formatFecha(c.fecha_inicio) }}</span>
-                  </div>
-                }
-              </div>
-
-              <p class="sign-legal-text">{{ 'contract_list.sign_legal_text' | translate }}</p>
-
-              <label class="sign-checkbox-label" (click)="toggleAceptado()">
-                <span class="sign-checkbox" [class.checked]="aceptado()"
-                      role="checkbox" [attr.aria-checked]="aceptado()">
-                  @if (aceptado()) {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M20 6 9 17l-5-5"/>
-                    </svg>
-                  }
-                </span>
-                <span>{{ 'contract_list.sign_terms_label' | translate }}</span>
-              </label>
-
-              <div class="sign-actions">
-                <button class="btn-sign-confirm"
-                        type="button"
-                        [disabled]="!aceptado() || firmandoId() === c.id"
-                        (click)="confirmarFirma(c)">
-                  @if (firmandoId() === c.id) {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    {{ 'contract_list.signing' | translate }}
-                  } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M12 20h9"/>
-                      <path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/>
-                      <path d="m15 5 3 3"/>
-                    </svg>
-                    {{ 'contract_list.sign_btn_confirm' | translate }}
-                  }
-                </button>
-                <button class="sign-cancel-link" type="button"
-                        [disabled]="firmandoId() === c.id"
-                        (click)="cerrarPanelFirma()">
-                  {{ 'contract_list.sign_cancel' | translate }}
-                </button>
-              </div>
-
-            </div>
-          }
-
-          <!-- ── Panel de cancelación ───────────────────────────────── -->
-          @if (confirmCancelId() === c.id) {
-            <div class="cancel-panel">
-              <div class="cancel-panel-header">
-                <span class="cancel-panel-icon" aria-hidden="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/>
-                    <line x1="12" x2="12" y1="9" y2="13"/>
-                    <line x1="12" x2="12.01" y1="17" y2="17"/>
-                  </svg>
-                </span>
-                <div>
-                  <p class="cancel-panel-title">{{ 'contract_list.cancel_title' | translate }}</p>
-                  <p class="cancel-panel-sub">{{ 'contract_list.cancel_subtitle' | translate }}</p>
-                </div>
-              </div>
-              <p class="cancel-panel-desc">{{ 'contract_list.cancel_desc' | translate }}</p>
-              <div class="cancel-actions">
-                <button class="btn-cancel-confirm"
-                        type="button"
-                        [disabled]="cancelandoId() === c.id"
-                        (click)="confirmarCancelacion(c)">
-                  @if (cancelandoId() === c.id) {
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    {{ 'contract_list.cancelling' | translate }}
-                  } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="m15 9-6 6"/><path d="m9 9 6 6"/>
-                    </svg>
-                    {{ 'contract_list.cancel_confirm' | translate }}
-                  }
-                </button>
-                <button class="cancel-close-link" type="button"
-                        [disabled]="cancelandoId() === c.id"
-                        (click)="cerrarPanelCancelacion()">
-                  {{ 'contract_list.cancel_close' | translate }}
-                </button>
-              </div>
-            </div>
-          }
-
-        </article>
-      }
-    </div>
-  }
-
-</div>
+  </article>
+</ng-template>

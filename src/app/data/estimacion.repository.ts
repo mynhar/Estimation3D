@@ -3,6 +3,7 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
 
 export type EstimacionRaw = {
   expediente_id:         string;
+  estimador_id:          string | null;
   fecha_visita_real:     string | null;
   descripcion_problemas: string;
   costo_estimado:        number | null;
@@ -37,7 +38,7 @@ export class EstimacionRepository {
   async findByExpedienteId(expedienteId: string): Promise<EstimacionRaw | null> {
     const { data, error } = await this.db
       .from('estimacion')
-      .select('expediente_id, fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour')
+      .select('expediente_id, estimador_id, fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour')
       .eq('expediente_id', expedienteId)
       .maybeSingle();
     if (error) throw new Error(error.message);

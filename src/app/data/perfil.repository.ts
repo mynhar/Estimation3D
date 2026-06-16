@@ -4,6 +4,7 @@ import { DbPerfil, RolUsuario } from '../types/supabase';
 
 export type PerfilNombre   = { id: string; nombre: string; apellido: string };
 export type PerfilContacto = PerfilNombre & { telefono: string | null; email: string | null };
+export type PerfilNombreRol = PerfilNombre & { rol: RolUsuario };
 
 @Injectable({ providedIn: 'root' })
 export class PerfilRepository {
@@ -48,6 +49,16 @@ export class PerfilRepository {
       .in('id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as PerfilContacto[];
+  }
+
+  async findNombreRolByIds(ids: string[]): Promise<PerfilNombreRol[]> {
+    if (!ids.length) return [];
+    const { data, error } = await this.db
+      .from('perfil')
+      .select('id, nombre, apellido, rol')
+      .in('id', ids);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PerfilNombreRol[];
   }
 
   async findByRoles(roles: RolUsuario[]): Promise<PerfilNombre[]> {
