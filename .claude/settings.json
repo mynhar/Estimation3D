@@ -189,7 +189,15 @@
       "Bash(export PUPPETEER_SKIP_DOWNLOAD=true)",
       "Bash(npm init *)",
       "Bash(/c/tmp/node_modules/.bin/mmdc -i \"01-flujo-extremo-a-extremo.mmd\" -o \"test.svg\" -p \"/c/tmp/puppeteer.json\" -b \"#F5F3EE\")",
-      "Bash(grep -nE \"^      [a-z_]+: \\\\{$\" src/app/types/supabase.ts)"
+      "Bash(grep -nE \"^      [a-z_]+: \\\\{$\" src/app/types/supabase.ts)",
+      "PowerShell(npx ng build --configuration development 2>&1)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(ls supabase/functions/)",
+      "Bash(ls supabase/)",
+      "Bash(ls supabase/functions/*/)",
+      "Bash(find supabase *)",
+      "mcp__claude_ai_Supabase__list_edge_functions"
     ],
     "additionalDirectories": [
       "\\tmp",

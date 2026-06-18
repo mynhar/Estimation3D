@@ -73,6 +73,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'client/ai-assistant',
+    loadComponent: () => import('./client/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'client/perfil',
     loadComponent: () => import('./client/perfil/perfil.component').then(m => m.PerfilComponent),
     canActivate: [authGuard],
