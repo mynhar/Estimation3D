@@ -438,8 +438,12 @@
             <ul class="adm-tl__list">
               @for (ev of timelinePaginada(); track ev.id) {
                 <li class="adm-tl__event"
-                    [class.adm-tl__event--clickable]="ev.tipo === 'expediente' && !!ev.entityId"
-                    (click)="onTimelineClick(ev)">
+                    [class.adm-tl__event--clickable]="!!ev.entityId"
+                    [attr.role]="ev.entityId ? 'button' : null"
+                    [attr.tabindex]="ev.entityId ? 0 : null"
+                    (click)="onTimelineClick(ev)"
+                    (keydown.enter)="onTimelineClick(ev)"
+                    (keydown.space)="ev.entityId && $event.preventDefault(); onTimelineClick(ev)">
 
                   <div class="adm-tl__dot adm-tl__dot--{{ ev.tipo }}" aria-hidden="true">
                     <i class="{{ tipoIcon(ev.tipo) }}"></i>
@@ -471,7 +475,7 @@
                     <span class="adm-tl__badge adm-tl__badge--{{ ev.tipo }}">
                       {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
                     </span>
-                    @if (ev.tipo === 'expediente' && ev.entityId) {
+                    @if (ev.entityId) {
                       <i class="bi bi-arrow-right adm-tl__nav-icon" aria-hidden="true"></i>
                     }
                   </div>

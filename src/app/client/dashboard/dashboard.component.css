@@ -19,6 +19,10 @@
   flex-direction: column;
   gap: var(--ds-space-5);
   min-height: calc(100vh - 64px);
+  /* Garantía anti-desbordamiento: ningún hijo provoca scroll lateral.
+     `clip` no crea contenedor de scroll, así que no rompe el sticky. */
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1354,16 +1358,9 @@
   .dash-media-placeholder { max-height: 280px; min-height: 200px; }
   .dash-modules      { grid-template-columns: 1fr; }
   .dash-skel-modules { grid-template-columns: 1fr; }
-  .dash-info-card__body { grid-template-columns: 1fr; }
-  .dash-person-col {
-    border-right: none;
-    border-bottom: 1px solid var(--ds-border-subtle);
-    flex-direction: row;
-    align-items: flex-start;
-    text-align: left;
-    gap: var(--ds-space-3);
-  }
-  .dash-person-details { align-items: flex-start; }
+  /* NOTA: las reglas responsive de .dash-info-card__body / .dash-person-col
+     viven AL FINAL del archivo, después de sus definiciones base, para que el
+     override gane por orden de cascada (misma especificidad → gana el último). */
   .dash-header__title { font-size: var(--ds-text-xl); }
   .dash-kpi { padding: var(--ds-space-2) var(--ds-space-3); }
   .dash-kpi__num { font-size: var(--ds-text-2xl); }
@@ -1377,8 +1374,12 @@
   .dash-kpi-strip { padding: var(--ds-space-3) var(--ds-space-3); }
   .dash-kpi { padding: var(--ds-space-1) var(--ds-space-2); }
   .dash-kpi__num { font-size: var(--ds-text-xl); }
+  /* Las etiquetas KPI pueden envolver: no fuerzan ancho mínimo. */
+  .dash-kpi__lbl { white-space: normal; }
   .dash-offers-banner { flex-direction: column; align-items: flex-start; }
   .dash-offers-banner__cta { width: 100%; text-align: center; }
+  /* La etiqueta del calendario no impone 130px en pantallas estrechas. */
+  .dash-cal-label { min-width: 0; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1455,6 +1456,9 @@
   align-items: center;
   gap: var(--ds-space-3);
   text-align: center;
+  /* Evita que la columna se expanda por su contenido (email/teléfono
+     largos) y desborde la tarjeta. */
+  min-width: 0;
 }
 .dash-person-avatar {
   width: 56px; height: 56px;
@@ -1477,6 +1481,7 @@
   gap: var(--ds-space-2);
   align-items: center;
   width: 100%;
+  min-width: 0;
 }
 .dash-person-name {
   font-family: var(--ds-font-display);
@@ -1485,6 +1490,8 @@
   letter-spacing: var(--ds-tracking-tight);
   color: var(--ds-ink);
   margin: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .dash-person-name--empty { color: var(--ds-ink-muted); }
 .dash-person-meta {
@@ -1496,17 +1503,38 @@
 }
 .dash-person-meta i { font-size: 0.65rem; }
 .dash-person-meta--pending { color: var(--ds-ink-muted); }
+/* Contacto del constructor: chips accionables (teléfono / email) */
 .dash-person-contact {
   display: flex;
   align-items: center;
-  gap: var(--ds-space-1);
+  gap: var(--ds-space-2);
+  width: 100%;
+  padding: var(--ds-space-2) var(--ds-space-3);
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-secondary);
   text-decoration: none;
-  transition: color var(--ds-duration-fast) var(--ds-ease-out);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+  /* Email/teléfono son tokens sin espacios: deben poder romperse para
+     no desbordar la columna ni la tarjeta. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
-.dash-person-contact:hover { color: var(--ds-gold-active); }
-.dash-person-contact i { font-size: 0.65rem; }
+.dash-person-contact:hover {
+  border-color: var(--ds-success);
+  color: var(--ds-ink);
+  background: var(--ds-success-soft);
+}
+.dash-person-contact:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+.dash-person-contact i { font-size: 0.85rem; color: var(--ds-success); flex-shrink: 0; }
 
 /* ── Estimation / contrato column ──────────────── */
 .dash-estimation-col {
@@ -1514,6 +1542,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-4);
+  min-width: 0;
+}
+/* La CTA ("Voir le contrat") se ajusta a su contenido y nunca se parte:
+   una sola línea, anclada a la izquierda, sin exceder la columna. */
+.dash-estimation-col .btn {
+  align-self: flex-start;
+  max-width: 100%;
+  white-space: nowrap;
 }
 .dash-estimate-price { display: flex; flex-direction: column; gap: var(--ds-space-2); }
 .dash-price-range {
@@ -1551,36 +1587,84 @@
 }
 .dash-pending-state p { margin: 0; }
 
-/* ── Contract rows ──────────────────────────────── */
-.dash-contract-rows { display: flex; flex-direction: column; }
-.dash-contract-row {
+/* ── Contrato · cifra principal (precio + estado) ──
+   Apilado: el precio ocupa su propia línea (nunca se parte) y el estado
+   va debajo. Sin emparejado lateral = sin desborde posible. */
+.dash-contract-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+.dash-contract-hero__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  min-width: 0;
+  /* Contenedor de consulta: el precio se mide contra el ancho real de la
+     columna, no del viewport (clave en el layout de 2 columnas). */
+  container-type: inline-size;
+}
+.dash-contract-hero__price {
+  font-family: var(--ds-font-display);
+  /* Tamaño fluido por ANCHO DE COLUMNA (cqi): el precio (CAD, p. ej.
+     "1 250 000 $CA") se mantiene en una sola línea y escala para no salirse
+     nunca. ~36px en columnas anchas → ~16px en columnas estrechas.
+     Verificado a 320/360px con precios de hasta 10 cifras. */
+  font-size: clamp(1rem, 9cqi, var(--ds-text-3xl));
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: 1.1;
+  color: var(--ds-success);
+  margin: 0;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.dash-contract-hero__status {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-2) 0;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.dash-contract-hero__status-label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Contrato · metadatos (garantía, inicio de obra) ── */
+.dash-contract-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-4) 0;
+  border-top: 1px solid var(--ds-border-subtle);
   border-bottom: 1px solid var(--ds-border-subtle);
 }
-.dash-contract-row:last-child { border-bottom: none; }
-.dash-contract-key {
+.dash-contract-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  min-width: 0;
+}
+.dash-contract-stat__label {
   display: flex;
   align-items: center;
   gap: var(--ds-space-1);
-  font-size: var(--ds-text-xs);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
   color: var(--ds-ink-muted);
-  flex-shrink: 0;
 }
-.dash-contract-key i { font-size: 0.65rem; }
-.dash-contract-val {
-  font-size: var(--ds-text-xs);
+.dash-contract-stat__label i { font-size: 0.7rem; color: var(--ds-success); flex-shrink: 0; }
+.dash-contract-stat__value {
+  font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink);
-  text-align: right;
-}
-.dash-contract-val--price {
-  font-family: var(--ds-font-display);
-  font-size: var(--ds-text-xl);
-  color: var(--ds-success);
+  overflow-wrap: anywhere;
 }
 .dash-contrato-badge {
   display: inline-flex;
@@ -1867,7 +1951,12 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
+  /* Si los pasos no caben (móvil), desplazan dentro de la tarjeta
+     en lugar de ensanchar la página. */
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.dash-avance-stepper::-webkit-scrollbar { display: none; }
 
 .dash-avance-step {
   display: flex;
@@ -2014,4 +2103,24 @@
   .dash-avance-connector { margin-top: 17px; }
 
   .dash-avance-step { width: 48px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE · INFO CARDS (estimador + constructor)
+   Va al FINAL a propósito: estas reglas deben ganar por orden de cascada a las
+   definiciones base de .dash-info-card__body / .dash-person-col de más arriba.
+   Antes vivían antes de la base y quedaban anuladas → la tarjeta NUNCA
+   colapsaba a 1 columna en móvil y el contenido (precio) se desbordaba.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .dash-info-card__body { grid-template-columns: 1fr; }
+  .dash-person-col {
+    border-right: none;
+    border-bottom: 1px solid var(--ds-border-subtle);
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    gap: var(--ds-space-3);
+  }
+  .dash-person-details { align-items: flex-start; }
 }

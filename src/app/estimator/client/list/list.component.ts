@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { DbPerfil, ProveedorAuth } from '../../../types/supabase';
@@ -18,6 +18,7 @@ type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 export class EstimatorClientListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);
   private translate = inject(TranslateService);
+  private router    = inject(Router);
 
   private _clientes = signal<DbPerfil[]>([]);
   cargando = signal(true);
@@ -100,5 +101,10 @@ export class EstimatorClientListComponent implements OnInit {
     const n = u.nombre?.[0] ?? '';
     const a = u.apellido?.[0] ?? '';
     return (n + a).toUpperCase() || '?';
+  }
+
+  /** Navega a la edición del cliente (fila/tarjeta completa clicable). */
+  irAEditar(id: string): void {
+    this.router.navigate(['/estimator/client/edit', id]);
   }
 }

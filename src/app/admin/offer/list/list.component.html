@@ -109,131 +109,153 @@
 
     </div>
 
-    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <!-- ── Lista de expedientes/ofertas ─────────────────────────────────────── -->
     <div class="table-card">
-      <div class="table-responsive">
-        <table class="table table-admin align-middle mb-0">
-          <thead>
-            <tr>
-              <th class="col-num">{{ 'admin_offer.col_number' | translate }}</th>
-              <th class="col-identity">{{ 'admin_offer.col_client' | translate }} / {{ 'admin_offer.col_service' | translate }}</th>
-              <th class="col-person">{{ 'admin_offer.col_estimator' | translate }}</th>
-              <th>{{ 'admin_offer.col_exp_status' | translate }}</th>
-              <th class="col-person">{{ 'admin_offer.col_constructor' | translate }}</th>
-              <th class="col-count">{{ 'admin_offer.col_offers' | translate }}</th>
-              <th class="col-precio">{{ 'admin_offer.col_price' | translate }}</th>
-              <th class="col-date">{{ 'admin_offer.col_start_date' | translate }}</th>
-              <th>{{ 'admin_offer.col_offer_status' | translate }}</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (e of expedientesPaginados(); track e.id) {
-              <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
+      @if (expedientesFiltrados().length === 0) {
+        <div class="empty-state empty-state--table">
+          @if (hayFiltros()) {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_offer.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_offer.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-tags"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_offer.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_offer.no_data_hint' | translate }}</p>
+          }
+        </div>
 
-                <!-- Número -->
-                <td class="col-num">
-                  <span class="exp-num">{{ e.numero }}</span>
-                </td>
+      } @else {
 
-                <!-- Cliente / Servicio -->
-                <td class="col-identity">
-                  <span class="cell-primary">{{ e.cliente_nombre }}</span>
-                  <span class="cell-secondary">{{ servicioNombre(e) }}</span>
-                </td>
-
-                <!-- Estimador -->
-                <td class="col-person">
-                  @if (e.estimador_nombre) {
-                    <span class="cell-primary">{{ e.estimador_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Estado expediente -->
-                <td>
-                  <span class="estado-badge {{ estadoBadgeExp(e.estado) }}">
-                    {{ ('admin_offer.status_' + e.estado) | translate }}
-                  </span>
-                </td>
-
-                <!-- Constructor -->
-                <td class="col-person">
-                  @if (e.constructor_nombre) {
-                    <span class="cell-primary">{{ e.constructor_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Cantidad de ofertas -->
-                <td class="col-count">
-                  <span class="offers-count" [class.offers-count--zero]="e.total_ofertas === 0">
-                    {{ e.total_ofertas }}
-                  </span>
-                </td>
-
-                <!-- Precio -->
-                <td class="col-precio">
-                  <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
-                </td>
-
-                <!-- Fecha inicio -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
-                </td>
-
-                <!-- Estado oferta -->
-                <td>
-                  @if (e.oferta_estado) {
-                    <span class="estado-badge {{ estadoBadgeOferta(e.oferta_estado) }}">
-                      {{ ('admin_offer.oferta_' + e.oferta_estado) | translate }}
-                    </span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Acciones -->
-                <td class="col-actions" (click)="$event.stopPropagation()">
-                  <a [routerLink]="['/admin/offer/edit', e.id]"
-                     class="action-btn"
-                     [title]="'admin_offer.ver_btn' | translate">
-                    <i class="bi bi-eye"></i>
-                  </a>
-                </td>
-
-              </tr>
-            } @empty {
+        <!-- Escritorio: tabla con filas clicables -->
+        <div class="table-responsive d-none d-xl-block">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="10">
-                  <div class="empty-state empty-state--table">
-                    @if (hayFiltros()) {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-funnel"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_offer.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_offer.no_results_hint' | translate }}</p>
-                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
-                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-tags"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_offer.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_offer.no_data_hint' | translate }}</p>
-                    }
-                  </div>
-                </td>
+                <th class="col-num">{{ 'admin_offer.col_number' | translate }}</th>
+                <th class="col-identity">{{ 'admin_offer.col_client' | translate }} / {{ 'admin_offer.col_service' | translate }}</th>
+                <th class="col-person">{{ 'admin_offer.col_estimator' | translate }}</th>
+                <th>{{ 'admin_offer.col_exp_status' | translate }}</th>
+                <th class="col-person">{{ 'admin_offer.col_constructor' | translate }}</th>
+                <th class="col-count">{{ 'admin_offer.col_offers' | translate }}</th>
+                <th class="col-precio">{{ 'admin_offer.col_price' | translate }}</th>
+                <th class="col-date">{{ 'admin_offer.col_start_date' | translate }}</th>
+                <th>{{ 'admin_offer.col_offer_status' | translate }}</th>
+                <th class="col-actions"></th>
               </tr>
-            }
+            </thead>
+            <tbody>
+              @for (e of expedientesPaginados(); track e.id) {
+                <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
+                  <td class="col-num">
+                    <span class="exp-num">{{ e.numero }}</span>
+                  </td>
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ e.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(e) }}</span>
+                  </td>
+                  <td class="col-person">
+                    @if (e.estimador_nombre) {
+                      <span class="cell-primary">{{ e.estimador_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="estado-badge {{ estadoBadgeExp(e.estado) }}">
+                      {{ ('admin_offer.status_' + e.estado) | translate }}
+                    </span>
+                  </td>
+                  <td class="col-person">
+                    @if (e.constructor_nombre) {
+                      <span class="cell-primary">{{ e.constructor_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="col-count">
+                    <span class="offers-count" [class.offers-count--zero]="e.total_ofertas === 0">
+                      {{ e.total_ofertas }}
+                    </span>
+                  </td>
+                  <td class="col-precio">
+                    <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
+                  </td>
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
+                  </td>
+                  <td>
+                    @if (e.oferta_estado) {
+                      <span class="estado-badge {{ estadoBadgeOferta(e.oferta_estado) }}">
+                        {{ ('admin_offer.oferta_' + e.oferta_estado) | translate }}
+                      </span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <a [routerLink]="['/admin/offer/edit', e.id]"
+                       class="action-btn"
+                       [title]="'admin_offer.ver_btn' | translate">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
 
-          </tbody>
-        </table>
-      </div>
+        <!-- Móvil/tablet: tarjetas clicables (sin scroll lateral) -->
+        <div class="cm-cards d-xl-none">
+          @for (e of expedientesPaginados(); track e.id) {
+            <button type="button" class="cm-card" (click)="irAEditar(e.id)">
+              <div class="cm-card__top">
+                <span class="exp-num">{{ e.numero }}</span>
+                <span class="estado-badge {{ estadoBadgeExp(e.estado) }}">
+                  {{ ('admin_offer.status_' + e.estado) | translate }}
+                </span>
+              </div>
+              <div class="cm-card__body">
+                <span class="cm-card__name">{{ e.cliente_nombre }}</span>
+                <span class="cm-card__svc">{{ servicioNombre(e) }}</span>
+              </div>
+              <div class="cm-card__meta">
+                <span class="cm-meta">
+                  <i class="bi bi-person-badge" aria-hidden="true"></i>{{ e.estimador_nombre || '—' }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-hard-hat" aria-hidden="true"></i>{{ e.constructor_nombre || '—' }}
+                </span>
+              </div>
+              <div class="cm-card__meta">
+                <span class="cm-meta">
+                  <i class="bi bi-tags" aria-hidden="true"></i>{{ e.total_ofertas }} {{ 'admin_offer.col_offers' | translate }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-cash-coin" aria-hidden="true"></i>{{ formatPrecio(e.oferta_precio) }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(e.oferta_fecha_inicio) }}
+                </span>
+                @if (e.oferta_estado) {
+                  <span class="estado-badge {{ estadoBadgeOferta(e.oferta_estado) }}">
+                    {{ ('admin_offer.oferta_' + e.oferta_estado) | translate }}
+                  </span>
+                }
+              </div>
+            </button>
+          }
+        </div>
+
+      }
 
       <!-- ── Paginación ──────────────────────────────────────────────────────── -->
       @if (expedientesFiltrados().length > 0) {

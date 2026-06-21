@@ -63,6 +63,12 @@
 /* ── Main content ─────────────────────────────────────────────────────────── */
 .app-main {
   flex: 1;
+  /* min-width:0 permite que el item flex se encoja por debajo del ancho
+     intrínseco de su contenido; sin esto, contenido ancho empuja toda la
+     página y aparece scroll lateral en móvil. clip lo confina sin romper
+     el scroll vertical ni el position:sticky interno. */
+  min-width: 0;
+  overflow-x: clip;
   margin-left: var(--sb-width);
   transition: margin-left var(--sb-transition);
   min-height: 100vh;

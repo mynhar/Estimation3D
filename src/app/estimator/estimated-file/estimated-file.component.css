@@ -6,6 +6,9 @@
   padding: var(--ds-space-5) var(--ds-space-6);
   min-height: 100%;
   font-family: var(--ds-font-body);
+  /* Garantía anti-desbordamiento lateral en móvil. */
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* ── Loading / empty ─────────────────────────────────────────────────────── */
@@ -148,8 +151,10 @@
   gap: var(--ds-space-5);
   align-items: start;
 }
-.ef-col-main { display: flex; flex-direction: column; gap: var(--ds-space-4); }
-.ef-col-side { display: flex; flex-direction: column; gap: var(--ds-space-4); position: sticky; top: var(--ds-space-4); }
+/* min-width:0 evita que el contenido ancho (URLs, direcciones, nombres de
+   archivo) expanda las columnas del grid y desborde la pantalla. */
+.ef-col-main { display: flex; flex-direction: column; gap: var(--ds-space-4); min-width: 0; }
+.ef-col-side { display: flex; flex-direction: column; gap: var(--ds-space-4); position: sticky; top: var(--ds-space-4); min-width: 0; }
 
 /* ── Cards ───────────────────────────────────────────────────────────────── */
 .ef-card {
@@ -187,6 +192,7 @@
   gap: var(--ds-space-4) var(--ds-space-5);
 }
 .ef-info-grid--2 { grid-template-columns: 1fr 1fr; }
+.ef-info-item { min-width: 0; }
 .ef-info-item--wide { grid-column: 1 / 2; }
 .ef-info-item--block { grid-column: 1 / -1; }
 
@@ -204,6 +210,8 @@
   color: var(--ds-ink);
   margin: 0;
   line-height: var(--ds-leading-snug);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .ef-info-value--upper { text-transform: uppercase; font-size: var(--ds-text-xs); font-weight: var(--ds-weight-semibold); }
 .ef-info-value--muted { color: var(--ds-ink-muted); font-weight: var(--ds-weight-regular); }
@@ -234,6 +242,7 @@
   padding: var(--ds-space-3) var(--ds-space-4);
   line-height: var(--ds-leading-relaxed);
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
   margin: 0;
 }
 

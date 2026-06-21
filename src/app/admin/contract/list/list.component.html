@@ -110,138 +110,160 @@
 
     </div>
 
-    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
     <div class="table-card">
-      <div class="table-responsive">
-        <table class="table table-admin align-middle mb-0">
-          <thead>
-            <tr>
-              <th class="col-num">{{ 'admin_contract.col_number' | translate }}</th>
-              <th class="col-identity">{{ 'admin_contract.col_client' | translate }} / {{ 'admin_contract.col_service' | translate }}</th>
-              <th>{{ 'admin_contract.col_exp_status' | translate }}</th>
-              <th class="col-person">{{ 'admin_contract.col_estimator' | translate }}</th>
-              <th class="col-person">{{ 'admin_contract.col_constructor' | translate }}</th>
-              <th class="col-date">{{ 'admin_contract.col_start_date' | translate }}</th>
-              <th class="col-precio">{{ 'admin_contract.col_price' | translate }}</th>
-              <th class="col-warranty">{{ 'admin_contract.col_warranty' | translate }}</th>
-              <th>{{ 'admin_contract.col_contract_status' | translate }}</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (c of contratosPaginados(); track c.contrato_id) {
-              <tr class="table-row table-row--clickable" (click)="irAEditar(c.contrato_id)">
+      @if (contratosFiltrados().length === 0) {
+        <div class="empty-state empty-state--table">
+          @if (hayFiltros()) {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_contract.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_contract.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_contract.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_contract.no_data_hint' | translate }}</p>
+          }
+        </div>
 
-                <!-- Número expediente -->
-                <td class="col-num">
-                  <span class="exp-num">{{ c.expediente_numero }}</span>
-                </td>
+      } @else {
 
-                <!-- Cliente / Servicio -->
-                <td class="col-identity">
-                  <span class="cell-primary">{{ c.cliente_nombre }}</span>
-                  <span class="cell-secondary">{{ servicioNombre(c) }}</span>
-                </td>
-
-                <!-- Estado expediente -->
-                <td>
-                  <span class="estado-badge {{ badgeExpediente(c.expediente_estado) }}">
-                    {{ ('admin_contract.status_' + c.expediente_estado) | translate }}
-                  </span>
-                </td>
-
-                <!-- Estimador -->
-                <td class="col-person">
-                  @if (c.estimador_nombre) {
-                    <span class="cell-primary">{{ c.estimador_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Constructor -->
-                <td class="col-person">
-                  @if (c.constructor_nombre) {
-                    <span class="cell-primary">{{ c.constructor_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Fecha inicio oferta -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(c.oferta_fecha_inicio) }}</span>
-                </td>
-
-                <!-- Precio final -->
-                <td class="col-precio">
-                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
-                </td>
-
-                <!-- Garantía -->
-                <td class="col-warranty">
-                  @if (c.garantia_anos != null) {
-                    <span class="cell-primary">{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Estado contrato -->
-                <td>
-                  <div class="contrato-estado-cell">
-                    <span class="estado-badge {{ badgeContrato(c.contrato_estado) }}">
-                      {{ ('admin_contract.contrato_' + c.contrato_estado) | translate }}
-                    </span>
-                    <span class="cell-date-hint">
-                      @if (c.firmado_en && c.contrato_estado !== 'generado') {
-                        {{ formatFecha(c.firmado_en) }}
-                      } @else {
-                        {{ formatFecha(c.generado_en) }}
-                      }
-                    </span>
-                  </div>
-                </td>
-
-                <!-- Acciones -->
-                <td class="col-actions" (click)="$event.stopPropagation()">
-                  <a [routerLink]="['/admin/contract/edit', c.contrato_id]"
-                     class="action-btn"
-                     [title]="'admin_contract.ver_btn' | translate">
-                    <i class="bi bi-eye"></i>
-                  </a>
-                </td>
-
-              </tr>
-            } @empty {
+        <!-- Escritorio: tabla con filas clicables -->
+        <div class="table-responsive d-none d-xl-block">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="10">
-                  <div class="empty-state empty-state--table">
-                    @if (hayFiltros()) {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-funnel"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_contract.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_contract.no_results_hint' | translate }}</p>
-                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
-                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-file-earmark-text"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_contract.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_contract.no_data_hint' | translate }}</p>
-                    }
-                  </div>
-                </td>
+                <th class="col-num">{{ 'admin_contract.col_number' | translate }}</th>
+                <th class="col-identity">{{ 'admin_contract.col_client' | translate }} / {{ 'admin_contract.col_service' | translate }}</th>
+                <th>{{ 'admin_contract.col_exp_status' | translate }}</th>
+                <th class="col-person">{{ 'admin_contract.col_estimator' | translate }}</th>
+                <th class="col-person">{{ 'admin_contract.col_constructor' | translate }}</th>
+                <th class="col-date">{{ 'admin_contract.col_start_date' | translate }}</th>
+                <th class="col-precio">{{ 'admin_contract.col_price' | translate }}</th>
+                <th class="col-warranty">{{ 'admin_contract.col_warranty' | translate }}</th>
+                <th>{{ 'admin_contract.col_contract_status' | translate }}</th>
+                <th class="col-actions"></th>
               </tr>
-            }
+            </thead>
+            <tbody>
+              @for (c of contratosPaginados(); track c.contrato_id) {
+                <tr class="table-row table-row--clickable" (click)="irAEditar(c.contrato_id)">
+                  <td class="col-num">
+                    <span class="exp-num">{{ c.expediente_numero }}</span>
+                  </td>
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ c.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(c) }}</span>
+                  </td>
+                  <td>
+                    <span class="estado-badge {{ badgeExpediente(c.expediente_estado) }}">
+                      {{ ('admin_contract.status_' + c.expediente_estado) | translate }}
+                    </span>
+                  </td>
+                  <td class="col-person">
+                    @if (c.estimador_nombre) {
+                      <span class="cell-primary">{{ c.estimador_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="col-person">
+                    @if (c.constructor_nombre) {
+                      <span class="cell-primary">{{ c.constructor_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(c.oferta_fecha_inicio) }}</span>
+                  </td>
+                  <td class="col-precio">
+                    <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                  </td>
+                  <td class="col-warranty">
+                    @if (c.garantia_anos != null) {
+                      <span class="cell-primary">{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="contrato-estado-cell">
+                      <span class="estado-badge {{ badgeContrato(c.contrato_estado) }}">
+                        {{ ('admin_contract.contrato_' + c.contrato_estado) | translate }}
+                      </span>
+                      <span class="cell-date-hint">
+                        @if (c.firmado_en && c.contrato_estado !== 'generado') {
+                          {{ formatFecha(c.firmado_en) }}
+                        } @else {
+                          {{ formatFecha(c.generado_en) }}
+                        }
+                      </span>
+                    </div>
+                  </td>
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <a [routerLink]="['/admin/contract/edit', c.contrato_id]"
+                       class="action-btn"
+                       [title]="'admin_contract.ver_btn' | translate">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
 
-          </tbody>
-        </table>
-      </div>
+        <!-- Móvil/tablet: tarjetas clicables (sin scroll lateral) -->
+        <div class="cm-cards d-xl-none">
+          @for (c of contratosPaginados(); track c.contrato_id) {
+            <button type="button" class="cm-card" (click)="irAEditar(c.contrato_id)">
+              <div class="cm-card__top">
+                <span class="exp-num">{{ c.expediente_numero }}</span>
+                <span class="estado-badge {{ badgeContrato(c.contrato_estado) }}">
+                  {{ ('admin_contract.contrato_' + c.contrato_estado) | translate }}
+                </span>
+              </div>
+              <div class="cm-card__body">
+                <span class="cm-card__name">{{ c.cliente_nombre }}</span>
+                <span class="cm-card__svc">{{ servicioNombre(c) }}</span>
+              </div>
+              <div class="cm-card__meta">
+                <span class="cm-meta">
+                  <i class="bi bi-person-badge" aria-hidden="true"></i>{{ c.estimador_nombre || '—' }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-hard-hat" aria-hidden="true"></i>{{ c.constructor_nombre || '—' }}
+                </span>
+              </div>
+              <div class="cm-card__meta">
+                <span class="cm-meta">
+                  <i class="bi bi-cash-coin" aria-hidden="true"></i>{{ formatPrecio(c.precio_final) }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.oferta_fecha_inicio) }}
+                </span>
+                @if (c.garantia_anos != null) {
+                  <span class="cm-meta">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}
+                  </span>
+                }
+                <span class="estado-badge {{ badgeExpediente(c.expediente_estado) }}">
+                  {{ ('admin_contract.status_' + c.expediente_estado) | translate }}
+                </span>
+              </div>
+            </button>
+          }
+        </div>
+
+      }
 
       <!-- ── Paginación ──────────────────────────────────────────────────────── -->
       @if (contratosFiltrados().length > 0) {

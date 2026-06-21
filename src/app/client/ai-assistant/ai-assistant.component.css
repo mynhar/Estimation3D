@@ -11,12 +11,14 @@
 
 .ai-page {
   width: 100%;
+  max-width: 100%;
   margin: 0;
   padding: var(--ds-space-6) clamp(var(--ds-space-4), 4vw, var(--ds-space-8)) var(--ds-space-7);
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-5);
   min-height: 100%;
+  overflow-x: clip;
 }
 
 /* ── Encabezado ── */
@@ -223,14 +225,14 @@
 @keyframes aiBlink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
 
 /* ── Sugerencias (FAQ) ── */
+/* Las preguntas envuelven en varias filas; nunca scroll horizontal. */
 .ai-faqs {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--ds-space-2);
-  overflow-x: auto;
-  padding-bottom: var(--ds-space-1, 4px);
 }
 .ai-faq {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   font-family: var(--ds-font-body);
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-secondary);
@@ -239,7 +241,8 @@
   border-radius: var(--ds-radius-pill);
   padding: var(--ds-space-2) var(--ds-space-3);
   cursor: pointer;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: left;
   transition: border-color 160ms var(--ds-ease-out), color 160ms var(--ds-ease-out), background 160ms var(--ds-ease-out);
 }
 .ai-faq:hover { border-color: var(--ds-gold-active); color: var(--ds-ink); background: var(--ds-bg-alt); }
@@ -301,6 +304,10 @@
 @media (max-width: 560px) {
   .ai-scroll { max-height: none; }
   .ai-msg__bubble { max-width: 88%; }
+
+  /* Móvil: las preguntas se muestran verticalmente, a ancho completo. */
+  .ai-faqs { flex-direction: column; align-items: stretch; }
+  .ai-faq { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

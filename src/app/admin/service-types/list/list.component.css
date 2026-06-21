@@ -271,6 +271,63 @@
   box-shadow: var(--ds-shadow-xs);
 }
 
+/* ── Filas clicables (escritorio) ────────────────────────── */
+.row-clickable { cursor: pointer; }
+.row-clickable:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ds-gold);
+}
+
+/* ── Tarjetas de servicio (móvil) ────────────────────────────
+   Reemplazan la tabla en < lg para eliminar el scroll lateral. */
+.cm-cards { display: flex; flex-direction: column; }
+.cm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  padding: var(--ds-space-4);
+  cursor: pointer;
+  min-width: 0;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.cm-card:last-child { border-bottom: none; }
+.cm-card:hover { background: var(--ds-gold-faint); }
+.cm-card:focus-visible {
+  outline: none;
+  background: var(--ds-gold-faint);
+  box-shadow: inset 0 0 0 2px var(--ds-gold);
+}
+.cm-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+.cm-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cm-card__name {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+.cm-card__desc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  line-height: var(--ds-leading-snug);
+  overflow-wrap: anywhere;
+}
+
 /* Empty state */
 .empty-state {
   display: flex;

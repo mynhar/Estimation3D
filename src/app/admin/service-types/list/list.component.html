@@ -112,64 +112,98 @@
 
     </div>
 
-    <!-- Tabla -->
+    <!-- Lista de servicios -->
     <div class="card table-card">
-      <div class="table-responsive">
-        <table class="table table-hover table-admin align-middle mb-0">
-          <thead>
-            <tr>
-              <th style="width:130px">{{ 'admin_service_types.col_code'       | translate }}</th>
-              <th style="width:220px">{{ 'admin_service_types.col_name'       | translate }}</th>
-              <th>                    {{ 'admin_service_types.col_description' | translate }}</th>
-              <th class="text-center" style="width:100px">{{ 'admin_service_types.col_active' | translate }}</th>
-              <th style="width:56px"></th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (s of serviciosPaginados(); track s.id) {
-              <tr>
-                <td><span class="codigo-chip">{{ s.codigo }}</span></td>
-                <td class="nombre-cell">{{ servicioNombre(s) }}</td>
-                <td class="col-descripcion">{{ servicioDescripcion(s) || '—' }}</td>
-                <td class="text-center">
-                  <span class="status-badge"
-                        [class.status-badge--active]="s.activo"
-                        [class.status-badge--inactive]="!s.activo">
-                    <i class="bi"
-                       [class.bi-check-circle]="s.activo"
-                       [class.bi-x-circle]="!s.activo"
-                       aria-hidden="true"></i>
-                    {{ (s.activo ? 'common.active' : 'common.inactive') | translate }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <a [routerLink]="['/admin/service-type/edit', s.id]"
-                     class="btn-icon-edit"
-                     [title]="'admin_service_types.edit_btn' | translate">
-                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                  </a>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    @if (hayFiltros()) {
-                      <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
-                      <p class="empty-state__msg">{{ 'admin_service_types.no_results' | translate }}</p>
-                    } @else {
-                      <i class="bi bi-grid empty-state__icon" aria-hidden="true"></i>
-                      <p class="empty-state__msg">{{ 'admin_service_types.no_data' | translate }}</p>
-                    }
-                  </div>
-                </td>
-              </tr>
-            }
+      @if (serviciosFiltrados().length === 0) {
+        <div class="empty-state">
+          @if (hayFiltros()) {
+            <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
+            <p class="empty-state__msg">{{ 'admin_service_types.no_results' | translate }}</p>
+          } @else {
+            <i class="bi bi-grid empty-state__icon" aria-hidden="true"></i>
+            <p class="empty-state__msg">{{ 'admin_service_types.no_data' | translate }}</p>
+          }
+        </div>
 
-          </tbody>
-        </table>
-      </div>
+      } @else {
+
+        <!-- Escritorio: tabla con filas clicables -->
+        <div class="table-responsive d-none d-lg-block">
+          <table class="table table-hover table-admin align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:130px">{{ 'admin_service_types.col_code'       | translate }}</th>
+                <th style="width:220px">{{ 'admin_service_types.col_name'       | translate }}</th>
+                <th>                    {{ 'admin_service_types.col_description' | translate }}</th>
+                <th class="text-center" style="width:100px">{{ 'admin_service_types.col_active' | translate }}</th>
+                <th style="width:56px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of serviciosPaginados(); track s.id) {
+                <tr class="row-clickable" tabindex="0" role="button"
+                    [attr.aria-label]="('admin_service_types.edit_btn' | translate) + ': ' + servicioNombre(s)"
+                    (click)="irAEditar(s.id)"
+                    (keydown.enter)="irAEditar(s.id)"
+                    (keydown.space)="$event.preventDefault(); irAEditar(s.id)">
+                  <td><span class="codigo-chip">{{ s.codigo }}</span></td>
+                  <td class="nombre-cell">{{ servicioNombre(s) }}</td>
+                  <td class="col-descripcion">{{ servicioDescripcion(s) || '—' }}</td>
+                  <td class="text-center">
+                    <span class="status-badge"
+                          [class.status-badge--active]="s.activo"
+                          [class.status-badge--inactive]="!s.activo">
+                      <i class="bi"
+                         [class.bi-check-circle]="s.activo"
+                         [class.bi-x-circle]="!s.activo"
+                         aria-hidden="true"></i>
+                      {{ (s.activo ? 'common.active' : 'common.inactive') | translate }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    <a [routerLink]="['/admin/service-type/edit', s.id]"
+                       class="btn-icon-edit"
+                       [title]="'admin_service_types.edit_btn' | translate"
+                       (click)="$event.stopPropagation()">
+                      <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Móvil: tarjetas clicables (sin scroll lateral) -->
+        <div class="cm-cards d-lg-none">
+          @for (s of serviciosPaginados(); track s.id) {
+            <button type="button" class="cm-card" (click)="irAEditar(s.id)"
+                    [attr.aria-label]="('admin_service_types.edit_btn' | translate) + ': ' + servicioNombre(s)">
+              <div class="cm-card__top">
+                <span class="codigo-chip">{{ s.codigo }}</span>
+                <span class="status-badge"
+                      [class.status-badge--active]="s.activo"
+                      [class.status-badge--inactive]="!s.activo">
+                  <i class="bi"
+                     [class.bi-check-circle]="s.activo"
+                     [class.bi-x-circle]="!s.activo"
+                     aria-hidden="true"></i>
+                  {{ (s.activo ? 'common.active' : 'common.inactive') | translate }}
+                </span>
+              </div>
+              <div class="cm-card__body">
+                <span class="cm-card__name">{{ servicioNombre(s) }}</span>
+                @if (servicioDescripcion(s)) {
+                  <span class="cm-card__desc">{{ servicioDescripcion(s) }}</span>
+                }
+              </div>
+            </button>
+          }
+        </div>
+
+      }
+
       <div class="table-card__footer">
         <app-pagination
           [total]="serviciosFiltrados().length"

@@ -77,101 +77,118 @@
       </div>
     </div>
 
-    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
     <div class="table-card">
-      <div class="table-responsive">
-        <table class="table table-monitoring align-middle mb-0">
-          <thead>
-            <tr>
-              <th class="col-num">{{ 'construction_monitoring.col_number' | translate }}</th>
-              <th class="col-identity">{{ 'construction_monitoring.col_client' | translate }} / {{ 'construction_monitoring.col_service' | translate }}</th>
-              <th class="col-location">{{ 'construction_monitoring.col_location' | translate }}</th>
-              <th class="col-date">{{ 'construction_monitoring.col_signed' | translate }}</th>
-              <th class="col-date">{{ 'construction_monitoring.col_start' | translate }}</th>
-              <th class="col-plazo">{{ 'construction_monitoring.col_deadline' | translate }}</th>
-              <th class="col-precio">{{ 'construction_monitoring.col_price' | translate }}</th>
-              <th>{{ 'construction_monitoring.col_status' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (c of contratosPaginados(); track c.id) {
-              <tr class="table-row table-row--clickable" (click)="irAMonitoreo(c.id)">
+      @if (contratosFiltrados().length === 0) {
+        <div class="empty-state empty-state--table">
+          @if (filtroEstado() !== 'todos') {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'construction_monitoring.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'construction_monitoring.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="filtroEstado.set('todos')">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-clipboard"></i>
+            </div>
+            <p class="empty-state__title">{{ 'construction_monitoring.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'construction_monitoring.no_data_hint' | translate }}</p>
+          }
+        </div>
 
-                <!-- Número expediente -->
-                <td class="col-num">
-                  <span class="exp-num">{{ c.expediente_numero }}</span>
-                </td>
+      } @else {
 
-                <!-- Cliente / Servicio -->
-                <td class="col-identity">
-                  <span class="cell-primary">{{ c.cliente_nombre }}</span>
-                  <span class="cell-secondary">{{ servicioNombre(c) }}</span>
-                </td>
-
-                <!-- Localización -->
-                <td class="col-location">
-                  <span class="cell-primary">{{ c.canton }}</span>
-                  <span class="cell-secondary">{{ c.provincia }}</span>
-                </td>
-
-                <!-- Firmado en -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(c.firmado_en) }}</span>
-                </td>
-
-                <!-- Fecha inicio -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(c.fecha_inicio) }}</span>
-                </td>
-
-                <!-- Plazo -->
-                <td class="col-plazo">
-                  <span class="cell-muted">{{ plazoLabel(c) }}</span>
-                </td>
-
-                <!-- Precio -->
-                <td class="col-precio">
-                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
-                </td>
-
-                <!-- Estado -->
-                <td>
-                  <span class="estado-badge {{ badgeContrato(c.estado) }}">
-                    <i class="bi {{ iconoEstado(c.estado) }}"></i>
-                    {{ ('construction_monitoring.estado_' + c.estado) | translate }}
-                  </span>
-                </td>
-
-              </tr>
-            } @empty {
+        <!-- Escritorio: tabla con filas clicables -->
+        <div class="table-responsive d-none d-lg-block">
+          <table class="table table-monitoring align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="8">
-                  <div class="empty-state empty-state--table">
-                    @if (filtroEstado() !== 'todos') {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-funnel"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'construction_monitoring.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'construction_monitoring.no_results_hint' | translate }}</p>
-                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="filtroEstado.set('todos')">
-                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-clipboard"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'construction_monitoring.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'construction_monitoring.no_data_hint' | translate }}</p>
-                    }
-                  </div>
-                </td>
+                <th class="col-num">{{ 'construction_monitoring.col_number' | translate }}</th>
+                <th class="col-identity">{{ 'construction_monitoring.col_client' | translate }} / {{ 'construction_monitoring.col_service' | translate }}</th>
+                <th class="col-location">{{ 'construction_monitoring.col_location' | translate }}</th>
+                <th class="col-date">{{ 'construction_monitoring.col_signed' | translate }}</th>
+                <th class="col-date">{{ 'construction_monitoring.col_start' | translate }}</th>
+                <th class="col-plazo">{{ 'construction_monitoring.col_deadline' | translate }}</th>
+                <th class="col-precio">{{ 'construction_monitoring.col_price' | translate }}</th>
+                <th>{{ 'construction_monitoring.col_status' | translate }}</th>
               </tr>
-            }
+            </thead>
+            <tbody>
+              @for (c of contratosPaginados(); track c.id) {
+                <tr class="table-row table-row--clickable" (click)="irAMonitoreo(c.id)">
+                  <td class="col-num">
+                    <span class="exp-num">{{ c.expediente_numero }}</span>
+                  </td>
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ c.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(c) }}</span>
+                  </td>
+                  <td class="col-location">
+                    <span class="cell-primary">{{ c.canton }}</span>
+                    <span class="cell-secondary">{{ c.provincia }}</span>
+                  </td>
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(c.firmado_en) }}</span>
+                  </td>
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(c.fecha_inicio) }}</span>
+                  </td>
+                  <td class="col-plazo">
+                    <span class="cell-muted">{{ plazoLabel(c) }}</span>
+                  </td>
+                  <td class="col-precio">
+                    <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                  </td>
+                  <td>
+                    <span class="estado-badge {{ badgeContrato(c.estado) }}">
+                      <i class="bi {{ iconoEstado(c.estado) }}"></i>
+                      {{ ('construction_monitoring.estado_' + c.estado) | translate }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
 
-          </tbody>
-        </table>
-      </div>
+        <!-- Móvil: tarjetas clicables (sin scroll lateral) -->
+        <div class="cm-cards d-lg-none">
+          @for (c of contratosPaginados(); track c.id) {
+            <button type="button" class="cm-card" (click)="irAMonitoreo(c.id)">
+              <div class="cm-card__top">
+                <span class="exp-num">{{ c.expediente_numero }}</span>
+                <span class="estado-badge {{ badgeContrato(c.estado) }}">
+                  <i class="bi {{ iconoEstado(c.estado) }}"></i>
+                  {{ ('construction_monitoring.estado_' + c.estado) | translate }}
+                </span>
+              </div>
+              <div class="cm-card__body">
+                <span class="cm-card__name">{{ c.cliente_nombre }}</span>
+                <span class="cm-card__svc">{{ servicioNombre(c) }}</span>
+              </div>
+              <div class="cm-card__meta">
+                <span class="cm-meta">
+                  <i class="bi bi-geo-alt" aria-hidden="true"></i>{{ c.canton }}, {{ c.provincia }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-cash-coin" aria-hidden="true"></i>{{ formatPrecio(c.precio_final) }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.fecha_inicio) }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-hourglass-split" aria-hidden="true"></i>{{ plazoLabel(c) }}
+                </span>
+              </div>
+            </button>
+          }
+        </div>
+
+      }
 
       <!-- ── Paginación ──────────────────────────────────────────────────────── -->
       @if (contratosFiltrados().length > POR_PAGINA) {

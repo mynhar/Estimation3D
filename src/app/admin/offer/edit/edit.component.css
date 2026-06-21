@@ -12,6 +12,8 @@
   padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-9);
   max-width: 1680px;
   margin: 0 auto;
+  /* Garantía anti-desbordamiento lateral en móvil. */
+  overflow-x: clip;
 }
 
 /* ============================================================
@@ -238,6 +240,7 @@
   line-height: var(--ds-leading-snug);
   margin: 0 0 var(--ds-space-3);
   letter-spacing: var(--ds-tracking-tight);
+  overflow-wrap: anywhere;
 }
 
 .fued-header__meta {
@@ -256,6 +259,9 @@
   border-radius: var(--ds-radius-pill);
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-secondary);
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .fued-meta-chip--gold {
@@ -330,6 +336,12 @@
   gap: var(--ds-space-5);
   align-items: start;
 }
+
+/* min-width:0 en las 3 columnas: el contenido ancho (títulos, direcciones,
+   nombres) no expande las pistas del grid ni desborda la pantalla. */
+.fued-col-context,
+.fued-col-offers,
+.fued-col-form { min-width: 0; }
 
 /* ============================================================
    COL 1: Context
@@ -1011,6 +1023,8 @@
   color: var(--ds-ink-secondary);
   margin: 0;
   line-height: var(--ds-leading-relaxed);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .fued-cost-banner {
@@ -1277,6 +1291,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-2);
+  min-width: 0;
 }
 
 .fued-field-row {

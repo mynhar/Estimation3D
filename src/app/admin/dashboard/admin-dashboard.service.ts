@@ -96,12 +96,12 @@ export class AdminDashboardService {
         .limit(25),
       this.db
         .from('estimacion')
-        .select('id, creado_en, expediente:expediente_id(numero), estimador:estimador_id(nombre, apellido)')
+        .select('id, creado_en, expediente:expediente_id(id, numero), estimador:estimador_id(nombre, apellido)')
         .order('creado_en', { ascending: false })
         .limit(25),
       this.db
         .from('oferta')
-        .select('id, precio, creado_en, expediente:expediente_id(numero), constructor:constructor_id(nombre, apellido)')
+        .select('id, precio, creado_en, expediente:expediente_id(id, numero), constructor:constructor_id(nombre, apellido)')
         .order('creado_en', { ascending: false })
         .limit(25),
       this.db
@@ -111,7 +111,7 @@ export class AdminDashboardService {
         .limit(25),
       this.db
         .from('reporte_diario')
-        .select('id, creado_en, porcentaje_acumulado, constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, expediente:expediente_id(numero))')
+        .select('id, creado_en, porcentaje_acumulado, constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, contrato_id, expediente:expediente_id(numero))')
         .order('creado_en', { ascending: false })
         .limit(25),
     ]);
@@ -131,19 +131,23 @@ export class AdminDashboardService {
     }
 
     for (const e of (estsR.data ?? []) as any[]) {
+      const exp = Array.isArray(e.expediente) ? e.expediente[0] : e.expediente;
       events.push({
         id: `est-${e.id}`, timestamp: e.creado_en, tipo: 'estimacion',
         descKey: 'admin_dashboard.tl_event_est_created',
-        autor: nombre(e.estimador), referencia: e.expediente?.numero ?? '—',
+        autor: nombre(e.estimador), referencia: exp?.numero ?? '—',
+        entityId: exp?.id,   // → /admin/to-estimate/edit/:expedienteId
       });
     }
 
     for (const o of (ofersR.data ?? []) as any[]) {
+      const exp = Array.isArray(o.expediente) ? o.expediente[0] : o.expediente;
       events.push({
         id: `ofe-${o.id}`, timestamp: o.creado_en, tipo: 'oferta',
         descKey: 'admin_dashboard.tl_event_ofe_sent',
         precio: fmtPrecio(o.precio ?? 0),
-        autor: nombre(o.constructor), referencia: o.expediente?.numero ?? '—',
+        autor: nombre(o.constructor), referencia: exp?.numero ?? '—',
+        entityId: exp?.id,   // → /admin/offer/edit/:expedienteId
       });
     }
 
@@ -153,11 +157,13 @@ export class AdminDashboardService {
       events.push({
         id: `ctr-gen-${c.id}`, timestamp: c.generado_en, tipo: 'contrato',
         descKey: 'admin_dashboard.tl_event_ctr_generated', autor, referencia: ref,
+        entityId: c.id,   // → /admin/contract/edit/:contratoId
       });
       if (c.firmado_en) {
         events.push({
           id: `ctr-firm-${c.id}`, timestamp: c.firmado_en, tipo: 'contrato',
           descKey: 'admin_dashboard.tl_event_ctr_signed', autor, referencia: ref,
+          entityId: c.id,
         });
       }
     }
@@ -171,6 +177,7 @@ export class AdminDashboardService {
         autor: nombre(r.constructor), referencia: exp?.numero ?? '—',
         avance: Math.round(r.porcentaje_acumulado ?? 0),
         estadoObra: seg?.estado ?? undefined,
+        entityId: seg?.contrato_id,   // → /admin/construction-monitoring/monitoring/:contratoId
       });
     }
 

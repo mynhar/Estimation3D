@@ -67,6 +67,14 @@
 }
 
 /* ── Base global ─────────────────────────────────────────────────────────── */
+/* Red de seguridad: el documento nunca desborda horizontalmente.
+   `overflow-x: clip` no crea contenedor de scroll, así que el scroll
+   vertical y los position:sticky internos siguen funcionando. */
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--warm-bg);

@@ -4,6 +4,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--ds-space-4);
+  flex-wrap: wrap;
 }
 .list-page-header__title {
   font-family: var(--ds-font-display);
@@ -285,6 +286,80 @@
   border-color: var(--ds-gold);
   color: var(--ds-gold-active);
   background: var(--ds-gold-faint);
+}
+
+/* ── Filas clicables (escritorio) ────────────────────────── */
+.row-clickable { cursor: pointer; }
+.row-clickable:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ds-gold);
+}
+
+/* ── Tarjetas de cliente (móvil) ─────────────────────────────
+   Reemplazan a la tabla en pantallas < lg para eliminar el scroll
+   lateral: cada tarjeta es un enlace completo a la edición. */
+.client-cards {
+  display: flex;
+  flex-direction: column;
+}
+.client-card {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  text-decoration: none;
+  color: var(--ds-ink);
+  min-width: 0;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.client-card:last-child { border-bottom: none; }
+.client-card:hover { background: var(--ds-gold-faint); }
+.client-card:focus-visible {
+  outline: none;
+  background: var(--ds-gold-faint);
+  box-shadow: inset 0 0 0 2px var(--ds-gold);
+}
+.client-card__avatar { flex-shrink: 0; }
+.client-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+.client-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+}
+.client-card__name {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.client-card__line {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  min-width: 0;
+}
+.client-card__line i { font-size: 0.75rem; flex-shrink: 0; color: var(--ds-gold-active); }
+.client-card__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.client-card__chev {
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: var(--ds-ink-muted);
 }
 
 /* ── Skeletons ───────────────────────────────────────────── */

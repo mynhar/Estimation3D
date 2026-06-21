@@ -132,44 +132,48 @@
       </div>
     </div>
 
-    <!-- Tabla -->
-    <div class="card table-card">
-      <div class="table-responsive">
-        <table class="table table-admin table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th style="width:48px"></th>
-              <th>{{ 'admin_users.col_name' | translate }}</th>
-              <th>{{ 'admin_users.col_lastname' | translate }}</th>
-              <th>{{ 'admin_users.col_phone' | translate }}</th>
-              <th>{{ 'admin_users.col_email' | translate }}</th>
-              <th>{{ 'admin_users.col_provider' | translate }}</th>
-              <th class="text-center">{{ 'admin_users.col_active' | translate }}</th>
-              <th class="text-center" style="width:52px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (clientesFiltrados().length === 0) {
+    <!-- Lista de clientes -->
+    @if (clientesFiltrados().length === 0) {
+      <div class="card table-card">
+        <div class="empty-state">
+          @if (hayFiltros()) {
+            <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
+            <span>{{ 'admin_users.no_results' | translate }}</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    (click)="limpiarFiltros()">
+              {{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <i class="bi bi-people empty-state__icon" aria-hidden="true"></i>
+            <span>{{ 'admin_users.no_data' | translate }}</span>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="card table-card">
+
+        <!-- Escritorio: tabla con filas clicables -->
+        <div class="table-responsive d-none d-lg-block">
+          <table class="table table-admin table-hover align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="8">
-                  <div class="empty-state">
-                    @if (hayFiltros()) {
-                      <i class="bi bi-funnel empty-state__icon" aria-hidden="true"></i>
-                      <span>{{ 'admin_users.no_results' | translate }}</span>
-                      <button type="button" class="btn btn-sm btn-outline-secondary"
-                              (click)="limpiarFiltros()">
-                        {{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <i class="bi bi-people empty-state__icon" aria-hidden="true"></i>
-                      <span>{{ 'admin_users.no_data' | translate }}</span>
-                    }
-                  </div>
-                </td>
+                <th style="width:48px"></th>
+                <th>{{ 'admin_users.col_name' | translate }}</th>
+                <th>{{ 'admin_users.col_lastname' | translate }}</th>
+                <th>{{ 'admin_users.col_phone' | translate }}</th>
+                <th>{{ 'admin_users.col_email' | translate }}</th>
+                <th>{{ 'admin_users.col_provider' | translate }}</th>
+                <th class="text-center">{{ 'admin_users.col_active' | translate }}</th>
+                <th class="text-center" style="width:52px"></th>
               </tr>
-            } @else {
+            </thead>
+            <tbody>
               @for (u of clientesPaginados(); track u.id) {
-                <tr>
+                <tr class="row-clickable" tabindex="0" role="button"
+                    [attr.aria-label]="('admin_users.edit_client_title' | translate) + ': ' + u.nombre + ' ' + u.apellido"
+                    (click)="irAEditar(u.id)"
+                    (keydown.enter)="irAEditar(u.id)"
+                    (keydown.space)="$event.preventDefault(); irAEditar(u.id)">
                   <td>
                     @if (u.avatar_url) {
                       <img [src]="u.avatar_url" [alt]="u.nombre"
@@ -204,25 +208,71 @@
                   </td>
                   <td class="text-center">
                     <a [routerLink]="['/estimator/client/edit', u.id]"
-                       class="btn-icon-edit" [title]="'admin_users.edit_client_title' | translate">
+                       class="btn-icon-edit" [title]="'admin_users.edit_client_title' | translate"
+                       (click)="$event.stopPropagation()">
                       <i class="bi bi-pencil" aria-hidden="true"></i>
                     </a>
                   </td>
                 </tr>
               }
-            }
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Móvil: tarjetas clicables (sin scroll lateral) -->
+        <div class="client-cards d-lg-none">
+          @for (u of clientesPaginados(); track u.id) {
+            <a class="client-card" [routerLink]="['/estimator/client/edit', u.id]"
+               [attr.aria-label]="('admin_users.edit_client_title' | translate) + ': ' + u.nombre + ' ' + u.apellido">
+              <div class="client-card__avatar">
+                @if (u.avatar_url) {
+                  <img [src]="u.avatar_url" [alt]="u.nombre"
+                       class="user-avatar rounded-circle" referrerpolicy="no-referrer">
+                } @else {
+                  <div class="user-avatar-fallback rounded-circle">{{ avatarFallback(u) }}</div>
+                }
+              </div>
+              <div class="client-card__body">
+                <div class="client-card__top">
+                  <span class="client-card__name">{{ u.nombre }} {{ u.apellido }}</span>
+                  @if (u.activo) {
+                    <i class="bi bi-check-circle status-icon status-icon--active" aria-hidden="true"></i>
+                  } @else {
+                    <i class="bi bi-x-circle status-icon status-icon--inactive" aria-hidden="true"></i>
+                  }
+                </div>
+                <span class="client-card__line">
+                  <i class="bi bi-envelope" aria-hidden="true"></i>
+                  <span class="client-card__email">{{ u.email ?? '—' }}</span>
+                </span>
+                <span class="client-card__line">
+                  <i class="bi bi-telephone" aria-hidden="true"></i>
+                  {{ u.telefono ?? '—' }}
+                </span>
+                <span class="provider-badge">
+                  @if (u.proveedor === 'google') {
+                    <i class="bi bi-google" aria-hidden="true"></i>
+                  } @else {
+                    <i class="bi bi-envelope" aria-hidden="true"></i>
+                  }
+                  {{ u.proveedor }}
+                </span>
+              </div>
+              <i class="bi bi-chevron-right client-card__chev" aria-hidden="true"></i>
+            </a>
+          }
+        </div>
+
+        <div class="table-card__footer">
+          <app-pagination
+            [total]="clientesFiltrados().length"
+            [page]="paginaActual()"
+            [pageSize]="POR_PAGINA"
+            (pageChange)="paginaActual.set($event)">
+          </app-pagination>
+        </div>
       </div>
-      <div class="table-card__footer">
-        <app-pagination
-          [total]="clientesFiltrados().length"
-          [page]="paginaActual()"
-          [pageSize]="POR_PAGINA"
-          (pageChange)="paginaActual.set($event)">
-        </app-pagination>
-      </div>
-    </div>
+    }
 
   }
 

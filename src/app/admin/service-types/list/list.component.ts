@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
@@ -29,6 +29,7 @@ type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 export class AdminServiceTypeListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);
   private translate = inject(TranslateService);
+  private router    = inject(Router);
 
   private _servicios = signal<Servicio[]>([]);
   cargando = signal(true);
@@ -113,5 +114,10 @@ export class AdminServiceTypeListComponent implements OnInit {
     if (lang === 'en') return s.descripcion_en || s.descripcion_es || '';
     if (lang === 'fr') return s.descripcion_fr || s.descripcion_es || '';
     return s.descripcion_es || '';
+  }
+
+  /** Navega a la edición del servicio (fila/tarjeta completa clicable). */
+  irAEditar(id: number): void {
+    this.router.navigate(['/admin/service-type/edit', id]);
   }
 }

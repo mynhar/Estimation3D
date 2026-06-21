@@ -181,10 +181,19 @@ export class AdminDashboardComponent implements OnInit {
     return m[tipo] ?? 'bi bi-circle';
   }
 
+  /** Ruta de edición por tipo de evento (la línea de actividad es clicable). */
+  private readonly TL_RUTA: Record<TimelineEvent['tipo'], string> = {
+    expediente: '/admin/file/edit',
+    estimacion: '/admin/to-estimate/edit',
+    oferta:     '/admin/offer/edit',
+    contrato:   '/admin/contract/edit',
+    obra:       '/admin/construction-monitoring/monitoring',
+  };
+
   onTimelineClick(ev: TimelineEvent): void {
-    if (ev.tipo === 'expediente' && ev.entityId) {
-      this.router.navigate(['/admin/file/edit', ev.entityId]);
-    }
+    if (!ev.entityId) return;
+    const ruta = this.TL_RUTA[ev.tipo];
+    if (ruta) this.router.navigate([ruta, ev.entityId]);
   }
 
 }

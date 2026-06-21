@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { DbPerfil, RolUsuario, ProveedorAuth } from '../../../types/supabase';
@@ -26,6 +26,7 @@ export class AdminUserListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);
   private translate = inject(TranslateService);
   private route     = inject(ActivatedRoute);
+  private router    = inject(Router);
 
   private _usuarios = signal<DbPerfil[]>([]);
   cargando = signal(true);
@@ -123,5 +124,10 @@ export class AdminUserListComponent implements OnInit {
 
   rolBadgeClass(rol: string): string {
     return ROL_BADGE_CLASS[rol] ?? 'role-badge role-badge--cliente';
+  }
+
+  /** Navega a la edición del usuario (fila/tarjeta completa clicable). */
+  irAEditar(id: string): void {
+    this.router.navigate(['/admin/user/edit', id]);
   }
 }

@@ -203,6 +203,70 @@
 .badge-completado   { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info); }
 .badge-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger); }
 
+/* ── Mobile cards (sustituyen la tabla < lg) ──────────────────────────────────
+   Eliminan el scroll lateral: cada tarjeta es clicable → abre el seguimiento. */
+.cm-cards { display: flex; flex-direction: column; }
+.cm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  padding: var(--ds-space-4);
+  cursor: pointer;
+  min-width: 0;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.cm-card:last-child { border-bottom: none; }
+.cm-card:hover { background: var(--ds-gold-faint); }
+.cm-card:focus-visible {
+  outline: none;
+  background: var(--ds-gold-faint);
+  box-shadow: inset 0 0 0 2px var(--ds-gold);
+}
+.cm-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+.cm-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cm-card__name {
+  font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+.cm-card__svc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  overflow-wrap: anywhere;
+}
+.cm-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1) var(--ds-space-3);
+}
+.cm-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cm-meta i { font-size: 0.75rem; color: var(--ds-gold-active); flex-shrink: 0; }
+
 /* ── Empty state ──────────────────────────────────────────────────────────── */
 .empty-state {
   display: flex;
