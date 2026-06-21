@@ -577,7 +577,9 @@
                 </div>
               }
 
-              @if (otrosFotos().length > 0) {
+              <!-- Fotos del sitio: todas las fotos del expediente (expediente,
+                   oferta, contrato, obra) y de todos los roles; videos/docs NO. -->
+              @if (fotosVM().length > 0) {
                 <hr class="detail-divider my-4" />
                 <div class="d-flex align-items-center gap-2 mb-3">
                   <p class="section-label mb-0">
@@ -591,32 +593,43 @@
                     </svg>
                     {{ 'file.site_photos' | translate }}
                   </p>
-                  <span class="archivo-count">{{ otrosFotos().length }}</span>
+                  <span class="archivo-count">{{ fotosVM().length }}</span>
                 </div>
                 <div class="photos-grid">
-                  @for (foto of otrosFotos(); track foto.id) {
-                    <button type="button" class="photo-thumb"
-                            (click)="abrirFoto(foto)"
-                            [attr.aria-label]="foto.nombre_archivo">
-                      <img [src]="publicUrl(foto.url_storage)"
-                           [alt]="foto.nombre_archivo"
-                           class="photo-thumb__img" />
-                      <div class="photo-thumb__overlay" aria-hidden="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5"
-                             stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="11" cy="11" r="8"/>
-                          <line x1="21" x2="16.65" y1="21" y2="16.65"/>
-                          <line x1="11" x2="11" y1="8" y2="14"/>
-                          <line x1="8" x2="14" y1="11" y2="11"/>
-                        </svg>
-                      </div>
-                    </button>
+                  @for (foto of fotosVM(); track foto.id) {
+                    <div class="photo-thumb" [class.photo-thumb--client]="foto.esPropio">
+                      <img [src]="foto.url"
+                           [alt]="foto.nombre"
+                           class="photo-thumb__img"
+                           (click)="abrirFotoVM(foto)" />
+                      @if (foto.esPropio) {
+                        <button type="button" class="thumb-delete"
+                                [disabled]="eliminando() !== null"
+                                (click)="eliminarArchivoVM(foto)"
+                                [title]="'common.delete' | translate">
+                          @if (eliminando() === foto.id) {
+                            <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
+                          } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <polyline points="3 6 5 6 21 6"/>
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                              <path d="M10 11v6"/><path d="M14 11v6"/>
+                              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                            </svg>
+                          }
+                        </button>
+                      }
+                    </div>
                   }
                 </div>
               }
 
-              @if (otrosDocs().length > 0) {
+              <!-- Documentos técnicos: todos los documentos del expediente
+                   (expediente, oferta, contrato, obra) y de todos los roles;
+                   videos/fotos NO. -->
+              @if (documentosVM().length > 0) {
                 <hr class="detail-divider my-4" />
                 <div class="d-flex align-items-center gap-2 mb-3">
                   <p class="section-label mb-0">
@@ -630,10 +643,10 @@
                     </svg>
                     {{ 'file.technical_docs' | translate }}
                   </p>
-                  <span class="archivo-count">{{ otrosDocs().length }}</span>
+                  <span class="archivo-count">{{ documentosVM().length }}</span>
                 </div>
                 <div class="doc-list">
-                  @for (doc of otrosDocs(); track doc.id) {
+                  @for (doc of documentosVM(); track doc.id) {
                     <div class="file-row">
                       <div class="file-row__icon" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -645,11 +658,11 @@
                         </svg>
                       </div>
                       <div class="file-row__info">
-                        <p class="file-row__name">{{ doc.nombre_archivo }}</p>
-                        <p class="file-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                        <p class="file-row__name">{{ doc.nombre }}</p>
+                        <p class="file-row__meta">{{ formatTamano(doc.tamanoBytes) }}</p>
                       </div>
                       <div class="file-row__actions">
-                        <a [href]="publicUrl(doc.url_storage)" target="_blank" rel="noopener"
+                        <a [href]="doc.url" target="_blank" rel="noopener"
                            class="btn-file-open">
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                                fill="none" stroke="currentColor" stroke-width="1.5"
@@ -659,6 +672,25 @@
                           </svg>
                           {{ 'common.open' | translate }}
                         </a>
+                        @if (doc.esPropio) {
+                          <button type="button" class="btn-file-delete"
+                                  [disabled]="eliminando() !== null"
+                                  (click)="eliminarArchivoVM(doc)"
+                                  [title]="'common.delete' | translate">
+                            @if (eliminando() === doc.id) {
+                              <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
+                            } @else {
+                              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                   fill="none" stroke="currentColor" stroke-width="1.5"
+                                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6"/><path d="M14 11v6"/>
+                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                              </svg>
+                            }
+                          </button>
+                        }
                       </div>
                     </div>
                   }
@@ -832,7 +864,7 @@
               </label>
             </div>
 
-            <!-- ── Fotos del cliente ─── -->
+            <!-- ── Mis fotos (las que agregó el cliente) ─── -->
             @if (misFotos().length > 0) {
               <hr class="detail-divider my-4" />
               <div class="d-flex align-items-center gap-2 mb-3">
@@ -876,7 +908,7 @@
               </div>
             }
 
-            <!-- ── Videos del cliente ─── -->
+            <!-- ── Mis videos (los que agregó el cliente) ─── -->
             @if (misVideos().length > 0) {
               <hr class="detail-divider my-4" />
               <div class="d-flex align-items-center gap-2 mb-3">
@@ -941,7 +973,7 @@
               </div>
             }
 
-            <!-- ── Documentos del cliente ─── -->
+            <!-- ── Mis documentos (los que agregó el cliente) ─── -->
             @if (misDocs().length > 0) {
               <hr class="detail-divider my-4" />
               <div class="d-flex align-items-center gap-2 mb-3">

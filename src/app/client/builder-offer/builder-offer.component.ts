@@ -7,6 +7,7 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService } from '../../services/archivo.service';
+import { DocumentosClienteService, ArchivoVM } from '../../services/documentos-cliente.service';
 import { OfertaService } from '../../services/oferta.service';
 import { ContratoService } from '../../services/contrato.service';
 import {
@@ -32,6 +33,7 @@ export class BuilderOfferComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
+  private documentosService = inject(DocumentosClienteService);
   private ofertaService     = inject(OfertaService);
   private contratoService   = inject(ContratoService);
   private route             = inject(ActivatedRoute);
@@ -44,8 +46,11 @@ export class BuilderOfferComponent implements OnInit {
   estimacion    = signal<EstimacionDetalle | null>(null);
   ofertas       = signal<OfertaConConstructor[]>([]);
   fotosExp      = signal<ArchivoRow[]>([]);
-  videosExp     = signal<ArchivoRow[]>([]);
   documentosExp = signal<ArchivoRow[]>([]);
+  // "Fotos del sitio" / "Documentos técnicos": solo lo que agregó el ESTIMADOR
+  // (no cliente). Resuelto por rol vía el agregador de documentos.
+  fotosEstimador      = signal<ArchivoVM[]>([]);
+  documentosEstimador = signal<ArchivoVM[]>([]);
 
   // ── Estado UI ─────────────────────────────────────────────────────────────
   cargando                = signal(true);
@@ -60,9 +65,6 @@ export class BuilderOfferComponent implements OnInit {
 
   // ── Lightbox de fotos ─────────────────────────────────────────────────────
   fotoAmpliada = signal<string | null>(null);
-
-  // ── Video inline — sección estimador ─────────────────────────────────────
-  videoExpUrl = signal<string | null>(null);
 
   // ── Video inline — sección oferta (almacena { ofertaId, url }) ───────────
   videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
@@ -108,12 +110,14 @@ export class BuilderOfferComponent implements OnInit {
       this.estimacion.set(estimacion);
       this.ofertas.set(ofertas);
       this.fotosExp.set(archivos.fotos);
-      this.videosExp.set(archivos.videos);
       this.documentosExp.set(archivos.documentos);
 
       // Pre-seleccionar la oferta aceptada si ya existe
       const aceptada = ofertas.find(o => o.estado === 'aceptada');
       if (aceptada) this.ofertaSeleccionadaId.set(aceptada.id);
+
+      // "Fotos del sitio" / "Documentos técnicos": solo lo del estimador.
+      await this.cargarArchivosEstimador();
 
     } catch (e: any) {
       console.error('[BuilderOffer]', e.message);
@@ -258,15 +262,36 @@ export class BuilderOfferComponent implements OnInit {
     this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
   }
 
+  /** Abre el visor con la URL ya resuelta del VM (fotos del estimador). */
+  abrirFotoVM(foto: ArchivoVM) {
+    this.fotoAmpliada.set(foto.url);
+  }
+
+  /** Abre un documento del estimador (URL ya resuelta del VM). */
+  verDocumentoVM(doc: ArchivoVM) {
+    window.open(doc.url, '_blank', 'noopener');
+  }
+
   cerrarFoto() {
     this.fotoAmpliada.set(null);
   }
 
-  // ── Video inline — estimador ──────────────────────────────────────────────
-
-  toggleVideoExp(archivo: ArchivoRow) {
-    const url = this.publicUrl(archivo.url_storage);
-    this.videoExpUrl.set(this.videoExpUrl() === url ? null : url);
+  /**
+   * Carga lo que agregó el estimador: fotos y documentos (todas las fuentes),
+   * resueltos por rol. Una sola consulta.
+   */
+  private async cargarArchivosEstimador(): Promise<void> {
+    const clienteId = this.user()?.id ?? '';
+    const numero    = this.expediente()?.numero ?? '';
+    try {
+      const archivos = await this.documentosService.getArchivosDeExpediente(this.expedienteId, numero, clienteId);
+      const delEstimador = archivos.filter(a => a.subidoPorRol === 'estimador');
+      this.fotosEstimador.set(delEstimador.filter(a => a.tipo === 'foto'));
+      this.documentosEstimador.set(delEstimador.filter(a => a.tipo === 'documento'));
+    } catch {
+      this.fotosEstimador.set([]);
+      this.documentosEstimador.set([]);
+    }
   }
 
   // ── Video inline — oferta ─────────────────────────────────────────────────

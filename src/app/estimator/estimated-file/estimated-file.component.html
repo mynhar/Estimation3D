@@ -128,6 +128,111 @@
           </div>
         </section>
 
+        <!-- Archivos del cliente (solo lectura): fotos, videos y documentos que
+             agregó el cliente. -->
+        <section class="ef-card">
+          <div class="ef-card__head">
+            <p class="ef-section-label">{{ 'estimator_file.client_files_title' | translate }}</p>
+          </div>
+          <div class="ef-card__body ef-card__body--files">
+
+            @if (fotosCliente().length === 0 && videosCliente().length === 0 && documentosCliente().length === 0) {
+              <div class="ef-file-section">
+                <div class="ef-upload-empty">
+                  <i class="bi bi-folder2" aria-hidden="true"></i>
+                  {{ 'estimator_file.no_docs' | translate }}
+                </div>
+              </div>
+            }
+
+            <!-- Fotos del cliente -->
+            @if (fotosCliente().length > 0) {
+              <div class="ef-file-section">
+                <div class="ef-file-section__head">
+                  <h3 class="ef-file-title">
+                    <i class="bi bi-images" aria-hidden="true"></i>
+                    {{ 'file.site_photos' | translate }}
+                    <span class="ef-count">{{ fotosCliente().length }}</span>
+                  </h3>
+                </div>
+                <div class="ef-photos-grid">
+                  @for (f of fotosCliente(); track f.id) {
+                    <div class="ef-photo">
+                      <img [src]="publicUrl(f.url_storage)" class="ef-photo__img"
+                           [title]="f.nombre_archivo" (click)="verArchivo(f)" />
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Videos del cliente -->
+            @if (videosCliente().length > 0) {
+              <div class="ef-file-section">
+                <div class="ef-file-section__head">
+                  <h3 class="ef-file-title">
+                    <i class="bi bi-camera-video" aria-hidden="true"></i>
+                    {{ 'builder_offer.videos' | translate }}
+                    <span class="ef-count">{{ videosCliente().length }}</span>
+                  </h3>
+                </div>
+                <div class="ef-doc-list">
+                  @for (v of videosCliente(); track v.id) {
+                    <div class="ef-doc-row">
+                      <div class="ef-doc-row__icon">
+                        <i class="bi bi-camera-video-fill" aria-hidden="true"></i>
+                      </div>
+                      <div class="ef-doc-row__info">
+                        <p class="ef-doc-row__name">{{ v.nombre_archivo }}</p>
+                        <p class="ef-doc-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                      </div>
+                      <div class="ef-doc-row__actions">
+                        <button class="ef-btn ef-btn--icon" (click)="verArchivo(v)"
+                                [title]="'common.open' | translate">
+                          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Documentos del cliente -->
+            @if (documentosCliente().length > 0) {
+              <div class="ef-file-section">
+                <div class="ef-file-section__head">
+                  <h3 class="ef-file-title">
+                    <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                    {{ 'file.technical_docs' | translate }}
+                    <span class="ef-count">{{ documentosCliente().length }}</span>
+                  </h3>
+                </div>
+                <div class="ef-doc-list">
+                  @for (doc of documentosCliente(); track doc.id) {
+                    <div class="ef-doc-row">
+                      <div class="ef-doc-row__icon">
+                        <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+                      </div>
+                      <div class="ef-doc-row__info">
+                        <p class="ef-doc-row__name">{{ doc.nombre_archivo }}</p>
+                        <p class="ef-doc-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
+                      </div>
+                      <div class="ef-doc-row__actions">
+                        <button class="ef-btn ef-btn--icon" (click)="verDocumento(doc)"
+                                [title]="'common.open' | translate">
+                          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        </section>
+
         <!-- Archivos del expediente -->
         <section class="ef-card">
           <div class="ef-card__head">
@@ -141,8 +246,8 @@
                 <h3 class="ef-file-title">
                   <i class="bi bi-images" aria-hidden="true"></i>
                   {{ 'file.site_photos' | translate }}
-                  @if (fotos().length > 0) {
-                    <span class="ef-count">{{ fotos().length }}</span>
+                  @if (fotosEstimador().length > 0) {
+                    <span class="ef-count">{{ fotosEstimador().length }}</span>
                   }
                 </h3>
                 <label class="ef-btn ef-btn--upload" [class.ef-btn--loading]="subiendoFoto()">
@@ -155,14 +260,14 @@
               @if (errorFotos()) {
                 <div class="ef-alert">{{ errorFotos() }}</div>
               }
-              @if (fotos().length === 0) {
+              @if (fotosEstimador().length === 0) {
                 <div class="ef-upload-empty">
                   <i class="bi bi-image" aria-hidden="true"></i>
                   {{ 'estimator_file.no_photos' | translate }}
                 </div>
               } @else {
                 <div class="ef-photos-grid">
-                  @for (f of fotos(); track f.id) {
+                  @for (f of fotosEstimador(); track f.id) {
                     <div class="ef-photo">
                       <img [src]="publicUrl(f.url_storage)" class="ef-photo__img"
                            [title]="f.nombre_archivo" (click)="verArchivo(f)" />
@@ -347,8 +452,8 @@
                 <h3 class="ef-file-title">
                   <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
                   {{ 'file.technical_docs' | translate }}
-                  @if (documentos().length > 0) {
-                    <span class="ef-count">{{ documentos().length }}</span>
+                  @if (documentosEstimador().length > 0) {
+                    <span class="ef-count">{{ documentosEstimador().length }}</span>
                   }
                 </h3>
                 <label class="ef-btn ef-btn--upload" [class.ef-btn--loading]="subiendoDocumento()">
@@ -364,14 +469,14 @@
               @if (errorDocumentos()) {
                 <div class="ef-alert">{{ errorDocumentos() }}</div>
               }
-              @if (documentos().length === 0) {
+              @if (documentosEstimador().length === 0) {
                 <div class="ef-upload-empty">
                   <i class="bi bi-file-earmark" aria-hidden="true"></i>
                   {{ 'estimator_file.no_docs' | translate }}
                 </div>
               } @else {
                 <div class="ef-doc-list">
-                  @for (doc of documentos(); track doc.id) {
+                  @for (doc of documentosEstimador(); track doc.id) {
                     <div class="ef-doc-row">
                       <div class="ef-doc-row__icon">
                         <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
@@ -381,7 +486,7 @@
                         <p class="ef-doc-row__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
                       </div>
                       <div class="ef-doc-row__actions">
-                        <button class="ef-btn ef-btn--icon" (click)="verArchivo(doc)"
+                        <button class="ef-btn ef-btn--icon" (click)="verDocumento(doc)"
                                 [title]="'common.open' | translate">
                           <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
                         </button>

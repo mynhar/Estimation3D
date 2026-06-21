@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -50,7 +50,34 @@ export class FileToBeEstimatedComponent implements OnInit {
   errorVisitaMsg  = signal('');
 
   fotos      = signal<ArchivoRow[]>([]);
+  videos     = signal<ArchivoRow[]>([]);
   documentos = signal<ArchivoRow[]>([]);
+
+  // Estas secciones muestran SOLO lo que agregó el estimador (no las fotos/
+  // documentos del cliente). El tour (url_tour) ya es del estimador. Fallback al
+  // usuario actual: en esta vista de trabajo el estimador sube los archivos.
+  fotosEstimador = computed(() => {
+    const eid = this.detalle()?.estimador_id ?? this.user()?.id;
+    return eid ? this.fotos().filter(f => f.subido_por === eid) : [];
+  });
+  documentosEstimador = computed(() => {
+    const eid = this.detalle()?.estimador_id ?? this.user()?.id;
+    return eid ? this.documentos().filter(d => d.subido_por === eid) : [];
+  });
+
+  // "Archivos del cliente": fotos, videos y documentos que agregó el cliente.
+  fotosCliente = computed(() => {
+    const cid = this.detalle()?.cliente_id;
+    return cid ? this.fotos().filter(f => f.subido_por === cid) : [];
+  });
+  videosCliente = computed(() => {
+    const cid = this.detalle()?.cliente_id;
+    return cid ? this.videos().filter(v => v.subido_por === cid) : [];
+  });
+  documentosCliente = computed(() => {
+    const cid = this.detalle()?.cliente_id;
+    return cid ? this.documentos().filter(d => d.subido_por === cid) : [];
+  });
 
   subiendoFoto      = signal(false);
   subiendoDocumento = signal(false);
@@ -199,8 +226,9 @@ export class FileToBeEstimatedComponent implements OnInit {
   // ── Archivos ──────────────────────────────────────────────────────────────
 
   private async cargarArchivos() {
-    const { fotos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
+    const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
     this.fotos.set(fotos);
+    this.videos.set(videos);
     this.documentos.set(documentos);
   }
 
@@ -263,6 +291,22 @@ export class FileToBeEstimatedComponent implements OnInit {
 
   verArchivo(archivo: ArchivoRow) {
     window.open(this.publicUrl(archivo.url_storage), '_blank');
+  }
+
+  /**
+   * Muestra el documento en el navegador (no lo descarga): PDF inline; Office
+   * (docx/xlsx/pptx) vía el visor online de Microsoft. Requiere URL pública.
+   */
+  verDocumento(archivo: ArchivoRow) {
+    const url   = this.publicUrl(archivo.url_storage);
+    const name  = (archivo.nombre_archivo ?? '').toLowerCase();
+    const esPdf = archivo.mime_type === 'application/pdf' || name.endsWith('.pdf');
+    if (esPdf) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      const viewer = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(url);
+      window.open(viewer, '_blank', 'noopener');
+    }
   }
 
   formatTamano(bytes: number): string {

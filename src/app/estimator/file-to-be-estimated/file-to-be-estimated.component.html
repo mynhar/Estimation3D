@@ -56,9 +56,9 @@
             <i class="bi bi-pencil"></i>{{ 'estimator_file.pill_in_progress' | translate }}
           </span>
         }
-        @if (fotos().length > 0) {
+        @if (fotosEstimador().length > 0) {
           <span class="fte-badge fte-badge--info">
-            <i class="bi bi-images"></i>{{ fotos().length }}
+            <i class="bi bi-images"></i>{{ fotosEstimador().length }}
           </span>
         }
       </div>
@@ -124,13 +124,83 @@
           </div>
         </section>
 
+        <!-- ── Archivos del cliente (solo lectura) ────────────────────── -->
+        @if (fotosCliente().length > 0 || videosCliente().length > 0 || documentosCliente().length > 0) {
+          <section class="fte-card">
+            <div class="fte-card__header">
+              <h2 class="fte-card__title">
+                <i class="bi bi-person-lines-fill"></i>{{ 'estimator_file.client_files_title' | translate }}
+              </h2>
+            </div>
+
+            <!-- Fotos del cliente -->
+            @if (fotosCliente().length > 0) {
+              <p class="fte-section-label">
+                <i class="bi bi-images"></i> {{ 'file.site_photos' | translate }} ({{ fotosCliente().length }})
+              </p>
+              <div class="fte-photo-grid">
+                @for (f of fotosCliente(); track f.id) {
+                  <div class="fte-photo-thumb">
+                    <img [src]="publicUrl(f.url_storage)"
+                         class="fte-photo-thumb__img"
+                         [title]="f.nombre_archivo"
+                         (click)="verArchivo(f)" />
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Videos del cliente -->
+            @if (videosCliente().length > 0) {
+              <p class="fte-section-label">
+                <i class="bi bi-camera-video"></i> {{ 'builder_offer.videos' | translate }} ({{ videosCliente().length }})
+              </p>
+              @for (v of videosCliente(); track v.id) {
+                <div class="fte-file-row">
+                  <div class="fte-file-row__icon"><i class="bi bi-camera-video"></i></div>
+                  <div class="fte-file-row__info">
+                    <p class="fte-file-row__name">{{ v.nombre_archivo }}</p>
+                    <p class="fte-file-row__size">{{ formatTamano(v.tamano_bytes) }}</p>
+                  </div>
+                  <div class="fte-file-row__actions">
+                    <button class="fte-btn-icon" (click)="verArchivo(v)" [title]="'common.view' | translate">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+
+            <!-- Documentos del cliente -->
+            @if (documentosCliente().length > 0) {
+              <p class="fte-section-label">
+                <i class="bi bi-file-earmark-text"></i> {{ 'file.technical_docs' | translate }} ({{ documentosCliente().length }})
+              </p>
+              @for (d of documentosCliente(); track d.id) {
+                <div class="fte-file-row">
+                  <div class="fte-file-row__icon"><i class="bi bi-file-earmark-text"></i></div>
+                  <div class="fte-file-row__info">
+                    <p class="fte-file-row__name">{{ d.nombre_archivo }}</p>
+                    <p class="fte-file-row__size">{{ formatTamano(d.tamano_bytes) }}</p>
+                  </div>
+                  <div class="fte-file-row__actions">
+                    <button class="fte-btn-icon" (click)="verDocumento(d)" [title]="'common.view' | translate">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </section>
+        }
+
         <!-- ── Fotos del sitio ────────────────────────────────────────── -->
         <section class="fte-card">
           <div class="fte-card__header">
             <h2 class="fte-card__title">
               <i class="bi bi-images"></i>{{ 'file.site_photos' | translate }}
-              @if (fotos().length > 0) {
-                <span class="fte-count-badge">{{ fotos().length }}</span>
+              @if (fotosEstimador().length > 0) {
+                <span class="fte-count-badge">{{ fotosEstimador().length }}</span>
               }
             </h2>
             <label class="fte-btn-upload" [class.fte-btn-upload--busy]="subiendoFoto()">
@@ -150,14 +220,14 @@
             </div>
           }
 
-          @if (fotos().length === 0) {
+          @if (fotosEstimador().length === 0) {
             <div class="fte-upload-empty">
               <i class="bi bi-camera"></i>
               <p>{{ 'estimator_file.no_photos_hint' | translate }}</p>
             </div>
           } @else {
             <div class="fte-photo-grid">
-              @for (f of fotos(); track f.id) {
+              @for (f of fotosEstimador(); track f.id) {
                 <div class="fte-photo-thumb">
                   <img [src]="publicUrl(f.url_storage)"
                        class="fte-photo-thumb__img"
@@ -343,8 +413,8 @@
           <div class="fte-card__header">
             <h2 class="fte-card__title">
               <i class="bi bi-file-earmark-text"></i>{{ 'file.technical_docs' | translate }}
-              @if (documentos().length > 0) {
-                <span class="fte-count-badge">{{ documentos().length }}</span>
+              @if (documentosEstimador().length > 0) {
+                <span class="fte-count-badge">{{ documentosEstimador().length }}</span>
               }
             </h2>
             <label class="fte-btn-upload" [class.fte-btn-upload--busy]="subiendoDocumento()">
@@ -366,14 +436,14 @@
             </div>
           }
 
-          @if (documentos().length === 0) {
+          @if (documentosEstimador().length === 0) {
             <div class="fte-upload-empty">
               <i class="bi bi-file-earmark"></i>
               <p>{{ 'estimator_file.no_docs_hint' | translate }}</p>
             </div>
           } @else {
             <div class="fte-file-list">
-              @for (doc of documentos(); track doc.id) {
+              @for (doc of documentosEstimador(); track doc.id) {
                 <div class="fte-file-row">
                   <div class="fte-file-row__icon">
                     <i class="bi bi-file-earmark-text"></i>
@@ -384,7 +454,7 @@
                   </div>
                   <div class="fte-file-row__actions">
                     <button class="fte-btn-icon"
-                            (click)="verArchivo(doc)"
+                            (click)="verDocumento(doc)"
                             [title]="'common.view' | translate">
                       <i class="bi bi-eye"></i>
                     </button>

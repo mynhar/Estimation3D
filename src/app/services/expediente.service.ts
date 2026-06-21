@@ -297,6 +297,7 @@ export class ExpedienteService {
       servicio_nombre:    servicio?.nombre_es ?? '—',
       servicio_nombre_en: servicio?.nombre_en ?? servicio?.nombre_es ?? '—',
       servicio_nombre_fr: servicio?.nombre_fr ?? servicio?.nombre_es ?? '—',
+      cliente_id:         exp.cliente_id,
       cliente_nombre:     perfil ? `${perfil.nombre} ${perfil.apellido}` : '—',
       cliente_telefono:   perfil?.telefono ?? '',
       direccion:  loc?.direccion  ?? '—',

@@ -97,6 +97,7 @@ export interface ExpedienteDetalle {
   servicio_nombre: string;
   servicio_nombre_en: string;
   servicio_nombre_fr: string;
+  cliente_id: string;
   cliente_nombre: string;
   cliente_telefono: string;
   direccion: string;

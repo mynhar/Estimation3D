@@ -897,90 +897,47 @@
             <i class="bi bi-folder2"></i>
           </div>
           <span class="dash-module__title">{{ 'dashboard_client.my_documents' | translate }}</span>
-          @if (todosDocs().length > 0) {
-            <span class="dash-docs-count">{{ todosDocs().length }}</span>
+          @if (documentosVM().length > 0) {
+            <span class="dash-docs-count">{{ documentosVM().length }}</span>
           }
         </div>
         <div class="dash-module__body">
-          @if (fotosExp().length === 0 && documentosExp().length === 0) {
+          <!-- Documentos del expediente de TODAS las fuentes (expediente, estimación,
+               oferta, contrato, obra) y roles; fotos y videos NO. -->
+          @if (documentosVM().length === 0) {
             <div class="dash-module__body--empty">
               <i class="bi bi-folder2 dash-module__empty-icon" aria-hidden="true"></i>
               <p class="dash-module__empty-text">{{ 'dashboard_client.no_documents' | translate }}</p>
             </div>
           } @else {
-            @if (fotosExp().length > 0) {
-              <p class="dash-docs-section-label">
-                <i class="bi bi-images" aria-hidden="true"></i>
-                {{ 'dashboard_client.photos' | translate }}
-              </p>
-              <div class="dash-foto-grid">
-                @for (foto of fotosExp(); track foto.id) {
-                  @if (foto.subido_por === user()?.id) {
-                    <div class="dash-foto-wrap">
-                      <a [href]="docUrl(foto)" target="_blank" rel="noopener"
-                         class="dash-foto-thumb" [attr.title]="foto.nombre_archivo">
-                        <img [src]="docUrl(foto)" [alt]="foto.nombre_archivo" loading="lazy">
-                      </a>
-                      <button type="button" class="dash-foto-del"
-                              [disabled]="eliminando() !== null"
-                              (click)="eliminarArchivo(foto)"
-                              [title]="'common.delete' | translate">
-                        @if (eliminando() === foto.id) {
-                          <span class="dash-del-spinner" aria-hidden="true"></span>
-                        } @else {
-                          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
-                               fill="none" stroke="currentColor" stroke-width="2.2"
-                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                          </svg>
-                        }
-                      </button>
-                    </div>
-                  } @else {
-                    <a [href]="docUrl(foto)" target="_blank" rel="noopener"
-                       class="dash-foto-thumb" [attr.title]="foto.nombre_archivo">
-                      <img [src]="docUrl(foto)" [alt]="foto.nombre_archivo" loading="lazy">
-                    </a>
+            <ul class="dash-doc-list">
+              @for (doc of documentosVM(); track doc.id) {
+                <li class="dash-doc-item">
+                  <i class="bi {{ mimeIcon(doc.mimeType) }}" aria-hidden="true"></i>
+                  <a [href]="doc.url" target="_blank" rel="noopener" class="dash-doc-link">
+                    {{ doc.nombre }}
+                  </a>
+                  @if (doc.esPropio) {
+                    <button type="button" class="dash-doc-del"
+                            [disabled]="eliminando() !== null"
+                            (click)="eliminarDocumento(doc)"
+                            [title]="'common.delete' | translate">
+                      @if (eliminando() === doc.id) {
+                        <span class="dash-del-spinner" aria-hidden="true"></span>
+                      } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      }
+                    </button>
                   }
-                }
-              </div>
-            }
-            @if (documentosExp().length > 0) {
-              <p class="dash-docs-section-label">
-                <i class="bi bi-files" aria-hidden="true"></i>
-                {{ 'dashboard_client.documents_label' | translate }}
-              </p>
-              <ul class="dash-doc-list">
-                @for (doc of documentosExp(); track doc.id) {
-                  <li class="dash-doc-item">
-                    <i class="bi {{ mimeIcon(doc.mime_type) }}" aria-hidden="true"></i>
-                    <a [href]="docUrl(doc)" target="_blank" rel="noopener" class="dash-doc-link">
-                      {{ doc.nombre_archivo }}
-                    </a>
-                    @if (doc.subido_por === user()?.id) {
-                      <button type="button" class="dash-doc-del"
-                              [disabled]="eliminando() !== null"
-                              (click)="eliminarArchivo(doc)"
-                              [title]="'common.delete' | translate">
-                        @if (eliminando() === doc.id) {
-                          <span class="dash-del-spinner" aria-hidden="true"></span>
-                        } @else {
-                          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                               fill="none" stroke="currentColor" stroke-width="2"
-                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                          </svg>
-                        }
-                      </button>
-                    }
-                  </li>
-                }
-              </ul>
-            }
+                </li>
+              }
+            </ul>
           }
         </div>
       </div>

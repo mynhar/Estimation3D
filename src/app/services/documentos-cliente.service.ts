@@ -20,6 +20,7 @@ const ORDEN_ROLES: RolSubida[] = ['cliente', 'estimador', 'constructor', 'admini
 // autor ya resueltos, y una URL lista para abrir.
 export interface ArchivoVM {
   id:              string;
+  archivoId?:      string;          // id real de la fila `archivo` (para borrar); undefined si no aplica
   nombre:          string;
   tipo:            TipoArchivo;
   fuente:          FuenteArchivo;
@@ -113,6 +114,38 @@ export class DocumentosClienteService {
     });
   }
 
+  /**
+   * Archivos de UN expediente (todas las fuentes y roles), con autor/rol
+   * resueltos. Misma data que `getExpedientesConArchivos` pero acotada a un
+   * expediente — para el módulo "Mis documentos" del dashboard del cliente.
+   */
+  async getArchivosDeExpediente(
+    expedienteId: string,
+    numero: string,
+    clienteId: string,
+  ): Promise<ArchivoVM[]> {
+    const { items, autorIds } = await this.recolectar(expedienteId, numero);
+    const perfiles    = await this.perfilRepo.findNombreRolByIds(autorIds);
+    const perfilPorId = new Map(perfiles.map(p => [p.id, p]));
+    const nombreDe = (id: string | null): string => {
+      const p = id ? perfilPorId.get(id) : null;
+      return p ? `${p.nombre ?? ''} ${p.apellido ?? ''}`.trim() || '—' : '—';
+    };
+    const rolDe = (it: { subidoPor: string | null; subidoPorRol: RolSubida }): RolSubida => {
+      if (it.subidoPor) {
+        const p = perfilPorId.get(it.subidoPor);
+        if (p?.rol) return p.rol as RolSubida;
+      }
+      return it.subidoPorRol;
+    };
+    return items.map(it => ({
+      ...it,
+      subidoPorNombre: it.subidoPorNombre ?? nombreDe(it.subidoPor),
+      subidoPorRol:    rolDe(it),
+      esPropio:        it.fuente === 'expediente' && !!it.subidoPor && it.subidoPor === clienteId,
+    }));
+  }
+
   // ── Recolección por expediente (todas las fuentes) ──────────────────────────
   // Devuelve items parciales (sin nombre resuelto) + los ids de autor a resolver.
   private async recolectar(expedienteId: string, numero: string): Promise<{
@@ -135,6 +168,7 @@ export class DocumentosClienteService {
         if (a.subido_por) autorIds.add(a.subido_por);
         items.push({
           id:           `exp:${a.id}`,
+          archivoId:    a.id,
           nombre:       a.nombre_archivo,
           tipo,
           fuente:       'expediente',
@@ -183,6 +217,7 @@ export class DocumentosClienteService {
         for (const a of rows) {
           items.push({
             id:           `ofe:${a.id}`,
+            archivoId:    a.id,
             nombre:       a.nombre_archivo,
             tipo,
             fuente:       'oferta',
@@ -236,6 +271,7 @@ export class DocumentosClienteService {
                 if (a.subido_por) autorIds.add(a.subido_por);
                 items.push({
                   id:           `rep:${a.id}`,
+                  archivoId:    a.id,
                   nombre:       a.nombre_archivo,
                   tipo,
                   fuente:       'reporte',

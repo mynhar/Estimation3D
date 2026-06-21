@@ -283,15 +283,16 @@
                 </div>
               }
 
-              @if (fotosExp().length > 0) {
+              <!-- Fotos del sitio: solo las que agregó el estimador; videos/docs NO. -->
+              @if (fotosEstimador().length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'file.site_photos' | translate }}</p>
                 <div class="photos-grid">
-                  @for (f of fotosExp(); track f.id) {
+                  @for (f of fotosEstimador(); track f.id) {
                     <button class="photo-thumb" type="button"
-                            (click)="abrirFoto(f)" [title]="f.nombre_archivo">
-                      <img [src]="publicUrl(f.url_storage)"
-                           class="photo-thumb__img" [alt]="f.nombre_archivo" />
+                            (click)="abrirFotoVM(f)" [title]="f.nombre">
+                      <img [src]="f.url"
+                           class="photo-thumb__img" [alt]="f.nombre" />
                       <div class="photo-thumb__overlay" aria-hidden="true">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                              fill="none" stroke="currentColor" stroke-width="1.5"
@@ -307,81 +308,12 @@
                 </div>
               }
 
-              @if (videosExp().length > 0) {
-                <hr class="section-divider" />
-                <p class="info-label mb-2">{{ 'builder_offer.videos' | translate }}</p>
-                <div class="file-list">
-                  @for (v of videosExp(); track v.id) {
-                    <div class="file-row"
-                         [class.file-row--playing]="videoExpUrl() === publicUrl(v.url_storage)">
-                      <div class="file-row__icon file-row__icon--video">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5"
-                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                          <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-                        </svg>
-                      </div>
-                      <div class="file-row__info">
-                        <p class="file-row__name">{{ v.nombre_archivo }}</p>
-                        <p class="file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
-                      </div>
-                      <div class="file-row__actions">
-                        <button class="video-btn" type="button"
-                                [class.video-btn--active]="videoExpUrl() === publicUrl(v.url_storage)"
-                                (click)="toggleVideoExp(v)"
-                                [title]="videoExpUrl() === publicUrl(v.url_storage)
-                                         ? ('common.close' | translate)
-                                         : ('builder_offer.play' | translate)">
-                          @if (videoExpUrl() === publicUrl(v.url_storage)) {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5"
-                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                              <circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9"/>
-                            </svg>
-                          } @else {
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.5"
-                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                              <polygon points="5 3 19 12 5 21 5 3"/>
-                            </svg>
-                          }
-                        </button>
-                        <button class="btn-icon-sm" type="button"
-                                (click)="verDocumento(v)"
-                                [title]="'common.open' | translate">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                               fill="none" stroke="currentColor" stroke-width="1.5"
-                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                            <polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    @if (videoExpUrl() === publicUrl(v.url_storage)) {
-                      <div class="video-player">
-                        <video controls autoplay class="video-player__el" [src]="videoExpUrl()!">
-                          Tu navegador no soporta reproducción de video.
-                        </video>
-                        <button class="btn-close-player" type="button" (click)="toggleVideoExp(v)">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                               fill="none" stroke="currentColor" stroke-width="1.5"
-                               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                          </svg>
-                          {{ 'my_offer.close_player' | translate }}
-                        </button>
-                      </div>
-                    }
-                  }
-                </div>
-              }
-
-              @if (documentosExp().length > 0) {
+              <!-- Documentos técnicos: solo los que agregó el estimador; videos/fotos NO. -->
+              @if (documentosEstimador().length > 0) {
                 <hr class="section-divider" />
                 <p class="info-label mb-2">{{ 'file.technical_docs' | translate }}</p>
                 <div class="file-list">
-                  @for (d of documentosExp(); track d.id) {
+                  @for (d of documentosEstimador(); track d.id) {
                     <div class="file-row">
                       <div class="file-row__icon file-row__icon--doc">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -393,11 +325,11 @@
                         </svg>
                       </div>
                       <div class="file-row__info">
-                        <p class="file-row__name">{{ d.nombre_archivo }}</p>
-                        <p class="file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                        <p class="file-row__name">{{ d.nombre }}</p>
+                        <p class="file-row__meta">{{ formatTamano(d.tamanoBytes) }}</p>
                       </div>
                       <div class="file-row__actions">
-                        <button class="btn-icon-sm" type="button" (click)="verDocumento(d)"
+                        <button class="btn-icon-sm" type="button" (click)="verDocumentoVM(d)"
                                 [title]="'common.open' | translate">
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                fill="none" stroke="currentColor" stroke-width="1.5"

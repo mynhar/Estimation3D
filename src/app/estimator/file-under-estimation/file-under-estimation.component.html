@@ -57,10 +57,10 @@
               <i class="bi bi-hourglass-split"></i>{{ 'estimator_file.pill_in_estimation' | translate }}
             </span>
           }
-          @if (fotos().length > 0) {
+          @if (fotosEstimador().length > 0) {
             <span class="fued-badge fued-badge--info">
-              <i class="bi bi-images"></i>{{ fotos().length }}
-              {{ fotos().length !== 1 ? ('estimator_file.photos_many' | translate) : ('estimator_file.photos_one' | translate) }}
+              <i class="bi bi-images"></i>{{ fotosEstimador().length }}
+              {{ fotosEstimador().length !== 1 ? ('estimator_file.photos_many' | translate) : ('estimator_file.photos_one' | translate) }}
             </span>
           }
         </div>
@@ -139,14 +139,92 @@
           </div>
         </section>
 
+        <!-- Archivos del cliente (solo lectura): fotos, videos y documentos que
+             agregó el cliente. -->
+        @if (fotosCliente().length > 0 || videosCliente().length > 0 || documentosCliente().length > 0) {
+          <section class="fued-card">
+            <div class="fued-card__header">
+              <div class="fued-card__header-left">
+                <i class="bi bi-person-lines-fill"></i>
+                {{ 'estimator_file.client_files_title' | translate }}
+              </div>
+            </div>
+            <div class="fued-card__body">
+
+              <!-- Fotos del cliente -->
+              @if (fotosCliente().length > 0) {
+                <p class="fued-section-label">
+                  <i class="bi bi-images"></i> {{ 'file.site_photos' | translate }}
+                  <span class="fued-count-badge">{{ fotosCliente().length }}</span>
+                </p>
+                <div class="fued-photo-grid">
+                  @for (f of fotosCliente(); track f.id) {
+                    <div class="fued-photo-thumb">
+                      <img [src]="publicUrl(f.url_storage)"
+                           class="fued-photo-thumb__img"
+                           [title]="f.nombre_archivo"
+                           (click)="verArchivo(f)" />
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Videos del cliente -->
+              @if (videosCliente().length > 0) {
+                <p class="fued-section-label">
+                  <i class="bi bi-camera-video"></i> {{ 'builder_offer.videos' | translate }}
+                  <span class="fued-count-badge">{{ videosCliente().length }}</span>
+                </p>
+                @for (v of videosCliente(); track v.id) {
+                  <div class="fued-file-row">
+                    <div class="fued-file-row__icon"><i class="bi bi-camera-video"></i></div>
+                    <div class="fued-file-row__info">
+                      <p class="fued-file-row__name">{{ v.nombre_archivo }}</p>
+                      <p class="fued-file-row__meta">{{ formatTamano(v.tamano_bytes) }}</p>
+                    </div>
+                    <div class="fued-file-row__actions">
+                      <button class="fued-btn-icon" (click)="verArchivo(v)" [title]="'common.view' | translate">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+
+              <!-- Documentos del cliente -->
+              @if (documentosCliente().length > 0) {
+                <p class="fued-section-label">
+                  <i class="bi bi-file-earmark-text"></i> {{ 'file.technical_docs' | translate }}
+                  <span class="fued-count-badge">{{ documentosCliente().length }}</span>
+                </p>
+                @for (d of documentosCliente(); track d.id) {
+                  <div class="fued-file-row">
+                    <div class="fued-file-row__icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="fued-file-row__info">
+                      <p class="fued-file-row__name">{{ d.nombre_archivo }}</p>
+                      <p class="fued-file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
+                    </div>
+                    <div class="fued-file-row__actions">
+                      <button class="fued-btn-icon" (click)="verDocumento(d)" [title]="'common.view' | translate">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              }
+
+            </div>
+          </section>
+        }
+
         <!-- Fotos del sitio -->
         <section class="fued-card">
           <div class="fued-card__header">
             <div class="fued-card__header-left">
               <i class="bi bi-images"></i>
               {{ 'file.site_photos' | translate }}
-              @if (fotos().length > 0) {
-                <span class="fued-count-badge">{{ fotos().length }}</span>
+              @if (fotosEstimador().length > 0) {
+                <span class="fued-count-badge">{{ fotosEstimador().length }}</span>
               }
             </div>
             <label class="fued-btn-upload" [class.fued-btn-upload--busy]="subiendoFoto()">
@@ -163,14 +241,14 @@
             @if (errorFotos()) {
               <div class="fued-alert fued-alert--danger">{{ errorFotos() }}</div>
             }
-            @if (fotos().length === 0) {
+            @if (fotosEstimador().length === 0) {
               <div class="fued-empty-inline">
                 <i class="bi bi-camera"></i>
                 <p>{{ 'estimator_file.no_photos_hint' | translate }}</p>
               </div>
             } @else {
               <div class="fued-photo-grid">
-                @for (f of fotos(); track f.id) {
+                @for (f of fotosEstimador(); track f.id) {
                   <div class="fued-photo-thumb">
                     <img [src]="publicUrl(f.url_storage)"
                          class="fued-photo-thumb__img"
@@ -349,8 +427,8 @@
             <div class="fued-card__header-left">
               <i class="bi bi-file-earmark-text"></i>
               {{ 'file.technical_docs' | translate }}
-              @if (documentos().length > 0) {
-                <span class="fued-count-badge">{{ documentos().length }}</span>
+              @if (documentosEstimador().length > 0) {
+                <span class="fued-count-badge">{{ documentosEstimador().length }}</span>
               }
             </div>
             <label class="fued-btn-upload" [class.fued-btn-upload--busy]="subiendoDocumento()">
@@ -368,13 +446,13 @@
             @if (errorDocumentos()) {
               <div class="fued-alert fued-alert--danger">{{ errorDocumentos() }}</div>
             }
-            @if (documentos().length === 0) {
+            @if (documentosEstimador().length === 0) {
               <div class="fued-empty-inline">
                 <i class="bi bi-file-earmark"></i>
                 <p>{{ 'estimator_file.no_docs_hint' | translate }}</p>
               </div>
             } @else {
-              @for (d of documentos(); track d.id) {
+              @for (d of documentosEstimador(); track d.id) {
                 <div class="fued-file-row">
                   <div class="fued-file-row__icon">
                     <i class="bi bi-file-earmark-text"></i>
@@ -384,7 +462,7 @@
                     <p class="fued-file-row__meta">{{ formatTamano(d.tamano_bytes) }}</p>
                   </div>
                   <div class="fued-file-row__actions">
-                    <button class="fued-btn-icon" (click)="verArchivo(d)" [title]="'common.view' | translate">
+                    <button class="fued-btn-icon" (click)="verDocumento(d)" [title]="'common.view' | translate">
                       <i class="bi bi-eye"></i>
                     </button>
                     <button class="fued-btn-icon fued-btn-icon--danger" (click)="eliminarArchivo(d, 'documento')"

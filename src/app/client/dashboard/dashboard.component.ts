@@ -10,6 +10,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
+import { DocumentosClienteService, ArchivoVM } from '../../services/documentos-cliente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { SeguimientoService } from '../../services/seguimiento.service';
 import { ArchivoRow, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
@@ -106,6 +107,7 @@ export class DashboardComponent implements OnInit {
   private auth               = inject(AuthSupabaseService);
   private expedienteService  = inject(ExpedienteService);
   private archivoService     = inject(ArchivoService);
+  private documentosService  = inject(DocumentosClienteService);
   private seguimientoService = inject(SeguimientoService);
   private translate          = inject(TranslateService);
   private sanitizer          = inject(DomSanitizer);
@@ -135,6 +137,9 @@ export class DashboardComponent implements OnInit {
 
   fotosExp         = signal<ArchivoRow[]>([]);
   documentosExp    = signal<ArchivoRow[]>([]);
+  // "Mis documentos": documentos del expediente de TODAS las fuentes (expediente,
+  // estimación, oferta, contrato, obra) y roles — paridad con my-documents/list.
+  documentosVM     = signal<ArchivoVM[]>([]);
   contratoCompleto = signal<ContratoClienteInfo | null>(null);
   contratoPdfUrl   = signal<string | null>(null);
   // Seguimiento de obra — avance físico de los trabajos (seguimiento_obra).
@@ -192,7 +197,6 @@ export class DashboardComponent implements OnInit {
 
   tieneEstimacion = computed(() => !!this.detalleActivo()?.estimador_nombre);
   tieneContrato   = computed(() => !!this.contratoCompleto());
-  todosDocs       = computed(() => [...this.fotosExp(), ...this.documentosExp()]);
 
   // ── Avance computed ───────────────────────────────────────────────────────
 
@@ -607,6 +611,7 @@ export class DashboardComponent implements OnInit {
     this.videos.set([]);
     this.fotosExp.set([]);
     this.documentosExp.set([]);
+    this.documentosVM.set([]);
     this.contratoCompleto.set(null);
     this.contratoPdfUrl.set(null);
     this.obra.set(null);
@@ -629,6 +634,44 @@ export class DashboardComponent implements OnInit {
       this.documentosExp.set(archivos.documentos);
     } catch (e: any) {
       console.error('[Dashboard delete]', e.message);
+    } finally {
+      this.eliminando.set(null);
+    }
+  }
+
+  /**
+   * Carga en "Mis documentos" los documentos del expediente de todas las fuentes
+   * (expediente, estimación, oferta, contrato, obra) y roles, vía el mismo
+   * servicio que usa client/my-documents/list. Solo tipo 'documento'.
+   */
+  private async cargarDocumentosVM(id: string): Promise<void> {
+    const clienteId = this.user()?.id ?? '';
+    const numero = this.expedientes().find(e => this.expId(e) === id)?.numero ?? '';
+    try {
+      const archivos = await this.documentosService.getArchivosDeExpediente(id, numero, clienteId);
+      this.documentosVM.set(archivos.filter(a => a.tipo === 'documento'));
+    } catch {
+      this.documentosVM.set([]);
+    }
+  }
+
+  /** Borra un documento propio del expediente y recarga la lista. */
+  async eliminarDocumento(doc: ArchivoVM): Promise<void> {
+    if (!doc.esPropio || !doc.archivoId || this.eliminando() !== null) return;
+    this.eliminando.set(doc.id);
+    try {
+      await this.archivoService.eliminar({
+        id:             doc.archivoId,
+        nombre_archivo: doc.nombre,
+        url_storage:    doc.urlStorage,
+        mime_type:      doc.mimeType,
+        tamano_bytes:   doc.tamanoBytes,
+        subido_por:     doc.subidoPor ?? undefined,
+      });
+      const id = this.idSeleccionado() ?? this.expedienteActivo()?.id;
+      if (id) await this.cargarDocumentosVM(id);
+    } catch (e: any) {
+      console.error('[Dashboard delete doc]', e.message);
     } finally {
       this.eliminando.set(null);
     }
@@ -722,6 +765,10 @@ export class DashboardComponent implements OnInit {
       this.ofertasHistorial.set([]);
       this.contratoHistorial.set(null);
     }
+
+    // "Mis documentos": carga los documentos del expediente de todas las fuentes
+    // (expediente, estimación, oferta, contrato, obra) — igual que my-documents.
+    await this.cargarDocumentosVM(id);
 
     this.calInicializar();
     this.cargandoDetalle.set(false);

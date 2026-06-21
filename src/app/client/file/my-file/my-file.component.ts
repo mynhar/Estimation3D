@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { OfertaService } from '../../../services/oferta.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
+import { DocumentosClienteService, ArchivoVM } from '../../../services/documentos-cliente.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../../models';
 import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
@@ -24,6 +25,7 @@ export class MyFileComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private ofertaService     = inject(OfertaService);
   private archivoService    = inject(ArchivoService);
+  private documentosService = inject(DocumentosClienteService);
   private auth              = inject(AuthSupabaseService);
   private contratoRepo      = inject(ContratoRepository);
   private route             = inject(ActivatedRoute);
@@ -34,6 +36,11 @@ export class MyFileComponent implements OnInit {
   detalle        = signal<ExpedienteVistaCliente | null>(null);
   ofertaAceptada = signal<OfertaConConstructor | null>(null);
   fotos          = signal<ArchivoRow[]>([]);
+  // "Fotos del sitio" / "Documentos técnicos": archivos del expediente de TODAS
+  // las fuentes (expediente, oferta, contrato, obra) y roles — paridad con
+  // my-documents/list.
+  fotosVM        = signal<ArchivoVM[]>([]);
+  documentosVM   = signal<ArchivoVM[]>([]);
   videos         = signal<ArchivoRow[]>([]);
   documentos     = signal<ArchivoRow[]>([]);
   contrato       = signal<ContratoClienteView | null>(null);
@@ -46,12 +53,12 @@ export class MyFileComponent implements OnInit {
   currentUserId   = signal<string | null>(null);
   eliminando      = signal<string | null>(null);
 
+  // "Fotos del sitio" / "Documentos técnicos" listan lo de OTROS roles (fotosVM /
+  // documentosVM, sin el cliente). "Mis archivos" lista lo que agregó el cliente.
   misFotos    = computed(() => this.fotos().filter(f => f.subido_por === this.currentUserId()));
   misVideos   = computed(() => this.videos().filter(f => f.subido_por === this.currentUserId()));
   misDocs     = computed(() => this.documentos().filter(f => f.subido_por === this.currentUserId()));
-  otrosFotos  = computed(() => this.fotos().filter(f => f.subido_por !== this.currentUserId()));
   otrosVideos = computed(() => this.videos().filter(f => f.subido_por !== this.currentUserId()));
-  otrosDocs   = computed(() => this.documentos().filter(f => f.subido_por !== this.currentUserId()));
 
   readonly ESTADO_CFG: Record<string, { clase: string; icono: string }> = {
     nuevo:         { clase: 'bg-primary-subtle text-primary',            icono: 'bi-inbox' },
@@ -135,6 +142,7 @@ export class MyFileComponent implements OnInit {
           .then(url => this.contratoPdfUrl.set(url))
           .catch(() => {});
       }
+      await this.cargarArchivosVM();
     } catch (e: any) {
       console.error('[MyFile]', e.message);
       this.errorMsg.set(e.message);
@@ -157,6 +165,7 @@ export class MyFileComponent implements OnInit {
       this.fotos.set(archivos.fotos);
       this.videos.set(archivos.videos);
       this.documentos.set(archivos.documentos);
+      if (tipo === 'foto' || tipo === 'documento') await this.cargarArchivosVM();
       input.value = '';
     } catch (e: any) {
       this.errorSubida.set(e.message ?? 'upload_error');
@@ -174,6 +183,62 @@ export class MyFileComponent implements OnInit {
       this.fotos.set(archivos.fotos);
       this.videos.set(archivos.videos);
       this.documentos.set(archivos.documentos);
+    } catch (e: any) {
+      this.errorSubida.set(e.message ?? 'delete_error');
+    } finally {
+      this.eliminando.set(null);
+    }
+  }
+
+  /**
+   * Carga "Fotos del sitio" y "Documentos técnicos": fotos y documentos del
+   * expediente de todas las fuentes (expediente, oferta, contrato, obra) y
+   * roles, vía el mismo servicio que client/my-documents/list. Una sola consulta.
+   */
+  private async cargarArchivosVM(): Promise<void> {
+    const clienteId = this.currentUserId() ?? '';
+    const numero    = this.detalle()?.numero ?? '';
+    try {
+      const archivos = await this.documentosService.getArchivosDeExpediente(this.expedienteId, numero, clienteId);
+      // Excluir explícitamente lo que aportó el cliente: estas secciones muestran
+      // solo archivos de estimador / constructor / administrador (todas las fuentes).
+      const deOtros = archivos.filter(a => a.subidoPorRol !== 'cliente');
+      this.fotosVM.set(deOtros.filter(a => a.tipo === 'foto'));
+      this.documentosVM.set(deOtros.filter(a => a.tipo === 'documento'));
+    } catch {
+      this.fotosVM.set([]);
+      this.documentosVM.set([]);
+    }
+  }
+
+  /** Abre el visor con la URL ya resuelta del VM. */
+  abrirFotoVM(foto: ArchivoVM): void {
+    this.fotoAmpliada.set(foto.url);
+  }
+
+  /** Abre el visor para una foto propia (ArchivoRow). */
+  abrirFoto(archivo: ArchivoRow): void {
+    this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
+  }
+
+  /** Borra una foto/documento propio del expediente y recarga las galerías. */
+  async eliminarArchivoVM(item: ArchivoVM): Promise<void> {
+    if (!item.esPropio || !item.archivoId || this.eliminando() !== null) return;
+    this.eliminando.set(item.id);
+    this.errorSubida.set('');
+    try {
+      await this.archivoService.eliminar({
+        id:             item.archivoId,
+        nombre_archivo: item.nombre,
+        url_storage:    item.urlStorage,
+        mime_type:      item.mimeType,
+        tamano_bytes:   item.tamanoBytes,
+        subido_por:     item.subidoPor ?? undefined,
+      });
+      const archivos = await this.archivoService.cargarTodos(this.expedienteId);
+      this.fotos.set(archivos.fotos);
+      this.documentos.set(archivos.documentos);
+      await this.cargarArchivosVM();
     } catch (e: any) {
       this.errorSubida.set(e.message ?? 'delete_error');
     } finally {
@@ -229,9 +294,6 @@ export class MyFileComponent implements OnInit {
     return `${(bytes / 1_048_576).toFixed(1)} MB`;
   }
 
-  abrirFoto(archivo: ArchivoRow) {
-    this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
-  }
 
   cerrarFoto() { this.fotoAmpliada.set(null); }
 
