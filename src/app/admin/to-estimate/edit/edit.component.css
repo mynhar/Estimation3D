@@ -1,9 +1,12 @@
 /* ── Root ─────────────────────────────────────────────────────────────────── */
+:host { display: block; max-width: 100%; }
+
 .fued-root {
   padding: var(--ds-space-5) var(--ds-space-6);
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-5);
+  max-width: 100%;
 }
 
 /* ── Spinner ──────────────────────────────────────────────────────────────── */
@@ -609,8 +612,17 @@
   .fued-main { grid-template-columns: 1fr 340px; }
 }
 @media (max-width: 860px) {
-  .fued-main { grid-template-columns: 1fr; }
+  .fued-main {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+  .fued-col-main { min-width: 0; }
   .fued-col-side { position: static; }
+
+  /* Red de seguridad móvil: ningún descendiente provoca scroll lateral.
+     Aquí el sidebar ya es `position: static`, así que `overflow-x: hidden`
+     —soportado en todos los navegadores— no rompe ningún sticky. */
+  .fued-root { overflow-x: hidden; }
 }
 @media (max-width: 600px) {
   .fued-root { padding: var(--ds-space-4) var(--ds-space-3); }

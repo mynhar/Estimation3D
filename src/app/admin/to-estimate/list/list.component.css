@@ -377,6 +377,75 @@
   margin-bottom: 0;
 }
 
+/* ── Mobile cards ─────────────────────────────────────────────────────────── */
+.file-cards { display: flex; flex-direction: column; }
+
+.file-card {
+  position: relative;
+  padding: var(--ds-space-4) var(--ds-space-9) var(--ds-space-4) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  cursor: pointer;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.file-card:last-child { border-bottom: none; }
+.file-card:hover,
+.file-card:active { background: var(--ds-gold-faint); }
+
+.file-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-2);
+}
+
+.file-card__body { margin-bottom: var(--ds-space-3); }
+
+/* El nombre y el servicio deben poder envolver dentro de la tarjeta */
+.file-card__name,
+.file-card__service { white-space: normal; }
+
+.file-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  margin: 0;
+}
+.file-card__meta-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+.file-card__meta-item dt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink-muted);
+  margin: 0;
+  flex-shrink: 0;
+}
+.file-card__meta-item dd {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  text-align: right;
+  min-width: 0;
+}
+
+.file-card__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--ds-space-4);
+  transform: translateY(-50%);
+  color: var(--ds-border-strong);
+  font-size: var(--ds-text-sm);
+}
+
 /* ── Table footer ─────────────────────────────────────────────────────────── */
 .table-footer {
   padding: var(--ds-space-3) var(--ds-space-4);
@@ -399,8 +468,4 @@
     align-items: flex-start;
     gap: var(--ds-space-2);
   }
-
-  .col-estimador { display: none; }
-  .col-date      { display: none; }
-  .col-costo     { display: none; }
 }

@@ -108,117 +108,170 @@
 
     </div>
 
-    <!-- ── Tabla ──────────────────────────────────────────────────────────────── -->
+    <!-- ── Tabla / Tarjetas ─────────────────────────────────────────────────── -->
     <div class="table-card">
-      <div class="table-responsive">
-        <table class="table table-admin align-middle mb-0">
-          <thead>
-            <tr>
-              <th class="col-num">{{ 'to_estimate.col_number' | translate }}</th>
-              <th class="col-identity">{{ 'to_estimate.col_client' | translate }} / {{ 'to_estimate.col_service' | translate }}</th>
-              <th class="col-date">{{ 'to_estimate.col_visit_date' | translate }}</th>
-              <th class="col-estimador">{{ 'to_estimate.col_estimator' | translate }}</th>
-              <th>{{ 'to_estimate.col_status' | translate }}</th>
-              <th class="col-date">{{ 'to_estimate.col_real_visit' | translate }}</th>
-              <th class="col-costo">{{ 'to_estimate.col_estimated_cost' | translate }}</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (e of expedientesPaginados(); track e.id) {
-              <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
+      @if (expedientesPaginados().length === 0) {
+        <!-- ── Estado vacío (compartido) ──────────────────────────────────── -->
+        <div class="empty-state empty-state--table">
+          @if (hayFiltros()) {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'to_estimate.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'to_estimate.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-clipboard2"></i>
+            </div>
+            <p class="empty-state__title">{{ 'to_estimate.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'to_estimate.no_data_hint' | translate }}</p>
+          }
+        </div>
 
-                <!-- Número -->
-                <td class="col-num">
-                  <span class="exp-num">{{ e.numero }}</span>
-                </td>
+      } @else {
 
-                <!-- Cliente / Servicio -->
-                <td class="col-identity">
-                  <span class="cell-primary">{{ e.cliente_nombre }}</span>
-                  <span class="cell-secondary">{{ servicioNombre(e) }}</span>
-                </td>
-
-                <!-- Fecha visita prevista -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
-                </td>
-
-                <!-- Estimador -->
-                <td class="col-estimador">
-                  @if (e.estimador_nombre) {
-                    <span class="cell-primary">{{ e.estimador_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Estado -->
-                <td>
-                  <span class="estado-badge {{ estadoBadge(e.estado) }}">
-                    {{ ('to_estimate.status_' + e.estado) | translate }}
-                  </span>
-                </td>
-
-                <!-- Visita real -->
-                <td class="col-date">
-                  @if (e.fecha_visita_real) {
-                    <span class="cell-primary cell-real-date">
-                      <i class="bi bi-check2 me-1"></i>{{ formatFecha(e.fecha_visita_real) }}
-                    </span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Costo estimado -->
-                <td class="col-costo">
-                  @if (e.costo_estimado != null) {
-                    <span class="cell-costo">{{ formatCosto(e.costo_estimado, e.costo_estimado_max) }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Acciones -->
-                <td class="col-actions" (click)="$event.stopPropagation()">
-                  <a [routerLink]="editRoute(e)"
-                     class="action-btn"
-                     [title]="'to_estimate.edit_btn' | translate">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                </td>
-
-              </tr>
-            } @empty {
+        <!-- ── Tabla (escritorio) ───────────────────────────────────────────── -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="8">
-                  <div class="empty-state empty-state--table">
-                    @if (hayFiltros()) {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-funnel"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'to_estimate.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'to_estimate.no_results_hint' | translate }}</p>
-                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
-                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-clipboard2"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'to_estimate.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'to_estimate.no_data_hint' | translate }}</p>
-                    }
-                  </div>
-                </td>
+                <th class="col-num">{{ 'to_estimate.col_number' | translate }}</th>
+                <th class="col-identity">{{ 'to_estimate.col_client' | translate }} / {{ 'to_estimate.col_service' | translate }}</th>
+                <th class="col-date">{{ 'to_estimate.col_visit_date' | translate }}</th>
+                <th class="col-estimador">{{ 'to_estimate.col_estimator' | translate }}</th>
+                <th>{{ 'to_estimate.col_status' | translate }}</th>
+                <th class="col-date">{{ 'to_estimate.col_real_visit' | translate }}</th>
+                <th class="col-costo">{{ 'to_estimate.col_estimated_cost' | translate }}</th>
+                <th class="col-actions"></th>
               </tr>
-            }
+            </thead>
+            <tbody>
+              @for (e of expedientesPaginados(); track e.id) {
+                <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
 
-          </tbody>
-        </table>
-      </div>
+                  <!-- Número -->
+                  <td class="col-num">
+                    <span class="exp-num">{{ e.numero }}</span>
+                  </td>
+
+                  <!-- Cliente / Servicio -->
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ e.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(e) }}</span>
+                  </td>
+
+                  <!-- Fecha visita prevista -->
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
+                  </td>
+
+                  <!-- Estimador -->
+                  <td class="col-estimador">
+                    @if (e.estimador_nombre) {
+                      <span class="cell-primary">{{ e.estimador_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Estado -->
+                  <td>
+                    <span class="estado-badge {{ estadoBadge(e.estado) }}">
+                      {{ ('to_estimate.status_' + e.estado) | translate }}
+                    </span>
+                  </td>
+
+                  <!-- Visita real -->
+                  <td class="col-date">
+                    @if (e.fecha_visita_real) {
+                      <span class="cell-primary cell-real-date">
+                        <i class="bi bi-check2 me-1"></i>{{ formatFecha(e.fecha_visita_real) }}
+                      </span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Costo estimado -->
+                  <td class="col-costo">
+                    @if (e.costo_estimado != null) {
+                      <span class="cell-costo">{{ formatCosto(e.costo_estimado, e.costo_estimado_max) }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Acciones -->
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <a [routerLink]="editRoute(e)"
+                       class="action-btn"
+                       [title]="'to_estimate.edit_btn' | translate">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── Tarjetas (móvil) ─────────────────────────────────────────────── -->
+        <ul class="file-cards d-md-none list-unstyled mb-0">
+          @for (e of expedientesPaginados(); track e.id) {
+            <li class="file-card" (click)="irAEditar(e.id)">
+
+              <div class="file-card__top">
+                <span class="exp-num">{{ e.numero }}</span>
+                <span class="estado-badge {{ estadoBadge(e.estado) }}">
+                  {{ ('to_estimate.status_' + e.estado) | translate }}
+                </span>
+              </div>
+
+              <div class="file-card__body">
+                <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
+                <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+              </div>
+
+              <dl class="file-card__meta">
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-calendar3" aria-hidden="true"></i>{{ 'to_estimate.col_visit_date' | translate }}</dt>
+                  <dd>{{ formatFecha(e.fecha_visita) }}</dd>
+                </div>
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-calendar-check" aria-hidden="true"></i>{{ 'to_estimate.col_real_visit' | translate }}</dt>
+                  <dd>
+                    @if (e.fecha_visita_real) {
+                      <span class="cell-real-date">{{ formatFecha(e.fecha_visita_real) }}</span>
+                    } @else { — }
+                  </dd>
+                </div>
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-person" aria-hidden="true"></i>{{ 'to_estimate.col_estimator' | translate }}</dt>
+                  <dd>{{ e.estimador_nombre || '—' }}</dd>
+                </div>
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-cash-coin" aria-hidden="true"></i>{{ 'to_estimate.col_estimated_cost' | translate }}</dt>
+                  <dd>
+                    @if (e.costo_estimado != null) {
+                      <span class="cell-costo">{{ formatCosto(e.costo_estimado, e.costo_estimado_max) }}</span>
+                    } @else { — }
+                  </dd>
+                </div>
+              </dl>
+
+              <span class="file-card__chevron" aria-hidden="true">
+                <i class="bi bi-chevron-right"></i>
+              </span>
+            </li>
+          }
+        </ul>
+
+      }
 
       <!-- ── Paginación ──────────────────────────────────────────────────────── -->
       @if (expedientesFiltrados().length > 0) {

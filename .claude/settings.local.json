@@ -7,7 +7,8 @@
       "Bash(Format-Table -AutoSize)",
       "PowerShell($pw = Test-Path \"node_modules/playwright\"; $pwc = Test-Path \"node_modules/playwright-core\"; $pup = Test-Path \"node_modules/puppeteer\"; Write-Output \"playwright=$pw playwright-core=$pwc puppeteer=$pup\"; $chrome = Get-Command chrome -ErrorAction SilentlyContinue; $edge = Test-Path \"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\"; Write-Output \"edge=$edge\")",
       "PowerShell($edge=\"C:\\\\Program Files \\(x86\\)\\\\Microsoft\\\\Edge\\\\Application\\\\msedge.exe\"; & $edge --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --window-size=320,720 --screenshot=\"C:\\\\tmp\\\\price-320.png\" \"C:\\\\tmp\\\\price-harness.html\" 2>$null; Start-Sleep -Milliseconds 500; if\\(Test-Path \"C:\\\\tmp\\\\price-320.png\"\\){Write-Output \"OK $\\(\\(Get-Item C:\\\\tmp\\\\price-320.png\\).Length\\) bytes\"}else{Write-Output \"NO SCREENSHOT\"})",
-      "Bash(read f *)"
+      "Bash(read f *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(Object.keys\\({...p.dependencies,...p.devDependencies}\\).filter\\(d=>/playwright|puppeteer|cypress|karma/i.test\\(d\\)\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }

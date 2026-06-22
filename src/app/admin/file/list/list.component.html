@@ -109,116 +109,166 @@
 
     </div>
 
-    <!-- ── Tabla ────────────────────────────────────────────────────────────── -->
+    <!-- ── Tabla / Tarjetas ─────────────────────────────────────────────────── -->
     <div class="table-card">
-      <div class="table-responsive">
-        <table class="table table-admin align-middle mb-0">
-          <thead>
-            <tr>
-              <th class="col-num">#</th>
-              <th>{{ 'admin_file.col_client' | translate }} / {{ 'admin_file.col_service' | translate }}</th>
-              <th>{{ 'admin_file.col_visit_date' | translate }}</th>
-              <th>{{ 'admin_file.col_status' | translate }}</th>
-              <th>{{ 'admin_file.col_estimator' | translate }}</th>
-              <th class="text-end">{{ 'admin_file.col_price' | translate }}</th>
-              <th class="col-actions"></th>
-            </tr>
-          </thead>
-          <tbody>
 
-            @for (e of expedientes(); track e.id) {
-              <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
+      @if (expedientes().length === 0) {
+        <!-- ── Estado vacío (compartido) ──────────────────────────────────── -->
+        <div class="empty-state empty-state--table">
+          @if (hayFiltros()) {
+            <div class="empty-state__icon">
+              <i class="bi bi-funnel"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_file.no_results' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_file.no_results_hint' | translate }}</p>
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          } @else {
+            <div class="empty-state__icon">
+              <i class="bi bi-folder2-open"></i>
+            </div>
+            <p class="empty-state__title">{{ 'admin_file.no_data' | translate }}</p>
+            <p class="empty-state__desc">{{ 'admin_file.no_data_hint' | translate }}</p>
+            <a routerLink="/admin/file/create" class="btn btn-primary btn-sm mt-2">
+              <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
+            </a>
+          }
+        </div>
 
-                <!-- Número -->
-                <td class="col-num">
-                  <span class="exp-num">{{ e.numero }}</span>
-                </td>
+      } @else {
 
-                <!-- Cliente / Servicio -->
-                <td class="col-identity">
-                  <span class="cell-primary">{{ e.cliente_nombre }}</span>
-                  <span class="cell-secondary">{{ servicioNombre(e) }}</span>
-                </td>
-
-                <!-- Visita -->
-                <td class="col-date">
-                  <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
-                  @if (e.fecha_visita_real) {
-                    <span class="cell-secondary cell-real-date">
-                      <i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}
-                    </span>
-                  }
-                </td>
-
-                <!-- Estado -->
-                <td>
-                  <span class="estado-badge {{ estadoBadge(e.estado) }}">
-                    {{ ('admin_file.status_' + e.estado) | translate }}
-                  </span>
-                </td>
-
-                <!-- Estimador -->
-                <td class="col-estimador">
-                  @if (e.estimador_nombre) {
-                    <span class="cell-primary">{{ e.estimador_nombre }}</span>
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Precio / Inicio -->
-                <td class="text-end col-precio">
-                  @if (e.oferta_precio) {
-                    <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
-                    @if (e.oferta_fecha_inicio) {
-                      <span class="cell-secondary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
-                    }
-                  } @else {
-                    <span class="cell-muted">—</span>
-                  }
-                </td>
-
-                <!-- Acciones -->
-                <td class="col-actions" (click)="$event.stopPropagation()">
-                  <a [routerLink]="['/admin/file/edit', e.id]"
-                     class="action-btn"
-                     [title]="'admin_file.edit_btn' | translate">
-                    <i class="bi bi-pencil"></i>
-                  </a>
-                </td>
-
-              </tr>
-            } @empty {
+        <!-- ── Tabla (escritorio) ───────────────────────────────────────────── -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
               <tr>
-                <td colspan="7">
-                  <div class="empty-state empty-state--table">
-                    @if (hayFiltros()) {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-funnel"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_file.no_results' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_file.no_results_hint' | translate }}</p>
-                      <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
-                        <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
-                      </button>
-                    } @else {
-                      <div class="empty-state__icon">
-                        <i class="bi bi-folder2-open"></i>
-                      </div>
-                      <p class="empty-state__title">{{ 'admin_file.no_data' | translate }}</p>
-                      <p class="empty-state__desc">{{ 'admin_file.no_data_hint' | translate }}</p>
-                      <a routerLink="/admin/file/create" class="btn btn-primary btn-sm mt-2">
-                        <i class="bi bi-plus me-1"></i>{{ 'admin_file.add_btn' | translate }}
-                      </a>
-                    }
-                  </div>
-                </td>
+                <th class="col-num">#</th>
+                <th>{{ 'admin_file.col_client' | translate }} / {{ 'admin_file.col_service' | translate }}</th>
+                <th>{{ 'admin_file.col_visit_date' | translate }}</th>
+                <th>{{ 'admin_file.col_status' | translate }}</th>
+                <th>{{ 'admin_file.col_estimator' | translate }}</th>
+                <th class="text-end">{{ 'admin_file.col_price' | translate }}</th>
+                <th class="col-actions"></th>
               </tr>
-            }
+            </thead>
+            <tbody>
+              @for (e of expedientes(); track e.id) {
+                <tr class="table-row table-row--clickable" (click)="irAEditar(e.id)">
 
-          </tbody>
-        </table>
-      </div>
+                  <!-- Número -->
+                  <td class="col-num">
+                    <span class="exp-num">{{ e.numero }}</span>
+                  </td>
+
+                  <!-- Cliente / Servicio -->
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ e.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(e) }}</span>
+                  </td>
+
+                  <!-- Visita -->
+                  <td class="col-date">
+                    <span class="cell-primary">{{ formatFecha(e.fecha_visita) }}</span>
+                    @if (e.fecha_visita_real) {
+                      <span class="cell-secondary cell-real-date">
+                        <i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}
+                      </span>
+                    }
+                  </td>
+
+                  <!-- Estado -->
+                  <td>
+                    <span class="estado-badge {{ estadoBadge(e.estado) }}">
+                      {{ ('admin_file.status_' + e.estado) | translate }}
+                    </span>
+                  </td>
+
+                  <!-- Estimador -->
+                  <td class="col-estimador">
+                    @if (e.estimador_nombre) {
+                      <span class="cell-primary">{{ e.estimador_nombre }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Precio / Inicio -->
+                  <td class="text-end col-precio">
+                    @if (e.oferta_precio) {
+                      <span class="cell-precio">{{ formatPrecio(e.oferta_precio) }}</span>
+                      @if (e.oferta_fecha_inicio) {
+                        <span class="cell-secondary">{{ formatFecha(e.oferta_fecha_inicio) }}</span>
+                      }
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Acciones -->
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <a [routerLink]="['/admin/file/edit', e.id]"
+                       class="action-btn"
+                       [title]="'admin_file.edit_btn' | translate">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── Tarjetas (móvil) ─────────────────────────────────────────────── -->
+        <ul class="file-cards d-md-none list-unstyled mb-0">
+          @for (e of expedientes(); track e.id) {
+            <li class="file-card" (click)="irAEditar(e.id)">
+
+              <div class="file-card__top">
+                <span class="exp-num">{{ e.numero }}</span>
+                <span class="estado-badge {{ estadoBadge(e.estado) }}">
+                  {{ ('admin_file.status_' + e.estado) | translate }}
+                </span>
+              </div>
+
+              <div class="file-card__body">
+                <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
+                <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+              </div>
+
+              <dl class="file-card__meta">
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-calendar3" aria-hidden="true"></i>{{ 'admin_file.col_visit_date' | translate }}</dt>
+                  <dd>
+                    {{ formatFecha(e.fecha_visita) }}
+                    @if (e.fecha_visita_real) {
+                      <span class="cell-real-date"><i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}</span>
+                    }
+                  </dd>
+                </div>
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-person" aria-hidden="true"></i>{{ 'admin_file.col_estimator' | translate }}</dt>
+                  <dd>{{ e.estimador_nombre || '—' }}</dd>
+                </div>
+                <div class="file-card__meta-item">
+                  <dt><i class="bi bi-cash-coin" aria-hidden="true"></i>{{ 'admin_file.col_price' | translate }}</dt>
+                  <dd>
+                    @if (e.oferta_precio) {
+                      <span class="cell-precio d-inline">{{ formatPrecio(e.oferta_precio) }}</span>
+                    } @else { — }
+                  </dd>
+                </div>
+              </dl>
+
+              <span class="file-card__chevron" aria-hidden="true">
+                <i class="bi bi-chevron-right"></i>
+              </span>
+            </li>
+          }
+        </ul>
+
+      }
 
       <!-- ── Paginación ───────────────────────────────────────────────────── -->
       @if (totalItems() > POR_PAGINA) {
