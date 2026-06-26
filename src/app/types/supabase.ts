@@ -815,7 +815,7 @@ export type Database = {
       servicio: {
         Row: {
           activo: boolean
-          codigo: Database["public"]["Enums"]["tipo_servicio"]
+          codigo: string
           descripcion_en: string | null
           descripcion_es: string | null
           descripcion_fr: string | null
@@ -826,7 +826,7 @@ export type Database = {
         }
         Insert: {
           activo?: boolean
-          codigo: Database["public"]["Enums"]["tipo_servicio"]
+          codigo: string
           descripcion_en?: string | null
           descripcion_es?: string | null
           descripcion_fr?: string | null
@@ -837,7 +837,7 @@ export type Database = {
         }
         Update: {
           activo?: boolean
-          codigo?: Database["public"]["Enums"]["tipo_servicio"]
+          codigo?: string
           descripcion_en?: string | null
           descripcion_es?: string | null
           descripcion_fr?: string | null
@@ -946,13 +946,6 @@ export type Database = {
         | "edificio"
         | "local_comercial"
         | "otro"
-      tipo_servicio:
-        | "descontaminacion_moho"
-        | "desamiantado"
-        | "danos_por_agua"
-        | "demolicion_interior"
-        | "aislamiento"
-        | "fundacion_dren_frances"
       tipo_visitante: "inspector" | "dueno" | "estimador"
     }
     CompositeTypes: {
@@ -1087,7 +1080,7 @@ export type EstadoOferta    = Database["public"]["Enums"]["estado_oferta"]
 export type EstadoContrato  = Database["public"]["Enums"]["estado_contrato"]
 export type TipoInmueble    = Database["public"]["Enums"]["tipo_inmueble"]
 export type TipoArchivo     = Database["public"]["Enums"]["tipo_archivo"]
-export type TipoServicio    = Database["public"]["Enums"]["tipo_servicio"]
+export type TipoServicio    = string
 export type EstadoSeguimiento = Database["public"]["Enums"]["estado_seguimiento"]
 
 export const Constants = {
@@ -1134,14 +1127,6 @@ export const Constants = {
         "edificio",
         "local_comercial",
         "otro",
-      ],
-      tipo_servicio: [
-        "descontaminacion_moho",
-        "desamiantado",
-        "danos_por_agua",
-        "demolicion_interior",
-        "aislamiento",
-        "fundacion_dren_frances",
       ],
       tipo_visitante: ["inspector", "dueno", "estimador"],
     },
