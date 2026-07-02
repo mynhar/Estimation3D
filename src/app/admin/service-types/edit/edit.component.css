@@ -277,6 +277,248 @@
 }
 .form-check-label small { color: var(--ds-ink-muted); }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   FASES DEL SERVICIO
+════════════════════════════════════════════════════════════════════════════ */
+.fases-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  margin-bottom: var(--ds-space-2);
+}
+
+.fases-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5em;
+  padding: 0 0.4em;
+  margin-left: var(--ds-space-1);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-ink-muted);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-pill);
+}
+
+/* ── Formulario de alta/edición ──────────────────────────────────────────── */
+.fase-form {
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: var(--ds-space-4);
+}
+
+.fase-form__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  margin-bottom: var(--ds-space-3);
+}
+.fase-form__title .bi { color: var(--ds-gold-active); }
+
+.fase-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-4);
+  padding-top: var(--ds-space-3);
+  border-top: 1px solid var(--ds-border);
+}
+
+/* ── Lista de fases ──────────────────────────────────────────────────────── */
+.fase-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+
+.fase-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.fase-item:hover {
+  border-color: var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-xs);
+}
+.fase-item--inactive { opacity: 0.6; }
+.fase-item--editing {
+  border-color: var(--ds-gold);
+  box-shadow: 0 0 0 1px var(--ds-gold);
+}
+.fase-item--skel:hover { border-color: var(--ds-border); box-shadow: none; }
+
+/* Número de orden */
+.fase-orden {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  flex-shrink: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-bold);
+  color: var(--ds-gold-active);
+  background: var(--ds-gold-faint);
+  border: 1px solid rgba(212, 185, 110, 0.3);
+  border-radius: var(--ds-radius-circle);
+}
+
+.fase-main { flex: 1 1 auto; }
+.fase-nombre {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fase-codigo {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fase-status { flex-shrink: 0; }
+
+/* Acciones (editar / eliminar / confirmar) */
+.fase-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  flex-shrink: 0;
+}
+.fase-confirm {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+  font-weight: var(--ds-weight-semibold);
+  margin-right: var(--ds-space-1);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  color: var(--ds-ink-muted);
+  transition: var(--ds-transition-color),
+              border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.icon-btn:hover:not(:disabled) {
+  color: var(--ds-ink);
+  border-color: var(--ds-border-strong);
+}
+.icon-btn--danger:hover:not(:disabled) {
+  color: var(--ds-danger);
+  border-color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+}
+.icon-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Estado vacío ────────────────────────────────────────────────────────── */
+.fases-empty {
+  text-align: center;
+  padding: var(--ds-space-5) var(--ds-space-4);
+  color: var(--ds-ink-muted);
+  border: 1px dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-alt);
+}
+.fases-empty .bi {
+  font-size: var(--ds-text-2xl);
+  color: var(--ds-border-strong);
+  display: block;
+  margin-bottom: var(--ds-space-2);
+}
+.fases-empty p { font-size: var(--ds-text-sm); }
+
+/* ── Error de carga de fases ─────────────────────────────────────────────── */
+.fases-error {
+  padding: var(--ds-space-4);
+  text-align: center;
+  color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+  border-radius: var(--ds-radius-lg);
+  font-size: var(--ds-text-sm);
+}
+
+/* ── Skeleton específico de fases ────────────────────────────────────────── */
+.skel--orden {
+  width: 30px; height: 30px;
+  border-radius: var(--ds-radius-circle);
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ACTIVIDADES DEL SERVICIO
+   Reutilizan las clases de lista/formulario de las fases (.fase-list,
+   .fase-item, .fase-form, .fases-head, .fases-empty, .fases-error, .icon-btn).
+   Aquí solo lo específico de una actividad.
+════════════════════════════════════════════════════════════════════════════ */
+.acti-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  flex-shrink: 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+}
+
+.acti-sub {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1) var(--ds-space-2);
+  margin-top: 2px;
+}
+
+/* Chip de la fase vinculada */
+.acti-fase-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-info);
+  background: var(--ds-info-soft);
+  border: 1px solid rgba(74, 107, 122, 0.2);
+  border-radius: var(--ds-radius-pill);
+  padding: 0.1em 0.6em;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.acti-fase-link .bi { flex-shrink: 0; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 767.98px) {
   .stype-title { font-size: var(--ds-text-xl); }
@@ -284,4 +526,7 @@
   .stype-card__footer { padding: var(--ds-space-3) var(--ds-space-4); }
   .identity-card__body { flex-wrap: wrap; }
   .status-badge { margin-left: 0; }
+
+  .fase-status { display: none; }
+  .fase-item { gap: var(--ds-space-2); }
 }

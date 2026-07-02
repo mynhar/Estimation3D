@@ -12,7 +12,12 @@
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__execute_sql",
       "mcp__claude_ai_Supabase__apply_migration",
-      "PowerShell(npx tsc --noEmit -p tsconfig.app.json 2>&1)"
+      "PowerShell(npx tsc --noEmit -p tsconfig.app.json 2>&1)",
+      "Bash(node -e \"const j=require\\('./src/assets/i18n/fr.json'\\); console.log\\(JSON.stringify\\(j.admin_service_types,null,2\\)\\)\")",
+      "Bash(node scripts/validate-ds-tokens.mjs)",
+      "Bash(timeout 300 npx ng build --configuration development)",
+      "Bash(npx stylelint *)",
+      "Bash(echo \"--- exit: $? ---\")"
     ]
   }
 }

@@ -249,6 +249,480 @@
           </div>
         </form>
 
+        <!-- ── Fases del servicio ─────────────────────────────────────────── -->
+        <div class="stype-card fases-card mt-3">
+          <div class="stype-card__body">
+
+            <div class="fases-head">
+              <div class="form-section__header mb-0">
+                <i class="bi bi-list-ol" aria-hidden="true"></i>
+                {{ 'admin_service_types.fases.section' | translate }}
+                @if (!cargandoFases() && !errorFases()) {
+                  <span class="fases-count">{{ fases().length }}</span>
+                }
+              </div>
+              <button type="button" class="btn btn-sm btn-primary"
+                      (click)="nuevaFase()" [disabled]="faseFormAbierto()">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>{{ 'admin_service_types.fases.add_btn' | translate }}
+              </button>
+            </div>
+
+            <p class="form-hint mb-4">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              {{ 'admin_service_types.fases.hint' | translate }}
+            </p>
+
+            <!-- Skeleton -->
+            @if (cargandoFases()) {
+              <div aria-hidden="true">
+                @for (_ of [1, 2, 3]; track $index) {
+                  <div class="fase-item fase-item--skel">
+                    <div class="skel skel--orden"></div>
+                    <div class="flex-grow-1">
+                      <div class="skel skel--line skel--md mb-2"></div>
+                      <div class="skel skel--line skel--sm"></div>
+                    </div>
+                    <div class="skel skel--badge"></div>
+                  </div>
+                }
+              </div>
+
+            <!-- Error de carga -->
+            } @else if (errorFases()) {
+              <div class="fases-error" role="alert">
+                <p class="mb-2">
+                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorFases() }}
+                </p>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarFases()">
+                  <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>{{ 'common.retry' | translate }}
+                </button>
+              </div>
+
+            } @else {
+
+              <!-- Formulario alta/edición -->
+              @if (faseFormAbierto()) {
+                <form [formGroup]="faseForm" (ngSubmit)="guardarFase()" novalidate class="fase-form mb-4">
+
+                  <div class="fase-form__title">
+                    <i class="bi" [class.bi-plus-circle]="!faseEditandoId()"
+                       [class.bi-pencil]="faseEditandoId()" aria-hidden="true"></i>
+                    {{ (faseEditandoId() ? 'admin_service_types.fases.edit_title'
+                                         : 'admin_service_types.fases.new_title') | translate }}
+                  </div>
+
+                  <!-- Código + orden -->
+                  <div class="row g-3">
+                    <div class="col-8 col-md-9">
+                      <label class="form-label" for="fase-codigo">
+                        {{ 'admin_service_types.fases.codigo' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <input id="fase-codigo" type="text"
+                             class="form-control font-monospace" formControlName="codigo"
+                             placeholder="preparacion_encubrimiento"
+                             [class.is-invalid]="ff['codigo'].invalid && ff['codigo'].touched" />
+                      @if (ff['codigo'].invalid && ff['codigo'].touched) {
+                        <p class="field-error" role="alert">
+                          {{ (ff['codigo'].errors?.['pattern']
+                                ? 'admin_service_types.fases.codigo_pattern'
+                                : 'admin_service_types.fases.codigo_required') | translate }}
+                        </p>
+                      }
+                    </div>
+                    <div class="col-4 col-md-3">
+                      <label class="form-label" for="fase-orden">
+                        {{ 'admin_service_types.fases.orden' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <input id="fase-orden" type="number" min="1"
+                             class="form-control" formControlName="orden"
+                             [class.is-invalid]="ff['orden'].invalid && ff['orden'].touched" />
+                    </div>
+                  </div>
+
+                  <!-- Nombres -->
+                  <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-nombre-fr">
+                        {{ 'admin_service_types.fases.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--fr ms-1">FR</span>
+                      </label>
+                      <input id="fase-nombre-fr" type="text" class="form-control" formControlName="nombre_fr"
+                             [class.is-invalid]="ff['nombre_fr'].invalid && ff['nombre_fr'].touched" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-nombre-en">
+                        {{ 'admin_service_types.fases.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--en ms-1">EN</span>
+                      </label>
+                      <input id="fase-nombre-en" type="text" class="form-control" formControlName="nombre_en"
+                             [class.is-invalid]="ff['nombre_en'].invalid && ff['nombre_en'].touched" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-nombre-es">
+                        {{ 'admin_service_types.fases.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--es ms-1">ES</span>
+                      </label>
+                      <input id="fase-nombre-es" type="text" class="form-control" formControlName="nombre_es"
+                             [class.is-invalid]="ff['nombre_es'].invalid && ff['nombre_es'].touched" />
+                    </div>
+                  </div>
+
+                  <!-- Descripciones -->
+                  <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-desc-fr">
+                        {{ 'admin_service_types.fases.descripcion' | translate }}
+                        <span class="lang-badge lang-badge--fr ms-1">FR</span>
+                      </label>
+                      <textarea id="fase-desc-fr" class="form-control form-textarea"
+                                formControlName="descripcion_fr" rows="2"></textarea>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-desc-en">
+                        {{ 'admin_service_types.fases.descripcion' | translate }}
+                        <span class="lang-badge lang-badge--en ms-1">EN</span>
+                      </label>
+                      <textarea id="fase-desc-en" class="form-control form-textarea"
+                                formControlName="descripcion_en" rows="2"></textarea>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="fase-desc-es">
+                        {{ 'admin_service_types.fases.descripcion' | translate }}
+                        <span class="lang-badge lang-badge--es ms-1">ES</span>
+                      </label>
+                      <textarea id="fase-desc-es" class="form-control form-textarea"
+                                formControlName="descripcion_es" rows="2"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Activo -->
+                  <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" formControlName="activo" id="fase-activo">
+                    <label class="form-check-label" for="fase-activo">
+                      {{ 'admin_service_types.fases.active_label' | translate }}
+                    </label>
+                  </div>
+
+                  <!-- Acciones del formulario -->
+                  <div class="fase-form__actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="cancelarFase()" [disabled]="guardandoFase()">
+                      <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="guardandoFase()">
+                      @if (guardandoFase()) {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        {{ 'admin_service_types.saving' | translate }}
+                      } @else {
+                        <i class="bi bi-floppy me-1" aria-hidden="true"></i>{{ 'common.save' | translate }}
+                      }
+                    </button>
+                  </div>
+                </form>
+              }
+
+              <!-- Estado vacío -->
+              @if (fases().length === 0 && !faseFormAbierto()) {
+                <div class="fases-empty">
+                  <i class="bi bi-diagram-3" aria-hidden="true"></i>
+                  <p class="mb-0">{{ 'admin_service_types.fases.empty' | translate }}</p>
+                </div>
+
+              <!-- Lista de fases -->
+              } @else if (fases().length > 0) {
+                <ul class="fase-list">
+                  @for (fase of fases(); track fase.id) {
+                    <li class="fase-item"
+                        [class.fase-item--inactive]="!fase.activo"
+                        [class.fase-item--editing]="faseEditandoId() === fase.id">
+                      <span class="fase-orden">{{ fase.orden }}</span>
+
+                      <div class="fase-main min-w-0">
+                        <div class="fase-nombre">{{ nombreFase(fase) }}</div>
+                        <div class="fase-codigo font-monospace">{{ fase.codigo }}</div>
+                      </div>
+
+                      <span class="status-badge fase-status"
+                            [class.status-badge--active]="fase.activo"
+                            [class.status-badge--inactive]="!fase.activo">
+                        <i class="bi"
+                           [class.bi-check-circle]="fase.activo"
+                           [class.bi-x-circle]="!fase.activo" aria-hidden="true"></i>
+                        {{ (fase.activo ? 'common.active' : 'common.inactive') | translate }}
+                      </span>
+
+                      <div class="fase-actions">
+                        @if (confirmandoEliminarId() === fase.id) {
+                          <span class="fase-confirm">{{ 'admin_service_types.fases.confirm_delete' | translate }}</span>
+                          <button type="button" class="icon-btn icon-btn--danger"
+                                  (click)="confirmarEliminar(fase)" [disabled]="eliminandoId() === fase.id"
+                                  [title]="'common.delete' | translate">
+                            @if (eliminandoId() === fase.id) {
+                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            } @else {
+                              <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            }
+                          </button>
+                          <button type="button" class="icon-btn"
+                                  (click)="cancelarEliminar()" [disabled]="eliminandoId() === fase.id"
+                                  [title]="'common.cancel' | translate">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                          </button>
+                        } @else {
+                          <button type="button" class="icon-btn"
+                                  (click)="editarFase(fase)"
+                                  [title]="'admin_service_types.fases.edit_btn' | translate">
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                          </button>
+                          <button type="button" class="icon-btn icon-btn--danger"
+                                  (click)="pedirEliminar(fase)"
+                                  [title]="'common.delete' | translate">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                          </button>
+                        }
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+
+          </div>
+        </div>
+
+        <!-- ── Actividades del servicio ───────────────────────────────────── -->
+        <div class="stype-card fases-card mt-3">
+          <div class="stype-card__body">
+
+            <div class="fases-head">
+              <div class="form-section__header mb-0">
+                <i class="bi bi-check2-square" aria-hidden="true"></i>
+                {{ 'admin_service_types.actividades.section' | translate }}
+                @if (!cargandoActividades() && !errorActividades()) {
+                  <span class="fases-count">{{ actividades().length }}</span>
+                }
+              </div>
+              <button type="button" class="btn btn-sm btn-primary"
+                      (click)="nuevaActividad()" [disabled]="actividadFormAbierto()">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>{{ 'admin_service_types.actividades.add_btn' | translate }}
+              </button>
+            </div>
+
+            <p class="form-hint mb-4">
+              <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+              {{ 'admin_service_types.actividades.hint' | translate }}
+            </p>
+
+            <!-- Skeleton -->
+            @if (cargandoActividades()) {
+              <div aria-hidden="true">
+                @for (_ of [1, 2, 3]; track $index) {
+                  <div class="fase-item fase-item--skel">
+                    <div class="skel skel--orden"></div>
+                    <div class="flex-grow-1">
+                      <div class="skel skel--line skel--md mb-2"></div>
+                      <div class="skel skel--line skel--sm"></div>
+                    </div>
+                    <div class="skel skel--badge"></div>
+                  </div>
+                }
+              </div>
+
+            <!-- Error de carga -->
+            } @else if (errorActividades()) {
+              <div class="fases-error" role="alert">
+                <p class="mb-2">
+                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorActividades() }}
+                </p>
+                <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cargarActividades()">
+                  <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>{{ 'common.retry' | translate }}
+                </button>
+              </div>
+
+            } @else {
+
+              <!-- Formulario alta/edición -->
+              @if (actividadFormAbierto()) {
+                <form [formGroup]="actividadForm" (ngSubmit)="guardarActividad()" novalidate class="fase-form mb-4">
+
+                  <div class="fase-form__title">
+                    <i class="bi" [class.bi-plus-circle]="!actividadEditandoId()"
+                       [class.bi-pencil]="actividadEditandoId()" aria-hidden="true"></i>
+                    {{ (actividadEditandoId() ? 'admin_service_types.actividades.edit_title'
+                                              : 'admin_service_types.actividades.new_title') | translate }}
+                  </div>
+
+                  <!-- Código + fase vinculada -->
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label" for="acti-codigo">
+                        {{ 'admin_service_types.actividades.codigo' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <input id="acti-codigo" type="text"
+                             class="form-control font-monospace" formControlName="codigo"
+                             placeholder="montaje_confinamiento"
+                             [class.is-invalid]="fa['codigo'].invalid && fa['codigo'].touched" />
+                      @if (fa['codigo'].invalid && fa['codigo'].touched) {
+                        <p class="field-error" role="alert">
+                          {{ (fa['codigo'].errors?.['pattern']
+                                ? 'admin_service_types.actividades.codigo_pattern'
+                                : 'admin_service_types.actividades.codigo_required') | translate }}
+                        </p>
+                      }
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label" for="acti-fase">
+                        {{ 'admin_service_types.actividades.fase' | translate }}
+                      </label>
+                      <select id="acti-fase" class="form-select" formControlName="fase_id">
+                        <option value="">{{ 'admin_service_types.actividades.fase_none' | translate }}</option>
+                        @for (fase of fases(); track fase.id) {
+                          <option [value]="fase.id">{{ fase.orden }} · {{ nombreFase(fase) }}</option>
+                        }
+                      </select>
+                      <p class="form-hint">{{ 'admin_service_types.actividades.fase_hint' | translate }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Nombres -->
+                  <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="acti-nombre-fr">
+                        {{ 'admin_service_types.actividades.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--fr ms-1">FR</span>
+                      </label>
+                      <input id="acti-nombre-fr" type="text" class="form-control" formControlName="nombre_fr"
+                             [class.is-invalid]="fa['nombre_fr'].invalid && fa['nombre_fr'].touched" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="acti-nombre-en">
+                        {{ 'admin_service_types.actividades.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--en ms-1">EN</span>
+                      </label>
+                      <input id="acti-nombre-en" type="text" class="form-control" formControlName="nombre_en"
+                             [class.is-invalid]="fa['nombre_en'].invalid && fa['nombre_en'].touched" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label" for="acti-nombre-es">
+                        {{ 'admin_service_types.actividades.nombre' | translate }}
+                        <span class="req-mark" aria-hidden="true">*</span>
+                        <span class="lang-badge lang-badge--es ms-1">ES</span>
+                      </label>
+                      <input id="acti-nombre-es" type="text" class="form-control" formControlName="nombre_es"
+                             [class.is-invalid]="fa['nombre_es'].invalid && fa['nombre_es'].touched" />
+                    </div>
+                  </div>
+
+                  <!-- Activo -->
+                  <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" formControlName="activo" id="acti-activo">
+                    <label class="form-check-label" for="acti-activo">
+                      {{ 'admin_service_types.actividades.active_label' | translate }}
+                    </label>
+                  </div>
+
+                  <!-- Acciones del formulario -->
+                  <div class="fase-form__actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            (click)="cancelarActividad()" [disabled]="guardandoActividad()">
+                      <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="guardandoActividad()">
+                      @if (guardandoActividad()) {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        {{ 'admin_service_types.saving' | translate }}
+                      } @else {
+                        <i class="bi bi-floppy me-1" aria-hidden="true"></i>{{ 'common.save' | translate }}
+                      }
+                    </button>
+                  </div>
+                </form>
+              }
+
+              <!-- Estado vacío -->
+              @if (actividades().length === 0 && !actividadFormAbierto()) {
+                <div class="fases-empty">
+                  <i class="bi bi-ui-checks" aria-hidden="true"></i>
+                  <p class="mb-0">{{ 'admin_service_types.actividades.empty' | translate }}</p>
+                </div>
+
+              <!-- Lista de actividades -->
+              } @else if (actividades().length > 0) {
+                <ul class="fase-list">
+                  @for (acti of actividades(); track acti.id) {
+                    <li class="fase-item"
+                        [class.fase-item--inactive]="!acti.activo"
+                        [class.fase-item--editing]="actividadEditandoId() === acti.id">
+                      <span class="acti-icon" aria-hidden="true"><i class="bi bi-check2-square"></i></span>
+
+                      <div class="fase-main min-w-0">
+                        <div class="fase-nombre">{{ nombreActividad(acti) }}</div>
+                        <div class="acti-sub">
+                          <span class="fase-codigo font-monospace">{{ acti.codigo }}</span>
+                          @if (nombreFaseVinculada(acti.fase_id); as faseNombre) {
+                            <span class="acti-fase-link">
+                              <i class="bi bi-diagram-2" aria-hidden="true"></i>{{ faseNombre }}
+                            </span>
+                          }
+                        </div>
+                      </div>
+
+                      <span class="status-badge fase-status"
+                            [class.status-badge--active]="acti.activo"
+                            [class.status-badge--inactive]="!acti.activo">
+                        <i class="bi"
+                           [class.bi-check-circle]="acti.activo"
+                           [class.bi-x-circle]="!acti.activo" aria-hidden="true"></i>
+                        {{ (acti.activo ? 'common.active' : 'common.inactive') | translate }}
+                      </span>
+
+                      <div class="fase-actions">
+                        @if (confirmandoEliminarActiId() === acti.id) {
+                          <span class="fase-confirm">{{ 'admin_service_types.actividades.confirm_delete' | translate }}</span>
+                          <button type="button" class="icon-btn icon-btn--danger"
+                                  (click)="confirmarEliminarActividad(acti)" [disabled]="eliminandoActividadId() === acti.id"
+                                  [title]="'common.delete' | translate">
+                            @if (eliminandoActividadId() === acti.id) {
+                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            } @else {
+                              <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            }
+                          </button>
+                          <button type="button" class="icon-btn"
+                                  (click)="cancelarEliminarActividad()" [disabled]="eliminandoActividadId() === acti.id"
+                                  [title]="'common.cancel' | translate">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                          </button>
+                        } @else {
+                          <button type="button" class="icon-btn"
+                                  (click)="editarActividad(acti)"
+                                  [title]="'admin_service_types.actividades.edit_btn' | translate">
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                          </button>
+                          <button type="button" class="icon-btn icon-btn--danger"
+                                  (click)="pedirEliminarActividad(acti)"
+                                  [title]="'common.delete' | translate">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
+                          </button>
+                        }
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+
+          </div>
+        </div>
+
       </div>
     </div>
   }
