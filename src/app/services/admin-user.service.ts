@@ -29,19 +29,12 @@ export interface ActualizarUsuarioParams {
 export class AdminUserService {
   private auth = inject(AuthSupabaseService);
 
-  private async token(): Promise<string> {
-    const { data } = await this.auth.client.auth.getSession();
-    const t = data.session?.access_token;
-    if (!t) throw new Error('auth.invalid_session');
-    return t;
-  }
-
   private async call(fn: string, body: unknown): Promise<void> {
     const res = await fetch(`${environment.supabase.url}/functions/v1/${fn}`, {
       method:  'POST',
       headers: {
         'Content-Type':  'application/json',
-        'Authorization': `Bearer ${await this.token()}`,
+        'Authorization': `Bearer ${await this.auth.getAccessToken()}`,
       },
       body: JSON.stringify(body),
     });

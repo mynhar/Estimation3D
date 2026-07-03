@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { createClient, SupabaseClient, User, RealtimeChannel } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { Subject, firstValueFrom, filter, take, timeout, catchError, of } from 'rxjs';
@@ -18,6 +19,7 @@ export type PerfilCache = {
 export class AuthSupabaseService {
   private supabase: SupabaseClient<Database>;
   private router = inject(Router);
+  private translate = inject(TranslateService);
 
   // Signals — fuente de verdad del estado de autenticación
   private userSig        = signal<User | null>(null);
@@ -57,14 +59,23 @@ export class AuthSupabaseService {
   get client(): SupabaseClient<Database> { return this.supabase; }
 
   constructor() {
+    // Serializa las operaciones de auth (incl. el refresh de token) dentro de
+    // esta pestaña con una cola de promesas, en lugar de los Navigator Locks.
+    // Evita a la vez el NavigatorLockAcquireTimeoutError y las carreras de
+    // refresh concurrente que consumían/rotaban el refresh token (lo que
+    // revocaba la sesión → "Refresh Token Not Found").
+    let lockChain: Promise<unknown> = Promise.resolve();
+
     this.supabase = createClient<Database>(
       environment.supabase.url,
       environment.supabase.anonKey,
       {
         auth: {
-          // Evita NavigatorLockAcquireTimeoutError en entornos con múltiples
-          // pestañas o iframes que compiten por el mismo lock del navegador.
-          lock: <R>(_name: string, _timeout: number, fn: () => Promise<R>): Promise<R> => fn(),
+          lock: <R>(_name: string, _timeout: number, fn: () => Promise<R>): Promise<R> => {
+            const run = lockChain.then(fn, fn);
+            lockChain = run.then(() => undefined, () => undefined);
+            return run;
+          },
         },
       }
     );
@@ -269,6 +280,38 @@ export class AuthSupabaseService {
     if (rol === 'constructor')   return '/builder/dashboard';
     if (rol === 'estimador')     return '/estimator/dashboard';
     return '/client/dashboard';
+  }
+
+  // ----------------------------------------------------------
+  // Access token válido para llamadas manuales a Edge Functions.
+  // getSession() devuelve el token almacenado, que puede estar caducado
+  // (los JWT duran ~1h); el fetch() manual no pasa por el auto-refresh de
+  // supabase-js, así que lo refrescamos aquí si está por caducar.
+  // ----------------------------------------------------------
+  async getAccessToken(): Promise<string> {
+    const { data } = await this.supabase.auth.getSession();
+    const session = data.session;
+    const expiraEnMs = session?.expires_at ? session.expires_at * 1000 - Date.now() : -1;
+
+    // Token vigente (con 60s de margen): úsalo tal cual.
+    if (session?.access_token && expiraEnMs > 60_000) {
+      return session.access_token;
+    }
+
+    // Caducado o ausente: intentar refrescar.
+    const { data: refreshed, error } = await this.supabase.auth.refreshSession();
+    const nuevo = refreshed.session?.access_token;
+    if (!error && nuevo) return nuevo;
+
+    // La sesión está muerta (refresh token inválido / sesión revocada, p. ej. por
+    // "single session per user"). Limpiar y mandar a login para re-autenticar.
+    await this.forzarReautenticacion();
+    throw new Error(this.translate.instant('auth.session_expired'));
+  }
+
+  private async forzarReautenticacion(): Promise<void> {
+    try { await this.supabase.auth.signOut(); } catch { /* noop */ }
+    this.router.navigate(['/login'], { queryParams: { expired: '1' } });
   }
 
   // ----------------------------------------------------------

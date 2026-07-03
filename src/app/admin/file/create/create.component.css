@@ -239,6 +239,18 @@
 .char-counter--warn { color: var(--ds-danger); font-weight: var(--ds-weight-semibold); }
 
 /* ── Client search ───────────────────────────────────────────────────────── */
+/* La tarjeta del selector de cliente NO debe recortar su desplegable
+   (el resto de tarjetas conserva overflow:hidden para el borde/acento). */
+.section-card--pop { overflow: visible; }
+.section-card--pop .section-head {
+  border-top-left-radius: var(--ds-radius-xl);
+  border-top-right-radius: var(--ds-radius-xl);
+}
+.section-card--pop::before {
+  border-top-left-radius: var(--ds-radius-xl);
+  border-bottom-left-radius: var(--ds-radius-xl);
+}
+
 .client-search { position: relative; }
 
 .client-dropdown {

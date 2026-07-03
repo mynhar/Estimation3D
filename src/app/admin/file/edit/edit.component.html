@@ -106,7 +106,7 @@
       <!-- ════════════════════════════════════════════════════════════════════ -->
       <!-- PASO 1 · Cliente                                                      -->
       <!-- ════════════════════════════════════════════════════════════════════ -->
-      <div class="section-card mb-4" [class.section-card--done]="step1Complete()">
+      <div class="section-card section-card--pop mb-4" [class.section-card--done]="step1Complete()">
 
         <div class="section-head">
           <div class="section-num" [class.section-num--done]="step1Complete()" aria-hidden="true">
@@ -168,7 +168,7 @@
                     <li class="client-option" role="option"
                         (mousedown)="seleccionarCliente(c)">
                       <div class="client-avatar">
-                        {{ (c.nombre[0] + c.apellido[0]).toUpperCase() }}
+                        {{ iniciales(c.nombre, c.apellido) }}
                       </div>
                       <div class="flex-grow-1 min-w-0">
                         <div class="client-option__name">{{ c.nombre }} {{ c.apellido }}</div>
@@ -198,7 +198,7 @@
             @if (clienteSeleccionado()) {
               <div class="client-selected mt-3">
                 <div class="client-avatar client-avatar--lg">
-                  {{ (clienteSeleccionado()!.nombre[0] + clienteSeleccionado()!.apellido[0]).toUpperCase() }}
+                  {{ iniciales(clienteSeleccionado()!.nombre, clienteSeleccionado()!.apellido) }}
                 </div>
                 <div class="flex-grow-1 min-w-0">
                   <p class="client-selected__name mb-0">

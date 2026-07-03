@@ -1051,6 +1051,7 @@
     "email_registered": "Este correo ya está registrado.",
     "register_error": "Error al registrar. Intenta de nuevo.",
     "invalid_session": "Sesión no válida. Inicia sesión nuevamente.",
+    "session_expired": "Tu sesión ha expirado. Inicia sesión de nuevo.",
     "back_to_home": "Volver al inicio",
     "account_inactive": "Su cuenta está inactiva. Por favor contacte al administrador."
   },

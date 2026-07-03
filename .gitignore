@@ -41,6 +41,11 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Archivos .env con secretos (p. ej. scripts/borrado-usuario/.env)
+.env
+*.env
+!*.env.example
+
 # Entorno de desarrollo local (tiene claves reales)
 src/environments/environment.ts
 

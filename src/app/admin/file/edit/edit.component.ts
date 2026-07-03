@@ -219,6 +219,13 @@ export class AdminFileEditComponent implements OnInit {
     this.dropdownVisible.set(false);
   }
 
+  /** Iniciales seguras: evita NaN.toUpperCase() cuando nombre/apellido vienen vacíos. */
+  iniciales(nombre: string | null | undefined, apellido: string | null | undefined): string {
+    const a = (nombre ?? '').trim()[0] ?? '';
+    const b = (apellido ?? '').trim()[0] ?? '';
+    return (a + b).toUpperCase() || '?';
+  }
+
   cerrarDropdown() {
     setTimeout(() => this.dropdownVisible.set(false), 160);
   }

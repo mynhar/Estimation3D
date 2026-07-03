@@ -17,7 +17,12 @@
       "Bash(node scripts/validate-ds-tokens.mjs)",
       "Bash(timeout 300 npx ng build --configuration development)",
       "Bash(npx stylelint *)",
-      "Bash(echo \"--- exit: $? ---\")"
+      "Bash(echo \"--- exit: $? ---\")",
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__list_extensions",
+      "mcp__claude_ai_Supabase__get_advisors",
+      "mcp__claude_ai_Supabase__get_logs",
+      "mcp__claude_ai_Supabase__get_edge_function"
     ]
   }
 }
