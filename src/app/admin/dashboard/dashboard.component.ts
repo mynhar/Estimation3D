@@ -196,4 +196,24 @@ export class AdminDashboardComponent implements OnInit {
     if (ruta) this.router.navigate([ruta, ev.entityId]);
   }
 
+  /** Navega a la lista de expedientes por estimar filtrada por estado. */
+  irAEstimaciones(estado: 'nuevo' | 'en_estimacion' | 'estimado'): void {
+    this.router.navigate(['/admin/to-estimate'], { queryParams: { estado } });
+  }
+
+  /** Navega a la lista de usuarios filtrada por constructores activos. */
+  irAConstructoresActivos(): void {
+    this.router.navigate(['/admin/user'], { queryParams: { rol: 'constructor', activo: 'activo' } });
+  }
+
+  /** Navega a la lista de ofertas filtrada por estado de expediente. */
+  irAOfertas(estado: 'estimado' | 'en_oferta' | 'adjudicado'): void {
+    this.router.navigate(['/admin/offer'], { queryParams: { estado } });
+  }
+
+  /** Navega al seguimiento de obra filtrado por estado de contrato. */
+  irASeguimientoObra(estado: 'todos' | 'en_ejecucion' | 'completado'): void {
+    this.router.navigate(['/admin/construction-monitoring/list'], { queryParams: { estado } });
+  }
+
 }

@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
 import { ContratoConstructorListItem } from '../../../models';
@@ -25,6 +25,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
   private contratoService = inject(ContratoService);
   private translate       = inject(TranslateService);
   private router          = inject(Router);
+  private route           = inject(ActivatedRoute);
 
   private _contratos = signal<ContratoConstructorListItem[]>([]);
   cargando  = signal(true);
@@ -65,6 +66,10 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
   }
 
   async ngOnInit() {
+    const estadoParam = this.route.snapshot.queryParamMap.get('estado');
+    if (estadoParam && this.estados.includes(estadoParam)) {
+      this.filtroEstado.set(estadoParam);
+    }
     try {
       const data = await this.contratoService.getContratosMonitoringAdmin();
       // actualizado_en DESC, y a igualdad, firmado_en DESC.

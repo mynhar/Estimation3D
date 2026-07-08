@@ -22,7 +22,17 @@
       "mcp__claude_ai_Supabase__list_extensions",
       "mcp__claude_ai_Supabase__get_advisors",
       "mcp__claude_ai_Supabase__get_logs",
-      "mcp__claude_ai_Supabase__get_edge_function"
+      "mcp__claude_ai_Supabase__get_edge_function",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "mcp__claude_ai_Supabase__list_edge_functions",
+      "Bash(curl -s -o /dev/null -w \"%{redirect_url}\\\\n\" \"https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640&dpr=1\")",
+      "Bash(curl -sL -o /dev/null -w \"final HTTP:%{http_code}  type:%{content_type}  size:%{size_download}\\\\n\" \"https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640&dpr=1\")",
+      "Bash(npx ng *)",
+      "mcp__claude_ai_Supabase__deploy_edge_function",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('supabase/functions/asistente-ia/index.ts','utf8'\\);fs.writeFileSync\\(process.env.TEMP_OUT, JSON.stringify\\(c\\)\\);console.log\\('bytes:', c.length\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\(process.env.TEMP_OUT,'utf8'\\).length\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('supabase/functions/asistente-ia/index.ts','utf8'\\);fs.writeFileSync\\('C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/86ae97bc-1825-4b57-b2d4-dd76bdb583f7/scratchpad/edge_escaped.json', JSON.stringify\\(c\\)\\);console.log\\('ok, escaped bytes:', JSON.stringify\\(c\\).length\\);\")"
     ]
   }
 }

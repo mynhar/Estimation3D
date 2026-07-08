@@ -321,6 +321,19 @@
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold-soft);
 }
+.adm-stat-box--clickable {
+  cursor: pointer;
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.adm-stat-box--clickable:hover {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold-soft);
+}
+.adm-stat-box--clickable:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
 
 .adm-stat__n {
   font-family: var(--ds-font-display);
@@ -416,6 +429,20 @@
   gap: var(--ds-space-2);
 }
 .adm-funnel-row--muted .adm-funnel-name { color: var(--ds-ink-muted); }
+
+.adm-funnel-row--clickable {
+  cursor: pointer;
+  border-radius: var(--ds-radius-md);
+  margin: 0 calc(-1 * var(--ds-space-2));
+  padding: var(--ds-space-1) var(--ds-space-2);
+  transition: background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.adm-funnel-row--clickable:hover { background: var(--ds-gold-faint); }
+.adm-funnel-row--clickable:hover .adm-funnel-name { color: var(--ds-ink); }
+.adm-funnel-row--clickable:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
 
 .adm-funnel-label {
   display: flex;

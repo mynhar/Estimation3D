@@ -45,11 +45,16 @@ export class ExpedienteService {
     const exps = await this.expedienteRepo.findByClienteId(clienteId);
     if (!exps.length) return [];
 
-    const servicioIds = [...new Set(exps.map(e => e.servicio_id))];
-    const servicios   = await this.servicioRepo.findByIds(servicioIds);
+    const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
+    const expedienteIds = exps.map(e => e.id);
+    const [servicios, estimaciones] = await Promise.all([
+      this.servicioRepo.findByIds(servicioIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
+    ]);
 
     return exps.map(e => {
       const svc = servicios.find(s => s.id === e.servicio_id) ?? null;
+      const est = estimaciones.find(x => x.expediente_id === e.id);
       return {
         id:           e.id,
         numero:       e.numero,
@@ -58,6 +63,7 @@ export class ExpedienteService {
         creado_en:    e.creado_en,
         descripcion:  e.descripcion,
         servicio:     svc ? { nombre_fr: svc.nombre_fr ?? '', nombre_en: svc.nombre_en ?? '', nombre_es: svc.nombre_es } : null,
+        url_tour:     est?.url_tour ?? null,
       } as ExpedienteCliente;
     });
   }
@@ -141,10 +147,11 @@ export class ExpedienteService {
     const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
     const expedienteIds = exps.map(e => e.id);
 
-    const [servicios, locs, ofertasRaw] = await Promise.all([
+    const [servicios, locs, ofertasRaw, estimaciones] = await Promise.all([
       this.servicioRepo.findByIdsCompleto(servicioIds),
       this.localizacionRepo.findByExpedienteIds(expedienteIds),
       this.ofertaRepo.findByExpedienteIds(expedienteIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
     ]);
 
     const constructorIds = [...new Set(ofertasRaw.map(o => o.constructor_id))];
@@ -189,6 +196,7 @@ export class ExpedienteService {
         distrito:   loc?.distrito   ?? '—',
         total_ofertas: ofertas.length,
         ofertas,
+        url_tour: estimaciones.find(x => x.expediente_id === e.id)?.url_tour ?? null,
       } as ExpedienteConOfertas;
     });
   }
@@ -431,6 +439,7 @@ export class ExpedienteService {
         fecha_visita_real:   est?.fecha_visita_real  ?? null,
         costo_estimado:      est?.costo_estimado     ?? null,
         costo_estimado_max:  est?.costo_estimado_max ?? null,
+        url_tour:            est?.url_tour           ?? null,
       } as ExpedienteParaEstimar;
     });
   }
@@ -477,6 +486,7 @@ export class ExpedienteService {
         fecha_visita_real:   est?.fecha_visita_real    ?? null,
         oferta_precio:       oferta?.precio            ?? null,
         oferta_fecha_inicio: oferta?.fecha_inicio      ?? null,
+        url_tour:            est?.url_tour             ?? null,
       } as ExpedienteAdmin;
     });
 

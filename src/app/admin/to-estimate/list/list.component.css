@@ -194,6 +194,42 @@
 }
 .btn-clear-filters:hover { color: var(--ds-danger); }
 
+/* ── Right cluster + view toggle ─────────────────────────────────────────── */
+.filter-bar__right {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+}
+
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.view-toggle__btn:hover { color: var(--ds-ink); background: var(--ds-gold-faint); }
+.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.view-toggle__btn:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: -2px;
+}
+
 /* ── Table card ───────────────────────────────────────────────────────────── */
 .table-card {
   background: var(--ds-surface);
@@ -377,30 +413,86 @@
   margin-bottom: 0;
 }
 
-/* ── Mobile cards ─────────────────────────────────────────────────────────── */
-.file-cards { display: flex; flex-direction: column; }
+/* ── Cards grid (foto del tour 3D + datos) ───────────────────────────────── */
+.file-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-4);
+}
 
 .file-card {
-  position: relative;
-  padding: var(--ds-space-4) var(--ds-space-9) var(--ds-space-4) var(--ds-space-4);
-  border-bottom: 1px solid var(--ds-border-subtle);
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
   cursor: pointer;
-  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow    var(--ds-duration-fast) var(--ds-ease-out),
+              transform     var(--ds-duration-fast) var(--ds-ease-out);
   -webkit-tap-highlight-color: transparent;
 }
-.file-card:last-child { border-bottom: none; }
-.file-card:hover,
-.file-card:active { background: var(--ds-gold-faint); }
+.file-card:hover {
+  border-color: var(--ds-gold);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+}
+.file-card:active { transform: translateY(0); }
+.file-card:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
+
+/* Foto / miniatura del tour 3D */
+.file-card__photo {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+}
+.file-card__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.file-card:hover .file-card__photo-img { transform: scale(1.03); }
+
+.file-card__photo-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2.25rem;
+}
+
+.file-card__badge {
+  position: absolute;
+  top: var(--ds-space-2);
+  left: var(--ds-space-2);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+/* Contenido */
+.file-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+  flex: 1;
+}
 
 .file-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--ds-space-2);
-  margin-bottom: var(--ds-space-2);
 }
-
-.file-card__body { margin-bottom: var(--ds-space-3); }
 
 /* El nombre y el servicio deben poder envolver dentro de la tarjeta */
 .file-card__name,
@@ -437,13 +529,11 @@
   min-width: 0;
 }
 
-.file-card__chevron {
-  position: absolute;
-  top: 50%;
-  right: var(--ds-space-4);
-  transform: translateY(-50%);
-  color: var(--ds-border-strong);
-  font-size: var(--ds-text-sm);
+@media (prefers-reduced-motion: reduce) {
+  .file-card,
+  .file-card__photo-img { transition: none; }
+  .file-card:hover { transform: none; }
+  .file-card:hover .file-card__photo-img { transform: none; }
 }
 
 /* ── Table footer ─────────────────────────────────────────────────────────── */

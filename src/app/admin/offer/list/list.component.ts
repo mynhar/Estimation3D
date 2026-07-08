@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteConOfertaAdmin } from '../../../models';
@@ -25,6 +25,7 @@ export class AdminOfferListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private translate         = inject(TranslateService);
   private router            = inject(Router);
+  private route             = inject(ActivatedRoute);
 
   private _expedientes = signal<ExpedienteConOfertaAdmin[]>([]);
   cargando = signal(true);
@@ -87,6 +88,10 @@ export class AdminOfferListComponent implements OnInit {
   }
 
   async ngOnInit() {
+    const estadoParam = this.route.snapshot.queryParamMap.get('estado');
+    if (estadoParam && this.estados.includes(estadoParam)) {
+      this.filtroEstado.set(estadoParam);
+    }
     try {
       this._expedientes.set(await this.expedienteService.getExpedientesConOfertasAdmin());
     } catch (e: any) {

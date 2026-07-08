@@ -43,4 +43,24 @@ export class AsistenteIaService {
     }
     return res.json() as Promise<RespuestaAsistente>;
   }
+
+  /** Carga el historial persistido de la conversación de un expediente (RLS: solo el propio). */
+  async cargarHistorial(expedienteId: string): Promise<ChatMensaje[]> {
+    const { data, error } = await this.auth.client
+      .from('asistente_conversacion')
+      .select('role, content')
+      .eq('expediente_id', expedienteId)
+      .order('creado_en', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ChatMensaje[];
+  }
+
+  /** Borra el historial persistido de la conversación de un expediente. */
+  async limpiarHistorial(expedienteId: string): Promise<void> {
+    const { error } = await this.auth.client
+      .from('asistente_conversacion')
+      .delete()
+      .eq('expediente_id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
 }

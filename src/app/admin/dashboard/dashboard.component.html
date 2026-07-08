@@ -161,15 +161,24 @@
           <div class="adm-panel__body">
 
             <div class="adm-stat-row">
-              <div class="adm-stat-box">
+              <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('nuevo')"
+                   (keydown.enter)="irAEstimaciones('nuevo')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('nuevo')">
                 <span class="adm-stat__n">{{ expSinAsignar() }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_unassigned' | translate }}</span>
               </div>
-              <div class="adm-stat-box">
+              <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('en_estimacion')"
+                   (keydown.enter)="irAEstimaciones('en_estimacion')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('en_estimacion')">
                 <span class="adm-stat__n">{{ expEnEstimacion() }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_in_progress' | translate }}</span>
               </div>
-              <div class="adm-stat-box adm-stat-box--highlight">
+              <div class="adm-stat-box adm-stat-box--highlight adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('estimado')"
+                   (keydown.enter)="irAEstimaciones('estimado')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('estimado')">
                 <span class="adm-stat__n adm-stat__n--accent">{{ stats()!.estimaciones.total }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_completed' | translate }}</span>
               </div>
@@ -188,7 +197,10 @@
             }
 
             <div class="adm-funnel" role="list">
-              <div class="adm-funnel-row" role="listitem">
+              <div class="adm-funnel-row adm-funnel-row--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('nuevo')"
+                   (keydown.enter)="irAEstimaciones('nuevo')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('nuevo')">
                 <div class="adm-funnel-label">
                   <span class="adm-dot adm-dot--exp-nuevo" aria-hidden="true"></span>
                   <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_unassigned' | translate }}</span>
@@ -199,7 +211,10 @@
                 </div>
                 <span class="adm-funnel-num">{{ expSinAsignar() }}</span>
               </div>
-              <div class="adm-funnel-row" role="listitem">
+              <div class="adm-funnel-row adm-funnel-row--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('en_estimacion')"
+                   (keydown.enter)="irAEstimaciones('en_estimacion')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('en_estimacion')">
                 <div class="adm-funnel-label">
                   <span class="adm-dot adm-dot--exp-en_estimacion" aria-hidden="true"></span>
                   <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_in_estimation' | translate }}</span>
@@ -210,7 +225,10 @@
                 </div>
                 <span class="adm-funnel-num">{{ expEnEstimacion() }}</span>
               </div>
-              <div class="adm-funnel-row" role="listitem">
+              <div class="adm-funnel-row adm-funnel-row--clickable" role="button" tabindex="0"
+                   (click)="irAEstimaciones('estimado')"
+                   (keydown.enter)="irAEstimaciones('estimado')"
+                   (keydown.space)="$event.preventDefault(); irAEstimaciones('estimado')">
                 <div class="adm-funnel-label">
                   <span class="adm-dot adm-dot--exp-contratado" aria-hidden="true"></span>
                   <span class="adm-funnel-name">{{ 'admin_dashboard.est_label_estimated' | translate }}</span>
@@ -287,15 +305,24 @@
           <div class="adm-panel__body">
 
             <div class="adm-stat-row">
-              <div class="adm-stat-box">
+              <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAConstructoresActivos()"
+                   (keydown.enter)="irAConstructoresActivos()"
+                   (keydown.space)="$event.preventDefault(); irAConstructoresActivos()">
                 <span class="adm-stat__n">{{ stats()!.ofertas.constructoresActivos }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_builders' | translate }}</span>
               </div>
-              <div class="adm-stat-box">
+              <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAOfertas('en_oferta')"
+                   (keydown.enter)="irAOfertas('en_oferta')"
+                   (keydown.space)="$event.preventDefault(); irAOfertas('en_oferta')">
                 <span class="adm-stat__n">{{ stats()!.ofertas.total }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_offers_total' | translate }}</span>
               </div>
-              <div class="adm-stat-box">
+              <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                   (click)="irAOfertas('estimado')"
+                   (keydown.enter)="irAOfertas('estimado')"
+                   (keydown.space)="$event.preventDefault(); irAOfertas('estimado')">
                 <span class="adm-stat__n">{{ stats()!.expedientes.porEstado['en_oferta'] }}</span>
                 <span class="adm-stat__l">{{ 'admin_dashboard.mini_files_on_offer' | translate }}</span>
               </div>
@@ -354,15 +381,24 @@
             <!-- Desglose -->
             <div class="adm-obra-right">
               <div class="adm-stat-row">
-                <div class="adm-stat-box">
+                <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                     (click)="irASeguimientoObra('todos')"
+                     (keydown.enter)="irASeguimientoObra('todos')"
+                     (keydown.space)="$event.preventDefault(); irASeguimientoObra('todos')">
                   <span class="adm-stat__n">{{ obrasTotal() }}</span>
                   <span class="adm-stat__l">{{ 'admin_dashboard.obra_total' | translate }}</span>
                 </div>
-                <div class="adm-stat-box">
+                <div class="adm-stat-box adm-stat-box--clickable" role="button" tabindex="0"
+                     (click)="irASeguimientoObra('en_ejecucion')"
+                     (keydown.enter)="irASeguimientoObra('en_ejecucion')"
+                     (keydown.space)="$event.preventDefault(); irASeguimientoObra('en_ejecucion')">
                   <span class="adm-stat__n">{{ obrasEnProgreso() }}</span>
                   <span class="adm-stat__l">{{ 'seguimiento_estado.en_progreso' | translate }}</span>
                 </div>
-                <div class="adm-stat-box adm-stat-box--highlight">
+                <div class="adm-stat-box adm-stat-box--highlight adm-stat-box--clickable" role="button" tabindex="0"
+                     (click)="irASeguimientoObra('completado')"
+                     (keydown.enter)="irASeguimientoObra('completado')"
+                     (keydown.space)="$event.preventDefault(); irASeguimientoObra('completado')">
                   <span class="adm-stat__n adm-stat__n--accent">{{ obrasCompletadas() }}</span>
                   <span class="adm-stat__l">{{ 'seguimiento_estado.completado' | translate }}</span>
                 </div>

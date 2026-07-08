@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
@@ -54,16 +55,46 @@ export class AiAssistantComponent implements OnInit {
   enviando     = signal(false);
   cargando     = signal(true);
   borrador     = signal('');
+  rol          = signal<string>('cliente');
 
-  // Preguntas frecuentes sugeridas (claves i18n).
-  readonly faqs: readonly string[] = [
-    'ai_assistant.faq_recomienda',
-    'ai_assistant.faq_riesgos',
-    'ai_assistant.faq_fin',
-    'ai_assistant.faq_ahorro',
-    'ai_assistant.faq_rechazo',
-    'ai_assistant.faq_garantia',
-  ];
+  // Eyebrow / tagline / intro adaptados al rol.
+  eyebrowKey   = computed(() => `role.${this.rol()}`);
+  taglineKey   = computed(() => `ai_assistant.tagline_${this.rol()}`);
+  introLeadKey = computed(() => `ai_assistant.intro_lead_${this.rol()}`);
+
+  // Preguntas frecuentes sugeridas (claves i18n) según el rol.
+  private readonly FAQS_POR_ROL: Record<string, string[]> = {
+    cliente: [
+      'ai_assistant.faq_recomienda',
+      'ai_assistant.faq_riesgos',
+      'ai_assistant.faq_fin',
+      'ai_assistant.faq_ahorro',
+      'ai_assistant.faq_rechazo',
+      'ai_assistant.faq_garantia',
+    ],
+    estimador: [
+      'ai_assistant.faq_est_diagnostico',
+      'ai_assistant.faq_est_partidas',
+      'ai_assistant.faq_est_medicion',
+      'ai_assistant.faq_est_riesgos',
+      'ai_assistant.faq_est_adjuntos',
+    ],
+    constructor: [
+      'ai_assistant.faq_con_alcance',
+      'ai_assistant.faq_con_oferta',
+      'ai_assistant.faq_con_plazo',
+      'ai_assistant.faq_con_riesgos',
+      'ai_assistant.faq_con_adjuntos',
+    ],
+    administrador: [
+      'ai_assistant.faq_adm_resumen',
+      'ai_assistant.faq_adm_estado',
+      'ai_assistant.faq_adm_ofertas',
+      'ai_assistant.faq_adm_cuellos',
+      'ai_assistant.faq_adm_contrato',
+    ],
+  };
+  faqs = computed(() => this.FAQS_POR_ROL[this.rol()] ?? this.FAQS_POR_ROL['cliente']);
 
   // Capacidades para el estado vacío (clave icono / título / descripción).
   readonly capacidades = [
@@ -74,35 +105,85 @@ export class AiAssistantComponent implements OnInit {
   ];
 
   constructor() {
-    // Auto-scroll al fondo cuando cambian los mensajes o el estado de envío.
+    // Auto-scroll al final cuando cambian los mensajes o el estado de envío
+    // (nueva pregunta, indicador de escritura y respuesta).
     effect(() => {
       this.mensajes();
       this.enviando();
-      queueMicrotask(() => {
-        const el = this.scrollRef()?.nativeElement;
-        if (el) el.scrollTop = el.scrollHeight;
-      });
+      // Doble rAF: espera a que Angular pinte la nueva burbuja y el layout se
+      // recalcule antes de medir scrollHeight; con queueMicrotask la altura aún
+      // estaba desactualizada y no bajaba hasta el final.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => this.scrollAlFondo()),
+      );
     });
+  }
+
+  /** Lleva el scroll del chat al final (última pregunta / respuesta). */
+  private scrollAlFondo(): void {
+    const el = this.scrollRef()?.nativeElement;
+    if (el) el.scrollTop = el.scrollHeight;
   }
 
   async ngOnInit(): Promise<void> {
     const userId = this.user()?.id;
     if (!userId) { this.cargando.set(false); return; }
     try {
-      const exps = await this.expRepo.findByClienteId(userId);
-      this.expedientes.set(exps.map(e => ({ id: e.id, numero: e.numero, estado: e.estado })));
-      this.seleccionado.set(exps[0]?.id ?? null);
+      const { data: perfil } = await this.auth.client
+        .from('perfil').select('rol').eq('id', userId).single();
+      const rol = perfil?.rol ?? 'cliente';
+      this.rol.set(rol);
+
+      const exps = await this.cargarExpedientesPorRol(rol, userId);
+      this.expedientes.set(exps);
+      const primero = exps[0]?.id ?? null;
+      this.seleccionado.set(primero);
+      if (primero) await this.cargarConversacion(primero);
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  /** Expedientes que cada rol puede consultar con el asistente. */
+  private async cargarExpedientesPorRol(rol: string, userId: string): Promise<ExpedienteOpcion[]> {
+    const raw =
+      rol === 'estimador'     ? await this.expRepo.findByFiltro({ estimadorId: userId }) :
+      rol === 'constructor'   ? await this.expRepo.findDisponibles() :
+      rol === 'administrador' ? await this.expRepo.findAll() :
+                                await this.expRepo.findByClienteId(userId);
+    return raw.map(e => ({ id: e.id, numero: e.numero, estado: e.estado }));
   }
 
   // ── Selección de expediente ──────────────────────────────────────────────
   cambiarExpediente(id: string): void {
     if (id === this.seleccionado()) return;
     this.seleccionado.set(id);
-    this.mensajes.set([]);          // el contexto cambia → nueva conversación
     this.borrador.set('');
+    this.mensajes.set([]);                 // el contexto cambia → cargar su historial
+    void this.cargarConversacion(id);
+  }
+
+  /** Carga el historial persistido del expediente en la conversación. */
+  private async cargarConversacion(expId: string): Promise<void> {
+    try {
+      const historial = await this.asistente.cargarHistorial(expId);
+      // Evita carreras si el usuario cambió de expediente mientras cargaba.
+      if (this.seleccionado() === expId) this.mensajes.set(historial);
+    } catch {
+      // Silencioso: si falla la carga, se deja la conversación vacía.
+    }
+  }
+
+  /** Borra la conversación persistida del expediente activo. */
+  async limpiarConversacion(): Promise<void> {
+    const expId = this.seleccionado();
+    if (!expId || this.enviando() || !this.hayConversacion) return;
+    try {
+      await this.asistente.limpiarHistorial(expId);
+      this.mensajes.set([]);
+    } catch {
+      this.mensajes.update(m => [...m, { role: 'error', content: this.translate.instant('ai_assistant.error') }]);
+    }
   }
 
   get hayConversacion(): boolean {

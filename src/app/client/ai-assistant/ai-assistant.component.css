@@ -49,6 +49,33 @@
 }
 .ai-pagesub { color: var(--ds-ink-secondary); font-size: var(--ds-text-sm); margin: var(--ds-space-2) 0 0; }
 
+/* Herramientas del encabezado: selector + limpiar */
+.ai-headtools {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--ds-space-3);
+  flex-wrap: wrap;
+}
+
+.ai-clearbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 160ms var(--ds-ease-out), border-color 160ms var(--ds-ease-out), background 160ms var(--ds-ease-out);
+}
+.ai-clearbtn:hover { color: var(--ds-danger); border-color: var(--ds-danger); background: var(--ds-danger-soft); }
+.ai-clearbtn:focus-visible { outline: 2px solid var(--ds-gold-active); outline-offset: 1px; }
+.ai-clearbtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* Selector de expediente */
 .ai-expsel { display: flex; flex-direction: column; gap: var(--ds-space-1, 4px); }
 .ai-expsel__label {
@@ -98,12 +125,81 @@
 .ai-empty__title { font-family: var(--ds-font-display); font-size: var(--ds-text-lg); color: var(--ds-ink); margin: 0; }
 .ai-empty__hint { font-size: var(--ds-text-sm); margin: 0; max-width: 42ch; }
 
+/* ── Layout de dos columnas: chat + aside ── */
+.ai-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-5);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Aside derecho con las dos tarjetas */
+.ai-aside {
+  flex: 0 0 300px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  position: sticky;
+  top: var(--ds-space-4);
+}
+
+.ai-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  padding: var(--ds-space-4);
+}
+.ai-card__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  margin: 0 0 var(--ds-space-3);
+}
+
+/* Preguntas frecuentes: dos columnas, chips compactos */
+.ai-card__faqs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ds-space-2);
+}
+.ai-card__faqs .ai-faq {
+  width: 100%;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-2xs);
+  line-height: var(--ds-leading-snug);
+  padding: var(--ds-space-2);
+}
+
+/* Lo que puedo hacer: una columna, filas compactas sin marco propio */
+.ai-card__caps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+}
+.ai-card__caps .ai-cap {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  gap: var(--ds-space-2);
+}
+.ai-card__caps .ai-cap__icon { width: 32px; height: 32px; font-size: var(--ds-text-sm); }
+.ai-card__caps .ai-cap__title { font-size: var(--ds-text-sm); }
+.ai-card__caps .ai-cap__desc  { font-size: var(--ds-text-xs); }
+
 /* ── Contenedor de chat ── */
 .ai-chat {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-4);
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
 }
 
@@ -139,11 +235,6 @@
 }
 .ai-intro__lead { color: var(--ds-ink-secondary); font-size: var(--ds-text-base); line-height: var(--ds-leading-relaxed); margin: 0; max-width: 56ch; }
 
-.ai-caps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-  gap: var(--ds-space-3);
-}
 .ai-cap {
   display: flex;
   gap: var(--ds-space-3);
@@ -224,13 +315,7 @@
 .ai-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes aiBlink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
 
-/* ── Sugerencias (FAQ) ── */
-/* Las preguntas envuelven en varias filas; nunca scroll horizontal. */
-.ai-faqs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ds-space-2);
-}
+/* ── Sugerencias (FAQ) — chips dentro de la tarjeta del aside ── */
 .ai-faq {
   flex: 0 1 auto;
   font-family: var(--ds-font-body);
@@ -301,13 +386,19 @@
 }
 
 /* ── Responsive ── */
+/* Bajo 992px el aside pasa a apilarse bajo el chat, a ancho completo. */
+@media (max-width: 991px) {
+  .ai-layout { flex-direction: column; }
+  .ai-aside {
+    flex: 1 1 auto;
+    width: 100%;
+    position: static;
+  }
+}
+
 @media (max-width: 560px) {
   .ai-scroll { max-height: none; }
   .ai-msg__bubble { max-width: 88%; }
-
-  /* Móvil: las preguntas se muestran verticalmente, a ancho completo. */
-  .ai-faqs { flex-direction: column; align-items: stretch; }
-  .ai-faq { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

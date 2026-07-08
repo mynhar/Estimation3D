@@ -12,21 +12,41 @@
       }
     </div>
     @if (!cargando() && expedientes().length > 0) {
-      <div class="or-header__stats">
-        <div class="stat">
-          <span class="stat__val">{{ expedientes().length }}</span>
-          <span class="stat__lbl">{{ 'offers_received.total_label' | translate }}</span>
+      <div class="or-header__aside">
+        <div class="view-toggle d-none d-md-inline-flex" role="group"
+             [attr.aria-label]="'offers_received.view_table' | translate">
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tabla'"
+                  [attr.aria-pressed]="vista() === 'tabla'"
+                  (click)="setVista('tabla')"
+                  [title]="'offers_received.view_table' | translate">
+            <i class="bi bi-table" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                  [attr.aria-pressed]="vista() === 'tarjetas'"
+                  (click)="setVista('tarjetas')"
+                  [title]="'offers_received.view_cards' | translate">
+            <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+          </button>
         </div>
-        @if (pendientes().length > 0) {
-          <div class="stat stat--gold">
-            <span class="stat__val">{{ pendientes().length }}</span>
-            <span class="stat__lbl">
-              {{ pendientes().length !== 1
-                  ? ('offers_received.pending_plural' | translate)
-                  : ('offers_received.pending_singular' | translate) }}
-            </span>
+
+        <div class="or-header__stats">
+          <div class="stat">
+            <span class="stat__val">{{ expedientes().length }}</span>
+            <span class="stat__lbl">{{ 'offers_received.total_label' | translate }}</span>
           </div>
-        }
+          @if (pendientes().length > 0) {
+            <div class="stat stat--gold">
+              <span class="stat__val">{{ pendientes().length }}</span>
+              <span class="stat__lbl">
+                {{ pendientes().length !== 1
+                    ? ('offers_received.pending_plural' | translate)
+                    : ('offers_received.pending_singular' | translate) }}
+              </span>
+            </div>
+          }
+        </div>
       </div>
     }
   </header>
@@ -56,34 +76,92 @@
   } @else {
 
     @if (pendientes().length > 0) {
-      <section class="or-section">
-        <h2 class="or-section__label">
-          {{ 'offers_received.section_pending' | translate }}
-          <span class="or-section__count">{{ pendientes().length }}</span>
-        </h2>
-        <div class="oc-list">
-          @for (exp of pendientes(); track exp.id) {
-            <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: exp }"></ng-container>
-          }
-        </div>
-      </section>
+      <ng-container [ngTemplateOutlet]="sectionTpl"
+        [ngTemplateOutletContext]="{ label: 'offers_received.section_pending', count: pendientes().length, items: pendientes() }"></ng-container>
     }
 
     @if (gestionados().length > 0) {
-      <section class="or-section">
-        <h2 class="or-section__label">
-          {{ 'offers_received.section_managed' | translate }}
-          <span class="or-section__count">{{ gestionados().length }}</span>
-        </h2>
-        <div class="oc-list">
-          @for (exp of gestionados(); track exp.id) {
-            <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: exp }"></ng-container>
-          }
-        </div>
-      </section>
+      <ng-container [ngTemplateOutlet]="sectionTpl"
+        [ngTemplateOutletContext]="{ label: 'offers_received.section_managed', count: gestionados().length, items: gestionados() }"></ng-container>
     }
   }
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Sección: etiqueta + tarjetas (grid) o tabla, según la vista
+═══════════════════════════════════════════════════════════════════════ -->
+<ng-template #sectionTpl let-label="label" let-count="count" let-items="items">
+  <section class="or-section">
+    <h2 class="or-section__label">
+      {{ label | translate }}
+      <span class="or-section__count">{{ count }}</span>
+    </h2>
+
+    <!-- Tarjetas (móvil siempre · escritorio en vista tarjetas) -->
+    <div class="oc-list" [class.d-md-none]="vista() === 'tabla'">
+      @for (exp of items; track exp.id) {
+        <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: exp }"></ng-container>
+      }
+    </div>
+
+    <!-- Tabla (escritorio, vista tabla) -->
+    <div class="or-table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+      <table class="or-table">
+        <thead>
+          <tr>
+            <th class="or-table__col-photo" aria-hidden="true"></th>
+            <th>{{ 'offers_received.col_service' | translate }}</th>
+            <th>{{ 'offers_received.col_location' | translate }}</th>
+            <th>{{ 'offers_received.col_status' | translate }}</th>
+            <th>{{ 'offers_received.col_offers' | translate }}</th>
+            <th class="or-table__col-date">{{ 'offers_received.col_date' | translate }}</th>
+            <th class="or-table__col-action" aria-hidden="true"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (exp of items; track exp.id) {
+            <tr class="or-table__row" (click)="ver(exp.id)"
+                [class.or-table__row--pending]="exp.estado === 'en_oferta'">
+              <td class="or-table__col-photo">
+                <div class="or-thumb">
+                  @if (fotoExpediente(exp); as foto) {
+                    <img [src]="foto" loading="lazy" [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+                  } @else {
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  }
+                </div>
+              </td>
+              <td>
+                <span class="or-table__service">{{ servicioNombre(exp) }}</span>
+                <span class="or-table__num">{{ exp.numero }}</span>
+              </td>
+              <td class="or-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+              <td>
+                <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ estadoTexto(exp.estado) }}</span>
+              </td>
+              <td>
+                @if (ofertaAceptada(exp); as acc) {
+                  <span class="or-table__accepted">
+                    <i class="bi bi-check-circle-fill" aria-hidden="true"></i>{{ formatPrecio(acc.precio) }}
+                  </span>
+                } @else {
+                  <span class="or-table__muted">
+                    {{ exp.total_ofertas }} {{ (exp.total_ofertas === 1 ? 'offers_received.offer' : 'offers_received.offers') | translate }}
+                    @if (hayOfertas(exp)) {
+                      · {{ 'offers_received.from' | translate }} {{ formatPrecio(precioMin(exp)) }}
+                    }
+                  </span>
+                }
+              </td>
+              <td class="or-table__col-date or-table__muted">{{ formatFecha(exp.fecha_visita) }}</td>
+              <td class="or-table__col-action"><i class="bi bi-chevron-right" aria-hidden="true"></i></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</ng-template>
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      Plantilla única de tarjeta de expediente
@@ -94,6 +172,18 @@
            [class.oc--accepted]="ofertaAceptada(exp)">
     <button class="oc__btn" type="button" (click)="ver(exp.id)"
             [attr.aria-label]="servicioNombre(exp) + ' · ' + exp.numero">
+
+      <!-- Foto del expediente (miniatura del tour 3D) -->
+      <div class="oc__photo">
+        @if (fotoExpediente(exp); as foto) {
+          <img class="oc__photo-img" [src]="foto" loading="lazy"
+               [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+        } @else {
+          <div class="oc__photo-empty" [title]="'offers_received.photo_none' | translate">
+            <i class="bi bi-badge-3d" aria-hidden="true"></i>
+          </div>
+        }
+      </div>
 
       <div class="oc__head">
         <div class="oc__id">

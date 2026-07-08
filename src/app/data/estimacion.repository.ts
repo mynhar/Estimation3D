@@ -21,6 +21,7 @@ export type EstimacionMin = {
 export type EstimacionFecha = {
   expediente_id:     string;
   fecha_visita_real: string | null;
+  url_tour:          string | null;
 };
 
 export type EstimacionSummary = {
@@ -28,6 +29,7 @@ export type EstimacionSummary = {
   fecha_visita_real:  string | null;
   costo_estimado:     number | null;
   costo_estimado_max: number | null;
+  url_tour:           string | null;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -59,7 +61,7 @@ export class EstimacionRepository {
     if (!ids.length) return [];
     const { data, error } = await this.db
       .from('estimacion')
-      .select('expediente_id, fecha_visita_real')
+      .select('expediente_id, fecha_visita_real, url_tour')
       .in('expediente_id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as EstimacionFecha[];
@@ -69,7 +71,7 @@ export class EstimacionRepository {
     if (!ids.length) return [];
     const { data, error } = await this.db
       .from('estimacion')
-      .select('expediente_id, fecha_visita_real, costo_estimado, costo_estimado_max')
+      .select('expediente_id, fecha_visita_real, costo_estimado, costo_estimado_max, url_tour')
       .in('expediente_id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as EstimacionSummary[];

@@ -12,12 +12,13 @@ import { RealtimeNotificationsService } from './services/realtime-notifications.
 import { ToastComponent } from './components/toast/toast.component';
 import { LangToggleComponent } from './components/lang-toggle/lang-toggle.component';
 import { AppFooterComponent } from './components/app-footer/app-footer.component';
+import { ClaudeIconComponent } from './shared/ui/claude-icon/claude-icon.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe, LangToggleComponent, AppFooterComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe, LangToggleComponent, AppFooterComponent, ClaudeIconComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

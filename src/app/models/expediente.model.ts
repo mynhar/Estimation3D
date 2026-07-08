@@ -54,6 +54,7 @@ export interface ExpedienteParaEstimar {
   fecha_visita_real:   string | null;
   costo_estimado:      number | null;
   costo_estimado_max:  number | null;
+  url_tour:            string | null;
 }
 
 /** Vista aplanada para la lista admin de expedientes. */
@@ -70,6 +71,7 @@ export interface ExpedienteAdmin {
   fecha_visita_real:    string | null;
   oferta_precio:        number | null;
   oferta_fecha_inicio:  string | null;
+  url_tour:             string | null;
 }
 
 /** Forma aplanada usada en las listas del módulo estimador. */
@@ -207,6 +209,7 @@ export interface ExpedienteCliente {
   creado_en: string;
   descripcion: string;
   servicio: { nombre_fr: string; nombre_en: string; nombre_es: string } | null;
+  url_tour: string | null;
 }
 
 // ── Constantes de estado ──────────────────────────────────────────────────────
@@ -254,6 +257,7 @@ export interface ExpedienteConOfertas {
   distrito: string;
   total_ofertas: number;
   ofertas: OfertaResumen[];
+  url_tour: string | null;
 }
 
 /** Mapa estado → { texto, clase } para la vista de ofertas recibidas (cliente). */

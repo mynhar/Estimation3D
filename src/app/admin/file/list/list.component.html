@@ -100,11 +100,30 @@
             </button>
           }
         </div>
-        @if (hayFiltros()) {
-          <button class="btn-clear-filters" (click)="limpiarFiltros()">
-            <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
-          </button>
-        }
+        <div class="filter-bar__right">
+          @if (hayFiltros()) {
+            <button class="btn-clear-filters" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
+            </button>
+          }
+          <div class="view-toggle d-none d-md-inline-flex" role="group"
+               [attr.aria-label]="'admin_file.view_table' | translate">
+            <button type="button" class="view-toggle__btn"
+                    [class.view-toggle__btn--active]="vista() === 'tabla'"
+                    [attr.aria-pressed]="vista() === 'tabla'"
+                    (click)="setVista('tabla')"
+                    [title]="'admin_file.view_table' | translate">
+              <i class="bi bi-table" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="view-toggle__btn"
+                    [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                    [attr.aria-pressed]="vista() === 'tarjetas'"
+                    (click)="setVista('tarjetas')"
+                    [title]="'admin_file.view_cards' | translate">
+              <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -138,8 +157,8 @@
 
       } @else {
 
-        <!-- ── Tabla (escritorio) ───────────────────────────────────────────── -->
-        <div class="table-responsive d-none d-md-block">
+        <!-- ── Tabla (escritorio, vista tabla) ──────────────────────────────── -->
+        <div class="table-responsive d-none" [class.d-md-block]="vista() === 'tabla'">
           <table class="table table-admin align-middle mb-0">
             <thead>
               <tr>
@@ -220,50 +239,59 @@
           </table>
         </div>
 
-        <!-- ── Tarjetas (móvil) ─────────────────────────────────────────────── -->
-        <ul class="file-cards d-md-none list-unstyled mb-0">
+        <!-- ── Tarjetas (móvil siempre · escritorio en vista tarjetas) ──────── -->
+        <ul class="file-cards list-unstyled mb-0" [class.d-md-none]="vista() === 'tabla'">
           @for (e of expedientes(); track e.id) {
-            <li class="file-card" (click)="irAEditar(e.id)">
+            <li class="file-card" role="button" tabindex="0"
+                (click)="irAEditar(e.id)"
+                (keydown.enter)="irAEditar(e.id)"
+                (keydown.space)="$event.preventDefault(); irAEditar(e.id)">
 
-              <div class="file-card__top">
-                <span class="exp-num">{{ e.numero }}</span>
-                <span class="estado-badge {{ estadoBadge(e.estado) }}">
+              <!-- Foto del expediente (miniatura del tour 3D) -->
+              <div class="file-card__photo">
+                @if (fotoExpediente(e); as foto) {
+                  <img class="file-card__photo-img" [src]="foto" loading="lazy"
+                       [alt]="e.numero" (error)="onFotoError(e.id)" />
+                } @else {
+                  <div class="file-card__photo-empty"
+                       [title]="'admin_file.photo_none' | translate">
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  </div>
+                }
+                <span class="estado-badge file-card__badge {{ estadoBadge(e.estado) }}">
                   {{ ('admin_file.status_' + e.estado) | translate }}
                 </span>
               </div>
 
-              <div class="file-card__body">
-                <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
-                <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+              <div class="file-card__content">
+                <div class="file-card__top">
+                  <span class="exp-num">{{ e.numero }}</span>
+                  @if (e.oferta_precio) {
+                    <span class="cell-precio d-inline">{{ formatPrecio(e.oferta_precio) }}</span>
+                  }
+                </div>
+
+                <div class="file-card__body">
+                  <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
+                  <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+                </div>
+
+                <dl class="file-card__meta">
+                  <div class="file-card__meta-item">
+                    <dt><i class="bi bi-calendar3" aria-hidden="true"></i>{{ 'admin_file.col_visit_date' | translate }}</dt>
+                    <dd>
+                      {{ formatFecha(e.fecha_visita) }}
+                      @if (e.fecha_visita_real) {
+                        <span class="cell-real-date"><i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}</span>
+                      }
+                    </dd>
+                  </div>
+                  <div class="file-card__meta-item">
+                    <dt><i class="bi bi-person" aria-hidden="true"></i>{{ 'admin_file.col_estimator' | translate }}</dt>
+                    <dd>{{ e.estimador_nombre || '—' }}</dd>
+                  </div>
+                </dl>
               </div>
-
-              <dl class="file-card__meta">
-                <div class="file-card__meta-item">
-                  <dt><i class="bi bi-calendar3" aria-hidden="true"></i>{{ 'admin_file.col_visit_date' | translate }}</dt>
-                  <dd>
-                    {{ formatFecha(e.fecha_visita) }}
-                    @if (e.fecha_visita_real) {
-                      <span class="cell-real-date"><i class="bi bi-check2"></i>{{ formatFecha(e.fecha_visita_real) }}</span>
-                    }
-                  </dd>
-                </div>
-                <div class="file-card__meta-item">
-                  <dt><i class="bi bi-person" aria-hidden="true"></i>{{ 'admin_file.col_estimator' | translate }}</dt>
-                  <dd>{{ e.estimador_nombre || '—' }}</dd>
-                </div>
-                <div class="file-card__meta-item">
-                  <dt><i class="bi bi-cash-coin" aria-hidden="true"></i>{{ 'admin_file.col_price' | translate }}</dt>
-                  <dd>
-                    @if (e.oferta_precio) {
-                      <span class="cell-precio d-inline">{{ formatPrecio(e.oferta_precio) }}</span>
-                    } @else { — }
-                  </dd>
-                </div>
-              </dl>
-
-              <span class="file-card__chevron" aria-hidden="true">
-                <i class="bi bi-chevron-right"></i>
-              </span>
             </li>
           }
         </ul>

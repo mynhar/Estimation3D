@@ -5,11 +5,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
+import { EstimacionService } from '../../services/estimacion.service';
 import {
   ExpedienteConOfertas,
   OfertaResumen,
   ESTADO_BADGE_OFERTA_RECIBIDA,
 } from '../../models';
+
+type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
   selector: 'app-offers-received',
@@ -28,6 +31,10 @@ export class OffersReceivedComponent implements OnInit {
   user        = toSignal(this.auth.user$);
   expedientes = signal<ExpedienteConOfertas[]>([]);
   cargando    = signal(true);
+  vista       = signal<VistaExpedientes>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   pendientes  = computed(() => this.expedientes().filter(e => e.estado === 'en_oferta'));
   gestionados = computed(() => this.expedientes().filter(e => e.estado !== 'en_oferta'));
@@ -95,5 +102,37 @@ export class OffersReceivedComponent implements OnInit {
 
   ver(id: string) {
     this.router.navigate(['/client/builder-offer', id]);
+  }
+
+  setVista(v: VistaExpedientes): void {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del primer tour 3D Matterport adjunto.
+   * Devuelve null si no hay tour Matterport o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(exp: ExpedienteConOfertas): string | null {
+    if (this.fotosFallidas().has(exp.id)) return null;
+    const modelId = this.matterportModelId(exp.url_tour);
+    return modelId
+      ? `https://my.matterport.com/api/v1/player/models/${modelId}/thumb?width=640&dpr=1`
+      : null;
+  }
+
+  onFotoError(id: string): void {
+    this.fotosFallidas.update(set => {
+      const next = new Set(set);
+      next.add(id);
+      return next;
+    });
+  }
+
+  /** Extrae el id del modelo Matterport (`?m=<id>`) del primer URL de tour. */
+  private matterportModelId(urlTour: string | null): string | null {
+    const [primera] = EstimacionService.parseUrls(urlTour);
+    if (!primera || !/matterport\.com/i.test(primera)) return null;
+    const match = primera.match(/[?&]m=([^&]+)/);
+    return match ? match[1] : null;
   }
 }

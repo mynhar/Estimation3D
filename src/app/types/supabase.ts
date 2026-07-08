@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      asistente_conversacion: {
+        Row: {
+          content: string
+          creado_en: string
+          expediente_id: string
+          id: string
+          role: string
+          usuario_id: string
+        }
+        Insert: {
+          content: string
+          creado_en?: string
+          expediente_id: string
+          id?: string
+          role: string
+          usuario_id: string
+        }
+        Update: {
+          content?: string
+          creado_en?: string
+          expediente_id?: string
+          id?: string
+          role?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asistente_conversacion_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asistente_conversacion_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       actividad_servicio: {
         Row: {
           activo: boolean

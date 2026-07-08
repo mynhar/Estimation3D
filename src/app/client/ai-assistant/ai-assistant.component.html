@@ -2,24 +2,36 @@
 
   <!-- Encabezado -->
   <header class="ai-pagehead">
-    <span class="ai-eyebrow">{{ 'ai_assistant.eyebrow' | translate }}</span>
+    <span class="ai-eyebrow">{{ eyebrowKey() | translate }}</span>
     <div class="ai-headrow">
       <div>
         <h1 class="ai-pagetitle">{{ 'ai_assistant.title' | translate }}</h1>
-        <p class="ai-pagesub">{{ 'ai_assistant.tagline' | translate }}</p>
+        <p class="ai-pagesub">{{ taglineKey() | translate }}</p>
       </div>
 
       @if (expedientes().length) {
-        <label class="ai-expsel">
-          <span class="ai-expsel__label">{{ 'ai_assistant.expediente' | translate }}</span>
-          <select class="ai-expsel__select"
-                  [value]="seleccionado()"
-                  (change)="cambiarExpediente($any($event.target).value)">
-            @for (e of expedientes(); track e.id) {
-              <option [value]="e.id">{{ 'ai_assistant.dossier' | translate }} {{ e.numero }}</option>
-            }
-          </select>
-        </label>
+        <div class="ai-headtools">
+          <label class="ai-expsel">
+            <span class="ai-expsel__label">{{ 'ai_assistant.expediente' | translate }}</span>
+            <select class="ai-expsel__select"
+                    [value]="seleccionado()"
+                    (change)="cambiarExpediente($any($event.target).value)">
+              @for (e of expedientes(); track e.id) {
+                <option [value]="e.id">{{ 'ai_assistant.dossier' | translate }} {{ e.numero }}</option>
+              }
+            </select>
+          </label>
+
+          @if (hayConversacion) {
+            <button type="button" class="ai-clearbtn"
+                    [disabled]="enviando()"
+                    (click)="limpiarConversacion()"
+                    [title]="'ai_assistant.clear' | translate">
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+              <span class="ai-clearbtn__label">{{ 'ai_assistant.clear' | translate }}</span>
+            </button>
+          }
+        </div>
       }
     </div>
   </header>
@@ -37,22 +49,92 @@
   }
 
   @else {
-    <div class="ai-chat">
+    <div class="ai-layout">
 
-      <!-- Zona de mensajes / estado inicial -->
-      <div class="ai-scroll" #scroller>
+      <!-- ── Columna izquierda: chat ── -->
+      <div class="ai-chat">
 
-        @if (!hayConversacion) {
-          <!-- Estado inicial: presentación + capacidades -->
-          <section class="ai-intro fade-up" style="--delay: 40ms">
-            <span class="ai-intro__tile" aria-hidden="true"><i class="bi bi-robot"></i></span>
-            <h2 class="ai-intro__title">{{ 'ai_assistant.intro_title' | translate }}</h2>
-            <p class="ai-intro__lead">{{ 'ai_assistant.intro_lead' | translate }}</p>
-          </section>
+        <!-- Zona de mensajes / estado inicial -->
+        <div class="ai-scroll" #scroller>
 
-          <div class="ai-caps">
-            @for (cap of capacidades; track cap.title; let i = $index) {
-              <article class="ai-cap fade-up" [style.--delay]="(120 + i * 70) + 'ms'">
+          @if (!hayConversacion) {
+            <!-- Estado inicial: presentación -->
+            <section class="ai-intro fade-up" style="--delay: 40ms">
+              <span class="ai-intro__tile" aria-hidden="true"><i class="bi bi-robot"></i></span>
+              <h2 class="ai-intro__title">{{ 'ai_assistant.intro_title' | translate }}</h2>
+              <p class="ai-intro__lead">{{ introLeadKey() | translate }}</p>
+            </section>
+          }
+
+          @else {
+            <!-- Conversación -->
+            <ol class="ai-thread">
+              @for (m of mensajes(); track $index) {
+                <li class="ai-msg ai-msg--{{ m.role }}">
+                  @if (m.role === 'assistant') {
+                    <span class="ai-msg__avatar" aria-hidden="true"><i class="bi bi-robot"></i></span>
+                  }
+                  @if (m.role === 'error') {
+                    <span class="ai-msg__avatar ai-msg__avatar--error" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
+                  }
+                  <div class="ai-msg__bubble">{{ m.content }}</div>
+                </li>
+              }
+              @if (enviando()) {
+                <li class="ai-msg ai-msg--assistant">
+                  <span class="ai-msg__avatar" aria-hidden="true"><i class="bi bi-robot"></i></span>
+                  <div class="ai-msg__bubble ai-msg__bubble--typing" aria-label="…">
+                    <span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>
+                  </div>
+                </li>
+              }
+            </ol>
+          }
+        </div>
+
+        <!-- Entrada -->
+        <form class="ai-composer" (ngSubmit)="enviarBorrador()">
+          <textarea class="ai-composer__input"
+                    rows="1"
+                    [placeholder]="'ai_assistant.placeholder' | translate"
+                    [ngModel]="borrador()"
+                    (ngModelChange)="borrador.set($event)"
+                    [ngModelOptions]="{ standalone: true }"
+                    (keydown)="onKeydown($event)"
+                    [disabled]="enviando()"></textarea>
+          <button type="submit" class="ai-composer__send btn"
+                  [disabled]="enviando() || !borrador().trim()"
+                  [attr.aria-label]="'ai_assistant.send' | translate">
+            <i class="bi bi-send" aria-hidden="true"></i>
+          </button>
+        </form>
+
+        <p class="ai-disclaimer">{{ 'ai_assistant.disclaimer' | translate }}</p>
+      </div>
+
+      <!-- ── Columna derecha: tarjetas ── -->
+      <aside class="ai-aside">
+
+        <!-- Preguntas frecuentes (2 columnas) -->
+        <section class="ai-card">
+          <h2 class="ai-card__title">{{ 'ai_assistant.faq_label' | translate }}</h2>
+          <div class="ai-card__faqs" role="list" [attr.aria-label]="'ai_assistant.faq_label' | translate">
+            @for (f of faqs(); track f) {
+              <button type="button" class="ai-faq" role="listitem"
+                      [disabled]="enviando()"
+                      (click)="usarFaq(f)">
+                {{ f | translate }}
+              </button>
+            }
+          </div>
+        </section>
+
+        <!-- Lo que puedo hacer (1 columna) -->
+        <section class="ai-card">
+          <h2 class="ai-card__title">{{ 'ai_assistant.caps_title' | translate }}</h2>
+          <div class="ai-card__caps">
+            @for (cap of capacidades; track cap.title) {
+              <article class="ai-cap">
                 <span class="ai-cap__icon" aria-hidden="true"><i class="bi {{ cap.icon }}"></i></span>
                 <div>
                   <h3 class="ai-cap__title">{{ cap.title | translate }}</h3>
@@ -61,63 +143,9 @@
               </article>
             }
           </div>
-        }
+        </section>
 
-        @else {
-          <!-- Conversación -->
-          <ol class="ai-thread">
-            @for (m of mensajes(); track $index) {
-              <li class="ai-msg ai-msg--{{ m.role }}">
-                @if (m.role === 'assistant') {
-                  <span class="ai-msg__avatar" aria-hidden="true"><i class="bi bi-robot"></i></span>
-                }
-                @if (m.role === 'error') {
-                  <span class="ai-msg__avatar ai-msg__avatar--error" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></span>
-                }
-                <div class="ai-msg__bubble">{{ m.content }}</div>
-              </li>
-            }
-            @if (enviando()) {
-              <li class="ai-msg ai-msg--assistant">
-                <span class="ai-msg__avatar" aria-hidden="true"><i class="bi bi-robot"></i></span>
-                <div class="ai-msg__bubble ai-msg__bubble--typing" aria-label="…">
-                  <span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span>
-                </div>
-              </li>
-            }
-          </ol>
-        }
-      </div>
-
-      <!-- Sugerencias (siempre visibles, scroll horizontal) -->
-      <div class="ai-faqs" role="list" [attr.aria-label]="'ai_assistant.faq_label' | translate">
-        @for (f of faqs; track f) {
-          <button type="button" class="ai-faq" role="listitem"
-                  [disabled]="enviando()"
-                  (click)="usarFaq(f)">
-            {{ f | translate }}
-          </button>
-        }
-      </div>
-
-      <!-- Entrada -->
-      <form class="ai-composer" (ngSubmit)="enviarBorrador()">
-        <textarea class="ai-composer__input"
-                  rows="1"
-                  [placeholder]="'ai_assistant.placeholder' | translate"
-                  [ngModel]="borrador()"
-                  (ngModelChange)="borrador.set($event)"
-                  [ngModelOptions]="{ standalone: true }"
-                  (keydown)="onKeydown($event)"
-                  [disabled]="enviando()"></textarea>
-        <button type="submit" class="ai-composer__send btn"
-                [disabled]="enviando() || !borrador().trim()"
-                [attr.aria-label]="'ai_assistant.send' | translate">
-          <i class="bi bi-send" aria-hidden="true"></i>
-        </button>
-      </form>
-
-      <p class="ai-disclaimer">{{ 'ai_assistant.disclaimer' | translate }}</p>
+      </aside>
     </div>
   }
 </div>

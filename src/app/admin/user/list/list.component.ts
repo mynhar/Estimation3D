@@ -90,6 +90,11 @@ export class AdminUserListComponent implements OnInit {
       this.filtroRol.set(rolParam as RolUsuario);
     }
 
+    const activoParam = this.route.snapshot.queryParamMap.get('activo');
+    if (activoParam && (this.estadosActivo as string[]).includes(activoParam)) {
+      this.filtroActivo.set(activoParam as FiltroActivo);
+    }
+
     try {
       const { data, error } = await this.auth.client
         .from('perfil')

@@ -69,6 +69,25 @@
             {{ countTodos() }}
           </span>
         }
+
+        <div class="view-toggle d-none d-md-inline-flex" role="group"
+             [class.ms-auto]="filtro() === 'todos'"
+             [attr.aria-label]="'file.view_table' | translate">
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tabla'"
+                  [attr.aria-pressed]="vista() === 'tabla'"
+                  (click)="setVista('tabla')"
+                  [title]="'file.view_table' | translate">
+            <i class="bi bi-table" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                  [attr.aria-pressed]="vista() === 'tarjetas'"
+                  (click)="setVista('tarjetas')"
+                  [title]="'file.view_cards' | translate">
+            <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
     } @else if (!cargando()) {
@@ -160,7 +179,57 @@
     <!-- Grid 1 → 2 → 3 → 4 columnas -->
     } @else {
 
-      <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+      <!-- ── Vista tabla (escritorio) ─────────────────────────────────────── -->
+      <div class="mf-table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="mf-table">
+          <thead>
+            <tr>
+              <th class="mf-table__col-photo" aria-hidden="true"></th>
+              <th class="mf-table__col-num">{{ 'file.col_number' | translate }}</th>
+              <th>{{ 'file.col_service' | translate }}</th>
+              <th class="mf-table__col-date">{{ 'file.col_visit' | translate }}</th>
+              <th>{{ 'file.col_status' | translate }}</th>
+              <th class="mf-table__col-action" aria-hidden="true"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientesPaginados(); track exp.id) {
+              <tr class="mf-table__row" [routerLink]="['/client/file/my-file', exp.id]"
+                  [attr.data-estado]="exp.estado">
+                <td class="mf-table__col-photo">
+                  <div class="mf-table__thumb">
+                    @if (fotoExpediente(exp); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                    }
+                  </div>
+                </td>
+                <td class="mf-table__col-num">
+                  <span class="mf-card__num">{{ exp.numero }}</span>
+                </td>
+                <td>
+                  <span class="mf-table__service">{{ servicioNombre(exp.servicio) }}</span>
+                </td>
+                <td class="mf-table__col-date">{{ formatFecha(exp.fecha_visita) }}</td>
+                <td>
+                  <span class="status-badge {{ estadoCfg(exp.estado).clase }}">
+                    <i class="bi {{ estadoCfg(exp.estado).icono }}" aria-hidden="true"></i>
+                    {{ ('state.' + exp.estado) | translate }}
+                  </span>
+                </td>
+                <td class="mf-table__col-action">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Grid de tarjetas (móvil siempre · escritorio en vista tarjetas) ─ -->
+      <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4"
+           [class.d-md-none]="vista() === 'tabla'">
         @for (exp of expedientesPaginados(); track exp.id) {
           <div class="col">
             <article class="mf-card h-100"
@@ -172,6 +241,19 @@
               <div class="mf-card__bar" aria-hidden="true"></div>
 
               <div class="mf-card__body">
+
+                <!-- Foto del expediente (miniatura del tour 3D) -->
+                <div class="mf-card__photo">
+                  @if (fotoExpediente(exp); as foto) {
+                    <img class="mf-card__photo-img" [src]="foto" loading="lazy"
+                         [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+                  } @else {
+                    <div class="mf-card__photo-empty"
+                         [title]="'file.photo_none' | translate">
+                      <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                    </div>
+                  }
+                </div>
 
                 <!-- Número + badge -->
                 <div class="mf-card__head">

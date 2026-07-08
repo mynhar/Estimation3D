@@ -102,11 +102,14 @@
             <i class="bi bi-clock-history sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.historique' | translate }}</span>
           </a>
+
+          <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
+          <div class="sidebar-section-separator"></div>
           <a class="sidebar-item" routerLink="/client/ai-assistant"
              routerLinkActive="active-link"
              [title]="'nav.assistant_ia' | translate"
              (click)="closeMobile()">
-            <i class="bi bi-robot sidebar-item__icon" aria-hidden="true"></i>
+            <app-claude-icon class="sidebar-item__icon" />
             <span class="sidebar-item__label">{{ 'nav.assistant_ia' | translate }}</span>
           </a>
         }
@@ -145,6 +148,16 @@
              (click)="closeMobile()">
             <i class="bi bi-tools sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.suivi_chantier' | translate }}</span>
+          </a>
+
+          <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
+          <div class="sidebar-section-separator"></div>
+          <a class="sidebar-item" routerLink="/client/ai-assistant"
+             routerLinkActive="active-link"
+             [title]="'nav.assistant_ia' | translate"
+             (click)="closeMobile()">
+            <app-claude-icon class="sidebar-item__icon" />
+            <span class="sidebar-item__label">{{ 'nav.assistant_ia' | translate }}</span>
           </a>
         }
 
@@ -203,6 +216,16 @@
              (click)="closeMobile()">
             <i class="bi bi-hammer sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.suivi_chantier' | translate }}</span>
+          </a>
+
+          <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
+          <div class="sidebar-section-separator"></div>
+          <a class="sidebar-item" routerLink="/client/ai-assistant"
+             routerLinkActive="active-link"
+             [title]="'nav.assistant_ia' | translate"
+             (click)="closeMobile()">
+            <app-claude-icon class="sidebar-item__icon" />
+            <span class="sidebar-item__label">{{ 'nav.assistant_ia' | translate }}</span>
           </a>
         }
 
@@ -271,6 +294,16 @@
              (click)="closeMobile()">
             <i class="bi bi-people sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.utilisateurs' | translate }}</span>
+          </a>
+
+          <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
+          <div class="sidebar-section-separator"></div>
+          <a class="sidebar-item" routerLink="/client/ai-assistant"
+             routerLinkActive="active-link"
+             [title]="'nav.assistant_ia' | translate"
+             (click)="closeMobile()">
+            <app-claude-icon class="sidebar-item__icon" />
+            <span class="sidebar-item__label">{{ 'nav.assistant_ia' | translate }}</span>
           </a>
         }
 
