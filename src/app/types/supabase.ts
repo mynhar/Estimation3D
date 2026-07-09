@@ -56,6 +56,177 @@ export type Database = {
           }
         ]
       }
+      asistente_evento: {
+        Row: {
+          creado_en: string
+          expediente_id: string
+          id: string
+          payload: Json
+          resuelto: boolean
+          resumen: string
+          rol: Database["public"]["Enums"]["rol_usuario"]
+          tipo: string
+          usuario_id: string
+        }
+        Insert: {
+          creado_en?: string
+          expediente_id: string
+          id?: string
+          payload?: Json
+          resuelto?: boolean
+          resumen: string
+          rol: Database["public"]["Enums"]["rol_usuario"]
+          tipo: string
+          usuario_id: string
+        }
+        Update: {
+          creado_en?: string
+          expediente_id?: string
+          id?: string
+          payload?: Json
+          resuelto?: boolean
+          resumen?: string
+          rol?: Database["public"]["Enums"]["rol_usuario"]
+          tipo?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asistente_evento_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asistente_evento_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ficha_normativa: {
+        Row: {
+          activo: boolean
+          codigo: string
+          creado_en: string
+          id: number
+          orden: number
+          palabras_clave: string[]
+          resumen_en: string
+          resumen_es: string
+          resumen_fr: string
+          titulo_en: string
+          titulo_es: string
+          titulo_fr: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          creado_en?: string
+          id?: number
+          orden?: number
+          palabras_clave?: string[]
+          resumen_en: string
+          resumen_es: string
+          resumen_fr: string
+          titulo_en: string
+          titulo_es: string
+          titulo_fr: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          creado_en?: string
+          id?: number
+          orden?: number
+          palabras_clave?: string[]
+          resumen_en?: string
+          resumen_es?: string
+          resumen_fr?: string
+          titulo_en?: string
+          titulo_es?: string
+          titulo_fr?: string
+        }
+        Relationships: []
+      }
+      imprevisto_catalogo: {
+        Row: {
+          activo: boolean
+          codigo: string
+          creado_en: string
+          ficha_codigo: string | null
+          id: number
+          orden: number
+          perfil_en: string
+          perfil_es: string
+          perfil_fr: string
+          protocolo_en: string
+          protocolo_es: string
+          protocolo_fr: string
+          requiere_aprobacion: boolean
+          servicio_id: number | null
+          titulo_en: string
+          titulo_es: string
+          titulo_fr: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          creado_en?: string
+          ficha_codigo?: string | null
+          id?: number
+          orden?: number
+          perfil_en: string
+          perfil_es: string
+          perfil_fr: string
+          protocolo_en: string
+          protocolo_es: string
+          protocolo_fr: string
+          requiere_aprobacion?: boolean
+          servicio_id?: number | null
+          titulo_en: string
+          titulo_es: string
+          titulo_fr: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          creado_en?: string
+          ficha_codigo?: string | null
+          id?: number
+          orden?: number
+          perfil_en?: string
+          perfil_es?: string
+          perfil_fr?: string
+          protocolo_en?: string
+          protocolo_es?: string
+          protocolo_fr?: string
+          requiere_aprobacion?: boolean
+          servicio_id?: number | null
+          titulo_en?: string
+          titulo_es?: string
+          titulo_fr?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imprevisto_catalogo_ficha_codigo_fkey"
+            columns: ["ficha_codigo"]
+            isOneToOne: false
+            referencedRelation: "ficha_normativa"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "imprevisto_catalogo_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       actividad_servicio: {
         Row: {
           activo: boolean
@@ -944,6 +1115,10 @@ export type Database = {
       mi_rol: {
         Args: never
         Returns: Database["public"]["Enums"]["rol_usuario"]
+      }
+      recalcular_avance_seguimiento: {
+        Args: { p_seguimiento_id: string }
+        Returns: undefined
       }
       rechazar_oferta: {
         Args: { p_expediente_id: string; p_oferta_id: string }

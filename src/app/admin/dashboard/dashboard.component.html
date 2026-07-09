@@ -455,6 +455,24 @@
                 </button>
               }
             </nav>
+            <div class="adm-tl__viewtoggle" role="group" [attr.aria-label]="'admin_dashboard.view_toggle' | translate">
+              <button type="button" class="adm-tl-view"
+                      [class.adm-tl-view--active]="vistaTimeline() === 'tabla'"
+                      (click)="vistaTimeline.set('tabla')"
+                      [attr.aria-pressed]="vistaTimeline() === 'tabla'"
+                      [title]="'admin_dashboard.view_table' | translate">
+                <i class="bi bi-list-ul" aria-hidden="true"></i>
+                <span class="adm-tl-view__label">{{ 'admin_dashboard.view_table' | translate }}</span>
+              </button>
+              <button type="button" class="adm-tl-view"
+                      [class.adm-tl-view--active]="vistaTimeline() === 'tarjetas'"
+                      (click)="vistaTimeline.set('tarjetas')"
+                      [attr.aria-pressed]="vistaTimeline() === 'tarjetas'"
+                      [title]="'admin_dashboard.view_cards' | translate">
+                <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+                <span class="adm-tl-view__label">{{ 'admin_dashboard.view_cards' | translate }}</span>
+              </button>
+            </div>
           </div>
 
           @if (cargandoTimeline()) {
@@ -471,6 +489,7 @@
             </div>
 
           } @else {
+            @if (vistaTimeline() === 'tabla') {
             <ul class="adm-tl__list">
               @for (ev of timelinePaginada(); track ev.id) {
                 <li class="adm-tl__event"
@@ -519,6 +538,62 @@
                 </li>
               }
             </ul>
+
+          } @else {
+            <!-- Vista de tarjetas (con foto del expediente extraída del tour 3D) -->
+            <div class="adm-tl-cards">
+              @for (ev of timelinePaginada(); track ev.id) {
+                <article class="adm-tl-card"
+                    [class.adm-tl-card--clickable]="!!ev.entityId"
+                    [attr.role]="ev.entityId ? 'button' : null"
+                    [attr.tabindex]="ev.entityId ? 0 : null"
+                    (click)="onTimelineClick(ev)"
+                    (keydown.enter)="onTimelineClick(ev)"
+                    (keydown.space)="ev.entityId && $event.preventDefault(); onTimelineClick(ev)">
+
+                  <div class="adm-tl-card__media">
+                    <div class="adm-tl-card__media-fallback adm-tl__dot--{{ ev.tipo }}" aria-hidden="true">
+                      <i class="{{ tipoIcon(ev.tipo) }}"></i>
+                    </div>
+                    @if (ev.foto) {
+                      <img class="adm-tl-card__img" [src]="ev.foto" alt="" loading="lazy"
+                           referrerpolicy="no-referrer"
+                           (error)="$any($event.target).style.display='none'">
+                    }
+                    <span class="adm-tl__badge adm-tl__badge--{{ ev.tipo }} adm-tl-card__badge">
+                      {{ 'admin_dashboard.tipo_' + ev.tipo | translate }}
+                    </span>
+                  </div>
+
+                  <div class="adm-tl-card__body">
+                    <p class="adm-tl__desc">
+                      <span class="adm-tl__ref">{{ ev.referencia }}</span>
+                      {{ ev.descKey | translate }}
+                      @if (ev.precio) { <span class="adm-tl__price">· {{ ev.precio }}</span> }
+                      @if (ev.avance != null) {
+                        <span class="adm-tl__avance">· {{ ev.avance }}%</span>
+                      }
+                      @if (ev.estadoObra) {
+                        <span class="adm-tl__estado adm-tl__estado--{{ ev.estadoObra }}">
+                          {{ 'seguimiento_estado.' + ev.estadoObra | translate }}
+                        </span>
+                      }
+                    </p>
+                    <p class="adm-tl__meta">
+                      <i class="bi bi-person" aria-hidden="true"></i>
+                      {{ ev.autor }}
+                      <span class="adm-tl__sep" aria-hidden="true">·</span>
+                      <time>{{ formatTs(ev.timestamp) }}</time>
+                      @if (ev.entityId) {
+                        <i class="bi bi-arrow-right adm-tl-card__nav" aria-hidden="true"></i>
+                      }
+                    </p>
+                  </div>
+
+                </article>
+              }
+            </div>
+            }
 
             <div class="adm-tl__footer">
               <app-pagination

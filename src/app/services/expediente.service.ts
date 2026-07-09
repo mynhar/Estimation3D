@@ -26,6 +26,7 @@ import {
 } from '../data';
 import { OfertaRaw, OfertaHistorialItem } from '../data/oferta.repository';
 import { ContratoHistorialItem } from '../data/contrato.repository';
+import { matterportThumbFromTour } from '../shared/util/matterport';
 export type { OfertaHistorialItem } from '../data/oferta.repository';
 export type { ContratoHistorialItem } from '../data/contrato.repository';
 
@@ -505,11 +506,19 @@ export class ExpedienteService {
       ...exps.filter(e => e.estimador_id).map(e => e.estimador_id as string),
     ])];
 
-    const [servicios, perfiles, ofertasRaw] = await Promise.all([
+    const [servicios, perfiles, ofertasRaw, estimaciones] = await Promise.all([
       this.servicioRepo.findByIds(servicioIds),
       this.perfilRepo.findByIds(userIds),
       this.ofertaRepo.findByExpedienteIds(expedienteIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
     ]);
+
+    // Miniatura del tour 3D (Matterport) por expediente.
+    const fotoPorExpediente = new Map<string, string>();
+    for (const est of estimaciones) {
+      const thumb = matterportThumbFromTour(est.url_tour);
+      if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
+    }
 
     const constructorIds = [...new Set(ofertasRaw.map(o => o.constructor_id))];
     const constructores  = constructorIds.length
@@ -548,6 +557,7 @@ export class ExpedienteService {
         oferta_estado:       oferta?.estado        ?? null,
         total_ofertas:       expOfertas.length,
         sort_date:           oferta?.creado_en     ?? e.creado_en,
+        foto:                fotoPorExpediente.get(e.id) ?? null,
       } as ExpedienteConOfertaAdmin;
     }).sort((a, b) => b.sort_date.localeCompare(a.sort_date));
   }

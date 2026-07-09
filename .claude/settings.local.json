@@ -32,7 +32,16 @@
       "mcp__claude_ai_Supabase__deploy_edge_function",
       "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('supabase/functions/asistente-ia/index.ts','utf8'\\);fs.writeFileSync\\(process.env.TEMP_OUT, JSON.stringify\\(c\\)\\);console.log\\('bytes:', c.length\\);\")",
       "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\(process.env.TEMP_OUT,'utf8'\\).length\\)\")",
-      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('supabase/functions/asistente-ia/index.ts','utf8'\\);fs.writeFileSync\\('C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/86ae97bc-1825-4b57-b2d4-dd76bdb583f7/scratchpad/edge_escaped.json', JSON.stringify\\(c\\)\\);console.log\\('ok, escaped bytes:', JSON.stringify\\(c\\).length\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('supabase/functions/asistente-ia/index.ts','utf8'\\);fs.writeFileSync\\('C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/86ae97bc-1825-4b57-b2d4-dd76bdb583f7/scratchpad/edge_escaped.json', JSON.stringify\\(c\\)\\);console.log\\('ok, escaped bytes:', JSON.stringify\\(c\\).length\\);\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")",
+      "Bash(echo \"---exit=$?---\")",
+      "Bash(curl -s -X POST https://ckdksfvxjimxuqceoeyr.supabase.co/functions/v1/asistente-ia -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZGtzZnZ4amlteHVxY2VvZXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NTczMjEsImV4cCI6MjA5MjEzMzMyMX0.sO8k6Nyrldu6bU3xfXb8oa31jz6dyQVsrjLpptdcIVE' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZGtzZnZ4amlteHVxY2VvZXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NTczMjEsImV4cCI6MjA5MjEzMzMyMX0.sO8k6Nyrldu6bU3xfXb8oa31jz6dyQVsrjLpptdcIVE' -H 'Content-Type: application/json' -d '{\"expedienteId\":\"x\",\"messages\":[{\"role\":\"user\",\"content\":\"hola\"}],\"lang\":\"fr\"}' -w '\\\\n[HTTP %{http_code}]\\\\n')",
+      "Bash(node -e ' *)",
+      "Bash(node \"C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/bc2d9041-6508-44fb-8639-7bdf7b56ab11/scratchpad/i18n-admin.mjs\")",
+      "mcp__claude_ai_Supabase__generate_typescript_types",
+      "Bash(curl -sL -o /dev/null -w 'final: HTTP %{http_code} · type=%{content_type} · bytes=%{size_download}\\\\n' 'https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640&dpr=1&disable=upscale')",
+      "Bash(curl -s -D - -o /dev/null \"https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640\")",
+      "Bash(grep -nA6 \"\\\\.status-chips-bar\" src/app/admin/construction-monitoring/list/list.component.css)"
     ]
   }
 }

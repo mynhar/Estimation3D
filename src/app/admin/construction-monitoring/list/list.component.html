@@ -75,6 +75,21 @@
           </button>
         }
       </div>
+
+      <div class="cm-view-toggle" role="group" [attr.aria-label]="'common.view_toggle' | translate">
+        <button type="button" class="offer-view" [class.offer-view--active]="vista() === 'tabla'"
+                (click)="vista.set('tabla')" [attr.aria-pressed]="vista() === 'tabla'"
+                [title]="'common.view_table' | translate">
+          <i class="bi bi-list-ul" aria-hidden="true"></i>
+          <span class="offer-view__label">{{ 'common.view_table' | translate }}</span>
+        </button>
+        <button type="button" class="offer-view" [class.offer-view--active]="vista() === 'tarjetas'"
+                (click)="vista.set('tarjetas')" [attr.aria-pressed]="vista() === 'tarjetas'"
+                [title]="'common.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+          <span class="offer-view__label">{{ 'common.view_cards' | translate }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
@@ -100,7 +115,7 @@
           }
         </div>
 
-      } @else {
+      } @else if (vista() === 'tabla') {
 
         <!-- Escritorio: tabla con filas clicables -->
         <div class="table-responsive d-none d-lg-block">
@@ -202,6 +217,48 @@
                 </span>
               </div>
             </button>
+          }
+        </div>
+
+      } @else {
+
+        <!-- Vista de tarjetas (con foto del expediente extraída del tour 3D) -->
+        <div class="offer-cards">
+          @for (c of contratosPaginados(); track c.id) {
+            <article class="offer-card" role="button" tabindex="0"
+                     (click)="irAMonitoreo(c.id)"
+                     (keydown.enter)="irAMonitoreo(c.id)"
+                     (keydown.space)="$event.preventDefault(); irAMonitoreo(c.id)">
+              <div class="offer-card__media">
+                <div class="offer-card__fallback" aria-hidden="true"><i class="bi bi-box-seam"></i></div>
+                @if (c.foto) {
+                  <img class="offer-card__img" [src]="c.foto" alt="" loading="lazy"
+                       referrerpolicy="no-referrer"
+                       (error)="$any($event.target).style.display='none'">
+                }
+                <span class="estado-badge {{ badgeContrato(c.estado) }} offer-card__badge">
+                  <i class="bi {{ iconoEstado(c.estado) }}"></i>
+                  {{ ('construction_monitoring.estado_' + c.estado) | translate }}
+                </span>
+              </div>
+              <div class="offer-card__body">
+                <div class="offer-card__head">
+                  <span class="exp-num">{{ c.expediente_numero }}</span>
+                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                </div>
+                <span class="offer-card__client">{{ c.cliente_nombre }}</span>
+                <span class="offer-card__svc">{{ servicioNombre(c) }}</span>
+                <div class="offer-card__meta">
+                  <span class="cm-meta"><i class="bi bi-hard-hat" aria-hidden="true"></i>{{ c.constructor_nombre }}</span>
+                  <span class="cm-meta"><i class="bi bi-envelope" aria-hidden="true"></i>{{ c.constructor_email }}</span>
+                  <span class="cm-meta"><i class="bi bi-telephone" aria-hidden="true"></i>{{ c.constructor_telefono }}</span>
+                  <span class="cm-meta"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ c.canton }}, {{ c.provincia }}</span>
+                  <span class="cm-meta"><i class="bi bi-pen" aria-hidden="true"></i>{{ formatFecha(c.firmado_en) }}</span>
+                  <span class="cm-meta"><i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.fecha_inicio) }}</span>
+                  <span class="cm-meta"><i class="bi bi-hourglass-split" aria-hidden="true"></i>{{ plazoLabel(c) }}</span>
+                </div>
+              </div>
+            </article>
           }
         </div>
 

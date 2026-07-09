@@ -108,6 +108,21 @@
         }
       </div>
 
+      <div class="offer-view-toggle" role="group" [attr.aria-label]="'common.view_toggle' | translate">
+        <button type="button" class="offer-view" [class.offer-view--active]="vista() === 'tabla'"
+                (click)="vista.set('tabla')" [attr.aria-pressed]="vista() === 'tabla'"
+                [title]="'common.view_table' | translate">
+          <i class="bi bi-list-ul" aria-hidden="true"></i>
+          <span class="offer-view__label">{{ 'common.view_table' | translate }}</span>
+        </button>
+        <button type="button" class="offer-view" [class.offer-view--active]="vista() === 'tarjetas'"
+                (click)="vista.set('tarjetas')" [attr.aria-pressed]="vista() === 'tarjetas'"
+                [title]="'common.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+          <span class="offer-view__label">{{ 'common.view_cards' | translate }}</span>
+        </button>
+      </div>
+
     </div>
 
     <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
@@ -133,7 +148,7 @@
           }
         </div>
 
-      } @else {
+      } @else if (vista() === 'tabla') {
 
         <!-- Escritorio: tabla con filas clicables -->
         <div class="table-responsive d-none d-xl-block">
@@ -260,6 +275,49 @@
                 </span>
               </div>
             </button>
+          }
+        </div>
+
+      } @else {
+
+        <!-- Vista de tarjetas (con foto del expediente extraída del tour 3D) -->
+        <div class="offer-cards">
+          @for (c of contratosPaginados(); track c.contrato_id) {
+            <article class="offer-card" role="button" tabindex="0"
+                     (click)="irAEditar(c.contrato_id)"
+                     (keydown.enter)="irAEditar(c.contrato_id)"
+                     (keydown.space)="$event.preventDefault(); irAEditar(c.contrato_id)">
+              <div class="offer-card__media">
+                <div class="offer-card__fallback" aria-hidden="true"><i class="bi bi-box-seam"></i></div>
+                @if (c.foto) {
+                  <img class="offer-card__img" [src]="c.foto" alt="" loading="lazy"
+                       referrerpolicy="no-referrer"
+                       (error)="$any($event.target).style.display='none'">
+                }
+                <span class="estado-badge {{ badgeContrato(c.contrato_estado) }} offer-card__badge">
+                  {{ ('admin_contract.contrato_' + c.contrato_estado) | translate }}
+                </span>
+              </div>
+              <div class="offer-card__body">
+                <div class="offer-card__head">
+                  <span class="exp-num">{{ c.expediente_numero }}</span>
+                  <span class="cell-precio">{{ formatPrecio(c.precio_final) }}</span>
+                </div>
+                <span class="offer-card__client">{{ c.cliente_nombre }}</span>
+                <span class="offer-card__svc">{{ servicioNombre(c) }}</span>
+                <div class="offer-card__meta">
+                  <span class="cm-meta"><i class="bi bi-person-badge" aria-hidden="true"></i>{{ c.estimador_nombre || '—' }}</span>
+                  <span class="cm-meta"><i class="bi bi-hard-hat" aria-hidden="true"></i>{{ c.constructor_nombre || '—' }}</span>
+                  <span class="cm-meta"><i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.oferta_fecha_inicio) }}</span>
+                  @if (c.garantia_anos != null) {
+                    <span class="cm-meta"><i class="bi bi-shield-check" aria-hidden="true"></i>{{ c.garantia_anos }} {{ 'admin_contract.years' | translate }}</span>
+                  }
+                </div>
+                <span class="estado-badge {{ badgeExpediente(c.expediente_estado) }}">
+                  {{ ('admin_contract.status_' + c.expediente_estado) | translate }}
+                </span>
+              </div>
+            </article>
           }
         </div>
 

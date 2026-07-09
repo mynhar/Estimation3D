@@ -74,7 +74,7 @@ export const routes: Routes = [
   },
   {
     path: 'client/ai-assistant',
-    loadComponent: () => import('./client/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
+    loadComponent: () => import('./client/ai-assistant/ai-assistant.component').then(m => m.ClientAiAssistantComponent),
     canActivate: [authGuard],
   },
   {
@@ -149,6 +149,11 @@ export const routes: Routes = [
     loadComponent: () => import('./estimator/construction-monitoring/monitoring/monitoring.component').then(m => m.EstimatorConstructionMonitoringComponent),
     canActivate: [estimatorGuard],
   },
+  {
+    path: 'estimator/ai-assistant',
+    loadComponent: () => import('./estimator/ai-assistant/ai-assistant.component').then(m => m.EstimatorAiAssistantComponent),
+    canActivate: [estimatorGuard],
+  },
 
   // ── Constructor ───────────────────────────────────────────────────────────
   {
@@ -184,6 +189,11 @@ export const routes: Routes = [
   {
     path: 'builder/construction-monitoring/monitoring/:id',
     loadComponent: () => import('./builder/construction-monitoring/monitoring/monitoring.component').then(m => m.ConstructionMonitoringComponent),
+    canActivate: [constructorGuard],
+  },
+  {
+    path: 'builder/ai-assistant',
+    loadComponent: () => import('./builder/ai-assistant/ai-assistant.component').then(m => m.BuilderAiAssistantComponent),
     canActivate: [constructorGuard],
   },
 
@@ -278,6 +288,46 @@ export const routes: Routes = [
   {
     path: 'admin/user/edit/:id',
     loadComponent: () => import('./admin/user/edit/edit.component').then(m => m.AdminUserEditComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/ai-assistant',
+    loadComponent: () => import('./admin/ai-assistant/ai-assistant.component').then(m => m.AdminAiAssistantComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/ai-events',
+    loadComponent: () => import('./admin/ai-events/list/list.component').then(m => m.AdminAiEventsListComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/ficha',
+    loadComponent: () => import('./admin/fichas/list/list.component').then(m => m.AdminFichasListComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/ficha/create',
+    loadComponent: () => import('./admin/fichas/create/create.component').then(m => m.AdminFichasCreateComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/ficha/edit/:id',
+    loadComponent: () => import('./admin/fichas/edit/edit.component').then(m => m.AdminFichasEditComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/imprevisto',
+    loadComponent: () => import('./admin/imprevistos/list/list.component').then(m => m.AdminImprevistosListComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/imprevisto/create',
+    loadComponent: () => import('./admin/imprevistos/create/create.component').then(m => m.AdminImprevistosCreateComponent),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/imprevisto/edit/:id',
+    loadComponent: () => import('./admin/imprevistos/edit/edit.component').then(m => m.AdminImprevistosEditComponent),
     canActivate: [adminGuard],
   },
 

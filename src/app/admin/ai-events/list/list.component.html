@@ -1,0 +1,179 @@
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <header class="page-header mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div>
+        <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+        <h1 class="page-header__title">{{ 'admin_ai_events.title' | translate }}</h1>
+        <p class="page-header__lead">{{ 'admin_ai_events.subtitle' | translate }}</p>
+      </div>
+      @if (!cargando() && !error()) {
+        <span class="kpi-pill">
+          <i class="bi bi-flag" aria-hidden="true"></i>
+          {{ pendientes() }} {{ 'admin_ai_events.pending' | translate }}
+        </span>
+      }
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <div class="filter-bar mb-3" aria-hidden="true">
+      <div class="d-flex gap-2 flex-wrap">
+        <div class="skel skel--chip"></div>
+        <div class="skel skel--chip"></div>
+        <div class="skel skel--chip"></div>
+      </div>
+    </div>
+    <div class="card table-card">
+      <div class="table-responsive">
+        <table class="table table-admin mb-0">
+          <tbody>
+            @for (_ of [1,2,3,4,5,6]; track $index) {
+              <tr>
+                <td><div class="skel skel--td skel--td-sm"></div></td>
+                <td><div class="skel skel--td skel--td-lg"></div></td>
+                <td><div class="skel skel--td skel--td-md"></div></td>
+                <td><div class="skel skel--td skel--td-btn mx-auto"></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  } @else if (error()) {
+    <div class="error-alert" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <span>{{ error() }}</span>
+    </div>
+
+  } @else {
+
+    <!-- Filtros -->
+    <div class="filter-bar mb-3">
+      <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+        <span class="filter-bar__label">{{ 'admin_ai_events.filter_type' | translate }}</span>
+        <div class="filter-chips" role="group">
+          @for (t of TIPOS; track t) {
+            <button type="button" class="filter-chip"
+                    [class.filter-chip--active-todos]="filtroTipo() === t"
+                    (click)="filtroTipo.set(t)">
+              {{ t === 'todos' ? ('common.all' | translate) : tipoLabel(t) }}
+            </button>
+          }
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="filter-bar__label">{{ 'admin_ai_events.filter_status' | translate }}</span>
+        <div class="filter-chips" role="group">
+          @for (r of RESUELTOS; track r) {
+            <button type="button" class="filter-chip"
+                    [class.filter-chip--active-todos]="filtroResuelto() === r && r === 'todos'"
+                    [class.filter-chip--active-no]="filtroResuelto() === r && r === 'pendiente'"
+                    [class.filter-chip--active-yes]="filtroResuelto() === r && r === 'resuelto'"
+                    (click)="filtroResuelto.set(r)">
+              {{ r === 'todos'     ? ('common.all' | translate) :
+                 r === 'pendiente' ? ('admin_ai_events.status_pending'  | translate) :
+                                     ('admin_ai_events.status_resolved' | translate) }}
+            </button>
+          }
+        </div>
+        @if (hayFiltros()) {
+          <button class="filter-bar__reset" type="button" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>{{ 'common.clear_filters' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="card table-card">
+      @if (eventosFiltrados().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-shield-check empty-state__icon" aria-hidden="true"></i>
+          <p class="empty-state__msg">
+            {{ (hayFiltros() ? 'admin_ai_events.no_results' : 'admin_ai_events.no_data') | translate }}
+          </p>
+        </div>
+
+      } @else {
+
+        <!-- Escritorio -->
+        <div class="table-responsive d-none d-lg-block">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:190px">{{ 'admin_ai_events.col_type'    | translate }}</th>
+                <th>                    {{ 'admin_ai_events.col_summary' | translate }}</th>
+                <th style="width:210px">{{ 'admin_ai_events.col_context' | translate }}</th>
+                <th style="width:160px">{{ 'admin_ai_events.col_date'    | translate }}</th>
+                <th class="text-center" style="width:130px">{{ 'admin_ai_events.col_action' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ev of eventosPaginados(); track ev.id) {
+                <tr [class.opacity-75]="ev.resuelto">
+                  <td><span class="tipo-badge {{ tipoClase(ev.tipo) }}">{{ tipoLabel(ev.tipo) }}</span></td>
+                  <td class="resumen-cell">{{ ev.resumen }}</td>
+                  <td class="meta-cell">
+                    <strong>{{ 'admin_ai_events.dossier' | translate }} {{ ev.expediente?.numero ?? '—' }}</strong><br>
+                    {{ usuarioNombre(ev) }} · {{ rolLabel(ev.rol) }}
+                  </td>
+                  <td class="meta-cell">{{ fecha(ev.creado_en) }}</td>
+                  <td class="text-center">
+                    <button type="button"
+                            class="btn-resolver"
+                            [class.btn-resolver--resuelto]="ev.resuelto"
+                            [disabled]="actualizando() === ev.id"
+                            (click)="alternarResuelto(ev)">
+                      <i class="bi" [class.bi-check-circle]="ev.resuelto" [class.bi-circle]="!ev.resuelto" aria-hidden="true"></i>
+                      {{ (ev.resuelto ? 'admin_ai_events.status_resolved' : 'admin_ai_events.mark_resolved') | translate }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Móvil -->
+        <div class="cm-cards d-lg-none">
+          @for (ev of eventosPaginados(); track ev.id) {
+            <div class="cm-card" [class.opacity-75]="ev.resuelto" style="cursor:default">
+              <div class="cm-card__top">
+                <span class="tipo-badge {{ tipoClase(ev.tipo) }}">{{ tipoLabel(ev.tipo) }}</span>
+                <span class="meta-cell">{{ fecha(ev.creado_en) }}</span>
+              </div>
+              <div class="cm-card__body">
+                <span class="resumen-cell">{{ ev.resumen }}</span>
+                <span class="meta-cell mt-1">
+                  <strong>{{ 'admin_ai_events.dossier' | translate }} {{ ev.expediente?.numero ?? '—' }}</strong>
+                  · {{ usuarioNombre(ev) }} · {{ rolLabel(ev.rol) }}
+                </span>
+              </div>
+              <button type="button"
+                      class="btn-resolver align-self-start"
+                      [class.btn-resolver--resuelto]="ev.resuelto"
+                      [disabled]="actualizando() === ev.id"
+                      (click)="alternarResuelto(ev)">
+                <i class="bi" [class.bi-check-circle]="ev.resuelto" [class.bi-circle]="!ev.resuelto" aria-hidden="true"></i>
+                {{ (ev.resuelto ? 'admin_ai_events.status_resolved' : 'admin_ai_events.mark_resolved') | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="table-card__footer">
+        <app-pagination
+          [total]="eventosFiltrados().length"
+          [page]="paginaActual()"
+          [pageSize]="POR_PAGINA"
+          (pageChange)="paginaActual.set($event)">
+        </app-pagination>
+      </div>
+    </div>
+
+  }
+
+</div>

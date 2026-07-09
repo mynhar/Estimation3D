@@ -32,6 +32,7 @@ export class AdminContractListComponent implements OnInit {
 
   busqueda     = signal('');
   filtroEstado = signal('todos');
+  vista        = signal<'tabla' | 'tarjetas'>('tabla');   // por defecto: tabla
 
   readonly estados    = ['todos', 'generado', 'firmado', 'en_ejecucion', 'completado', 'cancelado'];
   readonly POR_PAGINA = 15;

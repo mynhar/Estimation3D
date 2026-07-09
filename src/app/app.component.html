@@ -152,7 +152,7 @@
 
           <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
           <div class="sidebar-section-separator"></div>
-          <a class="sidebar-item" routerLink="/client/ai-assistant"
+          <a class="sidebar-item" routerLink="/builder/ai-assistant"
              routerLinkActive="active-link"
              [title]="'nav.assistant_ia' | translate"
              (click)="closeMobile()">
@@ -220,7 +220,7 @@
 
           <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
           <div class="sidebar-section-separator"></div>
-          <a class="sidebar-item" routerLink="/client/ai-assistant"
+          <a class="sidebar-item" routerLink="/estimator/ai-assistant"
              routerLinkActive="active-link"
              [title]="'nav.assistant_ia' | translate"
              (click)="closeMobile()">
@@ -295,15 +295,36 @@
             <i class="bi bi-people sidebar-item__icon" aria-hidden="true"></i>
             <span class="sidebar-item__label">{{ 'nav.utilisateurs' | translate }}</span>
           </a>
+          <a class="sidebar-item" routerLink="/admin/imprevisto"
+             routerLinkActive="active-link"
+             [title]="'nav.imprevistos' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-exclamation-diamond sidebar-item__icon" aria-hidden="true"></i>
+            <span class="sidebar-item__label">{{ 'nav.imprevistos' | translate }}</span>
+          </a>
+          <a class="sidebar-item" routerLink="/admin/ficha"
+             routerLinkActive="active-link"
+             [title]="'nav.fiches_normatives' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-journal-text sidebar-item__icon" aria-hidden="true"></i>
+            <span class="sidebar-item__label">{{ 'nav.fiches_normatives' | translate }}</span>
+          </a>
 
           <div class="sidebar-section-label">{{ 'nav.section_assistant' | translate }}</div>
           <div class="sidebar-section-separator"></div>
-          <a class="sidebar-item" routerLink="/client/ai-assistant"
+          <a class="sidebar-item" routerLink="/admin/ai-assistant"
              routerLinkActive="active-link"
              [title]="'nav.assistant_ia' | translate"
              (click)="closeMobile()">
             <app-claude-icon class="sidebar-item__icon" />
             <span class="sidebar-item__label">{{ 'nav.assistant_ia' | translate }}</span>
+          </a>
+          <a class="sidebar-item" routerLink="/admin/ai-events"
+             routerLinkActive="active-link"
+             [title]="'nav.evenements_ia' | translate"
+             (click)="closeMobile()">
+            <i class="bi bi-flag sidebar-item__icon" aria-hidden="true"></i>
+            <span class="sidebar-item__label">{{ 'nav.evenements_ia' | translate }}</span>
           </a>
         }
 

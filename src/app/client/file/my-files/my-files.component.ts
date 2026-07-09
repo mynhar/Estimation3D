@@ -8,6 +8,7 @@ import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { ExpedienteCliente } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import { ClaudeIconComponent } from '../../../shared/ui/claude-icon/claude-icon.component';
 
 interface EstadoCfg {
   texto: string;
@@ -23,7 +24,7 @@ type VistaExpedientes = 'tabla' | 'tarjetas';
   selector: 'app-my-files',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
+  imports: [RouterLink, TranslatePipe, PaginationComponent, ClaudeIconComponent],
   templateUrl: './my-files.component.html',
   styleUrl: './my-files.component.css',
 })

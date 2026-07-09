@@ -11,8 +11,15 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 //   · contexto (qué datos ve — p. ej. el constructor no ve ofertas ajenas),
 //   · persona (consultor del propietario, asistente técnico del estimador,
 //     asistente del constructor, o asistente operativo del administrador).
-// Responde SIEMPRE en el idioma seleccionado. El historial se persiste por
-// usuario en `asistente_conversacion` (cada rol tiene su propio hilo).
+//
+// Fuentes de verdad de referencia inyectadas: el catálogo de imprevistos del
+// servicio (imprevisto_catalogo) y las fichas normativas de Quebec
+// (ficha_normativa).
+//
+// Escalación estructurada: el modelo puede registrar eventos internos con la
+// herramienta `registrar_evento`, que se persisten en `asistente_evento` y NO
+// se muestran al usuario. Responde SIEMPRE en el idioma seleccionado. El
+// historial se persiste por usuario en `asistente_conversacion`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const corsHeaders = {
@@ -22,18 +29,54 @@ const corsHeaders = {
 
 const MODEL = 'claude-sonnet-4-6';
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const MAX_MENSAJES = 20; // límite de turnos de historial aceptados
+const MAX_MENSAJES = 20;   // límite de turnos de historial aceptados
+const MAX_TOOL_ITERS = 4;  // tope de vueltas del bucle de herramientas
 const ROLES_PERMITIDOS = ['cliente', 'estimador', 'constructor', 'administrador'] as const;
+
+// Tipos de evento de escalación que el asistente puede registrar.
+const TIPOS_EVENTO = [
+  'salud_mencionada',
+  'escalada_humana',
+  'caso_externo',
+  'evidencia_incompleta_imprevisto',
+  'imprevisto_anticipado',
+  'candidato_imprevisto',
+] as const;
+type TipoEvento = typeof TIPOS_EVENTO[number];
 
 type Rol = typeof ROLES_PERMITIDOS[number];
 type ChatRole = 'user' | 'assistant';
-interface ChatMessage { role: ChatRole; content: string }
+interface ChatMessage { role: ChatRole; content: any }
 
 interface Contexto {
   bloque:               string;
+  referencias:          string;
   servicioNombre:       string;
   servicioDescripcion:  string;
 }
+
+interface EventoPendiente { tipo: TipoEvento; resumen: string }
+
+// Herramienta de escalación. El resultado es interno; el usuario nunca lo ve.
+const TOOL_REGISTRAR_EVENTO = {
+  name: 'registrar_evento',
+  description:
+    'Registra un evento interno de escalación o seguimiento para el equipo Estimation3D. ' +
+    'Es INTERNO: el usuario final nunca lo ve. Regístralo cuando corresponda: síntomas de ' +
+    'salud (salud_mencionada), enojo o amenaza de disputa (escalada_humana), pregunta fuera ' +
+    'de las fuentes de verdad (caso_externo), evidencia de un imprevisto incompleta ' +
+    '(evidencia_incompleta_imprevisto), cuando anticipas un imprevisto del catálogo ' +
+    '(imprevisto_anticipado), o cuando el técnico observa en sitio un imprevisto NUEVO fuera ' +
+    'del catálogo, para revisión humana (candidato_imprevisto). Puedes registrar más de uno en un mismo turno.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      tipo:    { type: 'string', enum: [...TIPOS_EVENTO] },
+      resumen: { type: 'string', description: 'Motivo breve y factual, sin datos sensibles de salud.' },
+    },
+    required: ['tipo', 'resumen'],
+  },
+};
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -85,48 +128,71 @@ Deno.serve(async (req: Request) => {
     const contexto = await construirContexto(db, expedienteId, user.id, rol, lang);
     if (!contexto) return json({ error: 'Expediente no encontrado o sin acceso' }, 404);
 
-    // 4. Construir prompt y llamar a Claude.
+    // 4. Construir prompt y ejecutar el bucle con Claude (con herramientas).
     const system = buildSystemPrompt(contexto, lang, rol);
+    const eventos: EventoPendiente[] = [];
+    let respuesta = '…';
+    let refusal = false;
 
-    const resp = await fetch(ANTHROPIC_URL, {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
+    for (let iter = 0; iter < MAX_TOOL_ITERS; iter++) {
+      const data = await callClaude(apiKey, {
         model: MODEL,
         max_tokens: 1500,
         system,
+        tools: [TOOL_REGISTRAR_EVENTO],
         messages,
-      }),
-    });
+      });
 
-    if (!resp.ok) {
-      const detail = await resp.text().catch(() => '');
-      console.error('Anthropic error', resp.status, detail);
-      return json({ error: 'El asistente no está disponible en este momento' }, 502);
+      if (data?.stop_reason === 'refusal') { refusal = true; break; }
+
+      const bloques = (data?.content ?? []) as any[];
+      const texto = bloques.filter((b) => b?.type === 'text').map((b) => b.text).join('\n').trim();
+      const toolUses = bloques.filter((b) => b?.type === 'tool_use' && b?.name === 'registrar_evento');
+
+      if (toolUses.length && iter < MAX_TOOL_ITERS - 1) {
+        // El modelo pidió registrar eventos: acúsalos y deja que continúe.
+        messages.push({ role: 'assistant', content: bloques });
+        const results: any[] = [];
+        for (const tu of toolUses) {
+          const tipo = tu?.input?.tipo;
+          const resumen = String(tu?.input?.resumen ?? '').slice(0, 1000);
+          if (TIPOS_EVENTO.includes(tipo)) eventos.push({ tipo, resumen });
+          results.push({ type: 'tool_result', tool_use_id: tu.id, content: 'Evento registrado.' });
+        }
+        messages.push({ role: 'user', content: results });
+        if (texto) respuesta = texto; // conserva texto parcial por si es la última vuelta
+        continue;
+      }
+
+      if (texto) respuesta = texto;
+      break;
     }
 
-    const data = await resp.json();
-    if (data?.stop_reason === 'refusal') {
-      return json({ reply: null, refusal: true }, 200);
+    if (refusal) return json({ reply: null, refusal: true }, 200);
+
+    // 5. Persistir eventos de escalación (best effort; internos).
+    if (eventos.length) {
+      try {
+        await db.from('asistente_evento').insert(
+          eventos.map((e) => ({
+            expediente_id: expedienteId,
+            usuario_id:    user.id,
+            rol,
+            tipo:          e.tipo,
+            resumen:       e.resumen,
+          })),
+        );
+      } catch (e) {
+        console.error('No se pudieron registrar los eventos', e);
+      }
     }
-    const reply = (data?.content ?? [])
-      .filter((b: any) => b?.type === 'text')
-      .map((b: any) => b.text)
-      .join('\n')
-      .trim();
 
-    const respuesta = reply || '…';
-
-    // 5. Persistir el turno (última pregunta + respuesta) para este usuario. No
-    //    debe romper la respuesta si falla el guardado.
+    // 6. Persistir el turno (última pregunta + respuesta) para este usuario.
     try {
-      const ultimaPregunta = messages[messages.length - 1].content;
+      const ultimaPregunta = String(messages.find((m) => m.role === 'user')?.content ?? '');
+      const preguntaOriginal = rawMessages.filter((m: any) => m?.role === 'user').slice(-1)[0]?.content ?? ultimaPregunta;
       await db.from('asistente_conversacion').insert([
-        { expediente_id: expedienteId, usuario_id: user.id, role: 'user',      content: ultimaPregunta },
+        { expediente_id: expedienteId, usuario_id: user.id, role: 'user',      content: String(preguntaOriginal).slice(0, 4000) },
         { expediente_id: expedienteId, usuario_id: user.id, role: 'assistant', content: respuesta },
       ]);
     } catch (e) {
@@ -137,9 +203,32 @@ Deno.serve(async (req: Request) => {
 
   } catch (err: any) {
     console.error('asistente-ia', err);
+    if (err?.message === 'anthropic') {
+      return json({ error: 'El asistente no está disponible en este momento' }, 502);
+    }
     return json({ error: err?.message ?? 'Error interno' }, 500);
   }
 });
+
+// ── Llamada a Claude ──────────────────────────────────────────────────────────
+
+async function callClaude(apiKey: string, body: unknown): Promise<any> {
+  const resp = await fetch(ANTHROPIC_URL, {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  if (!resp.ok) {
+    const detail = await resp.text().catch(() => '');
+    console.error('Anthropic error', resp.status, detail);
+    throw new Error('anthropic');
+  }
+  return resp.json();
+}
 
 // ── Utilidades de formato ─────────────────────────────────────────────────────
 
@@ -185,6 +274,8 @@ async function construirContexto(
     { data: contrato },
     { data: fases },
     { data: archivos },
+    { data: imprevistos },
+    { data: fichas },
   ] = await Promise.all([
     db.from('localizacion').select('direccion, referencia, provincia, canton, distrito, tipo_inmueble').eq('expediente_id', expedienteId).maybeSingle(),
     db.from('estimacion').select('fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour').eq('expediente_id', expedienteId).maybeSingle(),
@@ -192,6 +283,15 @@ async function construirContexto(
     db.from('contrato').select('precio_final, garantia_anos, estado, generado_en, firmado_en, descripcion_trabajo').eq('expediente_id', expedienteId).maybeSingle(),
     db.from('fase_servicio').select('orden, nombre_es, nombre_fr, nombre_en').eq('servicio_id', exp.servicio_id).eq('activo', true).order('orden', { ascending: true }),
     db.from('archivo').select('tipo, nombre_archivo, mime_type').eq('expediente_id', expedienteId).order('creado_en', { ascending: true }),
+    db.from('imprevisto_catalogo')
+      .select('codigo, titulo_fr, titulo_en, titulo_es, perfil_fr, perfil_en, perfil_es, protocolo_fr, protocolo_en, protocolo_es, requiere_aprobacion, ficha_codigo, orden')
+      .eq('activo', true)
+      .or(`servicio_id.is.null,servicio_id.eq.${exp.servicio_id}`)
+      .order('orden', { ascending: true }),
+    db.from('ficha_normativa')
+      .select('codigo, titulo_fr, titulo_en, titulo_es, resumen_fr, resumen_en, resumen_es, orden')
+      .eq('activo', true)
+      .order('orden', { ascending: true }),
   ]);
 
   const listaOfertas = (ofertas ?? []) as any[];
@@ -341,7 +441,146 @@ async function construirContexto(
   }
 
   L.push('</expediente>');
-  return { bloque: L.join('\n'), servicioNombre, servicioDescripcion };
+
+  // ── Fuentes de referencia: catálogo de imprevistos + fichas normativas ──
+  const R: string[] = [];
+  const impr = (imprevistos ?? []) as any[];
+  if (impr.length) {
+    R.push('<catalogo_imprevistos>');
+    for (const it of impr) {
+      R.push(`  <imprevisto codigo="${it.codigo}">`);
+      R.push(`    ${pick(it, 'titulo', lang)} — Perfil: ${pick(it, 'perfil', lang)}`);
+      R.push(`    Protocolo: ${pick(it, 'protocolo', lang)}`);
+      R.push(`    Requiere aprobación previa del cliente: ${it.requiere_aprobacion ? 'sí' : 'no'}`);
+      if (it.ficha_codigo) R.push(`    Norma relacionada: ${it.ficha_codigo}`);
+      R.push('  </imprevisto>');
+    }
+    R.push('</catalogo_imprevistos>');
+  }
+  const fich = (fichas ?? []) as any[];
+  if (fich.length) {
+    R.push('<fichas_normativas>');
+    for (const f of fich) {
+      R.push(`  <ficha codigo="${f.codigo}">${pick(f, 'titulo', lang)} — ${pick(f, 'resumen', lang)}</ficha>`);
+    }
+    R.push('</fichas_normativas>');
+  }
+
+  // Solo el ADMINISTRADOR recibe agregados de toda la plataforma (F2/F3/F4).
+  if (rol === 'administrador') {
+    const agg = await construirAgregadosAdmin(db, lang);
+    if (agg) R.push(agg);
+  }
+
+  return { bloque: L.join('\n'), referencias: R.join('\n'), servicioNombre, servicioDescripcion };
+}
+
+// ── Agregados de plataforma (solo administrador) ──────────────────────────────
+// Métricas cross-expediente para las funciones analíticas del admin. Best-effort:
+// si una consulta falla, se omite ese sub-bloque. Escala piloto (agrega en JS).
+async function construirAgregadosAdmin(db: any, lang: string): Promise<string> {
+  try {
+    const [
+      { data: exps },
+      { data: eventos },
+      { data: ofertas },
+      { data: estimaciones },
+      { data: servicios },
+    ] = await Promise.all([
+      db.from('expediente').select('id, numero, estado, servicio_id, actualizado_en'),
+      db.from('asistente_evento').select('tipo, resuelto, expediente_id'),
+      db.from('oferta').select('constructor_id, precio, expediente_id'),
+      db.from('estimacion').select('expediente_id, costo_estimado, costo_estimado_max'),
+      db.from('servicio').select('id, nombre_fr, nombre_en, nombre_es'),
+    ]);
+
+    const listExp = (exps ?? []) as any[];
+    const listEv  = (eventos ?? []) as any[];
+    const L: string[] = ['<agregados_plataforma>'];
+
+    const servNombre = new Map<number, string>();
+    for (const s of servicios ?? []) servNombre.set(s.id, pick(s, 'nombre', lang) || `Servicio ${s.id}`);
+
+    // Funnel por estado.
+    const porEstado = new Map<string, number>();
+    for (const e of listExp) porEstado.set(e.estado, (porEstado.get(e.estado) ?? 0) + 1);
+    const ordenEstados = ['nuevo', 'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado'];
+    const funnel = ordenEstados.filter(s => porEstado.has(s)).map(s => `${s}: ${porEstado.get(s)}`).join(' · ');
+    L.push(`  <funnel total="${listExp.length}">${funnel || '—'}</funnel>`);
+
+    // Expedientes estancados: no terminales sin actualizar > 14 días.
+    const cutoff = new Date(Date.now() - 14 * 86400 * 1000).toISOString();
+    const noTerminal = new Set(['en_estimacion', 'estimado', 'en_oferta', 'adjudicado']);
+    const estancados = listExp.filter(e => noTerminal.has(e.estado) && String(e.actualizado_en ?? '') < cutoff);
+    if (estancados.length) {
+      const detalle = estancados.slice(0, 15).map(e => {
+        const dias = Math.floor((Date.now() - new Date(e.actualizado_en).getTime()) / 86400000);
+        return `${e.numero} (${e.estado}, ${dias} d)`;
+      }).join(' · ');
+      L.push(`  <expedientes_estancados umbral="14 dias" total="${estancados.length}">${detalle}</expedientes_estancados>`);
+    } else {
+      L.push('  <expedientes_estancados umbral="14 dias" total="0">Ninguno.</expedientes_estancados>');
+    }
+
+    // Eventos del asistente por tipo + pendientes.
+    const porTipo = new Map<string, number>();
+    let pendientes = 0;
+    for (const ev of listEv) {
+      porTipo.set(ev.tipo, (porTipo.get(ev.tipo) ?? 0) + 1);
+      if (!ev.resuelto) pendientes++;
+    }
+    const tiposStr = [...porTipo.entries()].map(([t, n]) => `${t}: ${n}`).join(' · ');
+    L.push(`  <eventos_asistente total="${listEv.length}" pendientes="${pendientes}">${tiposStr || '—'}</eventos_asistente>`);
+
+    // Imprevistos por servicio (eventos relacionados con imprevistos, por servicio del expediente).
+    const expIdServ = new Map<string, number>();
+    for (const e of listExp) expIdServ.set(e.id, e.servicio_id);
+    const tiposImprev = new Set(['candidato_imprevisto', 'imprevisto_anticipado', 'evidencia_incompleta_imprevisto']);
+    const imprevPorServ = new Map<number, number>();
+    for (const ev of listEv) {
+      if (!tiposImprev.has(ev.tipo)) continue;
+      const sid = expIdServ.get(ev.expediente_id);
+      if (sid == null) continue;
+      imprevPorServ.set(sid, (imprevPorServ.get(sid) ?? 0) + 1);
+    }
+    if (imprevPorServ.size) {
+      const s = [...imprevPorServ.entries()].map(([sid, n]) => `${servNombre.get(sid) ?? sid}: ${n}`).join(' · ');
+      L.push(`  <imprevistos_por_servicio>${s}</imprevistos_por_servicio>`);
+    }
+
+    // Ofertas fuera del rango estimado (por constructor).
+    const rangoByExp = new Map<string, { min: number | null; max: number | null }>();
+    for (const es of estimaciones ?? []) {
+      rangoByExp.set(es.expediente_id, { min: es.costo_estimado, max: es.costo_estimado_max ?? es.costo_estimado });
+    }
+    const fueraPorConstructor = new Map<string, number>();
+    let fueraTotal = 0;
+    for (const o of ofertas ?? []) {
+      const r = rangoByExp.get(o.expediente_id);
+      if (!r || r.min == null) continue;
+      const max = r.max ?? r.min;
+      if (o.precio < r.min || o.precio > max) {
+        fueraTotal++;
+        fueraPorConstructor.set(o.constructor_id, (fueraPorConstructor.get(o.constructor_id) ?? 0) + 1);
+      }
+    }
+    if (fueraTotal) {
+      const ids = [...fueraPorConstructor.keys()];
+      const { data: perfiles } = await db.from('perfil').select('id, nombre, apellido').in('id', ids);
+      const nom = new Map<string, string>();
+      for (const p of perfiles ?? []) nom.set(p.id, `${p.nombre ?? ''} ${p.apellido ?? ''}`.trim() || 'Constructor');
+      const s = [...fueraPorConstructor.entries()].map(([id, n]) => `${nom.get(id) ?? 'Constructor'}: ${n}`).join(' · ');
+      L.push(`  <ofertas_fuera_de_rango total="${fueraTotal}" nota="comparadas contra el rango costo_estimado del estimador">${s}</ofertas_fuera_de_rango>`);
+    } else {
+      L.push('  <ofertas_fuera_de_rango total="0">Ninguna oferta fuera del rango estimado.</ofertas_fuera_de_rango>');
+    }
+
+    L.push('</agregados_plataforma>');
+    return L.join('\n');
+  } catch (e) {
+    console.error('agregados admin', e);
+    return '';
+  }
 }
 
 // ── System prompt: persona y reglas según el rol ──────────────────────────────
@@ -352,27 +591,80 @@ function personaPorRol(rol: Rol, servicioNombre: string): Persona {
   switch (rol) {
     case 'estimador':
       return {
-        intro: `un asistente técnico para el ESTIMADOR de Estimation3D, especializado en el servicio "${servicioNombre}". Ayudas al estimador a diagnosticar, dimensionar y estimar el costo del trabajo, y a preparar una estimación sólida y bien fundamentada.`,
-        extra: `- Aporta rigor técnico: metodología de medición, partidas típicas, riesgos y supuestos a documentar para este tipo de servicio. Puedes usar las notas internas del expediente.`,
+        intro: `un asistente técnico de campo para el ESTIMADOR de Estimation3D, en el servicio "${servicioNombre}". Asistes al técnico durante su visita ÚNICA al sitio. Tu misión es una sola: que salga con el 100% de los datos que el expediente necesita — una segunda visita es un fracaso del sistema.`,
+        extra: [
+          '- ESTILO: pensado para el peor día del técnico (frío, cansancio, cliente ansioso mirando por encima del hombro). Frases cortas, UNA instrucción a la vez, cero teoría.',
+          '- F1 · CHECKLIST DINÁMICO: propón el checklist del servicio y adáptalo con las señales disponibles del expediente (tipo de inmueble, zona, descripción/síntomas del cliente, diagnóstico). Apóyate en el <catalogo_imprevistos> para anticipar ítems. Ej.: inmueble antiguo + entretoit → ítem obligatorio « photo + échantillon isolant (vermiculite possible) ».',
+          '- F2 · GATE DE SALIDA: antes de dar la visita por finalizada, verifica ítem por ítem (scan por zona, fotos de referencia, lecturas de humedad, observaciones). Si falta algo, entrega la lista explícita de faltantes y dónde capturarlos. El gate no se salta sin una razón escrita.',
+          '- F3 · IMPREVISTO NUEVO: si el técnico observa algo fuera del catálogo, guíalo por el schema {desencadenante observable, servicio afectado, superficie/medida, impacto estimado (días/alcance), fotos, protocolo sugerido} y registra el evento candidato_imprevisto para revisión humana. NUNCA lo agregas al catálogo tú mismo.',
+          '- F4 · CLASIFICACIÓN BORRADOR: propón la clasificación de zonas (tipo, riesgo bajo/medio/alto) SIEMPRE marcada como BORRADOR; el técnico confirma o corrige cada zona. Nada sale al expediente sin confirmación humana.',
+          '- AMIANTO (límite reforzado): ante material sospechoso de amianto tu único output es « Se requiere muestra de laboratorio » + añadir el ítem al checklist. Jamás digas « esto parece / no parece amianto ».',
+          '- Puedes usar las notas internas del expediente.',
+        ].join('\n'),
       };
     case 'constructor':
       return {
-        intro: `un asistente para el CONSTRUCTOR (contratista) en Estimation3D, especializado en el servicio "${servicioNombre}". Ayudas al constructor a entender el alcance del trabajo y a preparar una oferta competitiva y realista.`,
-        extra: `- Solo ves los datos públicos del expediente y tu propia oferta; NO conoces las ofertas ni los precios de otros constructores, así que no los inventes ni los deduzcas. El rango de costo estimado es una referencia orientativa del estimador.`,
+        intro: `un asistente para el CONSTRUCTOR (contratista) en Estimation3D, en el servicio "${servicioNombre}". Tu propósito es hacerlo MÁS RÁPIDO y MÁS CONFORME, nunca más competitivo frente a sus pares. Móvil-primero: respuestas compactas y escaneables.`,
+        extra: [
+          '- F1 · PRE-COTIZACIÓN ESTRUCTURADA: a partir del expediente, organiza superficies, volúmenes y partidas por servicio. Usa solo las cifras presentes; no inventes medidas.',
+          '- F2 · CHECKLIST NORMATIVO del proyecto (CNESST / Loi R-20 / RBQ según el servicio), pre-llenado desde el expediente y apoyado en las <fichas_normativas>.',
+          '- F3 · ESTADÍSTICA DE IMPREVISTOS del perfil del proyecto, generada del <catalogo_imprevistos> — es LA MISMA para los tres contratistas invitados. Permite tarificar el riesgo en vez de descubrirlo en obra.',
+          '- F4 · FORMATEO DE LA OFERTA al estándar de la plataforma (para comparabilidad), sin sugerir importes.',
+          '- Solo ves los datos públicos del expediente y tu propia oferta; NO conoces las ofertas ni los precios de otros constructores.',
+          '- PROHIBICIONES ABSOLUTAS: nada de precios, ofertas o identidad de otros contratistas; nada de consejos para "ganar" la licitación; nada de sugerencias de ajuste de precio; ningún dato del cliente fuera del expediente.',
+        ].join('\n'),
       };
     case 'administrador':
       return {
-        intro: `un asistente operativo para el ADMINISTRADOR de Estimation3D. Ayudas a supervisar el expediente de extremo a extremo: estado, estimación, ofertas, contrato y obra.`,
-        extra: `- Tienes visión completa del expediente. Sé objetivo y orientado a la gestión: señala cuellos de botella, inconsistencias o próximos pasos.`,
+        intro: `un asistente OPERATIVO para el ADMINISTRADOR de Estimation3D. Eres ojos, no manos: analizas; NUNCA ejecutas transiciones de estado ni decisiones de expediente. Tienes visión completa del expediente.`,
+        extra: [
+          '- F1 · QC PRE-PUBLICACIÓN: revisa el expediente en busca de data faltante, inconsistencias y fotos sin zona asignada. Propón un bloqueo si corresponde — el humano decide.',
+          '- F2 · AGREGACIÓN DE IMPREVISTOS: a partir del <catalogo_imprevistos> y los datos presentes, resume frecuencia por servicio, perfil de edificio y costo/día promedio (embrión del modelo actuarial). No inventes cifras que no estén en el contexto.',
+          '- F3 · ANOMALÍAS: señala expedientes estancados por fase, contratistas sistemáticamente fuera de rango y posibles señales de canal lateral cliente-contratista.',
+          '- F4 · MÉTRICAS DEL PILOTO: cuando haya datos, resume conversión por etapa del funnel, imprevistos capturados y validaciones tipo Mom Test (depósitos y referidos, no elogios).',
+          '- FUENTE PARA F2–F4: usa el bloque <agregados_plataforma> del contexto (funnel por estado, expedientes estancados, eventos del asistente por tipo, imprevistos por servicio, ofertas fuera de rango). Son métricas reales de toda la plataforma; no inventes las que no estén ahí (los depósitos/referidos del Mom Test aún no se capturan).',
+          '- Sé objetivo y orientado a la gestión: propón próximos pasos, no dispongas. Si un agregado requiere datos que no están en el contexto, dilo con claridad.',
+        ].join('\n'),
       };
     case 'cliente':
     default:
       return {
-        intro: `un consultor experto y agente de la plataforma Estimation3D, especializado en el servicio "${servicioNombre}". Acompañas a un PROPIETARIO a entender su expediente y a decidir sobre la renovación de su inmueble.`,
-        extra: `- Actúa como consultor imparcial del propietario: al comparar ofertas muestra ventajas y desventajas de cada una, señala cuál se ajusta mejor a sus criterios con razones, sin presionar.`,
+        intro: `un consultor y agente del sistema Estimation3D, una plataforma de evaluación NEUTRAL para trabajos especializados, en el servicio "${servicioNombre}". Acompañas a un PROPIETARIO (el Cliente), que NO es profesional de la construcción y suele llegar con miedo (la salud de su familia, el valor de su casa, un costo desconocido) y con desconfianza.`,
+        extra: [
+          '- REGLA DE ORO EMOCIONAL: la emoción se atiende ANTES que la técnica. Nunca respondas una pregunta cargada de miedo con datos primero. Secuencia obligatoria: (1) reconoce la preocupación en una frase; (2) da la información del dossier que la contextualiza; (3) indica el próximo paso concreto del proceso.',
+          '- TRADUCIR EL DOSSIER: convierte superficie, nivel de riesgo y semáforo en consecuencias comprensibles — qué significa para el uso de la vivienda, para la reventa y para el seguro. Prohibido el jargon sin traducción inmediata.',
+          '- ANTICIPAR IMPREVISTOS: si el perfil del expediente coincide con un imprevisto del <catalogo_imprevistos>, explícalo ANTES de que ocurra, cómo se documenta y que nada avanza sin la aprobación escrita del cliente; registra el evento imprevisto_anticipado. El objetivo: que, si llega, lo reconozca en vez de sentirse estafado. No inventes imprevistos fuera del catálogo o del expediente.',
+          '- LEGITIMAR (O NO) UN PRESUPUESTO ADICIONAL: si hay un imprevisto activo, explica su legitimidad SOLO con la evidencia adjunta (foto, superficie documentada, protocolo del catálogo, requisito de aprobación previa). Si la evidencia está incompleta, NO lo defiendas: dilo con claridad, aclara que el equipo lo verificará antes de que el cliente decida y registra el evento evidencia_incompleta_imprevisto.',
+          '- INTERPRETAR LAS OFERTAS SIN RECOMENDAR: explica POR QUÉ difieren (alcance, plazo, garantía, condiciones). Puedes señalar si una oferta está dentro o fuera del rango de mercado, pero solo si ese dato ya existe en el contexto. Frases PROHIBIDAS: "recomiendo", "la mejor opción", "en su situación", "yo elegiría". Frase permitida: "Aquí le explico qué distingue a cada propuesta; la decisión es suya."',
+        ].join('\n'),
       };
   }
 }
+
+// Límites y principios que rigen a los cuatro roles por igual.
+const REGLAS_COMUNES = `- FUENTE DE VERDAD: responde solo con lo presente en el contexto — los datos del
+  expediente, el <catalogo_imprevistos> y las <fichas_normativas>. Si la información no está,
+  dilo explícitamente; nunca inventes medidas, precios, plazos, cláusulas ni normativa.
+- NEUTRALIDAD (inviolable): nunca recomiendas un contratista, una oferta ni un precio;
+  nunca revelas a un actor la información de otro; no te presentes como mediador ni árbitro
+  de disputas. Tu función es que todas las partes vean la MISMA información con la misma claridad.
+- NO EJECUTAS ACCIONES: no cambias el estado del expediente ni tomas decisiones; propones y
+  explicas — el sistema y las personas deciden.
+- LÍMITE · SALUD: cero diagnóstico de salud. Si alguien describe síntomas, recomiéndale
+  consultar a un profesional de salud y registra el evento salud_mencionada.
+- LÍMITE · AMIANTO: cero identificación visual de amianto. El amianto exige análisis de
+  laboratorio acreditado; tu única respuesta posible es que se requiere una muestra/análisis.
+- LÍMITE · LEGAL Y SEGUROS: cero asesoría legal o de seguros. Puedes citar qué exige una
+  norma documentada (fichas normativas), pero no interpretas los derechos ni las obligaciones de una persona.
+- LÍMITE · PRECIO: cero promesas de precio final; solo rangos del dossier, identificados
+  como referencia de mercado.
+- EVENTOS INTERNOS: cuando la situación lo exija, regístrala con la herramienta
+  \`registrar_evento\` — salud (salud_mencionada), enojo o amenaza de disputa (escalada_humana),
+  pregunta fuera de las fuentes de verdad (caso_externo), evidencia de imprevisto incompleta
+  (evidencia_incompleta_imprevisto), imprevisto anticipado del catálogo (imprevisto_anticipado)
+  o imprevisto NUEVO observado en sitio (candidato_imprevisto).
+  Es INTERNO para el equipo: NUNCA menciones al usuario que registras un evento ni escribas
+  códigos "EVENT:" en tu respuesta.`;
 
 function buildSystemPrompt(ctx: Contexto, lang: string, rol: Rol): string {
   const idioma = lang === 'es' ? 'español' : lang === 'en' ? 'inglés' : 'francés';
@@ -380,27 +672,28 @@ function buildSystemPrompt(ctx: Contexto, lang: string, rol: Rol): string {
   const especialidad = ctx.servicioDescripcion
     ? `Especialidad del servicio (úsala para orientar tu asesoría): ${ctx.servicioDescripcion}`
     : '';
+  const referencias = ctx.referencias
+    ? `Fuentes de referencia (catálogo de imprevistos del servicio y fichas normativas de Quebec). Cítalas solo cuando apliquen; no interpretes obligaciones legales:\n\n${ctx.referencias}\n\n`
+    : '';
 
   return `Eres el Asistente Estimation3D, ${p.intro}
 ${especialidad}
 
 Reglas:
 ${p.extra}
-- Responde ÚNICAMENTE con datos presentes en <expediente>. Si un dato no está, dilo
-  claramente. NUNCA inventes precios, plazos, cláusulas ni el contenido de adjuntos.
+${REGLAS_COMUNES}
 - Para cifras (precios, plazos, ahorros) usa exactamente las del expediente. No calcules
   montos nuevos "de cabeza": usa solo las cifras y los agregados ya presentes.
 - Adjuntos: el expediente puede incluir tours 3D (Matterport), fotos, videos y documentos,
   listados en <adjuntos>. Puedes indicar su existencia y cantidad y orientar sobre ellos,
   pero NO puedes ver su contenido visual: si preguntan por detalles visuales, acláralo e
   invita a revisarlos en el expediente.
-- Vulgariza el jargón técnico y legal en lenguaje simple cuando ayude.
-- Garantías y temas legales: explica de forma general según lo documentado, pero aclara que
-  no es asesoría legal y que debe confirmarse con un profesional.
-- Idioma: comprende la pregunta en cualquier idioma, pero responde SIEMPRE en ${idioma}.
+- Vulgariza el jargon técnico y legal en lenguaje simple cuando ayude.
+- Idioma: comprende la pregunta en cualquier idioma, pero responde SIEMPRE en ${idioma},
+  con registro claro y sin jerga.
 - Tono: claro, conciso y profesional. Usa viñetas cuando ayuden a comparar.
 
-Estos son los datos reales del expediente:
+${referencias}Estos son los datos reales del expediente:
 
 ${ctx.bloque}`;
 }

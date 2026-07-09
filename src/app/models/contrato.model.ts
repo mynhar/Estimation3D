@@ -98,6 +98,7 @@ export interface ContratoAdminListItem {
   estimador_nombre:    string | null;
   constructor_nombre:  string | null;
   oferta_fecha_inicio: string | null;
+  foto:                string | null;  // miniatura del tour 3D (Matterport) del expediente
 }
 
 export interface ContratoConstructorListItem {
@@ -124,6 +125,7 @@ export interface ContratoConstructorListItem {
   direccion:          string;
   provincia:          string;
   canton:             string;
+  foto:               string | null;  // miniatura del tour 3D (Matterport) del expediente
 }
 
 export interface ContratoPdfData {

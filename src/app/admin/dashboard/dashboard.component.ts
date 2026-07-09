@@ -36,6 +36,7 @@ export class AdminDashboardComponent implements OnInit {
   error            = signal<string | null>(null);
   refreshedAt      = signal('');
   filtroTimeline   = signal('todos');
+  vistaTimeline    = signal<'tabla' | 'tarjetas'>('tabla');   // por defecto: tabla
   paginaTl         = signal(1);
   readonly TL_POR_PAGINA = 10;
 

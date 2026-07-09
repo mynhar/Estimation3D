@@ -358,4 +358,12 @@
 
   }
 
+  <!-- FAB flotante: acceso al Asistente IA -->
+  <a routerLink="/client/ai-assistant" class="ai-fab"
+     [attr.aria-label]="'common.floating_ask' | translate"
+     [title]="'common.floating_ask' | translate">
+    <span class="ai-fab__icon" aria-hidden="true"><app-claude-icon /></span>
+    <span class="ai-fab__label">{{ 'common.floating_ask' | translate }}</span>
+  </a>
+
 </div>

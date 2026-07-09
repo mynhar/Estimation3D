@@ -1,0 +1,117 @@
+<div class="container-fluid py-4 px-3 px-xl-4 stype-wrap">
+
+  <div class="stype-header mb-4">
+    <button class="btn-back" type="button" (click)="cancelar()" [title]="'common.back' | translate">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+    </button>
+    <div>
+      <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+      <h1 class="stype-title">{{ 'admin_fichas.create_title' | translate }}</h1>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-9 col-xl-8">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="stype-card">
+          <div class="stype-card__body">
+
+            <!-- Código -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-key" aria-hidden="true"></i>{{ 'admin_fichas.section_code' | translate }}</div>
+              <label class="form-label" for="codigo-input">{{ 'admin_fichas.codigo_label' | translate }}<span class="req-mark" aria-hidden="true">*</span></label>
+              <input id="codigo-input" type="text" class="form-control font-monospace" formControlName="codigo"
+                     placeholder="ej: IICRC_S520" autocomplete="off"
+                     [class.is-invalid]="f['codigo'].invalid && f['codigo'].touched" />
+              @if (f['codigo'].invalid && f['codigo'].touched) {
+                <p class="field-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ (f['codigo'].errors?.['pattern'] ? 'admin_fichas.codigo_pattern' : 'admin_fichas.codigo_required') | translate }}
+                </p>
+              }
+              <p class="form-hint"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>{{ 'admin_fichas.codigo_note' | translate }}</p>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Títulos -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-translate" aria-hidden="true"></i>{{ 'admin_fichas.section_titles' | translate }}</div>
+              <div class="row g-3">
+                @for (l of langs; track l.c) {
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">{{ ('admin_fichas.titulo_' + l.c) | translate }}<span class="req-mark" aria-hidden="true">*</span>
+                      <span class="lang-badge lang-badge--{{ l.c }} ms-1">{{ l.b }}</span></label>
+                    <input type="text" class="form-control" [formControlName]="'titulo_' + l.c"
+                           [class.is-invalid]="ctrl('titulo_' + l.c)?.invalid && ctrl('titulo_' + l.c)?.touched" />
+                    @if (ctrl('titulo_' + l.c)?.invalid && ctrl('titulo_' + l.c)?.touched) {
+                      <p class="field-error" role="alert">{{ 'admin_fichas.field_required' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Resúmenes -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-card-text" aria-hidden="true"></i>{{ 'admin_fichas.section_summaries' | translate }}</div>
+              <div class="row g-3">
+                @for (l of langs; track l.c) {
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">{{ ('admin_fichas.resumen_' + l.c) | translate }}<span class="req-mark" aria-hidden="true">*</span>
+                      <span class="lang-badge lang-badge--{{ l.c }} ms-1">{{ l.b }}</span></label>
+                    <textarea class="form-control form-textarea" rows="5" [formControlName]="'resumen_' + l.c"
+                              [class.is-invalid]="ctrl('resumen_' + l.c)?.invalid && ctrl('resumen_' + l.c)?.touched"></textarea>
+                    @if (ctrl('resumen_' + l.c)?.invalid && ctrl('resumen_' + l.c)?.touched) {
+                      <p class="field-error" role="alert">{{ 'admin_fichas.field_required' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Configuración -->
+            <div class="form-section">
+              <div class="form-section__header"><i class="bi bi-sliders" aria-hidden="true"></i>{{ 'admin_service_types.section_config' | translate }}</div>
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-md-8">
+                  <label class="form-label" for="kw-input">{{ 'admin_fichas.keywords_label' | translate }}</label>
+                  <input id="kw-input" type="text" class="form-control" formControlName="palabras_clave"
+                         placeholder="moho, moisissure, mold" />
+                  <p class="form-hint">{{ 'admin_fichas.keywords_note' | translate }}</p>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="orden-input">{{ 'admin_fichas.orden_label' | translate }}</label>
+                  <input id="orden-input" type="number" min="0" class="form-control" formControlName="orden" />
+                </div>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" formControlName="activo" id="chkActivo">
+                <label class="form-check-label" for="chkActivo">{{ 'admin_fichas.active_label' | translate }}
+                  <small class="d-block mt-1">{{ 'admin_fichas.active_hint' | translate }}</small></label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="stype-card__footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" [disabled]="guardando()">
+              <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{{ 'admin_fichas.creating' | translate }}
+              } @else {
+                <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>{{ 'admin_fichas.create_submit' | translate }}
+              }
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

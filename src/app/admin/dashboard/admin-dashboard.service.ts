@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
+import { matterportThumbFromTour } from '../../shared/util/matterport';
 
 export interface DashboardStats {
   expedientes:  { total: number; porEstado: Record<string, number> };
@@ -20,6 +21,7 @@ export interface TimelineEvent {
   entityId?:  string;
   avance?:    number;   // % de avance de la obra (eventos tipo 'obra')
   estadoObra?: string;  // estado del seguimiento (eventos tipo 'obra')
+  foto?:      string;   // miniatura del tour 3D (Matterport) del expediente
 }
 
 @Injectable({ providedIn: 'root' })
@@ -88,7 +90,7 @@ export class AdminDashboardService {
   }
 
   async getTimeline(): Promise<TimelineEvent[]> {
-    const [expsR, estsR, ofersR, ctrsR, repsR] = await Promise.all([
+    const [expsR, estsR, ofersR, ctrsR, repsR, toursR] = await Promise.all([
       this.db
         .from('expediente')
         .select('id, numero, creado_en, cliente:cliente_id(nombre, apellido)')
@@ -114,7 +116,20 @@ export class AdminDashboardService {
         .select('id, creado_en, porcentaje_acumulado, constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, contrato_id, expediente:expediente_id(numero))')
         .order('creado_en', { ascending: false })
         .limit(25),
+      this.db
+        .from('estimacion')
+        .select('url_tour, expediente:expediente_id(numero)'),
     ]);
+
+    // Miniatura del tour 3D (Matterport) por número de expediente.
+    const tourPorNumero = new Map<string, string>();
+    for (const t of (toursR.data ?? []) as any[]) {
+      const exp = Array.isArray(t.expediente) ? t.expediente[0] : t.expediente;
+      const numero = exp?.numero;
+      if (!numero) continue;
+      const thumb = matterportThumbFromTour(t.url_tour);
+      if (thumb) tourPorNumero.set(numero, thumb);
+    }
 
     const events: TimelineEvent[] = [];
     const fmtPrecio = (v: number) =>
@@ -179,6 +194,12 @@ export class AdminDashboardService {
         estadoObra: seg?.estado ?? undefined,
         entityId: seg?.contrato_id,   // → /admin/construction-monitoring/monitoring/:contratoId
       });
+    }
+
+    // Adjunta la miniatura del expediente (por número) a cada evento que la tenga.
+    for (const ev of events) {
+      const foto = tourPorNumero.get(ev.referencia);
+      if (foto) ev.foto = foto;
     }
 
     return events.sort((a, b) =>

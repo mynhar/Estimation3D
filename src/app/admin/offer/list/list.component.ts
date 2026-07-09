@@ -33,6 +33,7 @@ export class AdminOfferListComponent implements OnInit {
 
   busqueda     = signal('');
   filtroEstado = signal('todos');
+  vista        = signal<'tabla' | 'tarjetas'>('tabla');   // por defecto: tabla
 
   readonly estados    = ['todos', 'estimado', 'en_oferta', 'adjudicado'];
   readonly POR_PAGINA = 15;

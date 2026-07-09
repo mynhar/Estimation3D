@@ -37,6 +37,7 @@ export interface ExpedienteConOfertaAdmin {
   oferta_estado:       string | null;
   total_ofertas:       number;
   sort_date:           string;
+  foto:                string | null;  // miniatura del tour 3D (Matterport) del expediente
 }
 
 /** Vista aplanada para la lista admin de expedientes a estimar (estados: nuevo, en_estimacion, estimado). */

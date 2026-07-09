@@ -1,0 +1,189 @@
+<div class="container-fluid py-4 px-3 px-xl-4 stype-wrap">
+
+  <div class="stype-header mb-4">
+    <button class="btn-back" type="button" (click)="cancelar()" [title]="'common.back' | translate">
+      <i class="bi bi-arrow-left" aria-hidden="true"></i>
+    </button>
+    <div>
+      <span class="eyebrow">{{ 'role.administrateur' | translate }}</span>
+      <h1 class="stype-title">{{ 'admin_imprevistos.edit_title' | translate }}</h1>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="row justify-content-center"><div class="col-12 col-lg-10 col-xl-9">
+      <div class="stype-card"><div class="stype-card__body">
+        <div class="skel skel--input mb-4"></div>
+        <div class="skel skel--input mb-4"></div>
+        <div class="skel skel--input mb-4"></div>
+      </div></div>
+    </div></div>
+
+  } @else if (error()) {
+    <div class="error-alert" role="alert"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>{{ error() }}</span></div>
+
+  } @else {
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-9">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="stype-card">
+          <div class="stype-card__body">
+
+            <!-- Identificación -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-key" aria-hidden="true"></i>{{ 'admin_imprevistos.section_id' | translate }}</div>
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="codigo-input">{{ 'admin_imprevistos.codigo_label' | translate }}<span class="req-mark" aria-hidden="true">*</span></label>
+                  <input id="codigo-input" type="text" class="form-control font-monospace" formControlName="codigo" autocomplete="off"
+                         [class.is-invalid]="f['codigo'].invalid && f['codigo'].touched" />
+                  @if (f['codigo'].invalid && f['codigo'].touched) {
+                    <p class="field-error" role="alert"><i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                      {{ (f['codigo'].errors?.['pattern'] ? 'admin_imprevistos.codigo_pattern' : 'admin_imprevistos.codigo_required') | translate }}</p>
+                  }
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="serv-input">{{ 'admin_imprevistos.service_label' | translate }}</label>
+                  <select id="serv-input" class="form-select" formControlName="servicio_id">
+                    <option value="">{{ 'admin_imprevistos.service_general' | translate }}</option>
+                    @for (s of servicios(); track s.id) {
+                      <option [value]="s.id">{{ s.nombre }}</option>
+                    }
+                  </select>
+                  <p class="form-hint">{{ 'admin_imprevistos.service_note' | translate }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Título -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-translate" aria-hidden="true"></i>{{ 'admin_imprevistos.section_title' | translate }}</div>
+              <div class="row g-3">
+                @for (l of langs; track l.c) {
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">{{ 'admin_imprevistos.field_title' | translate }}<span class="req-mark" aria-hidden="true">*</span>
+                      <span class="lang-badge lang-badge--{{ l.c }} ms-1">{{ l.b }}</span></label>
+                    <input type="text" class="form-control" [formControlName]="'titulo_' + l.c"
+                           [class.is-invalid]="ctrl('titulo_' + l.c)?.invalid && ctrl('titulo_' + l.c)?.touched" />
+                    @if (ctrl('titulo_' + l.c)?.invalid && ctrl('titulo_' + l.c)?.touched) {
+                      <p class="field-error" role="alert">{{ 'admin_imprevistos.field_required' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Perfil -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-diagram-3" aria-hidden="true"></i>{{ 'admin_imprevistos.section_profile' | translate }}</div>
+              <div class="row g-3">
+                @for (l of langs; track l.c) {
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">{{ 'admin_imprevistos.field_profile' | translate }}<span class="req-mark" aria-hidden="true">*</span>
+                      <span class="lang-badge lang-badge--{{ l.c }} ms-1">{{ l.b }}</span></label>
+                    <textarea class="form-control form-textarea" rows="4" [formControlName]="'perfil_' + l.c"
+                              [class.is-invalid]="ctrl('perfil_' + l.c)?.invalid && ctrl('perfil_' + l.c)?.touched"></textarea>
+                    @if (ctrl('perfil_' + l.c)?.invalid && ctrl('perfil_' + l.c)?.touched) {
+                      <p class="field-error" role="alert">{{ 'admin_imprevistos.field_required' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Protocolo -->
+            <div class="form-section mb-5">
+              <div class="form-section__header"><i class="bi bi-clipboard-check" aria-hidden="true"></i>{{ 'admin_imprevistos.section_protocol' | translate }}</div>
+              <div class="row g-3">
+                @for (l of langs; track l.c) {
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">{{ 'admin_imprevistos.field_protocol' | translate }}<span class="req-mark" aria-hidden="true">*</span>
+                      <span class="lang-badge lang-badge--{{ l.c }} ms-1">{{ l.b }}</span></label>
+                    <textarea class="form-control form-textarea" rows="4" [formControlName]="'protocolo_' + l.c"
+                              [class.is-invalid]="ctrl('protocolo_' + l.c)?.invalid && ctrl('protocolo_' + l.c)?.touched"></textarea>
+                    @if (ctrl('protocolo_' + l.c)?.invalid && ctrl('protocolo_' + l.c)?.touched) {
+                      <p class="field-error" role="alert">{{ 'admin_imprevistos.field_required' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- Configuración -->
+            <div class="form-section">
+              <div class="form-section__header"><i class="bi bi-sliders" aria-hidden="true"></i>{{ 'admin_service_types.section_config' | translate }}</div>
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-md-8">
+                  <label class="form-label" for="ficha-input">{{ 'admin_imprevistos.ficha_label' | translate }}</label>
+                  <select id="ficha-input" class="form-select" formControlName="ficha_codigo">
+                    <option value="">{{ 'admin_imprevistos.ficha_none' | translate }}</option>
+                    @for (fi of fichas(); track fi.id) {
+                      <option [value]="fi.codigo">{{ fichaLabel(fi) }}</option>
+                    }
+                  </select>
+                  <p class="form-hint">{{ 'admin_imprevistos.ficha_note' | translate }}</p>
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="orden-input">{{ 'admin_imprevistos.orden_label' | translate }}</label>
+                  <input id="orden-input" type="number" min="0" class="form-control" formControlName="orden" />
+                </div>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" formControlName="requiere_aprobacion" id="chkAprob">
+                <label class="form-check-label" for="chkAprob">{{ 'admin_imprevistos.aprob_label' | translate }}
+                  <small class="d-block mt-1">{{ 'admin_imprevistos.aprob_hint' | translate }}</small></label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" formControlName="activo" id="chkActivo">
+                <label class="form-check-label" for="chkActivo">{{ 'admin_imprevistos.active_label' | translate }}
+                  <small class="d-block mt-1">{{ 'admin_imprevistos.active_hint' | translate }}</small></label>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="stype-card__footer justify-content-between">
+            @if (confirmandoEliminar()) {
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-danger small">{{ 'admin_imprevistos.delete_confirm' | translate }}</span>
+                <button type="button" class="btn btn-sm btn-danger" (click)="confirmarEliminar()" [disabled]="eliminando()">
+                  @if (eliminando()) { <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> }
+                  {{ 'common.delete' | translate }}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="confirmandoEliminar.set(false)" [disabled]="eliminando()">
+                  {{ 'common.cancel' | translate }}
+                </button>
+              </div>
+            } @else {
+              <button type="button" class="btn btn-outline-danger" (click)="confirmandoEliminar.set(true)" [disabled]="guardando()">
+                <i class="bi bi-trash3 me-1" aria-hidden="true"></i>{{ 'common.delete' | translate }}
+              </button>
+            }
+            <div class="d-flex align-items-center gap-2">
+              <button type="button" class="btn btn-outline-secondary" (click)="cancelar()" [disabled]="guardando()">
+                <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+                @if (guardando()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{{ 'admin_imprevistos.saving' | translate }}
+                } @else {
+                  <i class="bi bi-check-lg me-1" aria-hidden="true"></i>{{ 'admin_imprevistos.save_submit' | translate }}
+                }
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

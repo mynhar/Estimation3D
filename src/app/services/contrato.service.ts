@@ -2,12 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
 import { ContratoRepository } from '../data/contrato.repository';
 import { OfertaRepository } from '../data/oferta.repository';
+import { EstimacionRepository } from '../data/estimacion.repository';
 import { generarContratoPdfBlob } from '../shared/contrato-pdf';
+import { matterportThumbFromTour } from '../shared/util/matterport';
 
 @Injectable({ providedIn: 'root' })
 export class ContratoService {
   private contratoRepo = inject(ContratoRepository);
   private ofertaRepo   = inject(OfertaRepository);
+  private estimacionRepo = inject(EstimacionRepository);
 
   // ── Listar contratos del cliente ─────────────────────────────────────────
 
@@ -249,8 +252,24 @@ export class ContratoService {
   // ── Administrador: todos los contratos con seguimiento de obra ────────────
 
   async getContratosMonitoringAdmin(): Promise<ContratoConstructorListItem[]> {
-    const rows = await this.contratoRepo.findAllForMonitoring();
-    return rows.map((c: any) => this.mapContratoListItem(c));
+    const rows  = await this.contratoRepo.findAllForMonitoring();
+    const items = rows.map((c: any) => this.mapContratoListItem(c));
+
+    // Miniatura del tour 3D (Matterport) por expediente.
+    const expedienteIds = [...new Set(items.map(i => i.expediente_id).filter(Boolean))];
+    if (expedienteIds.length) {
+      const estimaciones = await this.estimacionRepo.findFechasByExpedienteIds(expedienteIds);
+      const fotoPorExpediente = new Map<string, string>();
+      for (const est of estimaciones) {
+        const thumb = matterportThumbFromTour(est.url_tour);
+        if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
+      }
+      for (const it of items) {
+        const f = it.expediente_id ? fotoPorExpediente.get(it.expediente_id) : null;
+        if (f) it.foto = f;
+      }
+    }
+    return items;
   }
 
   // Mapea una fila de contrato (con joins expediente/servicio/loc/cliente/oferta)
@@ -286,6 +305,7 @@ export class ContratoService {
       direccion:          loc?.direccion        ?? '—',
       provincia:          loc?.provincia        ?? '—',
       canton:             loc?.canton           ?? '—',
+      foto:               null,
     } as ContratoConstructorListItem;
   }
 
@@ -303,10 +323,30 @@ export class ContratoService {
         .filter((id): id is string => !!id),
     )];
 
-    const perfiles = await this.contratoRepo.findPerfilesByIds(estimadorIds);
+    const expedienteIds = [...new Set(
+      rows
+        .map((c: any) => {
+          const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
+          return exp?.id as string | undefined;
+        })
+        .filter((id): id is string => !!id),
+    )];
+
+    const [perfiles, estimaciones] = await Promise.all([
+      this.contratoRepo.findPerfilesByIds(estimadorIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
+    ]);
+
     const estimadoresMap: Record<string, string> = {};
     for (const p of perfiles) {
       estimadoresMap[p.id] = `${p.nombre ?? ''} ${p.apellido ?? ''}`.trim();
+    }
+
+    // Miniatura del tour 3D (Matterport) por expediente.
+    const fotoPorExpediente = new Map<string, string>();
+    for (const est of estimaciones) {
+      const thumb = matterportThumbFromTour(est.url_tour);
+      if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
     }
 
     return rows.map((c: any) => {
@@ -332,6 +372,7 @@ export class ContratoService {
         estimador_nombre:    exp?.estimador_id ? (estimadoresMap[exp.estimador_id] ?? null) : null,
         constructor_nombre:  con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || null : null,
         oferta_fecha_inicio: ofe?.fecha_inicio     ?? null,
+        foto:                (exp?.id ? fotoPorExpediente.get(exp.id) : null) ?? null,
       } as ContratoAdminListItem;
     });
   }
