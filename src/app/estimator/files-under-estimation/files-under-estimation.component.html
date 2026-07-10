@@ -74,6 +74,24 @@
           {{ 'common.clear' | translate }}
         </button>
       }
+
+      <div class="fue-view-toggle d-none d-md-inline-flex ms-auto" role="group"
+           [attr.aria-label]="'files_under_estimation.view_cards' | translate">
+        <button type="button" class="fue-view-toggle__btn"
+                [class.fue-view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'files_under_estimation.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="fue-view-toggle__btn"
+                [class.fue-view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'files_under_estimation.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Results bar -->
@@ -98,9 +116,117 @@
         </button>
       </div>
 
-    <!-- Grid de cards -->
+    <!-- Tabla / tarjetas -->
     } @else {
-      <div class="fue-grid">
+
+      <!-- ── Vista tabla (escritorio) ───────────────────────────────────────── -->
+      <div class="fue-table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="fue-table">
+          <thead>
+            <tr>
+              <th class="fue-table__col-photo" aria-hidden="true"></th>
+              <th class="fue-table__col-num">{{ 'files_under_estimation.col_number' | translate }}</th>
+              <th>{{ 'files_under_estimation.col_service' | translate }}</th>
+              <th>{{ 'files_under_estimation.col_client' | translate }}</th>
+              <th>{{ 'files_under_estimation.col_location' | translate }}</th>
+              <th class="fue-table__col-date">{{ 'files_under_estimation.col_visit' | translate }}</th>
+              <th class="fue-table__col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientesFiltrados(); track exp.id) {
+              <tr class="fue-table__row"
+                  [class.fue-table__row--confirming]="confirmandoId() === exp.id">
+
+                <td class="fue-table__col-photo">
+                  <div class="fue-thumb">
+                    @if (fotoExpediente(exp); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="exp.numero"
+                           (error)="onFotoError(exp.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"
+                         [title]="'files_under_estimation.photo_none' | translate"></i>
+                    }
+                  </div>
+                </td>
+
+                <td class="fue-table__col-num">
+                  <span class="fue-card__num">{{ exp.numero }}</span>
+                </td>
+
+                <td><span class="fue-table__service">{{ servicioNombre(exp) }}</span></td>
+
+                <td>{{ exp.cliente_nombre }}</td>
+
+                <td class="fue-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+
+                <td class="fue-table__col-date">
+                  <span class="fue-table__fecha"
+                        [class.fue-table__fecha--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
+                        [class.fue-table__fecha--hoy]="urgencia(exp.fecha_visita) === 'hoy'">
+                    {{ formatFecha(exp.fecha_visita) }}
+                    @if (formatHora(exp.fecha_visita) !== '—') {
+                      <span class="fue-card__hora">{{ formatHora(exp.fecha_visita) }}</span>
+                    }
+                  </span>
+                  @if (urgencia(exp.fecha_visita) === 'vencida') {
+                    <span class="fue-badge fue-badge--danger">
+                      <i class="bi bi-exclamation-triangle"></i>
+                      {{ 'common.urgency_expired' | translate }}
+                    </span>
+                  } @else if (urgencia(exp.fecha_visita) === 'hoy') {
+                    <span class="fue-badge fue-badge--warning">
+                      <i class="bi bi-clock"></i>
+                      {{ 'common.urgency_today' | translate }}
+                    </span>
+                  } @else if (urgencia(exp.fecha_visita) === 'proxima') {
+                    <span class="fue-badge fue-badge--info">
+                      <i class="bi bi-calendar-event"></i>
+                      {{ 'common.urgency_upcoming' | translate }}
+                    </span>
+                  } @else {
+                    <span class="fue-badge fue-badge--success">
+                      <i class="bi bi-person-workspace"></i>
+                      {{ 'files_under_estimation.in_progress' | translate }}
+                    </span>
+                  }
+                </td>
+
+                <td class="fue-table__col-action">
+                  <div class="fue-actions fue-actions--row">
+                    <button class="fue-btn-continue fue-btn-continue--row" (click)="estimar(exp.id)">
+                      <i class="bi bi-pencil-square"></i>
+                      {{ 'files_under_estimation.continue_btn' | translate }}
+                    </button>
+
+                    @if (confirmandoId() === exp.id) {
+                      <button class="fue-btn-release fue-btn-release--confirm"
+                              (click)="confirmarLiberar(exp.id)"
+                              [disabled]="liberandoId() === exp.id"
+                              [title]="'files_under_estimation.confirm_release_title' | translate">
+                        @if (liberandoId() === exp.id) {
+                          <span class="fue-spinner-sm"></span>
+                        } @else {
+                          <i class="bi bi-check2-circle"></i>
+                        }
+                      </button>
+                    } @else {
+                      <button class="fue-btn-release"
+                              (click)="confirmarLiberar(exp.id)"
+                              [title]="'files_under_estimation.release_title' | translate">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ────────── -->
+      <div class="fue-grid" [class.d-md-none]="vista() === 'tabla'">
         @for (exp of expedientesFiltrados(); track exp.id; let idx = $index) {
           <article class="fue-card"
                    [class.fue-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
@@ -108,6 +234,19 @@
                    [class.fue-card--proxima]="urgencia(exp.fecha_visita) === 'proxima'"
                    [class.fue-card--confirming]="confirmandoId() === exp.id"
                    [class.fue-card--reciente]="idx === 0 && !hayFiltros()">
+
+            <!-- Foto del expediente (miniatura del tour 3D) -->
+            <div class="fue-card__photo">
+              @if (fotoExpediente(exp); as foto) {
+                <img class="fue-card__photo-img" [src]="foto" loading="lazy"
+                     [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+              } @else {
+                <div class="fue-card__photo-empty"
+                     [title]="'files_under_estimation.photo_none' | translate">
+                  <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                </div>
+              }
+            </div>
 
             <!-- Head: num + badges -->
             <div class="fue-card__head">

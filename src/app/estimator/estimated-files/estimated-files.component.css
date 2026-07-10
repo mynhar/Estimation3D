@@ -1,3 +1,7 @@
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S4 R5 V4
+ */
+
 /* ── Root ────────────────────────────────────────────────────────────────── */
 .ef-root {
   display: flex;
@@ -363,6 +367,157 @@
   box-shadow: 0 0 0 2px var(--ds-gold-soft), var(--ds-shadow-sm);
 }
 
+/* ── Foto del expediente (miniatura del tour 3D Matterport) ──────────────── */
+/* La barra de acento es un hijo flex, no un pseudo absoluto: la foto va debajo
+   sin márgenes negativos y a sangre (la tarjeta no tiene padding propio). */
+.ef-card__photo {
+  aspect-ratio: 16 / 9;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ef-card__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.ef-card:hover .ef-card__photo-img { transform: scale(1.03); }
+.ef-card--cancelado:hover .ef-card__photo-img { transform: none; }
+
+.ef-card__photo-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ef-card__photo-img { transition: none; }
+  .ef-card:hover .ef-card__photo-img { transform: none; }
+}
+
+/* ── View toggle (tabla / tarjetas) ──────────────────────────────────────── */
+.ef-view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+  flex-shrink: 0;
+}
+
+.ef-view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+
+.ef-view-toggle__btn + .ef-view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.ef-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
+.ef-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.ef-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
+
+/* ── Vista tabla (escritorio) ────────────────────────────────────────────── */
+.ef-table-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  /* La tabla scrollea dentro de su tarjeta; el body nunca scrollea en horizontal. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.ef-table {
+  width: 100%;
+  min-width: 940px;
+  border-collapse: collapse;
+  font-size: var(--ds-text-sm);
+}
+
+.ef-table thead th {
+  background: var(--ds-bg-alt);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  text-align: left;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  white-space: nowrap;
+}
+
+.ef-table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  vertical-align: middle;
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-xs);
+}
+
+.ef-table tbody tr:last-child td { border-bottom: none; }
+
+.ef-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.ef-table__row:hover { background: var(--ds-gold-faint); }
+.ef-table__row--cancelado { opacity: 0.8; }
+
+/* Estado de confirmación de borrado (sustituye al panel de la tarjeta) */
+.ef-table__row--confirming,
+.ef-table__row--confirming:hover { background: var(--ds-danger-soft); }
+
+.ef-table__col-photo  { width: 64px; }
+.ef-table__col-num    { white-space: nowrap; }
+.ef-table__col-date   { white-space: nowrap; }
+.ef-table__col-action { width: 1%; white-space: nowrap; }
+
+.ef-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+.ef-table__muted   { color: var(--ds-ink-muted); }
+
+.ef-table__fecha {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.ef-table__fecha .ef-hora { margin-left: 0; }
+
+.ef-table__err {
+  margin: var(--ds-space-1) 0 0;
+  white-space: normal;
+  max-width: 220px;
+}
+
+/* Miniatura 3D en la fila */
+.ef-thumb {
+  width: 48px;
+  height: 34px;
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+}
+
+.ef-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 /* Card sections (with internal padding) */
 .ef-card__head {
   display: flex;
@@ -539,6 +694,15 @@
 }
 .ef-btn--ghost:hover { background: var(--ds-bg-alt); color: var(--ds-ink); }
 .ef-btn--ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ef-btn:focus-visible {
+  outline: 2px solid var(--ds-gold-active);
+  outline-offset: 2px;
+}
+
+/* Variantes compactas para la fila de la tabla */
+.ef-actions--row { justify-content: flex-end; }
+.ef-btn--row     { flex: 0 0 auto; white-space: nowrap; }
 
 /* Spinner inside button */
 .ef-spinner {

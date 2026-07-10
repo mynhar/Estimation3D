@@ -1,3 +1,7 @@
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S4 R5 V4
+ */
+
 /* ── Root ─────────────────────────────────────────────────────────────────── */
 :host { display: block; }
 
@@ -374,6 +378,150 @@
 
 .fue-card--confirming::before { background: var(--ds-danger); }
 
+/* ── Foto del expediente (miniatura del tour 3D Matterport) ──────────────── */
+.fue-card__photo {
+  margin: calc(-1 * var(--ds-space-4)) calc(-1 * var(--ds-space-4)) 0;
+  aspect-ratio: 16 / 9;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+}
+
+.fue-card__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+
+.fue-card:hover .fue-card__photo-img { transform: scale(1.03); }
+
+.fue-card__photo-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fue-card__photo-img { transition: none; }
+  .fue-card:hover .fue-card__photo-img { transform: none; }
+}
+
+/* ── View toggle (tabla / tarjetas) ──────────────────────────────────────── */
+.fue-view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+  flex-shrink: 0;
+}
+
+.fue-view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+
+.fue-view-toggle__btn + .fue-view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.fue-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
+.fue-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.fue-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
+
+/* ── Vista tabla (escritorio) ────────────────────────────────────────────── */
+.fue-table-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  /* La tabla scrollea dentro de su tarjeta; el body nunca scrollea en horizontal. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.fue-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: var(--ds-text-sm);
+}
+
+.fue-table thead th {
+  background: var(--ds-bg-alt);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  text-align: left;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  white-space: nowrap;
+}
+
+.fue-table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  vertical-align: middle;
+  color: var(--ds-ink-secondary);
+}
+
+.fue-table tbody tr:last-child td { border-bottom: none; }
+
+.fue-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.fue-table__row:hover { background: var(--ds-gold-faint); }
+
+/* Estado de confirmación de liberación (sustituye al aviso de la tarjeta) */
+.fue-table__row--confirming,
+.fue-table__row--confirming:hover { background: var(--ds-danger-soft); }
+
+.fue-table__col-photo  { width: 64px; }
+.fue-table__col-num    { white-space: nowrap; }
+.fue-table__col-date   { white-space: nowrap; }
+.fue-table__col-action { width: 1%; white-space: nowrap; }
+
+.fue-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+.fue-table__muted   { color: var(--ds-ink-muted); }
+
+.fue-table__fecha {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.fue-table__fecha--vencida { color: var(--ds-danger);  font-weight: var(--ds-weight-semibold); }
+.fue-table__fecha--hoy     { color: var(--ds-warning); font-weight: var(--ds-weight-semibold); }
+
+.fue-table__fecha .fue-card__hora { margin-left: 0; }
+.fue-table__col-date .fue-badge   { margin-top: 2px; }
+
+/* Miniatura 3D en la fila */
+.fue-thumb {
+  width: 48px;
+  height: 34px;
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+}
+
+.fue-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 /* ── Card head ───────────────────────────────────────────────────────────── */
 .fue-card__head {
   display: flex;
@@ -532,6 +680,20 @@
 }
 
 .fue-btn-release:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.fue-btn-continue:focus-visible,
+.fue-btn-release:focus-visible {
+  outline: 2px solid var(--ds-gold-active);
+  outline-offset: 2px;
+}
+
+/* Variantes compactas para la fila de la tabla */
+.fue-actions--row { margin-top: 0; }
+
+.fue-btn-continue--row {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
 
 /* ── Confirm message ─────────────────────────────────────────────────────── */
 .fue-confirm-msg {

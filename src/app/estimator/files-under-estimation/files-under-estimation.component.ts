@@ -7,6 +7,8 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteRow } from '../../models';
 
+type VistaExpedientes = 'tabla' | 'tarjetas';
+
 @Component({
   selector: 'app-files-under-estimation',
   standalone: true,
@@ -28,6 +30,10 @@ export class FilesUnderEstimationComponent implements OnInit {
   soloUrgentes  = signal(false);
   liberandoId   = signal<string | null>(null);
   confirmandoId = signal<string | null>(null);
+  vista         = signal<VistaExpedientes>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   expedientesFiltrados = computed(() => {
     const q = this.busqueda().toLowerCase().trim();
@@ -114,6 +120,22 @@ export class FilesUnderEstimationComponent implements OnInit {
   limpiarFiltros() {
     this.busqueda.set('');
     this.soloUrgentes.set(false);
+  }
+
+  setVista(v: VistaExpedientes) {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(exp: ExpedienteRow): string | null {
+    return this.fotosFallidas().has(exp.id) ? null : exp.foto;
+  }
+
+  onFotoError(id: string) {
+    this.fotosFallidas.update(set => new Set(set).add(id));
   }
 
   estimar(id: string) {

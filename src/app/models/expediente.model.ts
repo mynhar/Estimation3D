@@ -89,6 +89,8 @@ export interface ExpedienteRow {
   provincia: string;
   canton: string;
   distrito: string;
+  /** Miniatura del tour 3D (Matterport), o null si el expediente no tiene tour. */
+  foto: string | null;
 }
 
 /** Vista de detalle de un expediente (join completo). */

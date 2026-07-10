@@ -245,8 +245,10 @@ export class ContratoService {
   // ── Estimador: contratos de los expedientes que estimó ───────────────────
 
   async getContratosEstimador(estimadorId: string): Promise<ContratoConstructorListItem[]> {
-    const rows = await this.contratoRepo.findByEstimadorId(estimadorId);
-    return rows.map((c: any) => this.mapContratoListItem(c));
+    const rows  = await this.contratoRepo.findByEstimadorId(estimadorId);
+    const items = rows.map((c: any) => this.mapContratoListItem(c));
+    await this.adjuntarFotos(items);
+    return items;
   }
 
   // ── Administrador: todos los contratos con seguimiento de obra ────────────
@@ -254,22 +256,25 @@ export class ContratoService {
   async getContratosMonitoringAdmin(): Promise<ContratoConstructorListItem[]> {
     const rows  = await this.contratoRepo.findAllForMonitoring();
     const items = rows.map((c: any) => this.mapContratoListItem(c));
-
-    // Miniatura del tour 3D (Matterport) por expediente.
-    const expedienteIds = [...new Set(items.map(i => i.expediente_id).filter(Boolean))];
-    if (expedienteIds.length) {
-      const estimaciones = await this.estimacionRepo.findFechasByExpedienteIds(expedienteIds);
-      const fotoPorExpediente = new Map<string, string>();
-      for (const est of estimaciones) {
-        const thumb = matterportThumbFromTour(est.url_tour);
-        if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
-      }
-      for (const it of items) {
-        const f = it.expediente_id ? fotoPorExpediente.get(it.expediente_id) : null;
-        if (f) it.foto = f;
-      }
-    }
+    await this.adjuntarFotos(items);
     return items;
+  }
+
+  // Rellena `foto` con la miniatura del tour 3D (Matterport) de cada expediente.
+  private async adjuntarFotos(items: ContratoConstructorListItem[]): Promise<void> {
+    const expedienteIds = [...new Set(items.map(i => i.expediente_id).filter(Boolean))];
+    if (!expedienteIds.length) return;
+
+    const estimaciones = await this.estimacionRepo.findFechasByExpedienteIds(expedienteIds);
+    const fotoPorExpediente = new Map<string, string>();
+    for (const est of estimaciones) {
+      const thumb = matterportThumbFromTour(est.url_tour);
+      if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
+    }
+    for (const it of items) {
+      const f = it.expediente_id ? fotoPorExpediente.get(it.expediente_id) : null;
+      if (f) it.foto = f;
+    }
   }
 
   // Mapea una fila de contrato (con joins expediente/servicio/loc/cliente/oferta)

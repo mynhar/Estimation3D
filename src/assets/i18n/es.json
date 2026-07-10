@@ -772,7 +772,16 @@
     "confirm_delete": "Sí, eliminar",
     "view_detail": "Ver detalle",
     "delete_title": "Eliminar estimación",
-    "sorted_recent": "Más reciente primero"
+    "sorted_recent": "Más reciente primero",
+    "view_table": "Vista de tabla",
+    "view_cards": "Vista de tarjetas",
+    "photo_none": "Sin tour 3D disponible",
+    "col_number": "Número",
+    "col_service": "Servicio",
+    "col_client": "Cliente",
+    "col_location": "Ubicación",
+    "col_visit": "Visita",
+    "col_status": "Estado"
   },
   "files_under_estimation": {
     "title": "Mis expedientes en estimación",
@@ -791,7 +800,15 @@
     "release_title": "Liberar expediente",
     "confirm_release_title": "Confirmar liberación",
     "confirm_msg_before": "Pulsa",
-    "confirm_msg_after": "para confirmar. El expediente vuelve al grupo disponible."
+    "confirm_msg_after": "para confirmar. El expediente vuelve al grupo disponible.",
+    "view_table": "Vista de tabla",
+    "view_cards": "Vista de tarjetas",
+    "photo_none": "Sin tour 3D disponible",
+    "col_number": "Número",
+    "col_service": "Servicio",
+    "col_client": "Cliente",
+    "col_location": "Ubicación",
+    "col_visit": "Visita prevista"
   },
   "files_to_estimate": {
     "title": "Expedientes a estimar",
@@ -805,7 +822,15 @@
     "no_filter_text": "Ningún expediente coincide con los filtros aplicados.",
     "visit_label": "Visita:",
     "take_estimate": "Tomar y estimar",
-    "files_count": "expedientes"
+    "files_count": "expedientes",
+    "view_table": "Vista de tabla",
+    "view_cards": "Vista de tarjetas",
+    "photo_none": "Sin tour 3D disponible",
+    "col_number": "Número",
+    "col_service": "Servicio",
+    "col_client": "Cliente",
+    "col_location": "Ubicación",
+    "col_visit": "Visita prevista"
   },
   "file_create": {
     "subtitle": "Completa los 4 pasos para solicitar tu estimación de proyecto",
@@ -1710,7 +1735,10 @@
     "no_data": "Sin obras activas",
     "no_data_hint": "Sus obras aparecerán aquí cuando se firme un contrato con un cliente.",
     "estado_contratado": "Contratado",
-    "estado_adjudicado": "Adjudicado"
+    "estado_adjudicado": "Adjudicado",
+    "view_table": "Vista de tabla",
+    "view_cards": "Vista de tarjetas",
+    "photo_none": "Sin tour 3D disponible"
   },
   "client_monitoring": {
     "eyebrow": "Seguimiento en tiempo real",

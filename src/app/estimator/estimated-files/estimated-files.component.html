@@ -111,6 +111,25 @@
         }
       </div>
 
+      <!-- Vista tabla / tarjetas -->
+      <div class="ef-view-toggle d-none d-md-inline-flex" role="group"
+           [attr.aria-label]="'estimated_files.view_cards' | translate">
+        <button type="button" class="ef-view-toggle__btn"
+                [class.ef-view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'estimated_files.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="ef-view-toggle__btn"
+                [class.ef-view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'estimated_files.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
+
     </div>
 
     <!-- ── Sin resultados ────────────────────────────────────────────────── -->
@@ -145,8 +164,111 @@
         </span>
       </div>
 
-      <!-- ── Grid de tarjetas ─────────────────────────────────────────────── -->
-      <div class="ef-grid">
+      <!-- ── Vista tabla (escritorio) ─────────────────────────────────────── -->
+      <div class="ef-table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="ef-table">
+          <thead>
+            <tr>
+              <th class="ef-table__col-photo" aria-hidden="true"></th>
+              <th class="ef-table__col-num">{{ 'estimated_files.col_number' | translate }}</th>
+              <th>{{ 'estimated_files.col_service' | translate }}</th>
+              <th>{{ 'estimated_files.col_client' | translate }}</th>
+              <th>{{ 'estimated_files.col_location' | translate }}</th>
+              <th class="ef-table__col-date">{{ 'estimated_files.col_visit' | translate }}</th>
+              <th>{{ 'estimated_files.col_status' | translate }}</th>
+              <th class="ef-table__col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientesPaginados(); track exp.id) {
+              <tr class="ef-table__row"
+                  [class.ef-table__row--confirming]="confirmandoId() === exp.id"
+                  [class.ef-table__row--cancelado]="exp.estado === 'cancelado'">
+
+                <td class="ef-table__col-photo">
+                  <div class="ef-thumb">
+                    @if (fotoExpediente(exp); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="exp.numero"
+                           (error)="onFotoError(exp.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"
+                         [title]="'estimated_files.photo_none' | translate"></i>
+                    }
+                  </div>
+                </td>
+
+                <td class="ef-table__col-num">
+                  <span class="ef-num">{{ exp.numero }}</span>
+                </td>
+
+                <td><span class="ef-table__service">{{ servicioNombre(exp) }}</span></td>
+
+                <td>{{ exp.cliente_nombre }}</td>
+
+                <td class="ef-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+
+                <td class="ef-table__col-date">
+                  <span class="ef-table__fecha">
+                    {{ formatFecha(exp.fecha_visita) }}
+                    @if (formatHora(exp.fecha_visita) !== '—') {
+                      <span class="ef-hora">{{ formatHora(exp.fecha_visita) }}</span>
+                    }
+                  </span>
+                </td>
+
+                <td>
+                  <span class="ef-badge badge rounded-pill {{ badgeClass(exp.estado) }}">
+                    {{ estadoLabel(exp.estado) | translate }}
+                  </span>
+                </td>
+
+                <td class="ef-table__col-action">
+                  @if (confirmandoId() === exp.id) {
+                    <div class="ef-actions ef-actions--row">
+                      <button class="ef-btn ef-btn--danger ef-btn--row"
+                              (click)="eliminarEstimacion(exp)"
+                              [disabled]="eliminando()">
+                        @if (eliminando()) {
+                          <span class="ef-spinner" aria-hidden="true"></span>
+                          {{ 'estimated_files.deleting' | translate }}
+                        } @else {
+                          <i class="bi bi-trash3" aria-hidden="true"></i>
+                          {{ 'estimated_files.confirm_delete' | translate }}
+                        }
+                      </button>
+                      <button class="ef-btn ef-btn--ghost"
+                              (click)="cancelarConfirmacion()"
+                              [disabled]="eliminando()">
+                        {{ 'common.cancel' | translate }}
+                      </button>
+                    </div>
+                    @if (errorEliminar()) {
+                      <p class="ef-confirm__err ef-table__err">{{ errorEliminar() }}</p>
+                    }
+                  } @else {
+                    <div class="ef-actions ef-actions--row">
+                      <button class="ef-btn ef-btn--primary ef-btn--row" (click)="ver(exp.id)">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                        {{ 'estimated_files.view_detail' | translate }}
+                      </button>
+                      @if (exp.estado !== 'adjudicado' && exp.estado !== 'contratado') {
+                        <button class="ef-btn ef-btn--icon ef-btn--delete"
+                                (click)="pedirConfirmacion(exp.id)"
+                                [title]="'estimated_files.delete_title' | translate">
+                          <i class="bi bi-trash3" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Grid de tarjetas (móvil siempre · escritorio por defecto) ─────── -->
+      <div class="ef-grid" [class.d-md-none]="vista() === 'tabla'">
 
         @for (exp of expedientesPaginados(); track exp.id; let idx = $index) {
 
@@ -157,6 +279,19 @@
                    [class.ef-card--contratado]="exp.estado === 'contratado'"
                    [class.ef-card--cancelado]="exp.estado === 'cancelado'"
                    [class.ef-card--reciente]="idx === 0 && paginaActual() === 1 && !hayFiltros()">
+
+            <!-- Foto del expediente (miniatura del tour 3D) -->
+            <div class="ef-card__photo">
+              @if (fotoExpediente(exp); as foto) {
+                <img class="ef-card__photo-img" [src]="foto" loading="lazy"
+                     [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+              } @else {
+                <div class="ef-card__photo-empty"
+                     [title]="'estimated_files.photo_none' | translate">
+                  <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                </div>
+              }
+            </div>
 
             <!-- Cabecera: número + badge -->
             <div class="ef-card__head">

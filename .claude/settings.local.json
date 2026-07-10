@@ -41,7 +41,8 @@
       "mcp__claude_ai_Supabase__generate_typescript_types",
       "Bash(curl -sL -o /dev/null -w 'final: HTTP %{http_code} · type=%{content_type} · bytes=%{size_download}\\\\n' 'https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640&dpr=1&disable=upscale')",
       "Bash(curl -s -D - -o /dev/null \"https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640\")",
-      "Bash(grep -nA6 \"\\\\.status-chips-bar\" src/app/admin/construction-monitoring/list/list.component.css)"
+      "Bash(grep -nA6 \"\\\\.status-chips-bar\" src/app/admin/construction-monitoring/list/list.component.css)",
+      "Bash(node -e \"for\\(const l of ['es','fr','en']\\){const j=require\\('./src/assets/i18n/'+l+'.json'\\);console.log\\('---'+l\\);console.log\\(JSON.stringify\\(j.files_to_estimate,null,1\\)\\);}\")"
     ]
   }
 }

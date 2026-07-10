@@ -105,7 +105,6 @@ export class FileCreateComponent implements OnInit {
     provincia_ca:  ['QC'],
     codigo_postal: [''],
     // ── Compartido ──
-    referencia:    [''],
     latitud:       [null as number | null],
     longitud:      [null as number | null],
   });
@@ -312,7 +311,7 @@ export class FileCreateComponent implements OnInit {
           provincia:  esCanada ? (lv.provincia_ca  ?? '') : (lv.provincia ?? ''),
           canton:     esCanada ? (lv.ciudad        ?? '') : (lv.canton    ?? ''),
           distrito:   esCanada ? (lv.codigo_postal ?? '') : (lv.distrito  ?? ''),
-          referencia: lv.referencia || null,
+          referencia: null,
           latitud:    lv.latitud    ?? null,
           longitud:   lv.longitud   ?? null,
         },

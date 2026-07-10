@@ -75,6 +75,24 @@
           </button>
         }
       </div>
+
+      <div class="view-toggle d-none d-lg-inline-flex" role="group"
+           [attr.aria-label]="'construction_monitoring.view_cards' | translate">
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'construction_monitoring.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'construction_monitoring.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
     </div>
 
     <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
@@ -102,11 +120,12 @@
 
       } @else {
 
-        <!-- Escritorio: tabla con filas clicables -->
-        <div class="table-responsive d-none d-lg-block">
+        <!-- Escritorio: tabla con filas clicables (vista tabla) -->
+        <div class="table-responsive d-none" [class.d-lg-block]="vista() === 'tabla'">
           <table class="table table-monitoring align-middle mb-0">
             <thead>
               <tr>
+                <th class="col-photo" aria-hidden="true"></th>
                 <th class="col-num">{{ 'construction_monitoring.col_number' | translate }}</th>
                 <th class="col-identity">{{ 'construction_monitoring.col_client' | translate }} / {{ 'construction_monitoring.col_service' | translate }}</th>
                 <th class="col-location">{{ 'construction_monitoring.col_location' | translate }}</th>
@@ -120,6 +139,17 @@
             <tbody>
               @for (c of contratosPaginados(); track c.id) {
                 <tr class="table-row table-row--clickable" (click)="irAMonitoreo(c.id)">
+                  <td class="col-photo">
+                    <div class="cm-thumb">
+                      @if (fotoContrato(c); as foto) {
+                        <img [src]="foto" loading="lazy" [alt]="c.expediente_numero"
+                             (error)="onFotoError(c.id)" />
+                      } @else {
+                        <i class="bi bi-badge-3d" aria-hidden="true"
+                           [title]="'construction_monitoring.photo_none' | translate"></i>
+                      }
+                    </div>
+                  </td>
                   <td class="col-num">
                     <span class="exp-num">{{ c.expediente_numero }}</span>
                   </td>
@@ -155,10 +185,24 @@
           </table>
         </div>
 
-        <!-- Móvil: tarjetas clicables (sin scroll lateral) -->
-        <div class="cm-cards d-lg-none">
+        <!-- Tarjetas clicables (móvil siempre · escritorio por defecto) -->
+        <div class="cm-cards" [class.d-lg-none]="vista() === 'tabla'">
           @for (c of contratosPaginados(); track c.id) {
             <button type="button" class="cm-card" (click)="irAMonitoreo(c.id)">
+
+              <!-- Foto del expediente (miniatura del tour 3D) -->
+              <div class="cm-card__photo">
+                @if (fotoContrato(c); as foto) {
+                  <img class="cm-card__photo-img" [src]="foto" loading="lazy"
+                       [alt]="c.expediente_numero" (error)="onFotoError(c.id)" />
+                } @else {
+                  <div class="cm-card__photo-empty"
+                       [title]="'construction_monitoring.photo_none' | translate">
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  </div>
+                }
+              </div>
+
               <div class="cm-card__top">
                 <span class="exp-num">{{ c.expediente_numero }}</span>
                 <span class="estado-badge {{ badgeContrato(c.estado) }}">
@@ -176,6 +220,9 @@
                 </span>
                 <span class="cm-meta">
                   <i class="bi bi-cash-coin" aria-hidden="true"></i>{{ formatPrecio(c.precio_final) }}
+                </span>
+                <span class="cm-meta">
+                  <i class="bi bi-pen" aria-hidden="true"></i>{{ formatFecha(c.firmado_en) }}
                 </span>
                 <span class="cm-meta">
                   <i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.fecha_inicio) }}

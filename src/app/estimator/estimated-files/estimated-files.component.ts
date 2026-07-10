@@ -13,6 +13,8 @@ import {
 } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
+type VistaExpedientes = 'tabla' | 'tarjetas';
+
 @Component({
   selector: 'app-estimated-files',
   standalone: true,
@@ -37,6 +39,10 @@ export class EstimatedFilesComponent implements OnInit {
   confirmandoId  = signal<string | null>(null);
   eliminando     = signal(false);
   errorEliminar  = signal('');
+  vista          = signal<VistaExpedientes>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   readonly estadoChips: { value: string }[] = [
     { value: 'estimado'   },
@@ -120,6 +126,22 @@ export class EstimatedFilesComponent implements OnInit {
   limpiarFiltros() {
     this.busqueda.set('');
     this.filtroEstado.set(null);
+  }
+
+  setVista(v: VistaExpedientes) {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(exp: ExpedienteRow): string | null {
+    return this.fotosFallidas().has(exp.id) ? null : exp.foto;
+  }
+
+  onFotoError(id: string) {
+    this.fotosFallidas.update(set => new Set(set).add(id));
   }
 
   formatFecha(valor: string): string {

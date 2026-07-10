@@ -256,16 +256,18 @@ export class ExpedienteService {
     const servicioIds   = [...new Set(exps.map(e => e.servicio_id))];
     const expedienteIds = exps.map(e => e.id);
 
-    const [perfiles, servicios, locs] = await Promise.all([
+    const [perfiles, servicios, locs, estimaciones] = await Promise.all([
       this.perfilRepo.findByIds(clienteIds),
       this.servicioRepo.findByIds(servicioIds),
       this.localizacionRepo.findByExpedienteIds(expedienteIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
     ]);
 
     return exps.map(e => {
       const perfil   = perfiles.find(p => p.id === e.cliente_id);
       const servicio = servicios.find(s => s.id === e.servicio_id);
       const loc      = locs.find(l => l.expediente_id === e.id);
+      const est      = estimaciones.find(x => x.expediente_id === e.id);
       return {
         id:                 e.id,
         numero:             e.numero,
@@ -279,6 +281,7 @@ export class ExpedienteService {
         provincia:          loc?.provincia ?? '—',
         canton:             loc?.canton    ?? '—',
         distrito:           loc?.distrito  ?? '—',
+        foto:               matterportThumbFromTour(est?.url_tour),
       } as ExpedienteRow;
     });
   }

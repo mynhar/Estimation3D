@@ -772,7 +772,16 @@
     "confirm_delete": "Oui, supprimer",
     "view_detail": "Voir le détail",
     "delete_title": "Supprimer l'estimation",
-    "sorted_recent": "Plus récent en premier"
+    "sorted_recent": "Plus récent en premier",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible",
+    "col_number": "Numéro",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Localisation",
+    "col_visit": "Visite",
+    "col_status": "Statut"
   },
   "files_under_estimation": {
     "title": "Mes dossiers en estimation",
@@ -791,7 +800,15 @@
     "release_title": "Libérer le dossier",
     "confirm_release_title": "Confirmer la libération",
     "confirm_msg_before": "Appuyez sur",
-    "confirm_msg_after": "pour confirmer. Le dossier revient dans les dossiers disponibles."
+    "confirm_msg_after": "pour confirmer. Le dossier revient dans les dossiers disponibles.",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible",
+    "col_number": "Numéro",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Localisation",
+    "col_visit": "Visite prévue"
   },
   "files_to_estimate": {
     "title": "Dossiers à estimer",
@@ -805,7 +822,15 @@
     "no_filter_text": "Aucun dossier ne correspond aux filtres appliqués.",
     "visit_label": "Visite :",
     "take_estimate": "Prendre et estimer",
-    "files_count": "dossiers"
+    "files_count": "dossiers",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible",
+    "col_number": "Numéro",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Localisation",
+    "col_visit": "Visite prévue"
   },
   "file_create": {
     "subtitle": "Complétez les 4 étapes pour demander votre estimation de projet",
@@ -1710,7 +1735,10 @@
     "no_data": "Aucun chantier actif",
     "no_data_hint": "Vos chantiers apparaîtront ici lorsqu'un contrat sera signé avec un client.",
     "estado_contratado": "Sous contrat",
-    "estado_adjudicado": "Adjugé"
+    "estado_adjudicado": "Adjugé",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible"
   },
   "client_monitoring": {
     "eyebrow": "Suivi en temps réel",

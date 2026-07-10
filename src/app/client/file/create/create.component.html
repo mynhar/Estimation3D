@@ -548,19 +548,8 @@
 
               }
 
-              <!-- Otras señas + GPS -->
-              <div class="col-md-8">
-                <label class="form-label fw-medium">
-                  {{ 'file_create.other_signs' | translate }}
-                  <span class="text-muted fw-normal">({{ 'common.optional' | translate }})</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="referencia"
-                       [placeholder]="'file_create.signs_placeholder' | translate" />
-                <div class="form-text">{{ 'file_create.signs_hint' | translate }}</div>
-              </div>
-
-              <div class="col-md-4 align-self-end">
+              <!-- GPS -->
+              <div class="col-md-4">
                 <button type="button"
                         class="gps-toggle w-100"
                         (click)="gpsVisible.set(!gpsVisible())">

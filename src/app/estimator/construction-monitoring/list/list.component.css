@@ -1,3 +1,7 @@
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P5 H5 E5 S4 R5 V4
+ */
+
 /* ── Page header ──────────────────────────────────────────────────────────── */
 .page-header {
   background: var(--ds-surface);
@@ -76,12 +80,42 @@
 
 /* ── Status chips bar ─────────────────────────────────────────────────────── */
 .status-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
   padding: var(--ds-space-3) var(--ds-space-4);
 }
-.status-chips { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); }
+.status-chips { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); flex: 1; min-width: 0; }
+
+/* ── View toggle (tabla / tarjetas) ───────────────────────────────────────── */
+.view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+  flex-shrink: 0;
+}
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
+.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 .status-chip {
   display: inline-flex;
@@ -160,6 +194,7 @@
 .table-row:hover { background: var(--ds-gold-faint) !important; }
 
 /* ── Column widths ────────────────────────────────────────────────────────── */
+.col-photo    { width: 64px; }
 .col-num      { width: 110px; white-space: nowrap; }
 .col-identity { min-width: 160px; }
 .col-location { min-width: 120px; }
@@ -203,30 +238,88 @@
 .badge-completado   { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info); }
 .badge-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger); }
 
-/* ── Mobile cards (sustituyen la tabla < lg) ──────────────────────────────────
-   Eliminan el scroll lateral: cada tarjeta es clicable → abre el seguimiento. */
-.cm-cards { display: flex; flex-direction: column; }
+/* ── Miniatura 3D en la fila de la tabla ──────────────────────────────────── */
+.cm-thumb {
+  width: 48px;
+  height: 34px;
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+}
+.cm-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ── Vista tarjetas (móvil siempre · escritorio por defecto) ──────────────────
+   Cada tarjeta es clicable → abre el seguimiento. */
+.cm-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-4);
+}
 .cm-card {
   display: flex;
   flex-direction: column;
   gap: var(--ds-space-2);
   width: 100%;
   text-align: left;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--ds-border-subtle);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
   padding: var(--ds-space-4);
   cursor: pointer;
   min-width: 0;
-  transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-base) var(--ds-ease-out),
+              transform var(--ds-duration-base) var(--ds-ease-out);
 }
-.cm-card:last-child { border-bottom: none; }
-.cm-card:hover { background: var(--ds-gold-faint); }
+.cm-card:hover {
+  background: var(--ds-gold-faint);
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+}
 .cm-card:focus-visible {
   outline: none;
   background: var(--ds-gold-faint);
   box-shadow: inset 0 0 0 2px var(--ds-gold);
 }
+
+/* Foto del expediente (miniatura del tour 3D Matterport) — a sangre */
+.cm-card__photo {
+  margin: calc(-1 * var(--ds-space-4)) calc(-1 * var(--ds-space-4)) 0;
+  aspect-ratio: 16 / 9;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cm-card__photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.cm-card:hover .cm-card__photo-img { transform: scale(1.03); }
+.cm-card__photo-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-card, .cm-card__photo-img { transition: none; }
+  .cm-card:hover { transform: none; }
+  .cm-card:hover .cm-card__photo-img { transform: none; }
+}
+
 .cm-card__top {
   display: flex;
   align-items: center;

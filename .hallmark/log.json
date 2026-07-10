@@ -1,5 +1,41 @@
 [
   {
+    "date": "2026-07-09",
+    "scope": "app",
+    "macrostructure": "Workbench (estimator construction-monitoring/list · +view toggle tabla/tarjetas + miniatura Matterport)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/construction-monitoring/list · ya tenía tabla(lg)+cards(movil); ahora toggle tabla|tarjetas (default 'tarjetas', breakpoint lg local), cards promovidas a rejilla real con foto Matterport + fecha firmado (paridad con la tabla); ContratoService.adjuntarFotos() extraído y reusado por getContratosEstimador + getContratosMonitoringAdmin; 100% tokens --ds-*"
+  },
+  {
+    "date": "2026-07-09",
+    "scope": "app",
+    "macrostructure": "Workbench (estimator estimated-files · +view toggle tabla/tarjetas + miniatura Matterport)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/estimated-files · toggle vista tabla|tarjetas (default 'tarjetas'), foto = miniatura del tour 3D Matterport (ExpedienteRow.foto); tabla comparte paginación y chips de estado; borrado conserva confirm inline (fila tiñe danger + error visible); barra de acento es hijo flex → foto a sangre sin márgenes negativos; tabla scrollea dentro de su tarjeta (gate 34); 100% tokens --ds-*"
+  },
+  {
+    "date": "2026-07-09",
+    "scope": "app",
+    "macrostructure": "Workbench (estimator files-under-estimation · +view toggle tabla/tarjetas + miniatura Matterport)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/files-under-estimation · toggle vista tabla|tarjetas (default 'tarjetas'), foto = miniatura del tour 3D Matterport (ExpedienteRow.foto ya provisto por getExpedienteRows); liberar conserva two-step confirm (fila se tiñe danger); tabla scrollea dentro de su tarjeta (gate 34); 100% tokens --ds-*"
+  },
+  {
+    "date": "2026-07-09",
+    "scope": "app",
+    "macrostructure": "Workbench (estimator files-to-be-estimated · +view toggle tabla/tarjetas + miniatura Matterport)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/files-to-be-estimated · toggle vista tabla|tarjetas (default 'tarjetas'), foto del expediente = miniatura del tour 3D Matterport (ExpedienteRow.foto via matterportThumbFromTour en getExpedienteRows); tabla scrollea dentro de su tarjeta (gate 34); 100% tokens --ds-*"
+  },
+  {
     "date": "2026-06-11",
     "scope": "app",
     "macrostructure": "Workbench (admin dashboard · +full-width works panel: hero avg + estado funnel)",

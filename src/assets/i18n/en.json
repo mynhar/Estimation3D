@@ -772,7 +772,16 @@
     "confirm_delete": "Yes, delete",
     "view_detail": "View detail",
     "delete_title": "Delete estimation",
-    "sorted_recent": "Most recent first"
+    "sorted_recent": "Most recent first",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available",
+    "col_number": "Number",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Location",
+    "col_visit": "Visit",
+    "col_status": "Status"
   },
   "files_under_estimation": {
     "title": "My files under estimation",
@@ -791,7 +800,15 @@
     "release_title": "Release file",
     "confirm_release_title": "Confirm release",
     "confirm_msg_before": "Press",
-    "confirm_msg_after": "to confirm. The file returns to the available pool."
+    "confirm_msg_after": "to confirm. The file returns to the available pool.",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available",
+    "col_number": "Number",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Location",
+    "col_visit": "Planned visit"
   },
   "files_to_estimate": {
     "title": "Files to estimate",
@@ -805,7 +822,15 @@
     "no_filter_text": "No files match the applied filters.",
     "visit_label": "Visit:",
     "take_estimate": "Take and estimate",
-    "files_count": "files"
+    "files_count": "files",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available",
+    "col_number": "Number",
+    "col_service": "Service",
+    "col_client": "Client",
+    "col_location": "Location",
+    "col_visit": "Planned visit"
   },
   "file_create": {
     "subtitle": "Complete the 4 steps to request your project estimation",
@@ -1710,7 +1735,10 @@
     "no_data": "No active construction sites",
     "no_data_hint": "Your construction sites will appear here once a contract is signed with a client.",
     "estado_contratado": "Under contract",
-    "estado_adjudicado": "Awarded"
+    "estado_adjudicado": "Awarded",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available"
   },
   "client_monitoring": {
     "eyebrow": "Real-time tracking",
