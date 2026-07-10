@@ -598,7 +598,15 @@
     "search_placeholder": "Buscar por número, servicio, provincia…",
     "my_price": "Mi precio",
     "start_deadline": "Inicio / Plazo",
-    "no_match": "Ninguna oferta coincide con los filtros aplicados."
+    "no_match": "Ninguna oferta coincide con los filtros aplicados.",
+    "view_table": "Vista tabla",
+    "view_cards": "Vista tarjetas",
+    "photo_none": "Sin tour 3D disponible",
+    "col_number": "Número",
+    "col_service": "Servicio",
+    "col_location": "Ubicación",
+    "col_price": "Mi precio",
+    "col_date": "Enviada"
   },
   "available_files": {
     "title": "Expedientes disponibles",
@@ -623,7 +631,14 @@
     "legend_title": "Nivel de competencia:",
     "legend_low": "Baja (0–1 ofertas)",
     "legend_mid": "Media (2–3 ofertas)",
-    "legend_high": "Alta (4–5 ofertas)"
+    "legend_high": "Alta (4–5 ofertas)",
+    "view_table": "Vista tabla",
+    "view_cards": "Vista tarjetas",
+    "photo_none": "Sin tour 3D disponible",
+    "col_number": "Número",
+    "col_service": "Servicio",
+    "col_location": "Ubicación",
+    "col_competition": "Competencia"
   },
   "builder_offer": {
     "loading": "Cargando expediente…",

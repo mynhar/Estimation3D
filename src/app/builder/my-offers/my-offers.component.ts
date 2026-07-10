@@ -14,6 +14,8 @@ const ESTADO_ICON: Record<string, string> = {
   rechazada: 'bi-x-circle',
 };
 
+type VistaOfertas = 'tabla' | 'tarjetas';
+
 @Component({
   selector: 'app-my-offers',
   standalone: true,
@@ -31,6 +33,12 @@ export class MyOffersComponent implements OnInit {
   user     = toSignal(this.auth.user$);
   ofertas  = signal<OfertaRow[]>([]);
   cargando = signal(true);
+
+  // ── Vista (tarjetas por defecto) ───────────────────────────────────────────
+  vista = signal<VistaOfertas>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   // ── Filtros ───────────────────────────────────────────────────────────────
   busqueda     = signal('');
@@ -109,6 +117,22 @@ export class MyOffersComponent implements OnInit {
   }
 
   estadoIcon(estado: string):  string { return ESTADO_ICON[estado]  ?? 'bi-circle'; }
+
+  setVista(v: VistaOfertas) {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(o: OfertaRow): string | null {
+    return this.fotosFallidas().has(o.id) ? null : o.foto;
+  }
+
+  onFotoError(id: string) {
+    this.fotosFallidas.update(set => new Set(set).add(id));
+  }
 
   formatCosto(valor: number): string {
     return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(valor);

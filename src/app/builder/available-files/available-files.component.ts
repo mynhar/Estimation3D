@@ -9,6 +9,8 @@ import { OfertaService } from '../../services/oferta.service';
 import { ExpedienteDisponible } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
+type VistaExpedientes = 'tabla' | 'tarjetas';
+
 @Component({
   selector: 'app-available-files',
   standalone: true,
@@ -28,6 +30,12 @@ export class AvailableFilesComponent implements OnInit {
   expedientes   = signal<ExpedienteDisponible[]>([]);
   ofertasHechas = signal<Set<string>>(new Set());
   cargando      = signal(true);
+
+  // ── Vista (tarjetas por defecto) ───────────────────────────────────────────
+  vista = signal<VistaExpedientes>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   // ── Filtros ───────────────────────────────────────────────────────────────
   busqueda          = signal('');
@@ -120,6 +128,22 @@ export class AvailableFilesComponent implements OnInit {
     return this.ofertasHechas().has(expedienteId);
   }
 
+  setVista(v: VistaExpedientes) {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(exp: ExpedienteDisponible): string | null {
+    return this.fotosFallidas().has(exp.id) ? null : exp.foto;
+  }
+
+  onFotoError(id: string) {
+    this.fotosFallidas.update(set => new Set(set).add(id));
+  }
+
   // Devuelve true si el expediente fue creado en los últimos 7 días
   esReciente(creado_en: string): boolean {
     if (!creado_en) return false;
@@ -160,10 +184,6 @@ export class AvailableFilesComponent implements OnInit {
     const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
-  }
-
-  formatPrecio(v: number): string {
-    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(v);
   }
 
   limpiarFiltros() {

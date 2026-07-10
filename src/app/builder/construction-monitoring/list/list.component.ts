@@ -15,6 +15,8 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoConstructorListItem } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
+type VistaContratos = 'tabla' | 'tarjetas';
+
 @Component({
   selector: 'app-construction-monitoring-list',
   standalone: true,
@@ -36,6 +38,10 @@ export class ConstructionMonitoringListComponent implements OnInit {
   error     = signal<string | null>(null);
 
   filtroEstado = signal('todos');
+  vista        = signal<VistaContratos>('tarjetas');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   readonly estados    = ['todos', 'firmado', 'en_ejecucion', 'completado', 'cancelado'];
   readonly POR_PAGINA = 15;
@@ -132,6 +138,22 @@ export class ConstructionMonitoringListComponent implements OnInit {
     return new Intl.NumberFormat('fr-CA', {
       style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(precio);
+  }
+
+  setVista(v: VistaContratos): void {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoContrato(c: ContratoConstructorListItem): string | null {
+    return this.fotosFallidas().has(c.id) ? null : c.foto;
+  }
+
+  onFotoError(id: string): void {
+    this.fotosFallidas.update(set => new Set(set).add(id));
   }
 
   irAMonitoreo(id: string): void {

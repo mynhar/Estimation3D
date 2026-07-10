@@ -598,7 +598,15 @@
     "search_placeholder": "Chercher par numéro, service, province…",
     "my_price": "Mon prix",
     "start_deadline": "Début / Délai",
-    "no_match": "Aucune offre ne correspond aux filtres appliqués."
+    "no_match": "Aucune offre ne correspond aux filtres appliqués.",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible",
+    "col_number": "Numéro",
+    "col_service": "Service",
+    "col_location": "Localisation",
+    "col_price": "Mon prix",
+    "col_date": "Envoyée le"
   },
   "available_files": {
     "title": "Dossiers disponibles",
@@ -623,7 +631,14 @@
     "legend_title": "Niveau de compétition :",
     "legend_low": "Basse (0–1 offres)",
     "legend_mid": "Moyenne (2–3 offres)",
-    "legend_high": "Élevée (4–5 offres)"
+    "legend_high": "Élevée (4–5 offres)",
+    "view_table": "Vue tableau",
+    "view_cards": "Vue cartes",
+    "photo_none": "Aucun tour 3D disponible",
+    "col_number": "Numéro",
+    "col_service": "Service",
+    "col_location": "Localisation",
+    "col_competition": "Compétition"
   },
   "builder_offer": {
     "loading": "Chargement du dossier…",

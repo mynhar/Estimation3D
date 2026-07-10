@@ -138,6 +138,25 @@
         </button>
       }
 
+      <!-- Alternar vista tabla / tarjetas (solo escritorio) -->
+      <div class="view-toggle d-none d-md-inline-flex ms-md-auto" role="group"
+           [attr.aria-label]="'available_files.view_cards' | translate">
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'available_files.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'available_files.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
+
     </div>
 
     <!-- â”€â”€ Conteo de resultados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
@@ -170,20 +189,139 @@
 
     <!-- â”€â”€ CuadrÃ­cula de expedientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 fade-up" style="--delay:120ms">
+
+      <!-- ── Vista tabla (solo escritorio) ──────────────────────────────────── -->
+      <div class="table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="files-table">
+          <thead>
+            <tr>
+              <th class="files-table__col-photo" aria-hidden="true"></th>
+              <th class="files-table__col-num">{{ 'available_files.col_number' | translate }}</th>
+              <th>{{ 'available_files.col_service' | translate }}</th>
+              <th>{{ 'available_files.col_location' | translate }}</th>
+              <th class="files-table__col-comp">{{ 'available_files.col_competition' | translate }}</th>
+              <th class="files-table__col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientesPaginados(); track exp.id) {
+              <tr class="files-table__row files-table__row--select"
+                  role="button" tabindex="0"
+                  [attr.aria-label]="exp.numero + ' · ' + servicioNombre(exp)"
+                  (click)="hacerOferta(exp.id)"
+                  (keydown.enter)="hacerOferta(exp.id)"
+                  (keydown.space)="$event.preventDefault(); hacerOferta(exp.id)"
+                  [class.files-table__row--offered]="tieneOferta(exp.id)">
+
+                <td class="files-table__col-photo">
+                  <div class="files-thumb">
+                    @if (fotoExpediente(exp); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="exp.numero"
+                           (error)="onFotoError(exp.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"
+                         [title]="'available_files.photo_none' | translate"></i>
+                    }
+                  </div>
+                </td>
+
+                <td class="files-table__col-num">
+                  <span class="file-num">{{ exp.numero }}</span>
+                  @if (esReciente(exp.creado_en)) {
+                    <span class="tag tag-gold ms-1">
+                      <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
+                    </span>
+                  }
+                </td>
+
+                <td><span class="files-table__service">{{ servicioNombre(exp) }}</span></td>
+
+                <td class="files-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+
+                <td class="files-table__col-comp">
+                  @if (tieneOferta(exp.id)) {
+                    <span class="cbadge cbadge--offered">
+                      <i class="bi bi-check-circle me-1"></i>{{ 'available_files.offer_sent' | translate }}
+                    </span>
+                  } @else {
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="slot-track">
+                        @for (i of slots; track i) {
+                          <span class="slot"
+                                [class.slot--filled]="i <= exp.total_ofertas"
+                                [style.background]="i <= exp.total_ofertas ? competenciaColor(exp.total_ofertas) : undefined">
+                          </span>
+                        }
+                      </div>
+                      <span class="slot-label">{{ exp.total_ofertas }}/5</span>
+                    </div>
+                  }
+                </td>
+
+                <td class="files-table__col-action">
+                  @if (tieneOferta(exp.id)) {
+                    <button class="btn btn-outline-secondary btn-sm fw-semibold
+                                   d-flex align-items-center justify-content-center gap-2"
+                            (click)="$event.stopPropagation(); hacerOferta(exp.id)">
+                      <i class="bi bi-eye"></i>{{ 'available_files.view_offer' | translate }}
+                    </button>
+                  } @else {
+                    <button class="btn btn-primary btn-sm fw-semibold
+                                   d-flex align-items-center justify-content-center gap-2"
+                            (click)="$event.stopPropagation(); hacerOferta(exp.id)"
+                            [disabled]="exp.total_ofertas >= 5">
+                      @if (exp.total_ofertas >= 5) {
+                        <i class="bi bi-x-circle"></i>{{ 'available_files.full' | translate }}
+                      } @else {
+                        <i class="bi bi-send"></i>{{ 'available_files.make_offer' | translate }}
+                      }
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ─────────── -->
+      <div class="cards-grid fade-up" style="--delay:120ms"
+           [class.d-md-none]="vista() === 'tabla'">
 
         @for (exp of expedientesPaginados(); track exp.id) {
-          <div class="col">
-            <div class="file-card h-100"
+            <div class="file-card file-card--select"
+                 role="button" tabindex="0"
+                 [attr.aria-label]="exp.numero + ' · ' + servicioNombre(exp)"
+                 (click)="hacerOferta(exp.id)"
+                 (keydown.enter)="hacerOferta(exp.id)"
+                 (keydown.space)="$event.preventDefault(); hacerOferta(exp.id)"
                  [class.file-card--offered]="tieneOferta(exp.id)"
                  [class.file-card--low]="!tieneOferta(exp.id) && exp.total_ofertas <= 1"
                  [class.file-card--mid]="!tieneOferta(exp.id) && exp.total_ofertas >= 2 && exp.total_ofertas <= 3"
                  [class.file-card--high]="!tieneOferta(exp.id) && exp.total_ofertas >= 4">
 
+              <!-- Foto del expediente (miniatura del tour 3D Matterport) -->
+              <div class="file-photo">
+                @if (fotoExpediente(exp); as foto) {
+                  <img class="file-photo__img" [src]="foto" loading="lazy"
+                       [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+                } @else {
+                  <div class="file-photo__empty"
+                       [title]="'available_files.photo_none' | translate">
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  </div>
+                }
+                @if (esReciente(exp.creado_en)) {
+                  <span class="tag tag-gold file-photo__tag">
+                    <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
+                  </span>
+                }
+              </div>
+
               <div class="file-card__body d-flex flex-column">
 
                 <!-- â”€â”€ Fila 1: nÃºmero + estado + reciente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                   <span class="file-num">{{ exp.numero }}</span>
 
                   @if (tieneOferta(exp.id)) {
@@ -195,19 +333,13 @@
                       <i class="bi bi-bar-chart me-1"></i>{{ competenciaLabel(exp.total_ofertas) | translate }}
                     </span>
                   }
-
-                  @if (esReciente(exp.creado_en)) {
-                    <span class="tag tag-gold ms-auto">
-                      <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
-                    </span>
-                  }
                 </div>
 
                 <!-- â”€â”€ Servicio (tÃ­tulo) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <h3 class="file-servicio mb-3">{{ servicioNombre(exp) }}</h3>
+                <h3 class="file-servicio mb-2">{{ servicioNombre(exp) }}</h3>
 
                 <!-- â”€â”€ UbicaciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="file-location mb-auto">
+                <div class="file-location">
                   <div class="d-flex align-items-start gap-2 mb-1">
                     <i class="bi bi-geo-alt file-location__icon"></i>
                     <span class="file-location__main">{{ exp.provincia }}, {{ exp.canton }}</span>
@@ -218,23 +350,10 @@
                   </div>
                 </div>
 
-                <!-- â”€â”€ EstimaciÃ³n de costo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                @if (exp.costo_estimado) {
-                  <div class="file-cost mt-3">
-                    @if (exp.costo_estimado_max && exp.costo_estimado_max > exp.costo_estimado) {
-                      <span class="file-cost__value">
-                        {{ formatPrecio(exp.costo_estimado) }} â€“ {{ formatPrecio(exp.costo_estimado_max) }}
-                      </span>
-                    } @else {
-                      <span class="file-cost__value">{{ formatPrecio(exp.costo_estimado) }}</span>
-                    }
-                  </div>
-                }
-
-                <hr class="file-divider my-3">
+                <hr class="file-divider my-2">
 
                 <!-- â”€â”€ Slots de competencia + fecha â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
                   <div class="d-flex align-items-center gap-2">
                     <div class="slot-track">
                       @for (i of slots; track i) {
@@ -255,13 +374,13 @@
                 @if (tieneOferta(exp.id)) {
                   <button class="btn btn-outline-secondary btn-sm w-100 fw-semibold
                                  d-flex align-items-center justify-content-center gap-2"
-                          (click)="hacerOferta(exp.id)">
+                          (click)="$event.stopPropagation(); hacerOferta(exp.id)">
                     <i class="bi bi-eye"></i>{{ 'available_files.view_offer' | translate }}
                   </button>
                 } @else {
                   <button class="btn btn-primary btn-sm w-100 fw-semibold
                                  d-flex align-items-center justify-content-center gap-2"
-                          (click)="hacerOferta(exp.id)"
+                          (click)="$event.stopPropagation(); hacerOferta(exp.id)"
                           [disabled]="exp.total_ofertas >= 5">
                     @if (exp.total_ofertas >= 5) {
                       <i class="bi bi-x-circle"></i>{{ 'available_files.full' | translate }}
@@ -273,7 +392,6 @@
 
               </div>
             </div>
-          </div>
         }
 
       </div>

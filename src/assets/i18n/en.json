@@ -598,7 +598,15 @@
     "search_placeholder": "Search by number, service, province…",
     "my_price": "My price",
     "start_deadline": "Start / Deadline",
-    "no_match": "No offers match the applied filters."
+    "no_match": "No offers match the applied filters.",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available",
+    "col_number": "Number",
+    "col_service": "Service",
+    "col_location": "Location",
+    "col_price": "My price",
+    "col_date": "Sent"
   },
   "available_files": {
     "title": "Available files",
@@ -623,7 +631,14 @@
     "legend_title": "Competition level:",
     "legend_low": "Low (0–1 offers)",
     "legend_mid": "Medium (2–3 offers)",
-    "legend_high": "High (4–5 offers)"
+    "legend_high": "High (4–5 offers)",
+    "view_table": "Table view",
+    "view_cards": "Card view",
+    "photo_none": "No 3D tour available",
+    "col_number": "Number",
+    "col_service": "Service",
+    "col_location": "Location",
+    "col_competition": "Competition"
   },
   "builder_offer": {
     "loading": "Loading file…",

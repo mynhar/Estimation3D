@@ -32,7 +32,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
   error     = signal<string | null>(null);
 
   filtroEstado = signal('todos');
-  vista        = signal<'tabla' | 'tarjetas'>('tabla');   // por defecto: tabla
+  vista        = signal<'tabla' | 'tarjetas'>('tarjetas');   // por defecto: tarjetas
 
   readonly estados    = ['todos', 'firmado', 'en_ejecucion', 'completado', 'cancelado'];
   readonly POR_PAGINA = 15;

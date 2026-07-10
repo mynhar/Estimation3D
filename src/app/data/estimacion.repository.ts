@@ -16,6 +16,7 @@ export type EstimacionMin = {
   expediente_id:      string;
   costo_estimado:     number | null;
   costo_estimado_max: number | null;
+  url_tour:           string | null;
 };
 
 export type EstimacionFecha = {
@@ -51,7 +52,7 @@ export class EstimacionRepository {
     if (!ids.length) return [];
     const { data, error } = await this.db
       .from('estimacion')
-      .select('expediente_id, costo_estimado, costo_estimado_max')
+      .select('expediente_id, costo_estimado, costo_estimado_max, url_tour')
       .in('expediente_id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as EstimacionMin[];

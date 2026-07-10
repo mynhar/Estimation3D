@@ -70,6 +70,8 @@ export interface OfertaRow {
   plazo_semanas_max: number | null;
   estado: string;
   creado_en: string;
+  /** Miniatura del tour 3D (Matterport) del expediente, o null si no tiene tour. */
+  foto: string | null;
 }
 
 export interface OfertaDashboard extends OfertaRow {

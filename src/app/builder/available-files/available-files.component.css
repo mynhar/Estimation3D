@@ -220,9 +220,23 @@
     transform var(--ds-duration-fast) var(--ds-ease-out),
     box-shadow var(--ds-duration-fast) var(--ds-ease-out);
 }
+/* Cuadrícula de tarjetas — mismo patrón que construction-monitoring/list */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--ds-space-4);
+}
+
 .file-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--ds-shadow-md);
+}
+
+/* Tarjeta seleccionable: toda la tarjeta es clicable */
+.file-card--select { cursor: pointer; }
+.file-card--select:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
 }
 
 /* Acento lateral por nivel de competencia */
@@ -235,8 +249,7 @@
 }
 
 .file-card__body {
-  padding: var(--ds-space-5);
-  height: 100%;
+  padding: var(--ds-space-3) var(--ds-space-4) var(--ds-space-4);
 }
 
 /* ── Número del expediente ──────────────────────────────────────────── */
@@ -285,7 +298,7 @@
 /* ── Nombre del servicio ─────────────────────────────────────────────── */
 .file-servicio {
   font-family: var(--ds-font-display);
-  font-size: var(--ds-text-lg);
+  font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-regular);
   color: var(--ds-ink);
   line-height: var(--ds-leading-snug);
@@ -308,21 +321,6 @@
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
   line-height: var(--ds-leading-relaxed);
-}
-
-/* ── Costo estimado ─────────────────────────────────────────────────── */
-.file-cost {
-  background: var(--ds-gold-faint);
-  border: 1px solid var(--ds-gold-soft);
-  border-radius: var(--ds-radius-md);
-  padding: var(--ds-space-2) var(--ds-space-3);
-  text-align: center;
-}
-.file-cost__value {
-  font-family: var(--ds-font-display);
-  font-size: var(--ds-text-base);
-  font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active);
 }
 
 /* ── Separador ──────────────────────────────────────────────────────── */
@@ -355,6 +353,147 @@
   color: var(--ds-ink-muted);
   white-space: nowrap;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ALTERNAR VISTA (tabla / tarjetas)
+══════════════════════════════════════════════════════════════════════ */
+.view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+  flex-shrink: 0;
+}
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease-out),
+    color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
+.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   FOTO DEL EXPEDIENTE (miniatura del tour 3D Matterport)
+══════════════════════════════════════════════════════════════════════ */
+.file-photo {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.file-photo__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.file-card:hover .file-photo__img { transform: scale(1.03); }
+.file-photo__empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2rem;
+}
+.file-photo__tag {
+  position: absolute;
+  top: var(--ds-space-2);
+  right: var(--ds-space-2);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .file-photo__img { transition: none; }
+  .file-card:hover .file-photo__img { transform: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VISTA TABLA (escritorio)
+══════════════════════════════════════════════════════════════════════ */
+.table-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  /* La tabla scrollea dentro de su tarjeta; el body nunca scrollea en horizontal. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.files-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: var(--ds-text-sm);
+}
+.files-table thead th {
+  background: var(--ds-bg-alt);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  text-align: left;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  white-space: nowrap;
+}
+.files-table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  vertical-align: middle;
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-xs);
+}
+.files-table tbody tr:last-child td { border-bottom: none; }
+
+.files-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.files-table__row:hover { background: var(--ds-gold-faint); }
+.files-table__row--offered { background: rgba(91, 122, 79, 0.03); }
+.files-table__row--select { cursor: pointer; }
+.files-table__row--select:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: -2px;
+}
+
+.files-table__col-photo  { width: 64px; }
+.files-table__col-num    { white-space: nowrap; }
+.files-table__col-comp   { white-space: nowrap; }
+.files-table__col-action { width: 1%; white-space: nowrap; }
+
+.files-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+.files-table__muted   { color: var(--ds-ink-muted); }
+
+/* Miniatura 3D en la fila */
+.files-thumb {
+  width: 48px;
+  height: 34px;
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+}
+.files-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ══════════════════════════════════════════════════════════════════════
    LEYENDA

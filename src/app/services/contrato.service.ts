@@ -238,8 +238,10 @@ export class ContratoService {
   // ── Constructor: listar contratos propios ───────────────────────────────
 
   async getContratosConstructor(constructorId: string): Promise<ContratoConstructorListItem[]> {
-    const rows = await this.contratoRepo.findByConstructorId(constructorId);
-    return rows.map((c: any) => this.mapContratoListItem(c));
+    const rows  = await this.contratoRepo.findByConstructorId(constructorId);
+    const items = rows.map((c: any) => this.mapContratoListItem(c));
+    await this.adjuntarFotos(items);
+    return items;
   }
 
   // ── Estimador: contratos de los expedientes que estimó ───────────────────

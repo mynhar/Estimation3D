@@ -360,6 +360,7 @@ export class ExpedienteService {
         costo_estimado:     estimacion?.costo_estimado     ?? null,
         costo_estimado_max: estimacion?.costo_estimado_max ?? null,
         total_ofertas:      total,
+        foto:               matterportThumbFromTour(estimacion?.url_tour),
       } as ExpedienteDisponible;
     }).filter(r =>
       r.estado === 'estimado' || (r.estado === 'en_oferta' && r.total_ofertas < 5)

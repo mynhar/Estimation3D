@@ -130,6 +130,8 @@ export interface ExpedienteDisponible {
   costo_estimado: number | null;
   costo_estimado_max: number | null;
   total_ofertas: number;
+  /** Miniatura del tour 3D (Matterport), o null si el expediente no tiene tour. */
+  foto: string | null;
 }
 
 /** Vista completa del expediente para el cliente (detalle propio). */

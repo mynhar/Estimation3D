@@ -53,8 +53,8 @@
   } @else {
 
     <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-    <header class="page-header card card-premium mb-4 fade-up">
-      <div class="card-body px-4 px-lg-5 py-4">
+    <header class="page-header card card-premium mb-3 fade-up">
+      <div class="card-body px-4 px-lg-5 py-3">
         <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
 
           <div class="d-flex align-items-center gap-3">
@@ -96,7 +96,7 @@
     </header>
 
     <!-- â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-    <div class="row g-4 align-items-start">
+    <div class="row g-3 align-items-start">
 
       <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
            COLUMNA IZQUIERDA â€” Info del expediente + Media
@@ -185,22 +185,6 @@
                 <p class="context-label">{{ 'make_offer.problems_noted' | translate }}</p>
                 <p class="context-sub context-sub--pre mb-0">{{ detalle()!.descripcion_problemas }}</p>
               </div>
-            </div>
-          }
-
-          <!-- Costo estimado por el estimador -->
-          @if (detalle()!.costo_estimado) {
-            <div class="context-divider"></div>
-            <div class="cost-summary-row">
-              <span class="context-label mb-0">{{ 'make_offer.estimated_range' | translate }}</span>
-              <span class="cost-summary__value">
-                @if (detalle()!.costo_estimado_max && detalle()!.costo_estimado_max !== detalle()!.costo_estimado) {
-                  {{ detalle()!.costo_estimado | number:'1.0-0' }}
-                  â€“ {{ detalle()!.costo_estimado_max | number:'1.0-0' }} CAD
-                } @else {
-                  {{ detalle()!.costo_estimado | number:'1.0-0' }} CAD
-                }
-              </span>
             </div>
           }
 
@@ -357,7 +341,7 @@
             <div class="form-card__body">
 
               <!-- â”€â”€ Precio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-              <div class="form-field mb-5">
+              <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
                   <span class="req-mark">*</span>
@@ -377,7 +361,7 @@
               </div>
 
               <!-- â”€â”€ Plazos + GarantÃ­a â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-              <div class="form-field mb-5">
+              <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-clock me-1"></i>{{ 'make_offer.project_times' | translate }}
                 </label>
@@ -412,7 +396,7 @@
               </div>
 
               <!-- â”€â”€ Fecha de inicio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-              <div class="form-field mb-5">
+              <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-calendar-event me-1"></i>{{ 'make_offer.start_date' | translate }}
                   <span class="req-mark">*</span>
@@ -421,7 +405,7 @@
               </div>
 
               <!-- â”€â”€ DescripciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-              <div class="form-field mb-5">
+              <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-text-paragraph me-1"></i>{{ 'make_offer.approach_desc' | translate }}
                   <span class="req-mark">*</span>
@@ -433,7 +417,7 @@
               </div>
 
               <!-- â”€â”€ Adjuntos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-              <div class="form-field mb-5">
+              <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-paperclip me-1"></i>{{ 'make_offer.attachments' | translate }}
                 </label>

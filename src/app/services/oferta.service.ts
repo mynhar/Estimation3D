@@ -6,6 +6,7 @@ import {
   PerfilRepository,
   EstimacionRepository,
 } from '../data';
+import { matterportThumbFromTour } from '../shared/util/matterport';
 
 @Injectable({ providedIn: 'root' })
 export class OfertaService {
@@ -178,6 +179,17 @@ export class OfertaService {
 
   async getMisOfertas(constructorId: string): Promise<OfertaRow[]> {
     const rows = await this.ofertaRepo.findByConstructorIdConExpediente(constructorId);
+    if (!rows.length) return [];
+
+    // Miniatura del tour 3D (Matterport) por expediente de cada oferta.
+    const expedienteIds = [...new Set(rows.map(o => o.expediente_id).filter(Boolean))];
+    const estimaciones  = await this.estimacionRepo.findFechasByExpedienteIds(expedienteIds);
+    const fotoPorExpediente = new Map<string, string>();
+    for (const est of estimaciones) {
+      const thumb = matterportThumbFromTour(est.url_tour);
+      if (thumb) fotoPorExpediente.set(est.expediente_id, thumb);
+    }
+
     return rows.map(o => {
       const exp = o.expediente;
       const loc = Array.isArray(exp?.localizacion) ? exp!.localizacion : exp?.localizacion ?? null;
@@ -198,6 +210,7 @@ export class OfertaService {
         provincia:         (loc as any)?.provincia  ?? '—',
         canton:            (loc as any)?.canton     ?? '—',
         distrito:          (loc as any)?.distrito   ?? '—',
+        foto:              fotoPorExpediente.get(o.expediente_id) ?? null,
       } as OfertaRow;
     });
   }

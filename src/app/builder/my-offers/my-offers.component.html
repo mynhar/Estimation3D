@@ -181,6 +181,25 @@
         </button>
       }
 
+      <!-- Alternar vista tabla / tarjetas (solo escritorio) -->
+      <div class="view-toggle d-none d-md-inline-flex ms-md-auto" role="group"
+           [attr.aria-label]="'my_offers.view_cards' | translate">
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'my_offers.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="view-toggle__btn"
+                [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'my_offers.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
+
     </div>
 
     <!-- â”€â”€ Conteo de resultados â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
@@ -213,19 +232,117 @@
 
     <!-- â”€â”€ CuadrÃ­cula de ofertas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     } @else {
-      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 fade-up" style="--delay:120ms">
+
+      <!-- ── Vista tabla (solo escritorio) ──────────────────────────────────── -->
+      <div class="table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="offers-table">
+          <thead>
+            <tr>
+              <th class="offers-table__col-photo" aria-hidden="true"></th>
+              <th class="offers-table__col-num">{{ 'my_offers.col_number' | translate }}</th>
+              <th>{{ 'my_offers.col_service' | translate }}</th>
+              <th>{{ 'my_offers.col_location' | translate }}</th>
+              <th class="offers-table__col-price">{{ 'my_offers.col_price' | translate }}</th>
+              <th class="offers-table__col-status">{{ 'common.status' | translate }}</th>
+              <th class="offers-table__col-date">{{ 'my_offers.col_date' | translate }}</th>
+              <th class="offers-table__col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (oferta of ofertasPaginadas(); track oferta.id) {
+              <tr class="offers-table__row offers-table__row--select"
+                  role="button" tabindex="0"
+                  [attr.aria-label]="oferta.expediente_numero + ' · ' + servicioNombre(oferta)"
+                  (click)="ver(oferta.id)"
+                  (keydown.enter)="ver(oferta.id)"
+                  (keydown.space)="$event.preventDefault(); ver(oferta.id)"
+                  [class.offers-table__row--accepted]="oferta.estado === 'aceptada'"
+                  [class.offers-table__row--rejected]="oferta.estado === 'rechazada'">
+
+                <td class="offers-table__col-photo">
+                  <div class="offers-thumb">
+                    @if (fotoExpediente(oferta); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="oferta.expediente_numero"
+                           (error)="onFotoError(oferta.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"
+                         [title]="'my_offers.photo_none' | translate"></i>
+                    }
+                  </div>
+                </td>
+
+                <td class="offers-table__col-num">
+                  <span class="offer-num">{{ oferta.expediente_numero }}</span>
+                </td>
+
+                <td><span class="offers-table__service">{{ servicioNombre(oferta) }}</span></td>
+
+                <td class="offers-table__muted">{{ oferta.provincia }}, {{ oferta.canton }}</td>
+
+                <td class="offers-table__col-price">
+                  <span class="offers-table__price">{{ formatCosto(oferta.precio) }}</span>
+                </td>
+
+                <td class="offers-table__col-status">
+                  <span class="offer-badge"
+                        [class.offer-badge--pending]="oferta.estado === 'pendiente'"
+                        [class.offer-badge--accepted]="oferta.estado === 'aceptada'"
+                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'">
+                    <i class="bi {{ estadoIcon(oferta.estado) }} me-1"></i>
+                    {{ ('state.' + oferta.estado) | translate }}
+                  </span>
+                </td>
+
+                <td class="offers-table__col-date offers-table__muted">
+                  {{ formatFechaCorta(oferta.creado_en) }}
+                </td>
+
+                <td class="offers-table__col-action">
+                  <button class="btn btn-outline-secondary btn-sm fw-semibold
+                                 d-flex align-items-center justify-content-center gap-2"
+                          type="button"
+                          (click)="$event.stopPropagation(); ver(oferta.id)">
+                    <i class="bi bi-eye"></i>{{ 'offer.my_offer' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ─────────── -->
+      <div class="cards-grid fade-up" style="--delay:120ms"
+           [class.d-md-none]="vista() === 'tabla'">
 
         @for (oferta of ofertasPaginadas(); track oferta.id) {
-          <div class="col">
-            <div class="offer-card h-100"
+            <div class="offer-card offer-card--select"
+                 role="button" tabindex="0"
+                 [attr.aria-label]="oferta.expediente_numero + ' · ' + servicioNombre(oferta)"
+                 (click)="ver(oferta.id)"
+                 (keydown.enter)="ver(oferta.id)"
+                 (keydown.space)="$event.preventDefault(); ver(oferta.id)"
                  [class.offer-card--pending]="oferta.estado === 'pendiente'"
                  [class.offer-card--accepted]="oferta.estado === 'aceptada'"
                  [class.offer-card--rejected]="oferta.estado === 'rechazada'">
 
+              <!-- Foto del expediente (miniatura del tour 3D Matterport) -->
+              <div class="offer-photo">
+                @if (fotoExpediente(oferta); as foto) {
+                  <img class="offer-photo__img" [src]="foto" loading="lazy"
+                       [alt]="oferta.expediente_numero" (error)="onFotoError(oferta.id)" />
+                } @else {
+                  <div class="offer-photo__empty"
+                       [title]="'my_offers.photo_none' | translate">
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  </div>
+                }
+              </div>
+
               <div class="offer-card__body d-flex flex-column">
 
                 <!-- â”€â”€ Fila 1: nÃºmero + estado + fecha â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                   <span class="offer-num">{{ oferta.expediente_numero }}</span>
                   <span class="offer-badge"
                         [class.offer-badge--pending]="oferta.estado === 'pendiente'"
@@ -240,10 +357,10 @@
                 </div>
 
                 <!-- â”€â”€ Servicio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <h3 class="offer-servicio mb-3">{{ servicioNombre(oferta) }}</h3>
+                <h3 class="offer-servicio mb-2">{{ servicioNombre(oferta) }}</h3>
 
                 <!-- â”€â”€ UbicaciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="offer-location mb-auto">
+                <div class="offer-location">
                   <div class="d-flex align-items-start gap-2 mb-1">
                     <i class="bi bi-geo-alt offer-location__icon"></i>
                     <span class="offer-location__main">{{ oferta.provincia }}, {{ oferta.canton }}</span>
@@ -258,19 +375,19 @@
 
                 <!-- â”€â”€ Nota de estado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
                 @if (oferta.estado === 'aceptada') {
-                  <div class="offer-status-note offer-status-note--accepted mt-3">
+                  <div class="offer-status-note offer-status-note--accepted mt-2">
                     <i class="bi bi-check-circle me-1"></i>{{ 'offer.accepted_note' | translate }}
                   </div>
                 } @else if (oferta.estado === 'rechazada') {
-                  <div class="offer-status-note offer-status-note--rejected mt-3">
+                  <div class="offer-status-note offer-status-note--rejected mt-2">
                     <i class="bi bi-info-circle me-1"></i>{{ 'offer.rejected_note' | translate }}
                   </div>
                 }
 
-                <hr class="offer-divider my-3">
+                <hr class="offer-divider my-2">
 
                 <!-- â”€â”€ Precio + Plazos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <div class="d-flex align-items-start justify-content-between gap-2 mb-4 flex-wrap">
+                <div class="d-flex align-items-start justify-content-between gap-2 mb-3 flex-wrap">
                   <div>
                     <p class="offer-detail-label mb-0">{{ 'my_offers.my_price' | translate }}</p>
                     <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
@@ -289,17 +406,16 @@
                 </div>
 
                 <!-- â”€â”€ CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-                <button class="offer-cta mt-auto"
+                <button class="offer-cta mt-1"
                         [class.offer-cta--pending]="oferta.estado === 'pendiente'"
                         [class.offer-cta--accepted]="oferta.estado === 'aceptada'"
                         [class.offer-cta--rejected]="oferta.estado === 'rechazada'"
-                        type="button" (click)="ver(oferta.id)">
+                        type="button" (click)="$event.stopPropagation(); ver(oferta.id)">
                   <i class="bi bi-eye me-1"></i>{{ 'offer.my_offer' | translate }}
                 </button>
 
               </div>
             </div>
-          </div>
         }
 
       </div>

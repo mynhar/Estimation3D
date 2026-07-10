@@ -196,6 +196,13 @@
 /* ══════════════════════════════════════════════════════════════════════
    TARJETA DE OFERTA
 ══════════════════════════════════════════════════════════════════════ */
+/* Cuadrícula de tarjetas — mismo patrón que construction-monitoring/list */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--ds-space-4);
+}
+
 .offer-card {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
@@ -207,7 +214,7 @@
     transform var(--ds-duration-fast) var(--ds-ease-out),
     box-shadow var(--ds-duration-fast) var(--ds-ease-out);
 }
-.offer-card:hover { transform: translateY(-3px); box-shadow: var(--ds-shadow-md); }
+.offer-card:hover { transform: translateY(-2px); box-shadow: var(--ds-shadow-md); }
 
 /* Acento lateral por estado */
 .offer-card--pending  { border-left-color: var(--ds-warning); }
@@ -223,7 +230,7 @@
   50%      { box-shadow: 0 0 0 3px rgba(184, 134, 46, 0.2); }
 }
 
-.offer-card__body { padding: var(--ds-space-5); height: 100%; }
+.offer-card__body { padding: var(--ds-space-3) var(--ds-space-4) var(--ds-space-4); }
 
 /* ── Número del expediente ──────────────────────────────────────────── */
 .offer-num {
@@ -251,7 +258,7 @@
 /* ── Nombre del servicio ────────────────────────────────────────────── */
 .offer-servicio {
   font-family: var(--ds-font-display);
-  font-size: var(--ds-text-lg); font-weight: var(--ds-weight-regular);
+  font-size: var(--ds-text-base); font-weight: var(--ds-weight-regular);
   color: var(--ds-ink); line-height: var(--ds-leading-snug);
   margin: 0;
 }
@@ -282,7 +289,7 @@
 }
 .offer-price {
   font-family: var(--ds-font-display);
-  font-size: var(--ds-text-lg); font-weight: var(--ds-weight-semibold);
+  font-size: var(--ds-text-base); font-weight: var(--ds-weight-semibold);
   color: var(--ds-gold-active);
 }
 .offer-detail-value { font-size: var(--ds-text-xs); color: var(--ds-ink); }
@@ -306,6 +313,156 @@
 .offer-cta--accepted:hover { background: var(--ds-success-soft); }
 .offer-cta--rejected { border-color: var(--ds-border);           color: var(--ds-ink-muted); }
 .offer-cta--rejected:hover { background: var(--ds-bg-alt); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ALTERNAR VISTA (tabla / tarjetas)
+══════════════════════════════════════════════════════════════════════ */
+.view-toggle {
+  align-items: center;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  overflow: hidden;
+  background: var(--ds-surface);
+  flex-shrink: 0;
+}
+.view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--ds-ink-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease-out),
+    color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--ds-border); }
+.view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
+.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   FOTO DEL EXPEDIENTE (miniatura del tour 3D Matterport)
+══════════════════════════════════════════════════════════════════════ */
+.offer-card--select { cursor: pointer; }
+.offer-card--select:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
+
+.offer-photo {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.offer-photo__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ds-duration-base) var(--ds-ease-out);
+}
+.offer-card:hover .offer-photo__img { transform: scale(1.03); }
+.offer-photo__empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+  font-size: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-photo__img { transition: none; }
+  .offer-card:hover .offer-photo__img { transform: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VISTA TABLA (escritorio)
+══════════════════════════════════════════════════════════════════════ */
+.table-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  /* La tabla scrollea dentro de su tarjeta; el body nunca scrollea en horizontal. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.offers-table {
+  width: 100%;
+  min-width: 940px;
+  border-collapse: collapse;
+  font-size: var(--ds-text-sm);
+}
+.offers-table thead th {
+  background: var(--ds-bg-alt);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  text-align: left;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border);
+  white-space: nowrap;
+}
+.offers-table td {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+  vertical-align: middle;
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-xs);
+}
+.offers-table tbody tr:last-child td { border-bottom: none; }
+
+.offers-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.offers-table__row:hover { background: var(--ds-gold-faint); }
+.offers-table__row--accepted { background: rgba(91, 122, 79, 0.03); }
+.offers-table__row--rejected { opacity: 0.78; }
+.offers-table__row--rejected:hover { opacity: 1; }
+.offers-table__row--select { cursor: pointer; }
+.offers-table__row--select:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: -2px;
+}
+
+.offers-table__col-photo  { width: 64px; }
+.offers-table__col-num    { white-space: nowrap; }
+.offers-table__col-price  { white-space: nowrap; }
+.offers-table__col-status { white-space: nowrap; }
+.offers-table__col-date   { white-space: nowrap; }
+.offers-table__col-action { width: 1%; white-space: nowrap; }
+
+.offers-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+.offers-table__muted   { color: var(--ds-ink-muted); }
+.offers-table__price {
+  font-family: var(--ds-font-display);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+
+/* Miniatura 3D en la fila */
+.offers-thumb {
+  width: 48px;
+  height: 34px;
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ds-border-strong);
+}
+.offers-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ══════════════════════════════════════════════════════════════════════
    RESPONSIVE
