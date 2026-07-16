@@ -1168,7 +1168,20 @@
     "submit_btn": "Enregistrer les modifications",
     "sending": "Enregistrement…",
     "save_error": "Erreur lors de l'enregistrement. Veuillez réessayer.",
-    "load_error": "Impossible de charger le dossier."
+    "load_error": "Impossible de charger le dossier.",
+    "full_subtitle": "Modifier toutes les données du dossier",
+    "form_incomplete": "Veuillez compléter les champs obligatoires de cette section.",
+    "saved_ok": "Modifications enregistrées.",
+    "save_expediente": "Enregistrer le dossier",
+    "save_estimator": "Enregistrer le rapport",
+    "save_constructor": "Enregistrer l'offre",
+    "notes_internal": "Notes internes",
+    "tour_urls": "Tours virtuels 3D",
+    "tour_add": "Ajouter un lien",
+    "tour_placeholder": "https://my.matterport.com/show/?m=…",
+    "select_offer": "Offre à modifier",
+    "constructor_no_offers": "Aucune offre reçue pour ce dossier.",
+    "contract_note": "Le contrat est en lecture seule. Gérez-le depuis la section Contrats."
   },
   "to_estimate": {
     "title": "À Estimer",

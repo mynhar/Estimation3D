@@ -1168,7 +1168,20 @@
     "submit_btn": "Guardar cambios",
     "sending": "Guardando…",
     "save_error": "Error al guardar los cambios. Intenta de nuevo.",
-    "load_error": "No se pudo cargar el expediente."
+    "load_error": "No se pudo cargar el expediente.",
+    "full_subtitle": "Editar todos los datos del expediente",
+    "form_incomplete": "Completa los campos obligatorios de esta sección.",
+    "saved_ok": "Cambios guardados.",
+    "save_expediente": "Guardar expediente",
+    "save_estimator": "Guardar informe",
+    "save_constructor": "Guardar oferta",
+    "notes_internal": "Notas internas",
+    "tour_urls": "Tours virtuales 3D",
+    "tour_add": "Añadir enlace",
+    "tour_placeholder": "https://my.matterport.com/show/?m=…",
+    "select_offer": "Oferta a editar",
+    "constructor_no_offers": "No hay ofertas recibidas para este expediente.",
+    "contract_note": "El contrato es de solo lectura. Gestiónalo desde la sección Contratos."
   },
   "to_estimate": {
     "title": "A Estimar",

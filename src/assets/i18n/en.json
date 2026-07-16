@@ -1168,7 +1168,20 @@
     "submit_btn": "Save changes",
     "sending": "Saving…",
     "save_error": "Error saving changes. Please try again.",
-    "load_error": "Could not load the file."
+    "load_error": "Could not load the file.",
+    "full_subtitle": "Edit all the file data",
+    "form_incomplete": "Please complete the required fields in this section.",
+    "saved_ok": "Changes saved.",
+    "save_expediente": "Save file",
+    "save_estimator": "Save report",
+    "save_constructor": "Save offer",
+    "notes_internal": "Internal notes",
+    "tour_urls": "3D virtual tours",
+    "tour_add": "Add link",
+    "tour_placeholder": "https://my.matterport.com/show/?m=…",
+    "select_offer": "Offer to edit",
+    "constructor_no_offers": "No offers received for this file.",
+    "contract_note": "The contract is read-only. Manage it from the Contracts section."
   },
   "to_estimate": {
     "title": "To Estimate",
