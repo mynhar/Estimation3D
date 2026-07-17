@@ -411,11 +411,10 @@
               background var(--ds-duration-fast) var(--ds-ease-out);
 }
 .attach-item--drag { border-color: var(--ds-gold-active); background: var(--ds-gold-soft); }
-/* Sin esto, `dragleave` salta al pasar sobre los hijos y el resalte parpadea. */
-.attach-item--docs > * { pointer-events: none; }
-.attach-item--docs .attach-view-btn,
-.attach-item--docs .attach-remove-btn,
-.attach-item--docs label { pointer-events: auto; }
+/* Los hijos quedan inertes SOLO mientras se arrastra: si no, `dragleave`
+   salta al pasar sobre ellos y el resalte parpadea. Fuera del arrastre todo
+   conserva sus eventos, asi que los controles de dentro siguen funcionando. */
+.attach-item--drag > * { pointer-events: none; }
 
 .attach-item__hint {
   font-size: var(--ds-text-2xs);

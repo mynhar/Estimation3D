@@ -985,7 +985,14 @@
     "err_load_list": "Error while loading users.",
     "success_created": "User {{nombre}} {{apellido}} created successfully.",
     "success_updated": "User {{nombre}} {{apellido}} updated successfully.",
-    "err_file_size": "File must not exceed 2 MB."
+    "err_file_size": "File must not exceed 2 MB.",
+    "company_data": "Company",
+    "company_hint": "The contractor's company details. All fields are optional.",
+    "company_name": "Company name",
+    "company_phone": "Company phone",
+    "company_email": "Email",
+    "company_address": "Company address",
+    "company_email_invalid": "Enter a valid email address."
   },
   "estimator_file": {
     "pill_ready": "Ready to submit",

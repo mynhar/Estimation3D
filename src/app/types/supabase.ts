@@ -773,6 +773,10 @@ export type Database = {
           activo: boolean
           actualizado_en: string
           apellido: string
+          compania_direccion: string | null
+          compania_email: string | null
+          compania_nombre: string | null
+          compania_telefono: string | null
           avatar_url: string | null
           creado_en: string
           email: string | null
@@ -787,6 +791,10 @@ export type Database = {
           activo?: boolean
           actualizado_en?: string
           apellido?: string
+          compania_direccion?: string | null
+          compania_email?: string | null
+          compania_nombre?: string | null
+          compania_telefono?: string | null
           avatar_url?: string | null
           creado_en?: string
           email?: string | null
@@ -801,6 +809,10 @@ export type Database = {
           activo?: boolean
           actualizado_en?: string
           apellido?: string
+          compania_direccion?: string | null
+          compania_email?: string | null
+          compania_nombre?: string | null
+          compania_telefono?: string | null
           avatar_url?: string | null
           creado_en?: string
           email?: string | null

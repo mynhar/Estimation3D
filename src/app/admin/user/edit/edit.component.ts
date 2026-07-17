@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -50,7 +51,18 @@ export class AdminUserEditComponent implements OnInit {
     activo:     [true, Validators.required],
     email:      [''],
     password:   ['', passwordOpcionalValidator],
+    // Sección Compañía: sólo para el constructor, todos opcionales.
+    compania_nombre:    [''],
+    compania_telefono:  [''],
+    compania_email:     ['', Validators.email],
+    compania_direccion: [''],
   });
+
+  /** El rol elegido, como signal, para mostrar/ocultar la sección Compañía. */
+  rolSeleccionado = toSignal(this.form.controls.rol.valueChanges, {
+    initialValue: this.form.controls.rol.value,
+  });
+  esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
 
   get f() { return this.form.controls; }
   get esProveedorEmail(): boolean { return this.usuario()?.proveedor === 'email'; }
@@ -84,6 +96,10 @@ export class AdminUserEditComponent implements OnInit {
         rol:        data.rol,
         activo:     data.activo,
         email:      data.email ?? '',
+        compania_nombre:    data.compania_nombre    ?? '',
+        compania_telefono:  data.compania_telefono  ?? '',
+        compania_email:     data.compania_email     ?? '',
+        compania_direccion: data.compania_direccion ?? '',
       });
 
       if (this.esProveedorEmail) {
@@ -117,6 +133,14 @@ export class AdminUserEditComponent implements OnInit {
       if (this.esProveedorEmail) {
         if (v.email)    params.email    = v.email;
         if (v.password) params.password = v.password;
+      }
+
+      // La edge function los ignora (y limpia) si el rol no es constructor.
+      if (this.esConstructor()) {
+        params.compania_nombre    = v.compania_nombre    ?? '';
+        params.compania_telefono  = v.compania_telefono  ?? '';
+        params.compania_email     = v.compania_email     ?? '';
+        params.compania_direccion = v.compania_direccion ?? '';
       }
 
       await this.service.actualizarUsuario(this.usuario()!.id, params);

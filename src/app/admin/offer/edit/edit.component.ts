@@ -42,7 +42,8 @@ export class AdminOfferEditComponent implements OnInit {
   constructorSeleccionadoId = signal<string>('');
 
   precio: number | null       = null;
-  plazoMin: number | null     = null;
+  /** Por defecto 1 semana: es el plazo mínimo razonable y evita el campo vacío. */
+  plazoMin: number | null     = 1;
   plazoMax: number | null     = null;
   garantiaAnos: number | null = null;
   fechaInicio                 = '';
@@ -89,6 +90,22 @@ export class AdminOfferEditComponent implements OnInit {
     if (this.descripcion.trim()) n++;
     if (this.documentosActuales().length || this.documentosOferta().length) n++;
     return n;
+  }
+
+  // ── Validez por campo ──────────────────────────────────────────────────────
+  // Mismos criterios que las guardas de enviarOferta(), para que el borde rojo
+  // y el error al guardar no puedan contradecirse.
+  get constructorInvalido(): boolean { return !this.constructorSeleccionadoId(); }
+  get precioInvalido():      boolean { return !this.precio   || this.precio   <= 0; }
+  get plazoMinInvalido():    boolean { return !this.plazoMin || this.plazoMin <= 0; }
+  get plazoMaxInvalido():    boolean {
+    return !this.plazoMax || this.plazoMax < (this.plazoMin ?? 1);
+  }
+  get fechaInicioInvalida(): boolean { return !this.fechaInicio; }
+  get descripcionInvalida(): boolean { return !this.descripcion.trim(); }
+  /** El documento sólo es obligatorio al crear la oferta. */
+  get documentoInvalido():   boolean {
+    return !this.ofertaId() && this.documentosOferta().length === 0;
   }
 
   get formularioCompleto(): boolean {
@@ -177,7 +194,7 @@ export class AdminOfferEditComponent implements OnInit {
   private limpiarFormulario() {
     this.ofertaId.set(null);
     this.precio       = null;
-    this.plazoMin     = null;
+    this.plazoMin     = 1;   // vuelve al valor por defecto, no a vacío
     this.plazoMax     = null;
     this.garantiaAnos = null;
     this.fechaInicio  = '';

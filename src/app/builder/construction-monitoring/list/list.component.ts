@@ -14,6 +14,9 @@ import { ContratoService } from '../../../services/contrato.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoConstructorListItem } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import {
+  direccionLinea1, direccionLinea2, direccionCompleta,
+} from '../../../shared/util/busqueda';
 
 type VistaContratos = 'tabla' | 'tarjetas';
 
@@ -95,6 +98,11 @@ export class ConstructionMonitoringListComponent implements OnInit {
       this.cargando.set(false);
     }
   }
+
+  // ── Dirección (formato postal en dos líneas) ─────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   servicioNombre(c: ContratoConstructorListItem): string {
     const lang = this.translate.currentLang;

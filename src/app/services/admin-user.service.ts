@@ -3,7 +3,18 @@ import { environment } from '../../environments/environment';
 import { RolUsuario } from '../types/supabase';
 import { AuthSupabaseService } from './auth-supabase.service';
 
-export interface CrearUsuarioParams {
+/**
+ * Datos de compañía del constructor. Opcionales, y sólo se conservan si el rol
+ * es `constructor`: la edge function los ignora (y limpia) para el resto.
+ */
+export interface DatosCompania {
+  compania_nombre?:    string;
+  compania_telefono?:  string;
+  compania_email?:     string;
+  compania_direccion?: string;
+}
+
+export interface CrearUsuarioParams extends DatosCompania {
   email:      string;
   password:   string;
   nombre:     string;
@@ -14,7 +25,7 @@ export interface CrearUsuarioParams {
   activo:     boolean;
 }
 
-export interface ActualizarUsuarioParams {
+export interface ActualizarUsuarioParams extends DatosCompania {
   nombre:     string;
   apellido:   string;
   telefono:   string;

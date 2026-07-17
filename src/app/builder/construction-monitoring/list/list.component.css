@@ -339,6 +339,34 @@
   color: var(--ds-ink);
   overflow-wrap: anywhere;
 }
+/* Dirección: icono fijo + bloque de texto que encoge y se abrevia. */
+.cm-card__addr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+  text-align: left;
+}
+.cm-card__addr-icon {
+  flex-shrink: 0;
+  color: var(--ds-gold-active);
+  line-height: var(--ds-leading-normal);
+}
+.cm-card__addr-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.cm-card__addr-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cm-card__addr-line--muted { color: var(--ds-ink-muted); }
+
 .cm-card__svc {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);

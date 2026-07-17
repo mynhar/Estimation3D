@@ -985,7 +985,14 @@
     "err_load_list": "Erreur lors du chargement des utilisateurs.",
     "success_created": "Utilisateur {{nombre}} {{apellido}} créé avec succès.",
     "success_updated": "Utilisateur {{nombre}} {{apellido}} mis à jour avec succès.",
-    "err_file_size": "Le fichier ne doit pas dépasser 2 Mo."
+    "err_file_size": "Le fichier ne doit pas dépasser 2 Mo.",
+    "company_data": "Entreprise",
+    "company_hint": "Coordonnées de l'entreprise de l'entrepreneur. Tous les champs sont facultatifs.",
+    "company_name": "Nom de l'entreprise",
+    "company_phone": "Téléphone de l'entreprise",
+    "company_email": "Courriel",
+    "company_address": "Adresse de l'entreprise",
+    "company_email_invalid": "Saisissez une adresse courriel valide."
   },
   "estimator_file": {
     "pill_ready": "Prêt à envoyer",

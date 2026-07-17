@@ -164,7 +164,14 @@
                      (change)="subirFotos($event)" [disabled]="subiendoFoto()"/>
             </label>
           </div>
-          <div class="fued-card__body">
+          <div class="fued-card__body fued-dropzone"
+               [class.fued-dropzone--drag]="dragFotos()"
+               (dragover)="onDragOverFotos($event)"
+               (dragleave)="onDragLeaveFotos()"
+               (drop)="onDropFotos($event)">
+            <p class="fued-drop-hint">
+              <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'my_documents.add_drop' | translate }}
+            </p>
             @if (errorFotos()) {
               <div class="fued-alert fued-alert--danger">{{ errorFotos() }}</div>
             }
@@ -359,11 +366,18 @@
                 <i class="bi bi-cloud-upload"></i>{{ 'estimator_file.upload_doc' | translate }}
               }
               <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                     class="fued-file-input"
-                     (change)="subirDocumento($event)" [disabled]="subiendoDocumento()"/>
+                     multiple class="fued-file-input"
+                     (change)="subirDocumentos($event)" [disabled]="subiendoDocumento()"/>
             </label>
           </div>
-          <div class="fued-card__body">
+          <div class="fued-card__body fued-dropzone"
+               [class.fued-dropzone--drag]="dragDocs()"
+               (dragover)="onDragOverDocs($event)"
+               (dragleave)="onDragLeaveDocs()"
+               (drop)="onDropDocs($event)">
+            <p class="fued-drop-hint">
+              <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'my_documents.add_drop' | translate }}
+            </p>
             @if (errorDocumentos()) {
               <div class="fued-alert fued-alert--danger">{{ errorDocumentos() }}</div>
             }

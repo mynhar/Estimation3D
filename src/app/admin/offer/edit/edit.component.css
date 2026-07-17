@@ -1346,6 +1346,17 @@
   box-shadow: var(--ds-focus-ring);
 }
 
+/* Campo requerido sin rellenar: el borde se apaga en cuanto es válido.
+   Al enfocar gana el dorado del foco, para no gritar mientras se escribe. */
+.fued-input--invalid {
+  border-color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+}
+.fued-input--invalid:focus {
+  border-color: var(--ds-gold);
+  background: var(--ds-surface-elevated);
+}
+
 .fued-input::placeholder {
   color: var(--ds-ink-muted);
 }
@@ -1412,15 +1423,21 @@
   transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
               background var(--ds-duration-fast) var(--ds-ease-out);
 }
+/* PDF obligatorio al crear la oferta y aún sin adjuntar. El estado de
+   arrastre manda sobre el rojo: prevalece la regla declarada después. */
+.fued-attach-row--invalid {
+  border-color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+}
+
 .fued-attach-row--drag {
   border-color: var(--ds-gold-active);
   background: var(--ds-gold-soft);
 }
-/* Sin esto, `dragleave` salta al pasar sobre los hijos y el resalte parpadea. */
-.fued-attach-row--docs > * { pointer-events: none; }
-.fued-attach-row--docs .fued-view-link,
-.fued-attach-row--docs .fued-doc-remove,
-.fued-attach-row--docs .fued-btn-upload { pointer-events: auto; }
+/* Los hijos quedan inertes SOLO mientras se arrastra: si no, `dragleave`
+   salta al pasar sobre ellos y el resalte parpadea. Fuera del arrastre todo
+   conserva sus eventos, asi que los controles de dentro siguen funcionando. */
+.fued-attach-row--drag > * { pointer-events: none; }
 
 .fued-attach-hint {
   font-size: var(--ds-text-2xs);

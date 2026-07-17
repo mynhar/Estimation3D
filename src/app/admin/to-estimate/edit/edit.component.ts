@@ -227,11 +227,28 @@ export class AdminToEstimateEditComponent implements OnInit {
     if (tipo === 'documento') this.documentos.set(data);
   }
 
+  // ── Fotos del sitio / Documentos técnicos ──────────────────────────────────
+  // El `accept` de un <input file> sólo filtra el diálogo, no el arrastre. Como
+  // FILE_LIMITS.DOCUMENTO.types admite '' (MIME vacío de .csv/.txt), un archivo
+  // soltado con MIME desconocido pasaría: se valida también la extensión.
+  private readonly DOC_EXT = ['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx','.txt'];
+
   async subirFotos(event: Event) {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!files.length) return;
+    await this.procesarFotos(files);
+  }
+
+  async subirDocumentos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    await this.procesarDocumentos(files);
+  }
+
+  private async procesarFotos(files: File[]) {
+    if (!files.length || this.subiendoFoto()) return;
     const userId = this.user()?.id;
     if (!userId) return;
     this.errorFotos.set('');
@@ -247,22 +264,51 @@ export class AdminToEstimateEditComponent implements OnInit {
     finally { this.subiendoFoto.set(false); }
   }
 
-  async subirDocumento(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0];
-    input.value = '';
-    if (!file) return;
+  private async procesarDocumentos(files: File[]) {
+    if (!files.length || this.subiendoDocumento()) return;
     const userId = this.user()?.id;
     if (!userId) return;
     this.errorDocumentos.set('');
-    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
-    if (err) { this.errorDocumentos.set(err); return; }
+    for (const file of files) {
+      const nombre = file.name.toLowerCase();
+      const punto  = nombre.lastIndexOf('.');
+      const ext    = punto >= 0 ? nombre.slice(punto) : '';
+      if (!this.DOC_EXT.includes(ext)) { this.errorDocumentos.set('validation.file_type'); return; }
+      const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
+      if (err) { this.errorDocumentos.set(err); return; }
+    }
     this.subiendoDocumento.set(true);
     try {
-      await this.archivoService.subir(this.expedienteId, 'documento', file, userId);
+      for (const file of files) await this.archivoService.subir(this.expedienteId, 'documento', file, userId);
       await this.recargar('documento');
     } catch (e: any) { this.errorDocumentos.set(e.message); }
     finally { this.subiendoDocumento.set(false); }
+  }
+
+  // ── Arrastrar y soltar ─────────────────────────────────────────────────────
+  dragFotos = signal(false);
+  dragDocs  = signal(false);
+
+  onDragOverFotos(e: DragEvent) {
+    e.preventDefault();
+    if (!this.subiendoFoto()) this.dragFotos.set(true);
+  }
+  onDragLeaveFotos() { this.dragFotos.set(false); }
+  async onDropFotos(e: DragEvent) {
+    e.preventDefault();
+    this.dragFotos.set(false);
+    await this.procesarFotos(Array.from(e.dataTransfer?.files ?? []));
+  }
+
+  onDragOverDocs(e: DragEvent) {
+    e.preventDefault();
+    if (!this.subiendoDocumento()) this.dragDocs.set(true);
+  }
+  onDragLeaveDocs() { this.dragDocs.set(false); }
+  async onDropDocs(e: DragEvent) {
+    e.preventDefault();
+    this.dragDocs.set(false);
+    await this.procesarDocumentos(Array.from(e.dataTransfer?.files ?? []));
   }
 
   async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {

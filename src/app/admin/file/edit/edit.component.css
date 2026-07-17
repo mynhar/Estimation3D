@@ -488,9 +488,10 @@
   gap: var(--ds-space-1); width: 100%; text-align: center;
   padding: var(--ds-space-5) var(--ds-space-4);
 }
-/* Sin pointer-events en los hijos, `dragleave` saltaría al pasar sobre ellos
-   y el resaltado parpadearía. */
-.upload-btn--drop > * { pointer-events: none; }
+/* Los hijos quedan inertes SÓLO mientras se arrastra: si no, `dragleave`
+   salta al pasar sobre ellos y el resalte parpadea. Fuera del arrastre todo
+   conserva sus eventos, así que los controles de dentro siguen funcionando. */
+.upload-btn--drag > * { pointer-events: none; }
 .upload-btn--drop .bi { font-size: var(--ds-text-2xl); color: var(--ds-gold-active); line-height: 1; }
 .upload-btn__title { font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium); color: var(--ds-ink); }
 .upload-btn__sub   { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }

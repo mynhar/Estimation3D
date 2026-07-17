@@ -481,6 +481,7 @@
                 <p class="fued-field-hint">{{ 'admin_offer.no_constructores' | translate }}</p>
               } @else {
                 <select id="constructor-select" class="fued-input fued-select"
+                        [class.fued-input--invalid]="constructorInvalido"
                         [ngModel]="constructorSeleccionadoId()"
                         (ngModelChange)="onConstructorChange($event)">
                   <option value="">{{ 'admin_offer.select_constructor' | translate }}</option>
@@ -500,6 +501,7 @@
               <div class="fued-input-group">
                 <span class="fued-input-prefix">CA$</span>
                 <input type="number" class="fued-input" placeholder="0" min="1" step="1000"
+                       [class.fued-input--invalid]="precioInvalido"
                        [(ngModel)]="precio" />
               </div>
             </div>
@@ -513,6 +515,7 @@
                   <span class="fued-req">*</span>
                 </label>
                 <input type="number" class="fued-input" placeholder="1" min="1" step="1"
+                       [class.fued-input--invalid]="plazoMinInvalido"
                        [(ngModel)]="plazoMin" />
               </div>
               <div class="fued-field">
@@ -522,6 +525,7 @@
                   <span class="fued-req">*</span>
                 </label>
                 <input type="number" class="fued-input" placeholder="4" min="1" step="1"
+                       [class.fued-input--invalid]="plazoMaxInvalido"
                        [(ngModel)]="plazoMax" />
               </div>
             </div>
@@ -541,7 +545,9 @@
                   <i class="bi bi-calendar-event"></i>{{ 'make_offer.start_date' | translate }}
                   <span class="fued-req">*</span>
                 </label>
-                <input type="date" class="fued-input" [(ngModel)]="fechaInicio" />
+                <input type="date" class="fued-input"
+                       [class.fued-input--invalid]="fechaInicioInvalida"
+                       [(ngModel)]="fechaInicio" />
               </div>
             </div>
 
@@ -552,6 +558,7 @@
                 <span class="fued-req">*</span>
               </label>
               <textarea class="fued-input fued-textarea" rows="3"
+                        [class.fued-input--invalid]="descripcionInvalida"
                         [placeholder]="'make_offer.approach_placeholder' | translate"
                         [(ngModel)]="descripcion"></textarea>
             </div>
@@ -563,6 +570,7 @@
               </label>
 
               <div class="fued-attach-row fued-attach-row--docs"
+                   [class.fued-attach-row--invalid]="documentoInvalido"
                    [class.fued-attach-row--drag]="dragDocs()"
                    (dragover)="onDragOverDocs($event)"
                    (dragleave)="onDragLeaveDocs()"

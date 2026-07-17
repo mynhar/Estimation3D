@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -37,7 +38,18 @@ export class AdminUserCreateComponent {
     avatar_url: [''],
     rol:        ['cliente' as RolUsuario, Validators.required],
     activo:     [true, Validators.required],
+    // Sección Compañía: sólo para el constructor, todos opcionales.
+    compania_nombre:    [''],
+    compania_telefono:  [''],
+    compania_email:     ['', Validators.email],
+    compania_direccion: [''],
   });
+
+  /** El rol elegido, como signal, para mostrar/ocultar la sección Compañía. */
+  rolSeleccionado = toSignal(this.form.controls.rol.valueChanges, {
+    initialValue: this.form.controls.rol.value,
+  });
+  esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
 
   get f() { return this.form.controls; }
 
@@ -59,6 +71,13 @@ export class AdminUserCreateComponent {
         avatar_url: v.avatar_url ?? '',
         rol:        v.rol as RolUsuario,
         activo:     v.activo!,
+        // La edge function ignora estos campos si el rol no es constructor.
+        ...(this.esConstructor() ? {
+          compania_nombre:    v.compania_nombre    ?? '',
+          compania_telefono:  v.compania_telefono  ?? '',
+          compania_email:     v.compania_email     ?? '',
+          compania_direccion: v.compania_direccion ?? '',
+        } : {}),
       });
 
       this.toast.show(this.translate.instant('admin_users.success_created', { nombre: v.nombre, apellido: v.apellido }), 'success');

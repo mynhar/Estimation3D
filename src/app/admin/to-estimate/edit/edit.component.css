@@ -194,6 +194,32 @@
 
 .fued-card__body { padding: var(--ds-space-5); }
 
+/* ── Zona de arrastre (cuerpo de las tarjetas de fotos y documentos) ───────── */
+.fued-dropzone {
+  position: relative;
+  border: 1.5px dashed transparent;
+  border-radius: var(--ds-radius-md);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.fued-dropzone--drag {
+  border-color: var(--ds-gold-active);
+  background: var(--ds-gold-soft);
+}
+/* Sin esto, `dragleave` salta al pasar sobre el contenido y el resalte
+   parpadea. Los controles de dentro se rehabilitan uno a uno. */
+.fued-dropzone--drag > * { pointer-events: none; }
+
+.fued-drop-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-3);
+  font-size: var(--ds-text-2xs);
+  color: var(--ds-ink-muted);
+}
+.fued-dropzone--drag .fued-drop-hint { color: var(--ds-gold-active); }
+
 /* ── Count badge ──────────────────────────────────────────────────────────── */
 .fued-count-badge {
   display: inline-flex; align-items: center; justify-content: center;

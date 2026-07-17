@@ -53,7 +53,12 @@
       "Bash(node)",
       "Bash(grep -n 'Skeleton\\\\|skeleton-toolbar\\\\|skeleton-table\\\\|@if \\(cargando\\(\\)\\)\\\\|@else if \\(error\\(\\)\\)\\\\|@else {$\\\\|filter-bar mb-3\\\\|Tabla / Tarjetas\\\\|Filtros' src/app/admin/file/list/list.component.html)",
       "Bash(grep -n \"file-card__addr\\\\|file-card__name,\\\\|file-card__service {\" src/app/admin/to-estimate/list/list.component.css)",
-      "Bash(awk 'NR>=130 && NR<=170 && /async find/' src/app/data/contrato.repository.ts)"
+      "Bash(awk 'NR>=130 && NR<=170 && /async find/' src/app/data/contrato.repository.ts)",
+      "Bash(grep -n \"          apellido: string$\\\\|          apellido?: string$\" src/app/types/supabase.ts)",
+      "Bash(awk 'NR>=252 && NR<=262 {printf \"%d: %s\\\\n\", NR, $0}' src/app/admin/user/create/create.component.html)",
+      "Bash(grep -n '<!-- ── \\\\|form-section-divider\\\\|class=\"form-section\\\\|^            }$\\\\|card-body p-4' src/app/admin/user/edit/edit.component.html)",
+      "Bash(awk 'NR>=145 && NR<=150 || NR>=196 && NR<=203 {printf \"%d: %s\\\\n\", NR, $0}' src/app/admin/user/edit/edit.component.html)",
+      "Bash(awk 'NR>=318 && NR<=326 {printf \"%d: %s\\\\n\", NR, $0}' src/app/admin/user/edit/edit.component.html)"
     ]
   }
 }

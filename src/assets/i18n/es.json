@@ -985,7 +985,14 @@
     "err_load_list": "Error al cargar usuarios.",
     "success_created": "Usuario {{nombre}} {{apellido}} creado correctamente.",
     "success_updated": "Usuario {{nombre}} {{apellido}} actualizado.",
-    "err_file_size": "El archivo no debe superar 2 MB."
+    "err_file_size": "El archivo no debe superar 2 MB.",
+    "company_data": "Compañía",
+    "company_hint": "Datos de la compañía del constructor. Todos los campos son opcionales.",
+    "company_name": "Nombre de compañía",
+    "company_phone": "Teléfono compañía",
+    "company_email": "Correo electrónico",
+    "company_address": "Dirección compañía",
+    "company_email_invalid": "Introduce un correo electrónico válido."
   },
   "estimator_file": {
     "pill_ready": "Listo para enviar",

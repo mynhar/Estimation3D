@@ -67,6 +67,8 @@
   margin: var(--ds-space-5) 0;
 }
 .req-star { color: var(--ds-danger); }
+/* Contraparte de .req-star para los campos opcionales (sección Compañía). */
+.opt-label { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); font-weight: var(--ds-weight-regular); margin-left: var(--ds-space-1); }
 
 /* ── Input readonly ──────────────────────────────────────── */
 .form-control-readonly {
