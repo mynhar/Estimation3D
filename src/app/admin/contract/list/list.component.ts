@@ -12,6 +12,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
 import { ContratoAdminListItem } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import {
+  coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
+} from '../../../shared/util/busqueda';
 
 @Component({
   selector: 'app-admin-contract-list',
@@ -53,12 +56,23 @@ export class AdminContractListComponent implements OnInit {
           c.estimador_nombre    ?? '',
           c.constructor_nombre  ?? '',
           c.contrato_estado,
+          // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+          // `canton` la ciudad y `distrito` el código postal.
+          c.direccion,
+          c.canton,
+          c.provincia,
+          c.distrito,
         ].join(' ').toLowerCase();
-        if (!haystack.includes(q)) return false;
+        if (!coincideBusqueda(haystack, q)) return false;
       }
       return true;
     });
   });
+
+  // ── Dirección (formato postal en dos líneas) ─────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   contratosPaginados = computed(() => {
     const desde = (this.paginaActual() - 1) * this.POR_PAGINA;

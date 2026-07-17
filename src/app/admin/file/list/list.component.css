@@ -54,16 +54,7 @@
 .skel--sm  { width: 96px;  height: 16px; }
 .skel--md  { width: 120px; height: 16px; }
 .skel--lg  { width: 200px; height: 16px; }
-.skel--search { width: 100%; height: 38px; border-radius: var(--ds-radius-md); }
-.skel--chip   { width: 80px; height: 30px; border-radius: var(--ds-radius-pill); }
 
-.skeleton-wrap { }
-.skeleton-toolbar {
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-xl);
-  padding: var(--ds-space-4);
-}
 .skeleton-table {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
@@ -502,6 +493,33 @@
 /* El nombre y el servicio deben poder envolver dentro de la tarjeta */
 .file-card__name,
 .file-card__service { white-space: normal; }
+
+/* Dirección: icono fijo + bloque de texto que encoge y se abrevia. */
+.file-card__addr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+}
+.file-card__addr-icon {
+  flex-shrink: 0;
+  color: var(--ds-gold-active);
+  line-height: var(--ds-leading-normal);
+}
+.file-card__addr-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.file-card__addr-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-card__addr-line--muted { color: var(--ds-ink-muted); }
 
 .file-card__meta {
   display: flex;

@@ -99,6 +99,12 @@ export interface ContratoAdminListItem {
   constructor_nombre:  string | null;
   oferta_fecha_inicio: string | null;
   foto:                string | null;  // miniatura del tour 3D (Matterport) del expediente
+  // Dirección. En Canadá `direccion` contiene "unidad-cívico calle",
+  // `canton` la ciudad y `distrito` el código postal.
+  direccion:           string;
+  provincia:           string;
+  canton:              string;
+  distrito:            string;
 }
 
 export interface ContratoConstructorListItem {
@@ -122,9 +128,12 @@ export interface ContratoConstructorListItem {
   fecha_inicio:       string | null;
   plazo_semanas_min:  number | null;
   plazo_semanas_max:  number | null;
+  // Dirección. En Canadá `direccion` contiene "unidad-cívico calle",
+  // `canton` la ciudad y `distrito` el código postal.
   direccion:          string;
   provincia:          string;
   canton:             string;
+  distrito:           string;
   foto:               string | null;  // miniatura del tour 3D (Matterport) del expediente
 }
 

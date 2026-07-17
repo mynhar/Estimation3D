@@ -9,12 +9,13 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { OfertaService } from '../../../services/oferta.service';
+import { ContratoService } from '../../../services/contrato.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
 import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
 import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
 import {
   Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK,
-  OfertaForm, OfertaConConstructor, ArchivoRow,
+  OfertaForm, OfertaConConstructor, ArchivoRow, ESTADO_BADGE_OFERTA,
 } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
@@ -27,6 +28,18 @@ interface ClienteRow {
   email: string | null;
   telefono: string | null;
 }
+
+// Avance del contrato — pasos y porcentajes (paridad con el panel del cliente)
+const CONTRATO_PASOS = [
+  { key: 'generado',     pct: 25,  icon: 'bi-file-earmark-text' },
+  { key: 'firmado',      pct: 50,  icon: 'bi-pen'               },
+  { key: 'en_ejecucion', pct: 75,  icon: 'bi-tools'             },
+  { key: 'completado',   pct: 100, icon: 'bi-house-check'       },
+] as const;
+
+const CONTRATO_PCT: Record<string, number> = {
+  generado: 25, firmado: 50, en_ejecucion: 75, completado: 100, cancelado: 0,
+};
 
 @Component({
   selector: 'app-admin-file-edit',
@@ -43,6 +56,7 @@ export class AdminFileEditComponent implements OnInit {
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
   private ofertaService     = inject(OfertaService);
+  private contratoService   = inject(ContratoService);
   private contratoRepo      = inject(ContratoRepository);
   private perfilRepo        = inject(PerfilRepository);
   private router            = inject(Router);
@@ -174,6 +188,24 @@ export class AdminFileEditComponent implements OnInit {
     return 'pending';
   }
 
+  expCancelado = computed(() => this.estadoActual() === 'cancelado');
+
+  // ── Avance del contrato ────────────────────────────────────────────────────
+  readonly CONTRATO_PASOS = CONTRATO_PASOS;
+
+  contratoEstado    = computed(() => this.contrato()?.estado ?? '');
+  contratoCancelado = computed(() => this.contratoEstado() === 'cancelado');
+  contratoProgreso  = computed(() => CONTRATO_PCT[this.contratoEstado()] ?? 0);
+
+  contratoPasoActivo(pasoKey: string): 'done' | 'active' | 'pending' {
+    if (this.contratoCancelado()) return 'pending';
+    const pct     = this.contratoProgreso();
+    const pasoPct = CONTRATO_PCT[pasoKey] ?? 0;
+    if (pct > pasoPct)               return 'done';
+    if (pct === pasoPct && pct > 0)  return 'active';
+    return 'pending';
+  }
+
   // ── Formularios base ───────────────────────────────────────────────────────
   expedienteForm = this.fb.group({
     fecha_visita: ['', Validators.required],
@@ -287,6 +319,135 @@ export class AdminFileEditComponent implements OnInit {
 
   get puedeEditarOferta(): boolean {
     return this.estadoActual() !== 'contratado';
+  }
+
+  // ── Adjudicación de la oferta (paridad con client/builder-offer) ───────────
+  adjudicando = signal(false);
+  errorAdj    = signal('');
+  exitoAdj    = signal('');
+  videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
+
+  // El RPC aceptar_oferta sólo admite estos estados; fuera de ellos lanza
+  // excepción, así que el botón se bloquea antes de llegar a la BD.
+  private readonly ESTADOS_ADJUDICABLES = ['en_oferta', 'adjudicado'];
+
+  yaContratado = computed(() => {
+    const e = this.estadoActual();
+    return e === 'adjudicado' || e === 'contratado';
+  });
+
+  puedeAdjudicar = computed(() => {
+    if (!this.ofertaId() || this.adjudicando())                        return false;
+    if (!this.ESTADOS_ADJUDICABLES.includes(this.estadoActual()))      return false;
+    // Ya adjudicado: sólo tiene sentido cambiar a una oferta distinta.
+    if (this.estadoActual() === 'adjudicado') {
+      return this.ofertaSeleccionada()?.estado !== 'aceptada';
+    }
+    return true;
+  });
+
+  esSeleccionada(ofertaId: string): boolean { return this.ofertaId() === ofertaId; }
+
+  ofertaBadgeClass(estado: string): string {
+    return ESTADO_BADGE_OFERTA[estado] ?? 'bg-secondary-subtle text-secondary';
+  }
+
+  formatPlazo(min: number | null, max: number | null): string {
+    if (!min && !max) return '—';
+    const w = this.translate.instant('offer.weeks');
+    if (min === max) return `${min} ${w}`;
+    return `${min ?? '?'} – ${max ?? '?'} ${w}`;
+  }
+
+  toggleVideoOferta(ofertaId: string, archivo: ArchivoRow) {
+    const url    = this.publicUrl(archivo.url_storage);
+    const actual = this.videoOfertaActiva();
+    if (actual?.ofertaId === ofertaId && actual.url === url) this.videoOfertaActiva.set(null);
+    else                                                     this.videoOfertaActiva.set({ ofertaId, url });
+  }
+
+  videoOfertaUrl(ofertaId: string): string | null {
+    const a = this.videoOfertaActiva();
+    return a?.ofertaId === ofertaId ? a.url : null;
+  }
+
+  /**
+   * Adjudica la oferta seleccionada: RPC (expediente → adjudicado, resto de
+   * ofertas → rechazadas, contrato nuevo), regenera el PDF y sustituye el
+   * anterior. Los datos del PDF se releen de la BD para que reflejen lo
+   * persistido y no ediciones del formulario sin guardar.
+   */
+  async adjudicarOferta() {
+    const ofertaId = this.ofertaId();
+    const oferta   = this.ofertaSeleccionada();
+    if (!ofertaId || !oferta || !this.puedeAdjudicar()) return;
+
+    this.adjudicando.set(true);
+    this.errorAdj.set('');
+    this.exitoAdj.set('');
+    try {
+      // 1 — Ruta del PDF anterior antes de que el RPC borre el contrato.
+      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.id);
+      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+
+      // 2 — Adjudicación en BD.
+      await this.ofertaService.aceptarOferta(this.id, ofertaId);
+
+      // 3 — Borrar el PDF anterior (best-effort: no interrumpe el flujo).
+      if (urlPdfAnterior) {
+        await this.contratoService.eliminarPdfStorage(urlPdfAnterior).catch(() => {});
+      }
+
+      // 4 — Contrato recién creado por el RPC.
+      const contratoRow = await this.contratoService.buscarPorExpediente(this.id);
+      if (!contratoRow) throw new Error('admin_file_edit.save_error');
+
+      // 5 — PDF con los datos persistidos del expediente.
+      const datos = await this.expedienteService.getExpedienteParaEdicion(this.id);
+      const cli   = this.clientes().find(c => c.id === datos.cliente_id);
+      const svc   = this.serviciosLocalizados().find(s => s.id === datos.servicio_id);
+      const lang  = this.translate.currentLang ?? 'fr';
+
+      const pdfBlob = this.contratoService.generarPdfBlob({
+        contratoId:          contratoRow.id,
+        expedienteNumero:    datos.numero,
+        fechaGenerado:       this.formatFecha(new Date().toISOString()),
+        clienteNombre:       cli ? `${cli.nombre} ${cli.apellido}`.trim() : '—',
+        constructorNombre:   oferta.constructor_nombre,
+        constructorTelefono: oferta.constructor_telefono,
+        constructorEmail:    oferta.constructor_email,
+        servicioNombre:      svc?.nombre_local      ?? '—',
+        servicioDescripcion: svc?.descripcion_local ?? '',
+        direccion:           datos.direccion ?? '—',
+        canton:              datos.canton    ?? '—',
+        provincia:           datos.provincia ?? '—',
+        distrito:            datos.distrito  ?? '',
+        precioFinal:         oferta.precio,
+        plazoMin:            oferta.plazo_semanas_min,
+        plazoMax:            oferta.plazo_semanas_max,
+        garantiaAnos:        oferta.garantia_anos,
+        fechaInicio:         oferta.fecha_inicio,
+        descripcionTrabajo:  oferta.descripcion,
+        lang,
+      });
+
+      // 6 — Subir el PDF y enlazarlo al contrato.
+      const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoRow.id);
+      await this.contratoService.actualizarUrlPdf(contratoRow.id, urlPdf);
+
+      // 7 — Reflejar el nuevo estado sin recargar la página.
+      this.estadoActual.set('adjudicado');
+      this.ofertas.update(lista =>
+        lista.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' })),
+      );
+      await this.cargarContrato();
+      this.exitoAdj.set('builder_offer.success_accepted');
+    } catch (e: any) {
+      console.error('[AdminFileEdit] adjudicarOferta:', e);
+      this.errorAdj.set(e.message ?? 'admin_file_edit.save_error');
+    } finally {
+      this.adjudicando.set(false);
+    }
   }
 
   // ── Contrato (solo lectura) ────────────────────────────────────────────────
@@ -747,11 +908,27 @@ export class AdminFileEditComponent implements OnInit {
   }
 
   // ── Fotos del sitio / Documentos técnicos ──────────────────────────────────
+  // El `accept` de un <input file> sólo filtra el diálogo, no el arrastre. Como
+  // FILE_LIMITS.DOCUMENTO.types admite '' (MIME vacío de .csv/.txt), un archivo
+  // soltado con MIME desconocido pasaría: se valida también la extensión.
+  private readonly DOC_EXT = ['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx','.txt','.csv'];
+
   async subirFotos(event: Event) {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!files.length) return;
+    await this.procesarFotos(files);
+  }
+
+  async subirDocumentos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    await this.procesarDocumentos(files);
+  }
+
+  private async procesarFotos(files: File[]) {
+    if (!files.length || this.subiendoFoto()) return;
     const userId = this.user()?.id;
     if (!userId) { this.errorFotos.set('estimator_form.err_session'); return; }
     this.errorFotos.set('');
@@ -770,25 +947,54 @@ export class AdminFileEditComponent implements OnInit {
     }
   }
 
-  async subirDocumento(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0];
-    input.value = '';
-    if (!file) return;
+  private async procesarDocumentos(files: File[]) {
+    if (!files.length || this.subiendoDoc()) return;
     const userId = this.user()?.id;
     if (!userId) { this.errorDocs.set('estimator_form.err_session'); return; }
     this.errorDocs.set('');
-    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
-    if (err) { this.errorDocs.set(err); return; }
+    for (const file of files) {
+      const nombre = file.name.toLowerCase();
+      const punto  = nombre.lastIndexOf('.');
+      const ext    = punto >= 0 ? nombre.slice(punto) : '';
+      if (!this.DOC_EXT.includes(ext)) { this.errorDocs.set('validation.file_type'); return; }
+      const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
+      if (err) { this.errorDocs.set(err); return; }
+    }
     this.subiendoDoc.set(true);
     try {
-      await this.archivoService.subir(this.id, 'documento', file, userId);
+      for (const file of files) await this.archivoService.subir(this.id, 'documento', file, userId);
       this.documentos.set(await this.archivoService.cargarPorTipo(this.id, 'documento'));
     } catch (e: any) {
       this.errorDocs.set(e.message ?? 'admin_file_edit.save_error');
     } finally {
       this.subiendoDoc.set(false);
     }
+  }
+
+  // ── Arrastrar y soltar ─────────────────────────────────────────────────────
+  dragFotos = signal(false);
+  dragDocs  = signal(false);
+
+  onDragOverFotos(e: DragEvent) {
+    e.preventDefault();
+    if (!this.subiendoFoto()) this.dragFotos.set(true);
+  }
+  onDragLeaveFotos() { this.dragFotos.set(false); }
+  async onDropFotos(e: DragEvent) {
+    e.preventDefault();
+    this.dragFotos.set(false);
+    await this.procesarFotos(Array.from(e.dataTransfer?.files ?? []));
+  }
+
+  onDragOverDocs(e: DragEvent) {
+    e.preventDefault();
+    if (!this.subiendoDoc()) this.dragDocs.set(true);
+  }
+  onDragLeaveDocs() { this.dragDocs.set(false); }
+  async onDropDocs(e: DragEvent) {
+    e.preventDefault();
+    this.dragDocs.set(false);
+    await this.procesarDocumentos(Array.from(e.dataTransfer?.files ?? []));
   }
 
   async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
@@ -834,11 +1040,8 @@ export class AdminFileEditComponent implements OnInit {
     this.descripcionOferta = oferta.descripcion;
     this.exitoOf.set(false);
     this.errorOf.set('');
-  }
-
-  onOfertaChange(ofertaId: string) {
-    const oferta = this.ofertas().find(o => o.id === ofertaId);
-    if (oferta) this.seleccionarOferta(oferta);
+    this.exitoAdj.set('');
+    this.errorAdj.set('');
   }
 
   async guardarOferta() {
@@ -863,7 +1066,7 @@ export class AdminFileEditComponent implements OnInit {
 
     this.guardandoOf.set(true);
     try {
-      await this.ofertaService.actualizar(this.ofertaId()!, this.constructorId, form, null, null);
+      await this.ofertaService.actualizar(this.ofertaId()!, this.constructorId, form, null);
       this.ofertas.set(await this.ofertaService.getOfertasDeExpediente(this.id));
       this.exitoOf.set(true);
     } catch (e: any) {

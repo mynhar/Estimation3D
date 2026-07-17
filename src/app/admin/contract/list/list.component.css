@@ -436,6 +436,33 @@
   color: var(--ds-ink-muted);
   overflow-wrap: anywhere;
 }
+/* Dirección: icono fijo + bloque de texto que encoge y se abrevia. */
+.offer-card__addr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-1);
+  margin: 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+}
+.offer-card__addr-icon {
+  flex-shrink: 0;
+  color: var(--ds-gold-active);
+  line-height: var(--ds-leading-normal);
+}
+.offer-card__addr-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.offer-card__addr-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offer-card__addr-line--muted { color: var(--ds-ink-muted); }
+
 .offer-card__meta {
   display: flex;
   flex-wrap: wrap;

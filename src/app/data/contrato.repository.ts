@@ -141,7 +141,7 @@ export class ContratoRepository {
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
-          localizacion ( direccion, provincia, canton )
+          localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
         oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
@@ -164,7 +164,7 @@ export class ContratoRepository {
         expediente:expediente_id!inner (
           numero, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
-          localizacion ( direccion, provincia, canton )
+          localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
         oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
@@ -186,7 +186,7 @@ export class ContratoRepository {
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
-          localizacion ( direccion, provincia, canton )
+          localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
         constructor:constructor_id ( nombre, apellido, telefono, email ),
@@ -205,7 +205,8 @@ export class ContratoRepository {
         id, precio_final, garantia_anos, estado, generado_en, firmado_en,
         expediente:expediente_id (
           id, numero, estado, estimador_id,
-          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr )
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
+          localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
         constructor:constructor_id ( nombre, apellido ),

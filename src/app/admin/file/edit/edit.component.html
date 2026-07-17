@@ -105,46 +105,104 @@
       </div>
     </header>
 
-    <!-- ── Progreso (paridad con my-file) ──────────────────────────── -->
-    <section class="exp-progress mb-4"
-             [class.exp-progress--cancelado]="estadoActual() === 'cancelado'">
-      <div class="exp-progress__top">
-        <div class="exp-progress__meta">
-          <span class="exp-progress__heading">{{ 'file.progress' | translate }}</span>
-          @if (estadoActual() === 'cancelado') {
-            <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'state.cancelado' | translate }}</span>
-          } @else {
-            <span class="exp-progress__pct">{{ progreso(estadoActual()) }}%</span>
+    <!-- ── Avance · expediente + contrato ──────────────────────────── -->
+    <section class="avance-grid mb-4" [class.avance-grid--dual]="contrato()">
+
+      <!-- Avance del expediente -->
+      <article class="exp-progress"
+               [class.exp-progress--cancelado]="expCancelado()">
+        <div class="exp-progress__top">
+          <div class="exp-progress__meta">
+            <div class="exp-progress__text">
+              <span class="exp-progress__heading">{{ 'dashboard_client.avance_expediente' | translate }}</span>
+              <p class="exp-progress__desc">{{ ('state_desc.' + estadoActual()) | translate }}</p>
+            </div>
+            @if (expCancelado()) {
+              <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'state.cancelado' | translate }}</span>
+            } @else {
+              <span class="exp-progress__pct">{{ progreso(estadoActual()) }}<span class="exp-progress__unit">%</span></span>
+            }
+          </div>
+          <div class="exp-progress__track">
+            <div class="exp-progress__fill"
+                 [style.width.%]="progreso(estadoActual())"
+                 [class.exp-progress__fill--cancelado]="expCancelado()"></div>
+          </div>
+        </div>
+        <div class="exp-steps" role="list">
+          @for (paso of PASOS; track paso.key; let last = $last) {
+            <div class="exp-step" role="listitem"
+                 [class.exp-step--done]="pasoActivo(paso.key, estadoActual()) === 'done'"
+                 [class.exp-step--active]="pasoActivo(paso.key, estadoActual()) === 'active'">
+              <div class="exp-step__top">
+                <div class="exp-step__circle" aria-hidden="true">
+                  @if (pasoActivo(paso.key, estadoActual()) === 'done') {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  } @else { {{ $index + 1 }} }
+                </div>
+                @if (!last) {
+                  <div class="exp-step__line"
+                       [class.exp-step__line--done]="pasoActivo(paso.key, estadoActual()) === 'done'"></div>
+                }
+              </div>
+              <span class="exp-step__label">{{ paso.tkey | translate }}</span>
+            </div>
           }
         </div>
-        <div class="exp-progress__track">
-          <div class="exp-progress__fill"
-               [style.width.%]="progreso(estadoActual())"
-               [class.exp-progress__fill--cancelado]="estadoActual() === 'cancelado'"></div>
-        </div>
-      </div>
-      <div class="exp-steps" role="list">
-        @for (paso of PASOS; track paso.key; let last = $last) {
-          <div class="exp-step" role="listitem"
-               [class.exp-step--done]="pasoActivo(paso.key, estadoActual()) === 'done'"
-               [class.exp-step--active]="pasoActivo(paso.key, estadoActual()) === 'active'">
-            <div class="exp-step__top">
-              <div class="exp-step__circle" aria-hidden="true">
-                @if (pasoActivo(paso.key, estadoActual()) === 'done') {
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2.5"
-                       stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                } @else { {{ $index + 1 }} }
+      </article>
+
+      <!-- Avance del contrato -->
+      @if (contrato()) {
+        <article class="exp-progress exp-progress--contrato"
+                 [class.exp-progress--cancelado]="contratoCancelado()">
+          <div class="exp-progress__top">
+            <div class="exp-progress__meta">
+              <div class="exp-progress__text">
+                <span class="exp-progress__heading">{{ 'dashboard_client.avance_contrato' | translate }}</span>
+                @if (!contratoCancelado()) {
+                  <p class="exp-progress__desc">{{ ('contrato_estado_desc.' + contratoEstado()) | translate }}</p>
+                }
               </div>
-              @if (!last) {
-                <div class="exp-step__line"
-                     [class.exp-step__line--done]="pasoActivo(paso.key, estadoActual()) === 'done'"></div>
+              @if (contratoCancelado()) {
+                <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'contrato_estado.cancelado' | translate }}</span>
+              } @else {
+                <span class="exp-progress__pct">{{ contratoProgreso() }}<span class="exp-progress__unit">%</span></span>
               }
             </div>
-            <span class="exp-step__label">{{ paso.tkey | translate }}</span>
+            <div class="exp-progress__track">
+              <div class="exp-progress__fill"
+                   [style.width.%]="contratoProgreso()"
+                   [class.exp-progress__fill--cancelado]="contratoCancelado()"></div>
+            </div>
           </div>
-        }
-      </div>
+          <div class="exp-steps" role="list">
+            @for (paso of CONTRATO_PASOS; track paso.key; let last = $last) {
+              <div class="exp-step" role="listitem"
+                   [class.exp-step--done]="contratoPasoActivo(paso.key) === 'done'"
+                   [class.exp-step--active]="contratoPasoActivo(paso.key) === 'active'">
+                <div class="exp-step__top">
+                  <div class="exp-step__circle" aria-hidden="true">
+                    @if (contratoPasoActivo(paso.key) === 'done') {
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="2.5"
+                           stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    } @else {
+                      <i class="bi {{ paso.icon }}"></i>
+                    }
+                  </div>
+                  @if (!last) {
+                    <div class="exp-step__line"
+                         [class.exp-step__line--done]="contratoPasoActivo(paso.key) === 'done'"></div>
+                  }
+                </div>
+                <span class="exp-step__label">{{ ('contrato_estado.' + paso.key) | translate }}</span>
+              </div>
+            }
+          </div>
+        </article>
+      }
     </section>
 
     <!-- ── Grid principal ──────────────────────────────────────────── -->
@@ -249,7 +307,10 @@
                             <i class="bi {{ serviceIcon(s.codigo) }}" aria-hidden="true"></i>
                           </div>
                           <div class="flex-grow-1 min-w-0">
-                            <p class="service-name mb-0">{{ s.nombre_local }}</p>
+                            <p class="service-name mb-1">{{ s.nombre_local }}</p>
+                            @if (s.descripcion_local) {
+                              <p class="service-desc mb-0">{{ s.descripcion_local }}</p>
+                            }
                           </div>
                         </div>
                         @if (servicioId() === s.id) { <div class="service-bar" aria-hidden="true"></div> }
@@ -456,15 +517,6 @@
                     }
                   </div>
                 }
-
-                <div class="col-12">
-                  <label class="form-label" for="referencia">
-                    {{ 'file_create.other_signs' | translate }}
-                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
-                  </label>
-                  <input id="referencia" type="text" class="form-control" formControlName="referencia"
-                         [placeholder]="'file_create.signs_placeholder' | translate" />
-                </div>
 
                 <div class="col-12">
                   <button type="button" class="gps-toggle" (click)="gpsVisible.set(!gpsVisible())"
@@ -707,11 +759,19 @@
                   <span class="archivo-count">{{ fotos().length }}</span>
                 </div>
 
-                <label class="upload-btn mb-3" [class.upload-btn--busy]="subiendoFoto()">
+                <label class="upload-btn upload-btn--drop mb-3"
+                       [class.upload-btn--busy]="subiendoFoto()"
+                       [class.upload-btn--drag]="dragFotos()"
+                       (dragover)="onDragOverFotos($event)"
+                       (dragleave)="onDragLeaveFotos()"
+                       (drop)="onDropFotos($event)">
                   @if (subiendoFoto()) {
-                    <span class="upload-spinner" aria-hidden="true"></span>{{ 'file.uploading' | translate }}
+                    <span class="upload-spinner" aria-hidden="true"></span>
+                    <span class="upload-btn__title">{{ 'file.uploading' | translate }}</span>
                   } @else {
-                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>{{ 'file.add_photos' | translate }}
+                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                    <span class="upload-btn__title">{{ 'file.add_photos' | translate }}</span>
+                    <span class="upload-btn__sub">{{ 'my_documents.add_drop' | translate }}</span>
                   }
                   <input type="file" accept="image/*" multiple class="visually-hidden"
                          [disabled]="subiendoFoto()" (change)="subirFotos($event)" />
@@ -759,14 +819,22 @@
                   <span class="archivo-count">{{ documentos().length }}</span>
                 </div>
 
-                <label class="upload-btn mb-3" [class.upload-btn--busy]="subiendoDoc()">
+                <label class="upload-btn upload-btn--drop mb-3"
+                       [class.upload-btn--busy]="subiendoDoc()"
+                       [class.upload-btn--drag]="dragDocs()"
+                       (dragover)="onDragOverDocs($event)"
+                       (dragleave)="onDragLeaveDocs()"
+                       (drop)="onDropDocs($event)">
                   @if (subiendoDoc()) {
-                    <span class="upload-spinner" aria-hidden="true"></span>{{ 'file.uploading' | translate }}
+                    <span class="upload-spinner" aria-hidden="true"></span>
+                    <span class="upload-btn__title">{{ 'file.uploading' | translate }}</span>
                   } @else {
-                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>{{ 'file.add_docs' | translate }}
+                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                    <span class="upload-btn__title">{{ 'file.add_docs' | translate }}</span>
+                    <span class="upload-btn__sub">{{ 'my_documents.add_drop' | translate }}</span>
                   }
-                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
-                         class="visually-hidden" [disabled]="subiendoDoc()" (change)="subirDocumento($event)" />
+                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv" multiple
+                         class="visually-hidden" [disabled]="subiendoDoc()" (change)="subirDocumentos($event)" />
                 </label>
                 @if (errorDocs()) {
                   <div class="pending-notice mb-3">
@@ -832,6 +900,166 @@
           </div>
         </div>
 
+        <!-- ─────────────────────────────────────────────────────────
+             TARJETA · OFERTAS DE CONSTRUCTORES (selección + adjudicación)
+        ────────────────────────────────────────────────────────── -->
+        <div class="detail-card">
+          <div class="detail-card__head">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="1.5"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 class="section-label__icon me-2" aria-hidden="true">
+              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+              <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+            </svg>
+            <span class="section-label">{{ 'builder_offer.title' | translate }}</span>
+            <span class="archivo-count ms-auto">{{ ofertas().length }}</span>
+          </div>
+          <div class="detail-card__body">
+
+            @if (ofertas().length === 0) {
+              <div class="pending-notice">
+                <i class="bi bi-inbox me-2" aria-hidden="true"></i>
+                {{ 'builder_offer.no_offers' | translate }}
+              </div>
+            } @else {
+              <div class="offers-grid">
+                @for (oferta of ofertas(); track oferta.id; let i = $index) {
+                  <div class="offer-card"
+                       [class.offer-card--selected]="esSeleccionada(oferta.id)"
+                       [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
+                       [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
+                       role="button" tabindex="0"
+                       [attr.aria-pressed]="esSeleccionada(oferta.id)"
+                       (click)="seleccionarOferta(oferta)"
+                       (keydown.enter)="seleccionarOferta(oferta)"
+                       (keydown.space)="$event.preventDefault(); seleccionarOferta(oferta)">
+
+                    <div class="offer-card__top">
+                      <span class="offer-card__index">#{{ i + 1 }}</span>
+                      <div class="d-flex align-items-center gap-1">
+                        @if (esSeleccionada(oferta.id)) {
+                          <span class="selected-badge" [title]="'builder_offer.selected_badge' | translate">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M20 6 9 17l-5-5"/>
+                            </svg>
+                          </span>
+                        }
+                        <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
+                          {{ ('state.' + oferta.estado) | translate }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="offer-card__price-block">
+                      <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
+                      <p class="offer-price-label mb-0">{{ 'builder_offer.total_price' | translate }}</p>
+                    </div>
+
+                    <div class="offer-card__section">
+                      <p class="offer-meta-label">{{ 'offers_received.builder' | translate }}</p>
+                      <p class="offer-builder-name mb-0">{{ oferta.constructor_nombre }}</p>
+                      @if (oferta.constructor_telefono) {
+                        <a href="tel:{{ oferta.constructor_telefono }}"
+                           class="offer-contact d-inline-flex align-items-center gap-1 mt-1"
+                           (click)="$event.stopPropagation()">
+                          <i class="bi bi-telephone" aria-hidden="true"></i>{{ oferta.constructor_telefono }}
+                        </a>
+                      }
+                    </div>
+
+                    <div class="offer-card__meta-grid">
+                      <div class="offer-meta-item">
+                        <span class="offer-meta-label">{{ 'offers_received.deadline' | translate }}</span>
+                        <span class="offer-meta-value">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</span>
+                      </div>
+                      <div class="offer-meta-item">
+                        <span class="offer-meta-label">{{ 'offer.start_date' | translate }}</span>
+                        <span class="offer-meta-value">{{ formatFecha(oferta.fecha_inicio) }}</span>
+                      </div>
+                      @if (oferta.garantia_anos) {
+                        <div class="offer-meta-item">
+                          <span class="offer-meta-label">{{ 'offer.warranty' | translate }}</span>
+                          <span class="offer-meta-value">{{ oferta.garantia_anos }} {{ 'offer.years' | translate }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    @if (oferta.descripcion) {
+                      <div class="offer-card__section">
+                        <p class="offer-meta-label">{{ 'builder_offer.approach' | translate }}</p>
+                        <p class="offer-desc mb-0">{{ oferta.descripcion }}</p>
+                      </div>
+                    }
+
+                    @if (oferta.videos.length > 0) {
+                      <div class="offer-card__section" (click)="$event.stopPropagation()">
+                        @for (v of oferta.videos; track v.id) {
+                          <button class="offer-video-btn w-100" type="button"
+                                  (click)="toggleVideoOferta(oferta.id, v)">
+                            <i class="bi" [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"
+                               [class.bi-x-circle]="videoOfertaUrl(oferta.id) !== null" aria-hidden="true"></i>
+                            {{ (videoOfertaUrl(oferta.id) !== null
+                                ? 'builder_offer.close_video'
+                                : 'builder_offer.view_video') | translate }}
+                          </button>
+                        }
+                        @if (videoOfertaUrl(oferta.id); as vurl) {
+                          <video class="offer-video-el mt-2" controls [src]="vurl"></video>
+                        }
+                      </div>
+                    }
+
+                    @if (oferta.documentos.length > 0) {
+                      <div class="offer-docs" (click)="$event.stopPropagation()">
+                        @for (d of oferta.documentos; track d.id) {
+                          <button class="offer-doc-chip" type="button" (click)="verArchivo(d)">
+                            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                            <span class="offer-doc-chip__name">{{ d.nombre_archivo }}</span>
+                            <span class="offer-doc-chip__size">{{ formatTamano(d.tamano_bytes) }}</span>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (ofertas().length > 0) {
+            <div class="detail-card__foot">
+              @if (errorAdj()) {
+                <span class="save-msg save-msg--err">
+                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorAdj() | translate }}
+                </span>
+              } @else if (exitoAdj()) {
+                <span class="save-msg save-msg--ok">
+                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ exitoAdj() | translate }}
+                </span>
+              } @else if (yaContratado() && ofertaSeleccionada()?.estado !== 'aceptada' && puedeAdjudicar()) {
+                <span class="save-msg save-msg--warn">
+                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ 'builder_offer.replace_warning' | translate }}
+                </span>
+              } @else if (estadoActual() === 'contratado') {
+                <span class="save-msg">{{ 'admin_file_edit.contract_note' | translate }}</span>
+              } @else { <span></span> }
+
+              <button type="button" class="btn-save" (click)="adjudicarOferta()" [disabled]="!puedeAdjudicar()">
+                @if (adjudicando()) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  {{ 'builder_offer.processing' | translate }}
+                } @else {
+                  <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
+                  {{ (yaContratado() ? 'builder_offer.change_btn' : 'builder_offer.accept_btn') | translate }}
+                }
+              </button>
+            </div>
+          }
+        </div>
+
       </div><!-- /col-lg-8 -->
 
       <!-- ══ Derecha: Constructor + Contrato ═════════════════════════ -->
@@ -862,20 +1090,6 @@
                   {{ 'admin_file_edit.constructor_no_offers' | translate }}
                 </div>
               } @else {
-
-                <!-- Selector de oferta -->
-                <div class="mb-4">
-                  <label class="form-label" for="oferta-sel">{{ 'admin_file_edit.select_offer' | translate }}</label>
-                  <select id="oferta-sel" class="form-select" name="ofertaSel"
-                          [ngModel]="ofertaId() ?? ''" (ngModelChange)="onOfertaChange($event)">
-                    @for (o of ofertas(); track o.id) {
-                      <option [value]="o.id">
-                        {{ o.constructor_nombre }} · {{ formatCosto(o.precio) }}
-                        @if (o.estado === 'aceptada') { ✓ }
-                      </option>
-                    }
-                  </select>
-                </div>
 
                 <div class="constructor-chip mb-3">
                   <div class="constructor-avatar" aria-hidden="true">

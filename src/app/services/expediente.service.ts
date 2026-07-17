@@ -419,10 +419,11 @@ export class ExpedienteService {
       ...exps.filter(e => e.estimador_id).map(e => e.estimador_id as string),
     ])];
 
-    const [servicios, perfiles, estimaciones] = await Promise.all([
+    const [servicios, perfiles, estimaciones, localizaciones] = await Promise.all([
       this.servicioRepo.findByIds(servicioIds),
       this.perfilRepo.findByIds(userIds),
       this.estimacionRepo.findSummaryByExpedienteIds(expedienteIds),
+      this.localizacionRepo.findByExpedienteIds(expedienteIds),
     ]);
 
     return exps.map(e => {
@@ -430,6 +431,7 @@ export class ExpedienteService {
       const cliente   = perfiles.find(p => p.id === e.cliente_id);
       const estimador = e.estimador_id ? perfiles.find(p => p.id === e.estimador_id) : null;
       const est       = estimaciones.find(est => est.expediente_id === e.id);
+      const loc       = localizaciones.find(l => l.expediente_id === e.id) ?? null;
       return {
         id:                  e.id,
         numero:              e.numero,
@@ -445,6 +447,10 @@ export class ExpedienteService {
         costo_estimado:      est?.costo_estimado     ?? null,
         costo_estimado_max:  est?.costo_estimado_max ?? null,
         url_tour:            est?.url_tour           ?? null,
+        direccion:           loc?.direccion          ?? '',
+        provincia:           loc?.provincia          ?? '',
+        canton:              loc?.canton             ?? '',
+        distrito:            loc?.distrito           ?? '',
       } as ExpedienteParaEstimar;
     });
   }
@@ -488,6 +494,10 @@ export class ExpedienteService {
         servicio_nombre_fr:  svc?.nombre_fr       ?? svc?.nombre_es ?? '—',
         cliente_nombre:      cliente ? `${cliente.nombre} ${cliente.apellido}`.trim() : '—',
         estimador_nombre:    estimador ? `${estimador.nombre} ${estimador.apellido}`.trim() : null,
+        direccion:           e.direccion ?? '',
+        provincia:           e.provincia ?? '',
+        canton:              e.canton    ?? '',
+        distrito:            e.distrito  ?? '',
         fecha_visita_real:   est?.fecha_visita_real    ?? null,
         oferta_precio:       oferta?.precio            ?? null,
         oferta_fecha_inicio: oferta?.fecha_inicio      ?? null,
@@ -510,11 +520,12 @@ export class ExpedienteService {
       ...exps.filter(e => e.estimador_id).map(e => e.estimador_id as string),
     ])];
 
-    const [servicios, perfiles, ofertasRaw, estimaciones] = await Promise.all([
+    const [servicios, perfiles, ofertasRaw, estimaciones, localizaciones] = await Promise.all([
       this.servicioRepo.findByIds(servicioIds),
       this.perfilRepo.findByIds(userIds),
       this.ofertaRepo.findByExpedienteIds(expedienteIds),
       this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
+      this.localizacionRepo.findByExpedienteIds(expedienteIds),
     ]);
 
     // Miniatura del tour 3D (Matterport) por expediente.
@@ -533,6 +544,7 @@ export class ExpedienteService {
       const svc       = servicios.find(s => s.id === e.servicio_id);
       const cliente   = perfiles.find(p => p.id === e.cliente_id);
       const estimador = e.estimador_id ? perfiles.find(p => p.id === e.estimador_id) : null;
+      const loc       = localizaciones.find(l => l.expediente_id === e.id) ?? null;
 
       const expOfertas = ofertasRaw.filter(o => o.expediente_id === e.id);
       let oferta: OfertaRaw | null = null;
@@ -562,6 +574,10 @@ export class ExpedienteService {
         total_ofertas:       expOfertas.length,
         sort_date:           oferta?.creado_en     ?? e.creado_en,
         foto:                fotoPorExpediente.get(e.id) ?? null,
+        direccion:           loc?.direccion        ?? '',
+        provincia:           loc?.provincia        ?? '',
+        canton:              loc?.canton           ?? '',
+        distrito:            loc?.distrito         ?? '',
       } as ExpedienteConOfertaAdmin;
     }).sort((a, b) => b.sort_date.localeCompare(a.sort_date));
   }

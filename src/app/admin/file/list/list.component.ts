@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
@@ -26,7 +26,13 @@ export class AdminFileListComponent {
   cargando     = signal(true);
   error        = signal<string | null>(null);
 
+  /** Lo que se ve en el input: se actualiza en cada tecla. */
   busqueda     = signal('');
+  /** Lo que dispara la consulta: se actualiza tras la pausa del debounce. */
+  private busquedaAplicada = signal('');
+  private debounceId?: ReturnType<typeof setTimeout>;
+  private readonly DEBOUNCE_MS = 300;
+
   filtroEstado = signal('todos');
   vista        = signal<VistaExpedientes>('tarjetas');
 
@@ -46,13 +52,17 @@ export class AdminFileListComponent {
   );
 
   constructor() {
-    // Carga server-side cuando cambia cualquier parámetro de búsqueda o página
+    // Carga server-side cuando cambia cualquier parámetro de búsqueda o página.
+    // Depende de `busquedaAplicada`, no de `busqueda`: así no se lanza una
+    // consulta por tecla.
     effect(() => {
       const page     = this.paginaActual();
       const estado   = this.filtroEstado();
-      const busqueda = this.busqueda();
+      const busqueda = this.busquedaAplicada();
       untracked(() => this.cargar(page, estado, busqueda));
     });
+
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.debounceId));
   }
 
   private async cargar(page: number, estado: string, busqueda: string): Promise<void> {
@@ -75,13 +85,21 @@ export class AdminFileListComponent {
   }
 
   setBusqueda(e: Event) {
-    this.busqueda.set((e.target as HTMLInputElement).value);
+    const valor = (e.target as HTMLInputElement).value;
+    this.busqueda.set(valor);
+    clearTimeout(this.debounceId);
+    this.debounceId = setTimeout(() => this.aplicarBusqueda(valor), this.DEBOUNCE_MS);
+  }
+
+  private aplicarBusqueda(valor: string) {
     this.paginaActual.set(1);
+    this.busquedaAplicada.set(valor);
   }
 
   clearBusqueda() {
+    clearTimeout(this.debounceId);
     this.busqueda.set('');
-    this.paginaActual.set(1);
+    this.aplicarBusqueda('');
   }
 
   setFiltroEstado(estado: string) {
@@ -90,9 +108,10 @@ export class AdminFileListComponent {
   }
 
   limpiarFiltros() {
+    clearTimeout(this.debounceId);
     this.busqueda.set('');
     this.filtroEstado.set('todos');
-    this.paginaActual.set(1);
+    this.aplicarBusqueda('');
   }
 
   servicioNombre(exp: ExpedienteAdmin): string {
@@ -100,6 +119,25 @@ export class AdminFileListComponent {
     if (lang === 'en') return exp.servicio_nombre_en || exp.servicio_nombre;
     if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
     return exp.servicio_nombre;
+  }
+
+  // ── Dirección ──────────────────────────────────────────────────────────────
+  // Formato postal: `direccion` ya combina nº de unidad, nº cívico y calle
+  // ("615-150 rue Berlioz"); la 2ª línea lleva ciudad, provincia y CP.
+  direccionLinea1(e: ExpedienteAdmin): string {
+    return e.direccion?.trim() ?? '';
+  }
+
+  direccionLinea2(e: ExpedienteAdmin): string {
+    return [e.canton, e.provincia, e.distrito]
+      .map(v => v?.trim())
+      .filter(Boolean)
+      .join(' ');
+  }
+
+  /** Dirección completa en una línea, para el `title` cuando el texto se abrevia. */
+  direccionCompleta(e: ExpedienteAdmin): string {
+    return [this.direccionLinea1(e), this.direccionLinea2(e)].filter(Boolean).join(', ');
   }
 
   estadoBadge(estado: string): string {

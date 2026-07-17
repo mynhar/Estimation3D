@@ -24,6 +24,30 @@ export type OfertaAceptadaRaw = {
 
 export type OfertaConteoRaw = { expediente_id: string; total: number };
 
+/** Fila de la vista `expediente_busqueda`: expediente + su localizacion. */
+export type ExpedienteConDireccionRaw = ExpedienteRaw & {
+  direccion: string | null;
+  provincia: string | null;
+  canton:    string | null;
+  distrito:  string | null;
+};
+
+/**
+ * Trocea la búsqueda en términos normalizados igual que `busqueda_texto` en la
+ * vista `expediente_busqueda`: minúsculas y sin acentos, para que "Montreal"
+ * encuentre "Montréal". Ambos lados deben normalizar idéntico.
+ * Los `%` y `_` se escapan: en un LIKE son comodines.
+ */
+function normalizarBusqueda(busqueda: string | undefined): string[] {
+  return (busqueda ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(t => t.replace(/[%_\\]/g, m => `\\${m}`));
+}
+
 @Injectable({ providedIn: 'root' })
 export class ExpedienteRepository {
   private auth = inject(AuthSupabaseService);
@@ -92,13 +116,16 @@ export class ExpedienteRepository {
     pageSize:  number;
     estado?:   string;
     busqueda?: string;
-  }): Promise<{ data: ExpedienteRaw[]; count: number }> {
+  }): Promise<{ data: ExpedienteConDireccionRaw[]; count: number }> {
     const offset = (options.page - 1) * options.pageSize;
 
+    // Se consulta la vista `expediente_busqueda` (expediente + localizacion
+    // aplanados) para poder filtrar por dirección sin romper la paginación ni
+    // el total. Hereda las RLS de las tablas base vía security_invoker.
     let query = this.db
-      .from('expediente')
+      .from('expediente_busqueda')
       .select(
-        'id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id',
+        'id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id, direccion, provincia, canton, distrito',
         { count: 'exact' },
       )
       .order('creado_en', { ascending: false })
@@ -107,13 +134,17 @@ export class ExpedienteRepository {
     if (options.estado && options.estado !== 'todos') {
       query = query.eq('estado', options.estado as EstadoExpediente);
     }
-    if (options.busqueda?.trim()) {
-      query = query.ilike('numero', `%${options.busqueda.trim()}%`);
+
+    // Cada término debe aparecer (los ilike encadenados se combinan con AND),
+    // así "Verdun H3B" cruza ciudad y código postal. La consulta se normaliza
+    // igual que `busqueda_texto` en la vista: minúsculas y sin acentos.
+    for (const termino of normalizarBusqueda(options.busqueda)) {
+      query = query.ilike('busqueda_texto', `%${termino}%`);
     }
 
     const { data, error, count } = await query;
     if (error) throw new Error(error.message);
-    return { data: (data ?? []) as ExpedienteRaw[], count: count ?? 0 };
+    return { data: (data ?? []) as ExpedienteConDireccionRaw[], count: count ?? 0 };
   }
 
   async findByFiltro(options: {

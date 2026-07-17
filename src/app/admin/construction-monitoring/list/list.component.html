@@ -53,6 +53,25 @@
   <!-- ── Contenido ────────────────────────────────────────────────────────────── -->
   } @else {
 
+    <!-- ── Búsqueda ─────────────────────────────────────────────────────────── -->
+    <div class="cm-search mb-3">
+      <div class="input-group">
+        <span class="input-group-text search-icon">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="form-control search-input"
+               [placeholder]="'construction_monitoring.search_placeholder' | translate"
+               [value]="busqueda()"
+               (input)="setBusqueda($event)">
+        @if (busqueda()) {
+          <button class="btn search-clear" type="button" (click)="busqueda.set('')"
+                  [title]="'common.clear' | translate">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+    </div>
+
     <!-- ── Chips de estado ──────────────────────────────────────────────────── -->
     <div class="status-chips-bar mb-3">
       <div class="status-chips" role="group">
@@ -248,11 +267,23 @@
                 </div>
                 <span class="offer-card__client">{{ c.cliente_nombre }}</span>
                 <span class="offer-card__svc">{{ servicioNombre(c) }}</span>
+                @if (direccionLinea1(c) || direccionLinea2(c)) {
+                  <p class="offer-card__addr" [title]="direccionCompleta(c)">
+                    <i class="bi bi-geo-alt offer-card__addr-icon" aria-hidden="true"></i>
+                    <span class="offer-card__addr-text">
+                      @if (direccionLinea1(c)) {
+                        <span class="offer-card__addr-line">{{ direccionLinea1(c) }}</span>
+                      }
+                      @if (direccionLinea2(c)) {
+                        <span class="offer-card__addr-line offer-card__addr-line--muted">{{ direccionLinea2(c) }}</span>
+                      }
+                    </span>
+                  </p>
+                }
                 <div class="offer-card__meta">
                   <span class="cm-meta"><i class="bi bi-hard-hat" aria-hidden="true"></i>{{ c.constructor_nombre }}</span>
                   <span class="cm-meta"><i class="bi bi-envelope" aria-hidden="true"></i>{{ c.constructor_email }}</span>
                   <span class="cm-meta"><i class="bi bi-telephone" aria-hidden="true"></i>{{ c.constructor_telefono }}</span>
-                  <span class="cm-meta"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ c.canton }}, {{ c.provincia }}</span>
                   <span class="cm-meta"><i class="bi bi-pen" aria-hidden="true"></i>{{ formatFecha(c.firmado_en) }}</span>
                   <span class="cm-meta"><i class="bi bi-calendar-event" aria-hidden="true"></i>{{ formatFecha(c.fecha_inicio) }}</span>
                   <span class="cm-meta"><i class="bi bi-hourglass-split" aria-hidden="true"></i>{{ plazoLabel(c) }}</span>

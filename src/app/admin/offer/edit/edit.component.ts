@@ -48,10 +48,15 @@ export class AdminOfferEditComponent implements OnInit {
   fechaInicio                 = '';
   descripcion                 = '';
 
-  documentoOferta = signal<File | null>(null);
-  videoOferta     = signal<File | null>(null);
-  documentoActual = signal<ArchivoRow | null>(null);
-  videoActual     = signal<ArchivoRow | null>(null);
+  // Documentos: varios por oferta. `documentosOferta` son los pendientes de
+  // subir; `documentosActuales`, los ya guardados. El vídeo sigue siendo único.
+  documentosOferta   = signal<File[]>([]);
+  documentosActuales = signal<ArchivoRow[]>([]);
+  videoOferta        = signal<File | null>(null);
+  videoActual        = signal<ArchivoRow | null>(null);
+
+  dragDocs      = signal(false);
+  eliminandoDoc = signal<string | null>(null);
 
   ofertaId  = signal<string | null>(null);
   enviada   = signal(false);
@@ -82,7 +87,7 @@ export class AdminOfferEditComponent implements OnInit {
     if (this.plazoMin && this.plazoMin > 0 && this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0)) n++;
     if (this.fechaInicio) n++;
     if (this.descripcion.trim()) n++;
-    if (this.documentoActual() || this.documentoOferta()) n++;
+    if (this.documentosActuales().length || this.documentosOferta().length) n++;
     return n;
   }
 
@@ -95,7 +100,7 @@ export class AdminOfferEditComponent implements OnInit {
       this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
       this.fechaInicio &&
       this.descripcion.trim() &&
-      (!esNueva || this.documentoOferta())
+      (!esNueva || this.documentosOferta().length > 0)
     );
   }
 
@@ -161,9 +166,9 @@ export class AdminOfferEditComponent implements OnInit {
     this.garantiaAnos = oferta.garantia_anos;
     this.fechaInicio  = oferta.fecha_inicio;
     this.descripcion  = oferta.descripcion;
-    this.documentoActual.set(oferta.documentos?.length ? oferta.documentos[0] : null);
+    this.documentosActuales.set(oferta.documentos ?? []);
     this.videoActual.set(oferta.videos?.length ? oferta.videos[0] : null);
-    this.documentoOferta.set(null);
+    this.documentosOferta.set([]);
     this.videoOferta.set(null);
     this.exitoMsg.set('');
     this.errorEnvio.set('');
@@ -177,9 +182,9 @@ export class AdminOfferEditComponent implements OnInit {
     this.garantiaAnos = null;
     this.fechaInicio  = '';
     this.descripcion  = '';
-    this.documentoActual.set(null);
+    this.documentosActuales.set([]);
     this.videoActual.set(null);
-    this.documentoOferta.set(null);
+    this.documentosOferta.set([]);
     this.videoOferta.set(null);
     this.exitoMsg.set('');
     this.errorEnvio.set('');
@@ -196,14 +201,59 @@ export class AdminOfferEditComponent implements OnInit {
     }
   }
 
-  onDocumento(event: Event) {
+  onDocumentos(event: Event) {
     const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0] ?? null;
+    const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!file) { this.documentoOferta.set(null); return; }
-    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
-    if (err) { this.errorEnvio.set(err); return; }
-    this.documentoOferta.set(file);
+    this.encolarDocumentos(files);
+  }
+
+  // ── Arrastrar y soltar documentos ──────────────────────────────────────────
+  onDragOverDocs(e: DragEvent) { e.preventDefault(); this.dragDocs.set(true); }
+  onDragLeaveDocs()            { this.dragDocs.set(false); }
+  onDropDocs(e: DragEvent) {
+    e.preventDefault();
+    this.dragDocs.set(false);
+    this.encolarDocumentos(Array.from(e.dataTransfer?.files ?? []));
+  }
+
+  /**
+   * El `accept` del input no filtra lo que se suelta, así que el tipo se valida
+   * aquí para ambos caminos. Este campo admite sólo PDF.
+   */
+  private validarDocumento(file: File): string | null {
+    const esPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!esPdf)                                       return 'validation.file_type';
+    if (file.size > FILE_LIMITS.DOCUMENTO.maxBytes)   return 'validation.file_size';
+    return null;
+  }
+
+  private encolarDocumentos(files: File[]) {
+    if (!files.length) return;
+    this.errorEnvio.set('');
+    for (const file of files) {
+      const err = this.validarDocumento(file);
+      if (err) { this.errorEnvio.set(err); return; }
+    }
+    this.documentosOferta.update(lista => [...lista, ...files]);
+  }
+
+  quitarDocumentoPendiente(indice: number) {
+    this.documentosOferta.update(lista => lista.filter((_, i) => i !== indice));
+  }
+
+  async eliminarDocumentoGuardado(archivo: ArchivoRow) {
+    if (this.eliminandoDoc()) return;
+    this.eliminandoDoc.set(archivo.id);
+    this.errorEnvio.set('');
+    try {
+      await this.archivoService.eliminar(archivo);
+      this.documentosActuales.update(lista => lista.filter(a => a.id !== archivo.id));
+    } catch (e: any) {
+      this.errorEnvio.set(e.message);
+    } finally {
+      this.eliminandoDoc.set(null);
+    }
   }
 
   onVideo(event: Event) {
@@ -229,7 +279,8 @@ export class AdminOfferEditComponent implements OnInit {
     if (!this.descripcion.trim()) { this.errorEnvio.set('make_offer.err_desc'); return; }
 
     const esNueva = !this.ofertaId();
-    if (esNueva && !this.documentoOferta()) { this.errorEnvio.set('make_offer.err_doc'); return; }
+    const docs    = this.documentosOferta();
+    if (esNueva && !docs.length) { this.errorEnvio.set('make_offer.err_doc'); return; }
 
     const form: OfertaForm = {
       precio:            this.precio,
@@ -244,8 +295,7 @@ export class AdminOfferEditComponent implements OnInit {
     try {
       if (esNueva) {
         await this.ofertaService.enviar(
-          this.expedienteId, constructorId, form,
-          this.documentoOferta(), this.videoOferta(),
+          this.expedienteId, constructorId, form, docs, this.videoOferta(),
         );
         this.enviada.set(true);
         this.exitoMsg.set('make_offer.success_sent');
@@ -253,22 +303,17 @@ export class AdminOfferEditComponent implements OnInit {
         const newOffer = this.todasLasOfertas().find(o => o.constructor_id === constructorId);
         if (newOffer) {
           this.ofertaId.set(newOffer.id);
-          this.documentoActual.set(newOffer.documentos?.length ? newOffer.documentos[0] : null);
-          this.videoActual.set(newOffer.videos?.length ? newOffer.videos[0] : null);
-          this.documentoOferta.set(null);
-          this.videoOferta.set(null);
+          await this.refrescarArchivos(newOffer.id);
         }
       } else {
         await this.ofertaService.actualizar(
-          this.ofertaId()!, constructorId, form,
-          this.documentoOferta(), this.videoOferta(),
+          this.ofertaId()!, constructorId, form, this.videoOferta(),
         );
-        if (this.documentoOferta() || this.videoOferta()) {
-          const archivos = await this.archivoService.cargarPorOferta(this.ofertaId()!);
-          this.documentoActual.set(archivos.documentos[0] ?? null);
-          this.videoActual.set(archivos.videos[0] ?? null);
-          this.documentoOferta.set(null);
-          this.videoOferta.set(null);
+        if (docs.length) {
+          await this.ofertaService.agregarDocumentos(this.ofertaId()!, constructorId, docs);
+        }
+        if (docs.length || this.videoOferta()) {
+          await this.refrescarArchivos(this.ofertaId()!);
         }
         this.exitoMsg.set('make_offer.success_updated');
       }
@@ -277,6 +322,14 @@ export class AdminOfferEditComponent implements OnInit {
     } finally {
       this.enviando.set(false);
     }
+  }
+
+  private async refrescarArchivos(ofertaId: string) {
+    const archivos = await this.archivoService.cargarPorOferta(ofertaId);
+    this.documentosActuales.set(archivos.documentos);
+    this.videoActual.set(archivos.videos[0] ?? null);
+    this.documentosOferta.set([]);
+    this.videoOferta.set(null);
   }
 
   publicUrl(storagePath: string): string {

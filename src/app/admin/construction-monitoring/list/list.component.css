@@ -201,6 +201,44 @@
   color: var(--ds-ink-muted);
   overflow-wrap: anywhere;
 }
+/* ── Búsqueda ─────────────────────────────────────────────────────────────── */
+.cm-search { max-width: 460px; }
+.search-icon  { background: transparent; border-right: none; color: var(--ds-ink-muted); }
+.search-input { border-left: none; background: transparent; }
+.search-input:focus { box-shadow: none; border-color: var(--ds-border); }
+.search-clear {
+  background: transparent; border-color: var(--ds-border); color: var(--ds-ink-muted);
+  transition: color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.search-clear:hover { color: var(--ds-ink); }
+
+/* Dirección: icono fijo + bloque de texto que encoge y se abrevia. */
+.offer-card__addr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-1);
+  margin: 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+}
+.offer-card__addr-icon {
+  flex-shrink: 0;
+  color: var(--ds-gold-active);
+  line-height: var(--ds-leading-normal);
+}
+.offer-card__addr-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.offer-card__addr-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offer-card__addr-line--muted { color: var(--ds-ink-muted); }
+
 .offer-card__meta {
   display: flex;
   flex-wrap: wrap;

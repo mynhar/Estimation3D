@@ -498,6 +498,33 @@
 .file-card__name,
 .file-card__service { white-space: normal; }
 
+/* Dirección: icono fijo + bloque de texto que encoge y se abrevia. */
+.file-card__addr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  min-width: 0;
+}
+.file-card__addr-icon {
+  flex-shrink: 0;
+  color: var(--ds-gold-active);
+  line-height: var(--ds-leading-normal);
+}
+.file-card__addr-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.file-card__addr-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-card__addr-line--muted { color: var(--ds-ink-muted); }
+
 .file-card__meta {
   display: flex;
   flex-direction: column;

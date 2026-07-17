@@ -13,6 +13,9 @@ import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { ExpedienteParaEstimar } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import {
+  coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
+} from '../../../shared/util/busqueda';
 
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
@@ -59,12 +62,23 @@ export class AdminToEstimateListComponent implements OnInit {
           this.servicioNombre(e),
           e.estado,
           e.estimador_nombre ?? '',
+          // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+          // `canton` la ciudad y `distrito` el código postal.
+          e.direccion,
+          e.canton,
+          e.provincia,
+          e.distrito,
         ].join(' ').toLowerCase();
-        if (!haystack.includes(q)) return false;
+        if (!coincideBusqueda(haystack, q)) return false;
       }
       return true;
     });
   });
+
+  // ── Dirección (formato postal en dos líneas) ─────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   expedientesPaginados = computed(() => {
     const desde = (this.paginaActual() - 1) * this.POR_PAGINA;

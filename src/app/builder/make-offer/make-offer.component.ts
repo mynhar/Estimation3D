@@ -47,13 +47,16 @@ export class MakeOfferComponent implements OnInit {
   fechaInicio                    = '';
   descripcion                    = '';
 
-  // Archivos de la oferta
-  documentoOferta = signal<File | null>(null);
-  videoOferta     = signal<File | null>(null);
+  // Archivos de la oferta. Los documentos son varios; el vídeo, único.
+  documentosOferta = signal<File[]>([]);
+  videoOferta      = signal<File | null>(null);
 
   // Archivos ya guardados (modo edición)
-  documentoActual = signal<ArchivoRow | null>(null);
-  videoActual     = signal<ArchivoRow | null>(null);
+  documentosActuales = signal<ArchivoRow[]>([]);
+  videoActual        = signal<ArchivoRow | null>(null);
+
+  dragDocs      = signal(false);
+  eliminandoDoc = signal<string | null>(null);
 
   ofertaId = signal<string | null>(null);
   enviada  = signal(false);
@@ -73,7 +76,7 @@ export class MakeOfferComponent implements OnInit {
     if (this.plazoMin && this.plazoMin > 0 && this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0)) n++;
     if (this.fechaInicio) n++;
     if (this.descripcion.trim()) n++;
-    if (this.documentoActual() || this.documentoOferta()) n++;
+    if (this.documentosActuales().length || this.documentosOferta().length) n++;
     return n;
   }
 
@@ -85,7 +88,7 @@ export class MakeOfferComponent implements OnInit {
       this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
       this.fechaInicio &&
       this.descripcion.trim() &&
-      (!esNueva || this.documentoOferta())
+      (!esNueva || this.documentosOferta().length > 0)
     );
   }
 
@@ -116,7 +119,7 @@ export class MakeOfferComponent implements OnInit {
         this.descripcion  = ofertaExistente.descripcion;
 
         const ofertaArchivos = await this.archivoService.cargarPorOferta(ofertaExistente.id);
-        this.documentoActual.set(ofertaArchivos.documentos[0] ?? null);
+        this.documentosActuales.set(ofertaArchivos.documentos);
         this.videoActual.set(ofertaArchivos.videos[0] ?? null);
       }
     } catch (e: any) {
@@ -127,14 +130,59 @@ export class MakeOfferComponent implements OnInit {
     }
   }
 
-  onDocumento(event: Event) {
+  onDocumentos(event: Event) {
     const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0] ?? null;
+    const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!file) { this.documentoOferta.set(null); return; }
-    const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
-    if (err) { this.errorEnvio.set(err); return; }
-    this.documentoOferta.set(file);
+    this.encolarDocumentos(files);
+  }
+
+  // ── Arrastrar y soltar documentos ──────────────────────────────────────────
+  onDragOverDocs(e: DragEvent) { e.preventDefault(); this.dragDocs.set(true); }
+  onDragLeaveDocs()            { this.dragDocs.set(false); }
+  onDropDocs(e: DragEvent) {
+    e.preventDefault();
+    this.dragDocs.set(false);
+    this.encolarDocumentos(Array.from(e.dataTransfer?.files ?? []));
+  }
+
+  /**
+   * El `accept` del input no filtra lo que se suelta, así que el tipo se valida
+   * aquí para ambos caminos. Este campo admite sólo PDF.
+   */
+  private validarDocumento(file: File): string | null {
+    const esPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!esPdf)                                     return 'validation.file_type';
+    if (file.size > FILE_LIMITS.DOCUMENTO.maxBytes) return 'validation.file_size';
+    return null;
+  }
+
+  private encolarDocumentos(files: File[]) {
+    if (!files.length) return;
+    this.errorEnvio.set('');
+    for (const file of files) {
+      const err = this.validarDocumento(file);
+      if (err) { this.errorEnvio.set(err); return; }
+    }
+    this.documentosOferta.update(lista => [...lista, ...files]);
+  }
+
+  quitarDocumentoPendiente(indice: number) {
+    this.documentosOferta.update(lista => lista.filter((_, i) => i !== indice));
+  }
+
+  async eliminarDocumentoGuardado(archivo: ArchivoRow) {
+    if (this.eliminandoDoc()) return;
+    this.eliminandoDoc.set(archivo.id);
+    this.errorEnvio.set('');
+    try {
+      await this.archivoService.eliminar(archivo);
+      this.documentosActuales.update(lista => lista.filter(a => a.id !== archivo.id));
+    } catch (e: any) {
+      this.errorEnvio.set(e.message);
+    } finally {
+      this.eliminandoDoc.set(null);
+    }
   }
 
   onVideo(event: Event) {
@@ -173,7 +221,8 @@ export class MakeOfferComponent implements OnInit {
     }
 
     const esNueva = !this.ofertaId();
-    if (esNueva && !this.documentoOferta()) {
+    const docs    = this.documentosOferta();
+    if (esNueva && !docs.length) {
       this.errorEnvio.set('make_offer.err_doc');
       return;
     }
@@ -197,7 +246,7 @@ export class MakeOfferComponent implements OnInit {
           this.expedienteId,
           userId,
           form,
-          this.documentoOferta(),
+          docs,
           this.videoOferta(),
         );
         this.enviada.set(true);
@@ -207,14 +256,16 @@ export class MakeOfferComponent implements OnInit {
           this.ofertaId()!,
           userId,
           form,
-          this.documentoOferta(),
           this.videoOferta(),
         );
-        if (this.documentoOferta() || this.videoOferta()) {
+        if (docs.length) {
+          await this.ofertaService.agregarDocumentos(this.ofertaId()!, userId, docs);
+        }
+        if (docs.length || this.videoOferta()) {
           const ofertaArchivos = await this.archivoService.cargarPorOferta(this.ofertaId()!);
-          this.documentoActual.set(ofertaArchivos.documentos[0] ?? null);
+          this.documentosActuales.set(ofertaArchivos.documentos);
           this.videoActual.set(ofertaArchivos.videos[0] ?? null);
-          this.documentoOferta.set(null);
+          this.documentosOferta.set([]);
           this.videoOferta.set(null);
         }
         this.exitoMsg.set('make_offer.success_updated');

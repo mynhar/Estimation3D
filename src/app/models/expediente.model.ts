@@ -38,6 +38,12 @@ export interface ExpedienteConOfertaAdmin {
   total_ofertas:       number;
   sort_date:           string;
   foto:                string | null;  // miniatura del tour 3D (Matterport) del expediente
+  // Dirección, para poder buscar por ella. En Canadá `direccion` contiene
+  // "unidad-cívico calle", `canton` la ciudad y `distrito` el código postal.
+  direccion:           string;
+  provincia:           string;
+  canton:              string;
+  distrito:            string;
 }
 
 /** Vista aplanada para la lista admin de expedientes a estimar (estados: nuevo, en_estimacion, estimado). */
@@ -56,6 +62,12 @@ export interface ExpedienteParaEstimar {
   costo_estimado:      number | null;
   costo_estimado_max:  number | null;
   url_tour:            string | null;
+  // Dirección. En Canadá `direccion` contiene "unidad-cívico calle",
+  // `canton` la ciudad y `distrito` el código postal.
+  direccion:           string;
+  provincia:           string;
+  canton:              string;
+  distrito:            string;
 }
 
 /** Vista aplanada para la lista admin de expedientes. */
@@ -73,6 +85,12 @@ export interface ExpedienteAdmin {
   oferta_precio:        number | null;
   oferta_fecha_inicio:  string | null;
   url_tour:             string | null;
+  // Dirección. En Canadá `direccion` contiene "unidad-cívico calle",
+  // `canton` la ciudad y `distrito` el código postal.
+  direccion:            string;
+  provincia:            string;
+  canton:               string;
+  distrito:             string;
 }
 
 /** Forma aplanada usada en las listas del módulo estimador. */

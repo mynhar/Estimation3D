@@ -297,6 +297,19 @@
                 </div>
                 <span class="offer-card__client">{{ e.cliente_nombre }}</span>
                 <span class="offer-card__svc">{{ servicioNombre(e) }}</span>
+                @if (direccionLinea1(e) || direccionLinea2(e)) {
+                  <p class="offer-card__addr" [title]="direccionCompleta(e)">
+                    <i class="bi bi-geo-alt offer-card__addr-icon" aria-hidden="true"></i>
+                    <span class="offer-card__addr-text">
+                      @if (direccionLinea1(e)) {
+                        <span class="offer-card__addr-line">{{ direccionLinea1(e) }}</span>
+                      }
+                      @if (direccionLinea2(e)) {
+                        <span class="offer-card__addr-line offer-card__addr-line--muted">{{ direccionLinea2(e) }}</span>
+                      }
+                    </span>
+                  </p>
+                }
                 <div class="offer-card__meta">
                   <span class="cm-meta"><i class="bi bi-person-badge" aria-hidden="true"></i>{{ e.estimador_nombre || '—' }}</span>
                   <span class="cm-meta"><i class="bi bi-hard-hat" aria-hidden="true"></i>{{ e.constructor_nombre || '—' }}</span>

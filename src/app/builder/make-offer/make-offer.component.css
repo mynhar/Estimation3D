@@ -402,6 +402,37 @@
 
 .attach-divider { border-top: 1px solid var(--ds-border-subtle); margin: 0; }
 
+/* Documentos: varios adjuntos + zona de arrastre */
+.attach-item--docs {
+  align-items: flex-start;
+  border: 1px dashed transparent;
+  border-radius: var(--ds-radius-md);
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.attach-item--drag { border-color: var(--ds-gold-active); background: var(--ds-gold-soft); }
+/* Sin esto, `dragleave` salta al pasar sobre los hijos y el resalte parpadea. */
+.attach-item--docs > * { pointer-events: none; }
+.attach-item--docs .attach-view-btn,
+.attach-item--docs .attach-remove-btn,
+.attach-item--docs label { pointer-events: auto; }
+
+.attach-item__hint {
+  font-size: var(--ds-text-2xs);
+  color: var(--ds-ink-muted);
+  margin: var(--ds-space-1) 0 0;
+}
+
+.attach-remove-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; padding: 0; flex-shrink: 0;
+  background: none; border: none; border-radius: var(--ds-radius-sm);
+  color: var(--ds-ink-muted); font-size: var(--ds-text-2xs); cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.attach-remove-btn:hover:not(:disabled) { background: var(--ds-danger-soft); color: var(--ds-danger); }
+.attach-remove-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .attach-item__icon {
   width: 36px; height: 36px;
   border-radius: var(--ds-radius-md);
@@ -421,8 +452,16 @@
 .attach-item__name {
   display: flex; align-items: center; gap: var(--ds-space-1);
   font-size: var(--ds-text-2xs); margin-bottom: 0;
+}
+/* El recorte vive en el nombre, no en la fila: si el contenedor flex recorta,
+   los botones de ver/eliminar quedan fuera de vista e inalcanzables. */
+.attach-item__fname {
+  flex: 1; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.attach-item__name > .bi,
+.attach-view-btn,
+.attach-remove-btn { flex-shrink: 0; }
 .attach-item__name--new   { color: var(--ds-success); }
 .attach-item__name--saved { color: var(--ds-ink-secondary); }
 

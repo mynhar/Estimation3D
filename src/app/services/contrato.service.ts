@@ -309,9 +309,12 @@ export class ContratoService {
       fecha_inicio:       ofe?.fecha_inicio     ?? null,
       plazo_semanas_min:  ofe?.plazo_semanas_min ?? null,
       plazo_semanas_max:  ofe?.plazo_semanas_max ?? null,
-      direccion:          loc?.direccion        ?? '—',
-      provincia:          loc?.provincia        ?? '—',
-      canton:             loc?.canton           ?? '—',
+      // Vacío, no '—': el guion es cosa de la plantilla, y así el bloque de
+      // dirección puede ocultarse cuando no hay datos en vez de pintar guiones.
+      direccion:          loc?.direccion        ?? '',
+      provincia:          loc?.provincia        ?? '',
+      canton:             loc?.canton           ?? '',
+      distrito:           loc?.distrito         ?? '',
       foto:               null,
     } as ContratoConstructorListItem;
   }
@@ -359,6 +362,7 @@ export class ContratoService {
     return rows.map((c: any) => {
       const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
       const svc = exp?.servicio ? (Array.isArray(exp.servicio) ? exp.servicio[0] : exp.servicio) : null;
+      const loc = exp?.localizacion ? (Array.isArray(exp.localizacion) ? exp.localizacion[0] : exp.localizacion) : null;
       const cli = Array.isArray(c.cliente)     ? c.cliente[0]     : c.cliente;
       const con = Array.isArray(c.constructor) ? c.constructor[0] : c.constructor;
       const ofe = Array.isArray(c.oferta)      ? c.oferta[0]      : c.oferta;
@@ -380,6 +384,10 @@ export class ContratoService {
         constructor_nombre:  con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || null : null,
         oferta_fecha_inicio: ofe?.fecha_inicio     ?? null,
         foto:                (exp?.id ? fotoPorExpediente.get(exp.id) : null) ?? null,
+        direccion:           loc?.direccion        ?? '',
+        provincia:           loc?.provincia        ?? '',
+        canton:              loc?.canton           ?? '',
+        distrito:            loc?.distrito         ?? '',
       } as ContratoAdminListItem;
     });
   }

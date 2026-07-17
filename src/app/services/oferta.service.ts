@@ -75,41 +75,63 @@ export class OfertaService {
     };
   }
 
+  /**
+   * Actualiza los datos de la oferta y, si se envía uno nuevo, reemplaza el
+   * vídeo. Los documentos NO se tocan aquí: son varios por oferta y se añaden
+   * con `agregarDocumentos` o se borran uno a uno.
+   */
   async actualizar(
     ofertaId:      string,
     constructorId: string,
     form:          OfertaForm,
-    documentoFile: File | null,
     videoFile:     File | null,
   ): Promise<void> {
     await this.ofertaRepo.update(ofertaId, form);
+    if (!videoFile) return;
 
-    const filesToReplace: Array<{ file: File; tipo: 'documento' | 'video' }> = [];
-    if (documentoFile) filesToReplace.push({ file: documentoFile, tipo: 'documento' });
-    if (videoFile)     filesToReplace.push({ file: videoFile,     tipo: 'video'     });
+    // El vídeo sí es único por oferta: se sustituye el anterior.
+    const existente = await this.archivoRepo.findByOfertaIdAndTipo(ofertaId, 'video');
+    if (existente) {
+      await this.archivoRepo.removeFromStorage([existente.url_storage]);
+      await this.archivoRepo.deleteById(existente.id);
+    }
+    await this.subirArchivoOferta(ofertaId, constructorId, videoFile, 'video');
+  }
 
-    for (const { file, tipo } of filesToReplace) {
-      const existing = await this.archivoRepo.findByOfertaIdAndTipo(ofertaId, tipo);
-      if (existing) {
-        await this.archivoRepo.removeFromStorage([existing.url_storage]);
-        await this.archivoRepo.deleteById(existing.id);
-      }
-      const path = `ofertas/${ofertaId}/${tipo}/${Date.now()}_${file.name}`;
-      await this.archivoRepo.uploadToStorage(path, file);
-      try {
-        await this.archivoRepo.insert({
-          tipo,
-          nombre_archivo: file.name,
-          url_storage:    path,
-          mime_type:      file.type || 'application/octet-stream',
-          tamano_bytes:   file.size,
-          subido_por:     constructorId,
-          oferta_id:      ofertaId,
-        });
-      } catch (err) {
-        await this.archivoRepo.removeFromStorage([path]);
-        throw err;
-      }
+  /** Sube un archivo al storage y lo registra; si el registro falla, deshace la subida. */
+  private async subirArchivoOferta(
+    ofertaId:      string,
+    constructorId: string,
+    file:          File,
+    tipo:          'documento' | 'video',
+    sufijo         = '',
+  ): Promise<void> {
+    const path = `ofertas/${ofertaId}/${tipo}/${Date.now()}${sufijo}_${file.name}`;
+    await this.archivoRepo.uploadToStorage(path, file);
+    try {
+      await this.archivoRepo.insert({
+        tipo,
+        nombre_archivo: file.name,
+        url_storage:    path,
+        mime_type:      file.type || 'application/octet-stream',
+        tamano_bytes:   file.size,
+        subido_por:     constructorId,
+        oferta_id:      ofertaId,
+      });
+    } catch (err) {
+      await this.archivoRepo.removeFromStorage([path]);
+      throw err;
+    }
+  }
+
+  /**
+   * Añade documentos conservando los existentes: una oferta admite varios
+   * (la tabla `archivo` no tiene restricción única por oferta_id + tipo).
+   */
+  async agregarDocumentos(ofertaId: string, constructorId: string, files: File[]): Promise<void> {
+    for (const [i, file] of files.entries()) {
+      // El índice evita colisiones entre archivos homónimos subidos en el mismo ms.
+      await this.subirArchivoOferta(ofertaId, constructorId, file, 'documento', `_${i}`);
     }
   }
 
@@ -216,11 +238,11 @@ export class OfertaService {
   }
 
   async enviar(
-    expedienteId:  string,
-    constructorId: string,
-    form:          OfertaForm,
-    documentoFile: File | null,
-    videoFile:     File | null,
+    expedienteId:    string,
+    constructorId:   string,
+    form:            OfertaForm,
+    documentoFiles:  File[],
+    videoFile:       File | null,
   ): Promise<void> {
     const ofertaId = await this.ofertaRepo.insert({
       expediente_id:     expedienteId,
@@ -234,27 +256,11 @@ export class OfertaService {
       estado:            'pendiente',
     });
 
-    const filesToUpload: Array<{ file: File; tipo: 'documento' | 'video' }> = [];
-    if (documentoFile) filesToUpload.push({ file: documentoFile, tipo: 'documento' });
-    if (videoFile)     filesToUpload.push({ file: videoFile,     tipo: 'video'     });
-
-    for (const { file, tipo } of filesToUpload) {
-      const path = `ofertas/${ofertaId}/${tipo}/${Date.now()}_${file.name}`;
-      await this.archivoRepo.uploadToStorage(path, file);
-      try {
-        await this.archivoRepo.insert({
-          tipo,
-          nombre_archivo: file.name,
-          url_storage:    path,
-          mime_type:      file.type || 'application/octet-stream',
-          tamano_bytes:   file.size,
-          subido_por:     constructorId,
-          oferta_id:      ofertaId,
-        });
-      } catch (err) {
-        await this.archivoRepo.removeFromStorage([path]);
-        throw err;
-      }
+    if (documentoFiles.length) {
+      await this.agregarDocumentos(ofertaId, constructorId, documentoFiles);
+    }
+    if (videoFile) {
+      await this.subirArchivoOferta(ofertaId, constructorId, videoFile, 'video');
     }
 
     await this.ofertaRepo.updateEstadoExpedienteEnOferta(expedienteId);

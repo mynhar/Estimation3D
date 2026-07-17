@@ -43,7 +43,17 @@
       "Bash(curl -s -D - -o /dev/null \"https://my.matterport.com/api/v1/player/models/jVcWmLNyS4K/thumb?width=640\")",
       "Bash(grep -nA6 \"\\\\.status-chips-bar\" src/app/admin/construction-monitoring/list/list.component.css)",
       "Bash(node -e \"for\\(const l of ['es','fr','en']\\){const j=require\\('./src/assets/i18n/'+l+'.json'\\);console.log\\('---'+l\\);console.log\\(JSON.stringify\\(j.files_to_estimate,null,1\\)\\);}\")",
-      "Bash(node -e \"const fr=require\\('./src/assets/i18n/fr.json'\\); console.log\\('validation:', JSON.stringify\\(fr.validation||'MISSING'\\)\\);\")"
+      "Bash(node -e \"const fr=require\\('./src/assets/i18n/fr.json'\\); console.log\\('validation:', JSON.stringify\\(fr.validation||'MISSING'\\)\\);\")",
+      "Bash(grep -rn \"me-1\\\\\"></i>{{ \\\\|me-1\\\\\"></i>$\" src/app/admin/offer/edit/edit.component.html src/app/builder/make-offer/make-offer.component.html)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Read(//c/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/d7036c5c-e0e1-464c-97a9-23dfab427f71/scratchpad/**)",
+      "Bash(cp /c/desarrollo/estimation3d-A18-v01/src/styles/tokens.css .)",
+      "Bash(cp /c/desarrollo/estimation3d-A18-v01/src/app/admin/offer/edit/edit.component.css .)",
+      "Bash(node)",
+      "Bash(grep -n 'Skeleton\\\\|skeleton-toolbar\\\\|skeleton-table\\\\|@if \\(cargando\\(\\)\\)\\\\|@else if \\(error\\(\\)\\)\\\\|@else {$\\\\|filter-bar mb-3\\\\|Tabla / Tarjetas\\\\|Filtros' src/app/admin/file/list/list.component.html)",
+      "Bash(grep -n \"file-card__addr\\\\|file-card__name,\\\\|file-card__service {\" src/app/admin/to-estimate/list/list.component.css)",
+      "Bash(awk 'NR>=130 && NR<=170 && /async find/' src/app/data/contrato.repository.ts)"
     ]
   }
 }

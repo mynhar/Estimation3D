@@ -12,6 +12,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
 import { ContratoConstructorListItem } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import {
+  coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
+} from '../../../shared/util/busqueda';
 
 @Component({
   selector: 'app-admin-construction-monitoring-list',
@@ -31,6 +34,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
   cargando  = signal(true);
   error     = signal<string | null>(null);
 
+  busqueda     = signal('');
   filtroEstado = signal('todos');
   vista        = signal<'tabla' | 'tarjetas'>('tarjetas');   // por defecto: tarjetas
 
@@ -39,10 +43,39 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
   paginaActual = signal(1);
 
   contratosFiltrados = computed(() => {
+    const q      = this.busqueda().trim();
     const estado = this.filtroEstado();
-    if (estado === 'todos') return this._contratos();
-    return this._contratos().filter(c => c.estado === estado);
+
+    return this._contratos().filter(c => {
+      if (estado !== 'todos' && c.estado !== estado) return false;
+      if (q) {
+        const haystack = [
+          c.expediente_numero,
+          c.cliente_nombre,
+          this.servicioNombre(c),
+          c.constructor_nombre,
+          c.estado,
+          // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+          // `canton` la ciudad y `distrito` el código postal.
+          c.direccion,
+          c.canton,
+          c.provincia,
+          c.distrito,
+        ].join(' ');
+        if (!coincideBusqueda(haystack, q)) return false;
+      }
+      return true;
+    });
   });
+
+  hayFiltros = computed(() =>
+    this.busqueda() !== '' || this.filtroEstado() !== 'todos'
+  );
+
+  // ── Dirección (formato postal en dos líneas) ─────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   contratosPaginados = computed(() => {
     const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
@@ -61,9 +94,19 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
 
   constructor() {
     effect(() => {
+      this.busqueda();
       this.filtroEstado();
       this.paginaActual.set(1);
     }, { allowSignalWrites: true });
+  }
+
+  setBusqueda(e: Event) {
+    this.busqueda.set((e.target as HTMLInputElement).value);
+  }
+
+  limpiarFiltros() {
+    this.busqueda.set('');
+    this.filtroEstado.set('todos');
   }
 
   async ngOnInit() {

@@ -1063,7 +1063,47 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      expediente_busqueda: {
+        Row: {
+          busqueda_texto: string | null
+          canton: string | null
+          cliente_id: string | null
+          creado_en: string | null
+          descripcion: string | null
+          direccion: string | null
+          distrito: string | null
+          estado: Database["public"]["Enums"]["estado_expediente"] | null
+          estimador_id: string | null
+          fecha_visita: string | null
+          id: string | null
+          numero: string | null
+          provincia: string | null
+          servicio_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expediente_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_estimador_id_fkey"
+            columns: ["estimador_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       aceptar_oferta: {

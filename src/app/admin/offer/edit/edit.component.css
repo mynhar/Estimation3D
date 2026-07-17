@@ -1406,6 +1406,47 @@
   margin-top: var(--ds-space-2);
 }
 
+/* Documentos: varios adjuntos + zona de arrastre */
+.fued-attach-row--docs {
+  border-style: dashed;
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.fued-attach-row--drag {
+  border-color: var(--ds-gold-active);
+  background: var(--ds-gold-soft);
+}
+/* Sin esto, `dragleave` salta al pasar sobre los hijos y el resalte parpadea. */
+.fued-attach-row--docs > * { pointer-events: none; }
+.fued-attach-row--docs .fued-view-link,
+.fued-attach-row--docs .fued-doc-remove,
+.fued-attach-row--docs .fued-btn-upload { pointer-events: auto; }
+
+.fued-attach-hint {
+  font-size: var(--ds-text-2xs);
+  color: var(--ds-ink-muted);
+  margin: var(--ds-space-1) 0 0;
+}
+
+.fued-doc-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-2xs);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.fued-doc-remove:hover:not(:disabled) { background: var(--ds-danger-soft); color: var(--ds-danger); }
+.fued-doc-remove:disabled { opacity: 0.5; cursor: not-allowed; }
+
 .fued-attach-icon {
   width: 32px;
   height: 32px;
@@ -1440,21 +1481,32 @@
 }
 
 .fued-attach-status {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
   font-size: var(--ds-text-xs);
   margin: 0;
+}
+
+/* El recorte vive en el nombre, no en la fila: si el contenedor flex recorta,
+   los botones de ver/eliminar quedan fuera de vista e inalcanzables. */
+.fued-attach-fname {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.fued-attach-status > .bi,
+.fued-view-link,
+.fued-doc-remove { flex-shrink: 0; }
 
 .fued-attach-status--new {
   color: var(--ds-success);
 }
 
 .fued-attach-status--saved {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-1);
   color: var(--ds-success);
 }
 

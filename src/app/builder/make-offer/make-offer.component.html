@@ -423,8 +423,12 @@
                 </label>
                 <div class="attach-panel">
 
-                  <!-- PDF -->
-                  <div class="attach-item">
+                  <!-- PDF — varios documentos, clic o arrastre -->
+                  <div class="attach-item attach-item--docs"
+                       [class.attach-item--drag]="dragDocs()"
+                       (dragover)="onDragOverDocs($event)"
+                       (dragleave)="onDragLeaveDocs()"
+                       (drop)="onDropDocs($event)">
                     <div class="attach-item__icon attach-item__icon--pdf">
                       <i class="bi bi-file-earmark-pdf"></i>
                     </div>
@@ -435,29 +439,50 @@
                           <span class="req-mark">*</span>
                         }
                       </p>
-                      @if (documentoOferta()) {
-                        <p class="attach-item__name attach-item__name--new">
-                          <i class="bi bi-check-circle me-1"></i>
-                          {{ documentoOferta()!.name }}
-                          <span class="attach-item__size">{{ formatTamano(documentoOferta()!.size) }}</span>
-                        </p>
-                      } @else if (documentoActual()) {
-                        <p class="attach-item__name attach-item__name--saved">
-                          <i class="bi bi-check-circle-fill me-1"></i>
-                          {{ documentoActual()!.nombre_archivo }}
-                          <button class="attach-view-btn" type="button"
-                                  (click)="verArchivo(documentoActual()!)">
-                            {{ 'make_offer.view' | translate }}
-                          </button>
-                        </p>
-                      } @else {
+
+                      @if (!documentosActuales().length && !documentosOferta().length) {
                         <p class="attach-item__empty">{{ 'make_offer.no_document' | translate }}</p>
                       }
+
+                      @for (doc of documentosActuales(); track doc.id) {
+                        <p class="attach-item__name attach-item__name--saved">
+                          <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                          <span class="attach-item__fname" [title]="doc.nombre_archivo">{{ doc.nombre_archivo }}</span>
+                          <button class="attach-view-btn" type="button" (click)="verArchivo(doc)">
+                            {{ 'make_offer.view' | translate }}
+                          </button>
+                          <button class="attach-remove-btn" type="button"
+                                  [disabled]="eliminandoDoc() !== null"
+                                  [title]="'common.delete' | translate"
+                                  (click)="eliminarDocumentoGuardado(doc)">
+                            @if (eliminandoDoc() === doc.id) {
+                              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            } @else {
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            }
+                          </button>
+                        </p>
+                      }
+
+                      @for (file of documentosOferta(); track file.name + file.size; let i = $index) {
+                        <p class="attach-item__name attach-item__name--new">
+                          <i class="bi bi-check-circle" aria-hidden="true"></i>
+                          <span class="attach-item__fname" [title]="file.name">{{ file.name }}</span>
+                          <span class="attach-item__size">{{ formatTamano(file.size) }}</span>
+                          <button class="attach-remove-btn" type="button"
+                                  [title]="'common.delete' | translate"
+                                  (click)="quitarDocumentoPendiente(i)">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                          </button>
+                        </p>
+                      }
+
+                      <p class="attach-item__hint">{{ 'my_documents.add_drop' | translate }}</p>
                     </div>
                     <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
                       <i class="bi bi-upload me-1"></i>
-                      {{ (documentoActual() && !documentoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
-                      <input type="file" accept=".pdf" class="d-none" (change)="onDocumento($event)" />
+                      {{ 'make_offer.attach' | translate }}
+                      <input type="file" accept=".pdf" multiple class="d-none" (change)="onDocumentos($event)" />
                     </label>
                   </div>
 
@@ -475,14 +500,14 @@
                       </p>
                       @if (videoOferta()) {
                         <p class="attach-item__name attach-item__name--new">
-                          <i class="bi bi-check-circle me-1"></i>
-                          {{ videoOferta()!.name }}
+                          <i class="bi bi-check-circle" aria-hidden="true"></i>
+                          <span class="attach-item__fname" [title]="videoOferta()!.name">{{ videoOferta()!.name }}</span>
                           <span class="attach-item__size">{{ formatTamano(videoOferta()!.size) }}</span>
                         </p>
                       } @else if (videoActual()) {
                         <p class="attach-item__name attach-item__name--saved">
-                          <i class="bi bi-check-circle-fill me-1"></i>
-                          {{ videoActual()!.nombre_archivo }}
+                          <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                          <span class="attach-item__fname" [title]="videoActual()!.nombre_archivo">{{ videoActual()!.nombre_archivo }}</span>
                           <button class="attach-view-btn" type="button"
                                   (click)="verArchivo(videoActual()!)">
                             {{ 'make_offer.view' | translate }}
@@ -527,9 +552,9 @@
                   {{ 'make_offer.checklist_desc' | translate }}
                 </div>
                 @if (!ofertaId()) {
-                  <div class="checklist__item" [class.checklist__item--done]="!!documentoOferta()">
-                    <i class="bi" [class.bi-check-circle-fill]="!!documentoOferta()"
-                                  [class.bi-circle]="!documentoOferta()"></i>
+                  <div class="checklist__item" [class.checklist__item--done]="documentosOferta().length > 0">
+                    <i class="bi" [class.bi-check-circle-fill]="documentosOferta().length > 0"
+                                  [class.bi-circle]="documentosOferta().length === 0"></i>
                     PDF
                   </div>
                 }

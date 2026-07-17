@@ -274,6 +274,19 @@
                 <div class="file-card__body">
                   <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
                   <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+                  @if (direccionLinea1(e) || direccionLinea2(e)) {
+                    <p class="file-card__addr" [title]="direccionCompleta(e)">
+                      <i class="bi bi-geo-alt file-card__addr-icon" aria-hidden="true"></i>
+                      <span class="file-card__addr-text">
+                        @if (direccionLinea1(e)) {
+                          <span class="file-card__addr-line">{{ direccionLinea1(e) }}</span>
+                        }
+                        @if (direccionLinea2(e)) {
+                          <span class="file-card__addr-line file-card__addr-line--muted">{{ direccionLinea2(e) }}</span>
+                        }
+                      </span>
+                    </p>
+                  }
                 </div>
 
                 <dl class="file-card__meta">

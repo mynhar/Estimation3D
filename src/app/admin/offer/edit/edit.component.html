@@ -562,7 +562,11 @@
                 <i class="bi bi-paperclip"></i>{{ 'make_offer.attachments' | translate }}
               </label>
 
-              <div class="fued-attach-row">
+              <div class="fued-attach-row fued-attach-row--docs"
+                   [class.fued-attach-row--drag]="dragDocs()"
+                   (dragover)="onDragOverDocs($event)"
+                   (dragleave)="onDragLeaveDocs()"
+                   (drop)="onDropDocs($event)">
                 <div class="fued-attach-icon fued-attach-icon--pdf">
                   <i class="bi bi-file-earmark-pdf"></i>
                 </div>
@@ -571,26 +575,52 @@
                     {{ 'make_offer.pdf_doc' | translate }}
                     @if (!ofertaId()) { <span class="fued-req">*</span> }
                   </p>
-                  @if (documentoOferta()) {
-                    <p class="fued-attach-status fued-attach-status--new">
-                      <i class="bi bi-check-circle me-1"></i>{{ documentoOferta()!.name }}
-                    </p>
-                  } @else if (documentoActual()) {
-                    <p class="fued-attach-status fued-attach-status--saved">
-                      <i class="bi bi-check-circle-fill me-1"></i>{{ documentoActual()!.nombre_archivo }}
-                      <button class="fued-view-link" type="button"
-                              (click)="verArchivo(documentoActual()!)">
-                        {{ 'make_offer.view' | translate }}
-                      </button>
-                    </p>
-                  } @else {
+
+                  @if (!documentosActuales().length && !documentosOferta().length) {
                     <p class="fued-attach-empty">{{ 'make_offer.no_document' | translate }}</p>
                   }
+
+                  <!-- Ya guardados -->
+                  @for (doc of documentosActuales(); track doc.id) {
+                    <p class="fued-attach-status fued-attach-status--saved">
+                      <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                      <span class="fued-attach-fname" [title]="doc.nombre_archivo">{{ doc.nombre_archivo }}</span>
+                      <button class="fued-view-link" type="button" (click)="verArchivo(doc)">
+                        {{ 'make_offer.view' | translate }}
+                      </button>
+                      <button class="fued-doc-remove" type="button"
+                              [disabled]="eliminandoDoc() !== null"
+                              [title]="'common.delete' | translate"
+                              (click)="eliminarDocumentoGuardado(doc)">
+                        @if (eliminandoDoc() === doc.id) {
+                          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        } @else {
+                          <i class="bi bi-trash" aria-hidden="true"></i>
+                        }
+                      </button>
+                    </p>
+                  }
+
+                  <!-- Pendientes de subir -->
+                  @for (file of documentosOferta(); track file.name + file.size; let i = $index) {
+                    <p class="fued-attach-status fued-attach-status--new">
+                      <i class="bi bi-check-circle" aria-hidden="true"></i>
+                      <span class="fued-attach-fname" [title]="file.name">{{ file.name }}</span>
+                      <button class="fued-doc-remove" type="button"
+                              [title]="'common.delete' | translate"
+                              (click)="quitarDocumentoPendiente(i)">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      </button>
+                    </p>
+                  }
+
+                  <p class="fued-attach-hint">{{ 'my_documents.add_drop' | translate }}</p>
                 </div>
                 <label class="fued-btn-upload mb-0 flex-shrink-0">
                   <i class="bi bi-upload"></i>
-                  {{ (documentoActual() && !documentoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
-                  <input type="file" accept=".pdf" class="fued-file-input" (change)="onDocumento($event)" />
+                  {{ 'make_offer.attach' | translate }}
+                  <input type="file" accept=".pdf" multiple class="fued-file-input"
+                         (change)="onDocumentos($event)" />
                 </label>
               </div>
 
@@ -605,11 +635,13 @@
                   </p>
                   @if (videoOferta()) {
                     <p class="fued-attach-status fued-attach-status--new">
-                      <i class="bi bi-check-circle me-1"></i>{{ videoOferta()!.name }}
+                      <i class="bi bi-check-circle" aria-hidden="true"></i>
+                      <span class="fued-attach-fname" [title]="videoOferta()!.name">{{ videoOferta()!.name }}</span>
                     </p>
                   } @else if (videoActual()) {
                     <p class="fued-attach-status fued-attach-status--saved">
-                      <i class="bi bi-check-circle-fill me-1"></i>{{ videoActual()!.nombre_archivo }}
+                      <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                      <span class="fued-attach-fname" [title]="videoActual()!.nombre_archivo">{{ videoActual()!.nombre_archivo }}</span>
                       <button class="fued-view-link" type="button"
                               (click)="verArchivo(videoActual()!)">
                         {{ 'make_offer.view' | translate }}
@@ -657,10 +689,10 @@
                               [class.bi-text-paragraph]="!descripcion.trim()"></i>
               </div>
               @if (!ofertaId()) {
-                <div class="fued-prog-dot" [class.fued-prog-dot--done]="!!documentoOferta()"
+                <div class="fued-prog-dot" [class.fued-prog-dot--done]="documentosOferta().length > 0"
                      title="PDF">
-                  <i class="bi" [class.bi-check-lg]="!!documentoOferta()"
-                                [class.bi-file-earmark-pdf]="!documentoOferta()"></i>
+                  <i class="bi" [class.bi-check-lg]="documentosOferta().length > 0"
+                                [class.bi-file-earmark-pdf]="documentosOferta().length === 0"></i>
                 </div>
               }
             </div>

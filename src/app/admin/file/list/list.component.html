@@ -24,15 +24,79 @@
     </div>
   </header>
 
-  <!-- ── Skeleton ──────────────────────────────────────────────────────────── -->
-  @if (cargando()) {
-    <div class="skeleton-wrap">
-      <div class="skeleton-toolbar mb-3">
-        <div class="skel skel--search"></div>
-        <div class="d-flex gap-2 mt-3">
-          @for (i of [1,2,3,4,5]; track i) { <div class="skel skel--chip"></div> }
+  <!-- ── Filtros ───────────────────────────────────────────────────────────
+       Fuera del @if de carga a propósito: si se destruyen y recrean en cada
+       recarga, el input de búsqueda pierde el foco letra a letra. -->
+  <div class="filter-bar mb-3">
+
+    <!-- Búsqueda -->
+    <div class="filter-bar__search">
+      <div class="input-group">
+        <span class="input-group-text search-icon">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="form-control search-input"
+               [placeholder]="'admin_file.search_placeholder' | translate"
+               [value]="busqueda()"
+               (input)="setBusqueda($event)">
+        @if (busqueda()) {
+          <button class="btn search-clear" type="button" (click)="clearBusqueda()"
+                  [title]="'common.clear' | translate">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Status chips -->
+    <div class="filter-bar__chips">
+      <div class="status-chips" role="group">
+        @for (estado of estados; track estado) {
+          <button type="button" class="status-chip"
+                  [class.status-chip--active]="filtroEstado() === estado"
+                  (click)="setFiltroEstado(estado)">
+            <span class="status-chip__label">
+              {{ estado === 'todos'
+                  ? ('common.all' | translate)
+                  : (('admin_file.status_' + estado) | translate) }}
+            </span>
+            @if (estado === 'todos') {
+              <span class="status-chip__count">{{ totalItems() }}</span>
+            }
+          </button>
+        }
+      </div>
+      <div class="filter-bar__right">
+        @if (hayFiltros()) {
+          <button class="btn-clear-filters" (click)="limpiarFiltros()">
+            <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
+          </button>
+        }
+        <div class="view-toggle d-none d-md-inline-flex" role="group"
+             [attr.aria-label]="'admin_file.view_table' | translate">
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tabla'"
+                  [attr.aria-pressed]="vista() === 'tabla'"
+                  (click)="setVista('tabla')"
+                  [title]="'admin_file.view_table' | translate">
+            <i class="bi bi-table" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="view-toggle__btn"
+                  [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+                  [attr.aria-pressed]="vista() === 'tarjetas'"
+                  (click)="setVista('tarjetas')"
+                  [title]="'admin_file.view_cards' | translate">
+            <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
+    </div>
+
+  </div>
+
+  <!-- ── Skeleton (sólo el listado) ──────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-wrap">
       <div class="skeleton-table">
         @for (i of [1,2,3,4,5,6,7,8]; track i) {
           <div class="skeleton-row">
@@ -46,7 +110,6 @@
         }
       </div>
     </div>
-
   <!-- ── Error ──────────────────────────────────────────────────────────────── -->
   } @else if (error()) {
     <div class="empty-state">
@@ -59,74 +122,6 @@
 
   <!-- ── Contenido ──────────────────────────────────────────────────────────── -->
   } @else {
-
-    <!-- ── Filtros ──────────────────────────────────────────────────────────── -->
-    <div class="filter-bar mb-3">
-
-      <!-- Búsqueda -->
-      <div class="filter-bar__search">
-        <div class="input-group">
-          <span class="input-group-text search-icon">
-            <i class="bi bi-search"></i>
-          </span>
-          <input type="text" class="form-control search-input"
-                 [placeholder]="'admin_file.search_placeholder' | translate"
-                 [value]="busqueda()"
-                 (input)="setBusqueda($event)">
-          @if (busqueda()) {
-            <button class="btn search-clear" type="button" (click)="clearBusqueda()"
-                    [title]="'common.clear' | translate">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Status chips -->
-      <div class="filter-bar__chips">
-        <div class="status-chips" role="group">
-          @for (estado of estados; track estado) {
-            <button type="button" class="status-chip"
-                    [class.status-chip--active]="filtroEstado() === estado"
-                    (click)="setFiltroEstado(estado)">
-              <span class="status-chip__label">
-                {{ estado === 'todos'
-                    ? ('common.all' | translate)
-                    : (('admin_file.status_' + estado) | translate) }}
-              </span>
-              @if (estado === 'todos') {
-                <span class="status-chip__count">{{ totalItems() }}</span>
-              }
-            </button>
-          }
-        </div>
-        <div class="filter-bar__right">
-          @if (hayFiltros()) {
-            <button class="btn-clear-filters" (click)="limpiarFiltros()">
-              <i class="bi bi-x-circle"></i>{{ 'common.clear_filters' | translate }}
-            </button>
-          }
-          <div class="view-toggle d-none d-md-inline-flex" role="group"
-               [attr.aria-label]="'admin_file.view_table' | translate">
-            <button type="button" class="view-toggle__btn"
-                    [class.view-toggle__btn--active]="vista() === 'tabla'"
-                    [attr.aria-pressed]="vista() === 'tabla'"
-                    (click)="setVista('tabla')"
-                    [title]="'admin_file.view_table' | translate">
-              <i class="bi bi-table" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="view-toggle__btn"
-                    [class.view-toggle__btn--active]="vista() === 'tarjetas'"
-                    [attr.aria-pressed]="vista() === 'tarjetas'"
-                    (click)="setVista('tarjetas')"
-                    [title]="'admin_file.view_cards' | translate">
-              <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </div>
 
     <!-- ── Tabla / Tarjetas ─────────────────────────────────────────────────── -->
     <div class="table-card">
@@ -274,6 +269,19 @@
                 <div class="file-card__body">
                   <span class="cell-primary file-card__name">{{ e.cliente_nombre }}</span>
                   <span class="cell-secondary file-card__service">{{ servicioNombre(e) }}</span>
+                  @if (direccionLinea1(e) || direccionLinea2(e)) {
+                    <p class="file-card__addr" [title]="direccionCompleta(e)">
+                      <i class="bi bi-geo-alt file-card__addr-icon" aria-hidden="true"></i>
+                      <span class="file-card__addr-text">
+                        @if (direccionLinea1(e)) {
+                          <span class="file-card__addr-line">{{ direccionLinea1(e) }}</span>
+                        }
+                        @if (direccionLinea2(e)) {
+                          <span class="file-card__addr-line file-card__addr-line--muted">{{ direccionLinea2(e) }}</span>
+                        }
+                      </span>
+                    </p>
+                  }
                 </div>
 
                 <dl class="file-card__meta">

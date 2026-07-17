@@ -12,6 +12,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ExpedienteConOfertaAdmin } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
+import {
+  coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
+} from '../../../shared/util/busqueda';
 
 @Component({
   selector: 'app-admin-offer-list',
@@ -54,8 +57,14 @@ export class AdminOfferListComponent implements OnInit {
           e.estimador_nombre   ?? '',
           e.constructor_nombre ?? '',
           e.oferta_estado      ?? '',
+          // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+          // `canton` la ciudad y `distrito` el código postal.
+          e.direccion,
+          e.canton,
+          e.provincia,
+          e.distrito,
         ].join(' ').toLowerCase();
-        if (!haystack.includes(q)) return false;
+        if (!coincideBusqueda(haystack, q)) return false;
       }
       return true;
     });
@@ -117,6 +126,11 @@ export class AdminOfferListComponent implements OnInit {
     if (lang === 'fr') return exp.servicio_nombre_fr || exp.servicio_nombre;
     return exp.servicio_nombre;
   }
+
+  // ── Dirección (formato postal en dos líneas) ───────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   estadoBadgeExp(estado: string): string {
     const map: Record<string, string> = {
