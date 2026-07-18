@@ -152,14 +152,24 @@ export class AdminOfferEditComponent implements OnInit {
       const [detalle, archivosExpediente, constructoresList, ofertas] = await Promise.all([
         this.expedienteService.getExpedienteParaOferta(id),
         this.archivoService.listarPorExpediente(id),
-        this.perfilRepo.findByRoles(['constructor', 'administrador'] as const),
+        this.perfilRepo.findActivosByRoles(['constructor']),
         this.ofertaService.getOfertasDeExpediente(id),
       ]);
 
       this.detalle.set(detalle);
       this.fotos.set(archivosExpediente.fotos);
       this.documentos.set(archivosExpediente.documentos);
-      this.constructores.set(constructoresList);
+
+      // Los constructores con oferta existente se conservan como opción aunque
+      // hoy estén inactivos u otro rol, para no perder las ofertas guardadas.
+      let lista = constructoresList;
+      const faltantes = [...new Set(ofertas.map(o => o.constructor_id))]
+        .filter(cid => !lista.some(c => c.id === cid));
+      if (faltantes.length) {
+        const extras = await this.perfilRepo.findByIds(faltantes);
+        lista = [...extras, ...lista];
+      }
+      this.constructores.set(lista);
       this.todasLasOfertas.set(ofertas);
 
       const ofertaAceptada = ofertas.find(o => o.estado === 'aceptada');

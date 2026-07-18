@@ -638,7 +638,7 @@ export class AdminFileEditComponent implements OnInit {
 
   private async cargarEstimadores() {
     try {
-      const lista = await this.perfilRepo.findByRoles(['estimador', 'administrador'] as const);
+      const lista = await this.perfilRepo.findActivosByRoles(['estimador']);
       this.estimadores.set(lista);
     } catch (e: any) {
       console.error('[AdminFileEdit] estimadores:', e.message);
@@ -659,6 +659,13 @@ export class AdminFileEditComponent implements OnInit {
       this.estimadorActual.set(
         detalle.estimador_id && detalle.estimador_nombre !== '—' ? detalle.estimador_nombre : null
       );
+
+      // El estimador ya asignado se conserva como opción aunque hoy esté
+      // inactivo o tenga otro rol, para no perder la asignación existente.
+      if (detalle.estimador_id && !this.estimadores().some(e => e.id === detalle.estimador_id)) {
+        const asignado = await this.perfilRepo.findByIds([detalle.estimador_id]);
+        this.estimadores.update(lista => [...asignado, ...lista]);
+      }
 
       // Pre-llenar cliente
       this.clienteId.set(datos.cliente_id);
