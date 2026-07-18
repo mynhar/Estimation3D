@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { OfertaService } from '../../services/oferta.service';
+import { InvitacionService } from '../../services/invitacion.service';
 import { ExpedienteDisponible } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 
@@ -23,12 +24,15 @@ export class AvailableFilesComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
   private ofertaService     = inject(OfertaService);
+  private invitacionService = inject(InvitacionService);
   private translate         = inject(TranslateService);
   private router            = inject(Router);
 
   user          = toSignal(this.auth.user$);
   expedientes   = signal<ExpedienteDisponible[]>([]);
   ofertasHechas = signal<Set<string>>(new Set());
+  /** Expedientes a los que este constructor fue invitado por correo. */
+  invitadosCorreo = signal<Set<string>>(new Set());
   cargando      = signal(true);
 
   // ── Vista (tarjetas por defecto) ───────────────────────────────────────────
@@ -80,7 +84,13 @@ export class AvailableFilesComponent implements OnInit {
 
         return true;
       })
-      .sort((a, b) => new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime());
+      // Invitados por correo pendientes de oferta primero; luego más recientes.
+      .sort((a, b) => {
+        const ua = this.esUrgente(a.id) ? 1 : 0;
+        const ub = this.esUrgente(b.id) ? 1 : 0;
+        if (ua !== ub) return ub - ua;
+        return new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime();
+      });
   });
 
   expedientesPaginados = computed(() => {
@@ -88,6 +98,9 @@ export class AvailableFilesComponent implements OnInit {
     return this.expedientesFiltrados().slice(desde, desde + this.POR_PAGINA);
   });
 
+  totalUrgentes = computed(() =>
+    this.expedientes().filter(e => this.esUrgente(e.id)).length
+  );
   totalSinOferta = computed(() =>
     this.expedientes().filter(e => !this.tieneOferta(e.id)).length
   );
@@ -108,14 +121,18 @@ export class AvailableFilesComponent implements OnInit {
   async ngOnInit() {
     const userId = this.user()?.id;
     try {
-      const [expedientes, ofertasHechas] = await Promise.all([
+      const [expedientes, ofertasHechas, invitadosCorreo] = await Promise.all([
         this.expedienteService.getExpedientesDisponibles(),
         userId
           ? this.ofertaService.getExpedienteIdsConOferta(userId)
           : Promise.resolve(new Set<string>()),
+        userId
+          ? this.invitacionService.getExpedienteIdsInvitadoPorCorreo(userId)
+          : Promise.resolve(new Set<string>()),
       ]);
       this.expedientes.set(expedientes);
       this.ofertasHechas.set(ofertasHechas);
+      this.invitadosCorreo.set(invitadosCorreo);
     } catch (e: any) {
       console.error('[AvailableFiles]', e.message);
     } finally {
@@ -126,6 +143,11 @@ export class AvailableFilesComponent implements OnInit {
   // ── Helpers ───────────────────────────────────────────────────────────────
   tieneOferta(expedienteId: string): boolean {
     return this.ofertasHechas().has(expedienteId);
+  }
+
+  /** Invitado por correo y aún sin oferta → prioridad y marca "Urgente-Invitado". */
+  esUrgente(expedienteId: string): boolean {
+    return this.invitadosCorreo().has(expedienteId) && !this.tieneOferta(expedienteId);
   }
 
   setVista(v: VistaExpedientes) {

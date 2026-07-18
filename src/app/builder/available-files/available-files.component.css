@@ -44,6 +44,19 @@
   color: var(--ds-success);
   border-color: rgba(91, 122, 79, 0.3);
 }
+.stat-pill--urgent {
+  background: var(--ds-danger-soft);
+  color: var(--ds-danger);
+  border-color: rgba(161, 69, 69, 0.3);
+}
+
+/* ── Marca "Urgente-Invitado" (invitación por correo pendiente) ──────── */
+.tag-urgent {
+  background-color: var(--ds-danger-soft);
+  border-color: rgba(161, 69, 69, 0.35);
+  color: var(--ds-danger);
+  font-weight: var(--ds-weight-semibold);
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    LOADING / EMPTY
@@ -246,6 +259,12 @@
 .file-card--offered {
   border-left-color: var(--ds-success);
   background: rgba(91, 122, 79, 0.03);
+}
+/* Invitado por correo pendiente: prioridad visual sobre el color de competencia */
+.file-card--invited {
+  border-left-color: var(--ds-danger);
+  border-left-width: 4px;
+  background: rgba(161, 69, 69, 0.03);
 }
 
 .file-card__body {
@@ -467,6 +486,10 @@
 .files-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
 .files-table__row:hover { background: var(--ds-gold-faint); }
 .files-table__row--offered { background: rgba(91, 122, 79, 0.03); }
+.files-table__row--invited {
+  background: rgba(161, 69, 69, 0.04);
+  box-shadow: inset 3px 0 0 var(--ds-danger);
+}
 .files-table__row--select { cursor: pointer; }
 .files-table__row--select:focus-visible {
   outline: 2px solid var(--ds-gold);

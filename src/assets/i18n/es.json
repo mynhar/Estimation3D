@@ -632,6 +632,8 @@
     "legend_low": "Baja (0–1 ofertas)",
     "legend_mid": "Media (2–3 ofertas)",
     "legend_high": "Alta (4–5 ofertas)",
+    "legend_invited": "Urgente-Invitado (invitación por correo)",
+    "invited_badge": "Urgente-Invitado",
     "view_table": "Vista tabla",
     "view_cards": "Vista tarjetas",
     "photo_none": "Sin tour 3D disponible",
@@ -1225,6 +1227,19 @@
     "delete_confirm_btn": "Sí, eliminar",
     "deleting": "Eliminando…",
     "delete_blocked": "No se puede eliminar una estimación en estado adjudicado o contratado."
+  },
+  "admin_invite": {
+    "title": "Invitación a constructores",
+    "hint": "Seleccione uno o más constructores para enviarles la información del expediente por correo. Solo los constructores invitados podrán ver este expediente y hacer ofertas.",
+    "need_estimado": "El expediente debe estar estimado antes de poder invitar constructores.",
+    "no_constructores": "No hay constructores activos.",
+    "no_email": "Sin correo registrado",
+    "invited": "Invitado",
+    "selected_count": "{{n}} seleccionado(s)",
+    "send_btn": "Enviar invitación-correo",
+    "sending": "Enviando…",
+    "success": "Invitación enviada correctamente.",
+    "err_none": "Seleccione al menos un constructor."
   },
   "admin_offer": {
     "title": "Ofertas",

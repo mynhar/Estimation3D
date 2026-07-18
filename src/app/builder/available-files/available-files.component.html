@@ -19,6 +19,12 @@
 
       @if (!cargando() && expedientes().length > 0) {
         <div class="d-flex gap-2 flex-wrap align-items-center pt-1">
+          @if (totalUrgentes() > 0) {
+            <span class="stat-pill stat-pill--urgent">
+              <i class="bi bi-envelope-exclamation me-1"></i>
+              {{ totalUrgentes() }} {{ 'available_files.invited_badge' | translate }}
+            </span>
+          }
           <span class="stat-pill stat-pill--neutral">
             <i class="bi bi-clipboard2-check me-1"></i>
             {{ expedientes().length }} {{ 'available_files.available' | translate }}
@@ -211,7 +217,8 @@
                   (click)="hacerOferta(exp.id)"
                   (keydown.enter)="hacerOferta(exp.id)"
                   (keydown.space)="$event.preventDefault(); hacerOferta(exp.id)"
-                  [class.files-table__row--offered]="tieneOferta(exp.id)">
+                  [class.files-table__row--offered]="tieneOferta(exp.id)"
+                  [class.files-table__row--invited]="esUrgente(exp.id)">
 
                 <td class="files-table__col-photo">
                   <div class="files-thumb">
@@ -227,7 +234,11 @@
 
                 <td class="files-table__col-num">
                   <span class="file-num">{{ exp.numero }}</span>
-                  @if (esReciente(exp.creado_en)) {
+                  @if (esUrgente(exp.id)) {
+                    <span class="tag tag-urgent ms-1">
+                      <i class="bi bi-envelope-exclamation me-1"></i>{{ 'available_files.invited_badge' | translate }}
+                    </span>
+                  } @else if (esReciente(exp.creado_en)) {
                     <span class="tag tag-gold ms-1">
                       <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
                     </span>
@@ -298,7 +309,8 @@
                  [class.file-card--offered]="tieneOferta(exp.id)"
                  [class.file-card--low]="!tieneOferta(exp.id) && exp.total_ofertas <= 1"
                  [class.file-card--mid]="!tieneOferta(exp.id) && exp.total_ofertas >= 2 && exp.total_ofertas <= 3"
-                 [class.file-card--high]="!tieneOferta(exp.id) && exp.total_ofertas >= 4">
+                 [class.file-card--high]="!tieneOferta(exp.id) && exp.total_ofertas >= 4"
+                 [class.file-card--invited]="esUrgente(exp.id)">
 
               <!-- Foto del expediente (miniatura del tour 3D Matterport) -->
               <div class="file-photo">
@@ -311,7 +323,11 @@
                     <i class="bi bi-badge-3d" aria-hidden="true"></i>
                   </div>
                 }
-                @if (esReciente(exp.creado_en)) {
+                @if (esUrgente(exp.id)) {
+                  <span class="tag tag-urgent file-photo__tag">
+                    <i class="bi bi-envelope-exclamation me-1"></i>{{ 'available_files.invited_badge' | translate }}
+                  </span>
+                } @else if (esReciente(exp.creado_en)) {
                   <span class="tag tag-gold file-photo__tag">
                     <i class="bi bi-star me-1"></i>{{ 'common.new' | translate }}
                   </span>
@@ -406,6 +422,10 @@
       <!-- â”€â”€ Leyenda â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <div class="legend-bar mt-4">
         <span class="legend-bar__title">{{ 'available_files.legend_title' | translate }}</span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:var(--ds-danger)"></span>
+          {{ 'available_files.legend_invited' | translate }}
+        </span>
         <span class="legend-item">
           <span class="legend-dot" style="background:var(--ds-success)"></span>
           {{ 'available_files.legend_low' | translate }}

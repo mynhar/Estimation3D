@@ -632,6 +632,8 @@
     "legend_low": "Basse (0–1 offres)",
     "legend_mid": "Moyenne (2–3 offres)",
     "legend_high": "Élevée (4–5 offres)",
+    "legend_invited": "Urgent-Invité (invitation par courriel)",
+    "invited_badge": "Urgent-Invité",
     "view_table": "Vue tableau",
     "view_cards": "Vue cartes",
     "photo_none": "Aucun tour 3D disponible",
@@ -1225,6 +1227,19 @@
     "delete_confirm_btn": "Oui, supprimer",
     "deleting": "Suppression…",
     "delete_blocked": "Impossible de supprimer une estimation avec le statut adjugé ou contracté."
+  },
+  "admin_invite": {
+    "title": "Invitation aux constructeurs",
+    "hint": "Sélectionnez un ou plusieurs constructeurs pour leur envoyer les informations du dossier par courriel. Seuls les constructeurs invités pourront voir ce dossier et soumettre des offres.",
+    "need_estimado": "Le dossier doit être estimé avant de pouvoir inviter des constructeurs.",
+    "no_constructores": "Aucun constructeur actif.",
+    "no_email": "Aucun courriel enregistré",
+    "invited": "Invité",
+    "selected_count": "{{n}} sélectionné(s)",
+    "send_btn": "Envoyer l'invitation-courriel",
+    "sending": "Envoi…",
+    "success": "Invitation envoyée avec succès.",
+    "err_none": "Sélectionnez au moins un constructeur."
   },
   "admin_offer": {
     "title": "Offres",

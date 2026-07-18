@@ -61,6 +61,19 @@ export class PerfilRepository {
     return (data ?? []) as PerfilNombreRol[];
   }
 
+  /** Perfiles activos de los roles dados, con teléfono y correo. */
+  async findActivosByRolesWithContact(roles: RolUsuario[]): Promise<PerfilContacto[]> {
+    if (!roles.length) return [];
+    const { data, error } = await this.db
+      .from('perfil')
+      .select('id, nombre, apellido, telefono, email')
+      .in('rol', roles)
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PerfilContacto[];
+  }
+
   async findByRoles(roles: RolUsuario[]): Promise<PerfilNombre[]> {
     if (!roles.length) return [];
     const { data, error } = await this.db

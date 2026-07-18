@@ -411,6 +411,87 @@
           </div>
         </section>
 
+        <!-- Invitación a constructores -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-envelope-paper"></i>
+              {{ 'admin_invite.title' | translate }}
+              @if (invitadosIds().size > 0) {
+                <span class="fued-count-badge">{{ invitadosIds().size }}</span>
+              }
+            </div>
+          </div>
+          <div class="fued-card__body">
+
+            @if (!puedeInvitar) {
+              <div class="fued-alert fued-alert--warning">
+                <i class="bi bi-info-circle"></i>
+                {{ 'admin_invite.need_estimado' | translate }}
+              </div>
+            } @else if (constructores().length === 0) {
+              <div class="fued-empty-inline">
+                <i class="bi bi-people"></i>
+                <p>{{ 'admin_invite.no_constructores' | translate }}</p>
+              </div>
+            } @else {
+              <p class="fued-invite-hint">{{ 'admin_invite.hint' | translate }}</p>
+
+              <ul class="fued-invite-list" role="list">
+                @for (c of constructores(); track c.id) {
+                  <li>
+                    <label class="fued-invite-row"
+                           [class.fued-invite-row--selected]="seleccionInvitados().has(c.id)"
+                           [class.fued-invite-row--disabled]="!c.email">
+                      <input type="checkbox" class="fued-invite-check"
+                             [checked]="seleccionInvitados().has(c.id)"
+                             (change)="toggleSeleccionInvitado(c.id)"
+                             [disabled]="!c.email || enviandoInvitacion()" />
+                      <span class="fued-invite-row__info">
+                        <span class="fued-invite-row__name">{{ c.nombre }} {{ c.apellido }}</span>
+                        <span class="fued-invite-row__email">
+                          @if (c.email) {
+                            <i class="bi bi-envelope"></i>{{ c.email }}
+                          } @else {
+                            <i class="bi bi-envelope-slash"></i>{{ 'admin_invite.no_email' | translate }}
+                          }
+                        </span>
+                      </span>
+                      @if (estaInvitado(c.id)) {
+                        <span class="fued-invite-badge">
+                          <i class="bi bi-check-circle"></i>{{ 'admin_invite.invited' | translate }}
+                        </span>
+                      }
+                    </label>
+                  </li>
+                }
+              </ul>
+
+              @if (errorInvitacionMsg()) {
+                <div class="fued-alert fued-alert--danger">{{ errorInvitacionMsg() | translate }}</div>
+              }
+              @if (exitoInvitacionMsg()) {
+                <div class="fued-alert fued-alert--success">{{ exitoInvitacionMsg() | translate }}</div>
+              }
+
+              <div class="fued-invite-actions">
+                <span class="fued-invite-count">
+                  {{ 'admin_invite.selected_count' | translate:{ n: seleccionInvitados().size } }}
+                </span>
+                <button class="fued-btn-submit fued-btn-invite" (click)="enviarInvitaciones()"
+                        [disabled]="enviandoInvitacion() || seleccionInvitados().size === 0">
+                  @if (enviandoInvitacion()) {
+                    <span class="fued-spinner-sm"></span>{{ 'admin_invite.sending' | translate }}
+                  } @else {
+                    <i class="bi bi-envelope-arrow-up"></i>{{ 'admin_invite.send_btn' | translate }}
+                  }
+                </button>
+              </div>
+            }
+
+          </div>
+        </section>
+
       </div>
 
       <!-- ── Columna derecha: formulario sticky ──────────────────────────── -->

@@ -9,3 +9,4 @@ export * from './archivo.repository';
 export * from './ficha-normativa.repository';
 export * from './imprevisto-catalogo.repository';
 export * from './asistente-evento.repository';
+export * from './invitacion.repository';

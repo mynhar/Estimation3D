@@ -632,6 +632,8 @@
     "legend_low": "Low (0–1 offers)",
     "legend_mid": "Medium (2–3 offers)",
     "legend_high": "High (4–5 offers)",
+    "legend_invited": "Urgent-Invited (email invitation)",
+    "invited_badge": "Urgent-Invited",
     "view_table": "Table view",
     "view_cards": "Card view",
     "photo_none": "No 3D tour available",
@@ -1225,6 +1227,19 @@
     "delete_confirm_btn": "Yes, delete",
     "deleting": "Deleting…",
     "delete_blocked": "Cannot delete an estimation in adjudicated or contracted status."
+  },
+  "admin_invite": {
+    "title": "Builder invitations",
+    "hint": "Select one or more builders to email them the file information. Only invited builders can see this file and submit offers.",
+    "need_estimado": "The file must be estimated before builders can be invited.",
+    "no_constructores": "No active builders.",
+    "no_email": "No email on record",
+    "invited": "Invited",
+    "selected_count": "{{n}} selected",
+    "send_btn": "Send invitation email",
+    "sending": "Sending…",
+    "success": "Invitation sent successfully.",
+    "err_none": "Select at least one builder."
   },
   "admin_offer": {
     "title": "Offers",

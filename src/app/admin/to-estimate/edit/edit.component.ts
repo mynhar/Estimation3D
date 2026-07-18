@@ -8,7 +8,8 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
-import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
+import { PerfilRepository, PerfilNombre, PerfilContacto } from '../../../data/perfil.repository';
+import { InvitacionService } from '../../../services/invitacion.service';
 import { ExpedienteDetalle, ArchivoRow } from '../../../models';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
 
@@ -28,6 +29,7 @@ export class AdminToEstimateEditComponent implements OnInit {
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
   private perfilRepo        = inject(PerfilRepository);
+  private invitacionService = inject(InvitacionService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -66,6 +68,14 @@ export class AdminToEstimateEditComponent implements OnInit {
 
   estimadores             = signal<PerfilNombre[]>([]);
   estimadorSeleccionadoId = signal<string>('');
+
+  // ── Invitación a constructores ─────────────────────────────────────────────
+  constructores        = signal<PerfilContacto[]>([]);
+  invitadosIds         = signal<Set<string>>(new Set());
+  seleccionInvitados   = signal<Set<string>>(new Set());
+  enviandoInvitacion   = signal(false);
+  exitoInvitacionMsg   = signal('');
+  errorInvitacionMsg   = signal('');
 
   urlsTour         = signal<string[]>([]);
   collapsedSet     = signal<Set<number>>(new Set());
@@ -132,6 +142,62 @@ export class AdminToEstimateEditComponent implements OnInit {
     }
 
     this.cargarArchivos();
+    this.cargarInvitaciones();
+  }
+
+  // ── Invitación a constructores ─────────────────────────────────────────────
+
+  /** Carga aparte del detalle: un fallo aquí no debe tumbar la página. */
+  private async cargarInvitaciones() {
+    try {
+      const [constructores, invitados] = await Promise.all([
+        this.perfilRepo.findActivosByRolesWithContact(['constructor']),
+        this.invitacionService.getConstructorIdsInvitados(this.expedienteId),
+      ]);
+      this.constructores.set(constructores);
+      this.invitadosIds.set(invitados);
+    } catch (e: any) {
+      console.error('[AdminToEstimateEdit] invitaciones:', e.message);
+    }
+  }
+
+  /** Solo se puede invitar cuando el expediente ya está estimado. */
+  get puedeInvitar(): boolean {
+    const estado = this.detalle()?.estado;
+    return estado === 'estimado' || estado === 'en_oferta';
+  }
+
+  estaInvitado(id: string): boolean {
+    return this.invitadosIds().has(id);
+  }
+
+  toggleSeleccionInvitado(id: string) {
+    const s = new Set(this.seleccionInvitados());
+    if (s.has(id)) s.delete(id); else s.add(id);
+    this.seleccionInvitados.set(s);
+  }
+
+  async enviarInvitaciones() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+
+    const ids = [...this.seleccionInvitados()];
+    if (!ids.length) {
+      this.errorInvitacionMsg.set('admin_invite.err_none');
+      return;
+    }
+
+    this.enviandoInvitacion.set(true);
+    try {
+      await this.invitacionService.enviarInvitaciones(this.expedienteId, ids);
+      this.invitadosIds.update(prev => new Set([...prev, ...ids]));
+      this.seleccionInvitados.set(new Set());
+      this.exitoInvitacionMsg.set('admin_invite.success');
+    } catch (e: any) {
+      this.errorInvitacionMsg.set(e.message);
+    } finally {
+      this.enviandoInvitacion.set(false);
+    }
   }
 
   async guardarEstimacion() {
@@ -169,6 +235,7 @@ export class AdminToEstimateEditComponent implements OnInit {
         this.expedienteService.asignarEstimador(this.expedienteId, estimadorId),
       ]);
       await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
+      this.detalle.update(d => d ? { ...d, estado: 'estimado' } : d);
       this.hasDraft.set(true);
       this.exitoMsg.set('estimator_form.success_estimation');
     } catch (e: any) {

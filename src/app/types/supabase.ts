@@ -554,6 +554,52 @@ export type Database = {
           },
         ]
       }
+      expediente_invitacion: {
+        Row: {
+          constructor_id: string
+          enviado_en: string
+          expediente_id: string
+          id: string
+          invitado_por: string | null
+        }
+        Insert: {
+          constructor_id: string
+          enviado_en?: string
+          expediente_id: string
+          id?: string
+          invitado_por?: string | null
+        }
+        Update: {
+          constructor_id?: string
+          enviado_en?: string
+          expediente_id?: string
+          id?: string
+          invitado_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expediente_invitacion_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_invitacion_constructor_id_fkey"
+            columns: ["constructor_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_invitacion_invitado_por_fkey"
+            columns: ["invitado_por"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fase_servicio: {
         Row: {
           activo: boolean

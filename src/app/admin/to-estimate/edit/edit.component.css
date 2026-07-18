@@ -633,6 +633,69 @@
 .fued-btn-submit:hover { opacity: 0.9; }
 .fued-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Invitación a constructores ───────────────────────────────────────────── */
+.fued-invite-hint {
+  font-size: var(--ds-text-xs); color: var(--ds-ink-muted);
+  margin: 0 0 var(--ds-space-3);
+}
+
+.fued-invite-list {
+  list-style: none; margin: 0 0 var(--ds-space-4); padding: 0;
+  display: flex; flex-direction: column; gap: var(--ds-space-2);
+}
+
+.fued-invite-row {
+  display: flex; align-items: center; gap: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md);
+  background: transparent; cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.fued-invite-row:hover { border-color: var(--ds-gold-soft); background: var(--ds-gold-faint); }
+.fued-invite-row:focus-within { box-shadow: var(--ds-focus-ring); }
+.fued-invite-row--selected { border-color: var(--ds-gold); background: var(--ds-gold-faint); }
+.fued-invite-row--disabled { opacity: 0.55; cursor: not-allowed; }
+.fued-invite-row--disabled:hover { border-color: var(--ds-border); background: transparent; }
+
+.fued-invite-check {
+  width: 16px; height: 16px; flex-shrink: 0;
+  accent-color: var(--ds-gold-active); cursor: pointer;
+}
+.fued-invite-check:disabled { cursor: not-allowed; }
+/* El anillo de foco lo pinta la fila entera vía :focus-within */
+.fued-invite-check:focus-visible { outline: none; }
+
+.fued-invite-row__info {
+  display: flex; flex-direction: column; gap: 2px;
+  min-width: 0; flex: 1;
+}
+.fued-invite-row__name {
+  font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.fued-invite-row__email {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs); color: var(--ds-ink-muted);
+  overflow-wrap: anywhere;
+}
+
+.fued-invite-badge {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1);
+  padding: 2px var(--ds-space-2);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-success-soft); color: var(--ds-success);
+  font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-semibold);
+  white-space: nowrap;
+}
+
+.fued-invite-actions {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--ds-space-3); flex-wrap: wrap;
+  margin-top: var(--ds-space-4);
+}
+.fued-invite-count { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
+.fued-btn-invite { width: auto; padding-inline: var(--ds-space-5); }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .fued-main { grid-template-columns: 1fr 340px; }
