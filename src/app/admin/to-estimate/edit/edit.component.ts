@@ -117,10 +117,18 @@ export class AdminToEstimateEditComponent implements OnInit {
       const [detalle, estimacion, estimadoresList] = await Promise.all([
         this.expedienteService.getDetalle(id),
         this.estimacionService.get(id),
-        this.perfilRepo.findByRoles(['estimador', 'administrador'] as const),
+        this.perfilRepo.findActivosByRoles(['estimador']),
       ]);
       this.detalle.set(detalle);
-      this.estimadores.set(estimadoresList);
+
+      // El estimador ya asignado se conserva como opción aunque hoy esté
+      // inactivo o tenga otro rol, para no perder la asignación existente.
+      let lista = estimadoresList;
+      if (detalle.estimador_id && !lista.some(e => e.id === detalle.estimador_id)) {
+        const asignado = await this.perfilRepo.findByIds([detalle.estimador_id]);
+        lista = [...asignado, ...lista];
+      }
+      this.estimadores.set(lista);
       this.estimadorSeleccionadoId.set(detalle.estimador_id ?? '');
 
       if (estimacion) {
