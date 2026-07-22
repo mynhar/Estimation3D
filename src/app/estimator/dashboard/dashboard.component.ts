@@ -31,6 +31,8 @@ const PIPELINE_STEPS: string[] = [
   'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado',
 ];
 
+type VistaPipeline = 'tabla' | 'tarjetas';
+
 const R             = 54;
 const CIRCUMFERENCE = 2 * Math.PI * R;
 
@@ -70,6 +72,12 @@ export class EstimatorDashboardComponent implements OnInit {
   disponibles = signal(0);
   montoTotal  = signal(0);
   cargando    = signal(true);
+
+  /** Vista del seguimiento post-estimación (tabla por defecto; móvil siempre tarjetas). */
+  vista = signal<VistaPipeline>('tabla');
+
+  /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
+  private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   // ── Computed: grupos ──────────────────────────────────────────────────────
   activos = computed(() =>
@@ -209,6 +217,22 @@ export class EstimatorDashboardComponent implements OnInit {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  setVista(v: VistaPipeline): void {
+    this.vista.set(v);
+  }
+
+  /**
+   * Miniatura del expediente extraída del tour 3D Matterport.
+   * Null si el expediente no tiene tour o si la imagen ya falló al cargar.
+   */
+  fotoExpediente(exp: ExpedienteRow): string | null {
+    return this.fotosFallidas().has(exp.id) ? null : exp.foto;
+  }
+
+  onFotoError(id: string): void {
+    this.fotosFallidas.update(set => new Set(set).add(id));
+  }
+
   cfg(estado: string): EstadoCfg {
     return ESTADO_CFG[estado] ?? ESTADO_CFG['estimado'];
   }

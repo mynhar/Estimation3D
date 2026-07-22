@@ -452,19 +452,40 @@
               </p>
             </div>
           </div>
-          <div class="estd-pipeline-pills">
-            @if (enMercado().length > 0) {
-              <span class="kpi-pill">
-                <i class="bi bi-people" aria-hidden="true"></i>
-                {{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
-              </span>
-            }
-            @if (contratados().length > 0) {
-              <span class="kpi-pill" style="background:var(--ds-success-soft);border-color:var(--ds-success)">
-                <i class="bi bi-trophy" aria-hidden="true"></i>
-                {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
-              </span>
-            }
+          <div class="estd-pipe-head-tools">
+            <div class="estd-pipeline-pills">
+              @if (enMercado().length > 0) {
+                <span class="kpi-pill">
+                  <i class="bi bi-people" aria-hidden="true"></i>
+                  {{ enMercado().length }} {{ 'dashboard_estimator.on_market' | translate }}
+                </span>
+              }
+              @if (contratados().length > 0) {
+                <span class="kpi-pill" style="background:var(--ds-success-soft);border-color:var(--ds-success)">
+                  <i class="bi bi-trophy" aria-hidden="true"></i>
+                  {{ contratados().length }} {{ 'dashboard_estimator.contracted' | translate }}
+                </span>
+              }
+            </div>
+
+            <!-- Vista tabla / tarjetas (en móvil siempre tarjetas) -->
+            <div class="estd-view-toggle d-none d-md-inline-flex" role="group"
+                 [attr.aria-label]="'estimated_files.view_cards' | translate">
+              <button type="button" class="estd-view-toggle__btn"
+                      [class.estd-view-toggle__btn--active]="vista() === 'tabla'"
+                      [attr.aria-pressed]="vista() === 'tabla'"
+                      (click)="setVista('tabla')"
+                      [title]="'estimated_files.view_table' | translate">
+                <i class="bi bi-table" aria-hidden="true"></i>
+              </button>
+              <button type="button" class="estd-view-toggle__btn"
+                      [class.estd-view-toggle__btn--active]="vista() === 'tarjetas'"
+                      [attr.aria-pressed]="vista() === 'tarjetas'"
+                      (click)="setVista('tarjetas')"
+                      [title]="'estimated_files.view_cards' | translate">
+                <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -483,36 +504,154 @@
           }
         </div>
 
-        <!-- Filas del pipeline -->
-        <div class="estd-pipeline-list" role="list">
-          @for (exp of postEstimacion(); track exp.id) {
-            <div class="estd-pipe-row"
-                 [class.estd-pipe-row--contratado]="exp.estado === 'contratado'"
-                 [class.estd-pipe-row--cancelado]="exp.estado === 'cancelado'"
-                 role="listitem">
+        <!-- Vista tabla (escritorio) -->
+        <div class="estd-pipe-table-wrap d-none" [class.d-md-block]="vista() === 'tabla'">
+          <table class="estd-pipe-table">
+            <thead>
+              <tr>
+                <th class="estd-pipe-table__col-photo" aria-hidden="true"></th>
+                <th class="estd-pipe-table__col-num">{{ 'estimated_files.col_number' | translate }}</th>
+                <th>{{ 'estimated_files.col_service' | translate }}</th>
+                <th>{{ 'estimated_files.col_client' | translate }}</th>
+                <th>{{ 'estimated_files.col_location' | translate }}</th>
+                <th>{{ 'estimated_files.col_status' | translate }}</th>
+                <th class="estd-pipe-table__col-action"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (exp of postEstimacion(); track exp.id) {
+                <tr class="estd-pipe-table__row"
+                    (click)="irAVer(exp.id)"
+                    [class.estd-pipe-table__row--contratado]="exp.estado === 'contratado'"
+                    [class.estd-pipe-table__row--cancelado]="exp.estado === 'cancelado'">
 
-              <!-- Info del expediente -->
-              <div class="estd-pipe-info">
-                <div class="estd-pipe-info__head">
-                  <span class="estd-pipe-num">{{ exp.numero }}</span>
-                  @if (exp.estado === 'contratado') {
-                    <i class="bi bi-trophy estd-pipe-trophy" aria-label="Contratado" title="Contratado"></i>
+                  <!-- Foto del expediente (miniatura del tour 3D) -->
+                  <td class="estd-pipe-table__col-photo">
+                    <div class="estd-thumb">
+                      @if (fotoExpediente(exp); as foto) {
+                        <img [src]="foto" loading="lazy" [alt]="exp.numero"
+                             (error)="onFotoError(exp.id)" />
+                      } @else {
+                        <i class="bi bi-badge-3d" aria-hidden="true"
+                           [title]="'estimated_files.photo_none' | translate"></i>
+                      }
+                    </div>
+                  </td>
+
+                  <td class="estd-pipe-table__col-num">
+                    <span class="estd-pipe-num">{{ exp.numero }}</span>
+                    @if (exp.estado === 'contratado') {
+                      <i class="bi bi-trophy estd-pipe-trophy" aria-label="Contratado" title="Contratado"></i>
+                    }
+                  </td>
+
+                  <td><span class="estd-pipe-service">{{ servicioNombre(exp) }}</span></td>
+
+                  <td>{{ exp.cliente_nombre }}</td>
+
+                  <td>{{ exp.provincia }}, {{ exp.canton }}</td>
+
+                  <td>
+                    <div class="estd-pipe-track estd-pipe-track--cell">
+                      @if (exp.estado !== 'cancelado') {
+                        <div class="estd-p-dots" role="progressbar"
+                             [attr.aria-label]="('state.' + exp.estado) | translate">
+                          @for (step of pipelineSteps; track step; let last = $last) {
+                            <span [class]="pDotClass(exp.estado ?? '', step)"
+                                  [title]="('state.' + step) | translate">
+                            </span>
+                            @if (!last) {
+                              <span class="estd-p-line"
+                                    [class.estd-p-line--done]="stepDone(exp.estado ?? '', step)">
+                              </span>
+                            }
+                          }
+                        </div>
+                        <span [class]="'estd-pipe-badge ' + cfg(exp.estado ?? '').cls">
+                          <i class="bi {{ cfg(exp.estado ?? '').icon }}" aria-hidden="true"></i>
+                          {{ ('state.' + (exp.estado ?? '')) | translate }}
+                        </span>
+                      } @else {
+                        <span class="estd-pipe-badge estd-pipe-badge--cancelado">
+                          {{ 'state.cancelado' | translate }}
+                        </span>
+                      }
+                    </div>
+                  </td>
+
+                  <td class="estd-pipe-table__col-action" (click)="$event.stopPropagation()">
+                    <button class="estd-btn-eye"
+                            (click)="irAVer(exp.id)"
+                            [attr.aria-label]="('common.view' | translate) + ' ' + exp.numero">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Vista tarjetas (móvil siempre · escritorio según toggle) -->
+        <div class="estd-pipe-cards" [class.d-md-none]="vista() === 'tabla'" role="list">
+          @for (exp of postEstimacion(); track exp.id) {
+            <article class="estd-pipe-card" role="listitem" tabindex="0"
+                     (click)="irAVer(exp.id)"
+                     (keydown.enter)="irAVer(exp.id)"
+                     (keydown.space)="$event.preventDefault(); irAVer(exp.id)"
+                     [class.estd-pipe-card--contratado]="exp.estado === 'contratado'"
+                     [class.estd-pipe-card--cancelado]="exp.estado === 'cancelado'"
+                     [attr.aria-label]="exp.numero + ' — ' + servicioNombre(exp)">
+
+              <!-- Foto del expediente (miniatura del tour 3D) -->
+              <div class="estd-pipe-card__photo">
+                @if (fotoExpediente(exp); as foto) {
+                  <img class="estd-pipe-card__photo-img" [src]="foto" loading="lazy"
+                       [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+                } @else {
+                  <div class="estd-pipe-card__photo-empty"
+                       [title]="'estimated_files.photo_none' | translate">
+                    <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                  </div>
+                }
+              </div>
+
+              <div class="estd-pipe-card__body">
+
+                <!-- Cabecera: número + trofeo + badge de estado -->
+                <div class="estd-pipe-card__head">
+                  <div class="estd-pipe-card__head-left">
+                    <span class="estd-pipe-num">{{ exp.numero }}</span>
+                    @if (exp.estado === 'contratado') {
+                      <i class="bi bi-trophy estd-pipe-trophy" aria-label="Contratado" title="Contratado"></i>
+                    }
+                  </div>
+                  @if (exp.estado !== 'cancelado') {
+                    <span [class]="'estd-pipe-badge ' + cfg(exp.estado ?? '').cls">
+                      <i class="bi {{ cfg(exp.estado ?? '').icon }}" aria-hidden="true"></i>
+                      {{ ('state.' + (exp.estado ?? '')) | translate }}
+                    </span>
+                  } @else {
+                    <span class="estd-pipe-badge estd-pipe-badge--cancelado">
+                      {{ 'state.cancelado' | translate }}
+                    </span>
                   }
                 </div>
+
                 <p class="estd-pipe-service">{{ servicioNombre(exp) }}</p>
+
                 <p class="estd-pipe-meta">
                   <i class="bi bi-person" aria-hidden="true"></i>
                   {{ exp.cliente_nombre }}
-                  <span class="estd-pipe-sep" aria-hidden="true">Â·</span>
+                  <span class="estd-pipe-sep" aria-hidden="true">·</span>
                   <i class="bi bi-geo-alt" aria-hidden="true"></i>
                   {{ exp.provincia }}, {{ exp.canton }}
                 </p>
-              </div>
 
-              <!-- Track de progreso -->
-              <div class="estd-pipe-track">
+                <!-- Track de progreso -->
                 @if (exp.estado !== 'cancelado') {
-                  <div class="estd-p-dots" role="progressbar"
+                  <div class="estd-p-dots estd-pipe-card__dots" role="progressbar"
                        [attr.aria-label]="('state.' + exp.estado) | translate">
                     @for (step of pipelineSteps; track step; let last = $last) {
                       <span [class]="pDotClass(exp.estado ?? '', step)"
@@ -525,25 +664,10 @@
                       }
                     }
                   </div>
-                  <span [class]="'estd-pipe-badge ' + cfg(exp.estado ?? '').cls">
-                    <i class="bi {{ cfg(exp.estado ?? '').icon }}" aria-hidden="true"></i>
-                    {{ ('state.' + (exp.estado ?? '')) | translate }}
-                  </span>
-                } @else {
-                  <span class="estd-pipe-badge estd-pipe-badge--cancelado">
-                    {{ 'state.cancelado' | translate }}
-                  </span>
                 }
+
               </div>
-
-              <!-- AcciÃ³n ver -->
-              <button class="estd-btn-eye"
-                      (click)="irAVer(exp.id)"
-                      [attr.aria-label]="('common.view' | translate) + ' ' + exp.numero">
-                <i class="bi bi-eye" aria-hidden="true"></i>
-              </button>
-
-            </div>
+            </article>
           }
         </div>
 

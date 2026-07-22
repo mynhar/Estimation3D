@@ -70,7 +70,8 @@
       "PowerShell(\"== TXT raiz ==\")",
       "PowerShell(\"== DKIM de Resend ==\")",
       "PowerShell(\"== SPF subdominio send ==\")",
-      "PowerShell($anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZGtzZnZ4amlteHVxY2VvZXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NTczMjEsImV4cCI6MjA5MjEzMzMyMX0.sO8k6Nyrldu6bU3xfXb8oa31jz6dyQVsrjLpptdcIVE'; $body = '{\"token\":\"e3d-test-8f4a2c91\",\"to\":\"hmbonilla@gmail.com\",\"from\":\"onboarding@resend.dev\"}'; try { $r = Invoke-RestMethod -Method Post -Uri 'https://ckdksfvxjimxuqceoeyr.supabase.co/functions/v1/test-resend' -Headers @{ Authorization = \"Bearer $anon\"; 'Content-Type' = 'application/json' } -Body $body; $r | ConvertTo-Json -Depth 5 } catch { $_.Exception.Message; if \\($_.ErrorDetails\\) { $_.ErrorDetails.Message } })"
+      "PowerShell($anon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZGtzZnZ4amlteHVxY2VvZXlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NTczMjEsImV4cCI6MjA5MjEzMzMyMX0.sO8k6Nyrldu6bU3xfXb8oa31jz6dyQVsrjLpptdcIVE'; $body = '{\"token\":\"e3d-test-8f4a2c91\",\"to\":\"hmbonilla@gmail.com\",\"from\":\"onboarding@resend.dev\"}'; try { $r = Invoke-RestMethod -Method Post -Uri 'https://ckdksfvxjimxuqceoeyr.supabase.co/functions/v1/test-resend' -Headers @{ Authorization = \"Bearer $anon\"; 'Content-Type' = 'application/json' } -Body $body; $r | ConvertTo-Json -Depth 5 } catch { $_.Exception.Message; if \\($_.ErrorDetails\\) { $_.ErrorDetails.Message } })",
+      "PowerShell(npx ng build --configuration development 2>$null)"
     ]
   }
 }
