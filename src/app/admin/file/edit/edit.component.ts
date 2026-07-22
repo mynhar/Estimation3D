@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -7,19 +7,13 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { EstimacionService } from '../../../services/estimacion.service';
-import { OfertaService } from '../../../services/oferta.service';
-import { ContratoService } from '../../../services/contrato.service';
-import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
 import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
-import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
 import {
   Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK,
-  OfertaForm, OfertaConConstructor, ArchivoRow, ESTADO_BADGE_OFERTA,
 } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
-import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
-import { matterportThumb } from '../../../shared/util/matterport';
+import { AdminFileEstimatorReportComponent } from '../estimator-report/estimator-report.component';
+import { AdminFileBuilderBidsComponent } from '../builder-bids/builder-bids.component';
 
 interface ClienteRow {
   id: string;
@@ -45,7 +39,7 @@ const CONTRATO_PCT: Record<string, number> = {
   selector: 'app-admin-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -53,18 +47,17 @@ export class AdminFileEditComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private sanitizer         = inject(DomSanitizer);
   private expedienteService = inject(ExpedienteService);
-  private estimacionService = inject(EstimacionService);
-  private archivoService    = inject(ArchivoService);
-  private ofertaService     = inject(OfertaService);
-  private contratoService   = inject(ContratoService);
   private contratoRepo      = inject(ContratoRepository);
-  private perfilRepo        = inject(PerfilRepository);
   private router            = inject(Router);
   private route             = inject(ActivatedRoute);
   private fb                = inject(FormBuilder);
   private translate         = inject(TranslateService);
 
-  private readonly id = this.route.snapshot.paramMap.get('id')!;
+  /** Público: la plantilla lo pasa al componente del informe del estimador. */
+  readonly id = this.route.snapshot.paramMap.get('id')!;
+
+  /** Pestaña activa del panel izquierdo. */
+  tabActiva = signal<'expediente' | 'informe' | 'ofertas'>('expediente');
 
   private currentLang = toSignal(
     this.translate.onLangChange.pipe(map(e => e.lang)),
@@ -244,210 +237,18 @@ export class AdminFileEditComponent implements OnInit {
   descripcionLen = computed(() => (this.descripcionValue() as string | null)?.length ?? 0);
 
   // ════════════════════════════════════════════════════════════════════════════
-  //  SECCIÓN ESTIMADOR
+  //  SECCIÓN ESTIMADOR — trasladada a admin/file/estimator-report.
+  //  Aquí solo queda el nombre para la cabecera y los eventos del hijo.
   // ════════════════════════════════════════════════════════════════════════════
-  estimadores             = signal<PerfilNombre[]>([]);
-  estimadorSeleccionadoId = signal<string>('');
-
-  fechaVisitaReal     = '';
-  horaVisitaReal      = '';
-  descripcionProblema = '';
-  notasInternas       = '';
-  costoMin: number | null = null;
-  costoMax: number | null = null;
-  urlsTour            = signal<string[]>([]);
-
-  guardandoEst  = signal(false);
-  errorEst      = signal('');
-  exitoEst      = signal(false);
-  hasEstimacion = signal(false);
-
-  // ── Archivos del estimador (fotos / documentos) ────────────────────────────
-  private user = toSignal(this.auth.user$);
-  fotos             = signal<ArchivoRow[]>([]);
-  documentos        = signal<ArchivoRow[]>([]);
-  subiendoFoto      = signal(false);
-  subiendoDoc       = signal(false);
-  errorFotos        = signal('');
-  errorDocs         = signal('');
-  eliminandoArchivo = signal<string | null>(null);
-  fotoAmpliada      = signal<string | null>(null);
-
-  // ── Tours virtuales 3D ─────────────────────────────────────────────────────
-  nuevoTourUrl  = '';
-  guardandoTour = signal(false);
-  errorTour     = signal('');
-
-  get costoValido(): boolean {
-    if (this.costoMin === null && this.costoMax === null) return true;
-    if (this.costoMin === null || this.costoMax === null) return false;
-    return this.costoMin >= 0 && this.costoMax >= this.costoMin;
-  }
 
   // ════════════════════════════════════════════════════════════════════════════
-  //  SECCIÓN CONSTRUCTOR (ofertas)
+  //  SECCIÓN CONSTRUCTOR (ofertas) — trasladada a admin/file/builder-bids.
+  //  Aquí solo quedan los eventos del hijo (estado + recarga del contrato).
   // ════════════════════════════════════════════════════════════════════════════
-  ofertas    = signal<OfertaConConstructor[]>([]);
-  ofertaId   = signal<string | null>(null);
-  private constructorId = '';
 
-  precio: number | null       = null;
-  plazoMin: number | null     = null;
-  plazoMax: number | null     = null;
-  garantiaAnos: number | null = null;
-  fechaInicio                 = '';
-  descripcionOferta           = '';
-
-  guardandoOf = signal(false);
-  errorOf     = signal('');
-  exitoOf     = signal(false);
-
-  ofertaSeleccionada = computed(() =>
-    this.ofertas().find(o => o.id === this.ofertaId()) ?? null
-  );
-
-  get ofertaFormValido(): boolean {
-    return !!(
-      this.ofertaId() &&
-      this.precio && this.precio > 0 &&
-      this.plazoMin && this.plazoMin > 0 &&
-      this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
-      this.fechaInicio &&
-      this.descripcionOferta.trim()
-    );
-  }
-
-  get puedeEditarOferta(): boolean {
-    return this.estadoActual() !== 'contratado';
-  }
-
-  // ── Adjudicación de la oferta (paridad con client/builder-offer) ───────────
-  adjudicando = signal(false);
-  errorAdj    = signal('');
-  exitoAdj    = signal('');
-  videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
-
-  // El RPC aceptar_oferta sólo admite estos estados; fuera de ellos lanza
-  // excepción, así que el botón se bloquea antes de llegar a la BD.
-  private readonly ESTADOS_ADJUDICABLES = ['en_oferta', 'adjudicado'];
-
-  yaContratado = computed(() => {
-    const e = this.estadoActual();
-    return e === 'adjudicado' || e === 'contratado';
-  });
-
-  puedeAdjudicar = computed(() => {
-    if (!this.ofertaId() || this.adjudicando())                        return false;
-    if (!this.ESTADOS_ADJUDICABLES.includes(this.estadoActual()))      return false;
-    // Ya adjudicado: sólo tiene sentido cambiar a una oferta distinta.
-    if (this.estadoActual() === 'adjudicado') {
-      return this.ofertaSeleccionada()?.estado !== 'aceptada';
-    }
-    return true;
-  });
-
-  esSeleccionada(ofertaId: string): boolean { return this.ofertaId() === ofertaId; }
-
-  ofertaBadgeClass(estado: string): string {
-    return ESTADO_BADGE_OFERTA[estado] ?? 'bg-secondary-subtle text-secondary';
-  }
-
-  formatPlazo(min: number | null, max: number | null): string {
-    if (!min && !max) return '—';
-    const w = this.translate.instant('offer.weeks');
-    if (min === max) return `${min} ${w}`;
-    return `${min ?? '?'} – ${max ?? '?'} ${w}`;
-  }
-
-  toggleVideoOferta(ofertaId: string, archivo: ArchivoRow) {
-    const url    = this.publicUrl(archivo.url_storage);
-    const actual = this.videoOfertaActiva();
-    if (actual?.ofertaId === ofertaId && actual.url === url) this.videoOfertaActiva.set(null);
-    else                                                     this.videoOfertaActiva.set({ ofertaId, url });
-  }
-
-  videoOfertaUrl(ofertaId: string): string | null {
-    const a = this.videoOfertaActiva();
-    return a?.ofertaId === ofertaId ? a.url : null;
-  }
-
-  /**
-   * Adjudica la oferta seleccionada: RPC (expediente → adjudicado, resto de
-   * ofertas → rechazadas, contrato nuevo), regenera el PDF y sustituye el
-   * anterior. Los datos del PDF se releen de la BD para que reflejen lo
-   * persistido y no ediciones del formulario sin guardar.
-   */
-  async adjudicarOferta() {
-    const ofertaId = this.ofertaId();
-    const oferta   = this.ofertaSeleccionada();
-    if (!ofertaId || !oferta || !this.puedeAdjudicar()) return;
-
-    this.adjudicando.set(true);
-    this.errorAdj.set('');
-    this.exitoAdj.set('');
-    try {
-      // 1 — Ruta del PDF anterior antes de que el RPC borre el contrato.
-      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.id);
-      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
-
-      // 2 — Adjudicación en BD.
-      await this.ofertaService.aceptarOferta(this.id, ofertaId);
-
-      // 3 — Borrar el PDF anterior (best-effort: no interrumpe el flujo).
-      if (urlPdfAnterior) {
-        await this.contratoService.eliminarPdfStorage(urlPdfAnterior).catch(() => {});
-      }
-
-      // 4 — Contrato recién creado por el RPC.
-      const contratoRow = await this.contratoService.buscarPorExpediente(this.id);
-      if (!contratoRow) throw new Error('admin_file_edit.save_error');
-
-      // 5 — PDF con los datos persistidos del expediente.
-      const datos = await this.expedienteService.getExpedienteParaEdicion(this.id);
-      const cli   = this.clientes().find(c => c.id === datos.cliente_id);
-      const svc   = this.serviciosLocalizados().find(s => s.id === datos.servicio_id);
-      const lang  = this.translate.currentLang ?? 'fr';
-
-      const pdfBlob = this.contratoService.generarPdfBlob({
-        contratoId:          contratoRow.id,
-        expedienteNumero:    datos.numero,
-        fechaGenerado:       this.formatFecha(new Date().toISOString()),
-        clienteNombre:       cli ? `${cli.nombre} ${cli.apellido}`.trim() : '—',
-        constructorNombre:   oferta.constructor_nombre,
-        constructorTelefono: oferta.constructor_telefono,
-        constructorEmail:    oferta.constructor_email,
-        servicioNombre:      svc?.nombre_local      ?? '—',
-        servicioDescripcion: svc?.descripcion_local ?? '',
-        direccion:           datos.direccion ?? '—',
-        canton:              datos.canton    ?? '—',
-        provincia:           datos.provincia ?? '—',
-        distrito:            datos.distrito  ?? '',
-        precioFinal:         oferta.precio,
-        plazoMin:            oferta.plazo_semanas_min,
-        plazoMax:            oferta.plazo_semanas_max,
-        garantiaAnos:        oferta.garantia_anos,
-        fechaInicio:         oferta.fecha_inicio,
-        descripcionTrabajo:  oferta.descripcion,
-        lang,
-      });
-
-      // 6 — Subir el PDF y enlazarlo al contrato.
-      const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoRow.id);
-      await this.contratoService.actualizarUrlPdf(contratoRow.id, urlPdf);
-
-      // 7 — Reflejar el nuevo estado sin recargar la página.
-      this.estadoActual.set('adjudicado');
-      this.ofertas.update(lista =>
-        lista.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' })),
-      );
-      await this.cargarContrato();
-      this.exitoAdj.set('builder_offer.success_accepted');
-    } catch (e: any) {
-      console.error('[AdminFileEdit] adjudicarOferta:', e);
-      this.errorAdj.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.adjudicando.set(false);
-    }
+  /** El hijo adjudicó una oferta: el contrato del sidebar debe reflejarlo. */
+  async onOfertaAdjudicada() {
+    await this.cargarContrato();
   }
 
   // ── Contrato (solo lectura) ────────────────────────────────────────────────
@@ -490,21 +291,6 @@ export class AdminFileEditComponent implements OnInit {
   formatCosto(valor: number | null): string {
     if (valor === null || valor === undefined) return '—';
     return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(valor);
-  }
-
-  formatFecha(valor: string | null): string {
-    if (!valor) return '—';
-    const raw = valor.includes('T') ? valor.split('T')[0] : valor;
-    const d   = new Date(`${raw}T00:00:00`);
-    if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
-    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
-    const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
-    const p: Record<string, string> = {};
-    for (const part of parts) p[part.type] = part.value;
-    return this.translate.currentLang === 'en'
-      ? `${p['month']} ${p['day']}, ${p['year']}`
-      : `${p['day']} ${p['month']} ${p['year']}`;
   }
 
   // ── Selector de cliente ────────────────────────────────────────────────────
@@ -599,14 +385,10 @@ export class AdminFileEditComponent implements OnInit {
     await Promise.all([
       this.cargarServicios(),
       this.cargarClientes(),
-      this.cargarEstimadores(),
     ]);
     await Promise.all([
       this.cargarExpediente(),
-      this.cargarEstimacion(),
-      this.cargarOfertas(),
       this.cargarContrato(),
-      this.cargarArchivos(),
     ]);
     this.cargando.set(false);
   }
@@ -636,15 +418,6 @@ export class AdminFileEditComponent implements OnInit {
     this.cargandoClientes.set(false);
   }
 
-  private async cargarEstimadores() {
-    try {
-      const lista = await this.perfilRepo.findActivosByRoles(['estimador']);
-      this.estimadores.set(lista);
-    } catch (e: any) {
-      console.error('[AdminFileEdit] estimadores:', e.message);
-    }
-  }
-
   private async cargarExpediente() {
     try {
       const [datos, detalle] = await Promise.all([
@@ -655,17 +428,9 @@ export class AdminFileEditComponent implements OnInit {
       this.numero.set(datos.numero);
       this.estadoActual.set(datos.estado);
       this.servicioId.set(datos.servicio_id);
-      this.estimadorSeleccionadoId.set(detalle.estimador_id ?? '');
       this.estimadorActual.set(
         detalle.estimador_id && detalle.estimador_nombre !== '—' ? detalle.estimador_nombre : null
       );
-
-      // El estimador ya asignado se conserva como opción aunque hoy esté
-      // inactivo o tenga otro rol, para no perder la asignación existente.
-      if (detalle.estimador_id && !this.estimadores().some(e => e.id === detalle.estimador_id)) {
-        const asignado = await this.perfilRepo.findByIds([detalle.estimador_id]);
-        this.estimadores.update(lista => [...asignado, ...lista]);
-      }
 
       // Pre-llenar cliente
       this.clienteId.set(datos.cliente_id);
@@ -717,46 +482,6 @@ export class AdminFileEditComponent implements OnInit {
     } catch (e: any) {
       this.loadError.set('admin_file_edit.load_error');
       console.error('[AdminFileEdit] cargarExpediente:', e);
-    }
-  }
-
-  private async cargarEstimacion() {
-    try {
-      const est = await this.estimacionService.get(this.id);
-      if (!est) return;
-      if (est.fecha_visita_real) {
-        this.fechaVisitaReal = est.fecha_visita_real.slice(0, 10);
-        this.horaVisitaReal  = est.fecha_visita_real.slice(11, 16);
-      }
-      this.descripcionProblema = est.descripcion_problemas ?? '';
-      this.costoMin            = est.costo_estimado;
-      this.costoMax            = est.costo_estimado_max;
-      this.notasInternas       = est.notas_internas ?? '';
-      this.urlsTour.set(EstimacionService.parseUrls(est.url_tour));
-      this.hasEstimacion.set(true);
-    } catch (e: any) {
-      console.error('[AdminFileEdit] cargarEstimacion:', e.message);
-    }
-  }
-
-  private async cargarArchivos() {
-    try {
-      const { fotos, documentos } = await this.archivoService.cargarTodos(this.id);
-      this.fotos.set(fotos);
-      this.documentos.set(documentos);
-    } catch (e: any) {
-      console.error('[AdminFileEdit] cargarArchivos:', e.message);
-    }
-  }
-
-  private async cargarOfertas() {
-    try {
-      const lista = await this.ofertaService.getOfertasDeExpediente(this.id);
-      this.ofertas.set(lista);
-      const primaria = lista.find(o => o.estado === 'aceptada') ?? lista[0] ?? null;
-      if (primaria) this.seleccionarOferta(primaria);
-    } catch (e: any) {
-      console.error('[AdminFileEdit] cargarOfertas:', e.message);
     }
   }
 
@@ -819,268 +544,12 @@ export class AdminFileEditComponent implements OnInit {
     }
   }
 
-  // ── Guardar: ESTIMADOR ─────────────────────────────────────────────────────
-  async guardarEstimacion() {
-    this.exitoEst.set(false);
-    this.errorEst.set('');
-
-    if (!this.fechaVisitaReal || !this.horaVisitaReal) {
-      this.errorEst.set('estimator_form.err_visit');
-      return;
-    }
-    if (!this.descripcionProblema.trim()) {
-      this.errorEst.set('estimator_form.err_problems');
-      return;
-    }
-    if (!this.costoValido) {
-      this.errorEst.set('estimator_form.err_cost');
-      return;
-    }
-    const estimadorId = this.estimadorSeleccionadoId();
-    if (!estimadorId) {
-      this.errorEst.set('admin_estimate.err_estimador');
-      return;
-    }
-
-    this.guardandoEst.set(true);
-    try {
-      await this.estimacionService.guardar(this.id, estimadorId, {
-        fechaVisita:          this.fechaVisitaReal,
-        horaVisita:           this.horaVisitaReal,
-        descripcionProblemas: this.descripcionProblema.trim(),
-        costoMin:             this.costoMin,
-        costoMax:             this.costoMax,
-        notasInternas:        this.notasInternas.trim(),
-        urlTour:              EstimacionService.serializeUrls(
-          this.urlsTour().map(u => u.trim()).filter(Boolean),
-        ),
-      });
-      // Asigna el estimador al expediente solo si aún es 'nuevo' (evita
-      // retroceder el estado de un expediente ya avanzado).
-      if (this.estadoActual() === 'nuevo') {
-        await this.expedienteService.asignarEstimador(this.id, estimadorId);
-        this.estadoActual.set('en_estimacion');
-      }
-      const est = this.estimadores().find(x => x.id === estimadorId);
-      if (est) this.estimadorActual.set(`${est.nombre} ${est.apellido}`.trim());
-      this.hasEstimacion.set(true);
-      this.exitoEst.set(true);
-    } catch (e: any) {
-      this.errorEst.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.guardandoEst.set(false);
-    }
+  // ── Informe del estimador (componente hijo) ────────────────────────────────
+  onEstadoDesdeInforme(estado: string) {
+    this.estadoActual.set(estado);
   }
-
-  // ── Tours virtuales 3D ─────────────────────────────────────────────────────
-  tourThumb(url: string): string | null {
-    return matterportThumb(url);
-  }
-
-  async agregarTour() {
-    const url = this.nuevoTourUrl.trim();
-    if (!url) return;
-    const nuevaLista = [...this.urlsTour(), url];
-    this.errorTour.set('');
-    this.guardandoTour.set(true);
-    try {
-      // Si ya existe una estimación, persiste de inmediato; si no, se guardará
-      // junto con el informe al pulsar "Guardar informe".
-      if (this.hasEstimacion()) {
-        await this.estimacionService.actualizarUrlsTour(this.id, nuevaLista);
-      }
-      this.urlsTour.set(nuevaLista);
-      this.nuevoTourUrl = '';
-    } catch (e: any) {
-      this.errorTour.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.guardandoTour.set(false);
-    }
-  }
-
-  async eliminarTour(i: number) {
-    const nuevaLista = this.urlsTour().filter((_, idx) => idx !== i);
-    this.errorTour.set('');
-    this.guardandoTour.set(true);
-    try {
-      if (this.hasEstimacion()) {
-        await this.estimacionService.actualizarUrlsTour(this.id, nuevaLista);
-      }
-      this.urlsTour.set(nuevaLista);
-    } catch (e: any) {
-      this.errorTour.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.guardandoTour.set(false);
-    }
-  }
-
-  // ── Fotos del sitio / Documentos técnicos ──────────────────────────────────
-  // El `accept` de un <input file> sólo filtra el diálogo, no el arrastre. Como
-  // FILE_LIMITS.DOCUMENTO.types admite '' (MIME vacío de .csv/.txt), un archivo
-  // soltado con MIME desconocido pasaría: se valida también la extensión.
-  private readonly DOC_EXT = ['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx','.txt','.csv'];
-
-  async subirFotos(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    input.value = '';
-    await this.procesarFotos(files);
-  }
-
-  async subirDocumentos(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    input.value = '';
-    await this.procesarDocumentos(files);
-  }
-
-  private async procesarFotos(files: File[]) {
-    if (!files.length || this.subiendoFoto()) return;
-    const userId = this.user()?.id;
-    if (!userId) { this.errorFotos.set('estimator_form.err_session'); return; }
-    this.errorFotos.set('');
-    for (const file of files) {
-      const err = validateFile(file, FILE_LIMITS.FOTO.maxBytes, FILE_LIMITS.FOTO.types);
-      if (err) { this.errorFotos.set(err); return; }
-    }
-    this.subiendoFoto.set(true);
-    try {
-      for (const file of files) await this.archivoService.subir(this.id, 'foto', file, userId);
-      this.fotos.set(await this.archivoService.cargarPorTipo(this.id, 'foto'));
-    } catch (e: any) {
-      this.errorFotos.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.subiendoFoto.set(false);
-    }
-  }
-
-  private async procesarDocumentos(files: File[]) {
-    if (!files.length || this.subiendoDoc()) return;
-    const userId = this.user()?.id;
-    if (!userId) { this.errorDocs.set('estimator_form.err_session'); return; }
-    this.errorDocs.set('');
-    for (const file of files) {
-      const nombre = file.name.toLowerCase();
-      const punto  = nombre.lastIndexOf('.');
-      const ext    = punto >= 0 ? nombre.slice(punto) : '';
-      if (!this.DOC_EXT.includes(ext)) { this.errorDocs.set('validation.file_type'); return; }
-      const err = validateFile(file, FILE_LIMITS.DOCUMENTO.maxBytes, FILE_LIMITS.DOCUMENTO.types);
-      if (err) { this.errorDocs.set(err); return; }
-    }
-    this.subiendoDoc.set(true);
-    try {
-      for (const file of files) await this.archivoService.subir(this.id, 'documento', file, userId);
-      this.documentos.set(await this.archivoService.cargarPorTipo(this.id, 'documento'));
-    } catch (e: any) {
-      this.errorDocs.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.subiendoDoc.set(false);
-    }
-  }
-
-  // ── Arrastrar y soltar ─────────────────────────────────────────────────────
-  dragFotos = signal(false);
-  dragDocs  = signal(false);
-
-  onDragOverFotos(e: DragEvent) {
-    e.preventDefault();
-    if (!this.subiendoFoto()) this.dragFotos.set(true);
-  }
-  onDragLeaveFotos() { this.dragFotos.set(false); }
-  async onDropFotos(e: DragEvent) {
-    e.preventDefault();
-    this.dragFotos.set(false);
-    await this.procesarFotos(Array.from(e.dataTransfer?.files ?? []));
-  }
-
-  onDragOverDocs(e: DragEvent) {
-    e.preventDefault();
-    if (!this.subiendoDoc()) this.dragDocs.set(true);
-  }
-  onDragLeaveDocs() { this.dragDocs.set(false); }
-  async onDropDocs(e: DragEvent) {
-    e.preventDefault();
-    this.dragDocs.set(false);
-    await this.procesarDocumentos(Array.from(e.dataTransfer?.files ?? []));
-  }
-
-  async eliminarArchivo(archivo: ArchivoRow, tipo: TipoArchivo) {
-    const setError = tipo === 'foto' ? this.errorFotos : this.errorDocs;
-    setError.set('');
-    this.eliminandoArchivo.set(archivo.id);
-    try {
-      await this.archivoService.eliminar(archivo);
-      const lista = await this.archivoService.cargarPorTipo(this.id, tipo);
-      if (tipo === 'foto') this.fotos.set(lista); else this.documentos.set(lista);
-    } catch (e: any) {
-      setError.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.eliminandoArchivo.set(null);
-    }
-  }
-
-  publicUrl(storagePath: string): string {
-    return this.archivoService.publicUrl(storagePath);
-  }
-  verArchivo(archivo: ArchivoRow) {
-    window.open(this.publicUrl(archivo.url_storage), '_blank');
-  }
-  abrirFoto(archivo: ArchivoRow) {
-    this.fotoAmpliada.set(this.publicUrl(archivo.url_storage));
-  }
-  cerrarFoto() { this.fotoAmpliada.set(null); }
-  formatTamano(bytes: number): string {
-    if (bytes < 1_024)     return `${bytes} B`;
-    if (bytes < 1_048_576) return `${(bytes / 1_024).toFixed(1)} KB`;
-    return `${(bytes / 1_048_576).toFixed(1)} MB`;
-  }
-
-  // ── Guardar: CONSTRUCTOR (oferta) ──────────────────────────────────────────
-  seleccionarOferta(oferta: OfertaConConstructor) {
-    this.ofertaId.set(oferta.id);
-    this.constructorId    = oferta.constructor_id;
-    this.precio           = oferta.precio;
-    this.plazoMin         = oferta.plazo_semanas_min;
-    this.plazoMax         = oferta.plazo_semanas_max;
-    this.garantiaAnos     = oferta.garantia_anos;
-    this.fechaInicio      = oferta.fecha_inicio;
-    this.descripcionOferta = oferta.descripcion;
-    this.exitoOf.set(false);
-    this.errorOf.set('');
-    this.exitoAdj.set('');
-    this.errorAdj.set('');
-  }
-
-  async guardarOferta() {
-    this.exitoOf.set(false);
-    this.errorOf.set('');
-
-    if (!this.ofertaId()) { this.errorOf.set('admin_file_edit.constructor_no_offers'); return; }
-    if (!this.precio || this.precio <= 0)       { this.errorOf.set('make_offer.err_price'); return; }
-    if (!this.plazoMin || this.plazoMin <= 0)   { this.errorOf.set('make_offer.err_plazo_min'); return; }
-    if (!this.plazoMax || this.plazoMax < this.plazoMin) { this.errorOf.set('make_offer.err_plazo_max'); return; }
-    if (!this.fechaInicio)                      { this.errorOf.set('make_offer.err_date'); return; }
-    if (!this.descripcionOferta.trim())         { this.errorOf.set('make_offer.err_desc'); return; }
-
-    const form: OfertaForm = {
-      precio:            this.precio,
-      plazo_semanas_min: this.plazoMin,
-      plazo_semanas_max: this.plazoMax,
-      garantia_anos:     this.garantiaAnos,
-      fecha_inicio:      this.fechaInicio,
-      descripcion:       this.descripcionOferta.trim(),
-    };
-
-    this.guardandoOf.set(true);
-    try {
-      await this.ofertaService.actualizar(this.ofertaId()!, this.constructorId, form, null);
-      this.ofertas.set(await this.ofertaService.getOfertasDeExpediente(this.id));
-      this.exitoOf.set(true);
-    } catch (e: any) {
-      this.errorOf.set(e.message ?? 'admin_file_edit.save_error');
-    } finally {
-      this.guardandoOf.set(false);
-    }
+  onEstimadorAsignado(nombre: string) {
+    this.estimadorActual.set(nombre);
   }
 
   volver() { this.router.navigate(['/admin/file']); }

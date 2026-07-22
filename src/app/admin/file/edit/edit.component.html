@@ -1,6 +1,7 @@
-<!-- Admin · file/edit — mismo lenguaje visual que client/file/my-file,
-     con edición de: expediente + informe del estimador + oferta del constructor.
-     Guardado por sección (independiente). Ancho 100% vía .page-wrapper. -->
+<!-- Admin · file/edit — mismo lenguaje visual que client/file/my-file.
+     Pestañas: datos del expediente | informe del estimador (componente propio)
+     | ofertas de constructores (componente propio). Guardado por sección.
+     Ancho 100% vía .page-wrapper. -->
 <div class="page-wrapper">
 
   <!-- ── Skeleton ──────────────────────────────────────────────────── -->
@@ -210,6 +211,33 @@
 
       <!-- ══ Izquierda: Expediente + Estimador ═══════════════════════ -->
       <div class="col-lg-8 d-flex flex-column gap-4">
+
+        <!-- ── Pestañas: expediente | informe del estimador ─────────── -->
+        <nav class="edit-tabs" role="tablist">
+          <button type="button" class="edit-tab" role="tab"
+                  [class.edit-tab--active]="tabActiva() === 'expediente'"
+                  [attr.aria-selected]="tabActiva() === 'expediente'"
+                  (click)="tabActiva.set('expediente')">
+            <i class="bi bi-folder2-open" aria-hidden="true"></i>
+            {{ 'file.data' | translate }}
+          </button>
+          <button type="button" class="edit-tab" role="tab"
+                  [class.edit-tab--active]="tabActiva() === 'informe'"
+                  [attr.aria-selected]="tabActiva() === 'informe'"
+                  (click)="tabActiva.set('informe')">
+            <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+            {{ 'file.estimator_report' | translate }}
+          </button>
+          <button type="button" class="edit-tab" role="tab"
+                  [class.edit-tab--active]="tabActiva() === 'ofertas'"
+                  [attr.aria-selected]="tabActiva() === 'ofertas'"
+                  (click)="tabActiva.set('ofertas')">
+            <i class="bi bi-briefcase" aria-hidden="true"></i>
+            {{ 'builder_offer.title' | translate }}
+          </button>
+        </nav>
+
+        @if (tabActiva() === 'expediente') {
 
         <!-- ─────────────────────────────────────────────────────────
              TARJETA 1 · DATOS DEL EXPEDIENTE
@@ -585,600 +613,36 @@
           </div>
         </div>
 
-        <!-- ─────────────────────────────────────────────────────────
-             TARJETA 2 · INFORME DEL ESTIMADOR
-        ────────────────────────────────────────────────────────── -->
-        <div class="detail-card">
-          <div class="detail-card__head">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="1.5"
-                 stroke-linecap="round" stroke-linejoin="round"
-                 class="section-label__icon me-2" aria-hidden="true">
-              <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-              <path d="m9 14 2 2 4-4"/>
-            </svg>
-            <span class="section-label">{{ 'file.estimator_report' | translate }}</span>
-          </div>
-          <div class="detail-card__body">
 
-            <!-- Estimador asignado -->
-            <div class="mb-4">
-              <label class="form-label" for="estimador-sel">
-                {{ 'admin_estimate.estimador_label' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-              </label>
-              <select id="estimador-sel" class="form-select" name="estimadorSel"
-                      [ngModel]="estimadorSeleccionadoId()"
-                      (ngModelChange)="estimadorSeleccionadoId.set($event)">
-                <option value="">{{ 'admin_estimate.select_estimador' | translate }}</option>
-                @for (e of estimadores(); track e.id) {
-                  <option [value]="e.id">{{ e.nombre }} {{ e.apellido }}</option>
-                }
-              </select>
-            </div>
+        } @else if (tabActiva() === 'informe') {
 
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <label class="form-label" for="fecha-real">{{ 'file.real_visit_date' | translate }}</label>
-                <div class="input-group">
-                  <span class="input-group-text" aria-hidden="true"><i class="bi bi-calendar-check"></i></span>
-                  <input id="fecha-real" type="date" class="form-control"
-                         [(ngModel)]="fechaVisitaReal" name="fechaVisitaReal" />
-                </div>
-              </div>
-              <div class="col-sm-6">
-                <label class="form-label" for="hora-real">{{ 'file.hour' | translate }}</label>
-                <div class="input-group">
-                  <span class="input-group-text" aria-hidden="true"><i class="bi bi-clock"></i></span>
-                  <input id="hora-real" type="time" class="form-control"
-                         [(ngModel)]="horaVisitaReal" name="horaVisitaReal" />
-                </div>
-              </div>
+          <!-- ─────────────────────────────────────────────────────────
+               TAB · INFORME DEL ESTIMADOR (componente propio)
+          ────────────────────────────────────────────────────────── -->
+          <app-admin-file-estimator-report
+            [expedienteId]="id"
+            [estado]="estadoActual()"
+            (estadoChange)="onEstadoDesdeInforme($event)"
+            (estimadorAsignado)="onEstimadorAsignado($event)" />
 
-              <div class="col-12">
-                <label class="form-label" for="descripcion-problema">{{ 'file.situation' | translate }}</label>
-                <textarea id="descripcion-problema" class="form-control" rows="3"
-                          [(ngModel)]="descripcionProblema" name="descripcionProblema"></textarea>
-              </div>
+        } @else {
 
-              <div class="col-sm-6">
-                <label class="form-label" for="costo-min">
-                  {{ 'file.estimated_cost' | translate }} — {{ 'file.min' | translate }} (CAD)
-                </label>
-                <input id="costo-min" type="number" class="form-control" min="0"
-                       [(ngModel)]="costoMin" name="costoMin" />
-              </div>
-              <div class="col-sm-6">
-                <label class="form-label" for="costo-max">
-                  {{ 'file.estimated_cost' | translate }} — {{ 'file.max' | translate }} (CAD)
-                </label>
-                <input id="costo-max" type="number" class="form-control" min="0"
-                       [(ngModel)]="costoMax" name="costoMax" />
-              </div>
-              @if (!costoValido) {
-                <div class="col-12">
-                  <p class="field-error" role="alert">
-                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-                    {{ 'estimator_form.err_cost' | translate }}
-                  </p>
-                </div>
-              }
+          <!-- ─────────────────────────────────────────────────────────
+               TAB · OFERTAS DE CONSTRUCTORES (componente propio)
+          ────────────────────────────────────────────────────────── -->
+          <app-admin-file-builder-bids
+            [expedienteId]="id"
+            [estado]="estadoActual()"
+            (estadoChange)="onEstadoDesdeInforme($event)"
+            (adjudicada)="onOfertaAdjudicada()" />
 
-              <div class="col-12">
-                <label class="form-label" for="notas-internas">
-                  {{ 'admin_file_edit.notes_internal' | translate }}
-                  <span class="opt-label">({{ 'common.optional' | translate }})</span>
-                </label>
-                <textarea id="notas-internas" class="form-control" rows="2"
-                          [(ngModel)]="notasInternas" name="notasInternas"></textarea>
-              </div>
-
-              <!-- ── Tours virtuales 3D ─────────────────────────────── -->
-              <div class="col-12">
-                <hr class="detail-divider mb-4" />
-                <div class="media-head">
-                  <span class="section-label d-inline-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         class="section-label__icon me-1" aria-hidden="true">
-                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/>
-                    </svg>
-                    {{ 'admin_file_edit.tour_urls' | translate }}
-                  </span>
-                  <span class="archivo-count">{{ urlsTour().length }}</span>
-                </div>
-
-                <div class="input-group mb-3">
-                  <span class="input-group-text" aria-hidden="true"><i class="bi bi-badge-3d"></i></span>
-                  <input type="url" class="form-control" name="nuevoTourUrl" [(ngModel)]="nuevoTourUrl"
-                         [placeholder]="'admin_file_edit.tour_placeholder' | translate"
-                         (keydown.enter)="$event.preventDefault(); agregarTour()" />
-                  <button type="button" class="btn btn-outline-primary" (click)="agregarTour()"
-                          [disabled]="guardandoTour() || !nuevoTourUrl.trim()">
-                    @if (guardandoTour()) {
-                      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                    } @else {
-                      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>{{ 'admin_file_edit.tour_add' | translate }}
-                    }
-                  </button>
-                </div>
-                @if (errorTour()) {
-                  <div class="pending-notice mb-3">
-                    <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorTour() | translate }}
-                  </div>
-                }
-
-                @if (urlsTour().length > 0) {
-                  <div class="tour-grid">
-                    @for (url of urlsTour(); track $index) {
-                      <div class="tour-tile">
-                        <a [href]="url" target="_blank" rel="noopener" class="tour-tile__frame"
-                           [title]="'file.tour_title' | translate">
-                          @if (tourThumb(url); as thumb) {
-                            <img [src]="thumb" class="tour-tile__img" alt="" loading="lazy" />
-                          } @else {
-                            <span class="tour-tile__placeholder" aria-hidden="true">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"
-                                   fill="none" stroke="currentColor" stroke-width="1.5"
-                                   stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/>
-                              </svg>
-                            </span>
-                          }
-                          <span class="tour-tile__badge">
-                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> 3D
-                          </span>
-                        </a>
-                        <button type="button" class="thumb-delete" (click)="eliminarTour($index)"
-                                [disabled]="guardandoTour()" [title]="'common.delete' | translate">
-                          <i class="bi bi-trash" aria-hidden="true"></i>
-                        </button>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <!-- ── Fotos del sitio ────────────────────────────────── -->
-              <div class="col-12">
-                <hr class="detail-divider mb-4" />
-                <div class="media-head">
-                  <span class="section-label d-inline-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         class="section-label__icon me-1" aria-hidden="true">
-                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                    </svg>
-                    {{ 'file.site_photos' | translate }}
-                  </span>
-                  <span class="archivo-count">{{ fotos().length }}</span>
-                </div>
-
-                <label class="upload-btn upload-btn--drop mb-3"
-                       [class.upload-btn--busy]="subiendoFoto()"
-                       [class.upload-btn--drag]="dragFotos()"
-                       (dragover)="onDragOverFotos($event)"
-                       (dragleave)="onDragLeaveFotos()"
-                       (drop)="onDropFotos($event)">
-                  @if (subiendoFoto()) {
-                    <span class="upload-spinner" aria-hidden="true"></span>
-                    <span class="upload-btn__title">{{ 'file.uploading' | translate }}</span>
-                  } @else {
-                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
-                    <span class="upload-btn__title">{{ 'file.add_photos' | translate }}</span>
-                    <span class="upload-btn__sub">{{ 'my_documents.add_drop' | translate }}</span>
-                  }
-                  <input type="file" accept="image/*" multiple class="visually-hidden"
-                         [disabled]="subiendoFoto()" (change)="subirFotos($event)" />
-                </label>
-                @if (errorFotos()) {
-                  <div class="pending-notice mb-3">
-                    <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorFotos() | translate }}
-                  </div>
-                }
-
-                @if (fotos().length > 0) {
-                  <div class="photos-grid">
-                    @for (foto of fotos(); track foto.id) {
-                      <div class="photo-thumb">
-                        <img [src]="publicUrl(foto.url_storage)" [alt]="foto.nombre_archivo"
-                             class="photo-thumb__img" loading="lazy" (click)="abrirFoto(foto)" />
-                        <button type="button" class="thumb-delete" (click)="eliminarArchivo(foto, 'foto')"
-                                [disabled]="eliminandoArchivo() !== null" [title]="'common.delete' | translate">
-                          @if (eliminandoArchivo() === foto.id) {
-                            <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
-                          } @else {
-                            <i class="bi bi-trash" aria-hidden="true"></i>
-                          }
-                        </button>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <!-- ── Documentos técnicos ────────────────────────────── -->
-              <div class="col-12">
-                <hr class="detail-divider mb-4" />
-                <div class="media-head">
-                  <span class="section-label d-inline-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         class="section-label__icon me-1" aria-hidden="true">
-                      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                      <path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-                    </svg>
-                    {{ 'file.technical_docs' | translate }}
-                  </span>
-                  <span class="archivo-count">{{ documentos().length }}</span>
-                </div>
-
-                <label class="upload-btn upload-btn--drop mb-3"
-                       [class.upload-btn--busy]="subiendoDoc()"
-                       [class.upload-btn--drag]="dragDocs()"
-                       (dragover)="onDragOverDocs($event)"
-                       (dragleave)="onDragLeaveDocs()"
-                       (drop)="onDropDocs($event)">
-                  @if (subiendoDoc()) {
-                    <span class="upload-spinner" aria-hidden="true"></span>
-                    <span class="upload-btn__title">{{ 'file.uploading' | translate }}</span>
-                  } @else {
-                    <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
-                    <span class="upload-btn__title">{{ 'file.add_docs' | translate }}</span>
-                    <span class="upload-btn__sub">{{ 'my_documents.add_drop' | translate }}</span>
-                  }
-                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv" multiple
-                         class="visually-hidden" [disabled]="subiendoDoc()" (change)="subirDocumentos($event)" />
-                </label>
-                @if (errorDocs()) {
-                  <div class="pending-notice mb-3">
-                    <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>{{ errorDocs() | translate }}
-                  </div>
-                }
-
-                @if (documentos().length > 0) {
-                  <div class="doc-grid">
-                    @for (doc of documentos(); track doc.id) {
-                      <div class="doc-tile">
-                        <div class="doc-tile__icon" aria-hidden="true">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                               fill="none" stroke="currentColor" stroke-width="1.5"
-                               stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                            <path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-                          </svg>
-                        </div>
-                        <div class="doc-tile__info">
-                          <p class="doc-tile__name">{{ doc.nombre_archivo }}</p>
-                          <p class="doc-tile__meta">{{ formatTamano(doc.tamano_bytes) }}</p>
-                        </div>
-                        <div class="doc-tile__actions">
-                          <button type="button" class="btn-file-open" (click)="verArchivo(doc)">
-                            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>{{ 'common.open' | translate }}
-                          </button>
-                          <button type="button" class="btn-file-delete" (click)="eliminarArchivo(doc, 'documento')"
-                                  [disabled]="eliminandoArchivo() !== null" [title]="'common.delete' | translate">
-                            @if (eliminandoArchivo() === doc.id) {
-                              <span class="upload-spinner upload-spinner--xs" aria-hidden="true"></span>
-                            } @else {
-                              <i class="bi bi-trash" aria-hidden="true"></i>
-                            }
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-card__foot">
-            @if (errorEst()) {
-              <span class="save-msg save-msg--err">
-                <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorEst() | translate }}
-              </span>
-            } @else if (exitoEst()) {
-              <span class="save-msg save-msg--ok">
-                <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ 'estimator_form.success_estimation' | translate }}
-              </span>
-            } @else { <span></span> }
-            <button type="button" class="btn-save" (click)="guardarEstimacion()" [disabled]="guardandoEst()">
-              @if (guardandoEst()) {
-                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                {{ 'common.saving' | translate }}
-              } @else {
-                <i class="bi bi-floppy me-2" aria-hidden="true"></i>{{ 'admin_file_edit.save_estimator' | translate }}
-              }
-            </button>
-          </div>
-        </div>
-
-        <!-- ─────────────────────────────────────────────────────────
-             TARJETA · OFERTAS DE CONSTRUCTORES (selección + adjudicación)
-        ────────────────────────────────────────────────────────── -->
-        <div class="detail-card">
-          <div class="detail-card__head">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="1.5"
-                 stroke-linecap="round" stroke-linejoin="round"
-                 class="section-label__icon me-2" aria-hidden="true">
-              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-              <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-            </svg>
-            <span class="section-label">{{ 'builder_offer.title' | translate }}</span>
-            <span class="archivo-count ms-auto">{{ ofertas().length }}</span>
-          </div>
-          <div class="detail-card__body">
-
-            @if (ofertas().length === 0) {
-              <div class="pending-notice">
-                <i class="bi bi-inbox me-2" aria-hidden="true"></i>
-                {{ 'builder_offer.no_offers' | translate }}
-              </div>
-            } @else {
-              <div class="offers-grid">
-                @for (oferta of ofertas(); track oferta.id; let i = $index) {
-                  <div class="offer-card"
-                       [class.offer-card--selected]="esSeleccionada(oferta.id)"
-                       [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
-                       [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
-                       role="button" tabindex="0"
-                       [attr.aria-pressed]="esSeleccionada(oferta.id)"
-                       (click)="seleccionarOferta(oferta)"
-                       (keydown.enter)="seleccionarOferta(oferta)"
-                       (keydown.space)="$event.preventDefault(); seleccionarOferta(oferta)">
-
-                    <div class="offer-card__top">
-                      <span class="offer-card__index">#{{ i + 1 }}</span>
-                      <div class="d-flex align-items-center gap-1">
-                        @if (esSeleccionada(oferta.id)) {
-                          <span class="selected-badge" [title]="'builder_offer.selected_badge' | translate">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                              <path d="M20 6 9 17l-5-5"/>
-                            </svg>
-                          </span>
-                        }
-                        <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
-                          {{ ('state.' + oferta.estado) | translate }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="offer-card__price-block">
-                      <p class="offer-price mb-0">{{ formatCosto(oferta.precio) }}</p>
-                      <p class="offer-price-label mb-0">{{ 'builder_offer.total_price' | translate }}</p>
-                    </div>
-
-                    <div class="offer-card__section">
-                      <p class="offer-meta-label">{{ 'offers_received.builder' | translate }}</p>
-                      <p class="offer-builder-name mb-0">{{ oferta.constructor_nombre }}</p>
-                      @if (oferta.constructor_telefono) {
-                        <a href="tel:{{ oferta.constructor_telefono }}"
-                           class="offer-contact d-inline-flex align-items-center gap-1 mt-1"
-                           (click)="$event.stopPropagation()">
-                          <i class="bi bi-telephone" aria-hidden="true"></i>{{ oferta.constructor_telefono }}
-                        </a>
-                      }
-                    </div>
-
-                    <div class="offer-card__meta-grid">
-                      <div class="offer-meta-item">
-                        <span class="offer-meta-label">{{ 'offers_received.deadline' | translate }}</span>
-                        <span class="offer-meta-value">{{ formatPlazo(oferta.plazo_semanas_min, oferta.plazo_semanas_max) }}</span>
-                      </div>
-                      <div class="offer-meta-item">
-                        <span class="offer-meta-label">{{ 'offer.start_date' | translate }}</span>
-                        <span class="offer-meta-value">{{ formatFecha(oferta.fecha_inicio) }}</span>
-                      </div>
-                      @if (oferta.garantia_anos) {
-                        <div class="offer-meta-item">
-                          <span class="offer-meta-label">{{ 'offer.warranty' | translate }}</span>
-                          <span class="offer-meta-value">{{ oferta.garantia_anos }} {{ 'offer.years' | translate }}</span>
-                        </div>
-                      }
-                    </div>
-
-                    @if (oferta.descripcion) {
-                      <div class="offer-card__section">
-                        <p class="offer-meta-label">{{ 'builder_offer.approach' | translate }}</p>
-                        <p class="offer-desc mb-0">{{ oferta.descripcion }}</p>
-                      </div>
-                    }
-
-                    @if (oferta.videos.length > 0) {
-                      <div class="offer-card__section" (click)="$event.stopPropagation()">
-                        @for (v of oferta.videos; track v.id) {
-                          <button class="offer-video-btn w-100" type="button"
-                                  (click)="toggleVideoOferta(oferta.id, v)">
-                            <i class="bi" [class.bi-camera-video]="videoOfertaUrl(oferta.id) === null"
-                               [class.bi-x-circle]="videoOfertaUrl(oferta.id) !== null" aria-hidden="true"></i>
-                            {{ (videoOfertaUrl(oferta.id) !== null
-                                ? 'builder_offer.close_video'
-                                : 'builder_offer.view_video') | translate }}
-                          </button>
-                        }
-                        @if (videoOfertaUrl(oferta.id); as vurl) {
-                          <video class="offer-video-el mt-2" controls [src]="vurl"></video>
-                        }
-                      </div>
-                    }
-
-                    @if (oferta.documentos.length > 0) {
-                      <div class="offer-docs" (click)="$event.stopPropagation()">
-                        @for (d of oferta.documentos; track d.id) {
-                          <button class="offer-doc-chip" type="button" (click)="verArchivo(d)">
-                            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
-                            <span class="offer-doc-chip__name">{{ d.nombre_archivo }}</span>
-                            <span class="offer-doc-chip__size">{{ formatTamano(d.tamano_bytes) }}</span>
-                          </button>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          </div>
-
-          @if (ofertas().length > 0) {
-            <div class="detail-card__foot">
-              @if (errorAdj()) {
-                <span class="save-msg save-msg--err">
-                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorAdj() | translate }}
-                </span>
-              } @else if (exitoAdj()) {
-                <span class="save-msg save-msg--ok">
-                  <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ exitoAdj() | translate }}
-                </span>
-              } @else if (yaContratado() && ofertaSeleccionada()?.estado !== 'aceptada' && puedeAdjudicar()) {
-                <span class="save-msg save-msg--warn">
-                  <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ 'builder_offer.replace_warning' | translate }}
-                </span>
-              } @else if (estadoActual() === 'contratado') {
-                <span class="save-msg">{{ 'admin_file_edit.contract_note' | translate }}</span>
-              } @else { <span></span> }
-
-              <button type="button" class="btn-save" (click)="adjudicarOferta()" [disabled]="!puedeAdjudicar()">
-                @if (adjudicando()) {
-                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                  {{ 'builder_offer.processing' | translate }}
-                } @else {
-                  <i class="bi bi-check-circle me-2" aria-hidden="true"></i>
-                  {{ (yaContratado() ? 'builder_offer.change_btn' : 'builder_offer.accept_btn') | translate }}
-                }
-              </button>
-            </div>
-          }
-        </div>
+        }
 
       </div><!-- /col-lg-8 -->
 
-      <!-- ══ Derecha: Constructor + Contrato ═════════════════════════ -->
+      <!-- ══ Derecha: Contrato ═══════════════════════════════════════ -->
       <div class="col-lg-4">
         <div class="sidebar-sticky d-flex flex-column gap-4">
-
-          <!-- ───────────────────────────────────────────────────────
-               TARJETA 3 · OFERTA DEL CONSTRUCTOR (editable)
-          ──────────────────────────────────────────────────────── -->
-          <div class="detail-card">
-            <div class="detail-card__head">
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                   fill="none" stroke="currentColor" stroke-width="1.5"
-                   stroke-linecap="round" stroke-linejoin="round"
-                   class="section-label__icon me-2" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span class="section-label">{{ 'offer.selected_builder' | translate }}</span>
-            </div>
-            <div class="detail-card__body">
-              @if (ofertas().length === 0) {
-                <div class="pending-notice">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="1.5"
-                       stroke-linecap="round" stroke-linejoin="round" class="me-2 flex-shrink-0" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  {{ 'admin_file_edit.constructor_no_offers' | translate }}
-                </div>
-              } @else {
-
-                <div class="constructor-chip mb-3">
-                  <div class="constructor-avatar" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="constructor-nombre mb-0">{{ ofertaSeleccionada()?.constructor_nombre }}</p>
-                    <span class="badge rounded-pill px-2 py-1
-                      {{ ofertaSeleccionada()?.estado === 'aceptada' ? 'bg-success-subtle text-success'
-                        : ofertaSeleccionada()?.estado === 'rechazada' ? 'bg-secondary-subtle text-secondary'
-                        : 'bg-warning-subtle text-warning-emphasis' }}">
-                      {{ ('state.' + (ofertaSeleccionada()?.estado ?? '')) | translate }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="row g-3">
-                  <div class="col-12">
-                    <label class="form-label" for="of-precio">
-                      {{ 'offer.price' | translate }} (CAD) <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <input id="of-precio" type="number" class="form-control" min="0"
-                           [(ngModel)]="precio" name="precio" [disabled]="!puedeEditarOferta" />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label" for="of-pmin">{{ 'make_offer.min_deadline' | translate }} <span class="req-mark">*</span></label>
-                    <input id="of-pmin" type="number" class="form-control" min="1"
-                           [(ngModel)]="plazoMin" name="plazoMin" [disabled]="!puedeEditarOferta" />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label" for="of-pmax">{{ 'make_offer.max_deadline' | translate }} <span class="req-mark">*</span></label>
-                    <input id="of-pmax" type="number" class="form-control" min="1"
-                           [(ngModel)]="plazoMax" name="plazoMax" [disabled]="!puedeEditarOferta" />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label" for="of-gar">
-                      {{ 'offer.warranty' | translate }}
-                      <span class="opt-label">({{ 'offer.years' | translate }})</span>
-                    </label>
-                    <input id="of-gar" type="number" class="form-control" min="0"
-                           [(ngModel)]="garantiaAnos" name="garantiaAnos" [disabled]="!puedeEditarOferta" />
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label" for="of-inicio">{{ 'offer.start_date' | translate }} <span class="req-mark">*</span></label>
-                    <input id="of-inicio" type="date" class="form-control"
-                           [(ngModel)]="fechaInicio" name="fechaInicio" [disabled]="!puedeEditarOferta" />
-                  </div>
-                  <div class="col-12">
-                    <label class="form-label" for="of-desc">{{ 'offer.approach' | translate }} <span class="req-mark">*</span></label>
-                    <textarea id="of-desc" class="form-control" rows="3"
-                              [(ngModel)]="descripcionOferta" name="descripcionOferta"
-                              [disabled]="!puedeEditarOferta"></textarea>
-                  </div>
-                </div>
-
-                @if (!puedeEditarOferta) {
-                  <div class="pending-notice mt-3">
-                    <i class="bi bi-lock me-2" aria-hidden="true"></i>{{ 'admin_offer.delete_blocked' | translate }}
-                  </div>
-                }
-              }
-            </div>
-
-            @if (ofertas().length > 0 && puedeEditarOferta) {
-              <div class="detail-card__foot">
-                @if (errorOf()) {
-                  <span class="save-msg save-msg--err">
-                    <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ errorOf() | translate }}
-                  </span>
-                } @else if (exitoOf()) {
-                  <span class="save-msg save-msg--ok">
-                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i>{{ 'make_offer.success_updated' | translate }}
-                  </span>
-                } @else { <span></span> }
-                <button type="button" class="btn-save" (click)="guardarOferta()" [disabled]="guardandoOf()">
-                  @if (guardandoOf()) {
-                    <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                    {{ 'common.saving' | translate }}
-                  } @else {
-                    <i class="bi bi-floppy me-2" aria-hidden="true"></i>{{ 'admin_file_edit.save_constructor' | translate }}
-                  }
-                </button>
-              </div>
-            }
-          </div>
 
           <!-- ───────────────────────────────────────────────────────
                TARJETA 4 · CONTRATO (solo lectura)
@@ -1238,18 +702,3 @@
     </div>
   }
 </div>
-
-<!-- ── Lightbox de fotos ─────────────────────────────────────────────── -->
-@if (fotoAmpliada()) {
-  <div class="lightbox-overlay" (click)="cerrarFoto()"
-       role="dialog" aria-modal="true" [attr.aria-label]="'file.photo_viewer' | translate">
-    <button class="lightbox-close" type="button" (click)="cerrarFoto()" [title]="'common.close' | translate">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="1.5"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-      </svg>
-    </button>
-    <img [src]="fotoAmpliada()!" class="lightbox-img" (click)="$event.stopPropagation()" alt="" />
-  </div>
-}
