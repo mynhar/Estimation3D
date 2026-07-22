@@ -135,7 +135,8 @@
           </thead>
           <tbody>
             @for (exp of expedientesFiltrados(); track exp.id) {
-              <tr class="fue-table__row"
+              <tr class="fue-table__row fue-table__row--clickable"
+                  (click)="abrir(exp.id)"
                   [class.fue-table__row--confirming]="confirmandoId() === exp.id">
 
                 <td class="fue-table__col-photo">
@@ -158,7 +159,14 @@
 
                 <td>{{ exp.cliente_nombre }}</td>
 
-                <td class="fue-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+                <td class="fue-table__addr" [title]="direccionCompleta(exp)">
+                  @if (direccionLinea1(exp)) {
+                    <span class="fue-table__addr-line">{{ direccionLinea1(exp) }}</span>
+                  }
+                  @if (direccionLinea2(exp)) {
+                    <span class="fue-table__addr-line fue-table__muted">{{ direccionLinea2(exp) }}</span>
+                  }
+                </td>
 
                 <td class="fue-table__col-date">
                   <span class="fue-table__fecha"
@@ -192,7 +200,7 @@
                   }
                 </td>
 
-                <td class="fue-table__col-action">
+                <td class="fue-table__col-action" (click)="$event.stopPropagation()">
                   <div class="fue-actions fue-actions--row">
                     <button class="fue-btn-continue fue-btn-continue--row" (click)="estimar(exp.id)">
                       <i class="bi bi-pencil-square"></i>
@@ -228,7 +236,10 @@
       <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ────────── -->
       <div class="fue-grid" [class.d-md-none]="vista() === 'tabla'">
         @for (exp of expedientesFiltrados(); track exp.id; let idx = $index) {
-          <article class="fue-card"
+          <article class="fue-card" role="button" tabindex="0"
+                   (click)="abrir(exp.id)"
+                   (keydown.enter)="abrir(exp.id)"
+                   (keydown.space)="$event.preventDefault(); abrir(exp.id)"
                    [class.fue-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
                    [class.fue-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
                    [class.fue-card--proxima]="urgencia(exp.fecha_visita) === 'proxima'"
@@ -289,9 +300,19 @@
               <span class="fue-meta-item">
                 <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
               </span>
-              <span class="fue-meta-item">
-                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
-              </span>
+              @if (direccionLinea1(exp) || direccionLinea2(exp)) {
+                <span class="fue-meta-item fue-addr" [title]="direccionCompleta(exp)">
+                  <i class="bi bi-geo-alt"></i>
+                  <span class="fue-addr__text">
+                    @if (direccionLinea1(exp)) {
+                      <span class="fue-addr__line">{{ direccionLinea1(exp) }}</span>
+                    }
+                    @if (direccionLinea2(exp)) {
+                      <span class="fue-addr__line fue-addr__line--muted">{{ direccionLinea2(exp) }}</span>
+                    }
+                  </span>
+                </span>
+              }
             </div>
 
             <!-- Visit date -->
@@ -305,8 +326,10 @@
               }
             </div>
 
-            <!-- Acciones -->
-            <div class="fue-actions">
+            <!-- Acciones (los botones internos no deben disparar la navegación) -->
+            <div class="fue-actions" (click)="$event.stopPropagation()"
+                 (keydown.enter)="$event.stopPropagation()"
+                 (keydown.space)="$event.stopPropagation()">
               <button class="fue-btn-continue" (click)="estimar(exp.id)">
                 <i class="bi bi-pencil-square"></i>
                 {{ 'files_under_estimation.continue_btn' | translate }}

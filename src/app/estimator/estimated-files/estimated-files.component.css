@@ -346,6 +346,12 @@
   transform: translateY(-2px);
   box-shadow: var(--ds-shadow-md);
 }
+/* Toda la tarjeta navega al detalle (role="button") */
+.ef-card { cursor: pointer; }
+.ef-card:focus-visible {
+  outline: 2px solid var(--ds-gold-active);
+  outline-offset: 2px;
+}
 
 /* Top accent bar via ::before */
 .ef-card::before {
@@ -474,6 +480,8 @@
 .ef-table tbody tr:last-child td { border-bottom: none; }
 
 .ef-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.ef-table__row--clickable { cursor: pointer; }
+.ef-table__row--confirming { cursor: default; }
 .ef-table__row:hover { background: var(--ds-gold-faint); }
 .ef-table__row--cancelado { opacity: 0.8; }
 
@@ -488,6 +496,18 @@
 
 .ef-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
 .ef-table__muted   { color: var(--ds-ink-muted); }
+
+/* Dirección postal en dos líneas dentro de la celda de ubicación. */
+.ef-table__addr {
+  max-width: 18rem;
+  color: var(--ds-ink-secondary);
+}
+.ef-table__addr-line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .ef-table__fecha {
   display: flex;
@@ -598,6 +618,21 @@
   color: var(--ds-ink-secondary);
 }
 .ef-meta i { color: var(--ds-ink-muted); flex-shrink: 0; }
+
+/* Dirección postal en dos líneas: "615-150 rue Berlioz" / "Montréal QC H3E 1K3" */
+.ef-addr { align-items: flex-start; min-width: 0; }
+.ef-addr i { line-height: var(--ds-leading-normal); color: var(--ds-gold-active); }
+.ef-addr__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ef-addr__line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ef-addr__line--muted { color: var(--ds-ink-muted); }
 
 /* Fecha row */
 .ef-fecha {

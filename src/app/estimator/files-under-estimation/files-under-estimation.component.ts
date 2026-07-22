@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ExpedienteRow } from '../../models';
+import { coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta } from '../../shared/util/busqueda';
 
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
@@ -36,22 +37,32 @@ export class FilesUnderEstimationComponent implements OnInit {
   private fotosFallidas = signal<Set<string>>(new Set<string>());
 
   expedientesFiltrados = computed(() => {
-    const q = this.busqueda().toLowerCase().trim();
+    const q = this.busqueda().trim();
     const u = this.soloUrgentes();
     return this.expedientes().filter(e => {
       if (u && this.urgencia(e.fecha_visita) === null) return false;
       if (!q) return true;
-      return (
-        e.numero.toLowerCase().includes(q)             ||
-        e.servicio_nombre.toLowerCase().includes(q)    ||
-        e.servicio_nombre_en.toLowerCase().includes(q) ||
-        e.servicio_nombre_fr.toLowerCase().includes(q) ||
-        e.cliente_nombre.toLowerCase().includes(q)     ||
-        e.provincia.toLowerCase().includes(q)          ||
-        e.canton.toLowerCase().includes(q)
-      );
+      const haystack = [
+        e.numero,
+        e.servicio_nombre,
+        e.servicio_nombre_en,
+        e.servicio_nombre_fr,
+        e.cliente_nombre,
+        // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+        // `canton` la ciudad y `distrito` el código postal.
+        e.direccion,
+        e.canton,
+        e.provincia,
+        e.distrito,
+      ].join(' ');
+      return coincideBusqueda(haystack, q);
     });
   });
+
+  // ── Dirección (formato postal en dos líneas) ─────────────────────────────
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
 
   urgentesCount = computed(() =>
     this.expedientes().filter(e => this.urgencia(e.fecha_visita) !== null).length
@@ -140,6 +151,15 @@ export class FilesUnderEstimationComponent implements OnInit {
 
   estimar(id: string) {
     this.router.navigate(['/estimator/file-under-estimation', id]);
+  }
+
+  /**
+   * Clic en cualquier parte de la tarjeta o fila. No navega mientras la
+   * confirmación de liberación de ese expediente está abierta.
+   */
+  abrir(id: string) {
+    if (this.confirmandoId() === id) return;
+    this.estimar(id);
   }
 
   confirmarLiberar(id: string) {

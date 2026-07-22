@@ -362,6 +362,13 @@
   box-shadow: var(--ds-shadow-md);
   transform: translateY(-2px);
 }
+/* Toda la tarjeta continúa la estimación (role="button") */
+.fue-card { cursor: pointer; }
+.fue-card:focus-visible {
+  outline: 2px solid var(--ds-gold-active);
+  outline-offset: 2px;
+}
+.fue-card--confirming { cursor: default; }
 
 .fue-card--vencida::before  { background: var(--ds-danger); }
 .fue-card--hoy::before      { background: var(--ds-warning); }
@@ -481,6 +488,8 @@
 .fue-table tbody tr:last-child td { border-bottom: none; }
 
 .fue-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.fue-table__row--clickable { cursor: pointer; }
+.fue-table__row--confirming { cursor: default; }
 .fue-table__row:hover { background: var(--ds-gold-faint); }
 
 /* Estado de confirmación de liberación (sustituye al aviso de la tarjeta) */
@@ -494,6 +503,18 @@
 
 .fue-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
 .fue-table__muted   { color: var(--ds-ink-muted); }
+
+/* Dirección postal en dos líneas dentro de la celda de ubicación. */
+.fue-table__addr {
+  max-width: 18rem;
+  color: var(--ds-ink-secondary);
+}
+.fue-table__addr-line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .fue-table__fecha {
   display: flex;
@@ -594,6 +615,21 @@
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-secondary);
 }
+
+/* Dirección postal en dos líneas: "615-150 rue Berlioz" / "Montréal QC H3E 1K3" */
+.fue-addr { align-items: flex-start; min-width: 0; }
+.fue-addr i { line-height: var(--ds-leading-normal); }
+.fue-addr__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.fue-addr__line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fue-addr__line--muted { color: var(--ds-ink-muted); }
 
 /* ── Visit date row ──────────────────────────────────────────────────────── */
 .fue-card__fecha {

@@ -53,8 +53,28 @@
   <!-- ── Contenido ────────────────────────────────────────────────────────────── -->
   } @else {
 
-    <!-- ── Chips de estado ──────────────────────────────────────────────────── -->
-    <div class="status-chips-bar mb-3">
+    <!-- ── Búsqueda + chips de estado ───────────────────────────────────────── -->
+    <div class="filter-bar mb-3">
+
+      <div class="filter-bar__search">
+        <div class="input-group">
+          <span class="input-group-text search-icon">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" class="form-control search-input"
+                 [placeholder]="'construction_monitoring.search_placeholder' | translate"
+                 [value]="busqueda()"
+                 (input)="setBusqueda($event)">
+          @if (busqueda()) {
+            <button class="btn search-clear" type="button" (click)="busqueda.set('')"
+                    [title]="'common.clear' | translate">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="filter-bar__chips">
       <div class="status-chips" role="group">
         @for (estado of estados; track estado) {
           <button type="button"
@@ -93,6 +113,7 @@
           <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
         </button>
       </div>
+      </div>
     </div>
 
     <!-- ── Lista de contratos ───────────────────────────────────────────────── -->
@@ -100,13 +121,13 @@
 
       @if (contratosFiltrados().length === 0) {
         <div class="empty-state empty-state--table">
-          @if (filtroEstado() !== 'todos') {
+          @if (hayFiltros()) {
             <div class="empty-state__icon">
               <i class="bi bi-funnel"></i>
             </div>
             <p class="empty-state__title">{{ 'construction_monitoring.no_results' | translate }}</p>
             <p class="empty-state__desc">{{ 'construction_monitoring.no_results_hint' | translate }}</p>
-            <button class="btn btn-outline-primary btn-sm mt-2" (click)="filtroEstado.set('todos')">
+            <button class="btn btn-outline-primary btn-sm mt-2" (click)="limpiarFiltros()">
               <i class="bi bi-x-circle me-1"></i>{{ 'common.clear_filters' | translate }}
             </button>
           } @else {
@@ -157,9 +178,13 @@
                     <span class="cell-primary">{{ c.cliente_nombre }}</span>
                     <span class="cell-secondary">{{ servicioNombre(c) }}</span>
                   </td>
-                  <td class="col-location">
-                    <span class="cell-primary">{{ c.canton }}</span>
-                    <span class="cell-secondary">{{ c.provincia }}</span>
+                  <td class="col-location" [title]="direccionCompleta(c)">
+                    @if (direccionLinea1(c)) {
+                      <span class="cell-primary col-location__line">{{ direccionLinea1(c) }}</span>
+                    }
+                    @if (direccionLinea2(c)) {
+                      <span class="cell-secondary col-location__line">{{ direccionLinea2(c) }}</span>
+                    }
                   </td>
                   <td class="col-date">
                     <span class="cell-primary">{{ formatFecha(c.firmado_en) }}</span>

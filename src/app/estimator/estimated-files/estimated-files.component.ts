@@ -12,6 +12,7 @@ import {
   ESTADO_BADGE_ESTIMADOR,
 } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
+import { coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta } from '../../shared/util/busqueda';
 
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
@@ -41,6 +42,10 @@ export class EstimatedFilesComponent implements OnInit {
   errorEliminar  = signal('');
   vista          = signal<VistaExpedientes>('tarjetas');
 
+  direccionLinea1   = direccionLinea1;
+  direccionLinea2   = direccionLinea2;
+  direccionCompleta = direccionCompleta;
+
   /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
   private fotosFallidas = signal<Set<string>>(new Set<string>());
 
@@ -53,20 +58,25 @@ export class EstimatedFilesComponent implements OnInit {
   ];
 
   expedientesFiltrados = computed(() => {
-    const q = this.busqueda().toLowerCase().trim();
+    const q = this.busqueda().trim();
     const e = this.filtroEstado();
     return this.expedientes().filter(exp => {
       if (e && exp.estado !== e) return false;
       if (!q) return true;
-      return (
-        exp.numero.toLowerCase().includes(q)             ||
-        exp.servicio_nombre.toLowerCase().includes(q)    ||
-        exp.servicio_nombre_en.toLowerCase().includes(q) ||
-        exp.servicio_nombre_fr.toLowerCase().includes(q) ||
-        exp.cliente_nombre.toLowerCase().includes(q)     ||
-        exp.provincia.toLowerCase().includes(q)          ||
-        exp.canton.toLowerCase().includes(q)
-      );
+      const haystack = [
+        exp.numero,
+        exp.servicio_nombre,
+        exp.servicio_nombre_en,
+        exp.servicio_nombre_fr,
+        exp.cliente_nombre,
+        // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+        // `canton` la ciudad y `distrito` el código postal.
+        exp.direccion,
+        exp.canton,
+        exp.provincia,
+        exp.distrito,
+      ].join(' ');
+      return coincideBusqueda(haystack, q);
     });
   });
 
@@ -170,6 +180,15 @@ export class EstimatedFilesComponent implements OnInit {
 
   ver(id: string) {
     this.router.navigate(['/estimator/estimated-file', id]);
+  }
+
+  /**
+   * Clic en cualquier parte de la tarjeta o fila. No navega mientras la
+   * confirmación de borrado de ese expediente está abierta.
+   */
+  abrir(id: string) {
+    if (this.confirmandoId() === id) return;
+    this.ver(id);
   }
 
   pedirConfirmacion(id: string) {

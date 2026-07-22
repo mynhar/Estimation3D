@@ -181,7 +181,8 @@
           </thead>
           <tbody>
             @for (exp of expedientesPaginados(); track exp.id) {
-              <tr class="ef-table__row"
+              <tr class="ef-table__row ef-table__row--clickable"
+                  (click)="abrir(exp.id)"
                   [class.ef-table__row--confirming]="confirmandoId() === exp.id"
                   [class.ef-table__row--cancelado]="exp.estado === 'cancelado'">
 
@@ -205,7 +206,14 @@
 
                 <td>{{ exp.cliente_nombre }}</td>
 
-                <td class="ef-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+                <td class="ef-table__addr" [title]="direccionCompleta(exp)">
+                  @if (direccionLinea1(exp)) {
+                    <span class="ef-table__addr-line">{{ direccionLinea1(exp) }}</span>
+                  }
+                  @if (direccionLinea2(exp)) {
+                    <span class="ef-table__addr-line ef-table__muted">{{ direccionLinea2(exp) }}</span>
+                  }
+                </td>
 
                 <td class="ef-table__col-date">
                   <span class="ef-table__fecha">
@@ -222,7 +230,7 @@
                   </span>
                 </td>
 
-                <td class="ef-table__col-action">
+                <td class="ef-table__col-action" (click)="$event.stopPropagation()">
                   @if (confirmandoId() === exp.id) {
                     <div class="ef-actions ef-actions--row">
                       <button class="ef-btn ef-btn--danger ef-btn--row"
@@ -272,7 +280,10 @@
 
         @for (exp of expedientesPaginados(); track exp.id; let idx = $index) {
 
-          <article class="ef-card"
+          <article class="ef-card" role="button" tabindex="0"
+                   (click)="abrir(exp.id)"
+                   (keydown.enter)="abrir(exp.id)"
+                   (keydown.space)="$event.preventDefault(); abrir(exp.id)"
                    [class.ef-card--estimado]="exp.estado === 'estimado'"
                    [class.ef-card--en_oferta]="exp.estado === 'en_oferta'"
                    [class.ef-card--adjudicado]="exp.estado === 'adjudicado'"
@@ -318,10 +329,19 @@
                 <i class="bi bi-person" aria-hidden="true"></i>
                 <span>{{ exp.cliente_nombre }}</span>
               </div>
-              <div class="ef-meta">
-                <i class="bi bi-geo-alt" aria-hidden="true"></i>
-                <span>{{ exp.provincia }}, {{ exp.canton }}</span>
-              </div>
+              @if (direccionLinea1(exp) || direccionLinea2(exp)) {
+                <div class="ef-meta ef-addr" [title]="direccionCompleta(exp)">
+                  <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                  <span class="ef-addr__text">
+                    @if (direccionLinea1(exp)) {
+                      <span class="ef-addr__line">{{ direccionLinea1(exp) }}</span>
+                    }
+                    @if (direccionLinea2(exp)) {
+                      <span class="ef-addr__line ef-addr__line--muted">{{ direccionLinea2(exp) }}</span>
+                    }
+                  </span>
+                </div>
+              }
             </div>
 
             <!-- Fecha de visita -->
@@ -333,8 +353,10 @@
               }
             </div>
 
-            <!-- Acciones -->
-            <div class="ef-card__foot">
+            <!-- Acciones (los botones internos no deben disparar la navegación) -->
+            <div class="ef-card__foot" (click)="$event.stopPropagation()"
+                 (keydown.enter)="$event.stopPropagation()"
+                 (keydown.space)="$event.stopPropagation()">
 
               @if (confirmandoId() === exp.id) {
 

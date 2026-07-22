@@ -367,6 +367,12 @@
   box-shadow: var(--ds-shadow-md);
   transform: translateY(-2px);
 }
+/* Toda la tarjeta toma la estimación (role="button") */
+.ftbe-card { cursor: pointer; }
+.ftbe-card:focus-visible {
+  outline: 2px solid var(--ds-gold-active);
+  outline-offset: 2px;
+}
 
 .ftbe-card--vencida::before { background: var(--ds-danger); }
 .ftbe-card--hoy::before     { background: var(--ds-warning); }
@@ -479,6 +485,7 @@
 .ftbe-table tbody tr:last-child td { border-bottom: none; }
 
 .ftbe-table__row { transition: background-color var(--ds-duration-fast) var(--ds-ease-out); }
+.ftbe-table__row--clickable { cursor: pointer; }
 .ftbe-table__row:hover { background: var(--ds-gold-faint); }
 
 .ftbe-table__col-photo  { width: 64px; }
@@ -488,6 +495,18 @@
 
 .ftbe-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
 .ftbe-table__muted   { color: var(--ds-ink-muted); }
+
+/* Dirección postal en dos líneas dentro de la celda de ubicación. */
+.ftbe-table__addr {
+  max-width: 18rem;
+  color: var(--ds-ink-secondary);
+}
+.ftbe-table__addr-line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .ftbe-table__fecha { display: block; }
 .ftbe-table__fecha--vencida { color: var(--ds-danger);  font-weight: var(--ds-weight-semibold); }
@@ -585,6 +604,21 @@
   font-size: var(--ds-text-sm);
   color: var(--ds-ink-secondary);
 }
+
+/* Dirección postal en dos líneas: "615-150 rue Berlioz" / "Montréal QC H3E 1K3" */
+.ftbe-addr { align-items: flex-start; min-width: 0; }
+.ftbe-addr i { line-height: var(--ds-leading-normal); }
+.ftbe-addr__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ftbe-addr__line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ftbe-addr__line--muted { color: var(--ds-ink-muted); }
 
 /* ── Visit date ──────────────────────────────────────────────────────────── */
 .ftbe-card__fecha {

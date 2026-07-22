@@ -94,7 +94,7 @@ export class AdminToEstimateEditComponent implements OnInit {
       this.fechaVisita &&
       this.horaVisita &&
       this.descripcionProblema.trim() &&
-      this.urlsTour().length > 0
+      this.costoValido
     );
   }
 

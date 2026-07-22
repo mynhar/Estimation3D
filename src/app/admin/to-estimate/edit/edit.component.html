@@ -620,6 +620,7 @@
                    [class.bi-check-circle]="urlsTour().length > 0"
                    [class.bi-circle]="urlsTour().length === 0"></i>
                 {{ 'estimator_file.tour_title' | translate }}
+                <span class="fued-opt">({{ 'common.optional' | translate }})</span>
               </div>
               <div class="fued-checklist-item"
                    [class.fued-checklist-item--done]="costoMin !== null && costoMax !== null && costoValido">

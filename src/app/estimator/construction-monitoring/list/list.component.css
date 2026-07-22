@@ -79,14 +79,28 @@
 .skeleton-row:last-child { border-bottom: none; }
 
 /* ── Status chips bar ─────────────────────────────────────────────────────── */
-.status-chips-bar {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
+.filter-bar {
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+}
+.filter-bar__search {
   padding: var(--ds-space-3) var(--ds-space-4);
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+.search-icon  { background: transparent; border-right: none; color: var(--ds-ink-muted); }
+.search-input { border-left: none; background: transparent; }
+.search-input:focus { box-shadow: none; border-color: var(--ds-border); }
+.search-clear { background: transparent; border-color: var(--ds-border); color: var(--ds-ink-muted); transition: color var(--ds-duration-fast) var(--ds-ease-out); }
+.search-clear:hover { color: var(--ds-ink); }
+.filter-bar__chips {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  flex-wrap: wrap;
 }
 .status-chips { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); flex: 1; min-width: 0; }
 
@@ -197,7 +211,14 @@
 .col-photo    { width: 64px; }
 .col-num      { width: 110px; white-space: nowrap; }
 .col-identity { min-width: 160px; }
-.col-location { min-width: 120px; }
+.col-location { min-width: 120px; max-width: 18rem; }
+/* Dirección postal en dos líneas: "615-150 rue Berlioz" / "Montréal QC H3E 1K3" */
+.col-location__line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .col-date     { width: 100px; white-space: nowrap; }
 .col-plazo    { width: 100px; white-space: nowrap; }
 .col-precio   { width: 130px; white-space: nowrap; }

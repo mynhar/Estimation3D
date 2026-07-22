@@ -131,7 +131,7 @@
           </thead>
           <tbody>
             @for (exp of expedientesFiltrados(); track exp.id) {
-              <tr class="ftbe-table__row">
+              <tr class="ftbe-table__row ftbe-table__row--clickable" (click)="estimar(exp.id)">
                 <td class="ftbe-table__col-photo">
                   <div class="ftbe-thumb">
                     @if (fotoExpediente(exp); as foto) {
@@ -152,7 +152,14 @@
 
                 <td>{{ exp.cliente_nombre }}</td>
 
-                <td class="ftbe-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
+                <td class="ftbe-table__addr" [title]="direccionCompleta(exp)">
+                  @if (direccionLinea1(exp)) {
+                    <span class="ftbe-table__addr-line">{{ direccionLinea1(exp) }}</span>
+                  }
+                  @if (direccionLinea2(exp)) {
+                    <span class="ftbe-table__addr-line ftbe-table__muted">{{ direccionLinea2(exp) }}</span>
+                  }
+                </td>
 
                 <td class="ftbe-table__col-date">
                   <span class="ftbe-table__fecha"
@@ -178,7 +185,7 @@
                   }
                 </td>
 
-                <td class="ftbe-table__col-action">
+                <td class="ftbe-table__col-action" (click)="$event.stopPropagation()">
                   <button class="ftbe-btn-cta ftbe-btn-cta--row" (click)="estimar(exp.id)">
                     <i class="bi bi-pencil-square"></i>
                     {{ 'files_to_estimate.take_estimate' | translate }}
@@ -193,7 +200,10 @@
       <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ────────── -->
       <div class="ftbe-grid" [class.d-md-none]="vista() === 'tabla'">
         @for (exp of expedientesFiltrados(); track exp.id; let idx = $index) {
-          <article class="ftbe-card"
+          <article class="ftbe-card" role="button" tabindex="0"
+                   (click)="estimar(exp.id)"
+                   (keydown.enter)="estimar(exp.id)"
+                   (keydown.space)="$event.preventDefault(); estimar(exp.id)"
                    [class.ftbe-card--vencida]="urgencia(exp.fecha_visita) === 'vencida'"
                    [class.ftbe-card--hoy]="urgencia(exp.fecha_visita) === 'hoy'"
                    [class.ftbe-card--proxima]="urgencia(exp.fecha_visita) === 'proxima'"
@@ -245,9 +255,19 @@
               <span class="ftbe-meta-item">
                 <i class="bi bi-person"></i>{{ exp.cliente_nombre }}
               </span>
-              <span class="ftbe-meta-item">
-                <i class="bi bi-geo-alt"></i>{{ exp.provincia }}, {{ exp.canton }}
-              </span>
+              @if (direccionLinea1(exp) || direccionLinea2(exp)) {
+                <span class="ftbe-meta-item ftbe-addr" [title]="direccionCompleta(exp)">
+                  <i class="bi bi-geo-alt"></i>
+                  <span class="ftbe-addr__text">
+                    @if (direccionLinea1(exp)) {
+                      <span class="ftbe-addr__line">{{ direccionLinea1(exp) }}</span>
+                    }
+                    @if (direccionLinea2(exp)) {
+                      <span class="ftbe-addr__line ftbe-addr__line--muted">{{ direccionLinea2(exp) }}</span>
+                    }
+                  </span>
+                </span>
+              }
             </div>
 
             <div class="ftbe-card__fecha"
@@ -258,7 +278,9 @@
               <strong>{{ formatFecha(exp.fecha_visita) }}</strong>
             </div>
 
-            <button class="ftbe-btn-cta" (click)="estimar(exp.id)">
+            <button class="ftbe-btn-cta" (click)="$event.stopPropagation(); estimar(exp.id)"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()">
               <i class="bi bi-pencil-square"></i>
               {{ 'files_to_estimate.take_estimate' | translate }}
             </button>

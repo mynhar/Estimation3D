@@ -15,7 +15,7 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoConstructorListItem } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import {
-  direccionLinea1, direccionLinea2, direccionCompleta,
+  coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
 } from '../../../shared/util/busqueda';
 
 type VistaContratos = 'tabla' | 'tarjetas';
@@ -40,6 +40,7 @@ export class EstimatorConstructionMonitoringListComponent implements OnInit {
   cargando  = signal(true);
   error     = signal<string | null>(null);
 
+  busqueda     = signal('');
   filtroEstado = signal('todos');
   vista        = signal<VistaContratos>('tarjetas');
 
@@ -52,9 +53,31 @@ export class EstimatorConstructionMonitoringListComponent implements OnInit {
 
   contratosFiltrados = computed(() => {
     const estado = this.filtroEstado();
-    if (estado === 'todos') return this._contratos();
-    return this._contratos().filter(c => c.estado === estado);
+    const q      = this.busqueda().trim();
+    return this._contratos().filter(c => {
+      if (estado !== 'todos' && c.estado !== estado) return false;
+      if (q) {
+        const haystack = [
+          c.expediente_numero,
+          c.cliente_nombre,
+          c.constructor_nombre,
+          c.servicio_nombre,
+          c.servicio_nombre_en,
+          c.servicio_nombre_fr,
+          // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
+          // `canton` la ciudad y `distrito` el código postal.
+          c.direccion,
+          c.canton,
+          c.provincia,
+          c.distrito,
+        ].join(' ');
+        if (!coincideBusqueda(haystack, q)) return false;
+      }
+      return true;
+    });
   });
+
+  hayFiltros = computed(() => this.busqueda().trim() !== '' || this.filtroEstado() !== 'todos');
 
   contratosPaginados = computed(() => {
     const desde = (this.paginaActual() - 1) * this.POR_PAGINA;
@@ -74,8 +97,18 @@ export class EstimatorConstructionMonitoringListComponent implements OnInit {
   constructor() {
     effect(() => {
       this.filtroEstado();
+      this.busqueda();
       this.paginaActual.set(1);
     }, { allowSignalWrites: true });
+  }
+
+  setBusqueda(e: Event) {
+    this.busqueda.set((e.target as HTMLInputElement).value);
+  }
+
+  limpiarFiltros() {
+    this.busqueda.set('');
+    this.filtroEstado.set('todos');
   }
 
   async ngOnInit() {
