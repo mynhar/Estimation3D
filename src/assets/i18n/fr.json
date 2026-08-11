@@ -1,4 +1,25 @@
 {
+  "edge_errors": {
+    "no_autorizado": "Session non valide. Reconnectez-vous.",
+    "token_invalido": "Votre session a expiré. Reconnectez-vous.",
+    "rol_no_permitido": "Votre rôle ne permet pas cette action.",
+    "campos_requeridos": "Il manque des champs obligatoires.",
+    "error_interno": "Une erreur inattendue s'est produite. Réessayez.",
+    "estimador_solo_clientes": "Un estimateur ne peut gérer que des comptes clients.",
+    "email_duplicado": "Un compte existe déjà avec ce courriel.",
+    "auth_error": "Le compte n'a pas pu être créé ou mis à jour ({{detail}}).",
+    "perfil_error": "Le profil n'a pas pu être enregistré. Réessayez.",
+    "solo_admin": "Seul un administrateur peut envoyer des invitations.",
+    "expediente_no_encontrado": "Dossier introuvable.",
+    "sin_correo": "Aucun des constructeurs sélectionnés n'a de courriel enregistré.",
+    "resend_no_configurado": "Le service de courriel n'est pas configuré. Contactez l'administrateur.",
+    "envio_fallido": "Le courriel n'a pas pu être envoyé. Aucune invitation n'a été enregistrée.",
+    "servicio_no_configurado": "L'assistant n'est pas configuré. Contactez l'administrateur.",
+    "falta_expediente": "Sélectionnez d'abord un dossier.",
+    "ultimo_mensaje_usuario": "La conversation n'a pas pu être envoyée. Réessayez.",
+    "expediente_sin_acceso": "Ce dossier n'existe pas ou vous n'y avez pas accès.",
+    "asistente_no_disponible": "L'assistant n'est pas disponible en ce moment. Réessayez plus tard."
+  },
   "nav": {
     "section_principal": "Principal",
     "section_dossiers": "Dossiers",
@@ -1239,7 +1260,8 @@
     "send_btn": "Envoyer l'invitation-courriel",
     "sending": "Envoi…",
     "success": "Invitation envoyée avec succès.",
-    "err_none": "Sélectionnez au moins un constructeur."
+    "err_none": "Sélectionnez au moins un constructeur.",
+    "err_send": "L'invitation n'a pas pu être envoyée. Réessayez."
   },
   "admin_offer": {
     "title": "Offres",
@@ -1593,6 +1615,7 @@
     "refresh": "Actualiser",
     "refreshed_at": "Mis à jour à",
     "retry": "Réessayer",
+    "err_load": "Erreur lors du chargement des données du tableau de bord.",
     "kpi_exp": "Dossiers",
     "kpi_est": "Estimations",
     "kpi_con": "Entrepreneurs",
@@ -1791,6 +1814,10 @@
     "view_cards": "Vue cartes",
     "photo_none": "Aucun tour 3D disponible",
     "search_placeholder": "Rechercher par numéro, client, service, entrepreneur, adresse…"
+  },
+  "estimator_monitoring": {
+    "no_access_title": "Chantier non disponible",
+    "no_access_hint": "Ce contrat ne correspond à aucun dossier que vous avez estimé ou qui vous est assigné."
   },
   "client_monitoring": {
     "eyebrow": "Suivi en temps réel",

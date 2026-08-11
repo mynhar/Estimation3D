@@ -137,7 +137,7 @@
               </td>
               <td class="or-table__muted">{{ exp.provincia }}, {{ exp.canton }}</td>
               <td>
-                <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ estadoTexto(exp.estado) }}</span>
+                <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ ('state.' + exp.estado) | translate }}</span>
               </td>
               <td>
                 @if (ofertaAceptada(exp); as acc) {
@@ -193,7 +193,7 @@
             <span class="oc__loc"><i class="bi bi-geo-alt" aria-hidden="true"></i>{{ exp.provincia }}, {{ exp.canton }}</span>
           </p>
         </div>
-        <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ estadoTexto(exp.estado) }}</span>
+        <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ ('state.' + exp.estado) | translate }}</span>
       </div>
 
       <!-- Resumen compacto de ofertas -->

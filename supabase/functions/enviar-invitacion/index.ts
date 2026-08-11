@@ -26,7 +26,7 @@ Deno.serve(async (req: Request) => {
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return json({ error: 'No autorizado' }, 401);
+      return fail('no_autorizado', 'No autorizado', 401);
     }
 
     const supabaseUrl    = Deno.env.get('SUPABASE_URL')!;
@@ -40,19 +40,19 @@ Deno.serve(async (req: Request) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await adminClient.auth.getUser(token);
     if (userError || !user) {
-      return json({ error: 'Token inválido o expirado' }, 401);
+      return fail('token_invalido', 'Token inválido o expirado', 401);
     }
 
     const { data: perfil } = await adminClient
       .from('perfil').select('rol').eq('id', user.id).single();
     if (perfil?.rol !== 'administrador') {
-      return json({ error: 'Acceso denegado: se requiere rol administrador' }, 403);
+      return fail('solo_admin', 'Acceso denegado: se requiere rol administrador', 403);
     }
 
     // 2. Cuerpo
     const { expediente_id, constructor_ids } = await req.json();
     if (!expediente_id || !Array.isArray(constructor_ids) || constructor_ids.length === 0) {
-      return json({ error: 'Campos requeridos: expediente_id, constructor_ids[]' }, 400);
+      return fail('campos_requeridos', 'Campos requeridos: expediente_id, constructor_ids[]', 400);
     }
 
     // 3. Datos del expediente
@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
       .eq('id', expediente_id)
       .single();
     if (expError || !exp) {
-      return json({ error: 'Expediente no encontrado' }, 404);
+      return fail('expediente_no_encontrado', 'Expediente no encontrado', 404);
     }
 
     const [servicioRes, clienteRes, locRes, estimacionRes] = await Promise.all([
@@ -85,11 +85,11 @@ Deno.serve(async (req: Request) => {
       .select('id, nombre, apellido, email')
       .in('id', constructor_ids)
       .eq('rol', 'constructor');
-    if (consError) return json({ error: consError.message }, 500);
+    if (consError) return fail('error_interno', consError.message, 500, consError.message);
 
     const destinatarios = (constructores ?? []).filter((c) => !!c.email);
     if (!destinatarios.length) {
-      return json({ error: 'Ninguno de los constructores seleccionados tiene correo registrado' }, 400);
+      return fail('sin_correo', 'Ninguno de los constructores seleccionados tiene correo registrado', 400);
     }
 
     // 5. Registrar invitaciones nuevas (se revierten si el correo falla)
@@ -109,7 +109,7 @@ Deno.serve(async (req: Request) => {
           constructor_id: c.id,
           invitado_por:   user.id,
         })));
-      if (insError) return json({ error: insError.message }, 500);
+      if (insError) return fail('error_interno', insError.message, 500, insError.message);
     }
 
     const rollback = async () => {
@@ -126,7 +126,7 @@ Deno.serve(async (req: Request) => {
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) {
       await rollback();
-      return json({ error: 'Falta configurar el secreto RESEND_API_KEY en Supabase' }, 500);
+      return fail('resend_no_configurado', 'Falta configurar el secreto RESEND_API_KEY en Supabase', 500);
     }
 
     const cliente  = clienteRes.data;
@@ -182,18 +182,20 @@ Deno.serve(async (req: Request) => {
         if (!emailRes.ok) {
           await rollback();
           const payload = await emailRes.json().catch(() => ({}));
-          return json({ error: `No se pudo enviar el correo: ${payload?.message ?? `HTTP ${emailRes.status}`}` }, 502);
+          const detalle = payload?.message ?? `HTTP ${emailRes.status}`;
+          return fail('envio_fallido', `No se pudo enviar el correo: ${detalle}`, 502, detalle);
         }
       } else {
         await rollback();
-        return json({ error: `No se pudo enviar el correo: ${primerError?.message ?? `HTTP ${emailRes.status}`}` }, 502);
+        const detalle = primerError?.message ?? `HTTP ${emailRes.status}`;
+        return fail('envio_fallido', `No se pudo enviar el correo: ${detalle}`, 502, detalle);
       }
     }
 
     return json({ enviados: destinatarios.length, invitados_nuevos: nuevas.length, remitente }, 200);
 
   } catch (err: any) {
-    return json({ error: err?.message ?? 'Error interno' }, 500);
+    return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
   }
 });
 
@@ -204,6 +206,15 @@ function json(body: unknown, status: number): Response {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * Error con código estable. `code` es lo único que el frontend debe mostrar
+ * (lo traduce a los tres idiomas); `error` se conserva por compatibilidad y
+ * para los logs, pero está solo en español y no debe llegar a la interfaz.
+ */
+function fail(code: string, mensaje: string, status: number, detail?: string): Response {
+  return json(detail ? { code, error: mensaje, detail } : { code, error: mensaje }, status);
 }
 
 function esc(v: string): string {

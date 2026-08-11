@@ -326,7 +326,9 @@ export class AdminFileEditComponent implements OnInit {
 
     if (pais === 'canada') {
       crFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('numero_civico')?.setValidators([Validators.required]);
+      // `numero_civico` es opcional (igual que en las pantallas de creación):
+      // hay direcciones sin número cívico y la calle basta para identificarlas.
+      this.localizacionForm.get('numero_civico')?.clearValidators();
       this.localizacionForm.get('calle')?.setValidators([Validators.required]);
       this.localizacionForm.get('ciudad')?.setValidators([Validators.required]);
       this.localizacionForm.get('provincia_ca')?.setValidators([Validators.required]);

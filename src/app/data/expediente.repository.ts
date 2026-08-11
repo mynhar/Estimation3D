@@ -164,6 +164,35 @@ export class ExpedienteRepository {
     return (data ?? []) as ExpedienteRaw[];
   }
 
+  /**
+   * Expedientes de un estimador por las dos vías que lo vinculan:
+   * `expediente.estimador_id` (asignación actual, que se reescribe al reasignar)
+   * y `estimacion.estimador_id` (autoría de la estimación, que es estable).
+   * Mismo criterio que `fn_estimador_de_expediente` en la base y que
+   * `ContratoRepository.findByEstimadorId`.
+   */
+  async findDeEstimador(estimadorId: string): Promise<ExpedienteRaw[]> {
+    const { data: estimadas, error: errEst } = await this.db
+      .from('estimacion')
+      .select('expediente_id')
+      .eq('estimador_id', estimadorId);
+    if (errEst) throw new Error(errEst.message);
+
+    const ids = [...new Set((estimadas ?? []).map(r => (r as { expediente_id: string }).expediente_id))];
+
+    const filtro = ids.length
+      ? `estimador_id.eq.${estimadorId},id.in.(${ids.join(',')})`
+      : `estimador_id.eq.${estimadorId}`;
+
+    const { data, error } = await this.db
+      .from('expediente')
+      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, servicio_id, creado_en')
+      .or(filtro)
+      .order('creado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ExpedienteRaw[];
+  }
+
   async findDisponibles(): Promise<ExpedienteRaw[]> {
     const { data, error } = await this.db
       .from('expediente')

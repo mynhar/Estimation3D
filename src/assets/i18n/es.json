@@ -1,4 +1,25 @@
 {
+  "edge_errors": {
+    "no_autorizado": "Sesión no válida. Vuelva a iniciar sesión.",
+    "token_invalido": "Su sesión ha expirado. Vuelva a iniciar sesión.",
+    "rol_no_permitido": "Su rol no permite esta acción.",
+    "campos_requeridos": "Faltan campos obligatorios.",
+    "error_interno": "Ocurrió un error inesperado. Inténtelo de nuevo.",
+    "estimador_solo_clientes": "Un estimador solo puede gestionar cuentas de cliente.",
+    "email_duplicado": "Ya existe una cuenta con este correo.",
+    "auth_error": "No se pudo crear ni actualizar la cuenta ({{detail}}).",
+    "perfil_error": "No se pudo guardar el perfil. Inténtelo de nuevo.",
+    "solo_admin": "Solo un administrador puede enviar invitaciones.",
+    "expediente_no_encontrado": "Expediente no encontrado.",
+    "sin_correo": "Ninguno de los constructores seleccionados tiene correo registrado.",
+    "resend_no_configurado": "El servicio de correo no está configurado. Contacte al administrador.",
+    "envio_fallido": "No se pudo enviar el correo. No se registró ninguna invitación.",
+    "servicio_no_configurado": "El asistente no está configurado. Contacte al administrador.",
+    "falta_expediente": "Seleccione primero un expediente.",
+    "ultimo_mensaje_usuario": "No se pudo enviar la conversación. Inténtelo de nuevo.",
+    "expediente_sin_acceso": "Este expediente no existe o no tiene acceso a él.",
+    "asistente_no_disponible": "El asistente no está disponible en este momento. Inténtelo más tarde."
+  },
   "nav": {
     "section_principal": "Principal",
     "section_dossiers": "Expedientes",
@@ -1239,7 +1260,8 @@
     "send_btn": "Enviar invitación-correo",
     "sending": "Enviando…",
     "success": "Invitación enviada correctamente.",
-    "err_none": "Seleccione al menos un constructor."
+    "err_none": "Seleccione al menos un constructor.",
+    "err_send": "No se pudo enviar la invitación. Inténtelo de nuevo."
   },
   "admin_offer": {
     "title": "Ofertas",
@@ -1593,6 +1615,7 @@
     "refresh": "Actualizar",
     "refreshed_at": "Actualizado a las",
     "retry": "Reintentar",
+    "err_load": "Error al cargar los datos del panel.",
     "kpi_exp": "Expedientes",
     "kpi_est": "Estimaciones",
     "kpi_con": "Constructores",
@@ -1791,6 +1814,10 @@
     "view_cards": "Vista de tarjetas",
     "photo_none": "Sin tour 3D disponible",
     "search_placeholder": "Buscar por número, cliente, servicio, constructor, dirección…"
+  },
+  "estimator_monitoring": {
+    "no_access_title": "Obra no disponible",
+    "no_access_hint": "Este contrato no corresponde a ningún expediente que usted haya estimado o que tenga asignado."
   },
   "client_monitoring": {
     "eyebrow": "Seguimiento en tiempo real",

@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
+import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ExpedienteRepository, OfertaRepository } from '../../../data';
 import {
   AsistenteIaService,
@@ -56,6 +57,7 @@ export class AiAssistantComponent implements OnInit {
   private ofertaRepo = inject(OfertaRepository);
   private asistente = inject(AsistenteIaService);
   private translate = inject(TranslateService);
+  private edgeErr   = inject(EdgeErrorService);
 
   /** Rol forzado por el wrapper de la ruta. Si es null, se detecta del perfil. */
   rolForzado = input<string | null>(null);
@@ -168,8 +170,11 @@ export class AiAssistantComponent implements OnInit {
     // ofertado / le han aceptado) más los que siguen disponibles para ofertar.
     if (rol === 'constructor') return this.cargarExpedientesConstructor(userId);
 
+    // El estimador consulta los que tiene asignados MÁS los que estimó: al
+    // reasignar un expediente, `expediente.estimador_id` cambia pero la autoría
+    // de la estimación no, y el asistente debe seguir cubriendo ese trabajo.
     const raw =
-      rol === 'estimador'     ? await this.expRepo.findByFiltro({ estimadorId: userId }) :
+      rol === 'estimador'     ? await this.expRepo.findDeEstimador(userId) :
       rol === 'administrador' ? await this.expRepo.findAll() :
                                 await this.expRepo.findByClienteId(userId);
     return raw.map(e => ({ id: e.id, numero: e.numero, estado: e.estado }));
@@ -258,8 +263,10 @@ export class AiAssistantComponent implements OnInit {
         ? this.translate.instant('ai_assistant.refusal')
         : (res.reply ?? this.translate.instant('ai_assistant.empty_reply'));
       this.mensajes.update(m => [...m, { role: 'assistant', content: reply }]);
-    } catch {
-      this.mensajes.update(m => [...m, { role: 'error', content: this.translate.instant('ai_assistant.error') }]);
+    } catch (e: unknown) {
+      // La edge function distingue sin acceso, sin configurar, modelo caído…
+      // Antes todo caía en el mismo texto genérico.
+      this.mensajes.update(m => [...m, { role: 'error', content: this.edgeErr.mensaje(e, 'ai_assistant.error') }]);
     } finally {
       this.enviando.set(false);
     }

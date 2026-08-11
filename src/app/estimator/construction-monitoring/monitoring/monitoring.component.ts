@@ -37,6 +37,14 @@ export class EstimatorConstructionMonitoringComponent implements OnInit, OnDestr
   cargando = signal(true);
   error    = signal<string | null>(null);
 
+  /**
+   * El contrato del id de la URL no está entre los del estimador. Es un caso
+   * distinto de "todavía no hay seguimiento": no es que la obra no haya
+   * arrancado, es que este expediente no es suyo (o el id no existe). Sin este
+   * estado la pantalla se quedaba muda, porque RLS filtra la fila en silencio.
+   */
+  noAccesible = signal(false);
+
   private contratoId = '';
   private channels: RealtimeChannel[] = [];
   private recargaTimer: ReturnType<typeof setTimeout> | null = null;
@@ -67,8 +75,14 @@ export class EstimatorConstructionMonitoringComponent implements OnInit, OnDestr
     try {
       const contratos = await this.contratoService.getContratosEstimador(userId);
       const contrato  = contratos.find(c => c.id === this.contratoId);
-      if (!contrato) { this.obra.set(null); this.error.set(null); return; }
+      if (!contrato) {
+        this.obra.set(null);
+        this.error.set(null);
+        this.noAccesible.set(true);
+        return;
+      }
 
+      this.noAccesible.set(false);
       this.obra.set(await this.obraVm.construirObra(contrato));
       this.error.set(null);
     } catch (e: unknown) {

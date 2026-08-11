@@ -1,4 +1,25 @@
 {
+  "edge_errors": {
+    "no_autorizado": "Invalid session. Please sign in again.",
+    "token_invalido": "Your session has expired. Please sign in again.",
+    "rol_no_permitido": "Your role does not allow this action.",
+    "campos_requeridos": "Some required fields are missing.",
+    "error_interno": "Something went wrong. Please try again.",
+    "estimador_solo_clientes": "An estimator can only manage client accounts.",
+    "email_duplicado": "An account with this email already exists.",
+    "auth_error": "The account could not be created or updated ({{detail}}).",
+    "perfil_error": "The profile could not be saved. Please try again.",
+    "solo_admin": "Only an administrator can send invitations.",
+    "expediente_no_encontrado": "File not found.",
+    "sin_correo": "None of the selected builders has a registered email address.",
+    "resend_no_configurado": "The email service is not configured. Contact the administrator.",
+    "envio_fallido": "The email could not be sent. No invitation was recorded.",
+    "servicio_no_configurado": "The assistant is not configured. Contact the administrator.",
+    "falta_expediente": "Select a file first.",
+    "ultimo_mensaje_usuario": "The conversation could not be sent. Please try again.",
+    "expediente_sin_acceso": "This file does not exist or you do not have access to it.",
+    "asistente_no_disponible": "The assistant is unavailable right now. Please try again later."
+  },
   "nav": {
     "section_principal": "Main",
     "section_dossiers": "Files",
@@ -1239,7 +1260,8 @@
     "send_btn": "Send invitation email",
     "sending": "Sending…",
     "success": "Invitation sent successfully.",
-    "err_none": "Select at least one builder."
+    "err_none": "Select at least one builder.",
+    "err_send": "The invitation could not be sent. Please try again."
   },
   "admin_offer": {
     "title": "Offers",
@@ -1593,6 +1615,7 @@
     "refresh": "Refresh",
     "refreshed_at": "Updated at",
     "retry": "Retry",
+    "err_load": "Error loading dashboard data.",
     "kpi_exp": "Files",
     "kpi_est": "Estimates",
     "kpi_con": "Contractors",
@@ -1791,6 +1814,10 @@
     "view_cards": "Card view",
     "photo_none": "No 3D tour available",
     "search_placeholder": "Search by number, client, service, contractor, address…"
+  },
+  "estimator_monitoring": {
+    "no_access_title": "Site not available",
+    "no_access_hint": "This contract does not match any file you estimated or that is assigned to you."
   },
   "client_monitoring": {
     "eyebrow": "Real-time tracking",

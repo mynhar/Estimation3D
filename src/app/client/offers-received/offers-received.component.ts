@@ -73,20 +73,14 @@ export class OffersReceivedComponent implements OnInit {
   }
 
   // ── Estado del expediente (badge) ───────────────────────────────────────────
-  estadoTexto(estado: string): string {
-    return ESTADO_BADGE_OFERTA_RECIBIDA[estado]?.texto ?? estado;
-  }
   estadoClase(estado: string): string {
-    return ESTADO_BADGE_OFERTA_RECIBIDA[estado]?.clase ?? 'bg-secondary';
+    return ESTADO_BADGE_OFERTA_RECIBIDA[estado] ?? 'bg-secondary';
   }
 
   // ── Formato ─────────────────────────────────────────────────────────────────
   formatPrecio(precio: number): string {
-    const locale = this.translate.currentLang === 'fr' ? 'fr-CA'
-                 : this.translate.currentLang === 'en' ? 'en-CA'
-                 : 'es-CR';
-    return new Intl.NumberFormat(locale, {
-      style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0,
+    return new Intl.NumberFormat('fr-CA', {
+      style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(precio);
   }
 

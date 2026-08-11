@@ -41,6 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# HTML intermedio de `npm run manual -- --html` (sólo para depurar)
+docs/.manual.build.html
+
 # Archivos .env con secretos (p. ej. scripts/borrado-usuario/.env)
 .env
 *.env

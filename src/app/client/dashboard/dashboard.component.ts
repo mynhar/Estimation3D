@@ -519,13 +519,8 @@ export class DashboardComponent implements OnInit {
   }
 
   formatPrecio(precio: number): string {
-    // Use locales where CAD renders as "CA$" or "$CA" — never plain "$" which looks like USD
-    const locale = this.translate.currentLang === 'fr' ? 'fr-FR'
-                 : this.translate.currentLang === 'en' ? 'en-US'
-                 : 'es-CR';
-    return new Intl.NumberFormat(locale, {
-      style: 'currency', currency: 'CAD',
-      minimumFractionDigits: 0, maximumFractionDigits: 0,
+    return new Intl.NumberFormat('fr-CA', {
+      style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(precio);
   }
 

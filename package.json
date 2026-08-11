@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint:css": "stylelint \"src/**/*.css\" && node scripts/validate-ds-tokens.mjs",
-    "lint:tokens": "node scripts/validate-ds-tokens.mjs"
+    "lint:tokens": "node scripts/validate-ds-tokens.mjs",
+    "manual": "node scripts/build-manual.mjs"
   },
   "private": true,
   "engines": {
@@ -47,6 +48,8 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "markdown-it": "^15.0.0",
+    "puppeteer-core": "^25.5.0",
     "stylelint": "^16.26.1",
     "typescript": "~5.5.2"
   }

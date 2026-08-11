@@ -488,14 +488,11 @@
                   </div>
                   <div class="col-sm-3">
                     <label class="form-label" for="numero-civico">
-                      {{ 'file_create.civic_number' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+                      {{ 'file_create.civic_number' | translate }}
+                      <span class="opt-label">({{ 'common.optional' | translate }})</span>
                     </label>
                     <input id="numero-civico" type="text" class="form-control" formControlName="numero_civico"
                            [placeholder]="'file_create.civic_placeholder' | translate" />
-                    @if (invalid(localizacionForm, 'numero_civico')) {
-                      <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
-                        {{ 'file_create.field_required' | translate }}</p>
-                    }
                   </div>
                   <div class="col-sm-6">
                     <label class="form-label" for="calle">

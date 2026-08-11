@@ -546,6 +546,7 @@
 .badge-contrato-firmado      { background: var(--ds-success-soft);  color: var(--ds-success);     border: 1px solid var(--ds-success); }
 .badge-contrato-en-ejecucion { background: var(--ds-success-soft);  color: var(--ds-success);     border: 1px solid var(--ds-success); }
 .badge-contrato-completado   { background: var(--ds-info-soft);     color: var(--ds-info);        border: 1px solid var(--ds-info); }
+.badge-contrato-cancelado    { background: var(--ds-danger-soft);   color: var(--ds-danger);      border: 1px solid var(--ds-danger); }
 
 /* ── PDF section (full width) ───────────────────────────────────────────── */
 

@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminUserService } from '../../../services/admin-user.service';
+import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ToastService } from '../../../services/toast.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class EstimatorClientCreateComponent {
   private toast     = inject(ToastService);
   private router    = inject(Router);
   private translate = inject(TranslateService);
+  private edgeErr   = inject(EdgeErrorService);
 
   guardando       = signal(false);
   mostrarPassword = signal(false);
@@ -63,7 +65,7 @@ export class EstimatorClientCreateComponent {
       );
       this.router.navigate(['/estimator/client/list']);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_create'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_create'), 'danger');
     } finally {
       this.guardando.set(false);
     }
@@ -79,7 +81,7 @@ export class EstimatorClientCreateComponent {
       const url = await this.service.uploadAvatar(file);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_upload_avatar'), 'danger');
       this.previewUrl.set(null);
     } finally {
       this.subiendoAvatar.set(false);

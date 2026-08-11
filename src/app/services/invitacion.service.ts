@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AuthSupabaseService } from './auth-supabase.service';
 import { InvitacionRepository } from '../data/invitacion.repository';
+import { edgeError } from './edge-error.service';
 
 /**
  * Invitación de constructores a un expediente: la edge function
@@ -32,8 +33,10 @@ export class InvitacionService {
       },
       body: JSON.stringify({ expediente_id: expedienteId, constructor_ids: constructorIds }),
     });
-    const payload = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(payload.error ?? `Error ${res.status}`);
-    return payload.enviados ?? constructorIds.length;
+    // Se propaga el código, no el texto: el mensaje de la función está solo en
+    // español y lo traduce el componente con `EdgeErrorService`.
+    if (!res.ok) throw await edgeError(res);
+    const payload = await res.json().catch(() => ({} as Record<string, number>));
+    return payload['enviados'] ?? constructorIds.length;
   }
 }

@@ -242,6 +242,28 @@ export const ESTADOS_ESTIMADO: EstadoExpediente[] = [
   'estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado',
 ];
 
+/**
+ * Orden del pipeline de un expediente. `cancelado` queda fuera a propósito:
+ * no es un paso más avanzado, es una salida lateral del flujo.
+ */
+export const ORDEN_ESTADO: EstadoExpediente[] = [
+  'nuevo', 'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado',
+];
+
+/**
+ * `true` si el expediente debe avanzar de `actual` a `destino`.
+ *
+ * Solo avanza cuando `actual` está en el pipeline y es estrictamente anterior a
+ * `destino`. Devuelve `false` si ya lo alcanzó (no se retrocede al reeditar) y
+ * también para estados fuera del pipeline como `cancelado`, que no debe
+ * reactivarse por guardar sobre él.
+ */
+export function debeAvanzarEstado(actual: string | null | undefined, destino: EstadoExpediente): boolean {
+  const i = ORDEN_ESTADO.indexOf(actual as EstadoExpediente);
+  const j = ORDEN_ESTADO.indexOf(destino);
+  return i >= 0 && j >= 0 && i < j;
+}
+
 /** Mapa estado → { texto, clase } para la vista de mis expedientes (cliente). */
 export const ESTADO_BADGE_CLIENTE: Record<string, { texto: string; clase: string }> = {
   nuevo:      { texto: 'Nuevo',      clase: 'bg-primary' },
@@ -283,12 +305,15 @@ export interface ExpedienteConOfertas {
   url_tour: string | null;
 }
 
-/** Mapa estado → { texto, clase } para la vista de ofertas recibidas (cliente). */
-export const ESTADO_BADGE_OFERTA_RECIBIDA: Record<string, { texto: string; clase: string }> = {
-  en_oferta:  { texto: 'En oferta',  clase: 'bg-primary' },
-  adjudicado: { texto: 'Adjudicado', clase: 'bg-warning text-dark' },
-  contratado: { texto: 'Contratado', clase: 'bg-success' },
-  cancelado:  { texto: 'Cancelado',  clase: 'bg-secondary' },
+/**
+ * Mapa estado → clase CSS de badge para la vista de ofertas recibidas (cliente).
+ * La etiqueta visible es la clave i18n `state.<estado>`, resuelta en la plantilla.
+ */
+export const ESTADO_BADGE_OFERTA_RECIBIDA: Record<string, string> = {
+  en_oferta:  'bg-primary',
+  adjudicado: 'bg-warning text-dark',
+  contratado: 'bg-success',
+  cancelado:  'bg-secondary',
 };
 
 /** Mapa estado → clase CSS de badge para la lista de expedientes estimados. */

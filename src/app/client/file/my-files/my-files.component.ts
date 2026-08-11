@@ -10,8 +10,10 @@ import { ExpedienteCliente } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import { ClaudeIconComponent } from '../../../shared/ui/claude-icon/claude-icon.component';
 
+// Config por estado. La etiqueta y el mensaje de ayuda son claves i18n
+// (`state.<estado>` y `state_hint.<estado>`) que resuelve la plantilla;
+// aquí solo viven la clase semántica, el icono y el paso del pipeline.
 interface EstadoCfg {
-  texto: string;
   clase: string;
   icono: string;
   pipelineIdx: number;
@@ -91,28 +93,17 @@ export class MyFilesComponent implements OnInit {
 
   // ── State config ───────────────────────────────────────────────────────────
   private readonly ESTADO_CFG: Record<string, EstadoCfg> = {
-    nuevo:         { texto: 'Nuevo',        clase: 'status-badge--nuevo',         icono: 'bi-inbox',              pipelineIdx: 0 },
-    en_estimacion: { texto: 'En revisión',  clase: 'status-badge--en_estimacion', icono: 'bi-clipboard2-pulse',   pipelineIdx: 1 },
-    estimado:      { texto: 'Estimado',     clase: 'status-badge--estimado',      icono: 'bi-check-circle',       pipelineIdx: 1 },
-    en_oferta:     { texto: 'Con ofertas',  clase: 'status-badge--en_oferta',     icono: 'bi-cash-coin',          pipelineIdx: 2 },
-    adjudicado:    { texto: 'Adjudicado',   clase: 'status-badge--adjudicado',    icono: 'bi-trophy',             pipelineIdx: 3 },
-    contratado:    { texto: 'Contratado',   clase: 'status-badge--contratado',    icono: 'bi-file-earmark-check', pipelineIdx: 4 },
-    cancelado:     { texto: 'Cancelado',    clase: 'status-badge--cancelado',     icono: 'bi-x-circle',           pipelineIdx: -1 },
+    nuevo:         { clase: 'status-badge--nuevo',         icono: 'bi-inbox',              pipelineIdx: 0 },
+    en_estimacion: { clase: 'status-badge--en_estimacion', icono: 'bi-clipboard2-pulse',   pipelineIdx: 1 },
+    estimado:      { clase: 'status-badge--estimado',      icono: 'bi-check-circle',       pipelineIdx: 1 },
+    en_oferta:     { clase: 'status-badge--en_oferta',     icono: 'bi-cash-coin',          pipelineIdx: 2 },
+    adjudicado:    { clase: 'status-badge--adjudicado',    icono: 'bi-trophy',             pipelineIdx: 3 },
+    contratado:    { clase: 'status-badge--contratado',    icono: 'bi-file-earmark-check', pipelineIdx: 4 },
+    cancelado:     { clase: 'status-badge--cancelado',     icono: 'bi-x-circle',           pipelineIdx: -1 },
   };
 
   private readonly FALLBACK_CFG: EstadoCfg = {
-    texto: '—', clase: 'status-badge--cancelado', icono: 'bi-question-circle', pipelineIdx: 0,
-  };
-
-  // ── State hints (client-friendly next-step messages) ──────────────────────
-  private readonly ESTADO_HINT: Record<string, string> = {
-    nuevo:         'Tu solicitud fue recibida. Pronto se asignará un estimador.',
-    en_estimacion: 'Un estimador está evaluando tu caso.',
-    estimado:      'Estimación lista. Constructores pueden enviar propuestas.',
-    en_oferta:     'Hay propuestas de constructores listas para revisar.',
-    adjudicado:    'Constructor seleccionado. El contrato está en proceso.',
-    contratado:    '¡Proyecto contratado! El trabajo está en marcha.',
-    cancelado:     'Este expediente fue cancelado y ya no está activo.',
+    clase: 'status-badge--cancelado', icono: 'bi-question-circle', pipelineIdx: 0,
   };
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -164,10 +155,6 @@ export class MyFilesComponent implements OnInit {
   // ── Helpers ────────────────────────────────────────────────────────────────
   estadoCfg(estado: string): EstadoCfg {
     return this.ESTADO_CFG[estado] ?? this.FALLBACK_CFG;
-  }
-
-  estadoHint(estado: string): string {
-    return this.ESTADO_HINT[estado] ?? '';
   }
 
   dotActive(estado: string, stepIdx: number): boolean {

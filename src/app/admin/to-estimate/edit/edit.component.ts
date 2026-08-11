@@ -10,7 +10,8 @@ import { EstimacionService } from '../../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
 import { PerfilRepository, PerfilNombre, PerfilContacto } from '../../../data/perfil.repository';
 import { InvitacionService } from '../../../services/invitacion.service';
-import { ExpedienteDetalle, ArchivoRow } from '../../../models';
+import { EdgeErrorService } from '../../../services/edge-error.service';
+import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../../models';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
 
 @Component({
@@ -30,6 +31,7 @@ export class AdminToEstimateEditComponent implements OnInit {
   private archivoService    = inject(ArchivoService);
   private perfilRepo        = inject(PerfilRepository);
   private invitacionService = inject(InvitacionService);
+  private edgeErr           = inject(EdgeErrorService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -202,7 +204,8 @@ export class AdminToEstimateEditComponent implements OnInit {
       this.seleccionInvitados.set(new Set());
       this.exitoInvitacionMsg.set('admin_invite.success');
     } catch (e: any) {
-      this.errorInvitacionMsg.set(e.message);
+      // La plantilla traduce el contenido de este signal: se guarda la clave.
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_send'));
     } finally {
       this.enviandoInvitacion.set(false);
     }
@@ -242,8 +245,13 @@ export class AdminToEstimateEditComponent implements OnInit {
         }),
         this.expedienteService.asignarEstimador(this.expedienteId, estimadorId),
       ]);
-      await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
-      this.detalle.update(d => d ? { ...d, estado: 'estimado' } : d);
+      // El expediente solo avanza a `estimado` si aún no llegó ahí. Reeditar la
+      // estimación de uno ya en oferta, adjudicado o contratado no debe hacerlo
+      // retroceder, ni reactivar uno cancelado.
+      if (debeAvanzarEstado(this.detalle()?.estado, 'estimado')) {
+        await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
+        this.detalle.update(d => d ? { ...d, estado: 'estimado' } : d);
+      }
       this.hasDraft.set(true);
       this.exitoMsg.set('estimator_form.success_estimation');
     } catch (e: any) {
@@ -306,7 +314,7 @@ export class AdminToEstimateEditComponent implements OnInit {
   // El `accept` de un <input file> sólo filtra el diálogo, no el arrastre. Como
   // FILE_LIMITS.DOCUMENTO.types admite '' (MIME vacío de .csv/.txt), un archivo
   // soltado con MIME desconocido pasaría: se valida también la extensión.
-  private readonly DOC_EXT = ['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx','.txt'];
+  private readonly DOC_EXT = ['.pdf','.doc','.docx','.xls','.xlsx','.ppt','.pptx','.txt','.csv'];
 
   async subirFotos(event: Event) {
     const input = event.target as HTMLInputElement;

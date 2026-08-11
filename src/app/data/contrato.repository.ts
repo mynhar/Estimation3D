@@ -153,10 +153,32 @@ export class ContratoRepository {
     return data ?? [];
   }
 
+  /**
+   * Expedientes de un estimador, por las dos vías que lo vinculan:
+   * `expediente.estimador_id` (asignación actual, que se reescribe al reasignar
+   * y se pone a NULL al desasignar) y `estimacion.estimador_id` (autoría de la
+   * estimación, que es estable). Filtrar solo por la primera hace desaparecer
+   * las obras que el estimador estimó en cuanto el expediente cambia de manos.
+   */
+  private async findExpedienteIdsDeEstimador(estimadorId: string): Promise<string[]> {
+    const [asignados, estimados] = await Promise.all([
+      this.db.from('expediente').select('id').eq('estimador_id', estimadorId),
+      this.db.from('estimacion').select('expediente_id').eq('estimador_id', estimadorId),
+    ]);
+    if (asignados.error)  throw new Error(asignados.error.message);
+    if (estimados.error)  throw new Error(estimados.error.message);
+
+    const ids = new Set<string>();
+    for (const r of asignados.data ?? []) ids.add((r as { id: string }).id);
+    for (const r of estimados.data ?? []) ids.add((r as { expediente_id: string }).expediente_id);
+    return [...ids];
+  }
+
   // Contratos de los expedientes que estimó este estimador.
-  // Filtra por la columna estimador_id de la tabla embebida `expediente`
-  // (join forzado con !inner para excluir contratos sin coincidencia).
   async findByEstimadorId(estimadorId: string): Promise<any[]> {
+    const expedienteIds = await this.findExpedienteIdsDeEstimador(estimadorId);
+    if (expedienteIds.length === 0) return [];
+
     const { data, error } = await this.db
       .from('contrato')
       .select(`
@@ -169,7 +191,7 @@ export class ContratoRepository {
         cliente:cliente_id ( nombre, apellido ),
         oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
       `)
-      .eq('expediente.estimador_id', estimadorId)
+      .in('expediente_id', expedienteIds)
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
       .order('actualizado_en', { ascending: false });
     if (error) throw new Error(error.message);

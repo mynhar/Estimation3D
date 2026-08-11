@@ -303,6 +303,7 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
       firmado:      'badge-contrato-firmado',
       en_ejecucion: 'badge-contrato-en-ejecucion',
       completado:   'badge-contrato-completado',
+      cancelado:    'badge-contrato-cancelado',
     };
     return map[estado] ?? '';
   }

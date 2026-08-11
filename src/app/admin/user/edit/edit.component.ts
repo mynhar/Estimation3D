@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminUserService } from '../../../services/admin-user.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
+import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
 
@@ -31,6 +32,7 @@ export class AdminUserEditComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);
   private toast     = inject(ToastService);
   private translate = inject(TranslateService);
+  private edgeErr   = inject(EdgeErrorService);
 
   cargando        = signal(true);
   guardando       = signal(false);
@@ -147,7 +149,7 @@ export class AdminUserEditComponent implements OnInit {
       this.toast.show(this.translate.instant('admin_users.success_updated', { nombre: v.nombre, apellido: v.apellido }), 'success');
       this.router.navigate(['/admin/user']);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_update'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_update'), 'danger');
     } finally {
       this.guardando.set(false);
     }
@@ -163,7 +165,7 @@ export class AdminUserEditComponent implements OnInit {
       const url = await this.service.uploadAvatar(file, this.usuario()?.id);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_upload_avatar'), 'danger');
       this.previewUrl.set(null);
     } finally {
       this.subiendoAvatar.set(false);

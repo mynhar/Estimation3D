@@ -9,22 +9,22 @@ import { SeguimientoService } from '../../services/seguimiento.service';
 import { ExpedienteRow, ESTADOS_ESTIMADO } from '../../models';
 import { EstadoExpediente } from '../../types/supabase';
 
-// Config por estado. El color vive en el CSS como clase semántica (token);
-// aquí solo el icono, el % del pipeline y la clase — nunca hex inline.
+// Config por estado. La etiqueta es la clave i18n `state.<estado>` que resuelve
+// la plantilla; el color vive en el CSS como clase semántica (token); aquí solo
+// el icono, el % del pipeline y la clase — nunca hex inline.
 interface EstadoCfg {
-  label: string;
-  icon:  string;
-  pct:   number;
-  cls:   string;
+  icon: string;
+  pct:  number;
+  cls:  string;
 }
 
 const ESTADO_CFG: Record<string, EstadoCfg> = {
-  en_estimacion: { label: 'En estimación', icon: 'bi-pencil-square',   pct: 30,  cls: 'is-info'        },
-  estimado:      { label: 'Estimado',       icon: 'bi-clipboard-check', pct: 55,  cls: 'is-gold'        },
-  en_oferta:     { label: 'En oferta',      icon: 'bi-people',          pct: 70,  cls: 'is-warning'     },
-  adjudicado:    { label: 'Adjudicado',     icon: 'bi-award',           pct: 85,  cls: 'is-gold-strong' },
-  contratado:    { label: 'Contratado',     icon: 'bi-check-circle',    pct: 100, cls: 'is-success'     },
-  cancelado:     { label: 'Cancelado',      icon: 'bi-x-circle',        pct: 0,   cls: 'is-muted'       },
+  en_estimacion: { icon: 'bi-pencil-square',   pct: 30,  cls: 'is-info'        },
+  estimado:      { icon: 'bi-clipboard-check', pct: 55,  cls: 'is-gold'        },
+  en_oferta:     { icon: 'bi-people',          pct: 70,  cls: 'is-warning'     },
+  adjudicado:    { icon: 'bi-award',           pct: 85,  cls: 'is-gold-strong' },
+  contratado:    { icon: 'bi-check-circle',    pct: 100, cls: 'is-success'     },
+  cancelado:     { icon: 'bi-x-circle',        pct: 0,   cls: 'is-muted'       },
 };
 
 const PIPELINE_STEPS: string[] = [
@@ -279,7 +279,9 @@ export class EstimatorDashboardComponent implements OnInit {
   }
 
   formatPrecio(v: number): string {
-    return `₡ ${v.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return new Intl.NumberFormat('fr-CA', {
+      style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
+    }).format(v);
   }
 
   formatFecha(valor: string): string {

@@ -32,6 +32,15 @@
     </div>
   }
 
+  <!-- El contrato no está entre los expedientes de este estimador -->
+  @else if (noAccesible()) {
+    <div class="cm-empty">
+      <i class="bi bi-shield-lock"></i>
+      <p class="cm-empty__title">{{ 'estimator_monitoring.no_access_title' | translate }}</p>
+      <p class="cm-empty__hint">{{ 'estimator_monitoring.no_access_hint' | translate }}</p>
+    </div>
+  }
+
   <!-- Sin seguimiento para este contrato -->
   @else if (!obra()) {
     <div class="cm-empty">

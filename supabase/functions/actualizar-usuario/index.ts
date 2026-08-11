@@ -12,7 +12,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return json({ error: 'No autorizado' }, 401);
+    if (!authHeader) return fail('no_autorizado', 'No autorizado', 401);
 
     const supabaseUrl    = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
     // Verificar JWT
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await adminClient.auth.getUser(token);
-    if (userError || !user) return json({ error: 'Token inválido o expirado' }, 401);
+    if (userError || !user) return fail('token_invalido', 'Token inválido o expirado', 401);
 
     // Verificar rol
     const { data: caller } = await adminClient
@@ -35,16 +35,19 @@ Deno.serve(async (req: Request) => {
 
     const callerRol = caller?.rol;
     if (callerRol !== 'administrador' && callerRol !== 'estimador') {
-      return json({ error: 'Acceso denegado: se requiere rol administrador o estimador' }, 403);
+      return fail('rol_no_permitido', 'Acceso denegado: se requiere rol administrador o estimador', 403);
     }
 
     // Leer cuerpo
     const body = await req.json();
-    const { id, nombre, apellido, telefono, avatar_url, activo, email, password } = body;
+    const {
+      id, nombre, apellido, telefono, avatar_url, activo, email, password,
+      compania_nombre, compania_telefono, compania_email, compania_direccion,
+    } = body;
     let { rol } = body;
 
     if (!id || !nombre || !apellido || !rol) {
-      return json({ error: 'Campos requeridos: id, nombre, apellido, rol' }, 400);
+      return fail('campos_requeridos', 'Campos requeridos: id, nombre, apellido, rol', 400);
     }
 
     // El estimador solo puede editar clientes y no puede cambiar su rol
@@ -56,7 +59,7 @@ Deno.serve(async (req: Request) => {
         .single();
 
       if (target?.rol !== 'cliente') {
-        return json({ error: 'Acceso denegado: el estimador solo puede editar usuarios con rol cliente' }, 403);
+        return fail('estimador_solo_clientes', 'Acceso denegado: el estimador solo puede editar usuarios con rol cliente', 403);
       }
       rol = 'cliente';
     }
@@ -68,7 +71,11 @@ Deno.serve(async (req: Request) => {
       if (password) authUpdate.password = password;
 
       const { error: authUpdateError } = await adminClient.auth.admin.updateUserById(id, authUpdate);
-      if (authUpdateError) return json({ error: authUpdateError.message }, 400);
+      if (authUpdateError) {
+        return esEmailDuplicado(authUpdateError)
+          ? fail('email_duplicado', authUpdateError.message, 400)
+          : fail('auth_error', authUpdateError.message, 400, authUpdateError.message);
+      }
     }
 
     // Actualizar perfil
@@ -88,23 +95,58 @@ Deno.serve(async (req: Request) => {
     // Sincronizar email en perfil si cambió
     if (email) perfilPayload['email'] = email;
 
+    // Datos de compañía: sólo del constructor. Se usa el `rol` final (el
+    // estimador lo fuerza a 'cliente' arriba), y al dejar de ser constructor
+    // se limpian para no arrastrar datos huérfanos.
+    const limpiar = (v: unknown): string | null => {
+      if (typeof v !== 'string') return null;
+      const t = v.trim();
+      return t === '' ? null : t;
+    };
+    if (rol === 'constructor') {
+      perfilPayload['compania_nombre']    = limpiar(compania_nombre);
+      perfilPayload['compania_telefono']  = limpiar(compania_telefono);
+      perfilPayload['compania_email']     = limpiar(compania_email);
+      perfilPayload['compania_direccion'] = limpiar(compania_direccion);
+    } else {
+      perfilPayload['compania_nombre']    = null;
+      perfilPayload['compania_telefono']  = null;
+      perfilPayload['compania_email']     = null;
+      perfilPayload['compania_direccion'] = null;
+    }
+
     const { error: updateError } = await adminClient
       .from('perfil')
       .update(perfilPayload)
       .eq('id', id);
 
-    if (updateError) return json({ error: updateError.message }, 500);
+    if (updateError) return fail('perfil_error', updateError.message, 500, updateError.message);
 
     return json({ ok: true }, 200);
 
   } catch (err: any) {
-    return json({ error: err.message ?? 'Error interno' }, 500);
+    return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
   }
 });
+
+/** GoTrue no expone un código estable en todas las versiones: se comprueban ambos. */
+function esEmailDuplicado(err: { code?: string; message?: string }): boolean {
+  return err?.code === 'email_exists'
+    || /already (been )?registered|already exists/i.test(err?.message ?? '');
+}
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * Error con código estable. `code` es lo único que el frontend debe mostrar
+ * (lo traduce a los tres idiomas); `error` se conserva por compatibilidad y
+ * para los logs, pero está solo en español y no debe llegar a la interfaz.
+ */
+function fail(code: string, mensaje: string, status: number, detail?: string): Response {
+  return json(detail ? { code, error: mensaje, detail } : { code, error: mensaje }, status);
 }

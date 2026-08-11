@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminUserService } from '../../../services/admin-user.service';
+import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ToastService } from '../../../services/toast.service';
 import { RolUsuario } from '../../../types/supabase';
 
@@ -21,6 +22,7 @@ export class AdminUserCreateComponent {
   private toast     = inject(ToastService);
   private router    = inject(Router);
   private translate = inject(TranslateService);
+  private edgeErr   = inject(EdgeErrorService);
 
   guardando       = signal(false);
   mostrarPassword = signal(false);
@@ -83,7 +85,7 @@ export class AdminUserCreateComponent {
       this.toast.show(this.translate.instant('admin_users.success_created', { nombre: v.nombre, apellido: v.apellido }), 'success');
       this.router.navigate(['/admin/user']);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_create'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_create'), 'danger');
     } finally {
       this.guardando.set(false);
     }
@@ -99,7 +101,7 @@ export class AdminUserCreateComponent {
       const url = await this.service.uploadAvatar(file);
       this.f['avatar_url'].setValue(url);
     } catch (e: any) {
-      this.toast.show(e.message ?? this.translate.instant('admin_users.err_upload_avatar'), 'danger');
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_upload_avatar'), 'danger');
       this.previewUrl.set(null);
     } finally {
       this.subiendoAvatar.set(false);

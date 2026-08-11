@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AuthSupabaseService } from './auth-supabase.service';
+import { edgeError } from './edge-error.service';
 
 export type ChatRol = 'user' | 'assistant';
 
@@ -37,10 +38,9 @@ export class AsistenteIaService {
       body: JSON.stringify({ expedienteId, messages, lang }),
     });
 
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(payload.error ?? `Error ${res.status}`);
-    }
+    // Se propaga el código, no el texto: el mensaje de la función está solo en
+    // español y lo traduce el componente con `EdgeErrorService`.
+    if (!res.ok) throw await edgeError(res);
     return res.json() as Promise<RespuestaAsistente>;
   }
 

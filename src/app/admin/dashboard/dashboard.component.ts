@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AdminDashboardService, DashboardStats, TimelineEvent } from './admin-dashboard.service';
@@ -22,9 +22,10 @@ interface FunnelItem { estado: string; count: number }
   styleUrl:    './dashboard.component.css',
 })
 export class AdminDashboardComponent implements OnInit {
-  private svc    = inject(AdminDashboardService);
-  private auth   = inject(AuthSupabaseService);
-  private router = inject(Router);
+  private svc       = inject(AdminDashboardService);
+  private auth      = inject(AuthSupabaseService);
+  private translate = inject(TranslateService);
+  private router    = inject(Router);
 
   user   = toSignal(this.auth.user$);
   perfil = signal<{ nombre: string | null; apellido: string | null } | null>(null);
@@ -142,7 +143,7 @@ export class AdminDashboardComponent implements OnInit {
         }).format(new Date())
       );
     } catch (e: any) {
-      this.error.set(e.message ?? 'Error cargando datos del dashboard');
+      this.error.set(e?.message ?? this.translate.instant('admin_dashboard.err_load'));
     } finally {
       this.cargando.set(false);
       this.cargandoTimeline.set(false);
@@ -165,7 +166,9 @@ export class AdminDashboardComponent implements OnInit {
     if (!ts) return '—';
     const d = new Date(ts);
     if (isNaN(d.getTime())) return '—';
-    return new Intl.DateTimeFormat('es-CR', {
+    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
+    return new Intl.DateTimeFormat(locale, {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: false,
     }).format(d);

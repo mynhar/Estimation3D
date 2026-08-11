@@ -8,7 +8,7 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
-import { ExpedienteDetalle, ArchivoRow } from '../../models';
+import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../models';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 
 @Component({
@@ -178,7 +178,12 @@ export class FileUnderEstimationComponent implements OnInit {
         notasInternas:        this.notasInternas.trim(),
         urlTour:              EstimacionService.serializeUrls(this.urlsTour()),
       });
-      await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
+      // Solo se avanza a `estimado` si el expediente aún no llegó ahí: reeditar
+      // uno ya en oferta o más avanzado no debe hacerlo retroceder.
+      if (debeAvanzarEstado(this.detalle()?.estado, 'estimado')) {
+        await this.expedienteService.actualizarEstado(this.expedienteId, 'estimado');
+        this.detalle.update(d => d ? { ...d, estado: 'estimado' } : d);
+      }
       this.hasDraft.set(true);
       this.exitoMsg.set('estimator_form.success_estimation');
     } catch (e: any) {

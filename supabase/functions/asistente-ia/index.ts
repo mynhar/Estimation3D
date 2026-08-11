@@ -85,10 +85,10 @@ Deno.serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) return json({ error: 'No autorizado' }, 401);
+    if (!authHeader) return fail('no_autorizado', 'No autorizado', 401);
 
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!apiKey) return json({ error: 'Servicio no configurado (falta ANTHROPIC_API_KEY)' }, 500);
+    if (!apiKey) return fail('servicio_no_configurado', 'Servicio no configurado (falta ANTHROPIC_API_KEY)', 500);
 
     const supabaseUrl    = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -99,12 +99,12 @@ Deno.serve(async (req: Request) => {
     // 1. Verificar JWT y obtener el rol.
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await db.auth.getUser(token);
-    if (userError || !user) return json({ error: 'Token inválido o expirado' }, 401);
+    if (userError || !user) return fail('token_invalido', 'Token inválido o expirado', 401);
 
     const { data: perfil } = await db.from('perfil').select('rol').eq('id', user.id).single();
     const rol = perfil?.rol as Rol | undefined;
     if (!rol || !ROLES_PERMITIDOS.includes(rol)) {
-      return json({ error: 'Acceso denegado' }, 403);
+      return fail('rol_no_permitido', 'Acceso denegado', 403);
     }
 
     // 2. Validar cuerpo.
@@ -113,7 +113,7 @@ Deno.serve(async (req: Request) => {
     const lang: string = ['fr', 'es', 'en'].includes(body?.lang) ? body.lang : 'fr';
     const rawMessages = Array.isArray(body?.messages) ? body.messages : [];
 
-    if (!expedienteId) return json({ error: 'Falta expedienteId' }, 400);
+    if (!expedienteId) return fail('falta_expediente', 'Falta expedienteId', 400);
 
     const messages: ChatMessage[] = rawMessages
       .filter((m: any) => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
@@ -121,12 +121,12 @@ Deno.serve(async (req: Request) => {
       .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 4000) }));
 
     if (!messages.length || messages[messages.length - 1].role !== 'user') {
-      return json({ error: 'El último mensaje debe ser del usuario' }, 400);
+      return fail('ultimo_mensaje_usuario', 'El último mensaje debe ser del usuario', 400);
     }
 
     // 3. Control de acceso + contexto real, según el rol.
     const contexto = await construirContexto(db, expedienteId, user.id, rol, lang);
-    if (!contexto) return json({ error: 'Expediente no encontrado o sin acceso' }, 404);
+    if (!contexto) return fail('expediente_sin_acceso', 'Expediente no encontrado o sin acceso', 404);
 
     // 4. Construir prompt y ejecutar el bucle con Claude (con herramientas).
     const system = buildSystemPrompt(contexto, lang, rol);
@@ -204,9 +204,9 @@ Deno.serve(async (req: Request) => {
   } catch (err: any) {
     console.error('asistente-ia', err);
     if (err?.message === 'anthropic') {
-      return json({ error: 'El asistente no está disponible en este momento' }, 502);
+      return fail('asistente_no_disponible', 'El asistente no está disponible en este momento', 502);
     }
-    return json({ error: err?.message ?? 'Error interno' }, 500);
+    return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
   }
 });
 
@@ -278,7 +278,7 @@ async function construirContexto(
     { data: fichas },
   ] = await Promise.all([
     db.from('localizacion').select('direccion, referencia, provincia, canton, distrito, tipo_inmueble').eq('expediente_id', expedienteId).maybeSingle(),
-    db.from('estimacion').select('fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour').eq('expediente_id', expedienteId).maybeSingle(),
+    db.from('estimacion').select('estimador_id, fecha_visita_real, descripcion_problemas, costo_estimado, costo_estimado_max, notas_internas, url_tour').eq('expediente_id', expedienteId).maybeSingle(),
     db.from('oferta').select('id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en').eq('expediente_id', expedienteId).order('precio', { ascending: true }),
     db.from('contrato').select('precio_final, garantia_anos, estado, generado_en, firmado_en, descripcion_trabajo').eq('expediente_id', expedienteId).maybeSingle(),
     db.from('fase_servicio').select('orden, nombre_es, nombre_fr, nombre_en').eq('servicio_id', exp.servicio_id).eq('activo', true).order('orden', { ascending: true }),
@@ -298,10 +298,18 @@ async function construirContexto(
   const tieneOferta = listaOfertas.some((o) => o.constructor_id === userId);
 
   // ── Control de acceso por rol ──
+  // El estimador entra por dos vías, igual que la función SQL
+  // fn_estimador_de_expediente que rige las políticas RLS: el expediente le está
+  // asignado, o él firmó la estimación. Sin la segunda vía, un estimador que
+  // estimó un expediente reasignado después perdía el asistente sobre su propio
+  // trabajo aunque la aplicación sí se lo sigue mostrando.
+  const esEstimadorDelExpediente =
+    exp.estimador_id === userId || est?.estimador_id === userId;
+
   const acceso =
     rol === 'administrador' ? true :
     rol === 'cliente'       ? exp.cliente_id === userId :
-    rol === 'estimador'     ? exp.estimador_id === userId :
+    rol === 'estimador'     ? esEstimadorDelExpediente :
     rol === 'constructor'   ? (['estimado', 'en_oferta'].includes(exp.estado) || tieneOferta) :
     false;
   if (!acceso) return null;
@@ -703,4 +711,13 @@ function json(body: unknown, status: number): Response {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * Error con código estable. `code` es lo único que el frontend debe mostrar
+ * (lo traduce a los tres idiomas); `error` se conserva por compatibilidad y
+ * para los logs, pero está solo en español y no debe llegar a la interfaz.
+ */
+function fail(code: string, mensaje: string, status: number, detail?: string): Response {
+  return json(detail ? { code, error: mensaje, detail } : { code, error: mensaje }, status);
 }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { RolUsuario } from '../types/supabase';
 import { AuthSupabaseService } from './auth-supabase.service';
+import { EdgeError, edgeError } from './edge-error.service';
 
 /**
  * Datos de compañía del constructor. Opcionales, y sólo se conservan si el rol
@@ -49,10 +50,9 @@ export class AdminUserService {
       },
       body: JSON.stringify(body),
     });
-    if (!res.ok) {
-      const payload = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(payload.error ?? `Error ${res.status}`);
-    }
+    // Se propaga el código, no el texto: el mensaje de la función está solo en
+    // español y lo traduce el componente con `EdgeErrorService`.
+    if (!res.ok) throw await edgeError(res);
   }
 
   crearUsuario(params: CrearUsuarioParams): Promise<void> {
@@ -64,7 +64,7 @@ export class AdminUserService {
   }
 
   async uploadAvatar(file: File, id?: string): Promise<string> {
-    if (file.size > 2 * 1024 * 1024) throw new Error('admin_users.err_file_size');
+    if (file.size > 2 * 1024 * 1024) throw new EdgeError('archivo_muy_grande');
 
     const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
     const name = id ?? crypto.randomUUID();

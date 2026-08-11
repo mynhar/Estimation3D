@@ -460,7 +460,7 @@
                   <i class="bi bi-cloud-upload" aria-hidden="true"></i>
                   {{ subiendoDocumento() ? ('estimator_file.uploading' | translate) : ('estimator_file.upload_doc' | translate) }}
                   <input type="file"
-                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
                          class="ef-file-input"
                          (change)="subirDocumento($event)"
                          [disabled]="subiendoDocumento()" />
