@@ -105,7 +105,16 @@
       "PowerShell($p='docs\\\\MANUAL_DE_USUARIO.md'; $t=[System.IO.File]::ReadAllText\\($p\\); $n=\\($t.ToCharArray\\(\\)|Where-Object {$_ -eq [char]0x2705}\\).Count; $t=$t.Replace\\([string][char]0x2705,'Si'\\); [System.IO.File]::WriteAllText\\($p,$t,\\(New-Object System.Text.UTF8Encoding\\($false\\)\\)\\); \"reemplazos: $n\")",
       "PowerShell(node -e \"const fs=require\\('fs'\\);const p='docs/MANUAL_DE_USUARIO.md';let t=fs.readFileSync\\(p,'utf8'\\);let n=0;t=t.replace\\(/\\(?<=\\\\| \\)Si\\(?= \\\\|\\)/g,\\(\\)=>{n++;return 'S�'}\\);fs.writeFileSync\\(p,t,'utf8'\\);console.log\\('celdas corregidas a S�:',n\\)\")",
       "PowerShell(node scripts/build-manual.mjs)",
-      "PowerShell(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('docs/MANUAL_DE_USUARIO.pdf'\\).toString\\('latin1'\\);console.log\\('Emoji font:',/SegoeUIEmoji/.test\\(s\\)?'presente':'ausente'\\)\")"
+      "PowerShell(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('docs/MANUAL_DE_USUARIO.pdf'\\).toString\\('latin1'\\);console.log\\('Emoji font:',/SegoeUIEmoji/.test\\(s\\)?'presente':'ausente'\\)\")",
+      "Bash(node \"C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/0c696168-3210-4239-94b4-0a1b746a529b/scratchpad/anchors.mjs\" docs/MANUEL_UTILISATEUR.md)",
+      "Bash(npm run *)",
+      "Bash(node scripts/build-manual.mjs --lang=fr --html)",
+      "Bash(node scripts/build-manual.mjs --html)",
+      "Bash(grep -o '<div class=\"callout cita\">.\\\\{0,200\\\\}' docs/.manual.fr.build.html)",
+      "Bash(grep -o '<div class=\"callout cita\">.\\\\{0,200\\\\}' docs/.manual.es.build.html)",
+      "Bash(node \"C:/Users/HAROLD~1/AppData/Local/Temp/claude/c--desarrollo-estimation3d-A18-v01/0c696168-3210-4239-94b4-0a1b746a529b/scratchpad/anchors.mjs\" docs/MANUAL_DE_USUARIO.md)",
+      "Bash(rm -f docs/.manual.fr.build.html docs/.manual.es.build.html)",
+      "Bash(git checkout *)"
     ]
   }
 }

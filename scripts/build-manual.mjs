@@ -1,8 +1,9 @@
 /**
- * Genera docs/MANUAL_DE_USUARIO.pdf a partir de docs/MANUAL_DE_USUARIO.md.
+ * Genera el PDF del manual de usuario a partir de su Markdown.
  *
- *   npm run manual              genera el PDF
- *   npm run manual -- --html    conserva el HTML intermedio para depurar
+ *   npm run manual                 español  → docs/MANUAL_DE_USUARIO.pdf
+ *   npm run manual:fr              francés  → docs/MANUEL_UTILISATEUR.pdf
+ *   npm run manual -- --html       conserva el HTML intermedio para depurar
  *
  * El Markdown es la única fuente: el PDF es un artefacto derivado. Las
  * tipografías se leen de docs/fonts/, así que la generación funciona sin
@@ -18,11 +19,52 @@ import MarkdownIt from 'markdown-it';
 import puppeteer from 'puppeteer-core';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MD = path.join(RAIZ, 'docs', 'MANUAL_DE_USUARIO.md');
-const PDF = path.join(RAIZ, 'docs', 'MANUAL_DE_USUARIO.pdf');
 const DIR_FUENTES = path.join(RAIZ, 'docs', 'fonts');
-const HTML = path.join(RAIZ, 'docs', '.manual.build.html');
 const CONSERVAR_HTML = process.argv.includes('--html');
+
+/* ---------- idiomas ---------- */
+
+// Cada manual comparte maquetación y estilos; sólo cambian el archivo fuente y
+// los rótulos que el script genera por su cuenta (recuadros, pie de página).
+const IDIOMAS = {
+  es: {
+    lang: 'es',
+    md: 'MANUAL_DE_USUARIO.md',
+    pdf: 'MANUAL_DE_USUARIO.pdf',
+    titulo: 'Estimation3D — Manual de usuario',
+    pie: 'Estimation3D · Manual de usuario',
+    callouts: { nota: 'Nota', aviso: 'Atención' },
+    renglonesPropios: ['Causa:', 'Qué hacer:'],
+    capturaPendiente: 'Captura pendiente',
+  },
+  fr: {
+    lang: 'fr-CA',
+    md: 'MANUEL_UTILISATEUR.md',
+    pdf: 'MANUEL_UTILISATEUR.pdf',
+    titulo: "Estimation3D — Manuel de l'utilisateur",
+    pie: "Estimation3D · Manuel de l'utilisateur",
+    callouts: { nota: 'Note', aviso: 'Attention' },
+    renglonesPropios: ['Cause :', 'Que faire :'],
+    capturaPendiente: 'Capture à venir',
+    // Tipografía francesa: la ponctuation double lleva espacio insecable
+    // delante. Se sustituye el espacio ya escrito, nunca se añade uno nuevo,
+    // para no alterar las cadenas citadas literalmente de la interfaz.
+    tipografia: (html) =>
+      html.replace(/>([^<]+)</g, (_, txt) =>
+        '>' + txt.replace(/ ([:;!?»])/g, '&nbsp;$1').replace(/« /g, '«&nbsp;') + '<'
+      ),
+  },
+};
+
+const pedido = (process.argv.find((a) => a.startsWith('--lang=')) || '--lang=es').slice(7);
+const CFG = IDIOMAS[pedido];
+if (!CFG) {
+  throw new Error(`Idioma desconocido: ${pedido}. Disponibles: ${Object.keys(IDIOMAS).join(', ')}.`);
+}
+
+const MD = path.join(RAIZ, 'docs', CFG.md);
+const PDF = path.join(RAIZ, 'docs', CFG.pdf);
+const HTML = path.join(RAIZ, 'docs', `.manual.${pedido}.build.html`);
 
 const urlArchivo = (p) => 'file:///' + p.replace(/\\/g, '/');
 
@@ -61,6 +103,12 @@ const slug = (texto) =>
 
 const md = new MarkdownIt({ html: true, linkify: false, typographer: false });
 
+const escapar = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const RE_RENGLON = new RegExp(`\\n(?=(${[...CFG.renglonesPropios.map(escapar), '<strong>'].join('|')}))`, 'g');
+const RE_CALLOUT = new RegExp(
+  `^<p[^>]*><strong>(${escapar(CFG.callouts.nota)}|${escapar(CFG.callouts.aviso)})<\\/strong>\\s*(?:<br>)?\\s*`
+);
+
 function convertir(fuente) {
   let html = md.render(fuente);
 
@@ -88,16 +136,16 @@ function convertir(fuente) {
     const centrado = iniCentro >= 0 && pos > iniCentro && pos < finCentro;
     const cuerpo = centrado
       ? dentro.replace(/\n/g, '<br>').trim()
-      : dentro.replace(/\n(?=(Causa:|Qué hacer:|<strong>))/g, '<br>').replace(/\n/g, ' ').trim();
+      : dentro.replace(RE_RENGLON, '<br>').replace(/\n/g, ' ').trim();
     const soloRotulo = /^<strong>[^<]*<\/strong>$/.test(cuerpo);
     return `<p${soloRotulo ? ' class="rotulo"' : ''}>${cuerpo}</p>`;
   });
 
-  // Citas que abren con **Nota** o **Atención**: recuadros con su propio tono.
+  // Citas que abren con el rótulo de nota o de aviso: recuadros con su propio tono.
   html = html.replace(/<blockquote>\s*([\s\S]*?)\s*<\/blockquote>/g, (_, dentro) => {
-    const m = dentro.match(/^<p[^>]*><strong>(Nota|Atención)<\/strong>\s*(?:<br>)?\s*/);
+    const m = dentro.match(RE_CALLOUT);
     if (!m) return `<div class="callout cita">${dentro}</div>`;
-    const tipo = m[1] === 'Nota' ? 'nota' : 'aviso';
+    const tipo = m[1] === CFG.callouts.nota ? 'nota' : 'aviso';
     const resto = dentro.slice(m[0].length);
     return `<div class="callout ${tipo}"><p class="callout-t">${m[1]}</p><p>${resto}</div>`;
   });
@@ -115,7 +163,7 @@ function convertir(fuente) {
     ausentes++;
     return (
       '<figure class="shot pendiente"><div class="marco">' +
-      '<span class="tag">Captura pendiente</span>' +
+      `<span class="tag">${CFG.capturaPendiente}</span>` +
       `<span class="cap">${alt}</span><span class="file">${nombre}</span></div></figure>`
     );
   });
@@ -129,6 +177,10 @@ function convertir(fuente) {
       html = html.slice(0, i) + '<div align="center" class="cierre">' + html.slice(i + '<div align="center">'.length);
     }
   }
+
+  // Última pasada: convenciones tipográficas propias del idioma, ya sobre el
+  // HTML final y sólo en el texto visible, nunca dentro de las etiquetas.
+  if (CFG.tipografia) html = CFG.tipografia(html);
 
   return { html, presentes, ausentes };
 }
@@ -242,8 +294,8 @@ const { html, presentes, ausentes } = convertir(fuente);
 
 fs.writeFileSync(
   HTML,
-  `<!doctype html><html lang="es"><head><meta charset="utf-8">
-<title>Estimation3D — Manual de usuario</title>
+  `<!doctype html><html lang="${CFG.lang}"><head><meta charset="utf-8">
+<title>${CFG.titulo}</title>
 <style>${estilos()}</style></head><body>
 ${html}
 </body></html>`,
@@ -272,7 +324,7 @@ try {
   const pie =
     '<div style="width:100%;padding:0 16mm;font-family:sans-serif;font-size:7.5pt;color:#6E6A63;' +
     'display:flex;justify-content:space-between;align-items:center;">' +
-    '<span>Estimation3D · Manual de usuario</span>' +
+    `<span>${CFG.pie}</span>` +
     '<span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>';
 
   await pagina.pdf({
@@ -292,7 +344,7 @@ try {
 const kb = fs.statSync(PDF).size / 1024;
 const paginas = (fs.readFileSync(PDF).toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
 
-console.log(`\n  docs/MANUAL_DE_USUARIO.pdf`);
+console.log(`\n  docs/${CFG.pdf}`);
 console.log(`  ${paginas} páginas · ${kb.toFixed(0)} KB · ${((Date.now() - inicio) / 1000).toFixed(1)} s`);
 console.log(`  capturas: ${presentes} incrustadas, ${ausentes} pendientes en docs/img/`);
 if (CONSERVAR_HTML) console.log(`  HTML conservado en ${path.relative(RAIZ, HTML)}`);

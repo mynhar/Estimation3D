@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint:css": "stylelint \"src/**/*.css\" && node scripts/validate-ds-tokens.mjs",
     "lint:tokens": "node scripts/validate-ds-tokens.mjs",
-    "manual": "node scripts/build-manual.mjs"
+    "manual": "node scripts/build-manual.mjs",
+    "manual:fr": "node scripts/build-manual.mjs --lang=fr"
   },
   "private": true,
   "engines": {
