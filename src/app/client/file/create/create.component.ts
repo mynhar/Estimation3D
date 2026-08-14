@@ -6,7 +6,19 @@ import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
+import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
+
+/**
+ * Dirección del PERFIL del cliente. Solo se lee: es el punto de partida de la
+ * localización del inmueble y esta pantalla nunca la reescribe.
+ */
+interface PerfilDireccion {
+  unidad:        string | null;
+  calle:         string | null;
+  ciudad:        string | null;
+  provincia:     string | null;
+  codigo_postal: string | null;
+}
 
 @Component({
   selector: 'app-file-create',
@@ -57,7 +69,6 @@ export class FileCreateComponent implements OnInit {
   gpsVisible        = signal(false);
 
   // ── Static config ──────────────────────────────────────────────────────────
-  readonly provincias       = PROVINCIAS;
   readonly provinciasCanada = PROVINCIAS_CANADA;
   readonly CA_POSTAL_RE     = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
@@ -66,6 +77,22 @@ export class FileCreateComponent implements OnInit {
     'file_create.step2_name',
     'file_create.step3_name',
     'file_create.step4_name',
+  ];
+
+  /** Filas del resumen en vivo del raíl, en el mismo orden que STEPS. */
+  readonly RESUMEN_META = [
+    { label: 'file_create.step1_name', icon: 'bi-tools'     },
+    { label: 'file_create.step2_name', icon: 'bi-person'    },
+    { label: 'file_create.step3_name', icon: 'bi-calendar3' },
+    { label: 'file_create.step4_name', icon: 'bi-geo-alt'   },
+  ];
+
+  /** «¿Qué pasa después?» — línea de tiempo del proceso, en el raíl. */
+  readonly PROCESO = [
+    { num: '01', title: 'file_create.process1_title', text: 'file_create.process1_text' },
+    { num: '02', title: 'file_create.process2_title', text: 'file_create.process2_text' },
+    { num: '03', title: 'file_create.process3_title', text: 'file_create.process3_text' },
+    { num: '04', title: 'file_create.process4_title', text: 'file_create.process4_text' },
   ];
 
   readonly tiposInmueble = [
@@ -90,30 +117,17 @@ export class FileCreateComponent implements OnInit {
     descripcion:  [''],
   });
 
+  // Direcciones canadienses únicamente.
   localizacionForm = this.fb.group({
     tipo_inmueble: ['', Validators.required],
-    pais:          ['canada'],
-    // ── Costa Rica ──
-    direccion:     ['', Validators.required],
-    provincia:     ['', Validators.required],
-    canton:        ['', Validators.required],
-    distrito:      ['', Validators.required],
-    // ── Canadá ──
     numero_unidad: [''],
-    calle:         [''],
-    ciudad:        [''],
-    provincia_ca:  ['QC'],
-    codigo_postal: [''],
-    // ── Compartido ──
+    calle:         ['', Validators.required],
+    ciudad:        ['', Validators.required],
+    provincia_ca:  ['QC', Validators.required],
+    codigo_postal: ['', [Validators.required, Validators.pattern(this.CA_POSTAL_RE)]],
     latitud:       [null as number | null],
     longitud:      [null as number | null],
   });
-
-  private paisValue = toSignal(
-    this.localizacionForm.get('pais')!.valueChanges,
-    { initialValue: 'canada' as string },
-  );
-  paisActual = computed(() => this.paisValue() ?? 'canada');
 
   // Convertir el estado de validez de cada FormGroup a signals reactivos.
   // computed(() => this.form.valid) NO funciona: form.valid no es un signal,
@@ -125,6 +139,62 @@ export class FileCreateComponent implements OnInit {
     this.expedienteForm.get('descripcion')!.valueChanges,
     { initialValue: '' as string }
   );
+  private perfilValue        = toSignal(
+    this.perfilForm.valueChanges,
+    { initialValue: this.perfilForm.value },
+  );
+  private expedienteValue    = toSignal(
+    this.expedienteForm.valueChanges,
+    { initialValue: this.expedienteForm.value },
+  );
+  private localizacionValue  = toSignal(
+    this.localizacionForm.valueChanges,
+    { initialValue: this.localizacionForm.value },
+  );
+
+  // ── Dirección del inmueble a partir del perfil ─────────────────────────────
+  perfilDireccion = signal<PerfilDireccion | null>(null);
+
+  /** El perfil tiene dirección guardada → se puede recuperar. */
+  perfilConDireccion = computed(() => {
+    const d = this.perfilDireccion();
+    return !!d && !!(d.calle || d.ciudad || d.codigo_postal || d.unidad);
+  });
+
+  /**
+   * true mientras la localización coincide con la dirección del perfil. Se
+   * calcula (no se memoriza) para que el aviso deje de decir «tomada de tu
+   * perfil» en cuanto el cliente edita un campo.
+   */
+  direccionDesdePerfil = computed(() => {
+    const d = this.perfilDireccion();
+    if (!d || !this.perfilConDireccion()) return false;
+    const lv = this.localizacionValue();
+    return (lv.numero_unidad ?? '') === (d.unidad        ?? '')
+        && (lv.calle         ?? '') === (d.calle         ?? '')
+        && (lv.ciudad        ?? '') === (d.ciudad        ?? '')
+        && (lv.provincia_ca  ?? '') === (d.provincia     || 'QC')
+        && (lv.codigo_postal ?? '') === (d.codigo_postal ?? '');
+  });
+
+  /**
+   * Copia la dirección del perfil en los campos del inmueble. Es solo el punto
+   * de partida — casi siempre el inmueble es el domicilio del cliente — y los
+   * campos siguen siendo editables. Lo que se escriba aquí va únicamente a la
+   * tabla `localizacion` del expediente: el perfil no se toca al guardar.
+   */
+  aplicarDireccionPerfil(): void {
+    const d = this.perfilDireccion();
+    if (!d || !this.perfilConDireccion()) return;
+
+    this.localizacionForm.patchValue({
+      numero_unidad: d.unidad        ?? '',
+      calle:         d.calle         ?? '',
+      ciudad:        d.ciudad        ?? '',
+      provincia_ca:  d.provincia     || 'QC',
+      codigo_postal: d.codigo_postal ?? '',
+    });
+  }
 
   // ── Computed: per-step completion ──────────────────────────────────────────
   step1Complete = computed(() => !!this.servicioId());
@@ -141,9 +211,39 @@ export class FileCreateComponent implements OnInit {
       .filter(Boolean).length
   );
 
-  progressPct = computed(() => (this.completedSteps() / 4) * 100);
-
   descripcionLen = computed(() => (this.descripcionValue() as string | null)?.length ?? 0);
+
+  // ── Resumen en vivo del raíl ───────────────────────────────────────────────
+  /** Valor legible de cada paso, o null si aún no hay nada que enseñar. */
+  private resumenValores = computed<(string | null)[]>(() => {
+    const sid  = this.servicioId();
+    const serv = sid ? this.serviciosLocalizados().find(s => s.id === sid)?.nombre_local ?? null : null;
+
+    const pv       = this.perfilValue();
+    const contacto = [pv.nombre, pv.apellido].filter(Boolean).join(' ').trim() || null;
+
+    const ev     = this.expedienteValue();
+    const visita = ev.fecha_visita
+      ? `${ev.fecha_visita}${ev.hora_visita ? ' · ' + ev.hora_visita : ''}`
+      : null;
+
+    const lv    = this.localizacionValue();
+    const calle = (lv.numero_unidad ? `${lv.numero_unidad}-${lv.calle ?? ''}` : (lv.calle ?? '')).trim();
+    // La provincia trae 'QC' por defecto: sin calle ni ciudad no es un resumen.
+    const ubicacion = (calle || lv.ciudad)
+      ? [calle, lv.ciudad, lv.provincia_ca].filter(Boolean).join(', ')
+      : null;
+
+    return [serv, contacto, visita, ubicacion];
+  });
+
+  resumen = computed(() =>
+    this.RESUMEN_META.map((meta, i) => ({
+      ...meta,
+      value: this.resumenValores()[i],
+      done:  this.stepDone(i),
+    }))
+  );
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   stepDone(idx: number): boolean {
@@ -173,38 +273,6 @@ export class FileCreateComponent implements OnInit {
     return !!(ctrl?.invalid && ctrl?.touched);
   }
 
-  setPais(pais: string) {
-    this.localizacionForm.get('pais')?.setValue(pais);
-    this.actualizarValidadoresPais(pais);
-  }
-
-  private actualizarValidadoresPais(pais: string) {
-    const crFields = ['direccion', 'provincia', 'canton', 'distrito'];
-    const caFields = ['calle', 'ciudad', 'provincia_ca', 'codigo_postal'];
-
-    if (pais === 'canada') {
-      crFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('calle')?.setValidators([Validators.required]);
-      this.localizacionForm.get('ciudad')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia_ca')?.setValidators([Validators.required]);
-      this.localizacionForm.get('codigo_postal')?.setValidators([
-        Validators.required,
-        Validators.pattern(this.CA_POSTAL_RE),
-      ]);
-    } else {
-      caFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('direccion')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia')?.setValidators([Validators.required]);
-      this.localizacionForm.get('canton')?.setValidators([Validators.required]);
-      this.localizacionForm.get('distrito')?.setValidators([Validators.required]);
-    }
-
-    [...crFields, ...caFields].forEach(f =>
-      this.localizacionForm.get(f)?.updateValueAndValidity({ emitEvent: false })
-    );
-    this.localizacionForm.updateValueAndValidity();
-  }
-
   usarUbicacion() {
     if (!navigator.geolocation) {
       this.ubicacionError.set('file_create.geo_not_supported');
@@ -232,7 +300,6 @@ export class FileCreateComponent implements OnInit {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   async ngOnInit() {
-    this.actualizarValidadoresPais('canada');
     await Promise.all([this.cargarServicios(), this.cargarPerfil()]);
   }
 
@@ -254,7 +321,7 @@ export class FileCreateComponent implements OnInit {
     if (!userId) return;
     const { data } = await this.auth.client
       .from('perfil')
-      .select('nombre, apellido, telefono')
+      .select('nombre, apellido, telefono, direccion_unidad, direccion_calle, direccion_ciudad, direccion_provincia, direccion_codigo_postal')
       .eq('id', userId)
       .single();
     this.perfilForm.patchValue({
@@ -263,6 +330,17 @@ export class FileCreateComponent implements OnInit {
       telefono: data?.telefono ?? '',
       email:    this.user()?.email ?? '',
     });
+
+    this.perfilDireccion.set({
+      unidad:        data?.direccion_unidad        ?? null,
+      calle:         data?.direccion_calle         ?? null,
+      ciudad:        data?.direccion_ciudad        ?? null,
+      provincia:     data?.direccion_provincia     ?? null,
+      codigo_postal: data?.direccion_codigo_postal ?? null,
+    });
+    // El formulario está recién creado y vacío: rellenarlo aquí no pisa nada
+    // que el cliente haya escrito. A partir de este punto manda lo que edite.
+    this.aplicarDireccionPerfil();
   }
 
   // ── Actions ────────────────────────────────────────────────────────────────
@@ -287,17 +365,18 @@ export class FileCreateComponent implements OnInit {
       const pv = this.perfilForm.value;
       const ev = this.expedienteForm.value;
       const lv = this.localizacionForm.value;
-      const esCanada = lv.pais === 'canada';
 
+      // Solo datos de contacto. La dirección NO se toca: la del paso 4 es la
+      // del inmueble y se guarda únicamente en la `localizacion` del expediente.
       const { error: perfilError } = await this.auth.client
         .from('perfil')
         .update({ nombre: pv.nombre ?? undefined, apellido: pv.apellido ?? undefined, telefono: pv.telefono ?? undefined })
         .eq('id', userId);
       if (perfilError) throw new Error(`Error al actualizar perfil: ${perfilError.message}`);
 
-      const direccionFinal = esCanada
-        ? (lv.numero_unidad ? `${lv.numero_unidad}-${lv.calle}` : (lv.calle ?? ''))
-        : (lv.direccion ?? '');
+      const direccionFinal = lv.numero_unidad
+        ? `${lv.numero_unidad}-${lv.calle}`
+        : (lv.calle ?? '');
 
       await this.expedienteService.crear({
         clienteId:   userId,
@@ -305,12 +384,14 @@ export class FileCreateComponent implements OnInit {
         numero:      this.generarNumeroExpediente(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
+        // `provincia` / `canton` / `distrito` son los nombres de columna de la
+        // tabla localizacion; aquí transportan provincia, ciudad y código postal.
         localizacion: {
           tipo_inmueble: (lv.tipo_inmueble ?? 'otro') as import('../../../types/supabase').TipoInmueble,
           direccion:  direccionFinal,
-          provincia:  esCanada ? (lv.provincia_ca  ?? '') : (lv.provincia ?? ''),
-          canton:     esCanada ? (lv.ciudad        ?? '') : (lv.canton    ?? ''),
-          distrito:   esCanada ? (lv.codigo_postal ?? '') : (lv.distrito  ?? ''),
+          provincia:  lv.provincia_ca  ?? '',
+          canton:     lv.ciudad        ?? '',
+          distrito:   lv.codigo_postal ?? '',
           referencia: null,
           latitud:    lv.latitud    ?? null,
           longitud:   lv.longitud   ?? null,

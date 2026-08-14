@@ -41,16 +41,18 @@ Deno.serve(async (req: Request) => {
     // Leer cuerpo
     const body = await req.json();
     const {
-      id, nombre, apellido, telefono, avatar_url, activo, email, password,
+      id, nombre, apellido, telefono, avatar_url, activo, email, password, rol,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
     } = body;
-    let { rol } = body;
 
     if (!id || !nombre || !apellido || !rol) {
       return fail('campos_requeridos', 'Campos requeridos: id, nombre, apellido, rol', 400);
     }
 
-    // El estimador solo puede editar clientes y no puede cambiar su rol
+    // El estimador gestiona los dos roles externos: edita clientes y
+    // constructores, y puede mover una cuenta de un rol al otro. Lo que no
+    // puede es tocar cuentas internas ni ascender a nadie a estimador o
+    // administrador — ni por el rol de destino ni por el de origen.
     if (callerRol === 'estimador') {
       const { data: target } = await adminClient
         .from('perfil')
@@ -58,10 +60,10 @@ Deno.serve(async (req: Request) => {
         .eq('id', id)
         .single();
 
-      if (target?.rol !== 'cliente') {
-        return fail('estimador_solo_clientes', 'Acceso denegado: el estimador solo puede editar usuarios con rol cliente', 403);
+      const externos = ['cliente', 'constructor'];
+      if (!externos.includes(target?.rol) || !externos.includes(rol)) {
+        return fail('estimador_rol_no_permitido', 'Acceso denegado: el estimador solo puede gestionar usuarios con rol cliente o constructor', 403);
       }
-      rol = 'cliente';
     }
 
     // Actualizar email y/o contraseña en auth.users (solo si se enviaron)
@@ -95,9 +97,8 @@ Deno.serve(async (req: Request) => {
     // Sincronizar email en perfil si cambió
     if (email) perfilPayload['email'] = email;
 
-    // Datos de compañía: sólo del constructor. Se usa el `rol` final (el
-    // estimador lo fuerza a 'cliente' arriba), y al dejar de ser constructor
-    // se limpian para no arrastrar datos huérfanos.
+    // Datos de compañía: sólo del constructor. Se usa el `rol` final, y al
+    // dejar de ser constructor se limpian para no arrastrar datos huérfanos.
     const limpiar = (v: unknown): string | null => {
       if (typeof v !== 'string') return null;
       const t = v.trim();
@@ -113,6 +114,16 @@ Deno.serve(async (req: Request) => {
       perfilPayload['compania_telefono']  = null;
       perfilPayload['compania_email']     = null;
       perfilPayload['compania_direccion'] = null;
+    }
+
+    // Dirección personal: aplica a todos los roles. Sólo se escriben las claves
+    // que vengan en el cuerpo — hay llamadores (edición de cliente desde el
+    // estimador) que no envían esta sección, y no deben borrarla.
+    for (const campo of [
+      'direccion_unidad', 'direccion_calle', 'direccion_ciudad',
+      'direccion_provincia', 'direccion_codigo_postal',
+    ]) {
+      if (campo in body) perfilPayload[campo] = limpiar(body[campo]);
     }
 
     const { error: updateError } = await adminClient

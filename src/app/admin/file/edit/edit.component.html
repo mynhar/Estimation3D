@@ -411,6 +411,24 @@
             <!-- Localización -->
             <form [formGroup]="localizacionForm">
               <div class="row g-3">
+
+                <!-- Localización del expediente · el perfil del cliente no se modifica -->
+                <div class="col-12">
+                  <div class="addr-source">
+                    <i class="bi bi-info-circle flex-shrink-0" aria-hidden="true"></i>
+                    <span class="addr-source__text">
+                      {{ 'admin_file_edit.address_scope' | translate }}
+                    </span>
+                    @if (clienteConDireccion()) {
+                      <button type="button" class="addr-source__btn" (click)="aplicarDireccionCliente()"
+                              [disabled]="direccionDesdeCliente()">
+                        <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                        {{ 'file_create.use_client_address' | translate }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
                 <div class="col-12">
                   <label class="form-label mb-2">
                     {{ 'file_create.property_type' | translate }} <span class="req-mark" aria-hidden="true">*</span>
@@ -431,117 +449,79 @@
                   </div>
                 </div>
 
-                <!-- País toggle -->
+                <!-- País · las direcciones son siempre canadienses -->
                 <div class="col-12">
                   <label class="form-label">{{ 'file_create.country' | translate }}</label>
-                  <div class="pais-toggle">
-                    <button type="button" class="pais-btn" [class.pais-btn--on]="paisActual() === 'canada'"
-                            (click)="setPais('canada')">
-                      <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ 'file_create.country_ca' | translate }}
-                    </button>
-                    <button type="button" class="pais-btn" [class.pais-btn--on]="paisActual() === 'costa_rica'"
-                            (click)="setPais('costa_rica')">
-                      <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ 'file_create.country_cr' | translate }}
-                    </button>
+                  <div>
+                    <span class="country-badge">
+                      <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                      {{ 'file_create.country_ca' | translate }}
+                    </span>
                   </div>
                 </div>
-
-                @if (paisActual() === 'costa_rica') {
-                  <div class="col-12">
-                    <label class="form-label" for="direccion-cr">
-                      {{ 'file_create.full_address' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <input id="direccion-cr" type="text" class="form-control" formControlName="direccion"
-                           [placeholder]="'file_create.address_placeholder' | translate" />
-                    @if (invalid(localizacionForm, 'direccion')) {
-                      <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
-                        {{ 'file_create.address_required' | translate }}</p>
+                <div class="col-sm-3">
+                  <label class="form-label" for="numero-unidad">
+                    {{ 'file_create.unit_number' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="numero-unidad" type="text" class="form-control" formControlName="numero_unidad"
+                         [placeholder]="'file_create.unit_placeholder' | translate" />
+                </div>
+                <div class="col-sm-3">
+                  <label class="form-label" for="numero-civico">
+                    {{ 'file_create.civic_number' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="numero-civico" type="text" class="form-control" formControlName="numero_civico"
+                         [placeholder]="'file_create.civic_placeholder' | translate" />
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label" for="calle">
+                    {{ 'file_create.street_name' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+                  </label>
+                  <input id="calle" type="text" class="form-control" formControlName="calle"
+                         [placeholder]="'file_create.street_name_placeholder' | translate" />
+                  @if (invalid(localizacionForm, 'calle')) {
+                    <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
+                      {{ 'file_create.address_required' | translate }}</p>
+                  }
+                </div>
+                <div class="col-md-5">
+                  <label class="form-label" for="ciudad">
+                    {{ 'file_create.ca_city' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+                  </label>
+                  <input id="ciudad" type="text" class="form-control" formControlName="ciudad" />
+                  @if (invalid(localizacionForm, 'ciudad')) {
+                    <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
+                      {{ 'file_create.field_required' | translate }}</p>
+                  }
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label" for="provincia-ca">
+                    {{ 'file_create.province_territory' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+                  </label>
+                  <select id="provincia-ca" class="form-select" formControlName="provincia_ca">
+                    <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
+                    @for (p of provinciasCanada; track p.code) {
+                      <option [value]="p.code">{{ p.code }} — {{ p.nombre }}</option>
                     }
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="provincia-cr">
-                      {{ 'file.province' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <select id="provincia-cr" class="form-select" formControlName="provincia">
-                      <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
-                      @for (p of provincias; track p) { <option [value]="p">{{ p }}</option> }
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="canton">{{ 'file.canton' | translate }} <span class="req-mark">*</span></label>
-                    <input id="canton" type="text" class="form-control" formControlName="canton" />
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="distrito">{{ 'file.district' | translate }} <span class="req-mark">*</span></label>
-                    <input id="distrito" type="text" class="form-control" formControlName="distrito" />
-                  </div>
-                }
-
-                @if (paisActual() === 'canada') {
-                  <div class="col-sm-3">
-                    <label class="form-label" for="numero-unidad">
-                      {{ 'file_create.unit_number' | translate }}
-                      <span class="opt-label">({{ 'common.optional' | translate }})</span>
-                    </label>
-                    <input id="numero-unidad" type="text" class="form-control" formControlName="numero_unidad"
-                           [placeholder]="'file_create.unit_placeholder' | translate" />
-                  </div>
-                  <div class="col-sm-3">
-                    <label class="form-label" for="numero-civico">
-                      {{ 'file_create.civic_number' | translate }}
-                      <span class="opt-label">({{ 'common.optional' | translate }})</span>
-                    </label>
-                    <input id="numero-civico" type="text" class="form-control" formControlName="numero_civico"
-                           [placeholder]="'file_create.civic_placeholder' | translate" />
-                  </div>
-                  <div class="col-sm-6">
-                    <label class="form-label" for="calle">
-                      {{ 'file_create.street_name' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <input id="calle" type="text" class="form-control" formControlName="calle"
-                           [placeholder]="'file_create.street_name_placeholder' | translate" />
-                    @if (invalid(localizacionForm, 'calle')) {
-                      <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
-                        {{ 'file_create.address_required' | translate }}</p>
-                    }
-                  </div>
-                  <div class="col-md-5">
-                    <label class="form-label" for="ciudad">
-                      {{ 'file_create.ca_city' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <input id="ciudad" type="text" class="form-control" formControlName="ciudad" />
-                    @if (invalid(localizacionForm, 'ciudad')) {
-                      <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
-                        {{ 'file_create.field_required' | translate }}</p>
-                    }
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="provincia-ca">
-                      {{ 'file_create.province_territory' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <select id="provincia-ca" class="form-select" formControlName="provincia_ca">
-                      <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
-                      @for (p of provinciasCanada; track p.code) {
-                        <option [value]="p.code">{{ p.code }} — {{ p.nombre }}</option>
-                      }
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label" for="codigo-postal">
-                      {{ 'file_create.postal_code' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-                    </label>
-                    <input id="codigo-postal" type="text" class="form-control text-uppercase"
-                           formControlName="codigo_postal" maxlength="7"
-                           [placeholder]="'file_create.postal_placeholder' | translate" />
-                    @if (invalid(localizacionForm, 'codigo_postal')) {
-                      <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
-                        @if (localizacionForm.get('codigo_postal')?.errors?.['required']) {
-                          {{ 'file_create.field_required' | translate }}
-                        } @else { {{ 'file_create.postal_invalid' | translate }} }
-                      </p>
-                    }
-                  </div>
-                }
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label" for="codigo-postal">
+                    {{ 'file_create.postal_code' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+                  </label>
+                  <input id="codigo-postal" type="text" class="form-control text-uppercase"
+                         formControlName="codigo_postal" maxlength="7"
+                         [placeholder]="'file_create.postal_placeholder' | translate" />
+                  @if (invalid(localizacionForm, 'codigo_postal')) {
+                    <p class="field-error" role="alert"><i class="bi bi-exclamation-circle"></i>
+                      @if (localizacionForm.get('codigo_postal')?.errors?.['required']) {
+                        {{ 'file_create.field_required' | translate }}
+                      } @else { {{ 'file_create.postal_invalid' | translate }} }
+                    </p>
+                  }
+                </div>
 
                 <div class="col-12">
                   <button type="button" class="gps-toggle" (click)="gpsVisible.set(!gpsVisible())"

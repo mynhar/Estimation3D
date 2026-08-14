@@ -133,3 +133,61 @@
   background-color: var(--ds-success);
   border-color: var(--ds-success);
 }
+
+/* Contraparte de .req-star para los campos opcionales (bloque Dirección). */
+.opt-label { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); font-weight: var(--ds-weight-regular); margin-left: var(--ds-space-1); }
+
+/* Subcabecera dentro de una sección (bloque Dirección): deliberadamente más
+   discreta que .form-section__header para no competir con «Datos personales». */
+.form-subhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-2) 0 0;
+  padding-top: var(--ds-space-4);
+  border-top: 1px solid var(--ds-border);
+}
+.form-subhead__label {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.form-subhead__note {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Invitación por correo ───────────────────────────────── */
+.invite-block {
+  margin-top: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+}
+.invite-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+.invite-block__text { min-width: 0; flex: 1 1 20rem; }
+.invite-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.invite-block__hint,
+.invite-block__lang {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  line-height: 1.5;
+}
+.invite-block__lang { color: var(--ds-gold-active); font-weight: var(--ds-weight-semibold); }

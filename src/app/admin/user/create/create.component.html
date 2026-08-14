@@ -53,6 +53,19 @@
                   <div class="invalid-feedback">{{ 'admin_users.status_required' | translate }}</div>
                 </div>
 
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="idioma">
+                    {{ 'admin_users.language' | translate }}
+                    <span class="req-star" aria-hidden="true">*</span>
+                  </label>
+                  <select id="idioma" class="form-select" formControlName="idioma">
+                    @for (l of idiomas; track l) {
+                      <option [value]="l">{{ ('lang.' + l) | translate }}</option>
+                    }
+                  </select>
+                  <div class="form-text">{{ 'admin_users.language_hint' | translate }}</div>
+                </div>
+
                 <div class="col-12 col-md-6 d-flex align-items-center pt-2">
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="chkCompleto" disabled
@@ -122,6 +135,34 @@
                   </div>
                 </div>
 
+                <!-- ── Invitación por correo ──────────────────────────────── -->
+                <div class="col-12">
+                  <div class="invite-block">
+                    <div class="invite-block__head">
+                      <div class="invite-block__text">
+                        <p class="invite-block__title">
+                          <i class="bi bi-envelope-paper" aria-hidden="true"></i>
+                          {{ 'admin_users.invite_title' | translate }}
+                        </p>
+                        <p class="invite-block__hint">{{ 'admin_users.invite_create_hint' | translate }}</p>
+                        <p class="invite-block__lang">
+                          {{ 'admin_users.invite_lang' | translate:{ idioma: ('lang.' + idiomaInvitacion()) | translate } }}
+                        </p>
+                      </div>
+                      <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                              (click)="crearEInvitar()" [disabled]="ocupado()">
+                        @if (enviandoInvitacion()) {
+                          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          {{ 'admin_users.invite_sending' | translate }}
+                        } @else {
+                          <i class="bi bi-send me-1" aria-hidden="true"></i>
+                          {{ 'admin_users.invite_send' | translate }}
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -161,7 +202,7 @@
                   <label class="form-label">{{ 'common.phone' | translate }}</label>
                   <input type="tel" class="form-control"
                          formControlName="telefono"
-                         placeholder="+506 8888-8888">
+                         placeholder="+1 514-555-0100">
                 </div>
 
                 <!-- Avatar -->
@@ -197,6 +238,69 @@
                   <input #fileInput type="file" accept="image/jpeg,image/png,image/webp"
                          class="d-none" (change)="onAvatarChange($event)">
                   <input type="hidden" formControlName="avatar_url">
+                </div>
+
+                <!-- ── Dirección (opcional) ─────────────────────────────── -->
+                <div class="col-12">
+                  <p class="form-subhead">
+                    <span class="form-subhead__label">{{ 'admin_users.address_data' | translate }}</span>
+                    <span class="form-subhead__note">{{ 'admin_users.address_hint' | translate }}</span>
+                  </p>
+                </div>
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label" for="dirUnidad">
+                    {{ 'admin_users.unit_number' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="dirUnidad" type="text" class="form-control"
+                         formControlName="direccion_unidad" placeholder="5" autocomplete="address-line2">
+                </div>
+
+                <div class="col-12 col-md-9">
+                  <label class="form-label" for="dirCalle">
+                    {{ 'admin_users.street_address' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="dirCalle" type="text" class="form-control"
+                         formControlName="direccion_calle" placeholder="123 Rue Saint-Denis"
+                         autocomplete="address-line1">
+                </div>
+
+                <div class="col-12 col-md-5">
+                  <label class="form-label" for="dirCiudad">
+                    {{ 'admin_users.city' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="dirCiudad" type="text" class="form-control"
+                         formControlName="direccion_ciudad" placeholder="Montréal"
+                         autocomplete="address-level2">
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label" for="dirProvincia">
+                    {{ 'admin_users.province_territory' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <select id="dirProvincia" class="form-select"
+                          formControlName="direccion_provincia" autocomplete="address-level1">
+                    <option value="">{{ 'admin_users.province_none' | translate }}</option>
+                    @for (p of provinciasCanada; track p.code) {
+                      <option [value]="p.code">{{ p.nombre }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label" for="dirPostal">
+                    {{ 'admin_users.postal_code' | translate }}
+                    <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                  </label>
+                  <input id="dirPostal" type="text" class="form-control"
+                         formControlName="direccion_codigo_postal" placeholder="A1A 1A1"
+                         autocomplete="postal-code"
+                         [class.is-invalid]="f['direccion_codigo_postal'].invalid && f['direccion_codigo_postal'].touched">
+                  <div class="invalid-feedback">{{ 'admin_users.postal_invalid' | translate }}</div>
                 </div>
 
               </div>
@@ -259,10 +363,10 @@
           <!-- ── Footer acciones ─────────────────────────────────────────── -->
           <div class="form-card__footer">
             <button type="button" class="btn btn-outline-secondary"
-                    (click)="cancelar()" [disabled]="guardando()">
+                    (click)="cancelar()" [disabled]="ocupado()">
               <i class="bi bi-x-lg me-1" aria-hidden="true"></i>{{ 'common.cancel' | translate }}
             </button>
-            <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+            <button type="submit" class="btn btn-primary" [disabled]="ocupado()">
               @if (guardando()) {
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 {{ 'admin_users.creating' | translate }}

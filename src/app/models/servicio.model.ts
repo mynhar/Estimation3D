@@ -9,11 +9,6 @@ export interface Servicio {
   descripcion_es?: string;
 }
 
-export const PROVINCIAS: string[] = [
-  'San José', 'Alajuela', 'Cartago', 'Heredia',
-  'Guanacaste', 'Puntarenas', 'Limón',
-];
-
 export const PROVINCIAS_CANADA: { code: string; nombre: string }[] = [
   { code: 'AB', nombre: 'Alberta' },
   { code: 'BC', nombre: 'British Columbia' },

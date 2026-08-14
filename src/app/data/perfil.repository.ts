@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
-import { DbPerfil, RolUsuario } from '../types/supabase';
+import { DbPerfil, ProveedorAuth, RolUsuario } from '../types/supabase';
 
 export type PerfilNombre   = { id: string; nombre: string; apellido: string };
 export type PerfilContacto = PerfilNombre & { telefono: string | null; email: string | null };
+export type PerfilInvitable = PerfilContacto & { proveedor: ProveedorAuth };
 export type PerfilNombreRol = PerfilNombre & { rol: RolUsuario };
 
 @Injectable({ providedIn: 'root' })
@@ -59,6 +60,23 @@ export class PerfilRepository {
       .in('id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as PerfilNombreRol[];
+  }
+
+  /**
+   * Perfiles activos de los roles dados, con correo y proveedor de acceso.
+   * El proveedor decide si a esa cuenta se le puede fijar una contraseña: la
+   * que entra con Google no usa ninguna.
+   */
+  async findActivosByRolesInvitables(roles: RolUsuario[]): Promise<PerfilInvitable[]> {
+    if (!roles.length) return [];
+    const { data, error } = await this.db
+      .from('perfil')
+      .select('id, nombre, apellido, telefono, email, proveedor')
+      .in('rol', roles)
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PerfilInvitable[];
   }
 
   /** Perfiles activos de los roles dados, con teléfono y correo. */

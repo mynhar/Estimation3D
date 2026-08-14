@@ -4,7 +4,8 @@ import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdminUserService } from '../../../services/admin-user.service';
+import { PROVINCIAS_CANADA } from '../../../models/servicio.model';
+import { AdminUserService, EnvioCredenciales } from '../../../services/admin-user.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ToastService } from '../../../services/toast.service';
@@ -42,7 +43,29 @@ export class AdminUserEditComponent implements OnInit {
   error           = signal<string | null>(null);
   usuario         = signal<DbPerfil | null>(null);
 
+  // Invitación por correo
+  confirmarInvitacion = signal(false);
+  enviandoInvitacion  = signal(false);
+  envio               = signal<EnvioCredenciales | null>(null);
+
+  /** Idioma registrado del usuario; es en el que se redactará el correo. */
+  idiomaUsuario = computed<'fr' | 'en' | 'es'>(() => {
+    const v = this.usuario()?.idioma;
+    return v === 'en' || v === 'es' ? v : 'fr';
+  });
+
+  /**
+   * Resend rechaza el remitente propio mientras el dominio no esté verificado y
+   * la función cae en su remitente de pruebas, que sólo entrega al dueño de la
+   * cuenta: el usuario no recibe nada y hay que avisarlo.
+   */
+  envioConFallback = computed(() => this.envio()?.remitente.endsWith('resend.dev') ?? false);
+
   readonly roles: RolUsuario[] = ['cliente', 'estimador', 'constructor', 'administrador'];
+
+  readonly provinciasCanada = PROVINCIAS_CANADA;
+  /** Código postal canadiense: A1A 1A1 (también acepta «A1A-1A1» y sin separador). */
+  private readonly CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
   form = this.fb.group({
     nombre:     ['', Validators.required],
@@ -53,6 +76,14 @@ export class AdminUserEditComponent implements OnInit {
     activo:     [true, Validators.required],
     email:      [''],
     password:   ['', passwordOpcionalValidator],
+    // Dirección personal (canadiense): los cinco campos son opcionales. El
+    // código postal sólo se valida si se escribe algo — `Validators.pattern`
+    // deja pasar la cadena vacía.
+    direccion_unidad:        [''],
+    direccion_calle:         [''],
+    direccion_ciudad:        [''],
+    direccion_provincia:     [''],
+    direccion_codigo_postal: ['', Validators.pattern(this.CA_POSTAL_RE)],
     // Sección Compañía: sólo para el constructor, todos opcionales.
     compania_nombre:    [''],
     compania_telefono:  [''],
@@ -98,6 +129,11 @@ export class AdminUserEditComponent implements OnInit {
         rol:        data.rol,
         activo:     data.activo,
         email:      data.email ?? '',
+        direccion_unidad:        data.direccion_unidad        ?? '',
+        direccion_calle:         data.direccion_calle         ?? '',
+        direccion_ciudad:        data.direccion_ciudad        ?? '',
+        direccion_provincia:     data.direccion_provincia     ?? '',
+        direccion_codigo_postal: data.direccion_codigo_postal ?? '',
         compania_nombre:    data.compania_nombre    ?? '',
         compania_telefono:  data.compania_telefono  ?? '',
         compania_email:     data.compania_email     ?? '',
@@ -130,6 +166,11 @@ export class AdminUserEditComponent implements OnInit {
         avatar_url: v.avatar_url ?? '',
         rol:        v.rol as RolUsuario,
         activo:     v.activo!,
+        direccion_unidad:        v.direccion_unidad        ?? '',
+        direccion_calle:         v.direccion_calle         ?? '',
+        direccion_ciudad:        v.direccion_ciudad        ?? '',
+        direccion_provincia:     v.direccion_provincia     ?? '',
+        direccion_codigo_postal: v.direccion_codigo_postal ?? '',
       };
 
       if (this.esProveedorEmail) {
@@ -169,6 +210,53 @@ export class AdminUserEditComponent implements OnInit {
       this.previewUrl.set(null);
     } finally {
       this.subiendoAvatar.set(false);
+    }
+  }
+
+  // ── Invitación por correo ─────────────────────────────────────────────────
+  //
+  // La contraseña guardada no se puede leer (está hasheada), así que enviarla
+  // implica fijar una nueva. Nunca se genera: la escribe el administrador en
+  // «Nueva contraseña», y es obligatoria para invitar. Por eso hay confirmación.
+
+  /** Contraseña escrita por el administrador, si la hay. */
+  get passwordEscrita(): string {
+    return (this.f['password'].value ?? '').trim();
+  }
+
+  abrirInvitacion(): void {
+    if (this.f['password'].invalid) { this.f['password'].markAsTouched(); return; }
+    // En esta pantalla la contraseña es opcional para guardar, pero obligatoria
+    // para invitar: es la que va en el correo.
+    if (!this.passwordEscrita) {
+      this.f['password'].setErrors({ required: true });
+      this.f['password'].markAsTouched();
+      return;
+    }
+    this.envio.set(null);
+    this.confirmarInvitacion.set(true);
+  }
+
+  async enviarInvitacion(): Promise<void> {
+    const u = this.usuario();
+    if (!u) return;
+
+    const escrita = this.passwordEscrita;
+    if (!escrita) { this.confirmarInvitacion.set(false); return; }
+
+    this.enviandoInvitacion.set(true);
+    try {
+      const resultado = await this.service.enviarCredenciales(u.id, escrita);
+      this.envio.set(resultado);
+      this.confirmarInvitacion.set(false);
+      this.toast.show(
+        this.translate.instant('admin_users.invite_ok', { email: resultado.email }),
+        'success',
+      );
+    } catch (e: any) {
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_invite'), 'danger');
+    } finally {
+      this.enviandoInvitacion.set(false);
     }
   }
 

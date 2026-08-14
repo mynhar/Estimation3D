@@ -256,7 +256,7 @@ export class ObraCardComponent implements OnDestroy {
   }
 
   private langLocale(): string {
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     return localeMap[this.currentLang() ?? this.translate.currentLang] ?? 'fr-CA';
   }
 }

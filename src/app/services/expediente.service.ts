@@ -208,6 +208,19 @@ export class ExpedienteService {
     numero:      string;
     fechaVisita: string;
     descripcion?: string | null;
+    /**
+     * Estimador asignado desde el alta. Solo lo envía `estimator/file/create`,
+     * para que el expediente nazca ya en su bandeja. Ojo: es asignación, no
+     * autoría — `asignarEstimador()` lo reescribe y `liberar()` lo vacía.
+     */
+    estimadorId?: string | null;
+    /**
+     * Autor del alta (`expediente.creado_por`). Inmutable: sobrevive a las
+     * reasignaciones, y es lo que garantiza que el expediente siga apareciendo
+     * en la lista de quien lo creó. Si no se envía, la base lo sella igual con
+     * `auth.uid()`.
+     */
+    creadoPor?: string | null;
     localizacion: {
       tipo_inmueble: TipoInmueble;
       direccion:  string;
@@ -226,6 +239,10 @@ export class ExpedienteService {
       estado:       'nuevo',
       fecha_visita: payload.fechaVisita,
       descripcion:  payload.descripcion ?? null,
+      estimador_id: payload.estimadorId ?? null,
+      // Sólo se manda si se conoce: un NULL explícito anularía el DEFAULT
+      // `auth.uid()` de la columna y el expediente quedaría sin autor.
+      ...(payload.creadoPor ? { creado_por: payload.creadoPor } : {}),
     });
 
     await this.localizacionRepo.insert({
@@ -249,7 +266,21 @@ export class ExpedienteService {
     estados?:     EstadoExpediente[];
     estimadorId?: string;
   }): Promise<ExpedienteRow[]> {
-    const exps = await this.expedienteRepo.findByFiltro(options);
+    return this.componerFilas(await this.expedienteRepo.findByFiltro(options));
+  }
+
+  /**
+   * Todos los expedientes del estimador, en cualquier estado: los que creó
+   * (`expediente.creado_por`, inmutable), los que tiene asignados
+   * (`expediente.estimador_id`) y los que estimó (`estimacion.estimador_id`,
+   * que sobrevive a una reasignación).
+   */
+  async getExpedientesDeEstimador(estimadorId: string): Promise<ExpedienteRow[]> {
+    return this.componerFilas(await this.expedienteRepo.findDeEstimador(estimadorId));
+  }
+
+  /** Enriquece las filas crudas con cliente, servicio, dirección y miniatura. */
+  private async componerFilas(exps: { id: string; numero: string; fecha_visita: string; estado: string; cliente_id: string; servicio_id: number; creado_por?: string | null }[]): Promise<ExpedienteRow[]> {
     if (!exps.length) return [];
 
     const clienteIds    = [...new Set(exps.map(e => e.cliente_id))];
@@ -282,6 +313,7 @@ export class ExpedienteService {
         canton:             loc?.canton    ?? '—',
         distrito:           loc?.distrito  ?? '—',
         foto:               matterportThumbFromTour(est?.url_tour),
+        creado_por:         e.creado_por ?? null,
       } as ExpedienteRow;
     });
   }
@@ -640,6 +672,11 @@ export class ExpedienteService {
 
   async asignarEstimador(expedienteId: string, estimadorId: string): Promise<void> {
     return this.expedienteRepo.asignarEstimador(expedienteId, estimadorId);
+  }
+
+  /** Cambia el estimador asignado dejando el estado como está. */
+  async reasignarEstimador(expedienteId: string, estimadorId: string): Promise<void> {
+    return this.expedienteRepo.reasignarEstimador(expedienteId, estimadorId);
   }
 
   async actualizarEstado(expedienteId: string, estado: EstadoExpediente): Promise<void> {

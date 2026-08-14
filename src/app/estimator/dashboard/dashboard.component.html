@@ -295,7 +295,20 @@
               <h2 class="estd-card__title">{{ 'dashboard_builder.quick_actions' | translate }}</h2>
             </div>
           </div>
-          <nav class="estd-card__body estd-actions" aria-label="Acciones rÃ¡pidas">
+          <nav class="estd-card__body estd-actions"
+               [attr.aria-label]="'dashboard_builder.quick_actions' | translate">
+            <!-- Alta de cliente. Es la unica accion de creacion de la tarjeta:
+                 va primera y con el borde punteado del sistema, para no robarle
+                 el relleno dorado a la accion primaria (la bandeja, que es la
+                 que trae contador). -->
+            <a routerLink="/estimator/client/create" class="estd-action estd-action--create">
+              <div class="estd-action__icon" aria-hidden="true">
+                <i class="bi bi-person-plus"></i>
+              </div>
+              <div class="estd-action__text">
+                <span class="estd-action__label">{{ 'admin_users.create_client_btn' | translate }}</span>
+              </div>
+            </a>
             <a routerLink="/estimator/files-to-be-estimated" class="estd-action estd-action--primary">
               <div class="estd-action__icon" aria-hidden="true">
                 <i class="bi bi-inbox"></i>

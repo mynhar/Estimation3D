@@ -325,7 +325,7 @@ export class DashboardComponent implements OnInit {
   });
 
   calMesLabel = computed((): string => {
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.currentLang()] ?? 'fr-CA';
     const ref = this.calExpandido()
       ? new Date(this.calMes().year, this.calMes().month, 1)
@@ -334,7 +334,7 @@ export class DashboardComponent implements OnInit {
   });
 
   calWeekdays = computed((): string[] => {
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.currentLang()] ?? 'fr-CA';
     return Array.from({ length: 7 }, (_, i) =>
       new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2025, 0, 6 + i))
@@ -504,7 +504,7 @@ export class DashboardComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};

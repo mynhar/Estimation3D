@@ -1,10 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AdminUserService } from '../../../services/admin-user.service';
+import { PROVINCIAS_CANADA } from '../../../models/servicio.model';
+import { AdminUserService, CrearUsuarioParams } from '../../../services/admin-user.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
+import { Lang, LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
+import { RolUsuario } from '../../../types/supabase';
 
 @Component({
   selector: 'app-estimator-client-create',
@@ -22,10 +26,27 @@ export class EstimatorClientCreateComponent {
   private translate = inject(TranslateService);
   private edgeErr   = inject(EdgeErrorService);
 
-  guardando       = signal(false);
-  mostrarPassword = signal(false);
-  subiendoAvatar  = signal(false);
-  previewUrl      = signal<string | null>(null);
+  guardando          = signal(false);
+  enviandoInvitacion = signal(false);
+  mostrarPassword    = signal(false);
+  subiendoAvatar     = signal(false);
+  previewUrl         = signal<string | null>(null);
+
+  /** Cualquiera de las dos acciones bloquea el formulario mientras corre. */
+  ocupado = computed(() => this.guardando() || this.enviandoInvitacion());
+
+  /**
+   * Los dos roles externos. El estimador no da de alta estimadores ni
+   * administradores: la edge function rechaza cualquier otro rol.
+   */
+  readonly roles: RolUsuario[] = ['cliente', 'constructor'];
+
+  /** fr | en | es, en el orden en que los ofrece el selector de la aplicación. */
+  readonly idiomas = inject(LangService).langs;
+
+  readonly provinciasCanada = PROVINCIAS_CANADA;
+  /** Código postal canadiense: A1A 1A1 (también acepta «A1A-1A1» y sin separador). */
+  private readonly CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
   form = this.fb.group({
     email:      ['', [Validators.required, Validators.email]],
@@ -34,10 +55,72 @@ export class EstimatorClientCreateComponent {
     apellido:   ['', Validators.required],
     telefono:   [''],
     avatar_url: [''],
+    rol:        ['cliente' as RolUsuario, Validators.required],
     activo:     [true, Validators.required],
+    // Idioma del usuario: en el que se le escribirá (la invitación, y cualquier
+    // correo posterior). Arranca en francés, el idioma por defecto de la
+    // aplicación; el propio usuario lo cambia cuando elige idioma al entrar.
+    idioma:     ['fr' as Lang, Validators.required],
+    // Dirección personal (canadiense): los cinco campos son opcionales. El
+    // código postal sólo se valida si se escribe algo — `Validators.pattern`
+    // deja pasar la cadena vacía.
+    direccion_unidad:        [''],
+    direccion_calle:         [''],
+    direccion_ciudad:        [''],
+    direccion_provincia:     [''],
+    direccion_codigo_postal: ['', Validators.pattern(this.CA_POSTAL_RE)],
+    // Sección Compañía: sólo para el constructor, todos opcionales.
+    compania_nombre:    [''],
+    compania_telefono:  [''],
+    compania_email:     ['', Validators.email],
+    compania_direccion: [''],
   });
 
+  /** El rol elegido, como signal, para mostrar/ocultar la sección Compañía. */
+  rolSeleccionado = toSignal(this.form.controls.rol.valueChanges, {
+    initialValue: this.form.controls.rol.value,
+  });
+  esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
+
+  /** Idioma en el que se redactará la invitación. */
+  idiomaInvitacion = toSignal(this.form.controls.idioma.valueChanges, {
+    initialValue: this.form.controls.idioma.value,
+  });
+
+  /** Título y botón nombran el rol que se está dando de alta. */
+  tituloClave = computed(() =>
+    this.esConstructor() ? 'admin_users.create_builder_title' : 'admin_users.create_client_title');
+  botonClave = computed(() =>
+    this.esConstructor() ? 'admin_users.create_builder_btn' : 'admin_users.create_client_btn');
+
   get f() { return this.form.controls; }
+
+  private construirParams(): CrearUsuarioParams {
+    const v = this.form.getRawValue();
+    return {
+      email:      v.email!,
+      password:   v.password!,
+      nombre:     v.nombre!,
+      apellido:   v.apellido!,
+      telefono:   v.telefono ?? '',
+      avatar_url: v.avatar_url ?? '',
+      rol:        v.rol as RolUsuario,
+      activo:     v.activo!,
+      idioma:     v.idioma as Lang,
+      direccion_unidad:        v.direccion_unidad        ?? '',
+      direccion_calle:         v.direccion_calle         ?? '',
+      direccion_ciudad:        v.direccion_ciudad        ?? '',
+      direccion_provincia:     v.direccion_provincia     ?? '',
+      direccion_codigo_postal: v.direccion_codigo_postal ?? '',
+      // La edge function ignora estos campos si el rol no es constructor.
+      ...(this.esConstructor() ? {
+        compania_nombre:    v.compania_nombre    ?? '',
+        compania_telefono:  v.compania_telefono  ?? '',
+        compania_email:     v.compania_email     ?? '',
+        compania_direccion: v.compania_direccion ?? '',
+      } : {}),
+    };
+  }
 
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
@@ -47,20 +130,11 @@ export class EstimatorClientCreateComponent {
 
     this.guardando.set(true);
     try {
-      const v = this.form.getRawValue();
-      await this.service.crearUsuario({
-        email:      v.email!,
-        password:   v.password!,
-        nombre:     v.nombre!,
-        apellido:   v.apellido!,
-        telefono:   v.telefono ?? '',
-        avatar_url: v.avatar_url ?? '',
-        rol:        'cliente',
-        activo:     v.activo!,
-      });
+      const p = this.construirParams();
+      await this.service.crearUsuario(p);
 
       this.toast.show(
-        this.translate.instant('admin_users.success_created', { nombre: v.nombre, apellido: v.apellido }),
+        this.translate.instant('admin_users.success_created', { nombre: p.nombre, apellido: p.apellido }),
         'success',
       );
       this.router.navigate(['/estimator/client/list']);
@@ -68,6 +142,63 @@ export class EstimatorClientCreateComponent {
       this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_create'), 'danger');
     } finally {
       this.guardando.set(false);
+    }
+  }
+
+  /**
+   * «Enviar invitación»: da de alta al usuario igual que el botón de crear y
+   * además le manda por correo sus credenciales (usuario, contraseña y
+   * dirección de la aplicación), redactadas en el idioma elegido arriba.
+   *
+   * El correo lleva la contraseña que el estimador acaba de escribir — aquí no
+   * hay ninguna que reiniciar, así que no se pide confirmación.
+   *
+   * Si el usuario se crea pero el correo falla, el alta se mantiene: se avisa
+   * con un toast y la invitación puede reintentarse desde la edición.
+   */
+  async crearEInvitar(): Promise<void> {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.enviandoInvitacion.set(true);
+    try {
+      const p = this.construirParams();
+      const { id } = await this.service.crearUsuario(p);
+
+      try {
+        const envio = await this.service.enviarCredenciales(id, p.password);
+        this.toast.show(
+          this.translate.instant('admin_users.invite_created_ok', {
+            nombre: p.nombre, apellido: p.apellido, email: envio.email,
+          }),
+          'success',
+        );
+        // Resend cae en su remitente de pruebas si el dominio deja de estar
+        // verificado, y ese sólo entrega al dueño de la cuenta: el usuario no
+        // recibe nada y hay que avisarlo.
+        if (envio.remitente.endsWith('resend.dev')) {
+          this.toast.show(
+            this.translate.instant('admin_users.invite_fallback_from', { remitente: envio.remitente }),
+            'warning',
+          );
+        }
+      } catch (e: any) {
+        this.toast.show(
+          this.translate.instant('admin_users.invite_created_mail_failed', {
+            nombre: p.nombre, apellido: p.apellido,
+            motivo: this.edgeErr.mensaje(e, 'admin_users.err_invite'),
+          }),
+          'warning',
+        );
+      }
+
+      this.router.navigate(['/estimator/client/list']);
+    } catch (e: any) {
+      this.toast.show(this.edgeErr.mensaje(e, 'admin_users.err_create'), 'danger');
+    } finally {
+      this.enviandoInvitacion.set(false);
     }
   }
 

@@ -174,7 +174,7 @@ export class BuilderDashboardComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};
@@ -188,7 +188,7 @@ export class BuilderDashboardComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor);
     if (isNaN(d.getTime())) return this.formatFecha(valor);
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(d);
   }

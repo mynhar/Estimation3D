@@ -166,7 +166,7 @@ export class AdminDashboardComponent implements OnInit {
     if (!ts) return '—';
     const d = new Date(ts);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, {
       day: '2-digit', month: 'short', year: 'numeric',

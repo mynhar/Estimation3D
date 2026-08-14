@@ -299,17 +299,44 @@
 .tipo-btn__label { font-size: var(--ds-text-2xs); line-height: 1.1; white-space: nowrap; }
 .btn-check:checked + .tipo-btn { background: var(--ds-gold); border-color: var(--ds-gold); color: var(--ds-ink-on-accent); box-shadow: var(--ds-shadow-gold); }
 
-/* País toggle */
-.pais-toggle { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; }
-.pais-btn {
+/* Origen de la dirección · deja claro que lo copiado del perfil es un punto de
+   partida editable y que guardarlo no toca la ficha del cliente. */
+.addr-source {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: var(--ds-space-2) var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid color-mix(in oklab, var(--ds-info) 30%, transparent);
+  background: var(--ds-info-soft);
+  color: var(--ds-info);
+  font-size: var(--ds-text-sm); line-height: var(--ds-leading-relaxed);
+}
+.addr-source__text { flex: 1 1 16rem; min-width: 0; }
+.addr-source__btn {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2); flex-shrink: 0;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-radius: var(--ds-radius-pill);
+  border: 1px solid color-mix(in oklab, var(--ds-info) 45%, transparent);
+  background: var(--ds-surface); color: var(--ds-info);
+  font-size: var(--ds-text-xs); font-weight: var(--ds-weight-semibold);
+  white-space: nowrap; cursor: pointer;
+  transition: var(--ds-transition-color), box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.addr-source__btn:hover:not(:disabled) {
+  background: var(--ds-info); border-color: var(--ds-info);
+  color: var(--ds-ink-inverse); box-shadow: var(--ds-shadow-sm);
+}
+.addr-source__btn:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
+.addr-source__btn:active:not(:disabled) { transform: translateY(1px); }
+.addr-source__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* País · indicador fijo (Canadá) */
+.country-badge {
   display: inline-flex; align-items: center; gap: var(--ds-space-2);
   padding: var(--ds-space-2) var(--ds-space-4); border-radius: var(--ds-radius-pill);
-  border: 1.5px solid var(--ds-border-strong); background: var(--ds-surface);
-  color: var(--ds-ink-secondary); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium);
-  cursor: pointer; transition: var(--ds-transition-color);
+  border: 1px solid var(--ds-gold-soft); background: var(--ds-gold-faint);
+  color: var(--ds-gold-active); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold);
 }
-.pais-btn:hover { border-color: var(--ds-gold); color: var(--ds-gold-active); }
-.pais-btn--on { background: var(--ds-gold-faint); border-color: var(--ds-gold); color: var(--ds-gold-active); }
 
 /* GPS */
 .gps-toggle {

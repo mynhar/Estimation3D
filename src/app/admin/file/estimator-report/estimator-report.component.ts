@@ -6,8 +6,10 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
-import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
-import { ArchivoRow } from '../../../models';
+import { InvitacionService } from '../../../services/invitacion.service';
+import { EdgeErrorService } from '../../../services/edge-error.service';
+import { PerfilRepository, PerfilNombre, PerfilInvitable } from '../../../data/perfil.repository';
+import { ArchivoRow, debeAvanzarEstado } from '../../../models';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
 import { matterportThumb } from '../../../shared/util/matterport';
 
@@ -30,13 +32,15 @@ export class AdminFileEstimatorReportComponent implements OnInit {
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
   private perfilRepo        = inject(PerfilRepository);
+  private invitacionService = inject(InvitacionService);
+  private edgeErr           = inject(EdgeErrorService);
 
   /** Id del expediente cuyo informe se edita. */
   expedienteId = input.required<string>();
   /** Estado actual del expediente (lo mantiene el padre). */
   estado = input<string>('');
 
-  /** El guardado asignó estimador a un expediente 'nuevo' → 'en_estimacion'. */
+  /** Nuevo estado del expediente cuando el guardado del informe lo hace avanzar. */
   estadoChange = output<string>();
   /** Nombre completo del estimador asignado al guardar. */
   estimadorAsignado = output<string>();
@@ -60,6 +64,21 @@ export class AdminFileEstimatorReportComponent implements OnInit {
   exitoEst      = signal(false);
   hasEstimacion = signal(false);
 
+  // ── Invitación a constructores ─────────────────────────────────────────────
+  constructores       = signal<PerfilInvitable[]>([]);
+  invitadosIds        = signal<Set<string>>(new Set());
+  seleccionInvitados  = signal<Set<string>>(new Set());
+  // Contraseña que el administrador escribe para cada constructor, si decide
+  // mandarle credenciales nuevas. Vacía = no se toca su acceso actual.
+  passwordsInvitados  = signal<Record<string, string>>({});
+  enviandoInvitacion  = signal(false);
+  abriendoATodos      = signal(false);
+  // Abrir a todos borra la lista de invitados: se confirma antes de hacerlo.
+  confirmarAbrirATodos = signal(false);
+  exitoInvitacionMsg  = signal('');
+  exitoInvitacionArgs = signal<Record<string, number>>({});
+  errorInvitacionMsg  = signal('');
+
   // ── Archivos del estimador (fotos / documentos) ────────────────────────────
   fotos             = signal<ArchivoRow[]>([]);
   documentos        = signal<ArchivoRow[]>([]);
@@ -81,6 +100,17 @@ export class AdminFileEstimatorReportComponent implements OnInit {
     return this.costoMin >= 0 && this.costoMax >= this.costoMin;
   }
 
+  /** El informe tiene lo mínimo para poder guardarse («Enviar invitación»). */
+  get formularioCompleto(): boolean {
+    return !!(
+      this.estimadorSeleccionadoId() &&
+      this.fechaVisitaReal &&
+      this.horaVisitaReal &&
+      this.descripcionProblema.trim() &&
+      this.costoValido
+    );
+  }
+
   // ── Ciclo de vida ──────────────────────────────────────────────────────────
   async ngOnInit() {
     await this.cargarEstimadores();
@@ -88,6 +118,7 @@ export class AdminFileEstimatorReportComponent implements OnInit {
       this.cargarEstimadorAsignado(),
       this.cargarEstimacion(),
       this.cargarArchivos(),
+      this.cargarInvitaciones(),
     ]);
   }
 
@@ -145,27 +176,185 @@ export class AdminFileEstimatorReportComponent implements OnInit {
     }
   }
 
+  // ── Invitación a constructores ─────────────────────────────────────────────
+
+  /** Carga aparte del informe: un fallo aquí no debe tumbar la pestaña. */
+  private async cargarInvitaciones() {
+    try {
+      const [constructores, invitados] = await Promise.all([
+        this.perfilRepo.findActivosByRolesInvitables(['constructor']),
+        this.invitacionService.getConstructorIdsInvitados(this.expedienteId()),
+      ]);
+      this.constructores.set(constructores);
+      this.invitadosIds.set(invitados);
+    } catch (e: any) {
+      console.error('[AdminFileEstimatorReport] invitaciones:', e.message);
+    }
+  }
+
+  /** Solo se puede invitar cuando el expediente ya está estimado. */
+  get puedeInvitar(): boolean {
+    const estado = this.estado();
+    return estado === 'estimado' || estado === 'en_oferta';
+  }
+
+  /**
+   * Con ofertas ya en curso no se cambia quién ve el expediente: los
+   * constructores que están preparando su oferta no deben perder el acceso, ni
+   * entrar otros a mitad de la ronda.
+   */
+  get bloqueadoPorOferta(): boolean {
+    return this.estado() === 'en_oferta';
+  }
+
+  estaInvitado(id: string): boolean {
+    return this.invitadosIds().has(id);
+  }
+
+  /** Pide confirmación antes de abrir el expediente a todos: borra invitados. */
+  pedirAbrirATodos() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(true);
+  }
+
+  cancelarAbrirATodos() {
+    this.confirmarAbrirATodos.set(false);
+  }
+
+  /**
+   * «Todos los Constructores»: retira las invitaciones por correo y el
+   * expediente vuelve a ser público — lo ve y puede ofertar cualquier
+   * constructor, no solo los invitados.
+   */
+  async abrirATodosLosConstructores() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(false);
+
+    this.abriendoATodos.set(true);
+    try {
+      await this.invitacionService.abrirATodosLosConstructores(this.expedienteId());
+      this.seleccionInvitados.set(new Set());
+      this.passwordsInvitados.set({});
+      await this.cargarInvitaciones();
+      this.exitoInvitacionArgs.set({});
+      this.exitoInvitacionMsg.set('admin_invite.all_builders_done');
+    } catch (e: any) {
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_all_builders'));
+    } finally {
+      this.abriendoATodos.set(false);
+    }
+  }
+
+  toggleSeleccionInvitado(id: string) {
+    const s = new Set(this.seleccionInvitados());
+    if (s.has(id)) s.delete(id); else s.add(id);
+    this.seleccionInvitados.set(s);
+  }
+
+  passwordInvitado(id: string): string {
+    return this.passwordsInvitados()[id] ?? '';
+  }
+
+  setPasswordInvitado(id: string, valor: string) {
+    this.passwordsInvitados.update(prev => ({ ...prev, [id]: valor }));
+  }
+
+  /**
+   * Contraseñas a mandar, solo las escritas. Enviar una implica *fijarla*: la
+   * guardada está hasheada y no se puede leer. Las que se dejan vacías no tocan
+   * el acceso del constructor, que entra con la suya de siempre.
+   */
+  private clavesEscritas(ids: string[]): Record<string, string> {
+    const mapa = this.passwordsInvitados();
+    const out: Record<string, string> = {};
+    for (const id of ids) {
+      const clave = (mapa[id] ?? '').trim();
+      if (clave) out[id] = clave;
+    }
+    return out;
+  }
+
+  async enviarInvitaciones(): Promise<boolean> {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+
+    const ids = [...this.seleccionInvitados()];
+    if (!ids.length) {
+      this.errorInvitacionMsg.set('admin_invite.err_none');
+      return false;
+    }
+
+    this.enviandoInvitacion.set(true);
+    try {
+      const r = await this.invitacionService.enviarInvitaciones(
+        this.expedienteId(), ids, this.clavesEscritas(ids),
+      );
+      // Los que fallaron no quedan invitados: la función revierte su registro.
+      const enviadosIds = r.fallidos
+        ? ids.filter(id => !r.errores.some(e => e.constructor_id === id))
+        : ids;
+      this.invitadosIds.update(prev => new Set([...prev, ...enviadosIds]));
+      this.seleccionInvitados.set(new Set());
+      this.passwordsInvitados.set({});
+      this.exitoInvitacionArgs.set({ ok: r.enviados, ko: r.fallidos });
+      this.exitoInvitacionMsg.set(r.fallidos ? 'admin_invite.success_partial' : 'admin_invite.success');
+      return true;
+    } catch (e: any) {
+      // La plantilla traduce el contenido de este signal: se guarda la clave.
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_send'));
+      return false;
+    } finally {
+      this.enviandoInvitacion.set(false);
+    }
+  }
+
+  /**
+   * «Enviar invitación»: manda el correo y además hace lo mismo que el botón de
+   * guardar el informe. La estimación se guarda primero para que el correo salga
+   * con los datos recién grabados (visita, problemas observados, estimador).
+   */
+  async enviarInvitacionYEstimacion() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+
+    if (!this.seleccionInvitados().size) {
+      this.errorInvitacionMsg.set('admin_invite.err_none');
+      return;
+    }
+    if (!(await this.guardarEstimacion())) {
+      // `guardarEstimacion` ya dejó el motivo en su propio aviso; aquí solo se
+      // señala que por eso no se envió ningún correo.
+      this.errorInvitacionMsg.set('admin_invite.err_estimation_first');
+      return;
+    }
+    await this.enviarInvitaciones();
+  }
+
   // ── Guardar informe ────────────────────────────────────────────────────────
-  async guardarEstimacion() {
+
+  /** Devuelve si la estimación quedó guardada: «Enviar invitación» lo encadena. */
+  async guardarEstimacion(): Promise<boolean> {
     this.exitoEst.set(false);
     this.errorEst.set('');
 
     if (!this.fechaVisitaReal || !this.horaVisitaReal) {
       this.errorEst.set('estimator_form.err_visit');
-      return;
+      return false;
     }
     if (!this.descripcionProblema.trim()) {
       this.errorEst.set('estimator_form.err_problems');
-      return;
+      return false;
     }
     if (!this.costoValido) {
       this.errorEst.set('estimator_form.err_cost');
-      return;
+      return false;
     }
     const estimadorId = this.estimadorSeleccionadoId();
     if (!estimadorId) {
       this.errorEst.set('admin_estimate.err_estimador');
-      return;
+      return false;
     }
 
     this.guardandoEst.set(true);
@@ -181,18 +370,28 @@ export class AdminFileEstimatorReportComponent implements OnInit {
           this.urlsTour().map(u => u.trim()).filter(Boolean),
         ),
       });
-      // Asigna el estimador al expediente solo si aún es 'nuevo' (evita
-      // retroceder el estado de un expediente ya avanzado).
-      if (this.estado() === 'nuevo') {
+      // Igual que «Enviar estimación» de admin/to-estimate/edit: asigna el
+      // estimador y deja el expediente en `estimado`. Solo avanza si aún no
+      // llegó ahí — reeditar el informe de uno en oferta, adjudicado o
+      // contratado no debe hacerlo retroceder, ni reactivar uno cancelado. Por
+      // eso en esos estados se reasigna el estimador sin tocar el estado
+      // (`asignarEstimador` fijaría 'en_estimacion').
+      const avanza = debeAvanzarEstado(this.estado(), 'estimado');
+      if (avanza) {
         await this.expedienteService.asignarEstimador(this.expedienteId(), estimadorId);
-        this.estadoChange.emit('en_estimacion');
+        await this.expedienteService.actualizarEstado(this.expedienteId(), 'estimado');
+        this.estadoChange.emit('estimado');
+      } else {
+        await this.expedienteService.reasignarEstimador(this.expedienteId(), estimadorId);
       }
       const est = this.estimadores().find(x => x.id === estimadorId);
       if (est) this.estimadorAsignado.emit(`${est.nombre} ${est.apellido}`.trim());
       this.hasEstimacion.set(true);
       this.exitoEst.set(true);
+      return true;
     } catch (e: any) {
       this.errorEst.set(e.message ?? 'admin_file_edit.save_error');
+      return false;
     } finally {
       this.guardandoEst.set(false);
     }

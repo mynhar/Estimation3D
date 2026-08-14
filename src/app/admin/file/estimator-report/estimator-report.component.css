@@ -219,6 +219,125 @@
 .lightbox-close:hover { background: rgba(255,255,255,.25); }
 
 /* ════════════════════════════════════════════════════════════════════════════
+   INVITACIÓN A CONSTRUCTORES
+════════════════════════════════════════════════════════════════════════════ */
+.invite-card { margin-top: var(--ds-space-4); }
+
+.invite-hint {
+  font-size: var(--ds-text-sm); color: var(--ds-ink-secondary);
+  margin: 0 0 var(--ds-space-4); max-width: 68ch;
+}
+
+.invite-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ds-space-2); }
+
+.invite-row {
+  display: flex; align-items: center; gap: var(--ds-space-3); width: 100%; margin: 0;
+  padding: var(--ds-space-3); background: var(--ds-surface);
+  border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); cursor: pointer;
+  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
+              background var(--ds-duration-fast) var(--ds-ease-out);
+}
+.invite-row:hover { border-color: var(--ds-gold-soft); background: var(--ds-gold-faint); }
+.invite-row:focus-within { outline: var(--ds-focus-ring); outline-offset: 2px; }
+.invite-row--selected { border-color: var(--ds-gold); background: var(--ds-gold-faint); }
+.invite-row--disabled { opacity: 0.55; cursor: not-allowed; }
+.invite-row--disabled:hover { border-color: var(--ds-border); background: var(--ds-surface); }
+
+/* El anillo de foco lo pinta la fila entera vía :focus-within */
+.invite-check { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--ds-gold-active); cursor: inherit; }
+.invite-check:focus-visible { outline: none; }
+
+.invite-row__info  { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.invite-row__name  { font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium); color: var(--ds-ink); }
+.invite-row__email {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs); color: var(--ds-ink-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.invite-badge {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
+  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  border: 1px solid var(--ds-gold-soft); border-radius: var(--ds-radius-pill); padding: 0.15em 0.6em;
+}
+
+/* Contraseña opcional: fuera del <label> de la fila, para que escribir en ella
+   no marque ni desmarque la casilla. */
+.invite-pass {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
+  gap: var(--ds-space-2) var(--ds-space-3);
+  margin: var(--ds-space-1) 0 0 var(--ds-space-6);
+  padding: var(--ds-space-3); background: var(--ds-bg-alt);
+  border-left: 2px solid var(--ds-gold-soft); border-radius: var(--ds-radius-md);
+}
+.invite-pass__label {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1); margin: 0;
+  font-size: var(--ds-text-xs); font-weight: var(--ds-weight-medium); color: var(--ds-ink-secondary);
+}
+.invite-pass__input { max-width: 320px; }
+.invite-pass__hint {
+  grid-column: 1 / -1; display: flex; align-items: flex-start; gap: var(--ds-space-1);
+  font-size: var(--ds-text-2xs); color: var(--ds-ink-muted); margin: 0;
+}
+
+.invite-msg {
+  display: flex; align-items: flex-start; gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs); color: var(--ds-ink-muted);
+  margin: var(--ds-space-3) 0 0;
+}
+.invite-msg--err { color: var(--ds-danger); }
+.invite-msg--ok  { color: var(--ds-success); }
+
+.invite-count   { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
+.invite-buttons { display: flex; align-items: center; gap: var(--ds-space-2); flex-wrap: wrap; }
+
+.btn-invite {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4); border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              border-color var(--ds-duration-fast) var(--ds-ease-out),
+              color var(--ds-duration-fast) var(--ds-ease-out),
+              transform var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-invite:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
+.btn-invite:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-invite--ghost {
+  background: var(--ds-surface); border: 1px solid var(--ds-border-strong); color: var(--ds-ink-secondary);
+}
+.btn-invite--ghost:hover:not(:disabled) { border-color: var(--ds-gold); background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.btn-invite--ghost:active:not(:disabled) { background: var(--ds-gold-soft); }
+
+.btn-invite--primary { background: var(--ds-gold); border: 1px solid transparent; color: var(--ds-ink); }
+.btn-invite--primary:hover:not(:disabled) { background: var(--ds-gold-hover); transform: translateY(-1px); box-shadow: var(--ds-shadow-gold); }
+.btn-invite--primary:active:not(:disabled) { background: var(--ds-gold-active); transform: translateY(0); box-shadow: none; }
+
+/* Confirmación de «Todos los Constructores»: la acción borra los invitados. */
+.invite-confirm {
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-warning-soft);
+  border: 1px solid var(--ds-warning);
+  border-radius: var(--ds-radius-md);
+}
+.invite-confirm__title {
+  display: flex; align-items: center; gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold); color: var(--ds-ink);
+}
+.invite-confirm__body {
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-xs); color: var(--ds-ink); line-height: 1.6;
+}
+.invite-confirm__actions {
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--ds-space-2);
+  margin-top: var(--ds-space-3);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
    RESPONSIVE
 ════════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
@@ -227,6 +346,11 @@
 }
 @media (max-width: 575.98px) {
   .btn-save { width: 100%; }
+  .invite-pass { grid-template-columns: 1fr; margin-left: 0; }
+  .invite-pass__input { max-width: none; }
+  .invite-buttons { width: 100%; }
+  .btn-invite { flex: 1 1 100%; }
+  .invite-confirm__actions { flex-direction: column-reverse; }
   .photos-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
   .tour-grid   { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .doc-grid    { grid-template-columns: 1fr; }

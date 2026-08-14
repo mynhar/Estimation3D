@@ -8,7 +8,7 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { EstimacionService } from '../../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
-import { PerfilRepository, PerfilNombre, PerfilContacto } from '../../../data/perfil.repository';
+import { PerfilRepository, PerfilNombre, PerfilInvitable } from '../../../data/perfil.repository';
 import { InvitacionService } from '../../../services/invitacion.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
 import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../../models';
@@ -72,11 +72,18 @@ export class AdminToEstimateEditComponent implements OnInit {
   estimadorSeleccionadoId = signal<string>('');
 
   // ── Invitación a constructores ─────────────────────────────────────────────
-  constructores        = signal<PerfilContacto[]>([]);
+  constructores        = signal<PerfilInvitable[]>([]);
   invitadosIds         = signal<Set<string>>(new Set());
   seleccionInvitados   = signal<Set<string>>(new Set());
+  // Contraseña que el administrador escribe para cada constructor, si decide
+  // mandarle credenciales nuevas junto con la invitación.
+  passwordsInvitados   = signal<Record<string, string>>({});
   enviandoInvitacion   = signal(false);
+  abriendoATodos       = signal(false);
+  // Abrir a todos borra la lista de invitados: se confirma antes de hacerlo.
+  confirmarAbrirATodos = signal(false);
   exitoInvitacionMsg   = signal('');
+  exitoInvitacionArgs  = signal<Record<string, number>>({});
   errorInvitacionMsg   = signal('');
 
   urlsTour         = signal<string[]>([]);
@@ -161,7 +168,7 @@ export class AdminToEstimateEditComponent implements OnInit {
   private async cargarInvitaciones() {
     try {
       const [constructores, invitados] = await Promise.all([
-        this.perfilRepo.findActivosByRolesWithContact(['constructor']),
+        this.perfilRepo.findActivosByRolesInvitables(['constructor']),
         this.invitacionService.getConstructorIdsInvitados(this.expedienteId),
       ]);
       this.constructores.set(constructores);
@@ -177,8 +184,53 @@ export class AdminToEstimateEditComponent implements OnInit {
     return estado === 'estimado' || estado === 'en_oferta';
   }
 
+  /**
+   * Con ofertas ya en curso no se cambia quién ve el expediente: los
+   * constructores que están preparando su oferta no deben perder el acceso, ni
+   * entrar otros a mitad de la ronda.
+   */
+  get bloqueadoPorOferta(): boolean {
+    return this.detalle()?.estado === 'en_oferta';
+  }
+
   estaInvitado(id: string): boolean {
     return this.invitadosIds().has(id);
+  }
+
+  /** Pide confirmación antes de abrir el expediente a todos: borra invitados. */
+  pedirAbrirATodos() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(true);
+  }
+
+  cancelarAbrirATodos() {
+    this.confirmarAbrirATodos.set(false);
+  }
+
+  /**
+   * «Todos los Constructores»: retira las invitaciones por correo y el
+   * expediente vuelve a ser público — lo ve y puede ofertar cualquier
+   * constructor, no solo los invitados.
+   */
+  async abrirATodosLosConstructores() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(false);
+
+    this.abriendoATodos.set(true);
+    try {
+      await this.invitacionService.abrirATodosLosConstructores(this.expedienteId);
+      this.seleccionInvitados.set(new Set());
+      this.passwordsInvitados.set({});
+      await this.cargarInvitaciones();
+      this.exitoInvitacionArgs.set({});
+      this.exitoInvitacionMsg.set('admin_invite.all_builders_done');
+    } catch (e: any) {
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_all_builders'));
+    } finally {
+      this.abriendoATodos.set(false);
+    }
   }
 
   toggleSeleccionInvitado(id: string) {
@@ -187,49 +239,105 @@ export class AdminToEstimateEditComponent implements OnInit {
     this.seleccionInvitados.set(s);
   }
 
-  async enviarInvitaciones() {
+  passwordInvitado(id: string): string {
+    return this.passwordsInvitados()[id] ?? '';
+  }
+
+  setPasswordInvitado(id: string, valor: string) {
+    this.passwordsInvitados.update(prev => ({ ...prev, [id]: valor }));
+  }
+
+  /**
+   * Contraseñas a mandar, solo las escritas. Enviar una implica *fijarla*: la
+   * guardada está hasheada y no se puede leer. Las que se dejan vacías no tocan
+   * el acceso del constructor, que entra con la suya de siempre.
+   */
+  private clavesEscritas(ids: string[]): Record<string, string> {
+    const mapa = this.passwordsInvitados();
+    const out: Record<string, string> = {};
+    for (const id of ids) {
+      const clave = (mapa[id] ?? '').trim();
+      if (clave) out[id] = clave;
+    }
+    return out;
+  }
+
+  async enviarInvitaciones(): Promise<boolean> {
     this.errorInvitacionMsg.set('');
     this.exitoInvitacionMsg.set('');
 
     const ids = [...this.seleccionInvitados()];
     if (!ids.length) {
       this.errorInvitacionMsg.set('admin_invite.err_none');
-      return;
+      return false;
     }
 
     this.enviandoInvitacion.set(true);
     try {
-      await this.invitacionService.enviarInvitaciones(this.expedienteId, ids);
-      this.invitadosIds.update(prev => new Set([...prev, ...ids]));
+      const r = await this.invitacionService.enviarInvitaciones(
+        this.expedienteId, ids, this.clavesEscritas(ids),
+      );
+      // Los que fallaron no quedan invitados: la función revierte su registro.
+      const enviadosIds = r.fallidos
+        ? ids.filter(id => !r.errores.some(e => e.constructor_id === id))
+        : ids;
+      this.invitadosIds.update(prev => new Set([...prev, ...enviadosIds]));
       this.seleccionInvitados.set(new Set());
-      this.exitoInvitacionMsg.set('admin_invite.success');
+      this.passwordsInvitados.set({});
+      this.exitoInvitacionArgs.set({ ok: r.enviados, ko: r.fallidos });
+      this.exitoInvitacionMsg.set(r.fallidos ? 'admin_invite.success_partial' : 'admin_invite.success');
+      return true;
     } catch (e: any) {
       // La plantilla traduce el contenido de este signal: se guarda la clave.
       this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_send'));
+      return false;
     } finally {
       this.enviandoInvitacion.set(false);
     }
   }
 
-  async guardarEstimacion() {
+  /**
+   * «Enviar invitación»: manda el correo y además hace lo mismo que «Enviar
+   * estimación». La estimación se guarda primero para que el correo salga con
+   * los datos recién grabados (visita, problemas observados, estimador).
+   */
+  async enviarInvitacionYEstimacion() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+
+    if (!this.seleccionInvitados().size) {
+      this.errorInvitacionMsg.set('admin_invite.err_none');
+      return;
+    }
+    if (!(await this.guardarEstimacion())) {
+      // `guardarEstimacion` ya dejó el motivo en su propio aviso; aquí solo se
+      // señala que por eso no se envió ningún correo.
+      this.errorInvitacionMsg.set('admin_invite.err_estimation_first');
+      return;
+    }
+    await this.enviarInvitaciones();
+  }
+
+  /** Devuelve si la estimación quedó guardada: «Enviar invitación» lo encadena. */
+  async guardarEstimacion(): Promise<boolean> {
     this.errorGuardado.set('');
     this.exitoMsg.set('');
 
     if (!this.fechaVisita || !this.horaVisita) {
       this.errorGuardado.set('estimator_form.err_visit');
-      return;
+      return false;
     }
     if (!this.descripcionProblema.trim()) {
       this.errorGuardado.set('estimator_form.err_problems');
-      return;
+      return false;
     }
     if (!this.costoValido) {
       this.errorGuardado.set('estimator_form.err_cost');
-      return;
+      return false;
     }
 
     const estimadorId = this.estimadorSeleccionadoId();
-    if (!estimadorId) { this.errorGuardado.set('admin_estimate.err_estimador'); return; }
+    if (!estimadorId) { this.errorGuardado.set('admin_estimate.err_estimador'); return false; }
 
     this.guardando.set(true);
     try {
@@ -254,8 +362,10 @@ export class AdminToEstimateEditComponent implements OnInit {
       }
       this.hasDraft.set(true);
       this.exitoMsg.set('estimator_form.success_estimation');
+      return true;
     } catch (e: any) {
       this.errorGuardado.set(e.message);
+      return false;
     } finally {
       this.guardando.set(false);
     }
@@ -422,7 +532,7 @@ export class AdminToEstimateEditComponent implements OnInit {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};
@@ -436,8 +546,8 @@ export class AdminToEstimateEditComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
-    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CA';
     return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
 

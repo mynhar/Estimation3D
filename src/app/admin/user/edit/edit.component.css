@@ -144,6 +144,27 @@
 /* Contraparte de .req-star para los campos opcionales (sección Compañía). */
 .opt-label { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); font-weight: var(--ds-weight-regular); margin-left: var(--ds-space-1); }
 
+/* Subcabecera dentro de una sección (bloque Dirección): deliberadamente más
+   discreta que .form-section__header para no competir con «Datos personales». */
+.form-subhead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-2) 0 0;
+  padding-top: var(--ds-space-4);
+  border-top: 1px solid var(--ds-border);
+}
+.form-subhead__label {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.form-subhead__note {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
 /* ── Error alert ─────────────────────────────────────────── */
 .error-alert {
   display: flex;
@@ -204,4 +225,123 @@
 .form-check-input:checked {
   background-color: var(--ds-success);
   border-color: var(--ds-success);
+}
+
+/* ── Invitación por correo ───────────────────────────────── */
+/* Acción con consecuencia (reinicia la contraseña), no un campo más: se separa
+   de la rejilla con un panel propio sobre el fondo alterno. */
+.invite-block {
+  margin-top: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+}
+.invite-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+.invite-block__text { min-width: 0; flex: 1 1 20rem; }
+.invite-block__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.invite-block__hint,
+.invite-block__lang {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  line-height: 1.5;
+}
+.invite-block__lang { color: var(--ds-gold-active); font-weight: var(--ds-weight-semibold); }
+
+/* Confirmación en línea — no hay componente de diálogo en el proyecto. */
+.invite-confirm {
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-warning-soft);
+  border: 1px solid var(--ds-warning);
+  border-radius: var(--ds-radius-md);
+}
+.invite-confirm__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.invite-confirm__body {
+  margin: 0 0 var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink);
+  line-height: 1.6;
+}
+.invite-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  margin-top: var(--ds-space-3);
+}
+
+/* Resultado: la contraseña se muestra una sola vez, por si el correo no llega. */
+.invite-result {
+  margin-top: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-success-soft);
+  border: 1px solid var(--ds-success);
+  border-radius: var(--ds-radius-md);
+}
+.invite-result__ok {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.invite-result__label {
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+}
+.invite-result__password {
+  margin: var(--ds-space-1) 0 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.invite-result__note {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+.invite-result__warn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-3) 0 0;
+  padding-top: var(--ds-space-3);
+  border-top: 1px solid var(--ds-border);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+  line-height: 1.5;
 }

@@ -571,6 +571,19 @@ button.estd-kpi:focus-visible {
   transform: translateX(2px);
 }
 
+/* Acción de creación (alta de cliente): distinta de las de navegación que la
+   siguen, con el borde punteado que el sistema ya usa para «añadir». */
+.estd-action--create {
+  background: var(--ds-surface);
+  border-color: var(--ds-gold-soft);
+  border-style: dashed;
+}
+.estd-action--create:hover {
+  border-style: solid;
+  border-color: var(--ds-gold);
+  background: var(--ds-gold-faint);
+}
+
 .estd-action__icon {
   width: 32px; height: 32px;
   border-radius: var(--ds-radius-md);
@@ -585,6 +598,12 @@ button.estd-kpi:focus-visible {
   background: var(--ds-surface);
   color: var(--ds-gold-active);
   border: 1px solid var(--ds-border);
+}
+/* Va después de la regla anterior a propósito, y repite el `:not()` para igualar
+   su especificidad: con ambas empatadas, gana la última. */
+.estd-action--create:not(.estd-action--primary) .estd-action__icon {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold-soft);
 }
 
 .estd-action__text { flex: 1; min-width: 0; }

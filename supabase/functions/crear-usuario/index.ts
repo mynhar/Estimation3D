@@ -46,17 +46,21 @@ Deno.serve(async (req: Request) => {
     // 3. Leer y validar cuerpo
     const body = await req.json();
     const {
-      email, password, nombre, apellido, telefono, avatar_url, rol, activo,
+      email, password, nombre, apellido, telefono, avatar_url, rol, activo, idioma,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
+      direccion_unidad, direccion_calle, direccion_ciudad,
+      direccion_provincia, direccion_codigo_postal,
     } = body;
 
     if (!email || !password || !nombre || !apellido || !rol) {
       return fail('campos_requeridos', 'Campos requeridos: email, password, nombre, apellido, rol', 400);
     }
 
-    // El estimador solo puede crear clientes
-    if (callerRol === 'estimador' && rol !== 'cliente') {
-      return fail('estimador_solo_clientes', 'Acceso denegado: el estimador solo puede crear usuarios con rol cliente', 403);
+    // El estimador da de alta a los dos roles externos —cliente y constructor—,
+    // que son los que trata en su día a día. Los roles internos (estimador,
+    // administrador) siguen siendo cosa del administrador.
+    if (callerRol === 'estimador' && rol !== 'cliente' && rol !== 'constructor') {
+      return fail('estimador_rol_no_permitido', 'Acceso denegado: el estimador solo puede crear usuarios con rol cliente o constructor', 403);
     }
 
     const perfil_completo = !!(nombre && apellido && telefono && avatar_url);
@@ -82,6 +86,22 @@ Deno.serve(async (req: Request) => {
           compania_email:     null,
           compania_direccion: null,
         };
+
+    // Idioma del usuario: es en el que se le escribirá (enviar-credenciales lo
+    // lee de aquí). Quien no lo mande se queda con 'fr', el idioma por defecto
+    // de la aplicación y de la columna; el propio usuario lo cambia al elegir
+    // idioma en la aplicación.
+    const idiomaElegido = idioma === 'en' || idioma === 'es' || idioma === 'fr' ? idioma : 'fr';
+
+    // La dirección personal es opcional y aplica a todos los roles: se guarda
+    // tal cual, campo vacío = null.
+    const direccion = {
+      direccion_unidad:        limpiar(direccion_unidad),
+      direccion_calle:         limpiar(direccion_calle),
+      direccion_ciudad:        limpiar(direccion_ciudad),
+      direccion_provincia:     limpiar(direccion_provincia),
+      direccion_codigo_postal: limpiar(direccion_codigo_postal),
+    };
 
     // 4. Crear en auth.users
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -112,8 +132,10 @@ Deno.serve(async (req: Request) => {
       rol,
       proveedor:      'email',
       activo:         activo ?? true,
+      idioma:         idiomaElegido,
       perfil_completo,
       ...compania,
+      ...direccion,
     });
 
     if (upsertError) {

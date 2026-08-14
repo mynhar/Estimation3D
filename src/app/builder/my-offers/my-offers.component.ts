@@ -143,7 +143,7 @@ export class MyOffersComponent implements OnInit {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
   }
@@ -152,7 +152,7 @@ export class MyOffersComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
   }

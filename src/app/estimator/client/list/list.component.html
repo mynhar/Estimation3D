@@ -8,7 +8,7 @@
         {{ 'role.estimador' | translate }}
       </span>
       <div class="d-flex align-items-center gap-3 mt-1">
-        <h1 class="list-page-header__title">{{ 'nav.clientes' | translate }}</h1>
+        <h1 class="list-page-header__title">{{ 'nav.clientes_constructores' | translate }}</h1>
         @if (!cargando()) {
           <span class="kpi-pill">
             {{ clientesFiltrados().length }}
@@ -18,7 +18,7 @@
       </div>
     </div>
     <a routerLink="/estimator/client/create" class="btn btn-primary">
-      <i class="bi bi-person-plus me-1" aria-hidden="true"></i>{{ 'admin_users.create_client_btn' | translate }}
+      <i class="bi bi-person-plus me-1" aria-hidden="true"></i>{{ 'admin_users.create_external_btn' | translate }}
     </a>
   </div>
 
@@ -42,6 +42,7 @@
             <th><div class="skel skel--line skel--sm"></div></th>
             <th><div class="skel skel--line skel--md"></div></th>
             <th><div class="skel skel--line skel--sm"></div></th>
+            <th><div class="skel skel--line skel--sm"></div></th>
             <th class="text-center"><div class="skel skel--line skel--sm mx-auto" style="width:48px"></div></th>
             <th style="width:52px"></th>
           </tr></thead>
@@ -53,6 +54,7 @@
                 <td><div class="skel skel--line skel--md"></div></td>
                 <td><div class="skel skel--line skel--sm"></div></td>
                 <td><div class="skel skel--line skel--lg"></div></td>
+                <td><div class="skel skel--chip"></div></td>
                 <td><div class="skel skel--chip"></div></td>
                 <td class="text-center"><div class="skel skel--icon mx-auto"></div></td>
                 <td></td>
@@ -92,6 +94,19 @@
 
       <!-- Filter chips -->
       <div class="filter-row">
+
+        <div class="filter-group">
+          <span class="filter-label">{{ 'admin_users.role_filter' | translate }}</span>
+          <div class="filter-chips">
+            @for (r of rolesFiltro; track r) {
+              <button type="button" class="filter-chip"
+                      [class.filter-chip--active]="filtroRol() === r"
+                      (click)="filtroRol.set(r)">
+                {{ r === 'todos' ? ('common.all' | translate) : (('role.' + r) | translate) }}
+              </button>
+            }
+          </div>
+        </div>
 
         <div class="filter-group">
           <span class="filter-label">{{ 'admin_users.provider_filter' | translate }}</span>
@@ -162,6 +177,7 @@
                 <th>{{ 'admin_users.col_lastname' | translate }}</th>
                 <th>{{ 'admin_users.col_phone' | translate }}</th>
                 <th>{{ 'admin_users.col_email' | translate }}</th>
+                <th>{{ 'admin_users.col_role' | translate }}</th>
                 <th>{{ 'admin_users.col_provider' | translate }}</th>
                 <th class="text-center">{{ 'admin_users.col_active' | translate }}</th>
                 <th class="text-center" style="width:52px"></th>
@@ -170,7 +186,7 @@
             <tbody>
               @for (u of clientesPaginados(); track u.id) {
                 <tr class="row-clickable" tabindex="0" role="button"
-                    [attr.aria-label]="('admin_users.edit_client_title' | translate) + ': ' + u.nombre + ' ' + u.apellido"
+                    [attr.aria-label]="(tituloEditar(u.rol) | translate) + ': ' + u.nombre + ' ' + u.apellido"
                     (click)="irAEditar(u.id)"
                     (keydown.enter)="irAEditar(u.id)"
                     (keydown.space)="$event.preventDefault(); irAEditar(u.id)">
@@ -190,6 +206,9 @@
                   <td class="text-ink-muted">{{ u.telefono ?? '—' }}</td>
                   <td class="user-email">{{ u.email ?? '—' }}</td>
                   <td>
+                    <span [class]="rolBadgeClass(u.rol)">{{ ('role.' + u.rol) | translate }}</span>
+                  </td>
+                  <td>
                     <span class="provider-badge">
                       @if (u.proveedor === 'google') {
                         <i class="bi bi-google" aria-hidden="true"></i>
@@ -208,7 +227,7 @@
                   </td>
                   <td class="text-center">
                     <a [routerLink]="['/estimator/client/edit', u.id]"
-                       class="btn-icon-edit" [title]="'admin_users.edit_client_title' | translate"
+                       class="btn-icon-edit" [title]="tituloEditar(u.rol) | translate"
                        (click)="$event.stopPropagation()">
                       <i class="bi bi-pencil" aria-hidden="true"></i>
                     </a>
@@ -223,7 +242,7 @@
         <div class="client-cards d-lg-none">
           @for (u of clientesPaginados(); track u.id) {
             <a class="client-card" [routerLink]="['/estimator/client/edit', u.id]"
-               [attr.aria-label]="('admin_users.edit_client_title' | translate) + ': ' + u.nombre + ' ' + u.apellido">
+               [attr.aria-label]="(tituloEditar(u.rol) | translate) + ': ' + u.nombre + ' ' + u.apellido">
               <div class="client-card__avatar">
                 @if (u.avatar_url) {
                   <img [src]="u.avatar_url" [alt]="u.nombre"
@@ -235,6 +254,7 @@
               <div class="client-card__body">
                 <div class="client-card__top">
                   <span class="client-card__name">{{ u.nombre }} {{ u.apellido }}</span>
+                  <span [class]="rolBadgeClass(u.rol)">{{ ('role.' + u.rol) | translate }}</span>
                   @if (u.activo) {
                     <i class="bi bi-check-circle status-icon status-icon--active" aria-hidden="true"></i>
                   } @else {

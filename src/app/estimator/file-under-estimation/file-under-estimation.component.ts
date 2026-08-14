@@ -10,6 +10,9 @@ import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
 import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../models';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
+import { PerfilRepository, PerfilInvitable } from '../../data/perfil.repository';
+import { InvitacionService } from '../../services/invitacion.service';
+import { EdgeErrorService } from '../../services/edge-error.service';
 
 @Component({
   selector: 'app-file-under-estimation',
@@ -26,6 +29,9 @@ export class FileUnderEstimationComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
+  private perfilRepo        = inject(PerfilRepository);
+  private invitacionService = inject(InvitacionService);
+  private edgeErr           = inject(EdgeErrorService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -87,6 +93,18 @@ export class FileUnderEstimationComponent implements OnInit {
 
   hasDraft         = signal(false);
 
+  // ── Invitación a constructores ─────────────────────────────────────────────
+  constructores        = signal<PerfilInvitable[]>([]);
+  invitadosIds         = signal<Set<string>>(new Set());
+  seleccionInvitados   = signal<Set<string>>(new Set());
+  passwordsInvitados   = signal<Record<string, string>>({});
+  enviandoInvitacion   = signal(false);
+  abriendoATodos       = signal(false);
+  confirmarAbrirATodos = signal(false);
+  exitoInvitacionMsg   = signal('');
+  exitoInvitacionArgs  = signal<Record<string, number>>({});
+  errorInvitacionMsg   = signal('');
+
   // Tour multi-video
   urlsTour         = signal<string[]>([]);
   collapsedSet     = signal<Set<number>>(new Set());
@@ -145,27 +163,28 @@ export class FileUnderEstimationComponent implements OnInit {
     }
 
     this.cargarArchivos();
+    this.cargarInvitaciones();
   }
 
-  async guardarEstimacion() {
+  async guardarEstimacion(): Promise<boolean> {
     this.errorGuardado.set('');
     this.exitoMsg.set('');
 
     if (!this.fechaVisita || !this.horaVisita) {
       this.errorGuardado.set('estimator_form.err_visit');
-      return;
+      return false;
     }
     if (!this.descripcionProblema.trim()) {
       this.errorGuardado.set('estimator_form.err_problems');
-      return;
+      return false;
     }
     if (!this.costoValido) {
       this.errorGuardado.set('estimator_form.err_cost');
-      return;
+      return false;
     }
 
     const userId = this.user()?.id;
-    if (!userId) { this.errorGuardado.set('estimator_form.err_session'); return; }
+    if (!userId) { this.errorGuardado.set('estimator_form.err_session'); return false; }
 
     this.guardando.set(true);
     try {
@@ -186,12 +205,136 @@ export class FileUnderEstimationComponent implements OnInit {
       }
       this.hasDraft.set(true);
       this.exitoMsg.set('estimator_form.success_estimation');
+      return true;
     } catch (e: any) {
       console.error('[FileUnderEstimation] guardar:', e.message);
       this.errorGuardado.set(e.message);
+      return false;
     } finally {
       this.guardando.set(false);
     }
+  }
+
+  // ── Invitación a constructores ─────────────────────────────────────────────
+
+  /**
+   * Todos los constructores activos, más los que ya están invitados. Carga
+   * aparte del detalle: un fallo aquí no debe tumbar la página.
+   */
+  private async cargarInvitaciones() {
+    try {
+      const [constructores, invitados] = await Promise.all([
+        this.perfilRepo.findActivosByRolesInvitables(['constructor']),
+        this.invitacionService.getConstructorIdsInvitados(this.expedienteId),
+      ]);
+      this.constructores.set(constructores);
+      this.invitadosIds.set(invitados);
+    } catch (e: any) {
+      console.error('[FileUnderEstimation] invitaciones:', e.message);
+    }
+  }
+
+  /** Con oferta en curso ya no se toca la lista de invitados. */
+  get bloqueadoPorOferta(): boolean { return this.detalle()?.estado === 'en_oferta'; }
+
+  estaInvitado(id: string): boolean { return this.invitadosIds().has(id); }
+
+  pedirAbrirATodos() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(true);
+  }
+  cancelarAbrirATodos() { this.confirmarAbrirATodos.set(false); }
+
+  async abrirATodosLosConstructores() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    this.confirmarAbrirATodos.set(false);
+    this.abriendoATodos.set(true);
+    try {
+      await this.invitacionService.abrirATodosLosConstructores(this.expedienteId);
+      this.seleccionInvitados.set(new Set());
+      this.passwordsInvitados.set({});
+      await this.cargarInvitaciones();
+      this.exitoInvitacionArgs.set({});
+      this.exitoInvitacionMsg.set('admin_invite.all_builders_done');
+    } catch (e: any) {
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_all_builders'));
+    } finally {
+      this.abriendoATodos.set(false);
+    }
+  }
+
+  toggleSeleccionInvitado(id: string) {
+    const s = new Set(this.seleccionInvitados());
+    if (s.has(id)) s.delete(id); else s.add(id);
+    this.seleccionInvitados.set(s);
+  }
+
+  passwordInvitado(id: string): string { return this.passwordsInvitados()[id] ?? ''; }
+  setPasswordInvitado(id: string, valor: string) {
+    this.passwordsInvitados.update(prev => ({ ...prev, [id]: valor }));
+  }
+
+  /** Solo viajan las claves realmente escritas: una vacía no debe pisar la actual. */
+  private clavesEscritas(ids: string[]): Record<string, string> {
+    const mapa = this.passwordsInvitados();
+    const out: Record<string, string> = {};
+    for (const id of ids) {
+      const clave = (mapa[id] ?? '').trim();
+      if (clave) out[id] = clave;
+    }
+    return out;
+  }
+
+  async enviarInvitaciones(): Promise<boolean> {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+
+    const ids = [...this.seleccionInvitados()];
+    if (!ids.length) { this.errorInvitacionMsg.set('admin_invite.err_none'); return false; }
+
+    this.enviandoInvitacion.set(true);
+    try {
+      const r = await this.invitacionService.enviarInvitaciones(
+        this.expedienteId, ids, this.clavesEscritas(ids),
+      );
+      const enviadosIds = r.fallidos
+        ? ids.filter(id => !r.errores.some(e => e.constructor_id === id))
+        : ids;
+      this.invitadosIds.update(prev => new Set([...prev, ...enviadosIds]));
+      this.seleccionInvitados.set(new Set());
+      this.passwordsInvitados.set({});
+      this.exitoInvitacionArgs.set({ ok: r.enviados, ko: r.fallidos });
+      this.exitoInvitacionMsg.set(r.fallidos ? 'admin_invite.success_partial' : 'admin_invite.success');
+      return true;
+    } catch (e: any) {
+      this.errorInvitacionMsg.set(this.edgeErr.clave(e, 'admin_invite.err_send'));
+      return false;
+    } finally {
+      this.enviandoInvitacion.set(false);
+    }
+  }
+
+  /**
+   * «Enviar invitación-correo»: manda el correo y además hace lo mismo que
+   * «Enviar estimación». La estimación se guarda primero, por dos motivos: el
+   * correo sale con los datos recién grabados (visita, problemas observados) y
+   * es ese guardado el que pasa el expediente a `estimado`, único estado desde
+   * el que la función `enviar-invitacion` acepta invitar.
+   */
+  async enviarInvitacionYEstimacion() {
+    this.errorInvitacionMsg.set('');
+    this.exitoInvitacionMsg.set('');
+    if (!this.seleccionInvitados().size) {
+      this.errorInvitacionMsg.set('admin_invite.err_none');
+      return;
+    }
+    if (!(await this.guardarEstimacion())) {
+      this.errorInvitacionMsg.set('admin_invite.err_estimation_first');
+      return;
+    }
+    await this.enviarInvitaciones();
   }
 
   async guardarVisita() {
@@ -324,7 +467,7 @@ export class FileUnderEstimationComponent implements OnInit {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};
@@ -338,8 +481,8 @@ export class FileUnderEstimationComponent implements OnInit {
     if (!valor) return '—';
     const d = new Date(valor);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
-    const locale = localeMap[this.translate.currentLang] ?? 'es-CR';
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
+    const locale = localeMap[this.translate.currentLang] ?? 'es-CA';
     return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }
 

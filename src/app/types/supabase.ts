@@ -498,6 +498,7 @@ export type Database = {
           actualizado_en: string
           cliente_id: string
           creado_en: string
+          creado_por: string | null
           descripcion: string | null
           estado: Database["public"]["Enums"]["estado_expediente"]
           estimador_id: string | null
@@ -510,6 +511,7 @@ export type Database = {
           actualizado_en?: string
           cliente_id: string
           creado_en?: string
+          creado_por?: string | null
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_expediente"]
           estimador_id?: string | null
@@ -522,6 +524,7 @@ export type Database = {
           actualizado_en?: string
           cliente_id?: string
           creado_en?: string
+          creado_por?: string | null
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_expediente"]
           estimador_id?: string | null
@@ -534,6 +537,13 @@ export type Database = {
           {
             foreignKeyName: "expediente_cliente_id_fkey"
             columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_creado_por_fkey"
+            columns: ["creado_por"]
             isOneToOne: false
             referencedRelation: "perfil"
             referencedColumns: ["id"]
@@ -823,6 +833,12 @@ export type Database = {
           compania_email: string | null
           compania_nombre: string | null
           compania_telefono: string | null
+          direccion_unidad: string | null
+          direccion_calle: string | null
+          direccion_ciudad: string | null
+          direccion_provincia: string | null
+          direccion_codigo_postal: string | null
+          idioma: string
           avatar_url: string | null
           creado_en: string
           email: string | null
@@ -841,6 +857,12 @@ export type Database = {
           compania_email?: string | null
           compania_nombre?: string | null
           compania_telefono?: string | null
+          direccion_unidad?: string | null
+          direccion_calle?: string | null
+          direccion_ciudad?: string | null
+          direccion_provincia?: string | null
+          direccion_codigo_postal?: string | null
+          idioma?: string
           avatar_url?: string | null
           creado_en?: string
           email?: string | null
@@ -859,6 +881,12 @@ export type Database = {
           compania_email?: string | null
           compania_nombre?: string | null
           compania_telefono?: string | null
+          direccion_unidad?: string | null
+          direccion_calle?: string | null
+          direccion_ciudad?: string | null
+          direccion_provincia?: string | null
+          direccion_codigo_postal?: string | null
+          idioma?: string
           avatar_url?: string | null
           creado_en?: string
           email?: string | null
@@ -1127,6 +1155,7 @@ export type Database = {
           canton: string | null
           cliente_id: string | null
           creado_en: string | null
+          creado_por: string | null
           descripcion: string | null
           direccion: string | null
           distrito: string | null
@@ -1142,6 +1171,13 @@ export type Database = {
           {
             foreignKeyName: "expediente_cliente_id_fkey"
             columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_creado_por_fkey"
+            columns: ["creado_por"]
             isOneToOne: false
             referencedRelation: "perfil"
             referencedColumns: ["id"]

@@ -31,16 +31,25 @@ const CLAVE_POR_CODIGO: Record<string, string> = {
   campos_requeridos:       'edge_errors.campos_requeridos',
   error_interno:           'edge_errors.error_interno',
   // crear-usuario / actualizar-usuario
-  estimador_solo_clientes: 'edge_errors.estimador_solo_clientes',
+  estimador_rol_no_permitido: 'edge_errors.estimador_rol_no_permitido',
   email_duplicado:         'edge_errors.email_duplicado',
   auth_error:              'edge_errors.auth_error',
   perfil_error:            'edge_errors.perfil_error',
   // enviar-invitacion
   solo_admin:              'edge_errors.solo_admin',
   expediente_no_encontrado:'edge_errors.expediente_no_encontrado',
+  expediente_no_estimado:  'edge_errors.expediente_no_estimado',
   sin_correo:              'edge_errors.sin_correo',
   resend_no_configurado:   'edge_errors.resend_no_configurado',
   envio_fallido:           'edge_errors.envio_fallido',
+  // enviar-credenciales
+  usuario_no_encontrado:   'edge_errors.usuario_no_encontrado',
+  usuario_sin_correo:      'edge_errors.usuario_sin_correo',
+  proveedor_no_email:      'edge_errors.proveedor_no_email',
+  password_requerida:      'edge_errors.password_requerida',
+  password_corta:          'edge_errors.password_corta',
+  envio_credenciales_fallido: 'edge_errors.envio_credenciales_fallido',
+  password_no_aplicada:       'edge_errors.password_no_aplicada',
   // asistente-ia
   servicio_no_configurado: 'edge_errors.servicio_no_configurado',
   falta_expediente:        'edge_errors.falta_expediente',

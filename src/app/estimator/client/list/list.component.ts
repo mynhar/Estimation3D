@@ -2,10 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, s
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
-import { DbPerfil, ProveedorAuth } from '../../../types/supabase';
+import { DbPerfil, ProveedorAuth, RolUsuario } from '../../../types/supabase';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
+
+/** El estimador gestiona los dos roles externos; el resto no es asunto suyo. */
+type RolExterno = Extract<RolUsuario, 'cliente' | 'constructor'>;
 
 @Component({
   selector: 'app-estimator-client-list',
@@ -25,9 +28,11 @@ export class EstimatorClientListComponent implements OnInit {
   error    = signal<string | null>(null);
 
   busqueda        = signal('');
+  filtroRol       = signal<RolExterno | 'todos'>('todos');
   filtroProveedor = signal<ProveedorAuth | 'todos'>('todos');
   filtroActivo    = signal<FiltroActivo>('todos');
 
+  readonly rolesFiltro: Array<RolExterno | 'todos'>    = ['todos', 'cliente', 'constructor'];
   readonly proveedores: Array<ProveedorAuth | 'todos'> = ['todos', 'email', 'google'];
   readonly estadosActivo: FiltroActivo[]               = ['todos', 'activo', 'inactivo'];
 
@@ -36,11 +41,13 @@ export class EstimatorClientListComponent implements OnInit {
 
   clientesFiltrados = computed(() => {
     const q         = this.busqueda().toLowerCase().trim();
+    const rol       = this.filtroRol();
     const proveedor = this.filtroProveedor();
     const activo    = this.filtroActivo();
 
     return this._clientes().filter(u => {
       if (q && !`${u.nombre} ${u.apellido} ${u.email ?? ''}`.toLowerCase().includes(q)) return false;
+      if (rol !== 'todos' && u.rol !== rol) return false;
       if (proveedor !== 'todos' && u.proveedor !== proveedor) return false;
       if (activo === 'activo'   && !u.activo) return false;
       if (activo === 'inactivo' &&  u.activo) return false;
@@ -55,6 +62,7 @@ export class EstimatorClientListComponent implements OnInit {
 
   hayFiltros = computed(() =>
     this.busqueda() !== '' ||
+    this.filtroRol()       !== 'todos' ||
     this.filtroProveedor() !== 'todos' ||
     this.filtroActivo()    !== 'todos'
   );
@@ -64,6 +72,7 @@ export class EstimatorClientListComponent implements OnInit {
   constructor() {
     effect(() => {
       this.busqueda();
+      this.filtroRol();
       this.filtroProveedor();
       this.filtroActivo();
       this.paginaActual.set(1);
@@ -75,7 +84,7 @@ export class EstimatorClientListComponent implements OnInit {
       const { data, error } = await this.auth.client
         .from('perfil')
         .select('*')
-        .eq('rol', 'cliente')
+        .in('rol', ['cliente', 'constructor'])
         .order('creado_en', { ascending: false });
 
       if (error) throw error;
@@ -89,6 +98,7 @@ export class EstimatorClientListComponent implements OnInit {
 
   limpiarFiltros(): void {
     this.busqueda.set('');
+    this.filtroRol.set('todos');
     this.filtroProveedor.set('todos');
     this.filtroActivo.set('todos');
   }
@@ -103,7 +113,20 @@ export class EstimatorClientListComponent implements OnInit {
     return (n + a).toUpperCase() || '?';
   }
 
-  /** Navega a la edición del cliente (fila/tarjeta completa clicable). */
+  /** Clave i18n del título de edición, acorde al rol de la fila. */
+  tituloEditar(rol: RolUsuario): string {
+    return rol === 'constructor'
+      ? 'admin_users.edit_builder_title'
+      : 'admin_users.edit_client_title';
+  }
+
+  rolBadgeClass(rol: RolUsuario): string {
+    return rol === 'constructor'
+      ? 'role-badge role-badge--constructor'
+      : 'role-badge role-badge--cliente';
+  }
+
+  /** Navega a la edición del usuario (fila/tarjeta completa clicable). */
   irAEditar(id: string): void {
     this.router.navigate(['/estimator/client/edit', id]);
   }

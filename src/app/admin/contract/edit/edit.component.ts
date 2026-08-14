@@ -219,7 +219,7 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     this.generandoPdf.set(true);
     this.langPdf.set(lang);
     try {
-      const localeMap: Record<LangPdf, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+      const localeMap: Record<LangPdf, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
       const locale   = localeMap[lang];
       const fechaGen = c.generado_en
         ? new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -313,7 +313,7 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
   }

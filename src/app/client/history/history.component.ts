@@ -146,7 +146,7 @@ export class HistoryComponent implements OnInit {
   labelCategoria(cat: CategoriaEvento): string { return `history.cat_${cat}`; }
 
   private localeActual(): string {
-    const map: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const map: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     return map[this.translate.currentLang] ?? 'fr-CA';
   }
 

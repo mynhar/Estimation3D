@@ -100,8 +100,18 @@ export const routes: Routes = [
     canActivate: [estimatorGuard],
   },
   {
+    path: 'estimator/file/list',
+    loadComponent: () => import('./estimator/file/list/list.component').then(m => m.EstimatorFileListComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
     path: 'estimator/file/create',
     loadComponent: () => import('./estimator/file/create/create.component').then(m => m.EstimatorFileCreateComponent),
+    canActivate: [estimatorGuard],
+  },
+  {
+    path: 'estimator/file/edit/:id',
+    loadComponent: () => import('./estimator/file/edit/edit.component').then(m => m.EstimatorFileEditComponent),
     canActivate: [estimatorGuard],
   },
   {

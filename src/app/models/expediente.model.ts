@@ -109,6 +109,11 @@ export interface ExpedienteRow {
   distrito: string;
   /** Miniatura del tour 3D (Matterport), o null si el expediente no tiene tour. */
   foto: string | null;
+  /**
+   * Autor del alta (`expediente.creado_por`). Inmutable, a diferencia del
+   * estimador asignado. Null en los expedientes anteriores a la columna.
+   */
+  creado_por: string | null;
 }
 
 /** Vista de detalle de un expediente (join completo). */

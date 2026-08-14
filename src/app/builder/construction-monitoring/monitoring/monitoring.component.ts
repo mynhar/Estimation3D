@@ -634,7 +634,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     this.langPdf.set(lang);
     this.pdfVisible.set(true);
     try {
-      const localeMap: Record<LangPdf, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+      const localeMap: Record<LangPdf, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
       const locale  = localeMap[lang];
       const fechaGen = c.generado_en
         ? new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -917,7 +917,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   }
 
   private langLocale(): string {
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     return localeMap[this.currentLang() ?? this.translate.currentLang] ?? 'fr-CA';
   }
 

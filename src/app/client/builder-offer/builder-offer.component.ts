@@ -171,7 +171,7 @@ export class BuilderOfferComponent implements OnInit {
       // 5 — Generar PDF
       const lang = this.translate.currentLang ?? 'fr';
       const fechaGenerado = new Intl.DateTimeFormat(
-        lang === 'en' ? 'en-CA' : lang === 'fr' ? 'fr-CA' : 'es-CR',
+        lang === 'en' ? 'en-CA' : lang === 'fr' ? 'fr-CA' : 'es-CA',
         { day: 'numeric', month: 'long', year: 'numeric' },
       ).format(new Date());
 
@@ -368,7 +368,7 @@ export class BuilderOfferComponent implements OnInit {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};
@@ -382,7 +382,7 @@ export class BuilderOfferComponent implements OnInit {
     if (!valor || !valor.includes('T')) return '—';
     const d = new Date(valor);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   }

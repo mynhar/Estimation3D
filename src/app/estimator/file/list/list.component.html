@@ -1,0 +1,270 @@
+<div class="efl-root">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <header class="efl-header">
+    <div class="efl-header__content">
+      <p class="efl-header__eyebrow">
+        <i class="bi bi-folder2-open" aria-hidden="true"></i>
+        {{ 'role.estimateur' | translate }}
+      </p>
+      <h1 class="efl-header__title">{{ 'estimator_file_list.title' | translate }}</h1>
+      <p class="efl-header__sub">{{ 'estimator_file_list.subtitle' | translate }}</p>
+    </div>
+
+    <div class="efl-header__actions">
+      @if (!cargando() && expedientes().length > 0) {
+        <div class="efl-kpi">
+          <span class="efl-kpi__val">{{ expedientes().length }}</span>
+          <span class="efl-kpi__label">{{ 'estimator_file_list.count_total' | translate }}</span>
+        </div>
+      }
+      <a class="efl-btn-cta" routerLink="/estimator/file/create">
+        <i class="bi bi-plus-circle" aria-hidden="true"></i>
+        {{ 'estimator_file_list.new_file' | translate }}
+      </a>
+    </div>
+  </header>
+
+  <!-- ── Error de carga ───────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="efl-alert" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      {{ error() | translate }}
+    </div>
+  }
+
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="efl-loading">
+      <span class="efl-spinner" role="status" aria-hidden="true"></span>
+      {{ 'common.loading' | translate }}
+    </div>
+
+  <!-- ── Sin expedientes ──────────────────────────────────────────────────── -->
+  } @else if (expedientes().length === 0) {
+    <div class="efl-empty">
+      <div class="efl-empty__icon"><i class="bi bi-folder2-open" aria-hidden="true"></i></div>
+      <p class="efl-empty__title">{{ 'estimator_file_list.empty_title' | translate }}</p>
+      <p class="efl-empty__text">{{ 'estimator_file_list.empty_text' | translate }}</p>
+      <a class="efl-btn-cta" routerLink="/estimator/file/create">
+        <i class="bi bi-plus-circle" aria-hidden="true"></i>
+        {{ 'estimator_file_list.new_file' | translate }}
+      </a>
+    </div>
+
+  <!-- ── Con expedientes ──────────────────────────────────────────────────── -->
+  } @else {
+
+    <!-- Grupos: creados · en estimación · estimados -->
+    <nav class="efl-groups" [attr.aria-label]="'estimator_file_list.groups_label' | translate">
+      @for (g of GRUPOS; track g.key) {
+        <button type="button" class="efl-group"
+                [class.efl-group--active]="grupo() === g.key"
+                [attr.aria-pressed]="grupo() === g.key"
+                (click)="setGrupo(g.key)">
+          <i class="bi {{ g.icon }} efl-group__icon" aria-hidden="true"></i>
+          <span class="efl-group__label">{{ g.label | translate }}</span>
+          <span class="efl-group__count">{{ conteos()[g.key] }}</span>
+        </button>
+      }
+    </nav>
+
+    <!-- Toolbar -->
+    <div class="efl-toolbar">
+      <div class="efl-search">
+        <i class="bi bi-search efl-search__icon" aria-hidden="true"></i>
+        <input type="text" class="efl-search__input"
+               [placeholder]="'estimator_file_list.search_placeholder' | translate"
+               [attr.aria-label]="'estimator_file_list.search_placeholder' | translate"
+               [ngModel]="busqueda()"
+               (ngModelChange)="busqueda.set($event)" />
+      </div>
+
+      @if (hayFiltros()) {
+        <button type="button" class="efl-clear" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle" aria-hidden="true"></i>
+          {{ 'common.clear' | translate }}
+        </button>
+      }
+
+      <div class="efl-view-toggle d-none d-md-inline-flex ms-auto" role="group"
+           [attr.aria-label]="'common.view_cards' | translate">
+        <button type="button" class="efl-view-toggle__btn"
+                [class.efl-view-toggle__btn--active]="vista() === 'tabla'"
+                [attr.aria-pressed]="vista() === 'tabla'"
+                (click)="setVista('tabla')"
+                [title]="'common.view_table' | translate">
+          <i class="bi bi-table" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="efl-view-toggle__btn"
+                [class.efl-view-toggle__btn--active]="vista() === 'tarjetas'"
+                [attr.aria-pressed]="vista() === 'tarjetas'"
+                (click)="setVista('tarjetas')"
+                [title]="'common.view_cards' | translate">
+          <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de resultados -->
+    @if (hayFiltros()) {
+      <p class="efl-results-bar">
+        {{ 'common.showing' | translate }}
+        <strong>{{ expedientesFiltrados().length }}</strong>
+        {{ 'common.of' | translate }} {{ expedientes().length }}
+        {{ 'files_to_estimate.files_count' | translate }}
+      </p>
+    }
+
+    <!-- Sin resultados con filtro -->
+    @if (expedientesFiltrados().length === 0) {
+      <div class="efl-empty-inline">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <p class="efl-empty-inline__title">{{ 'common.no_results' | translate }}</p>
+        <p class="efl-empty-inline__text">{{ 'estimator_file_list.no_filter_text' | translate }}</p>
+        <button type="button" class="efl-btn-outline" (click)="limpiarFiltros()">
+          <i class="bi bi-x-circle" aria-hidden="true"></i>
+          {{ 'common.clear_filters' | translate }}
+        </button>
+      </div>
+
+    } @else {
+
+      <!-- ── Vista tabla (escritorio) ───────────────────────────────────────── -->
+      <div class="efl-table-card d-none" [class.d-md-block]="vista() === 'tabla'">
+        <table class="efl-table">
+          <thead>
+            <tr>
+              <th class="efl-table__col-photo" aria-hidden="true"></th>
+              <th class="efl-table__col-num">{{ 'files_to_estimate.col_number' | translate }}</th>
+              <th>{{ 'files_to_estimate.col_service' | translate }}</th>
+              <th>{{ 'files_to_estimate.col_client' | translate }}</th>
+              <th>{{ 'files_to_estimate.col_location' | translate }}</th>
+              <th class="efl-table__col-date">{{ 'files_to_estimate.col_visit' | translate }}</th>
+              <th class="efl-table__col-state">{{ 'estimator_file_list.col_state' | translate }}</th>
+              <th class="efl-table__col-action"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (exp of expedientesFiltrados(); track exp.id) {
+              <tr class="efl-table__row" (click)="editar(exp.id)">
+                <td class="efl-table__col-photo">
+                  <div class="efl-thumb">
+                    @if (fotoExpediente(exp); as foto) {
+                      <img [src]="foto" loading="lazy" [alt]="exp.numero"
+                           (error)="onFotoError(exp.id)" />
+                    } @else {
+                      <i class="bi bi-badge-3d" aria-hidden="true"
+                         [title]="'files_to_estimate.photo_none' | translate"></i>
+                    }
+                  </div>
+                </td>
+
+                <td class="efl-table__col-num">
+                  <span class="efl-num">{{ exp.numero }}</span>
+                </td>
+
+                <td><span class="efl-table__service">{{ servicioNombre(exp) }}</span></td>
+
+                <td>{{ exp.cliente_nombre }}</td>
+
+                <td class="efl-table__addr" [title]="direccionCompleta(exp)">
+                  @if (direccionLinea1(exp)) {
+                    <span class="efl-table__addr-line">{{ direccionLinea1(exp) }}</span>
+                  }
+                  @if (direccionLinea2(exp)) {
+                    <span class="efl-table__addr-line efl-table__muted">{{ direccionLinea2(exp) }}</span>
+                  }
+                </td>
+
+                <td class="efl-table__col-date">{{ formatFecha(exp.fecha_visita) }}</td>
+
+                <td class="efl-table__col-state">
+                  <span class="efl-state efl-state--{{ estadoTono(exp.estado) }}">
+                    {{ estadoLabel(exp.estado) | translate }}
+                  </span>
+                </td>
+
+                <td class="efl-table__col-action" (click)="$event.stopPropagation()">
+                  <button type="button" class="efl-btn-row" (click)="editar(exp.id)">
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                    {{ 'estimator_file_list.edit_file' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Vista tarjetas (móvil siempre · escritorio por defecto) ────────── -->
+      <div class="efl-grid" [class.d-md-none]="vista() === 'tabla'">
+        @for (exp of expedientesFiltrados(); track exp.id) {
+          <article class="efl-card" role="button" tabindex="0"
+                   (click)="editar(exp.id)"
+                   (keydown.enter)="editar(exp.id)"
+                   (keydown.space)="$event.preventDefault(); editar(exp.id)">
+
+            <!-- Miniatura del tour 3D -->
+            <div class="efl-card__photo">
+              @if (fotoExpediente(exp); as foto) {
+                <img class="efl-card__photo-img" [src]="foto" loading="lazy"
+                     [alt]="exp.numero" (error)="onFotoError(exp.id)" />
+              } @else {
+                <div class="efl-card__photo-empty"
+                     [title]="'files_to_estimate.photo_none' | translate">
+                  <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                </div>
+              }
+            </div>
+
+            <div class="efl-card__head">
+              <span class="efl-num">{{ exp.numero }}</span>
+              <span class="efl-state efl-state--{{ estadoTono(exp.estado) }}">
+                {{ estadoLabel(exp.estado) | translate }}
+              </span>
+            </div>
+
+            <h2 class="efl-card__service">{{ servicioNombre(exp) }}</h2>
+
+            <div class="efl-card__meta">
+              <span class="efl-meta-item">
+                <i class="bi bi-person" aria-hidden="true"></i>{{ exp.cliente_nombre }}
+              </span>
+              @if (direccionLinea1(exp) || direccionLinea2(exp)) {
+                <span class="efl-meta-item efl-addr" [title]="direccionCompleta(exp)">
+                  <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                  <span class="efl-addr__text">
+                    @if (direccionLinea1(exp)) {
+                      <span class="efl-addr__line">{{ direccionLinea1(exp) }}</span>
+                    }
+                    @if (direccionLinea2(exp)) {
+                      <span class="efl-addr__line efl-addr__line--muted">{{ direccionLinea2(exp) }}</span>
+                    }
+                  </span>
+                </span>
+              }
+            </div>
+
+            <div class="efl-card__fecha">
+              <i class="bi bi-calendar3" aria-hidden="true"></i>
+              {{ 'files_to_estimate.visit_label' | translate }}
+              <strong>{{ formatFecha(exp.fecha_visita) }}</strong>
+            </div>
+
+            <button type="button" class="efl-btn-row efl-btn-row--block"
+                    (click)="$event.stopPropagation(); editar(exp.id)"
+                    (keydown.enter)="$event.stopPropagation()"
+                    (keydown.space)="$event.stopPropagation()">
+              <i class="bi bi-pencil-square" aria-hidden="true"></i>
+              {{ 'estimator_file_list.edit_file' | translate }}
+            </button>
+
+          </article>
+        }
+      </div>
+    }
+
+  }
+
+</div>

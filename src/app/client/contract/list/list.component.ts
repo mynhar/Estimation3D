@@ -160,7 +160,7 @@ export class ContractListComponent implements OnInit {
 
   private generarBlob(c: ContratoListItem): Blob {
     const lang = this.translate.currentLang ?? 'fr';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-CA', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-CA', fr: 'fr-CA' };
     const fechaGenerado = new Intl.DateTimeFormat(
       localeMap[lang] ?? 'fr-CA',
       { day: 'numeric', month: 'long', year: 'numeric' },
@@ -278,7 +278,7 @@ export class ContractListComponent implements OnInit {
     const raw = valor.includes('T') ? valor.split('T')[0] : valor;
     const d   = new Date(`${raw}T00:00:00`);
     if (isNaN(d.getTime())) return '—';
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     const locale = localeMap[this.translate.currentLang] ?? 'fr-CA';
     const parts  = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(d);
     const p: Record<string, string> = {};

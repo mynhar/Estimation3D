@@ -11,6 +11,8 @@ export type ExpedienteRaw = {
   descripcion:  string | null;
   cliente_id:   string;
   estimador_id: string | null;
+  /** Autor del alta. Inmutable, a diferencia de `estimador_id`. Null en los expedientes anteriores a la columna. */
+  creado_por:   string | null;
   servicio_id:  number;
 };
 
@@ -58,7 +60,7 @@ export class ExpedienteRepository {
   async findByClienteId(clienteId: string): Promise<ExpedienteRaw[]> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id')
+      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, creado_por, servicio_id')
       .eq('cliente_id', clienteId)
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
@@ -95,7 +97,7 @@ export class ExpedienteRepository {
   async findById(id: string): Promise<ExpedienteRaw> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id')
+      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, creado_por, servicio_id')
       .eq('id', id)
       .single();
     if (error) throw new Error(error.message);
@@ -105,7 +107,7 @@ export class ExpedienteRepository {
   async findAll(): Promise<ExpedienteRaw[]> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id')
+      .select('id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, creado_por, servicio_id')
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as ExpedienteRaw[];
@@ -125,7 +127,7 @@ export class ExpedienteRepository {
     let query = this.db
       .from('expediente_busqueda')
       .select(
-        'id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, servicio_id, direccion, provincia, canton, distrito',
+        'id, numero, estado, fecha_visita, creado_en, descripcion, cliente_id, estimador_id, creado_por, servicio_id, direccion, provincia, canton, distrito',
         { count: 'exact' },
       )
       .order('creado_en', { ascending: false })
@@ -154,7 +156,7 @@ export class ExpedienteRepository {
   }): Promise<ExpedienteRaw[]> {
     let query = this.db
       .from('expediente')
-      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, servicio_id, creado_en')
+      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, creado_por, servicio_id, creado_en')
       .order('creado_en', { ascending: false });
     if (options.estado)      query = query.eq('estado', options.estado);
     if (options.estados)     query = query.in('estado', options.estados);
@@ -165,11 +167,14 @@ export class ExpedienteRepository {
   }
 
   /**
-   * Expedientes de un estimador por las dos vías que lo vinculan:
-   * `expediente.estimador_id` (asignación actual, que se reescribe al reasignar)
-   * y `estimacion.estimador_id` (autoría de la estimación, que es estable).
-   * Mismo criterio que `fn_estimador_de_expediente` en la base y que
-   * `ContratoRepository.findByEstimadorId`.
+   * Expedientes de un estimador por las tres vías que lo vinculan:
+   * `expediente.creado_por`   (autoría del alta, inmutable),
+   * `expediente.estimador_id` (asignación actual, que se reescribe al reasignar) y
+   * `estimacion.estimador_id` (autoría de la estimación, que es estable).
+   * Las dos últimas son el criterio de `fn_estimador_de_expediente` en la base y
+   * de `ContratoRepository.findByEstimadorId`; `creado_por` se añade aquí porque
+   * un expediente que el estimador dio de alta debe seguir en su lista aunque
+   * otro lo tome (`asignarEstimador`) o lo libere (`liberar`).
    */
   async findDeEstimador(estimadorId: string): Promise<ExpedienteRaw[]> {
     const { data: estimadas, error: errEst } = await this.db
@@ -181,12 +186,12 @@ export class ExpedienteRepository {
     const ids = [...new Set((estimadas ?? []).map(r => (r as { expediente_id: string }).expediente_id))];
 
     const filtro = ids.length
-      ? `estimador_id.eq.${estimadorId},id.in.(${ids.join(',')})`
-      : `estimador_id.eq.${estimadorId}`;
+      ? `estimador_id.eq.${estimadorId},creado_por.eq.${estimadorId},id.in.(${ids.join(',')})`
+      : `estimador_id.eq.${estimadorId},creado_por.eq.${estimadorId}`;
 
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, servicio_id, creado_en')
+      .select('id, numero, fecha_visita, estado, cliente_id, estimador_id, creado_por, servicio_id, creado_en')
       .or(filtro)
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
@@ -196,7 +201,7 @@ export class ExpedienteRepository {
   async findDisponibles(): Promise<ExpedienteRaw[]> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, servicio_id, cliente_id, estimador_id, fecha_visita, creado_en, descripcion')
+      .select('id, numero, estado, servicio_id, cliente_id, estimador_id, creado_por, fecha_visita, creado_en, descripcion')
       .in('estado', ['estimado', 'en_oferta'])
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
@@ -206,7 +211,7 @@ export class ExpedienteRepository {
   async findForEdicion(id: string): Promise<ExpedienteRaw & { tipo_inmueble?: string } | null> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, servicio_id, cliente_id, fecha_visita, descripcion, estimador_id, creado_en')
+      .select('id, numero, estado, servicio_id, cliente_id, fecha_visita, descripcion, estimador_id, creado_por, creado_en')
       .eq('id', id)
       .single();
     if (error) throw new Error(error.message);
@@ -241,6 +246,18 @@ export class ExpedienteRepository {
     estado:       EstadoExpediente;
     fecha_visita: string;
     descripcion:  string | null;
+    /**
+     * Estimador asignado desde el alta. Es un campo de asignación: se reescribe
+     * al reasignar el expediente y se vacía al liberarlo. Para saber quién lo
+     * creó está `creado_por`.
+     */
+    estimador_id?: string | null;
+    /**
+     * Autor del alta. La base lo sella igualmente por defecto (`auth.uid()`) y
+     * lo protege con un trigger de inmutabilidad, así que enviarlo es explícito,
+     * no obligatorio; la RLS sólo acepta el propio usuario.
+     */
+    creado_por?: string | null;
   }): Promise<string> {
     const { data, error } = await this.db
       .from('expediente')
@@ -282,6 +299,20 @@ export class ExpedienteRepository {
     const { error } = await this.db
       .from('expediente')
       .update({ estado: 'en_estimacion' as EstadoExpediente, estimador_id: estimadorId })
+      .eq('id', expedienteId);
+    if (error) throw new Error(error.message);
+  }
+
+  /**
+   * Reasigna el estimador sin tocar el estado. `asignarEstimador` fija
+   * 'en_estimacion', lo que haría *retroceder* a un expediente ya estimado, en
+   * oferta o adjudicado; desde admin/file/edit el informe se reedita en
+   * cualquier estado, así que allí se usa esta versión.
+   */
+  async reasignarEstimador(expedienteId: string, estimadorId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente')
+      .update({ estimador_id: estimadorId })
       .eq('id', expedienteId);
     if (error) throw new Error(error.message);
   }

@@ -392,8 +392,8 @@ problème de votre bien. L'écran est divisé en quatre étapes : `"Service"`,
    quelle surface est touchée.
 6. Descendez à l'étape `"Localisation"`. Cliquez sur le `"Type de bien"` qui
    convient : `"Maison"`, `"Appt."`, `"Immeuble"`, `"Commercial"` ou `"Autre"`.
-7. Dans `"Pays du bien"`, laissez `"Canada"` ou choisissez `"Costa Rica"`. Les
-   champs d'adresse changent selon votre choix.
+7. Le `"Pays du bien"` est toujours `"Canada"` : il s'affiche comme mention fixe
+   et ne peut pas être modifié.
 8. Remplissez l'adresse complète.
 9. Si vous voulez ajouter les coordonnées, cliquez sur `"Utiliser ma position"`
    et acceptez l'autorisation demandée par le navigateur.
@@ -409,19 +409,15 @@ problème de votre bien. L'écran est divisé en quatre étapes : `"Service"`,
 | `"Téléphone"` | Oui | Votre numéro de contact. | `+1 514 555 0134` |
 | `"Courriel"` | — | Ne peut pas être modifié ici. | — |
 | `"Date souhaitée"` | Oui | Le jour où vous pouvez recevoir l'estimateur. | `2026-09-03` |
-| `"Heure préférée"` | Oui | L'heure approximative. Le service est offert du lundi au vendredi, de 7 h à 16 h. | `10:00` |
+| `"Heure préférée"` | Oui | L'heure approximative. Le service est offert du lundi au vendredi, de 8 h à 16 h. | `10:00` |
 | `"Description du problème"` | Non | Type de dommage, depuis combien de temps et surface touchée. | `Tache d'humidité au sous-sol depuis trois mois, environ 4 m².` |
 | `"Type de bien"` | Oui | Cliquez sur l'une des cinq options. | `Maison` |
-| `"Pays du bien"` | Oui | `"Canada"` ou `"Costa Rica"`. `"Canada"` est coché par défaut. | `Canada` |
-| `"Numéro d'unité"` (Canada) | Non | Le numéro d'appartement ou de local, s'il y a lieu. | `5` |
-| `"Numéro et nom de rue"` (Canada) | Oui | Numéro et rue. | `123 rue Principale` |
-| `"Ville"` (Canada) | Oui | La ville. | `Montréal` |
-| `"Province / Territoire"` (Canada) | Oui | Choisissez dans la liste. `QC` est coché par défaut. | `QC` |
-| `"Code Postal"` (Canada) | Oui | Six caractères alternant lettre et chiffre. | `H2X 1Y4` |
-| `"Adresse complète"` (Costa Rica) | Oui | L'adresse avec ses repères. | `Av. Central, 200 m au nord du parc` |
-| `"Province"` (Costa Rica) | Oui | Choisissez dans la liste. | `San José` |
-| `"Canton"` (Costa Rica) | Oui | Choisissez dans la liste. | `Escazú` |
-| `"District"` (Costa Rica) | Oui | Choisissez dans la liste. | `San Rafael` |
+| `"Pays du bien"` | — | Mention fixe : toujours `"Canada"`. | `Canada` |
+| `"Numéro d'unité"` | Non | Le numéro d'appartement ou de local, s'il y a lieu. | `5` |
+| `"Numéro et nom de rue"` | Oui | Numéro et rue. | `123 rue Principale` |
+| `"Ville"` | Oui | La ville. | `Montréal` |
+| `"Province / Territoire"` | Oui | Choisissez dans la liste. `QC` est coché par défaut. | `QC` |
+| `"Code Postal"` | Oui | Six caractères alternant lettre et chiffre. | `H2X 1Y4` |
 | `"Latitude"` / `"Longitude"` | Non | Se remplissent seules avec `"Utiliser ma position"`, ou collez-les depuis une carte. | `45.5019` / `-73.5674` |
 
 > **Attention**

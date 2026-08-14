@@ -386,8 +386,8 @@ el problema de su inmueble. La pantalla está dividida en cuatro pasos:
    superficie está afectada.
 6. Baje al paso `"Ubicación"`. Haga clic en el `"Tipo de inmueble"` que
    corresponda: `"Casa"`, `"Apto."`, `"Edificio"`, `"Comercial"` u `"Otro"`.
-7. En `"País del inmueble"`, deje `"Canadá"` o elija `"Costa Rica"`. Los campos
-   de dirección cambian según lo que elija.
+7. El `"País del inmueble"` es siempre `"Canadá"`: aparece como indicación fija
+   y no se puede cambiar.
 8. Llene la dirección completa.
 9. Si quiere añadir las coordenadas, haga clic en `"Usar mi ubicación"` y
    acepte el permiso que pide el navegador.
@@ -403,19 +403,15 @@ el problema de su inmueble. La pantalla está dividida en cuatro pasos:
 | `"Teléfono"` | Sí | Su número de contacto. | `+1 514 555 0134` |
 | `"Correo electrónico"` | — | No se puede modificar aquí. | — |
 | `"Fecha deseada"` | Sí | El día en que puede recibir al estimador. | `2026-09-03` |
-| `"Hora preferida"` | Sí | La hora aproximada. Se atiende de lunes a viernes, de 7:00 a. m. a 4:00 p. m. | `10:00` |
+| `"Hora preferida"` | Sí | La hora aproximada. Se atiende de lunes a viernes, de 8:00 a. m. a 4:00 p. m. | `10:00` |
 | `"Descripción del problema"` | No | Tipo de daño, tiempo que lleva y área afectada. | `Mancha de humedad en el sótano desde hace tres meses, unos 4 m².` |
 | `"Tipo de inmueble"` | Sí | Haga clic en una de las cinco opciones. | `Casa` |
-| `"País del inmueble"` | Sí | `"Canadá"` o `"Costa Rica"`. Viene marcado `"Canadá"`. | `Canadá` |
-| `"Número de unidad"` (Canadá) | No | El número de apartamento o local, si aplica. | `5` |
-| `"Número y nombre de calle"` (Canadá) | Sí | Número y calle. | `123 Main Street` |
-| `"Ciudad"` (Canadá) | Sí | La ciudad. | `Montréal` |
-| `"Provincia / Territorio"` (Canadá) | Sí | Elija de la lista. Viene marcada `QC`. | `QC` |
-| `"Código Postal"` (Canadá) | Sí | Seis caracteres alternando letra y número. | `H2X 1Y4` |
-| `"Dirección completa"` (Costa Rica) | Sí | La dirección con sus señas. | `Av. Central, 200 m norte del parque` |
-| `"Provincia"` (Costa Rica) | Sí | Elija de la lista. | `San José` |
-| `"Cantón"` (Costa Rica) | Sí | Elija de la lista. | `Escazú` |
-| `"Distrito"` (Costa Rica) | Sí | Elija de la lista. | `San Rafael` |
+| `"País del inmueble"` | — | Indicación fija: siempre `"Canadá"`. | `Canadá` |
+| `"Número de unidad"` | No | El número de apartamento o local, si aplica. | `5` |
+| `"Número y nombre de calle"` | Sí | Número y calle. | `123 Main Street` |
+| `"Ciudad"` | Sí | La ciudad. | `Montréal` |
+| `"Provincia / Territorio"` | Sí | Elija de la lista. Viene marcada `QC`. | `QC` |
+| `"Código Postal"` | Sí | Seis caracteres alternando letra y número. | `H2X 1Y4` |
 | `"Latitud"` / `"Longitud"` | No | Se llenan solas con `"Usar mi ubicación"`, o péguelas desde un mapa. | `45.5019` / `-73.5674` |
 
 > **Atención**

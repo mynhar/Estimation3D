@@ -1,9 +1,19 @@
 // Envía por correo la invitación de un expediente a constructores
 // seleccionados y registra las invitaciones en expediente_invitacion.
-// Solo el administrador puede invocarla. El correo se envía vía Resend
+// La invocan el administrador y el estimador (que invita desde el expediente
+// que acaba de estimar). El correo se envía vía Resend
 // (secreto RESEND_API_KEY); el remitente es INVITACION_FROM_EMAIL o el
-// valor por defecto emiliopastora@hygienaction.com (el dominio debe estar
+// valor por defecto emiliopastora@estimation3d.com (el dominio debe estar
 // verificado en Resend).
+//
+// Se manda UN correo por constructor, redactado en su `perfil.idioma`
+// (fr | en | es), con sus datos de acceso y la ficha del expediente.
+//
+// La contraseña guardada no se puede leer (está hasheada en auth.users). Si
+// quien invita escribe una en `passwords[constructor_id]`, esta función la
+// *fija* — nunca genera una temporal, igual que `enviar-credenciales` — y solo
+// después de que Resend confirme el envío. Si no la escribe, el correo no lleva
+// contraseña y el constructor entra con la suya de siempre.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -13,10 +23,12 @@ const corsHeaders = {
 };
 
 const APP_URL    = 'https://estimation3d.vercel.app/';
-const FROM_EMAIL = Deno.env.get('INVITACION_FROM_EMAIL') ?? 'emiliopastora@hygienaction.com';
+const FROM_EMAIL = Deno.env.get('INVITACION_FROM_EMAIL') ?? 'emiliopastora@estimation3d.com';
 // Mientras el dominio del remitente no esté verificado en Resend, se reintenta
 // con el remitente de pruebas de Resend (solo entrega al dueño de la cuenta).
 const FALLBACK_FROM = 'onboarding@resend.dev';
+
+type Idioma = 'fr' | 'en' | 'es';
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -36,7 +48,7 @@ Deno.serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // 1. Verificar el JWT y el rol administrador
+    // 1. Verificar el JWT y el rol (administrador o estimador)
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await adminClient.auth.getUser(token);
     if (userError || !user) {
@@ -45,28 +57,34 @@ Deno.serve(async (req: Request) => {
 
     const { data: perfil } = await adminClient
       .from('perfil').select('rol').eq('id', user.id).single();
-    if (perfil?.rol !== 'administrador') {
-      return fail('solo_admin', 'Acceso denegado: se requiere rol administrador', 403);
+    if (perfil?.rol !== 'administrador' && perfil?.rol !== 'estimador') {
+      return fail('rol_no_permitido', 'Acceso denegado: se requiere rol administrador o estimador', 403);
     }
 
     // 2. Cuerpo
-    const { expediente_id, constructor_ids } = await req.json();
+    const { expediente_id, constructor_ids, passwords } = await req.json();
     if (!expediente_id || !Array.isArray(constructor_ids) || constructor_ids.length === 0) {
       return fail('campos_requeridos', 'Campos requeridos: expediente_id, constructor_ids[]', 400);
     }
+    const claves: Record<string, string> =
+      passwords && typeof passwords === 'object' ? passwords : {};
 
     // 3. Datos del expediente
     const { data: exp, error: expError } = await adminClient
       .from('expediente')
-      .select('id, numero, fecha_visita, cliente_id, estimador_id, servicio_id')
+      .select('id, numero, estado, fecha_visita, descripcion, cliente_id, estimador_id, servicio_id')
       .eq('id', expediente_id)
       .single();
     if (expError || !exp) {
       return fail('expediente_no_encontrado', 'Expediente no encontrado', 404);
     }
+    // Solo se invita a ofertar sobre un servicio ya estimado.
+    if (!ESTADOS_INVITABLES.includes(exp.estado)) {
+      return fail('expediente_no_estimado', 'El expediente debe estar estimado antes de invitar constructores', 400);
+    }
 
     const [servicioRes, clienteRes, locRes, estimacionRes] = await Promise.all([
-      adminClient.from('servicio').select('nombre_es').eq('id', exp.servicio_id).single(),
+      adminClient.from('servicio').select('nombre_es, nombre_fr, nombre_en').eq('id', exp.servicio_id).single(),
       adminClient.from('perfil').select('nombre, apellido, telefono').eq('id', exp.cliente_id).single(),
       adminClient.from('localizacion').select('direccion, provincia, canton, distrito').eq('expediente_id', exp.id).maybeSingle(),
       adminClient.from('estimacion').select('fecha_visita_real, descripcion_problemas').eq('expediente_id', exp.id).maybeSingle(),
@@ -82,7 +100,7 @@ Deno.serve(async (req: Request) => {
     // 4. Constructores destino (solo rol constructor con correo)
     const { data: constructores, error: consError } = await adminClient
       .from('perfil')
-      .select('id, nombre, apellido, email')
+      .select('id, nombre, apellido, email, idioma, proveedor')
       .in('id', constructor_ids)
       .eq('rol', 'constructor');
     if (consError) return fail('error_interno', consError.message, 500, consError.message);
@@ -92,7 +110,21 @@ Deno.serve(async (req: Request) => {
       return fail('sin_correo', 'Ninguno de los constructores seleccionados tiene correo registrado', 400);
     }
 
-    // 5. Registrar invitaciones nuevas (se revierten si el correo falla)
+    // 5. Validar las contraseñas escritas ANTES de mandar nada: si una es
+    // inválida, quien invita la corrige y reintenta el lote completo.
+    for (const c of destinatarios) {
+      const clave = String(claves[c.id] ?? '');
+      if (!clave) continue;
+      if (clave.length < 8) {
+        return fail('password_corta', 'La contraseña debe tener al menos 8 caracteres', 400);
+      }
+      // Una cuenta de Google no entra con contraseña: mandarle una sería mentirle.
+      if (c.proveedor !== 'email') {
+        return fail('proveedor_no_email', 'La cuenta inicia sesión con Google, no con contraseña', 400);
+      }
+    }
+
+    // 6. Registrar invitaciones nuevas (cada una se revierte si su correo falla)
     const { data: existentes } = await adminClient
       .from('expediente_invitacion')
       .select('constructor_id')
@@ -112,87 +144,128 @@ Deno.serve(async (req: Request) => {
       if (insError) return fail('error_interno', insError.message, 500, insError.message);
     }
 
-    const rollback = async () => {
-      if (nuevas.length) {
-        await adminClient
-          .from('expediente_invitacion')
-          .delete()
-          .eq('expediente_id', exp.id)
-          .in('constructor_id', nuevas.map((c) => c.id));
-      }
+    const nuevasIds = new Set(nuevas.map((c) => c.id));
+    const rollback = async (ids: string[]) => {
+      const aBorrar = ids.filter((id) => nuevasIds.has(id));
+      if (!aBorrar.length) return;
+      await adminClient
+        .from('expediente_invitacion')
+        .delete()
+        .eq('expediente_id', exp.id)
+        .in('constructor_id', aBorrar);
     };
 
-    // 6. Enviar el correo
+    // 7. Enviar
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) {
-      await rollback();
+      await rollback([...nuevasIds]);
       return fail('resend_no_configurado', 'Falta configurar el secreto RESEND_API_KEY en Supabase', 500);
     }
 
-    const cliente  = clienteRes.data;
-    const loc      = locRes.data;
-    const estim    = estimacionRes.data;
-    const servicio = servicioRes.data?.nombre_es ?? '—';
+    const cliente = clienteRes.data;
+    const loc     = locRes.data;
+    const estim   = estimacionRes.data;
     const direccion = loc
       ? [loc.direccion, loc.canton, loc.provincia, loc.distrito].filter(Boolean).join(', ')
       : '—';
 
-    const html = correoHtml({
-      numero:          exp.numero,
-      servicio,
-      clienteNombre:   cliente ? `${cliente.nombre} ${cliente.apellido}` : '—',
-      clienteTelefono: cliente?.telefono || '—',
-      direccion,
-      visitaFecha:     fmtFecha(exp.fecha_visita),
-      visitaHora:      fmtHora(exp.fecha_visita),
-      estimadorNombre,
-      visitaRealFecha: fmtFecha(estim?.fecha_visita_real ?? null),
-      visitaRealHora:  fmtHora(estim?.fecha_visita_real ?? null),
-      problemas:       estim?.descripcion_problemas || '—',
-    });
-
-    const enviarCorreo = (from: string) => fetch('https://api.resend.com/emails', {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${resendKey}`,
-      },
-      body: JSON.stringify({
-        from:     `Estimation3D <${from}>`,
-        to:       destinatarios.map((c) => c.email),
-        reply_to: FROM_EMAIL,
-        subject:  `Trabajo, Estimation3D, revisar el siguiente expediente - ${exp.numero}`,
-        html,
-      }),
-    });
-
+    // El remitente se decide una vez: si Resend rechaza el propio dominio con un
+    // 403, los correos que faltan salen ya con el de pruebas.
     let remitente = FROM_EMAIL;
-    let emailRes  = await enviarCorreo(FROM_EMAIL);
 
-    if (!emailRes.ok) {
-      const primerError = await emailRes.json().catch(() => ({}));
-      const dominioNoVerificado =
-        emailRes.status === 403 &&
-        typeof primerError?.message === 'string' &&
-        primerError.message.includes('not verified');
+    const enviarCorreo = (from: string, para: string, asunto: string, html: string) =>
+      fetch('https://api.resend.com/emails', {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${resendKey}`,
+        },
+        body: JSON.stringify({
+          from:     `Estimation3D <${from}>`,
+          to:       [para],
+          reply_to: FROM_EMAIL,
+          subject:  asunto,
+          html,
+        }),
+      });
 
-      if (dominioNoVerificado && FROM_EMAIL !== FALLBACK_FROM) {
-        remitente = FALLBACK_FROM;
-        emailRes  = await enviarCorreo(FALLBACK_FROM);
-        if (!emailRes.ok) {
-          await rollback();
-          const payload = await emailRes.json().catch(() => ({}));
-          const detalle = payload?.message ?? `HTTP ${emailRes.status}`;
-          return fail('envio_fallido', `No se pudo enviar el correo: ${detalle}`, 502, detalle);
+    const enviados: string[] = [];
+    const fallidos: { constructor_id: string; detalle: string }[] = [];
+
+    for (const c of destinatarios) {
+      const idioma = normalizarIdioma(c.idioma);
+      const t      = TEXTOS[idioma];
+      const clave  = String(claves[c.id] ?? '');
+
+      const html = correoHtml(idioma, {
+        nombre:        `${c.nombre ?? ''} ${c.apellido ?? ''}`.trim() || c.email!,
+        email:         c.email!,
+        password:      clave,
+        numero:        exp.numero,
+        servicio:      nombreServicio(servicioRes.data, idioma),
+        clienteNombre: cliente ? `${cliente.nombre} ${cliente.apellido}` : '—',
+        direccion,
+        visitaFecha:   fmtFecha(exp.fecha_visita, idioma),
+        visitaHora:    fmtHora(exp.fecha_visita, idioma),
+        descripcion:   exp.descripcion || '—',
+        estimadorNombre,
+        problemas:     estim?.descripcion_problemas || '—',
+      });
+
+      let res = await enviarCorreo(remitente, c.email!, t.asunto, html);
+
+      if (!res.ok) {
+        const primerError = await res.json().catch(() => ({}));
+        const primerMsg   = primerError?.message ?? `HTTP ${res.status}`;
+        console.error(`[enviar-invitacion] Resend rechazó ${remitente} → ${c.email}: ${res.status} ${primerMsg}`);
+
+        if (res.status === 403 && remitente !== FALLBACK_FROM) {
+          res = await enviarCorreo(FALLBACK_FROM, c.email!, t.asunto, html);
+          if (res.ok) {
+            remitente = FALLBACK_FROM;
+          } else {
+            const payload    = await res.json().catch(() => ({}));
+            const segundoMsg = payload?.message ?? `HTTP ${res.status}`;
+            console.error(`[enviar-invitacion] Resend rechazó ${FALLBACK_FROM} → ${c.email}: ${res.status} ${segundoMsg}`);
+            fallidos.push({ constructor_id: c.id, detalle: `${FROM_EMAIL}: ${primerMsg} — ${FALLBACK_FROM}: ${segundoMsg}` });
+            continue;
+          }
+        } else {
+          fallidos.push({ constructor_id: c.id, detalle: primerMsg });
+          continue;
         }
-      } else {
-        await rollback();
-        const detalle = primerError?.message ?? `HTTP ${emailRes.status}`;
-        return fail('envio_fallido', `No se pudo enviar el correo: ${detalle}`, 502, detalle);
       }
+
+      // El correo salió: recién ahora se aplica la contraseña anunciada. Si se
+      // aplicara antes y el envío fallara, el constructor se quedaría con una
+      // contraseña que nadie le mandó y sin poder entrar.
+      if (clave) {
+        const { error: updError } = await adminClient.auth.admin.updateUserById(c.id, { password: clave });
+        if (updError) {
+          console.error(`[enviar-invitacion] correo enviado a ${c.email} pero updateUserById falló: ${updError.message}`);
+          fallidos.push({ constructor_id: c.id, detalle: updError.message });
+          continue;
+        }
+      }
+
+      enviados.push(c.id);
     }
 
-    return json({ enviados: destinatarios.length, invitados_nuevos: nuevas.length, remitente }, 200);
+    // Las invitaciones nuevas cuyo correo no salió no deben dar acceso.
+    await rollback(fallidos.map((f) => f.constructor_id));
+
+    if (!enviados.length) {
+      const detalle = fallidos[0]?.detalle ?? 'Error desconocido';
+      return fail('envio_fallido', `No se pudo enviar el correo: ${detalle}`, 502, detalle);
+    }
+
+    return json({
+      enviados:         enviados.length,
+      fallidos:         fallidos.length,
+      invitados_nuevos: enviados.filter((id) => nuevasIds.has(id)).length,
+      remitente,
+      errores:          fallidos,
+    }, 200);
 
   } catch (err: any) {
     return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
@@ -200,6 +273,8 @@ Deno.serve(async (req: Request) => {
 });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+const ESTADOS_INVITABLES = ['estimado', 'en_oferta', 'adjudicado', 'contratado'];
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
@@ -223,55 +298,169 @@ function esc(v: string): string {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function fmtFecha(iso: string | null): string {
+function normalizarIdioma(v: unknown): Idioma {
+  return v === 'en' || v === 'es' ? v : 'fr';
+}
+
+const LOCALES: Record<Idioma, string> = { es: 'es-CA', fr: 'fr-CA', en: 'en-CA' };
+
+function nombreServicio(s: { nombre_es: string; nombre_fr: string; nombre_en: string } | null, idioma: Idioma): string {
+  if (!s) return '—';
+  if (idioma === 'fr') return s.nombre_fr || s.nombre_es;
+  if (idioma === 'en') return s.nombre_en || s.nombre_es;
+  return s.nombre_es;
+}
+
+function fmtFecha(iso: string | null, idioma: Idioma): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '—';
-  return new Intl.DateTimeFormat('es-CR', {
-    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Costa_Rica',
+  return new Intl.DateTimeFormat(LOCALES[idioma], {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Toronto',
   }).format(d);
 }
 
-function fmtHora(iso: string | null): string {
+function fmtHora(iso: string | null, idioma: Idioma): string {
   if (!iso) return '—';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '—';
-  return new Intl.DateTimeFormat('es-CR', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'America/Costa_Rica',
+  return new Intl.DateTimeFormat(LOCALES[idioma], {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Toronto',
   }).format(d);
 }
+
+// ── Textos por idioma ────────────────────────────────────────────────────────
+
+interface Textos {
+  lang:           string;
+  asunto:         string;
+  titulo:         string;
+  saludo:         (nombre: string) => string;
+  intro:          string;
+  accesoTitulo:   string;
+  etqUsuario:     string;
+  etqPassword:    string;
+  etqUrl:         string;
+  passwordActual: string;
+  cta:            string;
+  expTitulo:      string;
+  etqNumero:      string;
+  etqServicio:    string;
+  etqCliente:     string;
+  etqDireccion:   string;
+  etqVisita:      string;
+  etqDescripcion: string;
+  etqEstimador:   string;
+  etqProblemas:   string;
+  aviso:          string;
+  firma:          string;
+}
+
+const TEXTOS: Record<Idioma, Textos> = {
+  es: {
+    lang:           'es',
+    asunto:         'Estimation3D, Servicio del expediente.',
+    titulo:         'Invitación a ofertar',
+    saludo:         (n) => `Hola ${n},`,
+    intro:          'Le invitamos a presentar una oferta para el siguiente servicio ya estimado. Entre en Estimation3D para consultarlo y ofertar.',
+    accesoTitulo:   'Sus datos de acceso',
+    etqUsuario:     'Usuario',
+    etqPassword:    'Contraseña',
+    etqUrl:         'Dirección de la aplicación',
+    passwordActual: 'La de siempre',
+    cta:            '¡Hacer Oferta!',
+    expTitulo:      'Detalles del expediente',
+    etqNumero:      'Número',
+    etqServicio:    'Servicio',
+    etqCliente:     'Cliente',
+    etqDireccion:   'Ubicación / dirección',
+    etqVisita:      'Fecha de visita planificada',
+    etqDescripcion: 'Descripción del cliente',
+    etqEstimador:   'Estimador',
+    etqProblemas:   'Problemas observados',
+    aviso:          'Por seguridad, cambie su contraseña desde su perfil la primera vez que entre.',
+    firma:          'Equipo Estimation3D',
+  },
+  fr: {
+    lang:           'fr',
+    asunto:         'Estimation3D, Service du dossier.',
+    titulo:         'Invitation à soumissionner',
+    saludo:         (n) => `Bonjour ${n},`,
+    intro:          'Nous vous invitons à soumettre une offre pour le service estimé ci-dessous. Connectez-vous à Estimation3D pour le consulter et soumissionner.',
+    accesoTitulo:   'Vos identifiants de connexion',
+    etqUsuario:     'Utilisateur',
+    etqPassword:    'Mot de passe',
+    etqUrl:         'Adresse de l’application',
+    passwordActual: 'Celui que vous utilisez déjà',
+    cta:            'Faire une offre !',
+    expTitulo:      'Détails du dossier',
+    etqNumero:      'Numéro',
+    etqServicio:    'Service',
+    etqCliente:     'Client',
+    etqDireccion:   'Emplacement / adresse',
+    etqVisita:      'Date de visite planifiée',
+    etqDescripcion: 'Description du client',
+    etqEstimador:   'Estimateur',
+    etqProblemas:   'Problèmes observés',
+    aviso:          'Par sécurité, changez votre mot de passe depuis votre profil dès votre première connexion.',
+    firma:          'L’équipe Estimation3D',
+  },
+  en: {
+    lang:           'en',
+    asunto:         'Estimation3D, File service.',
+    titulo:         'Invitation to bid',
+    saludo:         (n) => `Hello ${n},`,
+    intro:          'You are invited to submit a bid for the estimated service below. Sign in to Estimation3D to review it and place your offer.',
+    accesoTitulo:   'Your sign-in details',
+    etqUsuario:     'Username',
+    etqPassword:    'Password',
+    etqUrl:         'Application address',
+    passwordActual: 'Your usual one',
+    cta:            'Make an offer!',
+    expTitulo:      'File details',
+    etqNumero:      'Number',
+    etqServicio:    'Service',
+    etqCliente:     'Client',
+    etqDireccion:   'Location / address',
+    etqVisita:      'Planned visit date',
+    etqDescripcion: 'Client description',
+    etqEstimador:   'Estimator',
+    etqProblemas:   'Observed problems',
+    aviso:          'For your security, change your password from your profile the first time you sign in.',
+    firma:          'The Estimation3D team',
+  },
+};
 
 interface DatosCorreo {
+  nombre:          string;
+  email:           string;
+  /** Vacía cuando quien invita no fijó una: el constructor entra con la suya. */
+  password:        string;
   numero:          string;
   servicio:        string;
   clienteNombre:   string;
-  clienteTelefono: string;
   direccion:       string;
   visitaFecha:     string;
   visitaHora:      string;
+  descripcion:     string;
   estimadorNombre: string;
-  visitaRealFecha: string;
-  visitaRealHora:  string;
   problemas:       string;
 }
 
 // Paleta del sistema (design.md): papel beige #F5F3EE, tarjeta crema #FBFAF6,
 // tinta #1A1A1A, dorado #D4B96E, borde #E8E5DC. Serif de sistema para títulos
 // (Fraunces no está disponible en clientes de correo).
-function correoHtml(d: DatosCorreo): string {
-  const fila = (etiqueta: string, valor: string) => `
-    <tr>
-      <td style="padding:6px 0;font-size:12px;color:#7A7770;text-transform:uppercase;letter-spacing:0.05em;vertical-align:top;width:190px;">${etiqueta}</td>
-      <td style="padding:6px 0;font-size:14px;color:#1A1A1A;">${esc(valor)}</td>
-    </tr>`;
+function correoHtml(idioma: Idioma, d: DatosCorreo): string {
+  const t = TEXTOS[idioma];
 
-  const seccion = (titulo: string) => `
+  const fila = (etiqueta: string, valor: string, mono = false) => `
     <tr>
-      <td colspan="2" style="padding:22px 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#1A1A1A;border-bottom:1px solid #E8E5DC;">${titulo}</td>
+      <td style="padding:8px 0;font-size:12px;color:#7A7770;text-transform:uppercase;letter-spacing:0.05em;vertical-align:top;width:190px;">${esc(etiqueta)}</td>
+      <td style="padding:8px 0;font-size:14px;color:#1A1A1A;${mono ? "font-family:'Courier New',Courier,monospace;font-weight:bold;letter-spacing:0.03em;" : ''}">${esc(valor)}</td>
     </tr>`;
 
   return `<!DOCTYPE html>
-<html lang="es">
+<html lang="${t.lang}">
 <body style="margin:0;padding:0;background-color:#F5F3EE;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F3EE;padding:32px 16px;">
     <tr><td align="center">
@@ -280,35 +469,58 @@ function correoHtml(d: DatosCorreo): string {
         <tr>
           <td style="padding:28px 32px 0;">
             <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#1A1A1A;">Estimation3D</p>
-            <p style="margin:4px 0 0;font-size:13px;color:#7A7770;">Nueva oportunidad de trabajo — expediente ${esc(d.numero)}</p>
+            <p style="margin:4px 0 0;font-size:13px;color:#7A7770;">${esc(t.titulo)} — ${esc(d.numero)}</p>
           </td>
         </tr>
         <tr>
-          <td style="padding:24px 32px 8px;" align="center">
+          <td style="padding:24px 32px 0;">
+            <p style="margin:0 0 12px;font-size:15px;color:#1A1A1A;">${esc(t.saludo(d.nombre))}</p>
+            <p style="margin:0;font-size:14px;color:#1A1A1A;line-height:1.6;">${esc(t.intro)}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px 0;">
+            <p style="margin:0 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#1A1A1A;">${esc(t.accesoTitulo)}</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                   style="background-color:#F5F3EE;border:1px solid #E8E5DC;border-radius:6px;padding:4px 20px;">
+              ${fila(t.etqUsuario, d.email)}
+              ${fila(t.etqPassword, d.password || t.passwordActual, !!d.password)}
+              ${fila(t.etqUrl, APP_URL)}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px 4px;" align="center">
             <a href="${APP_URL}"
                style="display:inline-block;background-color:#D4B96E;color:#1A1A1A;text-decoration:none;font-size:15px;font-weight:600;padding:12px 36px;border-radius:6px;">
-              ¡Hacer Oferta!
+              ${esc(t.cta)}
             </a>
           </td>
         </tr>
         <tr>
-          <td style="padding:8px 32px 28px;">
+          <td style="padding:16px 32px 8px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-              ${seccion('Detalles del expediente')}
-              ${fila('Expediente', d.numero)}
-              ${fila('Servicio', d.servicio)}
-              ${fila('Cliente', d.clienteNombre)}
-              ${fila('Teléfono', d.clienteTelefono)}
-              ${fila('Dirección', d.direccion)}
-              ${fila('Visita planificada por el cliente', `${d.visitaFecha} · ${d.visitaHora}`)}
-              ${seccion('Documentación de la visita')}
-              ${fila('Estimador asignado', d.estimadorNombre)}
-              ${fila('Fecha y hora de la visita', `${d.visitaRealFecha} · ${d.visitaRealHora}`)}
-              ${fila('Problemas observados', d.problemas)}
+              <tr>
+                <td colspan="2" style="padding:14px 0 8px;font-family:Georgia,'Times New Roman',serif;font-size:17px;color:#1A1A1A;border-bottom:1px solid #E8E5DC;">${esc(t.expTitulo)}</td>
+              </tr>
+              ${fila(t.etqNumero, d.numero)}
+              ${fila(t.etqServicio, d.servicio)}
+              ${fila(t.etqCliente, d.clienteNombre)}
+              ${fila(t.etqDireccion, d.direccion)}
+              ${fila(t.etqVisita, `${d.visitaFecha} · ${d.visitaHora}`)}
+              ${fila(t.etqDescripcion, d.descripcion)}
+              ${fila(t.etqEstimador, d.estimadorNombre)}
+              ${fila(t.etqProblemas, d.problemas)}
             </table>
-            <p style="margin:24px 0 0;font-size:14px;">
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 28px;">
+            ${d.password ? `<p style="margin:0 0 16px;font-size:13px;color:#7A7770;line-height:1.6;">${esc(t.aviso)}</p>` : ''}
+            <p style="margin:0;font-size:14px;">
               <a href="${APP_URL}" style="color:#B0964A;text-decoration:underline;">Estimation3D — ${APP_URL}</a>
             </p>
+            <p style="margin:20px 0 0;font-size:14px;color:#1A1A1A;">${esc(t.firma)}</p>
           </td>
         </tr>
         <tr>

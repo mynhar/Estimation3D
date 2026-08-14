@@ -9,7 +9,7 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
 import {
-  Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK,
+  Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK,
 } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
 import { AdminFileEstimatorReportComponent } from '../estimator-report/estimator-report.component';
@@ -21,6 +21,13 @@ interface ClienteRow {
   apellido: string;
   email: string | null;
   telefono: string | null;
+  // Dirección del PERFIL del cliente. Solo se lee: sirve de punto de partida
+  // para la localización del inmueble y esta pantalla nunca la reescribe.
+  direccion_unidad: string | null;
+  direccion_calle: string | null;
+  direccion_ciudad: string | null;
+  direccion_provincia: string | null;
+  direccion_codigo_postal: string | null;
 }
 
 // Avance del contrato — pasos y porcentajes (paridad con el panel del cliente)
@@ -129,10 +136,8 @@ export class AdminFileEditComponent implements OnInit {
   ubicacionError    = signal('');
   gpsVisible        = signal(false);
 
-  readonly provincias       = PROVINCIAS;
   readonly provinciasCanada = PROVINCIAS_CANADA;
   readonly CA_POSTAL_RE     = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
-  private readonly CA_CODES = new Set(['AB','BC','MB','NB','NL','NS','NT','NU','ON','PE','QC','SK','YT']);
 
   readonly tiposInmueble = [
     { value: 'casa',            label: 'file_create.type_casa',            icon: 'bi-house-door'  },
@@ -206,35 +211,86 @@ export class AdminFileEditComponent implements OnInit {
     descripcion:  [''],
   });
 
+  // Direcciones canadienses únicamente. `numero_civico` es opcional: hay
+  // direcciones sin número cívico y la calle basta para identificarlas.
   localizacionForm = this.fb.group({
     tipo_inmueble: ['', Validators.required],
-    pais:          ['canada'],
-    direccion:     ['', Validators.required],
-    provincia:     ['', Validators.required],
-    canton:        ['', Validators.required],
-    distrito:      ['', Validators.required],
     numero_unidad: [''],
     numero_civico: [''],
-    calle:         [''],
-    ciudad:        [''],
-    provincia_ca:  ['QC'],
-    codigo_postal: [''],
+    calle:         ['', Validators.required],
+    ciudad:        ['', Validators.required],
+    provincia_ca:  ['QC', Validators.required],
+    codigo_postal: ['', [Validators.required, Validators.pattern(this.CA_POSTAL_RE)]],
     referencia:    [''],
     latitud:       [null as number | null],
     longitud:      [null as number | null],
   });
-
-  private paisValue = toSignal(
-    this.localizacionForm.get('pais')!.valueChanges,
-    { initialValue: 'canada' as string },
-  );
-  paisActual = computed(() => this.paisValue() ?? 'canada');
 
   private descripcionValue = toSignal(
     this.expedienteForm.get('descripcion')!.valueChanges,
     { initialValue: '' as string },
   );
   descripcionLen = computed(() => (this.descripcionValue() as string | null)?.length ?? 0);
+
+  private localizacionValue = toSignal(
+    this.localizacionForm.valueChanges,
+    { initialValue: this.localizacionForm.value },
+  );
+
+  // ── Dirección del inmueble a partir del perfil del cliente ─────────────────
+
+  /** El cliente elegido tiene dirección en su perfil → se puede recuperar. */
+  clienteConDireccion = computed(() => {
+    const c = this.clienteSeleccionado();
+    return !!c && !!(c.direccion_calle || c.direccion_ciudad || c.direccion_codigo_postal || c.direccion_unidad);
+  });
+
+  /**
+   * true mientras la localización coincide con la dirección del perfil. Se
+   * calcula (no se memoriza) para que el aviso deje de decir «tomada del
+   * perfil» en cuanto el administrador edita un campo.
+   */
+  direccionDesdeCliente = computed(() => {
+    const c = this.clienteSeleccionado();
+    if (!c || !this.clienteConDireccion()) return false;
+    const lv = this.localizacionValue();
+    const d  = this.direccionClienteEnCampos(c);
+    return (lv.numero_unidad ?? '') === d.numero_unidad
+        && (lv.numero_civico ?? '') === d.numero_civico
+        && (lv.calle         ?? '') === d.calle
+        && (lv.ciudad        ?? '') === d.ciudad
+        && (lv.provincia_ca  ?? '') === d.provincia_ca
+        && (lv.codigo_postal ?? '') === d.codigo_postal;
+  });
+
+  /**
+   * Descompone la dirección del perfil en los campos del formulario. El perfil
+   * guarda la calle en una sola casilla, mientras que aquí el número cívico va
+   * aparte: se separa con el mismo criterio que la dirección ya grabada.
+   */
+  private direccionClienteEnCampos(c: ClienteRow) {
+    const { unit, civic, street } = this.parseDireccionCanada(c.direccion_calle ?? '');
+    return {
+      numero_unidad: (c.direccion_unidad ?? '').trim() || unit,
+      numero_civico: civic,
+      calle:         street,
+      ciudad:        c.direccion_ciudad        ?? '',
+      provincia_ca:  c.direccion_provincia     || 'QC',
+      codigo_postal: c.direccion_codigo_postal ?? '',
+    };
+  }
+
+  /**
+   * Copia la dirección del perfil en los campos del inmueble. Es solo un punto
+   * de partida y los campos siguen siendo editables. Lo que se escriba aquí va
+   * únicamente a la tabla `localizacion` del expediente: el perfil del cliente
+   * no se toca ni al cargar ni al guardar.
+   */
+  aplicarDireccionCliente(): void {
+    const c = this.clienteSeleccionado();
+    if (!c || !this.clienteConDireccion()) return;
+    this.localizacionForm.patchValue(this.direccionClienteEnCampos(c));
+  }
 
   // ════════════════════════════════════════════════════════════════════════════
   //  SECCIÓN ESTIMADOR — trasladada a admin/file/estimator-report.
@@ -304,50 +360,17 @@ export class AdminFileEditComponent implements OnInit {
     this.busquedaCliente.set(`${c.nombre} ${c.apellido}`);
     this.dropdownVisible.set(false);
     this.clienteRequerido.set(false);
+    // En edición la localización ya existe: cambiar de cliente no la pisa.
+    // El administrador la recupera con el botón «usar la dirección del cliente».
   }
   limpiarCliente() {
     this.clienteId.set(null);
     this.busquedaCliente.set('');
     this.dropdownVisible.set(false);
+    // La dirección se queda: pertenece al inmueble, no al cliente.
   }
   cerrarDropdown() {
     setTimeout(() => this.dropdownVisible.set(false), 160);
-  }
-
-  // ── País / validadores ─────────────────────────────────────────────────────
-  setPais(pais: string) {
-    this.localizacionForm.get('pais')?.setValue(pais);
-    this.actualizarValidadoresPais(pais);
-  }
-
-  private actualizarValidadoresPais(pais: string) {
-    const crFields = ['direccion', 'provincia', 'canton', 'distrito'];
-    const caFields = ['numero_civico', 'calle', 'ciudad', 'provincia_ca', 'codigo_postal'];
-
-    if (pais === 'canada') {
-      crFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      // `numero_civico` es opcional (igual que en las pantallas de creación):
-      // hay direcciones sin número cívico y la calle basta para identificarlas.
-      this.localizacionForm.get('numero_civico')?.clearValidators();
-      this.localizacionForm.get('calle')?.setValidators([Validators.required]);
-      this.localizacionForm.get('ciudad')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia_ca')?.setValidators([Validators.required]);
-      this.localizacionForm.get('codigo_postal')?.setValidators([
-        Validators.required,
-        Validators.pattern(this.CA_POSTAL_RE),
-      ]);
-    } else {
-      caFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('direccion')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia')?.setValidators([Validators.required]);
-      this.localizacionForm.get('canton')?.setValidators([Validators.required]);
-      this.localizacionForm.get('distrito')?.setValidators([Validators.required]);
-    }
-
-    [...crFields, ...caFields].forEach(f =>
-      this.localizacionForm.get(f)?.updateValueAndValidity({ emitEvent: false })
-    );
-    this.localizacionForm.updateValueAndValidity();
   }
 
   private parseDireccionCanada(dir: string): { unit: string; civic: string; street: string } {
@@ -383,7 +406,6 @@ export class AdminFileEditComponent implements OnInit {
 
   // ── Ciclo de vida ──────────────────────────────────────────────────────────
   async ngOnInit() {
-    this.actualizarValidadoresPais('canada');
     await Promise.all([
       this.cargarServicios(),
       this.cargarClientes(),
@@ -411,7 +433,7 @@ export class AdminFileEditComponent implements OnInit {
     this.cargandoClientes.set(true);
     const { data, error } = await this.auth.client
       .from('perfil')
-      .select('id, nombre, apellido, email, telefono')
+      .select('id, nombre, apellido, email, telefono, direccion_unidad, direccion_calle, direccion_ciudad, direccion_provincia, direccion_codigo_postal')
       .eq('rol', 'cliente')
       .eq('activo', true)
       .order('nombre', { ascending: true });
@@ -448,39 +470,21 @@ export class AdminFileEditComponent implements OnInit {
         descripcion:  datos.descripcion ?? '',
       });
 
-      // País
-      const esCanada = this.CA_CODES.has((datos.provincia ?? '').toUpperCase());
-      const pais = esCanada ? 'canada' : 'costa_rica';
-      this.actualizarValidadoresPais(pais);
-
-      if (esCanada) {
-        const { unit, civic, street } = this.parseDireccionCanada(datos.direccion);
-        this.localizacionForm.patchValue({
-          tipo_inmueble: datos.tipo_inmueble,
-          pais:          'canada',
-          numero_unidad: unit,
-          numero_civico: civic,
-          calle:         street,
-          ciudad:        datos.canton,
-          provincia_ca:  datos.provincia,
-          codigo_postal: datos.distrito,
-          referencia:    datos.referencia ?? '',
-          latitud:       datos.latitud,
-          longitud:      datos.longitud,
-        });
-      } else {
-        this.localizacionForm.patchValue({
-          tipo_inmueble: datos.tipo_inmueble,
-          pais:          'costa_rica',
-          direccion:     datos.direccion,
-          provincia:     datos.provincia,
-          canton:        datos.canton,
-          distrito:      datos.distrito,
-          referencia:    datos.referencia ?? '',
-          latitud:       datos.latitud,
-          longitud:      datos.longitud,
-        });
-      }
+      // Localización · las columnas provincia / canton / distrito guardan
+      // provincia, ciudad y código postal canadienses.
+      const { unit, civic, street } = this.parseDireccionCanada(datos.direccion);
+      this.localizacionForm.patchValue({
+        tipo_inmueble: datos.tipo_inmueble,
+        numero_unidad: unit,
+        numero_civico: civic,
+        calle:         street,
+        ciudad:        datos.canton,
+        provincia_ca:  datos.provincia,
+        codigo_postal: datos.distrito,
+        referencia:    datos.referencia ?? '',
+        latitud:       datos.latitud,
+        longitud:      datos.longitud,
+      });
     } catch (e: any) {
       this.loadError.set('admin_file_edit.load_error');
       console.error('[AdminFileEdit] cargarExpediente:', e);
@@ -514,12 +518,11 @@ export class AdminFileEditComponent implements OnInit {
     try {
       const ev = this.expedienteForm.value;
       const lv = this.localizacionForm.value;
-      const esCanada = lv.pais === 'canada';
 
       const streetPart     = `${lv.numero_civico ?? ''} ${lv.calle ?? ''}`.trim();
-      const direccionFinal = esCanada
-        ? (lv.numero_unidad?.trim() ? `${lv.numero_unidad.trim()}-${streetPart}` : streetPart)
-        : (lv.direccion ?? '');
+      const direccionFinal = lv.numero_unidad?.trim()
+        ? `${lv.numero_unidad.trim()}-${streetPart}`
+        : streetPart;
 
       await this.expedienteService.actualizarExpediente(this.id, {
         clienteId:   this.clienteId()!,
@@ -529,9 +532,9 @@ export class AdminFileEditComponent implements OnInit {
         localizacion: {
           tipo_inmueble: (lv.tipo_inmueble ?? 'otro') as TipoInmueble,
           direccion:  direccionFinal,
-          provincia:  esCanada ? (lv.provincia_ca  ?? '') : (lv.provincia ?? ''),
-          canton:     esCanada ? (lv.ciudad        ?? '') : (lv.canton    ?? ''),
-          distrito:   esCanada ? (lv.codigo_postal ?? '') : (lv.distrito  ?? ''),
+          provincia:  lv.provincia_ca  ?? '',
+          canton:     lv.ciudad        ?? '',
+          distrito:   lv.codigo_postal ?? '',
           referencia: lv.referencia || null,
           latitud:    lv.latitud    ?? null,
           longitud:   lv.longitud   ?? null,

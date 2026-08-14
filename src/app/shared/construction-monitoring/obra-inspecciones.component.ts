@@ -254,7 +254,7 @@ export class ObraInspeccionesComponent implements OnInit, OnDestroy {
   }
 
   private langLocale(): string {
-    const localeMap: Record<string, string> = { es: 'es-CR', en: 'en-US', fr: 'fr-CA' };
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
     return localeMap[this.lang() ?? this.translate.currentLang] ?? 'fr-CA';
   }
 

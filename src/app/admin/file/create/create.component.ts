@@ -6,7 +6,7 @@ import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { Servicio, PROVINCIAS, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
+import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
 
 interface ClienteRow {
@@ -15,6 +15,13 @@ interface ClienteRow {
   apellido: string;
   email: string | null;
   telefono: string | null;
+  // Dirección del PERFIL del cliente. Solo se lee: sirve de punto de partida
+  // para la localización del inmueble y esta pantalla nunca la reescribe.
+  direccion_unidad: string | null;
+  direccion_calle: string | null;
+  direccion_ciudad: string | null;
+  direccion_provincia: string | null;
+  direccion_codigo_postal: string | null;
 }
 
 @Component({
@@ -48,6 +55,28 @@ export class AdminFileCreateComponent implements OnInit {
   clienteSeleccionado = computed(() =>
     this.clientes().find(c => c.id === this.clienteId()) ?? null
   );
+
+  /** El cliente elegido tiene dirección en su perfil → se puede recuperar. */
+  clienteConDireccion = computed(() => {
+    const c = this.clienteSeleccionado();
+    return !!c && !!(c.direccion_calle || c.direccion_ciudad || c.direccion_codigo_postal || c.direccion_unidad);
+  });
+
+  /**
+   * true mientras la localización coincide con la dirección del perfil. Se
+   * calcula (no se memoriza) para que el aviso deje de decir «tomada del
+   * perfil» en cuanto el administrador edita un campo.
+   */
+  direccionDesdeCliente = computed(() => {
+    const c = this.clienteSeleccionado();
+    if (!c || !this.clienteConDireccion()) return false;
+    const lv = this.localizacionValue();
+    return (lv.numero_unidad ?? '') === (c.direccion_unidad        ?? '')
+        && (lv.calle         ?? '') === (c.direccion_calle         ?? '')
+        && (lv.ciudad        ?? '') === (c.direccion_ciudad        ?? '')
+        && (lv.provincia_ca  ?? '') === (c.direccion_provincia     || 'QC')
+        && (lv.codigo_postal ?? '') === (c.direccion_codigo_postal ?? '');
+  });
 
   clientesFiltrados = computed(() => {
     const q = this.busquedaCliente().toLowerCase().trim();
@@ -87,7 +116,6 @@ export class AdminFileCreateComponent implements OnInit {
   gpsVisible        = signal(false);
 
   // ── Static config ──────────────────────────────────────────────────────────
-  readonly provincias       = PROVINCIAS;
   readonly provinciasCanada = PROVINCIAS_CANADA;
   readonly CA_POSTAL_RE     = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
@@ -96,6 +124,14 @@ export class AdminFileCreateComponent implements OnInit {
     'file_create.step1_name',
     'file_create.step3_name',
     'file_create.step4_name',
+  ];
+
+  /** Etiquetas + icono de cada fila del resumen lateral. Mismo orden que STEPS. */
+  readonly RESUMEN_META = [
+    { label: 'admin_file_create.step2_name', icon: 'bi-person'    },
+    { label: 'file_create.step1_name',       icon: 'bi-tools'     },
+    { label: 'file_create.step3_name',       icon: 'bi-calendar3' },
+    { label: 'file_create.step4_name',       icon: 'bi-geo-alt'   },
   ];
 
   readonly tiposInmueble = [
@@ -113,34 +149,22 @@ export class AdminFileCreateComponent implements OnInit {
     descripcion:  [''],
   });
 
+  // Direcciones canadienses únicamente.
   localizacionForm = this.fb.group({
     tipo_inmueble: ['', Validators.required],
-    pais:          ['canada'],
-    direccion:     ['', Validators.required],
-    provincia:     ['', Validators.required],
-    canton:        ['', Validators.required],
-    distrito:      ['', Validators.required],
     numero_unidad: [''],
-    calle:         [''],
-    ciudad:        [''],
-    provincia_ca:  ['QC'],
-    codigo_postal: [''],
+    calle:         ['', Validators.required],
+    ciudad:        ['', Validators.required],
+    provincia_ca:  ['QC', Validators.required],
+    codigo_postal: ['', [Validators.required, Validators.pattern(this.CA_POSTAL_RE)]],
     latitud:       [null as number | null],
     longitud:      [null as number | null],
   });
 
-  private paisValue = toSignal(
-    this.localizacionForm.get('pais')!.valueChanges,
-    { initialValue: 'canada' as string },
-  );
-  paisActual = computed(() => this.paisValue() ?? 'canada');
-
   private expedienteStatus   = toSignal(this.expedienteForm.statusChanges,   { initialValue: this.expedienteForm.status });
   private localizacionStatus = toSignal(this.localizacionForm.statusChanges, { initialValue: this.localizacionForm.status });
-  private descripcionValue   = toSignal(
-    this.expedienteForm.get('descripcion')!.valueChanges,
-    { initialValue: '' as string },
-  );
+  private expedienteValue    = toSignal(this.expedienteForm.valueChanges,    { initialValue: this.expedienteForm.value });
+  private localizacionValue  = toSignal(this.localizacionForm.valueChanges,  { initialValue: this.localizacionForm.value });
 
   // ── Computed: per-step completion ──────────────────────────────────────────
   step1Complete = computed(() => !!this.clienteId());
@@ -157,8 +181,38 @@ export class AdminFileCreateComponent implements OnInit {
       .filter(Boolean).length
   );
 
-  progressPct    = computed(() => (this.completedSteps() / 4) * 100);
-  descripcionLen = computed(() => (this.descripcionValue() as string | null)?.length ?? 0);
+  descripcionLen = computed(() => this.expedienteValue().descripcion?.length ?? 0);
+
+  // ── Resumen lateral ────────────────────────────────────────────────────────
+  // Sustituye al antiguo listado de pasos del sidebar: en lugar de repetir el
+  // progreso por sexta vez, muestra el valor real elegido en cada paso.
+  private resumenValores = computed<(string | null)[]>(() => {
+    const cli = this.clienteSeleccionado();
+    const srv = this.serviciosLocalizados().find(s => s.id === this.servicioId());
+    const ev  = this.expedienteValue();
+    const lv  = this.localizacionValue();
+
+    const visita = ev.fecha_visita && ev.hora_visita
+      ? `${ev.fecha_visita} · ${ev.hora_visita}`
+      : null;
+
+    const partes = [lv.calle, lv.ciudad, lv.provincia_ca];
+
+    return [
+      cli ? `${cli.nombre} ${cli.apellido}` : null,
+      srv?.nombre_local ?? null,
+      visita,
+      partes.filter(Boolean).join(', ') || null,
+    ];
+  });
+
+  resumen = computed(() =>
+    this.RESUMEN_META.map((meta, i) => ({
+      ...meta,
+      value: this.resumenValores()[i],
+      done:  this.stepDone(i),
+    }))
+  );
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   stepDone(idx: number): boolean {
@@ -168,14 +222,14 @@ export class AdminFileCreateComponent implements OnInit {
   serviceIcon(codigo: string): string {
     const c = codigo.toLowerCase();
     if (c.includes('moho'))                          return 'bi-biohazard';
-    if (c.includes('agua') || c.includes('dano'))    return 'bi-droplet-half';
+    if (c.includes('agua') || c.includes('dano'))    return 'bi-droplet';
     if (c.includes('desamian'))                      return 'bi-layers';
     if (c.includes('demolic'))                       return 'bi-buildings';
     if (c.includes('aisla'))                         return 'bi-layers';
     if (c.includes('fund') || c.includes('dren'))    return 'bi-water';
-    if (c.includes('elect'))                         return 'bi-lightning-charge-fill';
-    if (c.includes('pint'))                          return 'bi-brush-fill';
-    if (c.includes('techo') || c.includes('teja'))   return 'bi-house-fill';
+    if (c.includes('elect'))                         return 'bi-lightning-charge';
+    if (c.includes('pint'))                          return 'bi-brush';
+    if (c.includes('techo') || c.includes('teja'))   return 'bi-house';
     if (c.includes('piso')  || c.includes('cer'))    return 'bi-grid-3x3';
     if (c.includes('carpint') || c.includes('mad'))  return 'bi-hammer';
     if (c.includes('alumin') || c.includes('vidri')) return 'bi-window';
@@ -200,12 +254,37 @@ export class AdminFileCreateComponent implements OnInit {
     this.busquedaCliente.set(`${c.nombre} ${c.apellido}`);
     this.dropdownVisible.set(false);
     this.clienteRequerido.set(false);
+    this.aplicarDireccionCliente();
   }
 
   limpiarCliente() {
     this.clienteId.set(null);
     this.busquedaCliente.set('');
     this.dropdownVisible.set(false);
+    // La dirección ya copiada se queda: pertenece al inmueble, no al cliente.
+  }
+
+  // ── Dirección del inmueble a partir del perfil del cliente ─────────────────
+  /**
+   * Copia la dirección del perfil en los campos del inmueble. Es solo el punto
+   * de partida — casi siempre el inmueble es el domicilio del cliente — y los
+   * campos siguen siendo editables. Lo que se escriba aquí va únicamente a la
+   * tabla `localizacion` del expediente: el perfil del cliente no se toca.
+   *
+   * Se sustituye el bloque entero (no campo a campo) para no mezclar la calle
+   * de un cliente con la ciudad de otro al cambiar de cliente.
+   */
+  aplicarDireccionCliente(): void {
+    const c = this.clienteSeleccionado();
+    if (!c || !this.clienteConDireccion()) return;
+
+    this.localizacionForm.patchValue({
+      numero_unidad: c.direccion_unidad         ?? '',
+      calle:         c.direccion_calle          ?? '',
+      ciudad:        c.direccion_ciudad         ?? '',
+      provincia_ca:  c.direccion_provincia      || 'QC',
+      codigo_postal: c.direccion_codigo_postal  ?? '',
+    });
   }
 
   /** Iniciales seguras: evita NaN.toUpperCase() cuando nombre/apellido vienen vacíos. */
@@ -217,39 +296,6 @@ export class AdminFileCreateComponent implements OnInit {
 
   cerrarDropdown() {
     setTimeout(() => this.dropdownVisible.set(false), 160);
-  }
-
-  // ── Country / validators ───────────────────────────────────────────────────
-  setPais(pais: string) {
-    this.localizacionForm.get('pais')?.setValue(pais);
-    this.actualizarValidadoresPais(pais);
-  }
-
-  private actualizarValidadoresPais(pais: string) {
-    const crFields = ['direccion', 'provincia', 'canton', 'distrito'];
-    const caFields = ['calle', 'ciudad', 'provincia_ca', 'codigo_postal'];
-
-    if (pais === 'canada') {
-      crFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('calle')?.setValidators([Validators.required]);
-      this.localizacionForm.get('ciudad')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia_ca')?.setValidators([Validators.required]);
-      this.localizacionForm.get('codigo_postal')?.setValidators([
-        Validators.required,
-        Validators.pattern(this.CA_POSTAL_RE),
-      ]);
-    } else {
-      caFields.forEach(f => this.localizacionForm.get(f)?.clearValidators());
-      this.localizacionForm.get('direccion')?.setValidators([Validators.required]);
-      this.localizacionForm.get('provincia')?.setValidators([Validators.required]);
-      this.localizacionForm.get('canton')?.setValidators([Validators.required]);
-      this.localizacionForm.get('distrito')?.setValidators([Validators.required]);
-    }
-
-    [...crFields, ...caFields].forEach(f =>
-      this.localizacionForm.get(f)?.updateValueAndValidity({ emitEvent: false })
-    );
-    this.localizacionForm.updateValueAndValidity();
   }
 
   // ── GPS ────────────────────────────────────────────────────────────────────
@@ -280,7 +326,6 @@ export class AdminFileCreateComponent implements OnInit {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   async ngOnInit() {
-    this.actualizarValidadoresPais('canada');
     await Promise.all([this.cargarServicios(), this.cargarClientes()]);
   }
 
@@ -300,7 +345,7 @@ export class AdminFileCreateComponent implements OnInit {
     this.cargandoClientes.set(true);
     const { data, error } = await this.auth.client
       .from('perfil')
-      .select('id, nombre, apellido, email, telefono')
+      .select('id, nombre, apellido, email, telefono, direccion_unidad, direccion_calle, direccion_ciudad, direccion_provincia, direccion_codigo_postal')
       .eq('rol', 'cliente')
       .eq('activo', true)
       .order('nombre', { ascending: true });
@@ -324,11 +369,10 @@ export class AdminFileCreateComponent implements OnInit {
     try {
       const ev = this.expedienteForm.value;
       const lv = this.localizacionForm.value;
-      const esCanada = lv.pais === 'canada';
 
-      const direccionFinal = esCanada
-        ? (lv.numero_unidad ? `${lv.numero_unidad}-${lv.calle}` : (lv.calle ?? ''))
-        : (lv.direccion ?? '');
+      const direccionFinal = lv.numero_unidad
+        ? `${lv.numero_unidad}-${lv.calle}`
+        : (lv.calle ?? '');
 
       await this.expedienteService.crear({
         clienteId:   this.clienteId()!,
@@ -336,12 +380,14 @@ export class AdminFileCreateComponent implements OnInit {
         numero:      this.generarNumeroExpediente(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
+        // `provincia` / `canton` / `distrito` son los nombres de columna de la
+        // tabla localizacion; aquí transportan provincia, ciudad y código postal.
         localizacion: {
           tipo_inmueble: (lv.tipo_inmueble ?? 'otro') as TipoInmueble,
           direccion:  direccionFinal,
-          provincia:  esCanada ? (lv.provincia_ca  ?? '') : (lv.provincia ?? ''),
-          canton:     esCanada ? (lv.ciudad        ?? '') : (lv.canton    ?? ''),
-          distrito:   esCanada ? (lv.codigo_postal ?? '') : (lv.distrito  ?? ''),
+          provincia:  lv.provincia_ca  ?? '',
+          canton:     lv.ciudad        ?? '',
+          distrito:   lv.codigo_postal ?? '',
           referencia: null,
           latitud:    lv.latitud    ?? null,
           longitud:   lv.longitud   ?? null,

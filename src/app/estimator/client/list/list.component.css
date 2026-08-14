@@ -226,6 +226,19 @@
 }
 
 /* Provider badge */
+/* Role badges — el estimador solo ve los dos roles externos */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2em 0.65em;
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  white-space: nowrap;
+}
+.role-badge--constructor { background: var(--ds-success-soft); color: var(--ds-success); }
+.role-badge--cliente     { background: var(--ds-info-soft);    color: var(--ds-info); }
+
 .provider-badge {
   display: inline-flex;
   align-items: center;
@@ -338,6 +351,8 @@
   font-weight: var(--ds-weight-semibold);
   font-size: var(--ds-text-sm);
   color: var(--ds-ink);
+  /* Ocupa el hueco para que el badge de rol y el estado queden juntos a la derecha. */
+  flex: 1 1 auto;
   min-width: 0;
   overflow-wrap: anywhere;
 }

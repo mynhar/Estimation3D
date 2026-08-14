@@ -1,748 +1,650 @@
-<!-- Hallmark · macrostructure: Split-Form · genre: editorial (warm-paper)
-     design-system: design.md · designed-as-app
+<!-- Hallmark · macrostructure: Workbench · genre: editorial (warm-paper)
+     design-system: design.md · designed-as-app · scope: component
      pre-emit critique: P5 H5 E5 S5 R5 V5
-     Change: 2-column layout; sidebar absorbs submit + process; Bootstrap
-     defaults (bg-light, text-primary, text-success) replaced with tokens. -->
-<div class="page-wrapper create-root">
-  <div class="create-layout">
+     Rediseño completo. Antes: lienzo con `max-width` implícito, cinco
+     representaciones simultáneas del progreso (pastilla + tracker + barra +
+     checklist del rail + barra del rail) y filas Bootstrap `col-md-*` que
+     medían el VIEWPORT aunque el formulario conviva con un rail de 340 px.
+     Ahora: lienzo a ancho completo, dos representaciones del progreso
+     (contador x/4 + stepper etiquetado), cada tarjeta es su propio contenedor
+     de consulta y reparte sus campos por el ancho REAL disponible, y el canvas
+     pasa a dos columnas a partir de 1600 px. El rail deja de ser un panel de
+     desktop: en móvil baja al final del flujo, así el resumen en vivo y el
+     «qué pasa después» dejan de perderse en pantallas pequeñas. -->
+<div class="page-wrapper create-wrap">
 
-    <!-- ══════════════════════════════════════════════════════════════════
-         COLUMNA IZQUIERDA — pasos del formulario
-         ══════════════════════════════════════════════════════════════════ -->
-    <div class="create-main">
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Encabezado · identidad + stepper (única representación del avance)
+       ══════════════════════════════════════════════════════════════════════ -->
+  <header class="create-header mb-4">
 
-      <!-- ── Encabezado ─────────────────────────────────────────────── -->
-      <header class="create-header">
+    <div class="create-header__top">
+      <button type="button" class="back-btn"
+              (click)="onCancel()"
+              [title]="'common.back' | translate"
+              [attr.aria-label]="'common.back' | translate">
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+      </button>
 
-        <div class="create-header__top">
-          <button class="btn btn-outline-secondary btn-sm flex-shrink-0"
-                  (click)="onCancel()"
-                  [title]="'common.back' | translate">
-            <i class="bi bi-arrow-left"></i>
-          </button>
-          <div class="create-header__title-area min-w-0 flex-grow-1">
-            <p class="page-eyebrow">
-              <i class="bi bi-person-circle" aria-hidden="true"></i>
-              {{ 'role.client' | translate }}
-            </p>
-            <h1 class="create-header__title">{{ 'file.new_file' | translate }}</h1>
-          </div>
-          <span class="progress-pill flex-shrink-0">
-            {{ completedSteps() }} {{ 'common.of' | translate }} 4
-          </span>
-        </div>
+      <div class="create-header__id">
+        <span class="create-eyebrow">
+          <i class="bi bi-person-circle" aria-hidden="true"></i>
+          {{ 'role.client' | translate }}
+        </span>
+        <h1 class="create-title">{{ 'file.new_file' | translate }}</h1>
+        <p class="create-sub">{{ 'file_create.subtitle' | translate }}</p>
+      </div>
 
-        <!-- Step tracker -->
-        <div class="step-tracker mt-3">
-          @for (step of STEPS; let i = $index; track step) {
-            <div class="step-tracker__item"
-                 [class.step-tracker__item--done]="stepDone(i)">
-              <div class="step-tracker__circle">
-                @if (stepDone(i)) {
-                  <i class="bi bi-check-lg"></i>
-                } @else {
-                  {{ i + 1 }}
-                }
-              </div>
-              <span class="step-tracker__label d-none d-sm-block">{{ step | translate }}</span>
-            </div>
-            @if (i < STEPS.length - 1) {
-              <div class="step-tracker__connector"
-                   [class.step-tracker__connector--done]="stepDone(i)"></div>
+      <p class="step-count" aria-live="polite">
+        <span class="step-count__num">{{ completedSteps() }}</span><span class="step-count__den">/4</span>
+        <span class="step-count__lbl">{{ 'file_create.steps_label' | translate }}</span>
+      </p>
+    </div>
+
+    <ol class="stepper" [attr.aria-label]="'file_create.steps_label' | translate">
+      @for (step of STEPS; let i = $index; let last = $last; track step) {
+        <li class="stepper__item" [class.stepper__item--done]="stepDone(i)">
+          <span class="stepper__dot">
+            @if (stepDone(i)) {
+              <i class="bi bi-check-lg" aria-hidden="true"></i>
+            } @else {
+              {{ i + 1 }}
             }
+          </span>
+          <span class="stepper__lbl">{{ step | translate }}</span>
+          @if (!last) {
+            <span class="stepper__line" [class.stepper__line--done]="stepDone(i)" aria-hidden="true"></span>
           }
-        </div>
+        </li>
+      }
+    </ol>
+  </header>
 
-        <div class="progress create-progress mt-3">
-          <div class="progress-bar"
-               role="progressbar"
-               [style.width.%]="progressPct()"
-               [attr.aria-valuenow]="progressPct()"
-               aria-valuemin="0" aria-valuemax="100">
-          </div>
-        </div>
-      </header>
+  <!-- ══════════════════════════════════════════════════════════════════════
+       Cuerpo · lienzo del formulario + raíl
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="create-body">
 
-      <!-- Error global (solo visible en móvil, sidebar lo muestra en desktop) -->
+    <div class="form-canvas">
+
       @if (error()) {
-        <div class="alert alert-danger d-flex align-items-center gap-2 d-lg-none">
-          <i class="bi bi-exclamation-triangle flex-shrink-0"></i>
+        <div class="form-alert canvas-alert d-lg-none" role="alert">
+          <i class="bi bi-exclamation-triangle flex-shrink-0" aria-hidden="true"></i>
           <span>{{ error() | translate }}</span>
         </div>
       }
 
-      <!-- ══════════════════════════════════════════════════════════════
-           PASO 1 · Servicio
-           ══════════════════════════════════════════════════════════════ -->
-      <div class="card section-card"
-           [class.section-card--done]="step1Complete()">
-        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-          <span class="section-num" [class.section-num--done]="step1Complete()">
+      <!-- ═══ PASO 1 · Servicio ══════════════════════════════════════════════ -->
+      <section class="section-card area-servicio" [class.section-card--done]="step1Complete()"
+               [attr.aria-label]="'file_create.step1_title' | translate">
+
+        <div class="section-head">
+          <span class="section-num" [class.section-num--done]="step1Complete()" aria-hidden="true">
             @if (step1Complete()) { <i class="bi bi-check-lg"></i> } @else { 1 }
           </span>
-          <div class="flex-grow-1 min-w-0">
-            <span class="section-title d-block">{{ 'file_create.step1_title' | translate }}</span>
-            <small class="text-muted">{{ 'file_create.step1_hint' | translate }}</small>
-          </div>
+          <span class="section-head__text">
+            <span class="section-title">{{ 'file_create.step1_title' | translate }}</span>
+            <small class="section-hint">{{ 'file_create.step1_hint' | translate }}</small>
+          </span>
           @if (step1Complete()) {
-            <span class="badge step-done-badge flex-shrink-0">
-              <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
+            <span class="done-pill">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              {{ 'file_create.done' | translate }}
             </span>
           }
         </div>
-        <div class="card-body p-4">
 
+        <div class="section-body">
           @if (cargandoServicios()) {
-            <div class="loading-state">
-              <div class="spinner-border spinner-border-sm" role="status"></div>
+            <div class="loading-inline">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               {{ 'file_create.loading_services' | translate }}
             </div>
           } @else {
-            <div class="row g-3">
+            <!-- auto-fill: el número de columnas lo decide el ancho real, no un
+                 col-* fijo; a ancho completo caben 4–6 tarjetas por fila. -->
+            <div class="service-grid" role="radiogroup"
+                 [attr.aria-label]="'file_create.step1_title' | translate">
               @for (s of serviciosLocalizados(); track s.id) {
-                <div class="col-sm-6 col-md-4 col-xl-3">
-                  <label class="service-card h-100"
-                         [class.service-card--selected]="servicioId() === s.id">
-                    <input type="radio" class="visually-hidden"
-                           [value]="s.id"
-                           [checked]="servicioId() === s.id"
-                           (change)="servicioId.set(s.id)" />
-                    <div class="d-flex align-items-start gap-3">
-                      <div class="service-icon flex-shrink-0"
-                           [class.service-icon--selected]="servicioId() === s.id">
-                        <i class="bi {{ serviceIcon(s.codigo) }}"></i>
-                      </div>
-                      <div class="flex-grow-1 min-w-0">
-                        <p class="service-name mb-1">{{ s.nombre_local }}</p>
-                        <p class="service-desc mb-0">{{ s.descripcion_local }}</p>
-                      </div>
-                      @if (servicioId() === s.id) {
-                        <i class="bi bi-check-circle service-check flex-shrink-0 mt-1"></i>
-                      }
-                    </div>
-                  </label>
-                </div>
+                <label class="service-card" [class.service-card--selected]="servicioId() === s.id">
+                  <input type="radio" class="visually-hidden"
+                         name="servicio"
+                         [value]="s.id"
+                         [checked]="servicioId() === s.id"
+                         (change)="servicioId.set(s.id)" />
+                  <span class="service-icon" [class.service-icon--selected]="servicioId() === s.id">
+                    <i class="bi {{ serviceIcon(s.codigo) }}" aria-hidden="true"></i>
+                  </span>
+                  <span class="service-text">
+                    <span class="service-name">{{ s.nombre_local }}</span>
+                    <span class="service-desc">{{ s.descripcion_local }}</span>
+                  </span>
+                  <i class="bi bi-check-circle service-check" aria-hidden="true"></i>
+                </label>
               }
             </div>
 
             @if (servicioRequerido()) {
-              <div class="invalid-msg mt-3">
-                <i class="bi bi-exclamation-circle"></i>
+              <p class="field-error mt-3" role="alert">
+                <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
                 {{ 'file_create.service_required' | translate }}
-              </div>
+              </p>
             }
           }
-
         </div>
-      </div>
+      </section>
 
-      <!-- ══════════════════════════════════════════════════════════════
-           PASO 2 · Datos de contacto
-           ══════════════════════════════════════════════════════════════ -->
-      <div class="card section-card"
-           [class.section-card--done]="step2Complete()">
-        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-          <span class="section-num" [class.section-num--done]="step2Complete()">
+      <!-- ═══ PASO 2 · Datos de contacto ═════════════════════════════════════ -->
+      <section class="section-card area-contacto" [class.section-card--done]="step2Complete()"
+               [attr.aria-label]="'file_create.step2_title' | translate">
+
+        <div class="section-head">
+          <span class="section-num" [class.section-num--done]="step2Complete()" aria-hidden="true">
             @if (step2Complete()) { <i class="bi bi-check-lg"></i> } @else { 2 }
           </span>
-          <div class="flex-grow-1 min-w-0">
-            <span class="section-title d-block">{{ 'file_create.step2_title' | translate }}</span>
-            <small class="text-muted">{{ 'file_create.step2_hint' | translate }}</small>
-          </div>
+          <span class="section-head__text">
+            <span class="section-title">{{ 'file_create.step2_title' | translate }}</span>
+            <small class="section-hint">{{ 'file_create.step2_hint' | translate }}</small>
+          </span>
           @if (step2Complete()) {
-            <span class="badge step-done-badge flex-shrink-0">
-              <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
+            <span class="done-pill">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              {{ 'file_create.done' | translate }}
             </span>
           }
         </div>
-        <div class="card-body p-4">
-          <form [formGroup]="perfilForm">
-            <div class="row g-3">
 
-              <div class="col-md-3 col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'common.name' | translate }} <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="nombre"
-                       [placeholder]="'common.name' | translate"
-                       autocomplete="given-name" />
-                @if (invalid(perfilForm, 'nombre')) {
-                  <div class="invalid-msg">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'admin_users.name_required' | translate }}
-                  </div>
-                }
-              </div>
+        <div class="section-body">
+          <form [formGroup]="perfilForm" class="fgrid">
 
-              <div class="col-md-3 col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'common.lastname' | translate }} <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control"
-                       formControlName="apellido"
-                       [placeholder]="'common.lastname' | translate"
-                       autocomplete="family-name" />
-                @if (invalid(perfilForm, 'apellido')) {
-                  <div class="invalid-msg">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'admin_users.lastname_required' | translate }}
-                  </div>
-                }
-              </div>
-
-              <div class="col-md-3 col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'common.phone' | translate }} <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                  <input type="tel" class="form-control"
-                         formControlName="telefono"
-                         placeholder="8888-8888"
-                         autocomplete="tel" />
-                </div>
-                @if (invalid(perfilForm, 'telefono')) {
-                  <div class="invalid-msg">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'auth.phone_required' | translate }}
-                  </div>
-                }
-              </div>
-
-              <div class="col-md-3 col-sm-6">
-                <label class="form-label fw-medium">{{ 'common.email' | translate }}</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                  <input type="email" class="form-control"
-                         formControlName="email"
-                         readonly tabindex="-1"
-                         autocomplete="email" />
-                </div>
-                <div class="form-text">
-                  <i class="bi bi-lock me-1"></i>{{ 'file_create.email_readonly' | translate }}
-                </div>
-              </div>
-
+            <div class="c-3">
+              <label class="form-label" for="perfil-nombre">
+                {{ 'common.name' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <input id="perfil-nombre" type="text" class="form-control"
+                     formControlName="nombre"
+                     [placeholder]="'common.name' | translate"
+                     autocomplete="given-name" />
+              @if (invalid(perfilForm, 'nombre')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'admin_users.name_required' | translate }}
+                </p>
+              }
             </div>
+
+            <div class="c-3">
+              <label class="form-label" for="perfil-apellido">
+                {{ 'common.lastname' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <input id="perfil-apellido" type="text" class="form-control"
+                     formControlName="apellido"
+                     [placeholder]="'common.lastname' | translate"
+                     autocomplete="family-name" />
+              @if (invalid(perfilForm, 'apellido')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'admin_users.lastname_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <div class="c-3">
+              <label class="form-label" for="perfil-telefono">
+                {{ 'common.phone' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-telephone"></i></span>
+                <input id="perfil-telefono" type="tel" class="form-control"
+                       formControlName="telefono"
+                       placeholder="8888-8888"
+                       autocomplete="tel" />
+              </div>
+              @if (invalid(perfilForm, 'telefono')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'auth.phone_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <div class="c-3">
+              <label class="form-label" for="perfil-email">{{ 'common.email' | translate }}</label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+                <input id="perfil-email" type="email" class="form-control"
+                       formControlName="email"
+                       readonly tabindex="-1"
+                       autocomplete="email" />
+              </div>
+              <p class="field-hint">
+                <i class="bi bi-lock" aria-hidden="true"></i>
+                {{ 'file_create.email_readonly' | translate }}
+              </p>
+            </div>
+
           </form>
         </div>
-      </div>
+      </section>
 
-      <!-- ══════════════════════════════════════════════════════════════
-           PASO 3 · Fecha de visita
-           ══════════════════════════════════════════════════════════════ -->
-      <div class="card section-card"
-           [class.section-card--done]="step3Complete()">
-        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-          <span class="section-num" [class.section-num--done]="step3Complete()">
+      <!-- ═══ PASO 3 · Visita ════════════════════════════════════════════════ -->
+      <section class="section-card area-visita" [class.section-card--done]="step3Complete()"
+               [attr.aria-label]="'file_create.step3_title' | translate">
+
+        <div class="section-head">
+          <span class="section-num" [class.section-num--done]="step3Complete()" aria-hidden="true">
             @if (step3Complete()) { <i class="bi bi-check-lg"></i> } @else { 3 }
           </span>
-          <div class="flex-grow-1 min-w-0">
-            <span class="section-title d-block">{{ 'file_create.step3_title' | translate }}</span>
-            <small class="text-muted">{{ 'file_create.step3_hint' | translate }}</small>
-          </div>
+          <span class="section-head__text">
+            <span class="section-title">{{ 'file_create.step3_title' | translate }}</span>
+            <small class="section-hint">{{ 'file_create.step3_hint' | translate }}</small>
+          </span>
           @if (step3Complete()) {
-            <span class="badge step-done-badge flex-shrink-0">
-              <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
+            <span class="done-pill">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              {{ 'file_create.done' | translate }}
             </span>
           }
         </div>
-        <div class="card-body p-4">
-          <form [formGroup]="expedienteForm">
-            <div class="row g-3">
 
-              <div class="col-md-4 col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'file_create.desired_date' | translate }} <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                  <input type="date" class="form-control" formControlName="fecha_visita" />
-                </div>
-                @if (invalid(expedienteForm, 'fecha_visita')) {
-                  <div class="invalid-msg">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'file_create.field_required' | translate }}
-                  </div>
-                }
+        <div class="section-body">
+          <form [formGroup]="expedienteForm" class="fgrid">
+
+            <div class="c-3">
+              <label class="form-label" for="visita-fecha">
+                {{ 'file_create.desired_date' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-calendar3"></i></span>
+                <input id="visita-fecha" type="date" class="form-control" formControlName="fecha_visita" />
               </div>
-
-              <div class="col-md-4 col-sm-6">
-                <label class="form-label fw-medium">
-                  {{ 'file_create.preferred_time' | translate }} <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-clock"></i></span>
-                  <input type="time" class="form-control" formControlName="hora_visita" />
-                </div>
-                @if (invalid(expedienteForm, 'hora_visita')) {
-                  <div class="invalid-msg">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'file_create.field_required' | translate }}
-                  </div>
-                }
-              </div>
-
-              <div class="col-md-4 align-self-end">
-                <div class="visit-note d-flex align-items-center gap-2 py-2 px-3 rounded-3 small">
-                  <i class="bi bi-info-circle flex-shrink-0"></i>
-                  <span>{{ 'file_create.schedule_before' | translate }}
-                    <strong>{{ 'file_create.schedule_days' | translate }}</strong>.
-                    {{ 'file_create.schedule_after' | translate }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="col-12">
-                <label class="form-label fw-medium">
-                  {{ 'file_create.problem_desc' | translate }}
-                  <span class="text-muted fw-normal">({{ 'common.optional' | translate }})</span>
-                </label>
-                <textarea class="form-control" rows="3"
-                          formControlName="descripcion"
-                          maxlength="500"
-                          [placeholder]="'file_create.problem_placeholder' | translate">
-                </textarea>
-                <div class="d-flex justify-content-between align-items-center mt-1">
-                  <div class="form-text">{{ 'file_create.problem_hint' | translate }}</div>
-                  <span class="char-counter"
-                        [class.char-counter--warn]="descripcionLen() > 450">
-                    {{ descripcionLen() }}/500
-                  </span>
-                </div>
-              </div>
-
+              @if (invalid(expedienteForm, 'fecha_visita')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.field_required' | translate }}
+                </p>
+              }
             </div>
+
+            <div class="c-3">
+              <label class="form-label" for="visita-hora">
+                {{ 'file_create.preferred_time' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-clock"></i></span>
+                <input id="visita-hora" type="time" class="form-control" formControlName="hora_visita" />
+              </div>
+              @if (invalid(expedienteForm, 'hora_visita')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.field_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <!-- 3 + 3 + 6 = fila completa en tarjeta ancha; la nota deja de ser
+                 un hueco suelto al final de la fila. -->
+            <div class="c-6">
+              <div class="info-note">
+                <i class="bi bi-info-circle flex-shrink-0" aria-hidden="true"></i>
+                <span>{{ 'file_create.schedule_before' | translate }}
+                  <strong>{{ 'file_create.schedule_days' | translate }}</strong>.
+                  {{ 'file_create.schedule_after' | translate }}
+                </span>
+              </div>
+            </div>
+
+            <div class="c-12">
+              <label class="form-label" for="visita-descripcion">
+                {{ 'file_create.problem_desc' | translate }}
+                <span class="opt-label">({{ 'common.optional' | translate }})</span>
+              </label>
+              <textarea id="visita-descripcion" class="form-control" rows="3"
+                        formControlName="descripcion"
+                        maxlength="500"
+                        [placeholder]="'file_create.problem_placeholder' | translate"></textarea>
+              <div class="field-foot">
+                <small class="field-hint mb-0">{{ 'file_create.problem_hint' | translate }}</small>
+                <span class="char-counter" [class.char-counter--warn]="descripcionLen() > 450">
+                  {{ descripcionLen() }}/500
+                </span>
+              </div>
+            </div>
+
           </form>
         </div>
-      </div>
+      </section>
 
-      <!-- ══════════════════════════════════════════════════════════════
-           PASO 4 · Localización
-           ══════════════════════════════════════════════════════════════ -->
-      <div class="card section-card"
-           [class.section-card--done]="step4Complete()">
-        <div class="card-header section-header px-4 py-3 d-flex align-items-center gap-3">
-          <span class="section-num" [class.section-num--done]="step4Complete()">
+      <!-- ═══ PASO 4 · Localización ══════════════════════════════════════════ -->
+      <section class="section-card area-ubicacion" [class.section-card--done]="step4Complete()"
+               [attr.aria-label]="'file_create.step4_title' | translate">
+
+        <div class="section-head">
+          <span class="section-num" [class.section-num--done]="step4Complete()" aria-hidden="true">
             @if (step4Complete()) { <i class="bi bi-check-lg"></i> } @else { 4 }
           </span>
-          <div class="flex-grow-1 min-w-0">
-            <span class="section-title d-block">{{ 'file_create.step4_title' | translate }}</span>
-            <small class="text-muted">{{ 'file_create.step4_hint' | translate }}</small>
-          </div>
+          <span class="section-head__text">
+            <span class="section-title">{{ 'file_create.step4_title' | translate }}</span>
+            <small class="section-hint">{{ 'file_create.step4_hint' | translate }}</small>
+          </span>
+          <span class="country-badge" [title]="'file_create.country' | translate">
+            <i class="bi bi-geo-alt" aria-hidden="true"></i>{{ 'file_create.country_ca' | translate }}
+          </span>
           @if (step4Complete()) {
-            <span class="badge step-done-badge flex-shrink-0">
-              <i class="bi bi-check me-1"></i>{{ 'file_create.done' | translate }}
+            <span class="done-pill">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>
+              {{ 'file_create.done' | translate }}
             </span>
           }
         </div>
-        <div class="card-body p-4">
-          <form [formGroup]="localizacionForm">
-            <div class="row g-4">
 
-              <!-- Tipo de inmueble -->
-              <div class="col-12">
-                <label class="form-label fw-medium mb-2">
-                  {{ 'file_create.property_type' | translate }} <span class="text-danger">*</span>
-                </label>
-                <div class="tipo-group" role="radiogroup">
-                  @for (tipo of tiposInmueble; track tipo.value) {
-                    <div>
-                      <input type="radio" class="btn-check"
-                             [id]="'tipo-' + tipo.value"
-                             autocomplete="off"
-                             [value]="tipo.value"
-                             [checked]="localizacionForm.get('tipo_inmueble')?.value === tipo.value"
-                             (change)="localizacionForm.get('tipo_inmueble')?.setValue(tipo.value)" />
-                      <label class="tipo-btn btn btn-outline-secondary"
-                             [for]="'tipo-' + tipo.value">
-                        <i class="bi {{ tipo.icon }} tipo-btn__icon"></i>
-                        <span class="tipo-btn__label">{{ tipo.label | translate }}</span>
-                      </label>
-                    </div>
-                  }
+        <div class="section-body">
+          <!-- Las cinco casillas de dirección caben en una sola fila en cuanto
+               la tarjeta da de sí; con el rail abierto siguen llenando la fila
+               porque la medida es el ancho de la TARJETA, no el del viewport. -->
+          <form [formGroup]="localizacionForm" class="fgrid">
+
+            <!-- Origen de la dirección · el perfil del cliente no se modifica -->
+            @if (perfilConDireccion()) {
+              <div class="c-12">
+                <div class="addr-source">
+                  <i class="bi bi-info-circle flex-shrink-0" aria-hidden="true"></i>
+                  <span class="addr-source__text">
+                    @if (direccionDesdePerfil()) {
+                      {{ 'file_create.address_from_profile' | translate }}
+                    } @else {
+                      {{ 'file_create.address_from_profile_off' | translate }}
+                    }
+                  </span>
+                  <button type="button" class="addr-source__btn" (click)="aplicarDireccionPerfil()"
+                          [disabled]="direccionDesdePerfil()">
+                    <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
+                    {{ 'file_create.use_my_address' | translate }}
+                  </button>
                 </div>
-                @if (invalid(localizacionForm, 'tipo_inmueble')) {
-                  <div class="invalid-msg mt-1">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ 'file_create.type_required' | translate }}
+              </div>
+            }
+
+            <div class="c-12">
+              <span class="form-label d-block" id="tipo-inmueble-label">
+                {{ 'file_create.property_type' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </span>
+              <!-- auto-fit: las cinco opciones se estiran hasta llenar el ancho
+                   en lugar de amontonarse a la izquierda. -->
+              <div class="tipo-group" role="radiogroup" aria-labelledby="tipo-inmueble-label">
+                @for (tipo of tiposInmueble; track tipo.value) {
+                  <div class="tipo-cell">
+                    <input type="radio" class="btn-check"
+                           [id]="'tipo-' + tipo.value"
+                           name="tipo_inmueble"
+                           autocomplete="off"
+                           [value]="tipo.value"
+                           [checked]="localizacionForm.get('tipo_inmueble')?.value === tipo.value"
+                           (change)="localizacionForm.get('tipo_inmueble')?.setValue(tipo.value)" />
+                    <label class="tipo-btn" [for]="'tipo-' + tipo.value">
+                      <i class="bi {{ tipo.icon }} tipo-btn__icon" aria-hidden="true"></i>
+                      <span class="tipo-btn__label">{{ tipo.label | translate }}</span>
+                    </label>
                   </div>
                 }
               </div>
-
-              <!-- País (solo Canadá por ahora) -->
-              <div class="col-12">
-                <label class="form-label fw-medium">{{ 'file_create.country' | translate }}</label>
-                <div class="d-flex gap-2">
-                  <span class="country-tag">
-                    <i class="bi bi-geo-alt"></i>{{ 'file_create.country_ca' | translate }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- ── Costa Rica ── -->
-              @if (paisActual() === 'costa_rica') {
-
-                <div class="col-12">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.full_address' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" class="form-control"
-                           formControlName="direccion"
-                           [placeholder]="'file_create.address_placeholder' | translate"
-                           autocomplete="street-address" />
-                  </div>
-                  @if (invalid(localizacionForm, 'direccion')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.address_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">
-                    {{ 'file.province' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <select class="form-select" formControlName="provincia"
-                          autocomplete="address-level1">
-                    <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
-                    @for (p of provincias; track p) {
-                      <option [value]="p">{{ p }}</option>
-                    }
-                  </select>
-                  @if (invalid(localizacionForm, 'provincia')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.field_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">
-                    {{ 'file.canton' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <input type="text" class="form-control"
-                         formControlName="canton"
-                         placeholder="San José"
-                         autocomplete="address-level2" />
-                  @if (invalid(localizacionForm, 'canton')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.field_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">
-                    {{ 'file.district' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <input type="text" class="form-control"
-                         formControlName="distrito"
-                         placeholder="Carmen"
-                         autocomplete="address-level3" />
-                  @if (invalid(localizacionForm, 'distrito')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.field_required' | translate }}
-                    </div>
-                  }
-                </div>
-
+              @if (invalid(localizacionForm, 'tipo_inmueble')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.type_required' | translate }}
+                </p>
               }
+            </div>
 
-              <!-- ── Canadá ── -->
-              @if (paisActual() === 'canada') {
+            <!-- ── Dirección canadiense ─────────────────────────────────────── -->
+            <div class="c-unit">
+              <label class="form-label" for="loc-unidad">
+                {{ 'file_create.unit_number' | translate }}
+                <span class="opt-label">({{ 'common.optional' | translate }})</span>
+              </label>
+              <input id="loc-unidad" type="text" class="form-control"
+                     formControlName="numero_unidad"
+                     [placeholder]="'file_create.unit_placeholder' | translate" />
+              <p class="field-hint">{{ 'file_create.unit_hint' | translate }}</p>
+            </div>
 
-                <div class="col-md-2 col-sm-4">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.unit_number' | translate }}
-                    <span class="text-muted fw-normal">({{ 'common.optional' | translate }})</span>
-                  </label>
-                  <input type="text" class="form-control"
-                         formControlName="numero_unidad"
-                         [placeholder]="'file_create.unit_placeholder' | translate" />
-                  <div class="form-text">{{ 'file_create.unit_hint' | translate }}</div>
-                </div>
-
-                <div class="col-md-10 col-sm-8">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.street_address' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                    <input type="text" class="form-control"
-                           formControlName="calle"
-                           [placeholder]="'file_create.street_placeholder' | translate"
-                           autocomplete="street-address" />
-                  </div>
-                  @if (invalid(localizacionForm, 'calle')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.address_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-5">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.ca_city' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <input type="text" class="form-control"
-                         formControlName="ciudad"
-                         placeholder="Montréal"
-                         autocomplete="address-level2" />
-                  @if (invalid(localizacionForm, 'ciudad')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.field_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.province_territory' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <select class="form-select"
-                          formControlName="provincia_ca"
-                          autocomplete="address-level1">
-                    <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
-                    @for (p of provinciasCanada; track p.code) {
-                      <option [value]="p.code">{{ p.code }} — {{ p.nombre }}</option>
-                    }
-                  </select>
-                  @if (invalid(localizacionForm, 'provincia_ca')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      {{ 'file_create.field_required' | translate }}
-                    </div>
-                  }
-                </div>
-
-                <div class="col-md-3">
-                  <label class="form-label fw-medium">
-                    {{ 'file_create.postal_code' | translate }} <span class="text-danger">*</span>
-                  </label>
-                  <input type="text" class="form-control text-uppercase"
-                         formControlName="codigo_postal"
-                         [placeholder]="'file_create.postal_placeholder' | translate"
-                         autocomplete="postal-code"
-                         maxlength="7" />
-                  @if (invalid(localizacionForm, 'codigo_postal')) {
-                    <div class="invalid-msg">
-                      <i class="bi bi-exclamation-circle"></i>
-                      @if (localizacionForm.get('codigo_postal')?.errors?.['required']) {
-                        {{ 'file_create.field_required' | translate }}
-                      } @else {
-                        {{ 'file_create.postal_invalid' | translate }}
-                      }
-                    </div>
-                  }
-                </div>
-
-              }
-
-              <!-- GPS -->
-              <div class="col-md-4">
-                <button type="button"
-                        class="gps-toggle w-100"
-                        (click)="gpsVisible.set(!gpsVisible())">
-                  <i class="bi bi-compass"></i>
-                  <span class="fw-medium">{{ 'file_create.gps_coords' | translate }}</span>
-                  <span class="text-muted fw-normal small d-none d-lg-inline">
-                    ({{ 'common.optional' | translate }})
-                  </span>
-                  <i class="bi ms-auto gps-chevron"
-                     [class.bi-chevron-down]="!gpsVisible()"
-                     [class.bi-chevron-up]="gpsVisible()"></i>
-                </button>
+            <div class="c-street">
+              <label class="form-label" for="loc-calle">
+                {{ 'file_create.street_address' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text" aria-hidden="true"><i class="bi bi-signpost"></i></span>
+                <input id="loc-calle" type="text" class="form-control"
+                       formControlName="calle"
+                       [placeholder]="'file_create.street_placeholder' | translate"
+                       autocomplete="street-address" />
               </div>
+              @if (invalid(localizacionForm, 'calle')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.address_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <div class="c-city">
+              <label class="form-label" for="loc-ciudad">
+                {{ 'file_create.ca_city' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <input id="loc-ciudad" type="text" class="form-control"
+                     formControlName="ciudad"
+                     placeholder="Montréal"
+                     autocomplete="address-level2" />
+              @if (invalid(localizacionForm, 'ciudad')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.field_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <div class="c-prov">
+              <label class="form-label" for="loc-provincia">
+                {{ 'file_create.province_territory' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <select id="loc-provincia" class="form-select"
+                      formControlName="provincia_ca"
+                      autocomplete="address-level1">
+                <option value="">{{ 'file_create.select_placeholder' | translate }}</option>
+                @for (p of provinciasCanada; track p.code) {
+                  <option [value]="p.code">{{ p.code }} — {{ p.nombre }}</option>
+                }
+              </select>
+              @if (invalid(localizacionForm, 'provincia_ca')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  {{ 'file_create.field_required' | translate }}
+                </p>
+              }
+            </div>
+
+            <div class="c-postal">
+              <label class="form-label" for="loc-postal">
+                {{ 'file_create.postal_code' | translate }}
+                <span class="req-mark" aria-hidden="true">*</span>
+              </label>
+              <input id="loc-postal" type="text" class="form-control text-uppercase"
+                     formControlName="codigo_postal"
+                     [placeholder]="'file_create.postal_placeholder' | translate"
+                     autocomplete="postal-code"
+                     maxlength="7" />
+              @if (invalid(localizacionForm, 'codigo_postal')) {
+                <p class="field-error" role="alert">
+                  <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+                  @if (localizacionForm.get('codigo_postal')?.errors?.['required']) {
+                    {{ 'file_create.field_required' | translate }}
+                  } @else {
+                    {{ 'file_create.postal_invalid' | translate }}
+                  }
+                </p>
+              }
+            </div>
+
+            <!-- GPS · plegado por defecto; al abrirse ocupa el ancho completo -->
+            <div class="c-12">
+              <button type="button" class="gps-toggle"
+                      (click)="gpsVisible.set(!gpsVisible())"
+                      [attr.aria-expanded]="gpsVisible()"
+                      aria-controls="gps-panel">
+                <i class="bi bi-compass" aria-hidden="true"></i>
+                <span class="fw-medium">{{ 'file_create.gps_coords' | translate }}</span>
+                <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                <i class="bi gps-toggle__caret"
+                   [class.bi-chevron-down]="!gpsVisible()"
+                   [class.bi-chevron-up]="gpsVisible()"
+                   aria-hidden="true"></i>
+              </button>
 
               @if (gpsVisible()) {
-                <div class="col-12">
-                  <div class="gps-panel">
-                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
-                      <p class="text-muted small mb-0 flex-grow-1">
-                        {{ 'file_create.gps_hint' | translate }}
-                      </p>
-                      <button type="button"
-                              class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 flex-shrink-0"
-                              (click)="usarUbicacion()"
-                              [disabled]="ubicacionCargando()">
-                        @if (ubicacionCargando()) {
-                          <span class="spinner-border spinner-border-sm"></span>
-                          {{ 'file_create.getting_location' | translate }}
-                        } @else {
-                          <i class="bi bi-crosshair2"></i>
-                          {{ 'file_create.use_location' | translate }}
-                        }
-                      </button>
+                <div id="gps-panel" class="gps-panel">
+                  <p class="gps-panel__hint">{{ 'file_create.gps_hint' | translate }}</p>
+
+                  <div class="gps-panel__fields">
+                    <div>
+                      <label class="form-label" for="loc-latitud">{{ 'file_create.latitude' | translate }}</label>
+                      <input id="loc-latitud" type="number" class="form-control"
+                             formControlName="latitud" step="any" placeholder="45.5019" />
                     </div>
-                    @if (ubicacionError()) {
-                      <div class="alert create-alert-warn py-2 small mb-3 d-flex align-items-center gap-2">
-                        <i class="bi bi-exclamation-triangle flex-shrink-0"></i>
-                        {{ ubicacionError() | translate }}
-                      </div>
-                    }
-                    <div class="row g-2">
-                      <div class="col-md-3 col-6">
-                        <label class="form-label small mb-1">{{ 'file_create.latitude' | translate }}</label>
-                        <input type="number" class="form-control form-control-sm"
-                               formControlName="latitud"
-                               step="any" placeholder="9.9341" />
-                      </div>
-                      <div class="col-md-3 col-6">
-                        <label class="form-label small mb-1">{{ 'file_create.longitude' | translate }}</label>
-                        <input type="number" class="form-control form-control-sm"
-                               formControlName="longitud"
-                               step="any" placeholder="-84.0877" />
-                      </div>
+                    <div>
+                      <label class="form-label" for="loc-longitud">{{ 'file_create.longitude' | translate }}</label>
+                      <input id="loc-longitud" type="number" class="form-control"
+                             formControlName="longitud" step="any" placeholder="-73.5674" />
                     </div>
+                    <button type="button" class="btn btn-outline-primary gps-panel__btn"
+                            (click)="usarUbicacion()"
+                            [disabled]="ubicacionCargando()">
+                      @if (ubicacionCargando()) {
+                        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                        {{ 'file_create.getting_location' | translate }}
+                      } @else {
+                        <i class="bi bi-crosshair2 me-2" aria-hidden="true"></i>
+                        {{ 'file_create.use_location' | translate }}
+                      }
+                    </button>
                   </div>
+
+                  @if (ubicacionError()) {
+                    <p class="field-error mt-3" role="alert">
+                      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                      {{ ubicacionError() | translate }}
+                    </p>
+                  }
                 </div>
               }
-
             </div>
+
           </form>
         </div>
-      </div>
+      </section>
+    </div><!-- /form-canvas -->
 
-      <!-- Espacio para la barra sticky en móvil -->
-      <div class="pb-mobile-bar d-lg-none"></div>
+    <!-- ══ Raíl · resumen en vivo + acciones + qué pasa después ══════════════
+         En ≥992 px es una columna sticky; por debajo baja al final del flujo
+         (ya no se oculta: el resumen y el proceso también sirven en móvil). -->
+    <aside class="create-rail" [attr.aria-label]="'admin_file_create.summary_title' | translate">
+      <div class="rail-sticky">
 
-    </div><!-- /create-main -->
+        <div class="rail-card">
+          <p class="rail-label">{{ 'admin_file_create.summary_title' | translate }}</p>
 
-    <!-- ══════════════════════════════════════════════════════════════════
-         COLUMNA DERECHA — sidebar sticky (solo desktop)
-         ══════════════════════════════════════════════════════════════════ -->
-    <aside class="create-sidebar d-none d-lg-flex">
-
-      <!-- Card 1: Progreso + Submit -->
-      <div class="csd-card">
-        <div class="csd-accent" aria-hidden="true"></div>
-
-        <p class="page-eyebrow mb-3">
-          {{ completedSteps() }}&nbsp;{{ 'common.of' | translate }}&nbsp;4&nbsp;{{ 'file_create.steps_label' | translate }}
-        </p>
-
-        <!-- Checklist de pasos -->
-        <div class="csd-steps">
-          @for (step of STEPS; let i = $index; track step) {
-            <div class="csd-step" [class.csd-step--done]="stepDone(i)">
-              <div class="csd-step__circle">
-                @if (stepDone(i)) {
-                  <i class="bi bi-check-lg"></i>
-                } @else {
-                  {{ i + 1 }}
+          <ul class="rail-list list-unstyled mb-0">
+            @for (row of resumen(); track row.label) {
+              <li class="rail-row" [class.rail-row--done]="row.done">
+                <i class="bi {{ row.icon }} rail-row__icon" aria-hidden="true"></i>
+                <span class="rail-row__text">
+                  <span class="rail-row__lbl">{{ row.label | translate }}</span>
+                  <span class="rail-row__val" [class.rail-row__val--empty]="!row.value">
+                    {{ row.value ?? ('admin_file_create.summary_pending' | translate) }}
+                  </span>
+                </span>
+                @if (row.done) {
+                  <i class="bi bi-check-circle rail-row__check" aria-hidden="true"></i>
                 }
-              </div>
-              <span class="csd-step__label">{{ step | translate }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Acciones · en móvil manda la barra fija de abajo -->
+        <div class="rail-card rail-card--actions d-none d-lg-block">
+          @if (error()) {
+            <div class="form-alert mb-3" role="alert">
+              <i class="bi bi-exclamation-triangle flex-shrink-0" aria-hidden="true"></i>
+              <span>{{ error() | translate }}</span>
             </div>
           }
-        </div>
-
-        <!-- Mini progress bar -->
-        <div class="csd-progress-track">
-          <div class="csd-progress-fill"
-               [style.width.%]="progressPct()"
-               role="progressbar"
-               [attr.aria-valuenow]="progressPct()"
-               aria-valuemin="0" aria-valuemax="100">
-          </div>
-        </div>
-
-        <!-- Error (desktop) -->
-        @if (error()) {
-          <div class="csd-error">
-            <i class="bi bi-exclamation-triangle"></i>
-            <span>{{ error() | translate }}</span>
-          </div>
-        }
-
-        <!-- Acciones -->
-        <div class="csd-actions">
-          <button type="button" class="btn btn-primary w-100 py-2"
+          <button type="button" class="btn btn-primary w-100 fw-semibold mb-2"
                   (click)="onSubmit()" [disabled]="enviando()">
             @if (enviando()) {
-              <span class="spinner-border spinner-border-sm me-2"></span>{{ 'file_create.sending' | translate }}
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              {{ 'file_create.sending' | translate }}
             } @else {
-              <i class="bi bi-send me-2"></i>{{ 'file_create.submit_btn' | translate }}
+              <i class="bi bi-send me-2" aria-hidden="true"></i>
+              {{ 'file_create.submit_btn' | translate }}
             }
           </button>
-          <button type="button" class="btn btn-outline-secondary w-100 mt-2"
+          <button type="button" class="btn btn-outline-secondary w-100"
                   (click)="onCancel()" [disabled]="enviando()">
-            <i class="bi bi-arrow-left me-1"></i>{{ 'common.cancel' | translate }}
+            {{ 'common.cancel' | translate }}
           </button>
-          <p class="csd-privacy">
-            <i class="bi bi-shield-check"></i>
+          <p class="rail-privacy">
+            <i class="bi bi-shield-check" aria-hidden="true"></i>
             {{ 'file_create.privacy_note' | translate }}
           </p>
         </div>
-      </div><!-- /csd-card progreso -->
 
-      <!-- Card 2: ¿Qué pasa después? -->
-      <div class="csd-card">
-        <p class="csd-card__title">{{ 'file_create.what_next' | translate }}</p>
-        <div class="csd-process">
-
-          <div class="csd-proc-item">
-            <div class="csd-proc-num">01</div>
-            <div class="csd-proc-body">
-              <p class="csd-proc-title">{{ 'file_create.process1_title' | translate }}</p>
-              <p class="csd-proc-desc">{{ 'file_create.process1_text' | translate }}</p>
-            </div>
-          </div>
-
-          <div class="csd-proc-item">
-            <div class="csd-proc-num">02</div>
-            <div class="csd-proc-body">
-              <p class="csd-proc-title">{{ 'file_create.process2_title' | translate }}</p>
-              <p class="csd-proc-desc">{{ 'file_create.process2_text' | translate }}</p>
-            </div>
-          </div>
-
-          <div class="csd-proc-item">
-            <div class="csd-proc-num">03</div>
-            <div class="csd-proc-body">
-              <p class="csd-proc-title">{{ 'file_create.process3_title' | translate }}</p>
-              <p class="csd-proc-desc">{{ 'file_create.process3_text' | translate }}</p>
-            </div>
-          </div>
-
-          <div class="csd-proc-item csd-proc-item--last">
-            <div class="csd-proc-num csd-proc-num--success">04</div>
-            <div class="csd-proc-body">
-              <p class="csd-proc-title">{{ 'file_create.process4_title' | translate }}</p>
-              <p class="csd-proc-desc">{{ 'file_create.process4_text' | translate }}</p>
-            </div>
-          </div>
-
+        <!-- ¿Qué pasa después? · línea de tiempo del proceso -->
+        <div class="rail-card">
+          <p class="rail-label">{{ 'file_create.what_next' | translate }}</p>
+          <ol class="proc list-unstyled mb-0">
+            @for (paso of PROCESO; let i = $index; let last = $last; track paso.title) {
+              <li class="proc__item" [class.proc__item--last]="last">
+                <span class="proc__num" [class.proc__num--end]="last">{{ paso.num }}</span>
+                <span class="proc__body">
+                  <span class="proc__title">{{ paso.title | translate }}</span>
+                  <span class="proc__desc">{{ paso.text | translate }}</span>
+                </span>
+              </li>
+            }
+          </ol>
         </div>
-      </div><!-- /csd-card proceso -->
 
-    </aside><!-- /create-sidebar -->
+      </div>
+    </aside>
 
-  </div><!-- /create-layout -->
-</div><!-- /create-root -->
+  </div><!-- /create-body -->
 
-<!-- ── Barra de acciones sticky — solo móvil ─────────────────────────────── -->
-<div class="create-actions-mobile d-lg-none">
+  <div class="pb-mobile-bar d-lg-none"></div>
+</div>
+
+<!-- ══ Barra de acciones fija · solo móvil ═════════════════════════════════ -->
+<div class="form-actions-mobile d-lg-none">
   <button type="button" class="btn btn-outline-secondary"
           (click)="onCancel()" [disabled]="enviando()">
-    <i class="bi bi-arrow-left me-1"></i>{{ 'common.cancel' | translate }}
+    {{ 'common.cancel' | translate }}
   </button>
-  <button type="button" class="btn btn-primary fw-semibold px-4"
+  <button type="button" class="btn btn-primary fw-semibold flex-grow-1"
           (click)="onSubmit()" [disabled]="enviando()">
     @if (enviando()) {
-      <span class="spinner-border spinner-border-sm me-2"></span>{{ 'file_create.sending' | translate }}
+      <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+      {{ 'file_create.sending' | translate }}
     } @else {
-      <i class="bi bi-send me-2"></i>{{ 'file_create.submit_btn' | translate }}
+      <i class="bi bi-send me-2" aria-hidden="true"></i>
+      {{ 'file_create.submit_btn' | translate }}
     }
   </button>
 </div>

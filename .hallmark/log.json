@@ -111,5 +111,59 @@
     "theme_axes": "light / serif-display / warm-gold",
     "enrichment": "none",
     "brief": "client/offers-received · rediseño · dos patrones: cards pendientes + rows gestionados"
+  },
+  {
+    "date": "2026-08-12",
+    "macrostructure": "Workbench (app-shell - lienzo full-bleed + rail 21rem, 2-col canvas >=1600px)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "app",
+    "brief": "admin/file/create - redisenno - sin max-width, container-queries por tarjeta, stepper etiquetado (6 barras de progreso -> 2), rail = resumen en vivo, service-grid auto-fill, iconos filled -> line"
+  },
+  {
+    "date": "2026-08-13",
+    "macrostructure": "Workbench (app-shell - lienzo full-bleed + rail 19/21rem, 2-col canvas >=1600px)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "app",
+    "brief": "estimator/file/create - redisenno - gemelo del admin ya aprobado: container-xl -> container-fluid (100% del ancho), 5 representaciones de progreso -> 2 (stepper etiquetado + contador x/4), rail = resumen en vivo de los valores elegidos, fgrid por container-query (5 casillas de direccion en una fila), service-grid auto-fill, iconos filled -> line, GPS en panel de 3 columnas"
+  },
+  {
+    "date": "2026-08-13",
+    "macrostructure": "Workbench (app-shell - cabecera con KPI, chips de grupo, toolbar, tabla o rejilla de tarjetas)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "app",
+    "brief": "estimator/file/list - nuevo - lista de expedientes del estimador agrupada por estado (creados / en estimacion / estimados), doble vista tabla+tarjetas con toggle (tarjetas forzadas <md), busqueda unica sobre numero+servicio+cliente+direccion, pastillas de estado con tokens semanticos, tarjetas accesibles por teclado (enter/space)"
+  },
+  {
+    "date": "2026-08-13",
+    "macrostructure": "Workbench (app-shell - lienzo full-bleed + rail 19/21rem, 2-col canvas >=1600px)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "app",
+    "brief": "estimator/file/edit - nuevo - copia visual exacta de estimator/file/create (mismo CSS byte a byte + reglas file-id/file-num/file-state/edit-loading), cabecera con numero de expediente y pastilla de estado, estado de carga, nota permanente de alcance de direccion (solo afecta al expediente, nunca al perfil del cliente)"
+  },
+  {
+    "date": "2026-08-14",
+    "macrostructure": "Split-Form (app-shell - formulario + rail sticky; paso 4 con rejilla propia por container-query)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "component",
+    "brief": "client/file/create - redisenno quirurgico del paso 4 (Localizacion) - Bootstrap row/col-md-* -> .loc-grid de 12 columnas por container-query sobre la tarjeta (el rail de 340px hacia que col-md-* rompiera donde no tocaba): direccion completa en una fila a partir de 62rem, dos filas llenas entre 34-62rem; la fila muerta de Pais pasa a pastilla en la banda del tipo de inmueble; tipos en rejilla auto-fit a todo el ancho sin clases .btn ni !important (8 estados propios); GPS a ancho completo con lat/lon/boton en linea y coordenadas de ejemplo de Montreal; labels con for/id, role=alert en errores, focus ring valido"
+  },
+  {
+    "date": "2026-08-14",
+    "macrostructure": "Workbench (app-shell - lienzo full-bleed + rail 19/21rem; canvas 2-col >=1600px con servicio a ancho completo)",
+    "theme": "custom (locked: design.md - warm editorial - beige paper - gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "scope": "component",
+    "brief": "client/file/create - redisenno completo del componente - de Split-Form a Workbench, hermano del admin/estimator ya aprobados pero con su propia reparticion: 5 representaciones simultaneas del progreso (pastilla + tracker + barra + checklist del rail + barra del rail) -> 2 (contador x/4 + stepper etiquetado); ancho 100% sin col-md-* (cada tarjeta es container-query y reparte sus campos por su ancho REAL, no por el del viewport que el rail falsea); .fgrid de 12 columnas con bandas 30/46rem calculadas para que ninguna fila quede a medias (contacto 3+3+3+3, visita 3+3+6, direccion 2+4+2+2+2); grid-areas servicio a lo ancho / contacto|visita / ubicacion a lo ancho a partir de 1600px; service-grid auto-fill; rail = resumen en vivo (nuevo computed resumen()) + acciones + 'que pasa despues', y en movil baja al final del flujo en vez de ocultarse; pais como insignia en la cabecera del paso 4"
   }
 ]

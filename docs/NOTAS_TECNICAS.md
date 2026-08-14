@@ -34,14 +34,14 @@ La función `enviar-invitacion` sí devuelve sus errores con código traducible
 constructor no está internacionalizado**:
 
 - [`supabase/functions/enviar-invitacion/index.ts:274`](../supabase/functions/enviar-invitacion/index.ts#L274) — `correoHtml()` emite `<html lang="es">` y todo el copy en español.
-- [`supabase/functions/enviar-invitacion/index.ts:226-243`](../supabase/functions/enviar-invitacion/index.ts#L226-L243) — `fmtFecha()` y `fmtHora()` formatean con `Intl.DateTimeFormat('es-CR', …)`.
+- [`supabase/functions/enviar-invitacion/index.ts:226-243`](../supabase/functions/enviar-invitacion/index.ts#L226-L243) — `fmtFecha()` y `fmtHora()` formatean con `Intl.DateTimeFormat('es-CA', …)` sobre el huso `America/Toronto`.
 
 Consecuencias:
 
 1. El destinatario recibe el mensaje en español aunque el administrador tenga la
    aplicación en francés o inglés, y aunque el idioma por defecto del producto
    sea **FR**.
-2. Las fechas y horas de la visita salen con convención `es-CR`, no `fr-CA`,
+2. Las fechas y horas de la visita salen con convención `es-CA`, no `fr-CA`,
    a diferencia del resto de la aplicación.
 
 No hay ningún parámetro `lang` en la llamada; el idioma no es configurable desde
