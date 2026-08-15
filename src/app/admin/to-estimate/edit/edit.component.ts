@@ -178,10 +178,15 @@ export class AdminToEstimateEditComponent implements OnInit {
     }
   }
 
-  /** Solo se puede invitar cuando el expediente ya está estimado. */
+  /**
+   * Se invita desde el expediente en estimación igual que desde el ya estimado:
+   * «Enviar invitación-correo» guarda antes la estimación, y ese guardado es el
+   * que lo pasa a `estimado` — único estado desde el que la función
+   * `enviar-invitacion` acepta invitar.
+   */
   get puedeInvitar(): boolean {
     const estado = this.detalle()?.estado;
-    return estado === 'estimado' || estado === 'en_oferta';
+    return estado === 'en_estimacion' || estado === 'estimado' || estado === 'en_oferta';
   }
 
   /**
