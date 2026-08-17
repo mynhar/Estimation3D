@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Landing v4 — elementos de firma : cortina de revelado, línea de cota,
+   regla de medición y los dos conmutadores flotantes (idioma / tema).
+   Portado de assets/site.css (bloques SIGNATURE + CONTROL DOCK).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══ FIRMA 1 · CORTINA DE REVELADO INTERACTIVA ═══ */
+.reveal-scan{
+  --rev:52%;
+  position:relative; aspect-ratio:16/10; overflow:hidden;
+  border:1px solid var(--line); background:var(--void);
+  cursor:ew-resize; user-select:none; touch-action:none;
+}
+.reveal-scan img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none; }
+/* El contraste "sin documentar / documentado" no se cuenta con brillo absoluto
+   sino con la distancia entre las dos capas: en oscuro el crudo se hunde, en
+   claro se lava. En las dos claves la mitad derecha es la nítida. */
+.reveal-scan .raw{ filter:var(--raw-filter); }
+.reveal-scan .doc-layer{ position:absolute; inset:0; clip-path:inset(0 0 0 var(--rev)); }
+.reveal-scan .doc-layer img{ filter:var(--doc-filter); }
+.reveal-scan .pin{
+  position:absolute; font-family:var(--mono); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--white); background:rgba(var(--scrim),.7); border:1px solid var(--gold); padding:3px 8px; white-space:nowrap;
+  transform:translate(-50%,-50%); animation:pinpop .5s var(--ease-out) both;
+}
+.reveal-scan .pin .v{ color:var(--gold-bright); }
+@keyframes pinpop{ from{ opacity:0; transform:translate(-50%,-40%) scale(.8); } }
+.reveal-scan .rs-label{
+  position:absolute; top:16px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
+  padding:6px 12px; background:rgba(var(--scrim),.6); border:1px solid var(--line);
+}
+.reveal-scan .rs-label.left{ left:16px; color:var(--white-dim); }
+.reveal-scan .rs-label.right{ right:16px; color:var(--gold); }
+.reveal-scan .rs-handle{
+  position:absolute; top:0; bottom:0; left:var(--rev); width:2px; background:var(--scan-line);
+  box-shadow:var(--scan-glow-sm); transform:translateX(-1px); z-index:3;
+  pointer-events:none;
+}
+.reveal-scan .rs-handle .grip{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:46px; height:46px; border-radius:50%; background:var(--gold); color:var(--on-gold);
+  display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:800;
+  box-shadow:0 8px 24px -6px rgba(var(--shadow-rgb),var(--shadow-a-soft)); border:2px solid var(--void);
+}
+.reveal-scan .rs-handle .grip svg{ width:22px; height:14px; }
+.reveal-scan .hint{
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+  font-family:var(--mono); font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-faint);
+  pointer-events:none; transition:opacity .4s;
+}
+.reveal-scan.touched .hint{ opacity:0; }
+
+/* ═══ FIRMA 2 · LÍNEA DE COTA ═══ */
+.dimline{ max-width:var(--maxw); margin:0 auto; padding:64px var(--pad-x); display:flex; align-items:center; gap:18px; }
+.dimline .seg{ flex:1; height:1px; background:var(--line); position:relative; }
+.dimline .seg::before, .dimline .seg::after{ content:""; position:absolute; top:50%; width:7px; height:7px; border-top:1px solid var(--gold); border-right:1px solid var(--gold); }
+.dimline .seg::before{ left:0; transform:translateY(-50%) rotate(-135deg); }
+.dimline .seg::after{ right:0; transform:translateY(-50%) rotate(45deg); }
+.dimline .lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+.dimline .lbl b{ color:var(--white); font-weight:500; }
+
+/* ═══ FIRMA 3 · REGLA DE MEDICIÓN ═══ */
+.measure-rail{
+  position:fixed; left:0; top:0; bottom:0; width:46px; z-index:60; pointer-events:none;
+  display:none; flex-direction:column; align-items:center; justify-content:space-between;
+  padding:96px 0 26px; border-right:1px solid var(--line-2);
+  background:linear-gradient(90deg, rgba(var(--scrim),.35), transparent);
+}
+@media(min-width:1480px){ .measure-rail{ display:flex; } }
+.measure-rail .ticks{ position:absolute; inset:96px 0 26px; background-image:repeating-linear-gradient(var(--line) 0 1px, transparent 1px 28px); width:9px; left:0; }
+.measure-rail .ticks.maj{ background-image:repeating-linear-gradient(var(--gold) 0 1px, transparent 1px 112px); width:16px; opacity:.5; }
+.measure-rail .readout{
+  writing-mode:vertical-rl; font-family:var(--mono); font-size:.62rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--gold); transform:rotate(180deg); font-variant-numeric:tabular-nums;
+}
+.measure-rail .cap{ writing-mode:vertical-rl; font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; color:var(--white-faint); }
+.measure-rail .reticle{ width:14px; height:14px; position:relative; }
+.measure-rail .reticle::before, .measure-rail .reticle::after{ content:""; position:absolute; background:var(--gold); }
+.measure-rail .reticle::before{ left:50%; top:0; bottom:0; width:1px; }
+.measure-rail .reticle::after{ top:50%; left:0; right:0; height:1px; }
+
+/* ═══ CONMUTADOR DE TEMA ═══ */
+.theme-toggle{
+  position:fixed; right:24px; bottom:24px; z-index:120;
+  display:inline-flex; align-items:center; gap:2px; padding:5px;
+  background:rgba(var(--scrim),.72); backdrop-filter:blur(14px);
+  border:1px solid var(--line); border-radius:100px;
+  box-shadow:0 16px 40px -18px rgba(var(--shadow-rgb),var(--shadow-a-soft));
+}
+.theme-toggle button{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--white-dim); padding:9px 16px; border-radius:100px; transition:color .3s, background .3s;
+}
+.theme-toggle button .d{ width:8px; height:8px; border-radius:50%; border:1px solid currentColor; }
+.theme-toggle button[aria-pressed="true"]{ background:var(--gold); color:var(--on-gold); }
+.theme-toggle button[aria-pressed="true"] .d{ background:var(--on-gold); border-color:var(--on-gold); }
+@media(max-width:600px){ .theme-toggle{ right:14px; bottom:14px; } .theme-toggle button{ padding:8px 12px; } }
+
+/* ═══ CONMUTADOR DE IDIOMA ═══ */
+.lang-toggle{
+  position:fixed; right:24px; bottom:82px; z-index:120;
+  display:inline-flex; align-items:center; gap:2px; padding:5px;
+  background:rgba(var(--scrim),.72); backdrop-filter:blur(14px);
+  border:1px solid var(--line); border-radius:100px;
+  box-shadow:0 16px 40px -18px rgba(var(--shadow-rgb),var(--shadow-a-soft));
+}
+.lang-toggle button{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--white-dim); padding:9px 15px; border-radius:100px; transition:color .3s, background .3s;
+}
+.lang-toggle button[aria-pressed="true"]{ background:var(--gold); color:var(--on-gold); }
+@media(max-width:600px){ .lang-toggle{ right:14px; bottom:66px; } .lang-toggle button{ padding:8px 12px; } }
+
+@media(prefers-reduced-motion: reduce){
+  .reveal-scan .pin{ animation:none; }
+}

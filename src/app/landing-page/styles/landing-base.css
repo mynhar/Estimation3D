@@ -1,0 +1,328 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Landing v4 — base : tokens, reset, tipografía, botones, cabecera, cinta.
+   Portado de assets/site.css (v4).
+
+   Todo vive bajo `:host` en vez de `:root` / `body`: la encapsulación emulada
+   de Angular aísla estos ~200 selectores del design system de la app y de
+   Bootstrap. Por eso `.btn`→`.e3-btn` y `.container`→`.e3-container`: aunque
+   la encapsulación protege *hacia fuera*, Bootstrap se carga globalmente y sus
+   reglas sí entrarían aquí si reutilizáramos sus nombres de clase.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════ TOKENS ════════════════════════ */
+:host{
+  --void:#1E1C22;
+  --void-2:#27252D;
+  --panel:#302E38;
+  --panel-2:#37353F;
+  /* superposición dependiente del tema */
+  --scrim:30,28,34;
+
+  /* ── TRATAMIENTO DE MEDIOS ────────────────────────────────────────────────
+     El tema oscuro oscurece la foto y la vela con su propio fondo: así nace la
+     profundidad sobre papel negro. En claro esa misma receta da barro — se
+     aplasta la imagen y luego se lava con beige. Por eso la polaridad se
+     invierte: en claro la foto va luminosa y el velo de papel cubre solo la
+     franja donde hay texto. Misma receta, dos polaridades. */
+  --hero-vid-gray:.5;  --hero-vid-bright:.6;  --hero-vid-contrast:1.06; --hero-vid-sat:1;
+  --vid-gray:.14;      --vid-bright:.84;      --vid-contrast:1.04;      --vid-sat:1;
+  --svc-gray:.4;       --svc-bright:.74;      --svc-bright-hover:.88;
+  /* velo de papel sobre la foto de cada especialidad */
+  --ph-scrim:linear-gradient(0deg, rgba(var(--scrim),.94) 4%, rgba(var(--scrim),.22) 58%, rgba(var(--scrim),.42) 100%);
+  /* cortina de revelado: "sin documentar" frente a "documentado" */
+  --raw-filter:grayscale(1) brightness(.5) contrast(1.15);
+  --doc-filter:brightness(.92) contrast(1.05);
+
+  /* ── ACENTOS DE BARRIDO ───────────────────────────────────────────────────
+     En oscuro son LUZ AÑADIDA: un resplandor dorado que solo existe porque hay
+     negro alrededor. Sobre papel la luz añadida no se ve, así que en claro las
+     mismas piezas pasan a ser trazo dibujado (dorado profundo) con sombra. */
+  --scan-line:var(--gold-bright);
+  --scan-glow:0 0 18px 2px rgba(var(--gold-rgb),.6);
+  --scan-glow-sm:0 0 16px 2px rgba(var(--gold-rgb),.5);
+  --halo-a:.05;
+  --halo-a-strong:.14;
+  /* opacidad inicial del anillo que late en los puntos "en vivo" */
+  --pulse-a:.6;
+  --white:#F3F0E9;
+  --white-dim:rgba(243,240,233,.62);
+  --white-faint:rgba(243,240,233,.34);
+  --line:rgba(243,240,233,.10);
+  --line-2:rgba(243,240,233,.06);
+
+  --gold:#D4A857;
+  --gold-bright:#EBCB85;
+  --gold-deep:#A07A33;
+  /* Rol propio: texto/iconos SOBRE relleno dorado. No puede ser `--void`: en el
+     tema claro `--void` es papel, no tinta. */
+  --on-gold:var(--void);
+  /* Canal RGB del dorado, para halos y resplandores rgba(). */
+  --gold-rgb:212,168,87;
+  /* Sombras. Oscuro: negro cinematográfico y profundo. Claro: tinta de la app
+     con las opacidades suaves del design system (--ds-shadow-*), porque una
+     sombra de contacto fuerte sobre papel beige se ve sucia, no elevada. */
+  --shadow-rgb:0,0,0;
+  --shadow-a:.9;
+  --shadow-a-soft:.65;
+  --shadow-a-inset:.4;
+  /* Nube de puntos del hero y del visor orbital. El canvas no puede usar
+     `var()`, así que `PointCloudDirective` lee estos dos tokens en canal RGB y
+     los relee cuando cambia `data-theme`. Punto encendido por el barrido /
+     punto en reposo. */
+  --cloud-lit-rgb:235,203,133;
+  --cloud-dim-rgb:226,228,232;
+  --burgundy:#8B2D3A;
+  --burgundy-bright:#B24355;
+
+  --disp:"Archivo", "Helvetica Neue", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, monospace;
+
+  --maxw:1320px;
+  --pad-x:40px;
+  --ease:cubic-bezier(.16,.84,.34,1);
+  --ease-out:cubic-bezier(.22,1,.36,1);
+
+  /* alto de la cabecera fija: compensa el desplazamiento a las anclas */
+  --hdr-h:78px;
+
+  display:block; position:relative; isolation:isolate;
+  background:var(--void); color:var(--white);
+  font-family:var(--disp); font-weight:400; font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  /* Sin `overflow` aquí a propósito: recortaría la cabecera, la regla y los
+     conmutadores, todos `position:fixed`. El desbordamiento horizontal lo
+     contienen ya .hero, .ticker, .cta y .svc con su propio overflow:hidden. */
+}
+
+/* ════════════ TEMA CLARO — paleta de la aplicación ════════════
+   El tema claro NO tiene paleta propia: cada token local apunta al token del
+   design system (`src/styles/tokens.css`), así la landing y la app comparten
+   literalmente los mismos colores. El tema oscuro conserva su paleta
+   cinematográfica, que es exclusiva de la landing. */
+:host([data-theme="light"]){
+  /* Superficies */
+  --void:var(--ds-bg);                    /* #F5F3EE papel principal      */
+  --void-2:var(--ds-bg-alt);              /* #EFEDE6 secciones alternas   */
+  --panel:var(--ds-surface);              /* #FBFAF6 tarjetas, paneles    */
+  --panel-2:var(--ds-surface-elevated);   /* #FFFFFF superficie elevada   */
+
+  /* Tinta */
+  --white:var(--ds-ink);                  /* #1A1A1A texto principal      */
+  --white-dim:var(--ds-ink-secondary);    /* #4A4A4A texto secundario     */
+  --white-faint:var(--ds-ink-muted);      /* #7A7770 captions, datos      */
+
+  /* Bordes */
+  --line:var(--ds-border);                /* #E8E5DC borde estándar       */
+  --line-2:var(--ds-border-subtle);       /* #EFEDE6 separador sutil      */
+
+  /* Dorado — mismos roles que en la app: `--ds-gold-active` para texto (es el
+     color de `.eyebrow` y `.text-gold`), dorado como relleno con tinta encima. */
+  --gold:var(--ds-gold-active);           /* #B0964A texto y filetes      */
+  --gold-bright:var(--ds-gold-hover);     /* #C2A85C realce / hover       */
+  --gold-deep:var(--ds-gold);             /* #D4B96E extremo claro        */
+  --on-gold:var(--ds-ink);                /* tinta sobre relleno dorado   */
+  --gold-rgb:212,185,110;                 /* --ds-gold en canal RGB       */
+  --shadow-rgb:26,26,26;                  /* sombras de tinta, nunca negro*/
+  --shadow-a:.16;
+  --shadow-a-soft:.12;
+  --shadow-a-inset:.05;
+  --cloud-lit-rgb:176,150,74;             /* --ds-gold-active #B0964A     */
+  --cloud-dim-rgb:74,74,74;               /* --ds-ink-secondary #4A4A4A   */
+
+  /* Error (icono "mal" del comparativo, campos inválidos) = danger de la app */
+  --burgundy:var(--ds-danger);            /* #A14545                      */
+  --burgundy-bright:var(--ds-danger);     /* sobre papel no hay variante clara */
+
+  --scrim:245,243,238;                    /* --ds-bg en canal RGB         */
+
+  /* ── Medios: polaridad invertida ────────────────────────────────────────
+     Nada de oscurecer: sobre papel, bajar el brillo y luego velar con beige
+     produce gris sucio. La foto va a brillo pleno o por encima, con la
+     saturación intacta; el velo se reserva para la franja del texto. */
+  --hero-vid-gray:.06; --hero-vid-bright:1.06; --hero-vid-contrast:1.02; --hero-vid-sat:1.06;
+  --vid-gray:0;        --vid-bright:1.04;      --vid-contrast:1.02;      --vid-sat:1.06;
+  --svc-gray:0;        --svc-bright:1.04;      --svc-bright-hover:1.1;
+  /* El velo de la foto cae rápido: papel sólido bajo el texto, foto limpia
+     encima. La versión oscura mantenía un .22 a media altura que aquí se lee
+     como neblina. */
+  --ph-scrim:linear-gradient(0deg, rgba(var(--scrim),.95) 0%, rgba(var(--scrim),.78) 24%, rgba(var(--scrim),.06) 54%, transparent 100%);
+  /* "Sin documentar" ya no es oscuro sino lavado y sin contraste; "documentado"
+     es nítido y saturado. El contraste semántico sobrevive en las dos claves. */
+  --raw-filter:grayscale(1) brightness(1.08) contrast(.82);
+  --doc-filter:brightness(1.02) contrast(1.06) saturate(1.06);
+
+  /* Acentos: de luz añadida a trazo dibujado. El dorado profundo tiene cuerpo
+     sobre foto clara y la sombra de tinta le da el borde que el resplandor ya
+     no puede dar. */
+  --scan-line:var(--gold);
+  --scan-glow:0 0 12px 1px rgba(var(--gold-rgb),.7), 0 1px 4px rgba(var(--shadow-rgb),.45);
+  --scan-glow-sm:0 0 10px 1px rgba(var(--gold-rgb),.6), 0 1px 3px rgba(var(--shadow-rgb),.4);
+  --halo-a:.1;
+  --halo-a-strong:.2;
+  --pulse-a:.9;                           /* el anillo pierde fuerza sobre papel */
+}
+:host([data-theme="light"])::before{
+  background-image:
+    linear-gradient(rgba(var(--shadow-rgb),.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--shadow-rgb),.05) 1px, transparent 1px);
+}
+@media(max-width:900px){ :host{ --pad-x:22px; --hdr-h:70px; } }
+
+/* ════════════════════════ RESET LOCAL ════════════════════════ */
+*{ box-sizing:border-box; }
+img,svg,video,canvas{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+fieldset{ margin:0; padding:0; border:0; min-width:0; }
+legend{ padding:0; }
+::selection{ background:var(--gold); color:var(--on-gold); }
+:focus-visible{ outline:1px solid var(--gold); outline-offset:3px; }
+
+/* retícula de planos + grano sobre toda la landing */
+:host::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(243,240,233,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(243,240,233,.022) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 80%);
+}
+:host::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ════════════════════════ TIPOGRAFÍA ════════════════════════ */
+.kicker{
+  font-family:var(--mono); font-weight:500; font-size:.72rem;
+  letter-spacing:.32em; text-transform:uppercase; color:var(--gold);
+  display:inline-flex; align-items:center; gap:12px;
+}
+.kicker::before{ content:""; width:24px; height:1px; background:var(--gold); display:inline-block; }
+.kicker.center{ justify-content:center; }
+.kicker.plain::before{ display:none; }
+
+/* `color` explícito: bootstrap-overrides.css es global y pinta todo h1..h6 con
+   var(--ds-ink); la encapsulación no lo detiene. Al declararlo aquí, el selector
+   prefijado de Angular gana y los títulos vuelven al blanco hueso / marrón del tema. */
+h1,h2,h3{ font-family:var(--disp); font-weight:800; letter-spacing:-.03em; line-height:.98; margin:0; color:var(--white); }
+h1{ font-size:clamp(3rem, 7.4vw, 7rem); font-weight:900; }
+h2{ font-size:clamp(2.2rem, 4.6vw, 4.2rem); }
+h3{ font-size:clamp(1.4rem, 2.2vw, 2rem); font-weight:700; letter-spacing:-.02em; }
+.display-dim{ color:var(--white-faint); }
+.gold-txt{ color:var(--gold); }
+p{ margin:0 0 1.1em; color:var(--white-dim); }
+.lede{ font-size:1.18rem; line-height:1.6; color:var(--white-dim); max-width:46ch; }
+
+.e3-container{ max-width:var(--maxw); margin:0 auto; padding:0 var(--pad-x); position:relative; z-index:1; }
+section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
+@media(max-width:900px){ section{ padding:84px 0; } }
+
+/* etiqueta de dato monoespaciada */
+.data{ font-family:var(--mono); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-faint); }
+.data .v{ color:var(--gold); }
+
+/* ════════════════════════ BOTONES ════════════════════════ */
+.e3-btn{
+  display:inline-flex; align-items:center; gap:12px;
+  font-family:var(--mono); font-weight:500; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase;
+  padding:16px 26px; border:1px solid var(--gold); color:var(--on-gold);
+  background:var(--gold); position:relative; overflow:hidden; border-radius:0;
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease), background .3s, color .3s;
+}
+.e3-btn:hover{ background:var(--gold-bright); box-shadow:0 0 0 1px var(--gold), 0 18px 50px -16px rgba(var(--gold-rgb),.7); transform:translateY(-2px); }
+.e3-btn .ar{ width:16px; height:12px; transition:transform .4s var(--ease); }
+.e3-btn:hover .ar{ transform:translateX(4px); }
+.e3-btn.ghost{ background:transparent; color:var(--white); border-color:var(--line); }
+.e3-btn.ghost:hover{ border-color:var(--gold); color:var(--gold-bright); box-shadow:none; transform:none; }
+
+/* ════════════════════════ CABECERA ════════════════════════ */
+.hdr{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  transition:background .4s, border-color .4s, backdrop-filter .4s;
+  border-bottom:1px solid transparent;
+}
+.hdr.scrolled{ background:rgba(var(--scrim),.72); backdrop-filter:blur(14px); border-color:var(--line-2); }
+.hdr .in{ position:relative; max-width:var(--maxw); margin:0 auto; padding:20px var(--pad-x); display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.brand{ display:inline-flex; align-items:baseline; gap:9px; font-weight:800; font-size:1.3rem; letter-spacing:-.03em; }
+.brand .e3{ position:relative; }
+.brand .e3 b{ color:var(--gold); font-weight:800; }
+.brand .reticle{ width:18px; height:18px; position:relative; }
+.brand .reticle::before,.brand .reticle::after{ content:""; position:absolute; background:var(--gold); }
+.brand .reticle::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-.5px); }
+.brand .reticle::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-.5px); }
+.brand .reticle i{ position:absolute; inset:3px; border:1px solid var(--gold); border-radius:50%; animation:reticlePulse 3.4s var(--ease) infinite; }
+@keyframes reticlePulse{ 0%,100%{ opacity:.6; transform:scale(1);} 50%{ opacity:1; transform:scale(1.12);} }
+
+.nav-links{ display:flex; align-items:center; gap:34px; }
+.nav-links a{ position:relative; padding-bottom:3px; font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); transition:color .25s; }
+.nav-links a:hover{ color:var(--gold); }
+.nav-links a::after{
+  content:""; position:absolute; left:0; right:100%; bottom:-2px; height:1px;
+  background:var(--gold); transition:right .35s var(--ease);
+}
+.nav-links a:hover::after{ right:0; }
+.nav-links a.active{ color:var(--gold-bright); }
+.nav-links a.active::after{ right:0; box-shadow:var(--scan-glow-sm); }
+.nav-links a.active::before{
+  content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:4px; height:4px; border-radius:50%; background:var(--gold);
+  box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a)); animation:navPulse 2s infinite;
+}
+@keyframes navPulse{ 0%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a));} 70%{box-shadow:0 0 0 6px rgba(var(--gold-rgb),0);} 100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),0);} }
+
+.hdr .e3-btn{ padding:12px 20px; font-size:.74rem; }
+
+/* barra de progreso de lectura (escrita por scaleX desde el componente) */
+.hdr-progress{
+  position:absolute; left:0; bottom:0; height:2px; width:100%;
+  transform:scaleX(0); transform-origin:left center;
+  background:linear-gradient(90deg, var(--gold-deep), var(--scan-line));
+  box-shadow:var(--scan-glow-sm);
+  transition:transform .12s linear; z-index:2;
+}
+.hdr:not(.scrolled) .hdr-progress{ opacity:.5; }
+
+.burger{ display:none; width:30px; height:22px; position:relative; }
+.burger span{ position:absolute; left:0; right:0; height:1.5px; background:var(--white); transition:.3s; }
+.burger span:nth-child(1){ top:2px; } .burger span:nth-child(2){ top:10px; } .burger span:nth-child(3){ top:18px; }
+@media(max-width:1040px){
+  .nav-links, .hdr .e3-btn.cta{ display:none; }
+  .burger{ display:block; }
+}
+
+.mobile-nav{
+  position:fixed; inset:0; z-index:99; background:rgba(var(--scrim),.97); backdrop-filter:blur(8px);
+  display:flex; flex-direction:column; justify-content:center; gap:8px; padding:var(--pad-x);
+  transform:translateY(-100%); transition:transform .5s var(--ease);
+}
+.mobile-nav.open{ transform:none; }
+.mobile-nav a{ font-family:var(--disp); font-weight:800; font-size:2.4rem; letter-spacing:-.03em; padding:10px 0; border-bottom:1px solid var(--line-2); }
+.mobile-nav a .num{ font-family:var(--mono); font-size:.8rem; color:var(--gold); font-weight:500; margin-right:14px; vertical-align:super; }
+
+/* ════════════════════════ CINTA ════════════════════════ */
+.ticker{ padding:0; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); overflow:hidden; background:var(--void-2); }
+.ticker-track{ display:flex; gap:0; white-space:nowrap; animation:scrollX 32s linear infinite; }
+.ticker-item{ font-family:var(--mono); font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-dim); padding:22px 0; display:inline-flex; align-items:center; }
+.ticker-item .sep{ color:var(--gold); margin:0 30px; }
+@keyframes scrollX{ to{ transform:translateX(-50%); } }
+
+/* ════════════════════════ ENCABEZADO DE SECCIÓN ════════════════════════ */
+.sec-head{ display:grid; grid-template-columns:auto 1fr; gap:0 60px; align-items:end; margin-bottom:72px; }
+.sec-head .idx{ font-family:var(--mono); font-size:.78rem; letter-spacing:.2em; color:var(--gold); padding-top:8px; }
+.sec-head h2{ max-width:18ch; }
+.sec-head .sub{ grid-column:2; margin-top:22px; max-width:52ch; }
+@media(max-width:760px){ .sec-head{ grid-template-columns:1fr; gap:18px; } .sec-head .sub{ grid-column:1; } }
+
+/* ════════════════════════ REVELADO AL SCROLL ════════════════════════ */
+.rv{ opacity:0; transform:translateY(28px); transition:opacity .9s var(--ease-out), transform .9s var(--ease-out); }
+.rv.in{ opacity:1; transform:none; }
+.rv-d1{ transition-delay:.08s; } .rv-d2{ transition-delay:.16s; } .rv-d3{ transition-delay:.24s; }
+
+/* Sin animaciones para quien las ha desactivado en el sistema. */
+@media(prefers-reduced-motion: reduce){
+  .rv{ opacity:1; transform:none; transition:none; }
+  .ticker-track,
+  .brand .reticle i,
+  .nav-links a.active::before{ animation:none; }
+}

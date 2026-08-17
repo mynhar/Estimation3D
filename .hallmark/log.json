@@ -1,5 +1,23 @@
 [
   {
+    "date": "2026-08-16",
+    "scope": "landing-page",
+    "macrostructure": "sin cambios (redesign de la capa de medios y acentos del tema claro)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "landing-page · el tema claro heredaba la receta de medios del tema oscuro (oscurecer la foto + velarla con el color del fondo), que sobre papel produce gris sucio: vídeo del hero a brightness(.5) MÁS opacity(.62) bajo un degradado beige, .svc con scrim .94, .reveal-scan .raw a brightness(.5). Se sustituye por un juego de tokens con polaridad invertida --hero-vid-*/--vid-*/--svc-*/--ph-scrim/--raw-filter/--doc-filter: en claro los medios van a brillo y saturación plenos y el velo de papel se concentra solo en la franja donde hay tinta (grade-v4 y .cta .grade reequilibrados, override de opacidad eliminado). Los acentos de barrido eran luz añadida (box-shadow glow), invisible sobre papel: nuevos --scan-line/--scan-glow/--scan-glow-sm/--halo-a/--halo-a-strong/--pulse-a los convierten en trazo dorado profundo con sombra de tinta (sweeps, rs-handle, hdr-progress, nav activa, puntos 'en vivo', halos radiales). La nube de puntos del hero pasa a mix-blend-mode:multiply en claro para integrarse en el vídeo en vez de quedar pegada encima."
+  },
+  {
+    "date": "2026-08-16",
+    "scope": "landing-page",
+    "macrostructure": "sin cambios (redesign solo de la capa de color del tema claro)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "landing-page · el tema claro deja de tener paleta propia y mapea cada token local a --ds-* (bg/bg-alt/surface/ink/border/gold/danger); nuevos roles --on-gold (tinta sobre relleno dorado), --gold-rgb y --shadow-rgb/--shadow-a* para que halos y sombras dejen de estar hardcodeados; tema oscuro intacto; la nube de puntos del canvas (PointCloudDirective) deja de tener colores fijos y lee --cloud-lit-rgb/--cloud-dim-rgb del tema, releyéndolos con MutationObserver sobre data-theme; además h1..h3 recuperan color:var(--white) frente a la fuga global de bootstrap-overrides.css"
+  },
+  {
     "date": "2026-07-09",
     "scope": "app",
     "macrostructure": "Workbench (estimator construction-monitoring/list · +view toggle tabla/tarjetas + miniatura Matterport)",

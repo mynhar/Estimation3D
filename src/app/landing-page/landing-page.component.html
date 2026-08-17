@@ -1,389 +1,517 @@
-<div class="lp-root">
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     Estimation3D — landing v4
+     Portado de "Estimation3D v4.html". El texto vive en i18n bajo `landing.*`.
+     Clases `.e3-btn` / `.e3-container` renombradas para no chocar con Bootstrap.
+     ═══════════════════════════════════════════════════════════════════════════ -->
 
-  <!-- ── Navegación ─────────────────────────────────────────────────────────── -->
-  <nav class="lp-nav" role="navigation" aria-label="Navegación principal">
-    <a class="lp-logo" routerLink="/" aria-label="Estimation3D — Inicio">
-      <i class="bi bi-box-seam lp-logo__icon" aria-hidden="true"></i>
-      <span class="lp-logo__text">Estimation3D</span>
+<!-- ─────────── HEADER ─────────── -->
+<header class="hdr" [class.scrolled]="scrolled()">
+  <div class="in">
+    <span class="hdr-progress" #progressBar></span>
+
+    <a routerLink="/" class="brand" [attr.aria-label]="'landing.nav.home_aria' | translate">
+      <span class="reticle"><i></i></span>
+      <span class="e3">Estimation<b>3D</b></span>
     </a>
 
-    <div class="lp-nav__center" aria-hidden="true">
-      <span class="lp-nav__tag">{{ 'landing.badge_3d' | translate }}</span>
-      <span class="lp-nav__dot"></span>
-      <span class="lp-nav__tag">{{ 'landing.badge_verified' | translate }}</span>
-      <span class="lp-nav__dot"></span>
-      <span class="lp-nav__tag">{{ 'landing.badge_free' | translate }}</span>
+    <nav class="nav-links">
+      <a href="#processus" (click)="goTo('processus', $event)"
+         [class.active]="activeSection() === 'processus'">{{ 'landing.nav.process' | translate }}</a>
+      <a href="#services" (click)="goTo('services', $event)"
+         [class.active]="activeSection() === 'services'">{{ 'landing.nav.specialties' | translate }}</a>
+      <a routerLink="/login">{{ 'landing.nav.login' | translate }}</a>
+    </nav>
+
+    <a href="#dossier" class="e3-btn cta" (click)="goTo('dossier', $event)">
+      {{ 'landing.nav.cta' | translate }}
+      <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+    </a>
+
+    <button class="burger" type="button" (click)="toggleMenu()"
+            [attr.aria-label]="'landing.nav.menu' | translate"
+            [attr.aria-expanded]="menuOpen()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav" [class.open]="menuOpen()">
+  <a href="#processus" (click)="goTo('processus', $event)"><span class="num">01</span><span>{{ 'landing.nav.process' | translate }}</span></a>
+  <a href="#services" (click)="goTo('services', $event)"><span class="num">02</span><span>{{ 'landing.nav.specialties' | translate }}</span></a>
+  <a routerLink="/login" (click)="closeMenu()"><span class="num">03</span><span>{{ 'landing.nav.login' | translate }}</span></a>
+  <a href="#dossier" (click)="goTo('dossier', $event)"><span class="num">04</span><span>{{ 'landing.nav.cta' | translate }}</span></a>
+</nav>
+
+<main id="top">
+
+  <!-- ─────────── HERO ─────────── -->
+  <section class="hero" id="hero" #heroSection>
+    <div class="hero-bg">
+      <video autoplay muted loop playsinline preload="metadata"
+             [poster]="media.heroPoster" [src]="media.heroVideo" aria-hidden="true"></video>
     </div>
 
-    <div class="lp-nav__right">
-      <div class="lp-lang" role="group" [attr.aria-label]="'Idioma'">
-        @for (l of langs; track l) {
-          <button type="button" class="lp-lang__btn"
-                  [class.lp-lang__btn--active]="lang.current() === l"
-                  (click)="setLang(l)">{{ l.toUpperCase() }}</button>
-        }
-      </div>
-      <a routerLink="/login" class="lp-nav__login">
-        {{ 'landing.login_link' | translate }}
-      </a>
-      <a routerLink="/login" class="lp-nav__cta">
-        <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
-        {{ 'landing.cta_client' | translate }}
-      </a>
-    </div>
-  </nav>
+    <canvas class="cloud" e3PointCloud="1"
+            [centerXf]="0.62" [centerYf]="0.48"
+            [observeTarget]="heroSection" aria-hidden="true"></canvas>
 
-  <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
-  <section class="lp-hero" aria-labelledby="hero-title">
+    <div class="grade-v4"></div>
 
-    <!-- Contenido editorial -->
-    <div class="lp-hero__content">
-
-      <p class="lp-eyebrow">
-        <span class="lp-eyebrow__dot" aria-hidden="true"></span>
-        {{ 'landing.eyebrow' | translate }}
-      </p>
-
-      <h1 class="lp-title" id="hero-title">
-        {{ 'landing.title' | translate }}
-      </h1>
-
-      <p class="lp-lead">{{ 'landing.subtitle' | translate }}</p>
-
-      <div class="lp-actions">
-        <a routerLink="/login" class="lp-btn lp-btn--gold">
-          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
-          {{ 'landing.cta_client' | translate }}
-        </a>
-        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--outline">
-          {{ 'landing.cta_builder' | translate }}
-        </a>
-      </div>
-
-      <div class="lp-trust" aria-label="Garantías">
-        <span class="lp-trust-badge">
-          <i class="bi bi-box" aria-hidden="true"></i>
-          {{ 'landing.badge_3d' | translate }}
+    <div class="e3-container">
+      <div class="hero-copy">
+        <span class="kicker">
+          {{ 'landing.hero.kicker' | translate }}
+          <span class="scan-live"><i></i></span>
         </span>
-        <span class="lp-trust-sep" aria-hidden="true"></span>
-        <span class="lp-trust-badge">
-          <i class="bi bi-patch-check" aria-hidden="true"></i>
-          {{ 'landing.badge_verified' | translate }}
-        </span>
-        <span class="lp-trust-sep" aria-hidden="true"></span>
-        <span class="lp-trust-badge">
-          <i class="bi bi-gift" aria-hidden="true"></i>
-          {{ 'landing.badge_free' | translate }}</span>
+
+        <h1>
+          <span class="line"><span>{{ 'landing.hero.l1' | translate }}</span></span>
+          <span class="line"><span>{{ 'landing.hero.l2' | translate }}</span></span>
+          <span class="line"><span class="gold-txt">{{ 'landing.hero.l3' | translate }}</span></span>
+        </h1>
+
+        <p class="lede">{{ 'landing.hero.lede' | translate }}</p>
+
+        <div class="hero-cta">
+          <a href="#dossier" class="e3-btn" (click)="goTo('dossier', $event)">
+            {{ 'landing.nav.cta' | translate }}
+            <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+          </a>
+          <a href="#processus" class="e3-btn ghost" (click)="goTo('processus', $event)">{{ 'landing.hero.cta_secondary' | translate }}</a>
+        </div>
       </div>
 
+      <div class="scan-card">
+        <span class="corner tl"></span><span class="corner tr"></span>
+        <span class="corner bl"></span><span class="corner br"></span>
+
+        <div class="imgwrap">
+          <img [src]="media.scanCard" [alt]="'landing.hero.scan_alt' | translate" />
+          <div class="sweep"></div>
+          <div class="hud">
+            @for (pin of heroPins; track pin.value) {
+              <span class="pin" [style]="pin.style">{{ pin.value }} <span class="v">ft²</span></span>
+            }
+          </div>
+        </div>
+
+        <div class="bar">
+          <span class="data live"><span class="dot"></span>{{ 'landing.hero.scan_label' | translate }}&nbsp;<span class="v">{{ 'landing.hero.scan_status' | translate }}</span></span>
+          <span class="data">786 ft² · <span class="v">{{ 'landing.hero.scan_floor' | translate }}</span></span>
+        </div>
+      </div>
     </div>
 
-    <!-- ── App preview mockup ─────────────────────────────────────────────── -->
-    <div class="lp-hero__visual" aria-hidden="true">
-      <div class="lp-mockup">
-
-        <!-- Header del mockup -->
-        <div class="lp-mockup__header">
-          <div class="lp-mockup__avatar"></div>
-          <div class="lp-mockup__user">
-            <div class="lp-mockup__name"></div>
-            <div class="lp-mockup__role"></div>
-          </div>
-          <div class="lp-mockup__status lp-mockup__status--active"></div>
-        </div>
-
-        <!-- KPIs -->
-        <div class="lp-mockup__kpis">
-          <div class="lp-mockup__kpi">
-            <span class="lp-mockup__kpi-n">12</span>
-            <span class="lp-mockup__kpi-l"></span>
-          </div>
-          <div class="lp-mockup__kpi">
-            <span class="lp-mockup__kpi-n lp-mockup__kpi-n--gold">3</span>
-            <span class="lp-mockup__kpi-l"></span>
-          </div>
-          <div class="lp-mockup__kpi">
-            <span class="lp-mockup__kpi-n">8</span>
-            <span class="lp-mockup__kpi-l"></span>
-          </div>
-        </div>
-
-        <!-- Pipeline de estado -->
-        <div class="lp-mockup__pipeline">
-          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--done">
-            <i class="bi bi-check2"></i>
-          </div>
-          <div class="lp-mockup__pipe-line lp-mockup__pipe-line--done"></div>
-          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--done">
-            <i class="bi bi-check2"></i>
-          </div>
-          <div class="lp-mockup__pipe-line lp-mockup__pipe-line--done"></div>
-          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--active">
-            <i class="bi bi-search"></i>
-          </div>
-          <div class="lp-mockup__pipe-line"></div>
-          <div class="lp-mockup__pipe-item">
-            <i class="bi bi-chat-square-quote"></i>
-          </div>
-          <div class="lp-mockup__pipe-line"></div>
-          <div class="lp-mockup__pipe-item">
-            <i class="bi bi-check-circle"></i>
-          </div>
-        </div>
-
-        <!-- Expedientes (filas simuladas) -->
-        <div class="lp-mockup__list">
-          <div class="lp-mockup__row">
-            <div class="lp-mockup__row-num"></div>
-            <div class="lp-mockup__row-info">
-              <div class="lp-mockup__row-title"></div>
-              <div class="lp-mockup__row-sub"></div>
-            </div>
-            <div class="lp-mockup__badge lp-mockup__badge--gold"></div>
-          </div>
-          <div class="lp-mockup__row">
-            <div class="lp-mockup__row-num"></div>
-            <div class="lp-mockup__row-info">
-              <div class="lp-mockup__row-title lp-mockup__row-title--sm"></div>
-              <div class="lp-mockup__row-sub"></div>
-            </div>
-            <div class="lp-mockup__badge lp-mockup__badge--green"></div>
-          </div>
-          <div class="lp-mockup__row">
-            <div class="lp-mockup__row-num"></div>
-            <div class="lp-mockup__row-info">
-              <div class="lp-mockup__row-title"></div>
-              <div class="lp-mockup__row-sub lp-mockup__row-sub--sm"></div>
-            </div>
-            <div class="lp-mockup__badge lp-mockup__badge--muted"></div>
-          </div>
-        </div>
-
-        <!-- Oferta destacada -->
-        <div class="lp-mockup__offer">
-          <div class="lp-mockup__offer-left">
-            <div class="lp-mockup__offer-icon">
-              <i class="bi bi-tags"></i>
-            </div>
-            <div>
-              <div class="lp-mockup__offer-title"></div>
-              <div class="lp-mockup__offer-sub"></div>
-            </div>
-          </div>
-          <div class="lp-mockup__offer-price">CAD 145k</div>
-        </div>
-
-      </div>
-
-      <!-- Elementos flotantes -->
-      <div class="lp-float lp-float--top">
-        <i class="bi bi-camera-video"></i>
-        <span>Tour 3D</span>
-      </div>
-      <div class="lp-float lp-float--bottom">
-        <i class="bi bi-bell-fill"></i>
-        <span>+1 offre reçue</span>
-      </div>
-
+    <div class="hero-meta">
+      <div class="data"><span class="big">1</span><span>{{ 'landing.hero.meta_visit' | translate }}</span></div>
+      <div class="data"><span class="big">3</span><span>{{ 'landing.hero.meta_bids' | translate }}</span></div>
+      <div class="data"><span class="big">399&nbsp;$</span><span>{{ 'landing.hero.meta_rate' | translate }}</span></div>
     </div>
 
+    <div class="scroll-cue"><span>{{ 'landing.hero.scroll' | translate }}</span><span class="ln"></span></div>
   </section>
 
-  <!-- ── Stats strip ────────────────────────────────────────────────────────── -->
-  <div class="lp-stats" role="region" aria-label="Estadísticas">
-    <div class="lp-stat">
-      <span class="lp-stat__n">3D</span>
-      <span class="lp-stat__l">{{ 'landing.badge_3d' | translate }}</span>
-    </div>
-    <div class="lp-stat-sep" aria-hidden="true"></div>
-    <div class="lp-stat">
-      <i class="bi bi-patch-check lp-stat__icon"></i>
-      <span class="lp-stat__l">{{ 'landing.badge_verified' | translate }}</span>
-    </div>
-    <div class="lp-stat-sep" aria-hidden="true"></div>
-    <div class="lp-stat">
-      <i class="bi bi-globe lp-stat__icon"></i>
-      <span class="lp-stat__l">FR · EN · ES</span>
-    </div>
-    <div class="lp-stat-sep" aria-hidden="true"></div>
-    <div class="lp-stat">
-      <i class="bi bi-gift lp-stat__icon"></i>
-      <span class="lp-stat__l">{{ 'landing.badge_free' | translate }}</span>
+  <!-- ─────────── TICKER ─────────── -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      @for (copy of [1, 2]; track copy) {
+        <span class="ticker-item">
+          @for (k of tickerKeys; track k) {
+            {{ 'landing.ticker.' + k | translate }}<span class="sep">/</span>
+          }
+        </span>
+      }
     </div>
   </div>
 
-  <!-- ── Cómo funciona ──────────────────────────────────────────────────────── -->
-  <section class="lp-how" aria-labelledby="how-title">
-
-    <div class="lp-how__head">
-      <p class="lp-section-eyebrow">{{ 'landing.how_eyebrow' | translate }}</p>
-      <h2 class="lp-section-title" id="how-title">{{ 'landing.how_title' | translate }}</h2>
-    </div>
-
-    <div class="lp-steps">
-
-      <article class="lp-step fade-up" style="--delay: 0ms">
-        <div class="lp-step__header">
-          <span class="lp-step__num">01</span>
-          <div class="lp-step__icon-wrap">
-            <i class="bi bi-folder-plus lp-step__icon" aria-hidden="true"></i>
-          </div>
-        </div>
-        <h3 class="lp-step__title">{{ 'landing.step1_title' | translate }}</h3>
-        <p class="lp-step__desc">{{ 'landing.step1_desc' | translate }}</p>
-        <div class="lp-step__foot" aria-hidden="true">
-          <div class="lp-step__foot-bar lp-step__foot-bar--full"></div>
-        </div>
-      </article>
-
-      <div class="lp-step-arrow" aria-hidden="true">
-        <div class="lp-step-arrow__line"></div>
-        <i class="bi bi-chevron-right"></i>
+  <!-- ─────────── [01] PROBLÈME ─────────── -->
+  <section id="probleme">
+    <div class="e3-container">
+      <div class="sec-head">
+        <span class="idx" e3Reveal>[ 01 ]</span>
+        <h2 e3Reveal>
+          {{ 'landing.problem.title_a' | translate }}
+          <span class="display-dim">{{ 'landing.problem.title_b' | translate }}</span>
+        </h2>
+        <p class="sub" [e3Reveal]="1">{{ 'landing.problem.sub' | translate }}</p>
       </div>
 
-      <article class="lp-step fade-up" style="--delay: 120ms">
-        <div class="lp-step__header">
-          <span class="lp-step__num">02</span>
-          <div class="lp-step__icon-wrap">
-            <i class="bi bi-camera lp-step__icon" aria-hidden="true"></i>
+      <div class="prob-grid">
+        @for (cell of problemCells; track cell.key; let i = $index) {
+          <div class="cell" [e3Reveal]="i">
+            <span class="n">{{ cell.n }}</span>
+            <h3>{{ 'landing.problem.' + cell.key + '_t' | translate }}</h3>
+            <p>{{ 'landing.problem.' + cell.key + '_d' | translate }}</p>
           </div>
-        </div>
-        <h3 class="lp-step__title">{{ 'landing.step2_title' | translate }}</h3>
-        <p class="lp-step__desc">{{ 'landing.step2_desc' | translate }}</p>
-        <div class="lp-step__foot" aria-hidden="true">
-          <div class="lp-step__foot-bar lp-step__foot-bar--half"></div>
-        </div>
-      </article>
-
-      <div class="lp-step-arrow" aria-hidden="true">
-        <div class="lp-step-arrow__line"></div>
-        <i class="bi bi-chevron-right"></i>
-      </div>
-
-      <article class="lp-step fade-up" style="--delay: 240ms">
-        <div class="lp-step__header">
-          <span class="lp-step__num">03</span>
-          <div class="lp-step__icon-wrap">
-            <i class="bi bi-handshake lp-step__icon" aria-hidden="true"></i>
-          </div>
-        </div>
-        <h3 class="lp-step__title">{{ 'landing.step3_title' | translate }}</h3>
-        <p class="lp-step__desc">{{ 'landing.step3_desc' | translate }}</p>
-        <div class="lp-step__foot" aria-hidden="true">
-          <div class="lp-step__foot-bar lp-step__foot-bar--done"></div>
-        </div>
-      </article>
-
-    </div>
-
-  </section>
-
-  <!-- ── Roles section ──────────────────────────────────────────────────────── -->
-  <section class="lp-roles" aria-labelledby="roles-title">
-
-    <div class="lp-roles__head">
-      <p class="lp-section-eyebrow">{{ 'landing.how_eyebrow' | translate }}</p>
-      <h2 class="lp-section-title" id="roles-title">{{ 'landing.cta_section_title' | translate }}</h2>
-    </div>
-
-    <div class="lp-roles__grid">
-
-      <!-- Cliente -->
-      <article class="lp-role-card fade-up" style="--delay: 0ms">
-        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--blue">
-          <i class="bi bi-person-circle" aria-hidden="true"></i>
-        </div>
-        <h3 class="lp-role-card__title">{{ 'role.client' | translate }}</h3>
-        <ul class="lp-role-card__list">
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step1_title' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step3_title' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_free' | translate }}</li>
-        </ul>
-        <a routerLink="/login" class="lp-role-card__cta">
-          {{ 'landing.cta_client' | translate }}
-          <i class="bi bi-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- Constructor -->
-      <article class="lp-role-card lp-role-card--featured fade-up" style="--delay: 100ms">
-        <div class="lp-role-card__badge">{{ 'landing.badge_3d' | translate }}</div>
-        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--gold">
-          <i class="bi bi-hammer" aria-hidden="true"></i>
-        </div>
-        <h3 class="lp-role-card__title">{{ 'role.constructor' | translate }}</h3>
-        <ul class="lp-role-card__list">
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step2_title' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_verified' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.cta_builder' | translate }}</li>
-        </ul>
-        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-role-card__cta lp-role-card__cta--gold">
-          {{ 'landing.cta_builder' | translate }}
-          <i class="bi bi-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- Estimador -->
-      <article class="lp-role-card fade-up" style="--delay: 200ms">
-        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--green">
-          <i class="bi bi-clipboard-check" aria-hidden="true"></i>
-        </div>
-        <h3 class="lp-role-card__title">{{ 'role.estimator' | translate }}</h3>
-        <ul class="lp-role-card__list">
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step2_title' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_3d' | translate }}</li>
-          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_verified' | translate }}</li>
-        </ul>
-        <a routerLink="/login" class="lp-role-card__cta">
-          {{ 'landing.login_link' | translate }}
-          <i class="bi bi-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-    </div>
-
-  </section>
-
-  <!-- ── CTA final ──────────────────────────────────────────────────────────── -->
-  <section class="lp-cta-section" aria-labelledby="cta-title">
-    <div class="lp-cta-section__deco" aria-hidden="true">
-      <div class="lp-cta-ring lp-cta-ring--1"></div>
-      <div class="lp-cta-ring lp-cta-ring--2"></div>
-      <div class="lp-cta-ring lp-cta-ring--3"></div>
-    </div>
-    <div class="lp-cta-section__inner">
-      <div class="lp-cta-icon" aria-hidden="true">
-        <i class="bi bi-box-seam"></i>
-      </div>
-      <h2 class="lp-cta-title" id="cta-title">{{ 'landing.cta_section_title' | translate }}</h2>
-      <p class="lp-cta-desc">{{ 'landing.cta_section_desc' | translate }}</p>
-      <div class="lp-actions lp-actions--centered">
-        <a routerLink="/login" class="lp-btn lp-btn--gold">
-          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
-          {{ 'landing.cta_client' | translate }}
-        </a>
-        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--ghost">
-          {{ 'landing.cta_builder' | translate }}
-        </a>
+        }
       </div>
     </div>
   </section>
 
-  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
-  <footer class="lp-footer" role="contentinfo">
-    <div class="lp-footer__inner">
-      <span class="lp-footer__brand">
-        <i class="bi bi-box-seam" aria-hidden="true"></i>
-        Estimation3D
-      </span>
-      <nav class="lp-footer__links" aria-label="Footer">
-        <span>© {{ year }}</span>
-        <span class="lp-footer__sep" aria-hidden="true">·</span>
-        <span>{{ 'footer.rights_' + lang.current() | translate }}</span>
-        <span class="lp-footer__sep" aria-hidden="true">·</span>
-        <span>{{ 'footer.country' | translate }}</span>
-      </nav>
-    </div>
-  </footer>
+  <!-- ─────────── [02] PROCESSUS ─────────── -->
+  <section id="processus" class="alt-bg">
+    <div class="e3-container">
+      <div class="sec-head">
+        <span class="idx" e3Reveal>[ 02 ]</span>
+        <h2 e3Reveal>
+          {{ 'landing.process.title_a' | translate }}
+          <span class="gold-txt">{{ 'landing.process.title_b' | translate }}</span>
+          {{ 'landing.process.title_c' | translate }}
+        </h2>
+        <p class="sub" [e3Reveal]="1">{{ 'landing.process.sub' | translate }}</p>
+      </div>
 
+      <div class="scan-feature">
+        <div class="reveal-scan" e3Reveal e3ScanSlider
+             [attr.aria-label]="'landing.process.rs_hint' | translate">
+          <img class="raw" [src]="media.planOutremont" [alt]="'landing.process.rs_left' | translate" />
+          <div class="doc-layer">
+            <img [src]="media.planOutremont" [alt]="'landing.process.rs_right' | translate" />
+            @for (pin of planPins; track pin.key) {
+              <span class="pin" [style]="pin.style">
+                {{ 'landing.process.pin_' + pin.key | translate }} · {{ pin.value }} <span class="v">ft²</span>
+              </span>
+            }
+          </div>
+          <span class="rs-label left">{{ 'landing.process.rs_left' | translate }}</span>
+          <span class="rs-label right">{{ 'landing.process.rs_right' | translate }}</span>
+          <div class="rs-handle">
+            <span class="grip"><svg viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 2 1 7l5 5M16 2l5 5-5 5"/></svg></span>
+          </div>
+          <span class="hint">{{ 'landing.process.rs_hint' | translate }}</span>
+        </div>
+
+        <div [e3Reveal]="1">
+          <span class="step-n">01</span>
+          <h3>{{ 'landing.process.s1_t' | translate }}</h3>
+          <p>{{ 'landing.process.s1_d' | translate }}</p>
+          <div class="feat-meta">
+            <span class="data"><span class="big">{{ 'landing.process.s1_m1_v' | translate }}</span><span>{{ 'landing.process.s1_m1_l' | translate }}</span></span>
+            <span class="data"><span class="big">2–3 h</span><span>{{ 'landing.process.s1_m2_l' | translate }}</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scan-feature rev">
+        <div class="scan-frame" e3Reveal e3Sweep>
+          <span class="tag data"><span class="v">DATA</span> · {{ 'landing.process.s2_tag' | translate }}</span>
+          <img [src]="media.planJolicoeur" [alt]="'landing.process.s2_alt' | translate" />
+          <div class="sweep"></div>
+        </div>
+
+        <div [e3Reveal]="1">
+          <span class="step-n">02</span>
+          <h3>{{ 'landing.process.s2_t' | translate }}</h3>
+          <p>{{ 'landing.process.s2_d' | translate }}</p>
+          <div class="feat-meta">
+            <span class="data"><span class="big">786 ft²</span><span>{{ 'landing.process.s2_m1_l' | translate }}</span></span>
+            <span class="data"><span class="big">{{ 'landing.process.s2_m2_v' | translate }}</span><span>{{ 'landing.process.s2_m2_l' | translate }}</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="dimline"><span class="seg"></span><span class="lbl"><b>02</b> &nbsp;↔&nbsp; 03 · <span>{{ 'landing.dimline.specialties' | translate }}</span></span><span class="seg"></span></div>
+
+  <!-- ─────────── [03] SPÉCIALITÉS ─────────── -->
+  <section id="services">
+    <div class="e3-container">
+      <div class="sec-head">
+        <span class="idx" e3Reveal>[ 03 ]</span>
+        <h2 e3Reveal>
+          {{ 'landing.services.title_a' | translate }}
+          <span class="display-dim">{{ 'landing.services.title_b' | translate }}</span>
+        </h2>
+        <p class="sub" [e3Reveal]="1">{{ 'landing.services.sub' | translate }}</p>
+      </div>
+
+      <div class="svc-grid">
+        @for (s of specialties; track s.key; let i = $index) {
+          <article class="svc" [e3Reveal]="i % 3">
+            <div class="ph"><img [src]="s.img" alt="" /></div>
+            <div class="body">
+              <span class="n">{{ 'landing.services.' + s.key + '_n' | translate }}</span>
+              <h3>{{ 'landing.services.' + s.key + '_t' | translate }}</h3>
+              <p>{{ 'landing.services.' + s.key + '_d' | translate }}</p>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="dimline"><span class="seg"></span><span class="lbl"><b>786 ft²</b> &nbsp;·&nbsp; <span>{{ 'landing.dimline.render' | translate }}</span></span><span class="seg"></span></div>
+
+  <!-- ─────────── [04] IMMERSION ─────────── -->
+  <section id="immersion" class="alt-bg">
+    <div class="e3-container immersion">
+      <span class="kicker center" e3Reveal>{{ 'landing.immersion.kicker' | translate }}</span>
+      <h2 [e3Reveal]="1">
+        {{ 'landing.immersion.title_a' | translate }}
+        <span class="gold-txt">{{ 'landing.immersion.title_b' | translate }}</span>
+      </h2>
+
+      <div class="orbit" [e3Reveal]="2" e3Sweep #orbitFrame>
+        <span class="hud-corner hc-tl">{{ 'landing.immersion.hud_project' | translate }}</span>
+        <span class="hud-corner hc-tr">● {{ 'landing.immersion.hud_live' | translate }}</span>
+        <span class="hud-corner hc-bl" #orbitReadout>AZ 000° · EL +00°</span>
+        <span class="hud-corner hc-br">EST3D — {{ year }}</span>
+
+        <canvas e3PointCloud="1.5" [interactive]="true"
+                [centerXf]="0.5" [centerYf]="0.52"
+                [rotY0]="-0.6" [rotX0]="0.2"
+                [readoutTarget]="orbitReadout"
+                [observeTarget]="orbitFrame"
+                [attr.aria-label]="'landing.immersion.hint' | translate"></canvas>
+
+        <span class="orbit-hint">{{ 'landing.immersion.hint' | translate }}</span>
+      </div>
+
+      <div class="words" [e3Reveal]="2">
+        @for (w of immersionWords; track w) {
+          <span><b>0{{ w }}</b> &nbsp;<span>{{ 'landing.immersion.w' + w | translate }}</span></span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── [05] COMPARAISON ─────────── -->
+  <section>
+    <div class="e3-container">
+      <div class="sec-head">
+        <span class="idx" e3Reveal>[ 05 ]</span>
+        <h2 e3Reveal>
+          {{ 'landing.compare.title_a' | translate }}
+          <span class="display-dim">{{ 'landing.compare.title_b' | translate }}</span>
+        </h2>
+      </div>
+
+      <div class="cmp" [e3Reveal]="1">
+        <div>
+          <span class="lbl">{{ 'landing.compare.without_lbl' | translate }}</span>
+          <h3>{{ 'landing.compare.without_t' | translate }}</h3>
+          <ul>
+            @for (r of compareRows; track r) {
+              <li>
+                <svg class="ic bad" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+                <span>{{ 'landing.compare.w' + r | translate }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="us">
+          <span class="lbl">{{ 'landing.compare.with_lbl' | translate }}</span>
+          <h3>{{ 'landing.compare.with_t' | translate }}</h3>
+          <ul>
+            @for (r of compareRows; track r) {
+              <li>
+                <svg class="ic good" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"/></svg>
+                <span>{{ 'landing.compare.u' + r | translate }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── CITATION ─────────── -->
+  <section class="quote-sec alt-bg">
+    <div class="e3-container">
+      <span class="kicker center" e3Reveal>{{ 'landing.quote.kicker' | translate }}</span>
+      <!-- `c` empieza por la coma: sin espacio antes, para no romper la puntuación. -->
+      <blockquote [e3Reveal]="1">{{ 'landing.quote.a' | translate
+        }} <span class="gold-txt">{{ 'landing.quote.b' | translate }}</span>{{ 'landing.quote.c' | translate }}</blockquote>
+      <p class="who" [e3Reveal]="2">{{ 'landing.quote.who' | translate }}</p>
+    </div>
+  </section>
+
+  <!-- ─────────── CTA ─────────── -->
+  <section class="cta" id="cta">
+    <div class="bg">
+      <video autoplay muted loop playsinline preload="none"
+             [poster]="media.ctaPoster" [src]="media.ctaVideo" aria-hidden="true"></video>
+      <div class="grade"></div>
+    </div>
+
+    <div class="e3-container inner">
+      <span class="kicker center" e3Reveal>{{ 'landing.cta.kicker' | translate }}</span>
+      <h2 [e3Reveal]="1">
+        {{ 'landing.cta.title_a' | translate }}<br />
+        <span class="gold-txt">{{ 'landing.cta.title_b' | translate }}</span>
+      </h2>
+      <p class="lede" [e3Reveal]="2">{{ 'landing.cta.lede' | translate }}</p>
+
+      <div [e3Reveal]="2">
+        <a href="#dossier" class="e3-btn" (click)="goTo('dossier', $event)">
+          {{ 'landing.nav.cta' | translate }}
+          <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+        </a>
+      </div>
+
+      <div class="price-row" [e3Reveal]="3">
+        <span>{{ 'landing.cta.price_a' | translate }}</span> ·
+        <b>{{ 'landing.cta.price_b' | translate }}</b> ·
+        <span>{{ 'landing.cta.price_c' | translate }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── [06] FORMULAIRE ─────────── -->
+  <section id="dossier">
+    <div class="e3-container">
+      <div class="sec-head">
+        <span class="idx" e3Reveal>[ 06 ]</span>
+        <h2 e3Reveal>
+          {{ 'landing.form.title_a' | translate }}
+          <span class="display-dim">{{ 'landing.form.title_b' | translate }}</span>
+        </h2>
+        <p class="sub" [e3Reveal]="1">{{ 'landing.form.sub' | translate }}</p>
+      </div>
+
+      <form class="form-wrap" e3Reveal [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-nom">{{ 'landing.form.name' | translate }}</label>
+            <input id="f-nom" type="text" formControlName="nom"
+                   [class.is-invalid]="invalid('nom')"
+                   [placeholder]="'landing.form.name_ph' | translate" />
+          </div>
+
+          <div class="field">
+            <label for="f-tel">{{ 'landing.form.phone' | translate }}</label>
+            <input id="f-tel" type="tel" formControlName="telephone"
+                   [class.is-invalid]="invalid('telephone')"
+                   [placeholder]="'landing.form.phone_ph' | translate" />
+          </div>
+
+          <div class="field">
+            <label for="f-mail">{{ 'landing.form.email' | translate }}</label>
+            <input id="f-mail" type="email" formControlName="courriel"
+                   [class.is-invalid]="invalid('courriel')"
+                   [placeholder]="'landing.form.email_ph' | translate" />
+          </div>
+
+          <div class="field">
+            <label for="f-type">{{ 'landing.form.type' | translate }}</label>
+            <select id="f-type" formControlName="typePropriete" [class.is-invalid]="invalid('typePropriete')">
+              <option value="">{{ 'landing.form.type_choose' | translate }}</option>
+              @for (t of propertyTypes; track t) {
+                <option [value]="t">{{ 'landing.form.type_' + t | translate }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="f-adr">{{ 'landing.form.address' | translate }}</label>
+            <input id="f-adr" type="text" formControlName="adresse"
+                   [class.is-invalid]="invalid('adresse')"
+                   [placeholder]="'landing.form.address_ph' | translate" />
+          </div>
+
+          <fieldset class="field full">
+            <legend>{{ 'landing.form.problem' | translate }}</legend>
+            <div class="checks">
+              @for (p of problemOptions; track p) {
+                <label class="check">
+                  <input type="checkbox" [checked]="hasProblem(p)"
+                         (change)="toggleProblem(p, $any($event.target).checked)" />
+                  <span>{{ 'landing.form.p_' + p | translate }}</span>
+                </label>
+              }
+            </div>
+          </fieldset>
+
+          <div class="field full">
+            <label for="f-desc">{{ 'landing.form.desc' | translate }}</label>
+            <textarea id="f-desc" formControlName="description"
+                      [placeholder]="'landing.form.desc_ph' | translate"></textarea>
+          </div>
+        </div>
+
+        <div class="form-foot">
+          <p class="form-note">{{ 'landing.form.note' | translate }}</p>
+
+          @if (sent()) {
+            <p class="form-success" role="status">✓ {{ 'landing.form.success' | translate }}</p>
+          } @else {
+            <button type="submit" class="e3-btn">
+              {{ 'landing.nav.cta' | translate }}
+              <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+            </button>
+          }
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─────────── FOOTER ─────────── -->
+<footer class="ftr">
+  <div class="e3-container">
+    <div class="ftr-top">
+      <div>
+        <a routerLink="/" class="brand"><span class="reticle"><i></i></span><span class="e3">Estimation<b>3D</b></span></a>
+        <p>{{ 'landing.footer.tagline' | translate }}</p>
+      </div>
+
+      <div>
+        <h5>{{ 'landing.footer.platform' | translate }}</h5>
+        <ul>
+          <li><a href="#processus" (click)="goTo('processus', $event)">{{ 'landing.nav.process' | translate }}</a></li>
+          <li><a href="#services" (click)="goTo('services', $event)">{{ 'landing.nav.specialties' | translate }}</a></li>
+          <li><a href="#dossier" (click)="goTo('dossier', $event)">{{ 'landing.nav.cta' | translate }}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5>{{ 'landing.footer.account' | translate }}</h5>
+        <ul>
+          <li><a routerLink="/login">{{ 'landing.nav.login' | translate }}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><span>{{ 'landing.footer.city' | translate }}</span></li>
+          <li><a href="mailto:info@estimation3d.ca">info&#64;estimation3d.ca</a></li>
+          <li><span>{{ 'landing.footer.pilot' | translate }}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr-bot">
+      <span>© {{ year }} HYGIENACTION · MONTRÉAL</span>
+      <span>EST3D — {{ 'landing.footer.sign' | translate }}</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─────────── RÈGLE DE MESURE ─────────── -->
+<div class="measure-rail" aria-hidden="true">
+  <span class="ticks"></span><span class="ticks maj"></span>
+  <span class="reticle"></span>
+  <span class="readout" #railReadout>Y 0000 · SECT 01</span>
+  <span class="cap">EST3D · SCAN VIEW</span>
+</div>
+
+<!-- ─────────── CONTRÔLES : LANGUE + THÈME ─────────── -->
+<div class="lang-toggle" role="group" [attr.aria-label]="'landing.controls.language' | translate">
+  @for (l of langs; track l) {
+    <!-- El CSS ya aplica text-transform:uppercase. -->
+    <button type="button" (click)="setLang(l)" [attr.aria-pressed]="lang.current() === l">{{ l }}</button>
+  }
+</div>
+
+<div class="theme-toggle" role="group" [attr.aria-label]="'landing.controls.theme' | translate">
+  <button type="button" (click)="setTheme('dark')" [attr.aria-pressed]="theme() === 'dark'">
+    <span class="d"></span><span>{{ 'landing.controls.dark' | translate }}</span>
+  </button>
+  <button type="button" (click)="setTheme('light')" [attr.aria-pressed]="theme() === 'light'">
+    <span class="d"></span><span>{{ 'landing.controls.light' | translate }}</span>
+  </button>
 </div>

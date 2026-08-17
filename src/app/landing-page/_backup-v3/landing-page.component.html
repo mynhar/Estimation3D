@@ -1,0 +1,389 @@
+<div class="lp-root">
+
+  <!-- ── Navegación ─────────────────────────────────────────────────────────── -->
+  <nav class="lp-nav" role="navigation" aria-label="Navegación principal">
+    <a class="lp-logo" routerLink="/" aria-label="Estimation3D — Inicio">
+      <i class="bi bi-box-seam lp-logo__icon" aria-hidden="true"></i>
+      <span class="lp-logo__text">Estimation3D</span>
+    </a>
+
+    <div class="lp-nav__center" aria-hidden="true">
+      <span class="lp-nav__tag">{{ 'landing.badge_3d' | translate }}</span>
+      <span class="lp-nav__dot"></span>
+      <span class="lp-nav__tag">{{ 'landing.badge_verified' | translate }}</span>
+      <span class="lp-nav__dot"></span>
+      <span class="lp-nav__tag">{{ 'landing.badge_free' | translate }}</span>
+    </div>
+
+    <div class="lp-nav__right">
+      <div class="lp-lang" role="group" [attr.aria-label]="'Idioma'">
+        @for (l of langs; track l) {
+          <button type="button" class="lp-lang__btn"
+                  [class.lp-lang__btn--active]="lang.current() === l"
+                  (click)="setLang(l)">{{ l.toUpperCase() }}</button>
+        }
+      </div>
+      <a routerLink="/login" class="lp-nav__login">
+        {{ 'landing.login_link' | translate }}
+      </a>
+      <a routerLink="/login" class="lp-nav__cta">
+        <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+        {{ 'landing.cta_client' | translate }}
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+  <section class="lp-hero" aria-labelledby="hero-title">
+
+    <!-- Contenido editorial -->
+    <div class="lp-hero__content">
+
+      <p class="lp-eyebrow">
+        <span class="lp-eyebrow__dot" aria-hidden="true"></span>
+        {{ 'landing.eyebrow' | translate }}
+      </p>
+
+      <h1 class="lp-title" id="hero-title">
+        {{ 'landing.title' | translate }}
+      </h1>
+
+      <p class="lp-lead">{{ 'landing.subtitle' | translate }}</p>
+
+      <div class="lp-actions">
+        <a routerLink="/login" class="lp-btn lp-btn--gold">
+          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+          {{ 'landing.cta_client' | translate }}
+        </a>
+        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--outline">
+          {{ 'landing.cta_builder' | translate }}
+        </a>
+      </div>
+
+      <div class="lp-trust" aria-label="Garantías">
+        <span class="lp-trust-badge">
+          <i class="bi bi-box" aria-hidden="true"></i>
+          {{ 'landing.badge_3d' | translate }}
+        </span>
+        <span class="lp-trust-sep" aria-hidden="true"></span>
+        <span class="lp-trust-badge">
+          <i class="bi bi-patch-check" aria-hidden="true"></i>
+          {{ 'landing.badge_verified' | translate }}
+        </span>
+        <span class="lp-trust-sep" aria-hidden="true"></span>
+        <span class="lp-trust-badge">
+          <i class="bi bi-gift" aria-hidden="true"></i>
+          {{ 'landing.badge_free' | translate }}</span>
+      </div>
+
+    </div>
+
+    <!-- ── App preview mockup ─────────────────────────────────────────────── -->
+    <div class="lp-hero__visual" aria-hidden="true">
+      <div class="lp-mockup">
+
+        <!-- Header del mockup -->
+        <div class="lp-mockup__header">
+          <div class="lp-mockup__avatar"></div>
+          <div class="lp-mockup__user">
+            <div class="lp-mockup__name"></div>
+            <div class="lp-mockup__role"></div>
+          </div>
+          <div class="lp-mockup__status lp-mockup__status--active"></div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="lp-mockup__kpis">
+          <div class="lp-mockup__kpi">
+            <span class="lp-mockup__kpi-n">12</span>
+            <span class="lp-mockup__kpi-l"></span>
+          </div>
+          <div class="lp-mockup__kpi">
+            <span class="lp-mockup__kpi-n lp-mockup__kpi-n--gold">3</span>
+            <span class="lp-mockup__kpi-l"></span>
+          </div>
+          <div class="lp-mockup__kpi">
+            <span class="lp-mockup__kpi-n">8</span>
+            <span class="lp-mockup__kpi-l"></span>
+          </div>
+        </div>
+
+        <!-- Pipeline de estado -->
+        <div class="lp-mockup__pipeline">
+          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--done">
+            <i class="bi bi-check2"></i>
+          </div>
+          <div class="lp-mockup__pipe-line lp-mockup__pipe-line--done"></div>
+          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--done">
+            <i class="bi bi-check2"></i>
+          </div>
+          <div class="lp-mockup__pipe-line lp-mockup__pipe-line--done"></div>
+          <div class="lp-mockup__pipe-item lp-mockup__pipe-item--active">
+            <i class="bi bi-search"></i>
+          </div>
+          <div class="lp-mockup__pipe-line"></div>
+          <div class="lp-mockup__pipe-item">
+            <i class="bi bi-chat-square-quote"></i>
+          </div>
+          <div class="lp-mockup__pipe-line"></div>
+          <div class="lp-mockup__pipe-item">
+            <i class="bi bi-check-circle"></i>
+          </div>
+        </div>
+
+        <!-- Expedientes (filas simuladas) -->
+        <div class="lp-mockup__list">
+          <div class="lp-mockup__row">
+            <div class="lp-mockup__row-num"></div>
+            <div class="lp-mockup__row-info">
+              <div class="lp-mockup__row-title"></div>
+              <div class="lp-mockup__row-sub"></div>
+            </div>
+            <div class="lp-mockup__badge lp-mockup__badge--gold"></div>
+          </div>
+          <div class="lp-mockup__row">
+            <div class="lp-mockup__row-num"></div>
+            <div class="lp-mockup__row-info">
+              <div class="lp-mockup__row-title lp-mockup__row-title--sm"></div>
+              <div class="lp-mockup__row-sub"></div>
+            </div>
+            <div class="lp-mockup__badge lp-mockup__badge--green"></div>
+          </div>
+          <div class="lp-mockup__row">
+            <div class="lp-mockup__row-num"></div>
+            <div class="lp-mockup__row-info">
+              <div class="lp-mockup__row-title"></div>
+              <div class="lp-mockup__row-sub lp-mockup__row-sub--sm"></div>
+            </div>
+            <div class="lp-mockup__badge lp-mockup__badge--muted"></div>
+          </div>
+        </div>
+
+        <!-- Oferta destacada -->
+        <div class="lp-mockup__offer">
+          <div class="lp-mockup__offer-left">
+            <div class="lp-mockup__offer-icon">
+              <i class="bi bi-tags"></i>
+            </div>
+            <div>
+              <div class="lp-mockup__offer-title"></div>
+              <div class="lp-mockup__offer-sub"></div>
+            </div>
+          </div>
+          <div class="lp-mockup__offer-price">CAD 145k</div>
+        </div>
+
+      </div>
+
+      <!-- Elementos flotantes -->
+      <div class="lp-float lp-float--top">
+        <i class="bi bi-camera-video"></i>
+        <span>Tour 3D</span>
+      </div>
+      <div class="lp-float lp-float--bottom">
+        <i class="bi bi-bell-fill"></i>
+        <span>+1 offre reçue</span>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ── Stats strip ────────────────────────────────────────────────────────── -->
+  <div class="lp-stats" role="region" aria-label="Estadísticas">
+    <div class="lp-stat">
+      <span class="lp-stat__n">3D</span>
+      <span class="lp-stat__l">{{ 'landing.badge_3d' | translate }}</span>
+    </div>
+    <div class="lp-stat-sep" aria-hidden="true"></div>
+    <div class="lp-stat">
+      <i class="bi bi-patch-check lp-stat__icon"></i>
+      <span class="lp-stat__l">{{ 'landing.badge_verified' | translate }}</span>
+    </div>
+    <div class="lp-stat-sep" aria-hidden="true"></div>
+    <div class="lp-stat">
+      <i class="bi bi-globe lp-stat__icon"></i>
+      <span class="lp-stat__l">FR · EN · ES</span>
+    </div>
+    <div class="lp-stat-sep" aria-hidden="true"></div>
+    <div class="lp-stat">
+      <i class="bi bi-gift lp-stat__icon"></i>
+      <span class="lp-stat__l">{{ 'landing.badge_free' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- ── Cómo funciona ──────────────────────────────────────────────────────── -->
+  <section class="lp-how" aria-labelledby="how-title">
+
+    <div class="lp-how__head">
+      <p class="lp-section-eyebrow">{{ 'landing.how_eyebrow' | translate }}</p>
+      <h2 class="lp-section-title" id="how-title">{{ 'landing.how_title' | translate }}</h2>
+    </div>
+
+    <div class="lp-steps">
+
+      <article class="lp-step fade-up" style="--delay: 0ms">
+        <div class="lp-step__header">
+          <span class="lp-step__num">01</span>
+          <div class="lp-step__icon-wrap">
+            <i class="bi bi-folder-plus lp-step__icon" aria-hidden="true"></i>
+          </div>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step1_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step1_desc' | translate }}</p>
+        <div class="lp-step__foot" aria-hidden="true">
+          <div class="lp-step__foot-bar lp-step__foot-bar--full"></div>
+        </div>
+      </article>
+
+      <div class="lp-step-arrow" aria-hidden="true">
+        <div class="lp-step-arrow__line"></div>
+        <i class="bi bi-chevron-right"></i>
+      </div>
+
+      <article class="lp-step fade-up" style="--delay: 120ms">
+        <div class="lp-step__header">
+          <span class="lp-step__num">02</span>
+          <div class="lp-step__icon-wrap">
+            <i class="bi bi-camera lp-step__icon" aria-hidden="true"></i>
+          </div>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step2_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step2_desc' | translate }}</p>
+        <div class="lp-step__foot" aria-hidden="true">
+          <div class="lp-step__foot-bar lp-step__foot-bar--half"></div>
+        </div>
+      </article>
+
+      <div class="lp-step-arrow" aria-hidden="true">
+        <div class="lp-step-arrow__line"></div>
+        <i class="bi bi-chevron-right"></i>
+      </div>
+
+      <article class="lp-step fade-up" style="--delay: 240ms">
+        <div class="lp-step__header">
+          <span class="lp-step__num">03</span>
+          <div class="lp-step__icon-wrap">
+            <i class="bi bi-handshake lp-step__icon" aria-hidden="true"></i>
+          </div>
+        </div>
+        <h3 class="lp-step__title">{{ 'landing.step3_title' | translate }}</h3>
+        <p class="lp-step__desc">{{ 'landing.step3_desc' | translate }}</p>
+        <div class="lp-step__foot" aria-hidden="true">
+          <div class="lp-step__foot-bar lp-step__foot-bar--done"></div>
+        </div>
+      </article>
+
+    </div>
+
+  </section>
+
+  <!-- ── Roles section ──────────────────────────────────────────────────────── -->
+  <section class="lp-roles" aria-labelledby="roles-title">
+
+    <div class="lp-roles__head">
+      <p class="lp-section-eyebrow">{{ 'landing.how_eyebrow' | translate }}</p>
+      <h2 class="lp-section-title" id="roles-title">{{ 'landing.cta_section_title' | translate }}</h2>
+    </div>
+
+    <div class="lp-roles__grid">
+
+      <!-- Cliente -->
+      <article class="lp-role-card fade-up" style="--delay: 0ms">
+        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--blue">
+          <i class="bi bi-person-circle" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-role-card__title">{{ 'role.client' | translate }}</h3>
+        <ul class="lp-role-card__list">
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step1_title' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step3_title' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_free' | translate }}</li>
+        </ul>
+        <a routerLink="/login" class="lp-role-card__cta">
+          {{ 'landing.cta_client' | translate }}
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <!-- Constructor -->
+      <article class="lp-role-card lp-role-card--featured fade-up" style="--delay: 100ms">
+        <div class="lp-role-card__badge">{{ 'landing.badge_3d' | translate }}</div>
+        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--gold">
+          <i class="bi bi-hammer" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-role-card__title">{{ 'role.constructor' | translate }}</h3>
+        <ul class="lp-role-card__list">
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step2_title' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_verified' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.cta_builder' | translate }}</li>
+        </ul>
+        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-role-card__cta lp-role-card__cta--gold">
+          {{ 'landing.cta_builder' | translate }}
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+      </article>
+
+      <!-- Estimador -->
+      <article class="lp-role-card fade-up" style="--delay: 200ms">
+        <div class="lp-role-card__icon-wrap lp-role-card__icon-wrap--green">
+          <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+        </div>
+        <h3 class="lp-role-card__title">{{ 'role.estimator' | translate }}</h3>
+        <ul class="lp-role-card__list">
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.step2_title' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_3d' | translate }}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>{{ 'landing.badge_verified' | translate }}</li>
+        </ul>
+        <a routerLink="/login" class="lp-role-card__cta">
+          {{ 'landing.login_link' | translate }}
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+      </article>
+
+    </div>
+
+  </section>
+
+  <!-- ── CTA final ──────────────────────────────────────────────────────────── -->
+  <section class="lp-cta-section" aria-labelledby="cta-title">
+    <div class="lp-cta-section__deco" aria-hidden="true">
+      <div class="lp-cta-ring lp-cta-ring--1"></div>
+      <div class="lp-cta-ring lp-cta-ring--2"></div>
+      <div class="lp-cta-ring lp-cta-ring--3"></div>
+    </div>
+    <div class="lp-cta-section__inner">
+      <div class="lp-cta-icon" aria-hidden="true">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <h2 class="lp-cta-title" id="cta-title">{{ 'landing.cta_section_title' | translate }}</h2>
+      <p class="lp-cta-desc">{{ 'landing.cta_section_desc' | translate }}</p>
+      <div class="lp-actions lp-actions--centered">
+        <a routerLink="/login" class="lp-btn lp-btn--gold">
+          <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+          {{ 'landing.cta_client' | translate }}
+        </a>
+        <a routerLink="/login" [queryParams]="{role: 'constructor'}" class="lp-btn lp-btn--ghost">
+          {{ 'landing.cta_builder' | translate }}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer class="lp-footer" role="contentinfo">
+    <div class="lp-footer__inner">
+      <span class="lp-footer__brand">
+        <i class="bi bi-box-seam" aria-hidden="true"></i>
+        Estimation3D
+      </span>
+      <nav class="lp-footer__links" aria-label="Footer">
+        <span>© {{ year }}</span>
+        <span class="lp-footer__sep" aria-hidden="true">·</span>
+        <span>{{ 'footer.rights_' + lang.current() | translate }}</span>
+        <span class="lp-footer__sep" aria-hidden="true">·</span>
+        <span>{{ 'footer.country' | translate }}</span>
+      </nav>
+    </div>
+  </footer>
+
+</div>

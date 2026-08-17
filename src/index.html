@@ -1,24 +1,115 @@
 <!doctype html>
-<html lang="es">
+<html lang="fr">
 
 <head>
   <meta charset="utf-8">
-  <title>Estimation3D</title>
+  <title>Estimation3D — Scannez une fois. Décidez mieux. | Montréal</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#F5F3EE">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <meta name="description"
+    content="Estimation3D documente votre propriété en un seul scan 3D et vous remet jusqu'à trois soumissions strictement comparables d'entrepreneurs qualifiés. Moisissures, dégâts d'eau, amiante, fondations — Montréal.">
+  <meta name="author" content="Hygienaction">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://estimation3d.ca/">
+
+  <!-- Open Graph / réseaux sociaux -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Estimation3D">
+  <meta property="og:locale" content="fr_CA">
+  <meta property="og:locale:alternate" content="en_CA">
+  <meta property="og:title" content="Estimation3D — Scannez une fois. Décidez mieux.">
+  <meta property="og:description"
+    content="Un seul scan 3D documente votre propriété. Vous recevez jusqu'à trois soumissions strictement comparables d'entrepreneurs qualifiés. Montréal.">
+  <meta property="og:url" content="https://estimation3d.ca/">
+  <meta property="og:image" content="https://estimation3d.ca/assets/landing/scan-render-1.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Estimation3D — Scannez une fois. Décidez mieux.">
+  <meta name="twitter:description"
+    content="Un seul scan 3D documente votre propriété. Jusqu'à trois soumissions comparables d'entrepreneurs qualifiés. Montréal.">
+  <meta name="twitter:image" content="https://estimation3d.ca/assets/landing/scan-render-1.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Application -->
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&display=swap"
     rel="stylesheet">
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=Inter+Tight:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap"
     rel="stylesheet">
+  <!-- Landing v4 : Archivo (display) + IBM Plex Mono (données) -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Données structurées pour la recherche et les moteurs de réponse -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["Organization","HomeAndConstructionBusiness","LocalBusiness"],
+        "@id": "https://estimation3d.ca/#org",
+        "name": "Estimation3D",
+        "alternateName": "Estimation3D par Hygienaction",
+        "description": "Plateforme montréalaise qui documente une propriété en un seul scan 3D et remet au propriétaire jusqu'à trois soumissions strictement comparables d'entrepreneurs qualifiés.",
+        "url": "https://estimation3d.ca/",
+        "logo": "https://estimation3d.ca/assets/landing/scan-render-1.jpg",
+        "parentOrganization": { "@type": "Organization", "name": "Hygienaction" },
+        "areaServed": { "@type": "City", "name": "Montréal", "containedInPlace": { "@type": "AdministrativeArea", "name": "Québec, Canada" } },
+        "address": { "@type": "PostalAddress", "addressLocality": "Montréal", "addressRegion": "QC", "addressCountry": "CA" },
+        "email": "info@estimation3d.ca",
+        "priceRange": "399 CAD",
+        "knowsLanguage": ["fr-CA","en-CA","es"],
+        "makesOffer": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Documentation par scan 3D", "serviceType": "Relevé et documentation 3D de propriété résidentielle" }, "price": "399", "priceCurrency": "CAD" }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://estimation3d.ca/#website",
+        "url": "https://estimation3d.ca/",
+        "name": "Estimation3D",
+        "inLanguage": ["fr-CA","en-CA","es"],
+        "publisher": { "@id": "https://estimation3d.ca/#org" }
+      },
+      {
+        "@type": "Service",
+        "name": "Scan 3D et soumissions comparables",
+        "provider": { "@id": "https://estimation3d.ca/#org" },
+        "areaServed": "Montréal, QC",
+        "description": "Une seule visite documente toute la propriété en 3D. Le dossier structuré est envoyé à un maximum de trois entrepreneurs qualifiés qui soumissionnent sur des données identiques.",
+        "offers": { "@type": "Offer", "price": "399", "priceCurrency": "CAD" },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Spécialités documentées",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Moisissures — décontamination" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Dégâts d'eau — assèchement et reconstruction" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Amiante et vermiculite — retrait conforme CNESST" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Démolition sélective" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Isolation — combles, murs, sous-sol" } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fondations et drain français" } }
+          ]
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          { "@type": "Question", "name": "Comment fonctionne Estimation3D ?", "acceptedAnswer": { "@type": "Answer", "text": "Un technicien documente votre propriété en une seule visite : scan 3D, photos, mesures et classification du problème. Le dossier est ensuite envoyé à un maximum de trois entrepreneurs qualifiés qui soumissionnent sur des données identiques, sans avoir à se déplacer." } },
+          { "@type": "Question", "name": "Combien coûte une visite ?", "acceptedAnswer": { "@type": "Answer", "text": "La visite de documentation est à tarif fixe de 399 $. Le dossier reste réactivable pendant 12 mois." } },
+          { "@type": "Question", "name": "Quels problèmes Estimation3D documente-t-il ?", "acceptedAnswer": { "@type": "Answer", "text": "Moisissures, dégâts d'eau, amiante et vermiculite, démolition sélective, isolation, fondations et drain français." } }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
