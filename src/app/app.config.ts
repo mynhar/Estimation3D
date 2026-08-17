@@ -1,5 +1,5 @@
 import { ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withViewTransitions } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
@@ -18,7 +18,10 @@ export function httpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),    
-    provideRouter(routes, withViewTransitions()),
+    // `anchorScrolling` hace que Le Journal y Entrepreneurs puedan enlazar a una
+    // sección de la landing (`routerLink="/" fragment="processus"`). Sólo actúa
+    // en navegaciones que llevan fragmento; el resto de la app no lo usa.
+    provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideAnimations(),
     provideHttpClient(withInterceptors([httpErrorInterceptor])),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },

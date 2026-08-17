@@ -1176,7 +1176,9 @@
       "specialties": "Spécialités",
       "login": "Connexion",
       "cta": "Créer mon dossier",
-      "menu": "Menu"
+      "menu": "Menu",
+      "journal": "Le Journal",
+      "contractors": "Entrepreneurs"
     },
     "hero": {
       "kicker": "Montréal · Plateforme pilote 2026",
@@ -1348,7 +1350,9 @@
       "account": "Compte",
       "city": "Montréal, QC",
       "pilot": "Pilote 2026",
-      "sign": "DIRECTION v3 / CINÉMA"
+      "sign": "DIRECTION v3 / CINÉMA",
+      "explore": "Explorer",
+      "apply": "Postuler"
     },
     "controls": {
       "language": "Langue",
@@ -2221,5 +2225,310 @@
     "err_delete": "Impossible de supprimer l'imprévu.",
     "err_codigo_dup": "Ce code existe déjà.",
     "delete_confirm": "Supprimer cet imprévu ?"
+  },
+  "journal": {
+    "crumbs": {
+      "home": "Accueil",
+      "current": "Le Journal"
+    },
+    "hero": {
+      "title_gold": "Comprendre",
+      "title_rest": " ce qui se passe chez soi.",
+      "lede": "Articles, guides et histoires pour mieux décider lorsqu'un problème touche votre propriété."
+    },
+    "filter": {
+      "aria": "Filtrer par catégorie"
+    },
+    "cats": {
+      "all": "Tout",
+      "moisissures": "Moisissures",
+      "eau": "Eau",
+      "amiante": "Amiante",
+      "fondations": "Fondations",
+      "decider": "Décider mieux",
+      "histoires": "Histoires"
+    },
+    "cards": {
+      "moisissure-danger": {
+        "title": "Comment savoir si la moisissure dans votre maison est dangereuse",
+        "sum": "Tâches, odeurs, espèces : ce qu'il faut regarder, ce qu'il faut faire, et ce qu'il ne faut jamais faire.",
+        "meta": "12 février 2026 · 6 min"
+      },
+      "degat-eau-48h": {
+        "title": "Dégât d'eau : les 48 premières heures qui changent tout",
+        "sum": "Pourquoi les deux premiers jours déterminent l'ampleur des dégâts — et la facture finale.",
+        "meta": "5 février 2026 · 5 min"
+      },
+      "comparer-soum": {
+        "title": "Comparer trois soumissions : ce qui compte vraiment au-delà du prix",
+        "sum": "Une grille de lecture simple pour ne pas se laisser piéger par le plus bas prix.",
+        "meta": "29 janvier 2026 · 7 min"
+      },
+      "avant-1980": {
+        "title": "Maisons construites avant 1980 : ce que tout propriétaire doit savoir",
+        "sum": "Où se cache l'amiante, comment le repérer, et pourquoi il ne faut jamais y toucher soi-même.",
+        "meta": "22 janvier 2026 · 8 min"
+      },
+      "cave-rosemont": {
+        "title": "Une cave humide à Rosemont : du diagnostic à la solution",
+        "sum": "Le cas d'une propriétaire qui pensait avoir un simple problème d'humidité.",
+        "meta": "15 janvier 2026 · 6 min"
+      },
+      "fissures-fond": {
+        "title": "Fissures dans la fondation : structurelles ou cosmétiques ?",
+        "sum": "Les signes qui changent tout, et ceux qui peuvent attendre.",
+        "meta": "8 janvier 2026 · 6 min"
+      },
+      "une-visite": {
+        "title": "Pourquoi une seule visite suffit (et pourquoi trois c'est trop)",
+        "sum": "Le calcul économique et humain derrière la documentation unique.",
+        "meta": "18 décembre 2025 · 5 min"
+      },
+      "vermiculite": {
+        "title": "Vermiculite dans l'entretoit : pourquoi c'est si délicat",
+        "sum": "Un isolant fréquent dans les vieilles maisons québécoises — et un piège à manier avec soin.",
+        "meta": "11 décembre 2025 · 7 min"
+      },
+      "assechement": {
+        "title": "L'assèchement après dégât d'eau : combien de temps, et pourquoi",
+        "sum": "Pourquoi un mur a l'air sec en surface mais ne l'est pas vraiment.",
+        "meta": "4 décembre 2025 · 5 min"
+      }
+    },
+    "featured": {
+      "label": "En vedette",
+      "sub": "lecture du mois",
+      "title": "Comprendre votre dossier : ce que chaque section vous dit vraiment.",
+      "text": "Mesures, classifications, plans, garanties : un dossier Estimation3D ressemble à un livre de bord. Voici comment le lire — et ce qu'il faut regarder en premier.",
+      "meta": "19 mars 2026 · 9 min",
+      "img_alt": "Plan 3D documenté d'une propriété"
+    },
+    "footer": {
+      "sign": "JOURNAL"
+    }
+  },
+  "entrepreneurs": {
+    "crumbs": {
+      "home": "Accueil",
+      "current": "Entrepreneurs"
+    },
+    "hero": {
+      "kicker": "Phase pilote — 15 entrepreneurs partenaires sélectionnés en 2026",
+      "title_1": "Recevez des dossiers complets.",
+      "title_2": "Soumissionnez sans visite.",
+      "lede": "Estimation3D vous envoie des projets pré-documentés à Montréal. Vous analysez le dossier, vous soumissionnez. Pas de déplacement à l'estimation. Pas de course à la cote la plus basse.",
+      "cta": "Postuler comme partenaire",
+      "cta_how": "Voir comment ça fonctionne",
+      "img_alt": "Dossier 3D pré-documenté envoyé à l'entrepreneur",
+      "badge_ready": "Dossier prêt",
+      "badge_bids": "3 soum."
+    },
+    "problem": {
+      "title_1": "Estimer gratuitement,",
+      "title_2": "encore et encore.",
+      "sub": "Vous êtes payé pour exécuter, pas pour estimer gratuitement. Aujourd'hui, le modèle demande l'inverse.",
+      "cells": {
+        "estimer": {
+          "title": "Estimer sans visite payée",
+          "text": "Vous vous déplacez, mesurez, rédigez. Et souvent, le contrat ne suit pas."
+        },
+        "temps": {
+          "title": "Du temps perdu en visites",
+          "text": "Des heures de route par semaine pour des projets qui ne se concrétisent pas."
+        },
+        "opaque": {
+          "title": "Concurrence opaque",
+          "text": "Vous soumissionnez à l'aveugle, contre un nombre inconnu d'entrepreneurs, sur des bases différentes."
+        },
+        "visibilite": {
+          "title": "Pas de visibilité réelle",
+          "text": "Vous ne savez ni la qualité du projet, ni le sérieux du client, ni le périmètre exact."
+        }
+      }
+    },
+    "how": {
+      "title_1": "Quatre étapes.",
+      "title_2": "Aucune zone grise.",
+      "sub": "Du dossier que vous recevez au paiement qui vous est dû, chaque étape est documentée.",
+      "steps": {
+        "dossier": {
+          "title": "Vous recevez un dossier complet",
+          "text": "Scan, mesures, photos, classification du problème. Vous décidez de soumissionner ou non."
+        },
+        "soumission": {
+          "title": "Vous soumissionnez sans déplacement",
+          "text": "Prix, délai, garantie. Le client compare jusqu'à trois propositions structurées."
+        },
+        "execution": {
+          "title": "Vous exécutez avec un suivi structuré",
+          "text": "Rapport quotidien, photos, validation client. Tout est documenté."
+        },
+        "paiement": {
+          "title": "Vous êtes payé selon le contrat",
+          "text": "Pas de paiement bloqué, pas de surprise. Le contrat protège les deux côtés."
+        }
+      }
+    },
+    "benefits": {
+      "label": "Ce que vous obtenez",
+      "title_1": "Du temps. De la clarté.",
+      "title_2": "De la dignité.",
+      "items": {
+        "prequalifies": {
+          "title": "Dossiers pré-qualifiés",
+          "text": "Le client a déjà payé pour structurer le projet. Il est sérieux."
+        },
+        "sans-visite": {
+          "title": "Pas de visite à l'estimation",
+          "text": "Vous économisez des heures chaque semaine."
+        },
+        "concurrence": {
+          "title": "Concurrence loyale",
+          "text": "Jusqu'à 3 entrepreneurs maximum par projet. Pas de course à douze."
+        },
+        "documentation": {
+          "title": "Documentation complète",
+          "text": "Mesures, surface, classification. Vous savez exactement quoi soumissionner."
+        },
+        "suivi": {
+          "title": "Suivi structuré",
+          "text": "Plateforme de reporting quotidien. Pas de WhatsApp éparpillé."
+        },
+        "reputation": {
+          "title": "Réputation construite",
+          "text": "Vos projets bien exécutés alimentent votre profil. La qualité paie."
+        }
+      }
+    },
+    "req": {
+      "title_1": "Une exigence claire,",
+      "title_2": "assumée des deux côtés.",
+      "sub": "Ce qu'on attend de chaque entrepreneur partenaire.",
+      "items": {
+        "rbq": {
+          "strong": "Licence RBQ en règle",
+          "rest": "pour votre spécialité."
+        },
+        "assurance": {
+          "strong": "Assurance responsabilité civile",
+          "rest": "active (minimum 2 M$)."
+        },
+        "certifications": {
+          "strong": "Certifications spécifiques",
+          "rest": "au service (CNESST pour amiante, Loi R-20, etc.)."
+        },
+        "rapports": {
+          "strong": "Capacité à fournir des rapports quotidiens",
+          "rest": "pendant les chantiers."
+        },
+        "protocoles": {
+          "strong": "Engagement à respecter les protocoles",
+          "rest": "documentés dans la plateforme."
+        },
+        "disponibilite": {
+          "strong": "Disponibilité à servir Montréal",
+          "rest": "et la couronne immédiate."
+        }
+      }
+    },
+    "specs": {
+      "title_1": "Six domaines.",
+      "title_2": "Quelques places, soigneusement.",
+      "sub": "Nous sélectionnons 15 entrepreneurs partenaires pour la phase pilote. La sélection n'est pas un volume — c'est une marque de confiance.",
+      "items": {
+        "moisissures": {
+          "title": "Moisissures",
+          "text": "Identification, périmètre, protocole de décontamination."
+        },
+        "eau": {
+          "title": "Dégâts d'eau",
+          "text": "Source, étendue, assèchement, reconstruction."
+        },
+        "amiante": {
+          "title": "Amiante & vermiculite",
+          "text": "Tests, encapsulation, retrait CNESST."
+        },
+        "demolition": {
+          "title": "Démolition sélective",
+          "text": "Plan d'évacuation et gestion des matières."
+        },
+        "isolation": {
+          "title": "Isolation",
+          "text": "Combles, murs, sous-sol. Valeurs R, ponts thermiques."
+        },
+        "fondations": {
+          "title": "Fondations & drain",
+          "text": "Fissures, infiltrations, drain français."
+        }
+      },
+      "avail": {
+        "p1": "1 place disponible",
+        "p2": "2 places disponibles",
+        "p3": "3 places disponibles",
+        "full": "Complet"
+      }
+    },
+    "faq": {
+      "title": "Avant de postuler.",
+      "items": {
+        "cout": {
+          "q": "Combien ça coûte de rejoindre la plateforme ?",
+          "a": "Aucun frais d'inscription. Nous prélevons une commission de service sur les projets exécutés, alignée sur les standards du marché. Détails complets lors de la qualification."
+        },
+        "attribution": {
+          "q": "Comment sont attribués les projets ?",
+          "a": "Chaque projet est ouvert à un maximum de 3 entrepreneurs qualifiés pour le service concerné, dans la zone géographique du client. Le client choisit en toute autonomie."
+        },
+        "obligation": {
+          "q": "Suis-je obligé de soumissionner sur tous les projets reçus ?",
+          "a": "Non. Vous voyez chaque dossier complet et décidez librement. Aucune pénalité à décliner."
+        },
+        "paiement": {
+          "q": "Comment fonctionne le paiement ?",
+          "a": "Le contrat définit les modalités. Le suivi documenté de la plateforme déclenche les libérations de paiement selon les étapes convenues avec le client."
+        },
+        "imprevu": {
+          "q": "Que se passe-t-il si un imprévu survient pendant l'exécution ?",
+          "a": "Chaque service a ses protocoles d'imprévus pré-documentés. Vous notifiez via la plateforme, soumettez un devis additionnel, le client approuve. Aucune zone grise."
+        }
+      }
+    },
+    "form": {
+      "title": "Présentez-nous votre entreprise.",
+      "sub": "Quelques informations suffisent pour démarrer la conversation.",
+      "company": "Nom de l'entreprise",
+      "company_ph": "Atelier Boréal Construction inc.",
+      "contact": "Personne contact",
+      "contact_ph": "Marie-Claude Lavoie",
+      "phone": "Téléphone",
+      "phone_ph": "514 555 0123",
+      "email": "Courriel",
+      "email_ph": "contact@exemple.ca",
+      "rbq": "Numéro de licence RBQ",
+      "rbq_ph": "0000-0000-00",
+      "specialties": "Spécialités",
+      "s_moisissures": "Moisissures",
+      "s_amiante": "Amiante",
+      "s_eau": "Eau",
+      "s_demolition": "Démolition",
+      "s_isolation": "Isolation",
+      "s_fondations": "Fondations",
+      "years": "Années d'expérience",
+      "area": "Zone desservie",
+      "area_ph": "Montréal et couronne nord",
+      "message": "Message (optionnel)",
+      "message_ph": "Quelques mots sur votre approche, vos chantiers récents, ou vos questions.",
+      "note": "Nous étudions chaque candidature individuellement. Réponse sous 5 jours ouvrables.",
+      "submit": "Soumettre ma candidature",
+      "success": "Candidature reçue"
+    },
+    "cta": {
+      "manifesto_1": "La construction mérite mieux que des estimations gratuites",
+      "manifesto_2": "en série.",
+      "lede": "Rejoignez les entrepreneurs qui choisissent la clarté."
+    },
+    "footer": {
+      "sign": "ENTREPRENEURS"
+    }
   }
 }

@@ -1,0 +1,345 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sitio público — armazón compartido: tokens, reset, tipografía, botones,
+   cabecera, menú móvil, encabezado de sección, línea de cota, pie y los dos
+   conmutadores flotantes (idioma / tema).
+
+   Lo incluyen vía `styleUrls` las páginas Le Journal y Entrepreneurs. Angular
+   lo inserta en cada componente con los atributos de encapsulación propios de
+   ese componente, así que una sola copia en disco sirve a las dos páginas sin
+   que sus estilos se escapen a la aplicación autenticada.
+
+   Todo cuelga de `:host` en vez de `:root`/`body`, y las clases `.btn` y
+   `.container` del original se renombran a `.e3-btn` / `.e3-container`: la
+   encapsulación protege hacia fuera, pero Bootstrap se carga globalmente y sus
+   reglas sí entrarían aquí si reutilizáramos sus nombres.
+
+   La landing mantiene su propia copia de este armazón en
+   `landing-page/styles/landing-base.css`, porque su cabecera lleva además la
+   barra de progreso de lectura y el scan-spy de secciones.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════ TOKENS ════════════════════════ */
+:host{
+  --void:#1E1C22;
+  --void-2:#27252D;
+  --panel:#302E38;
+  --panel-2:#37353F;
+  /* superposición dependiente del tema */
+  --scrim:30,28,34;
+
+  /* Tratamiento de medios. En oscuro la foto se hunde y el fondo la vela: así
+     nace la profundidad sobre papel negro. En claro esa receta da barro, por
+     eso la polaridad se invierte en el bloque del tema claro. */
+  --img-filter:grayscale(.3) brightness(.8) contrast(1.05);
+  --img-filter-doc:brightness(.92) contrast(1.05);
+
+  /* Acentos de barrido: en oscuro son luz añadida; en claro, trazo dibujado. */
+  --scan-line:var(--gold-bright);
+  --scan-glow:0 0 18px 2px rgba(var(--gold-rgb),.6);
+  --scan-glow-sm:0 0 16px 2px rgba(var(--gold-rgb),.5);
+
+  --white:#F3F0E9;
+  --white-dim:rgba(243,240,233,.62);
+  --white-faint:rgba(243,240,233,.34);
+  --line:rgba(243,240,233,.10);
+  --line-2:rgba(243,240,233,.06);
+
+  --gold:#D4A857;
+  --gold-bright:#EBCB85;
+  --gold-deep:#A07A33;
+  /* Rol propio: texto/iconos SOBRE relleno dorado. No puede ser `--void`: en el
+     tema claro `--void` es papel, no tinta. */
+  --on-gold:var(--void);
+  --gold-rgb:212,168,87;
+  /* opacidad inicial del anillo pulsante (indicadores "en vivo") */
+  --pulse-a:.6;
+
+  --shadow-rgb:0,0,0;
+  --shadow-a:.9;
+  --shadow-a-soft:.65;
+
+  --burgundy:#8B2D3A;
+  --burgundy-bright:#B24355;
+
+  --disp:"Archivo", "Helvetica Neue", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, monospace;
+
+  --maxw:1320px;
+  --pad-x:40px;
+  --ease:cubic-bezier(.16,.84,.34,1);
+  --ease-out:cubic-bezier(.22,1,.36,1);
+
+  /* alto de la cabecera fija: compensa el desplazamiento a las anclas */
+  --hdr-h:78px;
+
+  display:block; position:relative; isolation:isolate;
+  background:var(--void); color:var(--white);
+  font-family:var(--disp); font-weight:400; font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  /* Sin `overflow` aquí a propósito: recortaría la cabecera y los conmutadores,
+     todos `position:fixed`. El desbordamiento horizontal lo contiene el
+     `overflow:hidden` de .subhero y .cta. */
+}
+
+/* ════════════ TEMA CLARO — paleta de la aplicación ════════════
+   Igual que en la landing: el tema claro no tiene paleta propia, cada token
+   apunta al token del design system (`src/styles/tokens.css`). El oscuro
+   conserva la paleta cinematográfica, exclusiva del sitio público. */
+:host([data-theme="light"]){
+  --void:var(--ds-bg);                    /* #F5F3EE papel principal      */
+  --void-2:var(--ds-bg-alt);              /* #EFEDE6 secciones alternas   */
+  --panel:var(--ds-surface);              /* #FBFAF6 tarjetas, paneles    */
+  --panel-2:var(--ds-surface-elevated);   /* #FFFFFF superficie elevada   */
+
+  --white:var(--ds-ink);                  /* #1A1A1A texto principal      */
+  --white-dim:var(--ds-ink-secondary);    /* #4A4A4A texto secundario     */
+  --white-faint:var(--ds-ink-muted);      /* #7A7770 captions, datos      */
+
+  --line:var(--ds-border);                /* #E8E5DC borde estándar       */
+  --line-2:var(--ds-border-subtle);       /* #EFEDE6 separador sutil      */
+
+  --gold:var(--ds-gold-active);           /* #B0964A texto y filetes      */
+  --gold-bright:var(--ds-gold-hover);     /* #C2A85C realce / hover       */
+  --gold-deep:var(--ds-gold);             /* #D4B96E extremo claro        */
+  --on-gold:var(--ds-ink);                /* tinta sobre relleno dorado   */
+  --gold-rgb:212,185,110;
+  --pulse-a:.9;                           /* el anillo pierde fuerza sobre papel*/
+
+  --shadow-rgb:26,26,26;                  /* sombras de tinta, nunca negro*/
+  --shadow-a:.16;
+  --shadow-a-soft:.12;
+
+  --burgundy:var(--ds-danger);            /* #A14545                      */
+  --burgundy-bright:var(--ds-danger);
+
+  --scrim:245,243,238;                    /* --ds-bg en canal RGB         */
+
+  /* Medios: polaridad invertida. Sobre papel, bajar el brillo y velar con
+     beige produce gris sucio; la foto va a brillo pleno y saturación intacta. */
+  --img-filter:grayscale(.04) brightness(1.04) contrast(1.02) saturate(1.06);
+  --img-filter-doc:brightness(1.02) contrast(1.06) saturate(1.06);
+
+  --scan-line:var(--gold);
+  --scan-glow:0 0 12px 1px rgba(var(--gold-rgb),.7), 0 1px 4px rgba(var(--shadow-rgb),.45);
+  --scan-glow-sm:0 0 10px 1px rgba(var(--gold-rgb),.6), 0 1px 3px rgba(var(--shadow-rgb),.4);
+}
+:host([data-theme="light"])::before{
+  background-image:
+    linear-gradient(rgba(var(--shadow-rgb),.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--shadow-rgb),.05) 1px, transparent 1px);
+}
+@media(max-width:900px){ :host{ --pad-x:22px; --hdr-h:70px; } }
+
+/* ════════════════════════ RESET LOCAL ════════════════════════ */
+*{ box-sizing:border-box; }
+img,svg,video{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+fieldset{ margin:0; padding:0; border:0; min-width:0; }
+legend{ padding:0; }
+::selection{ background:var(--gold); color:var(--on-gold); }
+:focus-visible{ outline:1px solid var(--gold); outline-offset:3px; }
+
+/* retícula de planos + grano sobre toda la página */
+:host::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(243,240,233,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(243,240,233,.022) 1px, transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 120% 90% at 50% 0%, #000 30%, transparent 80%);
+}
+:host::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ════════════════════════ TIPOGRAFÍA ════════════════════════ */
+.kicker{
+  font-family:var(--mono); font-weight:500; font-size:.72rem;
+  letter-spacing:.32em; text-transform:uppercase; color:var(--gold);
+  display:inline-flex; align-items:center; gap:12px;
+}
+.kicker::before{ content:""; width:24px; height:1px; background:var(--gold); display:inline-block; }
+.kicker.plain::before{ display:none; }
+
+/* `color` explícito: bootstrap-overrides.css es global y pinta todo h1..h6 con
+   var(--ds-ink); la encapsulación no lo detiene. Al declararlo aquí, el selector
+   prefijado de Angular gana y los títulos vuelven al blanco hueso / tinta. */
+h1,h2,h3{ font-family:var(--disp); font-weight:800; letter-spacing:-.03em; line-height:.98; margin:0; color:var(--white); }
+h1{ font-size:clamp(3rem, 7.4vw, 7rem); font-weight:900; }
+h2{ font-size:clamp(2.2rem, 4.6vw, 4.2rem); }
+h3{ font-size:clamp(1.4rem, 2.2vw, 2rem); font-weight:700; letter-spacing:-.02em; }
+h4,h5{ color:var(--white); }
+.display-dim{ color:var(--white-faint); }
+.gold-txt{ color:var(--gold); }
+p{ margin:0 0 1.1em; color:var(--white-dim); }
+.lede{ font-size:1.18rem; line-height:1.6; color:var(--white-dim); max-width:46ch; }
+
+.e3-container{ max-width:var(--maxw); margin:0 auto; padding:0 var(--pad-x); position:relative; z-index:1; }
+section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
+@media(max-width:900px){ section{ padding:84px 0; } }
+
+/* etiqueta de dato monoespaciada */
+.data{ font-family:var(--mono); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-faint); }
+.data .v{ color:var(--gold); }
+
+/* ════════════════════════ BOTONES ════════════════════════ */
+.e3-btn{
+  display:inline-flex; align-items:center; gap:12px;
+  font-family:var(--mono); font-weight:500; font-size:.82rem; letter-spacing:.08em; text-transform:uppercase;
+  padding:16px 26px; border:1px solid var(--gold); color:var(--on-gold);
+  background:var(--gold); position:relative; overflow:hidden; border-radius:0;
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease), background .3s, color .3s;
+}
+.e3-btn:hover{ background:var(--gold-bright); box-shadow:0 0 0 1px var(--gold), 0 18px 50px -16px rgba(var(--gold-rgb),.7); transform:translateY(-2px); }
+.e3-btn .ar{ width:16px; height:12px; transition:transform .4s var(--ease); }
+.e3-btn:hover .ar{ transform:translateX(4px); }
+.e3-btn.ghost{ background:transparent; color:var(--white); border-color:var(--line); }
+.e3-btn.ghost:hover{ border-color:var(--gold); color:var(--gold-bright); box-shadow:none; transform:none; }
+
+/* ════════════════════════ CABECERA ════════════════════════ */
+.hdr{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  transition:background .4s, border-color .4s, backdrop-filter .4s;
+  border-bottom:1px solid transparent;
+}
+.hdr.scrolled{ background:rgba(var(--scrim),.72); backdrop-filter:blur(14px); border-color:var(--line-2); }
+.hdr .in{ position:relative; max-width:var(--maxw); margin:0 auto; padding:20px var(--pad-x); display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.brand{ display:inline-flex; align-items:baseline; gap:9px; font-weight:800; font-size:1.3rem; letter-spacing:-.03em; }
+.brand .e3{ position:relative; }
+.brand .e3 b{ color:var(--gold); font-weight:800; }
+.brand .reticle{ width:18px; height:18px; position:relative; }
+.brand .reticle::before,.brand .reticle::after{ content:""; position:absolute; background:var(--gold); }
+.brand .reticle::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-.5px); }
+.brand .reticle::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-.5px); }
+.brand .reticle i{ position:absolute; inset:3px; border:1px solid var(--gold); border-radius:50%; animation:reticlePulse 3.4s var(--ease) infinite; }
+@keyframes reticlePulse{ 0%,100%{ opacity:.6; transform:scale(1);} 50%{ opacity:1; transform:scale(1.12);} }
+
+.nav-links{ display:flex; align-items:center; gap:34px; }
+.nav-links a{ position:relative; padding-bottom:3px; font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); transition:color .25s; }
+.nav-links a:hover{ color:var(--gold); }
+.nav-links a::after{
+  content:""; position:absolute; left:0; right:100%; bottom:-2px; height:1px;
+  background:var(--gold); transition:right .35s var(--ease);
+}
+.nav-links a:hover::after{ right:0; }
+/* página actual: el original la marca con `.gold-txt` */
+.nav-links a.gold-txt::after{ right:0; box-shadow:var(--scan-glow-sm); }
+
+.hdr .e3-btn{ padding:12px 20px; font-size:.74rem; }
+
+.burger{ display:none; width:30px; height:22px; position:relative; }
+.burger span{ position:absolute; left:0; right:0; height:1.5px; background:var(--white); transition:.3s; }
+.burger span:nth-child(1){ top:2px; } .burger span:nth-child(2){ top:10px; } .burger span:nth-child(3){ top:18px; }
+@media(max-width:1040px){
+  .nav-links, .hdr .e3-btn.cta{ display:none; }
+  .burger{ display:block; }
+}
+
+.mobile-nav{
+  position:fixed; inset:0; z-index:99; background:rgba(var(--scrim),.97); backdrop-filter:blur(8px);
+  display:flex; flex-direction:column; justify-content:center; gap:8px; padding:var(--pad-x);
+  transform:translateY(-100%); transition:transform .5s var(--ease);
+}
+.mobile-nav.open{ transform:none; }
+.mobile-nav a{ font-family:var(--disp); font-weight:800; font-size:2.4rem; letter-spacing:-.03em; padding:10px 0; border-bottom:1px solid var(--line-2); }
+.mobile-nav a .num{ font-family:var(--mono); font-size:.8rem; color:var(--gold); font-weight:500; margin-right:14px; vertical-align:super; }
+
+/* ════════════════════════ SUB-HERO ════════════════════════ */
+.subhero{ padding:200px 0 90px; position:relative; overflow:hidden; }
+.subhero .glow{
+  position:absolute; top:-30%; right:-10%; width:60%; height:120%; z-index:0; pointer-events:none;
+  background:radial-gradient(ellipse 50% 50% at 50% 50%, rgba(var(--gold-rgb),.12), transparent 70%);
+}
+.subhero .e3-container{ position:relative; z-index:1; }
+.subhero h1{ font-size:clamp(2.6rem,6vw,5.4rem); max-width:16ch; margin:26px 0 0; }
+.subhero .lede{ margin-top:30px; max-width:58ch; font-size:1.22rem; }
+.crumbs{ font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--white-faint); display:flex; gap:10px; align-items:center; }
+.crumbs a{ color:var(--white-faint); transition:color .25s; }
+.crumbs a:hover{ color:var(--gold); }
+.crumbs .sep{ color:var(--gold); }
+
+/* ════════════════════════ ENCABEZADO DE SECCIÓN ════════════════════════ */
+.sec-head{ display:grid; grid-template-columns:auto 1fr; gap:0 60px; align-items:end; margin-bottom:72px; }
+.sec-head .idx{ font-family:var(--mono); font-size:.78rem; letter-spacing:.2em; color:var(--gold); padding-top:8px; }
+.sec-head h2{ max-width:18ch; }
+.sec-head .sub{ grid-column:2; margin-top:22px; max-width:52ch; }
+@media(max-width:760px){ .sec-head{ grid-template-columns:1fr; gap:18px; } .sec-head .sub{ grid-column:1; } }
+
+/* ════════════════════════ LÍNEA DE COTA ════════════════════════ */
+.dimline{ max-width:var(--maxw); margin:0 auto; padding:64px var(--pad-x); display:flex; align-items:center; gap:18px; }
+.dimline .seg{ flex:1; height:1px; background:var(--line); position:relative; }
+.dimline .seg::before, .dimline .seg::after{ content:""; position:absolute; top:50%; width:7px; height:7px; border-top:1px solid var(--gold); border-right:1px solid var(--gold); }
+.dimline .seg::before{ left:0; transform:translateY(-50%) rotate(-135deg); }
+.dimline .seg::after{ right:0; transform:translateY(-50%) rotate(45deg); }
+.dimline .lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+.dimline .lbl b{ color:var(--white); font-weight:500; }
+
+/* ════════════════════════ BARRIDO DE ESCANEO ════════════════════════
+   La línea sólo se anima mientras el bloque está en pantalla; lo conmuta
+   `SweepDirective` alternando la clase `in-view`. */
+.sweep{
+  position:absolute; left:0; right:0; height:2px; top:-10%;
+  background:linear-gradient(90deg,transparent,var(--scan-line),transparent);
+  box-shadow:var(--scan-glow);
+}
+.in-view > .sweep{ animation:sweep 4s var(--ease) infinite; }
+@keyframes sweep{ 0%{ top:-10%; opacity:0; } 12%{ opacity:1; } 88%{ opacity:1; } 100%{ top:110%; opacity:0; } }
+
+/* ════════════════════════ PIE ════════════════════════ */
+.ftr{ border-top:1px solid var(--line-2); padding:80px 0 40px; background:var(--void-2); position:relative; z-index:1; }
+.ftr-top{ display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:40px; }
+@media(max-width:860px){ .ftr-top{ grid-template-columns:1fr 1fr; } }
+.ftr .brand{ margin-bottom:18px; }
+.ftr-top p{ font-size:.9rem; max-width:30ch; }
+.ftr h5{ font-family:var(--mono); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-faint); margin:0 0 18px; font-weight:500; }
+.ftr ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:11px; }
+.ftr ul a, .ftr ul span{ font-size:.92rem; color:var(--white-dim); transition:color .25s; }
+.ftr ul a:hover{ color:var(--gold); }
+.ftr-bot{ display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; margin-top:60px; padding-top:26px; border-top:1px solid var(--line-2); font-family:var(--mono); font-size:.72rem; letter-spacing:.08em; color:var(--white-faint); }
+
+/* ════════════════════════ CONMUTADOR DE TEMA ════════════════════════ */
+.theme-toggle{
+  position:fixed; right:24px; bottom:24px; z-index:120;
+  display:inline-flex; align-items:center; gap:2px; padding:5px;
+  background:rgba(var(--scrim),.72); backdrop-filter:blur(14px);
+  border:1px solid var(--line); border-radius:100px;
+  box-shadow:0 16px 40px -18px rgba(var(--shadow-rgb),var(--shadow-a-soft));
+}
+.theme-toggle button{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--white-dim); padding:9px 16px; border-radius:100px; transition:color .3s, background .3s;
+}
+.theme-toggle button .d{ width:8px; height:8px; border-radius:50%; border:1px solid currentColor; }
+.theme-toggle button[aria-pressed="true"]{ background:var(--gold); color:var(--on-gold); }
+.theme-toggle button[aria-pressed="true"] .d{ background:var(--on-gold); border-color:var(--on-gold); }
+@media(max-width:600px){ .theme-toggle{ right:14px; bottom:14px; } .theme-toggle button{ padding:8px 12px; } }
+
+/* ════════════════════════ CONMUTADOR DE IDIOMA ════════════════════════ */
+.lang-toggle{
+  position:fixed; right:24px; bottom:82px; z-index:120;
+  display:inline-flex; align-items:center; gap:2px; padding:5px;
+  background:rgba(var(--scrim),.72); backdrop-filter:blur(14px);
+  border:1px solid var(--line); border-radius:100px;
+  box-shadow:0 16px 40px -18px rgba(var(--shadow-rgb),var(--shadow-a-soft));
+}
+.lang-toggle button{
+  font-family:var(--mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--white-dim); padding:9px 15px; border-radius:100px; transition:color .3s, background .3s;
+}
+.lang-toggle button[aria-pressed="true"]{ background:var(--gold); color:var(--on-gold); }
+@media(max-width:600px){ .lang-toggle{ right:14px; bottom:66px; } .lang-toggle button{ padding:8px 12px; } }
+
+/* ════════════════════════ REVELADO AL SCROLL ════════════════════════ */
+.rv{ opacity:0; transform:translateY(28px); transition:opacity .9s var(--ease-out), transform .9s var(--ease-out); }
+.rv.in{ opacity:1; transform:none; }
+.rv-d1{ transition-delay:.08s; } .rv-d2{ transition-delay:.16s; } .rv-d3{ transition-delay:.24s; }
+
+/* Sin animaciones para quien las ha desactivado en el sistema. */
+@media(prefers-reduced-motion: reduce){
+  .rv{ opacity:1; transform:none; transition:none; }
+  .brand .reticle i,
+  .in-view > .sweep{ animation:none; }
+}

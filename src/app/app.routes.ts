@@ -21,6 +21,21 @@ export const routes: Routes = [
     canActivate: [guestGuard],
   },
 
+  // Páginas públicas del sitio. Sin guard a propósito: `guestGuard` echaría de
+  // aquí a quien ya tenga sesión, y estas dos páginas tienen que poder verse
+  // esté uno logueado o no. `publicSite` le dice a AppComponent que no monte el
+  // armazón de la aplicación (menú lateral, barra superior, pie interno).
+  {
+    path: 'journal',
+    loadComponent: () => import('./public-site/journal/journal.component').then(m => m.JournalComponent),
+    data: { publicSite: true },
+  },
+  {
+    path: 'entrepreneurs',
+    loadComponent: () => import('./public-site/entrepreneurs/entrepreneurs.component').then(m => m.EntrepreneursComponent),
+    data: { publicSite: true },
+  },
+
   // ── Cliente ───────────────────────────────────────────────────────────────
   {
     path: 'client/dashboard',

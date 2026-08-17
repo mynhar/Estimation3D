@@ -1,0 +1,187 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     Estimation3D — Le Journal (página pública)
+     Portado de "Estimation3D - Journal.html". El texto vive en i18n bajo
+     `journal.*`; la cabecera y el pie comparten las claves `landing.*`.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ─────────── HEADER ─────────── -->
+<header class="hdr" [class.scrolled]="scrolled()">
+  <div class="in">
+    <a routerLink="/" class="brand" [attr.aria-label]="'landing.nav.home_aria' | translate">
+      <span class="reticle"><i></i></span>
+      <span class="e3">Estimation<b>3D</b></span>
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/" fragment="processus">{{ 'landing.nav.process' | translate }}</a>
+      <a routerLink="/" fragment="services">{{ 'landing.nav.specialties' | translate }}</a>
+      <a routerLink="/journal" class="gold-txt" aria-current="page">{{ 'landing.nav.journal' | translate }}</a>
+      <a routerLink="/entrepreneurs">{{ 'landing.nav.contractors' | translate }}</a>
+      <a routerLink="/login">{{ 'landing.nav.login' | translate }}</a>
+    </nav>
+
+    <a routerLink="/" fragment="dossier" class="e3-btn cta">
+      {{ 'landing.nav.cta' | translate }}
+      <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+    </a>
+
+    <button class="burger" type="button" (click)="toggleMenu()"
+            [attr.aria-label]="'landing.nav.menu' | translate"
+            [attr.aria-expanded]="menuOpen()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav" [class.open]="menuOpen()">
+  <a routerLink="/" fragment="processus" (click)="closeMenu()"><span class="num">01</span><span>{{ 'landing.nav.process' | translate }}</span></a>
+  <a routerLink="/" fragment="services" (click)="closeMenu()"><span class="num">02</span><span>{{ 'landing.nav.specialties' | translate }}</span></a>
+  <a routerLink="/journal" (click)="closeMenu()"><span class="num">03</span><span>{{ 'landing.nav.journal' | translate }}</span></a>
+  <a routerLink="/entrepreneurs" (click)="closeMenu()"><span class="num">04</span><span>{{ 'landing.nav.contractors' | translate }}</span></a>
+  <a routerLink="/login" (click)="closeMenu()"><span class="num">05</span><span>{{ 'landing.nav.login' | translate }}</span></a>
+  <a routerLink="/" fragment="dossier" (click)="closeMenu()"><span class="num">06</span><span>{{ 'landing.nav.cta' | translate }}</span></a>
+</nav>
+
+<main>
+
+  <!-- ─────────── SUB-HERO ─────────── -->
+  <section class="subhero">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="e3-container">
+      <div class="crumbs" e3Reveal>
+        <a routerLink="/">{{ 'journal.crumbs.home' | translate }}</a>
+        <span class="sep">/</span>
+        <span>{{ 'journal.crumbs.current' | translate }}</span>
+      </div>
+      <h1 e3Reveal="1">
+        <span class="gold-txt">{{ 'journal.hero.title_gold' | translate }}</span>{{ 'journal.hero.title_rest' | translate }}
+      </h1>
+      <p class="lede" e3Reveal="2">{{ 'journal.hero.lede' | translate }}</p>
+    </div>
+  </section>
+
+  <!-- ─────────── FILTRES ─────────── -->
+  <section class="pt-0">
+    <div class="e3-container">
+      <div class="cat-row" e3Reveal role="group" [attr.aria-label]="'journal.filter.aria' | translate">
+        @for (c of cats; track c) {
+          <button class="chip" type="button" [class.active]="activeCat() === c"
+                  [attr.aria-pressed]="activeCat() === c" (click)="setCat(c)">
+            {{ 'journal.cats.' + c | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── GRILLE ─────────── -->
+  <section class="pt-0">
+    <div class="e3-container">
+      <!-- TODO(article): las fichas son <article> y no <a> porque la página de
+           artículo ("Estimation3D - Article.html") todavía no se ha convertido a
+           Angular. En cuanto exista la ruta, basta con volverlas
+           <a class="jcard" [routerLink]="['/journal', c.id]">. -->
+      <div class="jgrid" e3Reveal>
+        @for (c of cards(); track c.id) {
+          <article class="jcard">
+            <span class="jc-cat">{{ 'journal.cats.' + c.cat | translate }}</span>
+            <h3>{{ 'journal.cards.' + c.id + '.title' | translate }}</h3>
+            <p class="jc-sum">{{ 'journal.cards.' + c.id + '.sum' | translate }}</p>
+            <span class="jc-meta">
+              <span>{{ 'journal.cards.' + c.id + '.meta' | translate }}</span>
+              <span class="arrow" aria-hidden="true">→</span>
+            </span>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="dimline">
+    <span class="seg"></span>
+    <span class="lbl"><b>{{ 'journal.featured.label' | translate }}</b> &nbsp;·&nbsp; {{ 'journal.featured.sub' | translate }}</span>
+    <span class="seg"></span>
+  </div>
+
+  <!-- ─────────── EN VEDETTE ─────────── -->
+  <section class="pt-30">
+    <div class="e3-container">
+      <article class="featured-wrap" e3Reveal>
+        <div class="featured-img" e3Sweep>
+          <span class="ftag data"><span class="v">SCAN</span> · Outremont</span>
+          <img src="assets/landing/scan-plan-outremont.jpg"
+               [alt]="'journal.featured.img_alt' | translate" loading="lazy" />
+          <div class="sweep" aria-hidden="true"></div>
+        </div>
+        <div class="featured-body">
+          <span class="kicker">{{ 'journal.cats.decider' | translate }}</span>
+          <h3>{{ 'journal.featured.title' | translate }}</h3>
+          <p>{{ 'journal.featured.text' | translate }}</p>
+          <!-- TODO(article): mismo motivo que la rejilla. -->
+          <span class="read">{{ 'journal.featured.meta' | translate }}</span>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<!-- ─────────── FOOTER ─────────── -->
+<footer class="ftr">
+  <div class="e3-container">
+    <div class="ftr-top">
+      <div>
+        <a routerLink="/" class="brand"><span class="reticle"><i></i></span><span class="e3">Estimation<b>3D</b></span></a>
+        <p>{{ 'landing.footer.tagline' | translate }}</p>
+      </div>
+
+      <div>
+        <h5>{{ 'landing.footer.platform' | translate }}</h5>
+        <ul>
+          <li><a routerLink="/" fragment="processus">{{ 'landing.nav.process' | translate }}</a></li>
+          <li><a routerLink="/" fragment="services">{{ 'landing.nav.specialties' | translate }}</a></li>
+          <li><a routerLink="/" fragment="dossier">{{ 'landing.nav.cta' | translate }}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5>{{ 'landing.footer.explore' | translate }}</h5>
+        <ul>
+          <li><a routerLink="/journal">{{ 'landing.nav.journal' | translate }}</a></li>
+          <li><a routerLink="/entrepreneurs">{{ 'landing.nav.contractors' | translate }}</a></li>
+          <li><a routerLink="/entrepreneurs" fragment="form">{{ 'landing.footer.apply' | translate }}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5>Contact</h5>
+        <ul>
+          <li><span>{{ 'landing.footer.city' | translate }}</span></li>
+          <li><a href="mailto:info@estimation3d.ca">info&#64;estimation3d.ca</a></li>
+          <li><span>{{ 'landing.footer.pilot' | translate }}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ftr-bot">
+      <span>© {{ year }} HYGIENACTION · MONTRÉAL</span>
+      <span>EST3D — {{ 'journal.footer.sign' | translate }}</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ─────────── CONTRÔLES : LANGUE + THÈME ─────────── -->
+<div class="lang-toggle" role="group" [attr.aria-label]="'landing.controls.language' | translate">
+  @for (l of langs; track l) {
+    <!-- El CSS ya aplica text-transform:uppercase. -->
+    <button type="button" (click)="setLang(l)" [attr.aria-pressed]="lang.current() === l">{{ l }}</button>
+  }
+</div>
+
+<div class="theme-toggle" role="group" [attr.aria-label]="'landing.controls.theme' | translate">
+  <button type="button" (click)="setTheme('dark')" [attr.aria-pressed]="theme() === 'dark'">
+    <span class="d"></span><span>{{ 'landing.controls.dark' | translate }}</span>
+  </button>
+  <button type="button" (click)="setTheme('light')" [attr.aria-pressed]="theme() === 'light'">
+    <span class="d"></span><span>{{ 'landing.controls.light' | translate }}</span>
+  </button>
+</div>

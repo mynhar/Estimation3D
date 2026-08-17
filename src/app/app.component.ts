@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
+  NavigationEnd,
   RouterLink,
   RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { filter } from 'rxjs/operators';
 import { AuthSupabaseService } from './services/auth-supabase.service';
 import { RealtimeNotificationsService } from './services/realtime-notifications.service';
 import { ToastComponent } from './components/toast/toast.component';
@@ -43,11 +45,33 @@ export class AppComponent {
 
   rolLabel = computed(() => 'role.' + (this.rolPerfil() ?? 'cliente'));
 
+  // ── Sitio público ─────────────────────────────────────────────────────────
+  /**
+   * true en las rutas marcadas con `data: { publicSite: true }` (Le Journal,
+   * Entrepreneurs). Esas páginas traen su propia cabecera y su propio pie, y
+   * deben verse igual con sesión o sin ella.
+   */
+  private sitioPublico = signal(false);
+
+  /** El armazón de la app sólo se monta con sesión y fuera del sitio público. */
+  mostrarArmazon = computed(() => !!this.user() && !this.sitioPublico());
+
   // ── Sidebar state ─────────────────────────────────────────────────────────
   collapsed  = signal(localStorage.getItem('sidebar-collapsed') === 'true');
   mobileOpen = signal(false);
 
   constructor() {
+    // El flag viaja en la ruta hoja: se baja hasta la más profunda porque las
+    // rutas con hijos dejan `data` vacío en los niveles superiores.
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe(() => {
+        let ruta = this.router.routerState.root;
+        while (ruta.firstChild) ruta = ruta.firstChild;
+        this.sitioPublico.set(ruta.snapshot.data['publicSite'] === true);
+        if (this.sitioPublico()) this.mobileOpen.set(false);
+      });
+
     // Iniciar/detener notificaciones según rol resuelto
     this.authService.rol$.pipe(takeUntilDestroyed()).subscribe(rol => {
       if (rol) {

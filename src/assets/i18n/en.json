@@ -1176,7 +1176,9 @@
       "specialties": "Specialties",
       "login": "Log in",
       "cta": "Create my file",
-      "menu": "Menu"
+      "menu": "Menu",
+      "journal": "The Journal",
+      "contractors": "Contractors"
     },
     "hero": {
       "kicker": "Montréal · Pilot platform 2026",
@@ -1348,7 +1350,9 @@
       "account": "Account",
       "city": "Montréal, QC",
       "pilot": "2026 pilot",
-      "sign": "DIRECTION v3 / CINEMA"
+      "sign": "DIRECTION v3 / CINEMA",
+      "explore": "Explore",
+      "apply": "Apply"
     },
     "controls": {
       "language": "Language",
@@ -2221,5 +2225,310 @@
     "err_delete": "Could not delete the contingency.",
     "err_codigo_dup": "That code already exists.",
     "delete_confirm": "Delete this contingency?"
+  },
+  "journal": {
+    "crumbs": {
+      "home": "Home",
+      "current": "The Journal"
+    },
+    "hero": {
+      "title_gold": "Understand",
+      "title_rest": " what happens at home.",
+      "lede": "Articles, guides and stories to decide better when a problem touches your property."
+    },
+    "filter": {
+      "aria": "Filter by category"
+    },
+    "cats": {
+      "all": "All",
+      "moisissures": "Mould",
+      "eau": "Water",
+      "amiante": "Asbestos",
+      "fondations": "Foundations",
+      "decider": "Decide better",
+      "histoires": "Stories"
+    },
+    "cards": {
+      "moisissure-danger": {
+        "title": "How to tell if the mould in your home is dangerous",
+        "sum": "Stains, smells, species: what to look at, what to do, and what never to do.",
+        "meta": "12 Feb 2026 · 6 min"
+      },
+      "degat-eau-48h": {
+        "title": "Water damage: the first 48 hours that change everything",
+        "sum": "Why the first two days determine the extent of the damage — and the final bill.",
+        "meta": "5 Feb 2026 · 5 min"
+      },
+      "comparer-soum": {
+        "title": "Comparing three bids: what really matters beyond price",
+        "sum": "A simple reading grid so you're not caught out by the lowest number.",
+        "meta": "29 Jan 2026 · 7 min"
+      },
+      "avant-1980": {
+        "title": "Homes built before 1980: what every owner should know",
+        "sum": "Where asbestos hides, how to spot it, and why you should never disturb it yourself.",
+        "meta": "22 Jan 2026 · 8 min"
+      },
+      "cave-rosemont": {
+        "title": "A damp basement in Rosemont: from diagnosis to solution",
+        "sum": "The case of an owner who thought she had a simple humidity problem.",
+        "meta": "15 Jan 2026 · 6 min"
+      },
+      "fissures-fond": {
+        "title": "Foundation cracks: structural or cosmetic?",
+        "sum": "The signs that change everything, and the ones that can wait.",
+        "meta": "8 Jan 2026 · 6 min"
+      },
+      "une-visite": {
+        "title": "Why one visit is enough (and why three is too many)",
+        "sum": "The economic and human math behind single-visit documentation.",
+        "meta": "18 Dec 2025 · 5 min"
+      },
+      "vermiculite": {
+        "title": "Vermiculite in the attic: why it's so delicate",
+        "sum": "A common insulant in old Québec homes — and a trap to handle with care.",
+        "meta": "11 Dec 2025 · 7 min"
+      },
+      "assechement": {
+        "title": "Drying after water damage: how long, and why",
+        "sum": "Why a wall looks dry on the surface but really isn't.",
+        "meta": "4 Dec 2025 · 5 min"
+      }
+    },
+    "featured": {
+      "label": "Featured",
+      "sub": "read of the month",
+      "title": "Understanding your file: what each section really tells you.",
+      "text": "Measurements, classifications, plans, warranties: an Estimation3D file reads like a logbook. Here's how to read it — and what to look at first.",
+      "meta": "19 Mar 2026 · 9 min",
+      "img_alt": "Documented 3D plan of a property"
+    },
+    "footer": {
+      "sign": "JOURNAL"
+    }
+  },
+  "entrepreneurs": {
+    "crumbs": {
+      "home": "Home",
+      "current": "Contractors"
+    },
+    "hero": {
+      "kicker": "Pilot phase — 15 partner contractors selected in 2026",
+      "title_1": "Receive complete files.",
+      "title_2": "Bid without visiting.",
+      "lede": "Estimation3D sends you pre-documented projects across Montréal. You analyze the file, you bid. No travel to estimate. No race to the lowest number.",
+      "cta": "Apply as a partner",
+      "cta_how": "See how it works",
+      "img_alt": "Pre-documented 3D file sent to the contractor",
+      "badge_ready": "File ready",
+      "badge_bids": "3 bids"
+    },
+    "problem": {
+      "title_1": "Estimating for free,",
+      "title_2": "again and again.",
+      "sub": "You're paid to execute, not to estimate for free. Today the model asks the opposite.",
+      "cells": {
+        "estimer": {
+          "title": "Estimating without a paid visit",
+          "text": "You travel, measure, write it up. And often, the contract doesn't follow."
+        },
+        "temps": {
+          "title": "Time lost in visits",
+          "text": "Hours of driving each week for projects that never materialize."
+        },
+        "opaque": {
+          "title": "Opaque competition",
+          "text": "You bid blind, against an unknown number of contractors, on different bases."
+        },
+        "visibilite": {
+          "title": "No real visibility",
+          "text": "You know neither the quality of the project, the seriousness of the client, nor the exact perimeter."
+        }
+      }
+    },
+    "how": {
+      "title_1": "Four steps.",
+      "title_2": "No grey zones.",
+      "sub": "From the file you receive to the payment you're owed, every stage is documented.",
+      "steps": {
+        "dossier": {
+          "title": "You receive a complete file",
+          "text": "Scan, measurements, photos, problem classification. You decide whether to bid or not."
+        },
+        "soumission": {
+          "title": "You bid without travel",
+          "text": "Price, timeline, warranty. The client compares up to three structured proposals."
+        },
+        "execution": {
+          "title": "You execute with structured follow-up",
+          "text": "Daily report, photos, client validation. Everything is documented."
+        },
+        "paiement": {
+          "title": "You're paid per contract",
+          "text": "No blocked payments, no surprises. The contract protects both sides."
+        }
+      }
+    },
+    "benefits": {
+      "label": "What you get",
+      "title_1": "Time. Clarity.",
+      "title_2": "Dignity.",
+      "items": {
+        "prequalifies": {
+          "title": "Pre-qualified files",
+          "text": "The client already paid to structure the project. They're serious."
+        },
+        "sans-visite": {
+          "title": "No estimating visit",
+          "text": "You save hours every week."
+        },
+        "concurrence": {
+          "title": "Fair competition",
+          "text": "Up to 3 contractors max per project. No race of twelve."
+        },
+        "documentation": {
+          "title": "Complete documentation",
+          "text": "Measurements, surface, classification. You know exactly what to bid."
+        },
+        "suivi": {
+          "title": "Structured follow-up",
+          "text": "Daily reporting platform. No scattered WhatsApp threads."
+        },
+        "reputation": {
+          "title": "Reputation you build",
+          "text": "Your well-executed projects feed your profile. Quality pays."
+        }
+      }
+    },
+    "req": {
+      "title_1": "A clear bar,",
+      "title_2": "owned on both sides.",
+      "sub": "What we expect from every partner contractor.",
+      "items": {
+        "rbq": {
+          "strong": "Valid RBQ licence",
+          "rest": "for your specialty."
+        },
+        "assurance": {
+          "strong": "Active liability insurance",
+          "rest": "(minimum $2M)."
+        },
+        "certifications": {
+          "strong": "Service-specific certifications",
+          "rest": "(CNESST for asbestos, Loi R-20, etc.)."
+        },
+        "rapports": {
+          "strong": "Ability to provide daily reports",
+          "rest": "during job sites."
+        },
+        "protocoles": {
+          "strong": "Commitment to follow protocols",
+          "rest": "documented in the platform."
+        },
+        "disponibilite": {
+          "strong": "Availability to serve Montréal",
+          "rest": "and the immediate ring."
+        }
+      }
+    },
+    "specs": {
+      "title_1": "Six fields.",
+      "title_2": "A few spots, carefully.",
+      "sub": "We select 15 partner contractors for the 2026 pilot. Selection isn't volume — it's a mark of trust.",
+      "items": {
+        "moisissures": {
+          "title": "Mould",
+          "text": "Identification, perimeter, decontamination protocol."
+        },
+        "eau": {
+          "title": "Water damage",
+          "text": "Source, extent, drying, rebuild."
+        },
+        "amiante": {
+          "title": "Asbestos & vermiculite",
+          "text": "Testing, encapsulation, CNESST removal."
+        },
+        "demolition": {
+          "title": "Selective demolition",
+          "text": "Evacuation plan and waste management."
+        },
+        "isolation": {
+          "title": "Insulation",
+          "text": "Attics, walls, basement. R-values, thermal bridges."
+        },
+        "fondations": {
+          "title": "Foundations & drain",
+          "text": "Cracks, infiltration, French drain."
+        }
+      },
+      "avail": {
+        "p1": "1 spot open",
+        "p2": "2 spots open",
+        "p3": "3 spots open",
+        "full": "Full"
+      }
+    },
+    "faq": {
+      "title": "Before you apply.",
+      "items": {
+        "cout": {
+          "q": "How much does it cost to join the platform?",
+          "a": "No registration fee. We take a service commission on executed projects, aligned with market standards. Full details during qualification."
+        },
+        "attribution": {
+          "q": "How are projects assigned?",
+          "a": "Each project is open to a maximum of 3 qualified contractors for the relevant service, in the client's geographic area. The client chooses independently."
+        },
+        "obligation": {
+          "q": "Am I required to bid on every project I receive?",
+          "a": "No. You see each complete file and decide freely. No penalty for declining."
+        },
+        "paiement": {
+          "q": "How does payment work?",
+          "a": "The contract defines the terms. The platform's documented follow-up triggers payment releases according to the stages agreed with the client."
+        },
+        "imprevu": {
+          "q": "What happens if something unexpected comes up during execution?",
+          "a": "Each service has pre-documented contingency protocols. You notify via the platform, submit an additional quote, the client approves. No grey zone."
+        }
+      }
+    },
+    "form": {
+      "title": "Tell us about your company.",
+      "sub": "A few details are enough to start the conversation.",
+      "company": "Company name",
+      "company_ph": "Atelier Boréal Construction inc.",
+      "contact": "Contact person",
+      "contact_ph": "Marie-Claude Lavoie",
+      "phone": "Phone",
+      "phone_ph": "514 555 0123",
+      "email": "Email",
+      "email_ph": "contact@exemple.ca",
+      "rbq": "RBQ licence number",
+      "rbq_ph": "0000-0000-00",
+      "specialties": "Specialties",
+      "s_moisissures": "Mould",
+      "s_amiante": "Asbestos",
+      "s_eau": "Water",
+      "s_demolition": "Demolition",
+      "s_isolation": "Insulation",
+      "s_fondations": "Foundations",
+      "years": "Years of experience",
+      "area": "Service area",
+      "area_ph": "Montréal and north ring",
+      "message": "Message (optional)",
+      "message_ph": "A few words on your approach, recent job sites, or your questions.",
+      "note": "We review each application individually. Response within 5 business days.",
+      "submit": "Submit my application",
+      "success": "Application received"
+    },
+    "cta": {
+      "manifesto_1": "Construction deserves better than free estimates",
+      "manifesto_2": "on repeat.",
+      "lede": "Join the contractors who choose clarity."
+    },
+    "footer": {
+      "sign": "CONTRACTORS"
+    }
   }
 }

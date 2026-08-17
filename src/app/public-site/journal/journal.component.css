@@ -1,0 +1,51 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Le Journal — rejilla de artículos, filtro por categoría y ficha destacada.
+   Portado del bloque JOURNAL de assets/site.css (líneas 489-517).
+   El armazón (tokens, cabecera, pie, conmutadores) llega desde site-chrome.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Las secciones encadenadas del original llevaban `style="padding-top:0"`
+   inline; aquí son clases para no dejar estilos sueltos en la plantilla. */
+.pt-0{ padding-top:0; }
+.pt-30{ padding-top:30px; }
+
+/* ─────────── FILTRO POR CATEGORÍA ─────────── */
+.cat-row{ display:flex; flex-wrap:wrap; gap:10px; padding:8px 0 0; }
+.chip{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--white-dim); padding:10px 18px; border:1px solid var(--line); border-radius:100px;
+  transition:color .25s, border-color .25s, background .25s;
+}
+.chip:hover{ border-color:var(--gold); color:var(--gold); }
+.chip.active{ background:var(--gold); color:var(--on-gold); border-color:var(--gold); }
+
+/* ─────────── REJILLA ───────────
+   El `gap:1px` sobre un fondo de línea dibuja los filetes entre fichas: cada
+   ficha repinta `--void` encima, así que la retícula queda de un solo píxel. */
+.jgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
+@media(max-width:980px){ .jgrid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:620px){ .jgrid{ grid-template-columns:1fr; } }
+
+.jcard{ background:var(--void); padding:34px 30px 28px; display:flex; flex-direction:column; min-height:300px; position:relative; overflow:hidden; transition:background .35s; }
+.jcard::after{ content:""; position:absolute; left:0; top:0; height:2px; width:0; background:linear-gradient(90deg,var(--gold-bright),transparent); transition:width .5s var(--ease); }
+.jcard:hover{ background:var(--void-2); }
+.jcard:hover::after{ width:100%; }
+.jcard .jc-cat{ font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.jcard h3{ font-size:1.34rem; line-height:1.12; margin:16px 0 12px; }
+/* `margin-bottom:auto` empuja la meta al fondo aunque el resumen sea corto:
+   así todas las fichas de una fila alinean su filete inferior. */
+.jcard .jc-sum{ font-size:.92rem; color:var(--white-dim); margin:0 0 auto; }
+.jcard .jc-meta{ margin-top:24px; padding-top:16px; border-top:1px solid var(--line-2); font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--white-faint); display:flex; justify-content:space-between; align-items:center; }
+.jcard .jc-meta .arrow{ color:var(--gold); transition:transform .3s; }
+.jcard:hover .jc-meta .arrow{ transform:translateX(4px); }
+
+/* ─────────── EN VEDETTE ─────────── */
+.featured-wrap{ display:grid; grid-template-columns:1.05fr .95fr; gap:0; border:1px solid var(--line); }
+@media(max-width:860px){ .featured-wrap{ grid-template-columns:1fr; } }
+.featured-img{ position:relative; min-height:360px; overflow:hidden; background:var(--void-2); }
+.featured-img img{ width:100%; height:100%; object-fit:cover; filter:var(--img-filter); }
+.featured-img .ftag{ position:absolute; top:16px; left:16px; z-index:2; }
+.featured-body{ padding:48px 44px; display:flex; flex-direction:column; justify-content:center; background:var(--void); }
+.featured-body h3{ font-size:clamp(1.6rem,2.6vw,2.4rem); line-height:1.05; margin:18px 0 16px; }
+.featured-body .read{ font-family:var(--mono); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-top:24px; display:inline-flex; gap:10px; align-items:center; }
+@media(max-width:620px){ .featured-body{ padding:36px 26px; } }

@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Entrepreneurs — bloques propios de la página: ficha de dossier, etapas,
+   ventajas, exigencias, dominios, FAQ, formulario y manifiesto final.
+   Portado del bloque ENTREPRENEURS de assets/site.css (líneas 548-614).
+   El armazón (tokens, cabecera, pie, conmutadores) llega desde site-chrome.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* El original llevaba estos ajustes como `style="…"` inline; aquí son clases
+   para que la plantilla quede libre de estilos sueltos. */
+.alt{ background:var(--void-2); }
+.pt-30{ padding-top:30px; }
+.mt-18{ margin-top:18px; }
+
+/* ─────────── SUB-HERO : DEUX COLONNES ─────────── */
+.scan-feature{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
+@media(max-width:900px){ .scan-feature{ grid-template-columns:1fr; gap:36px; } }
+.hero-cta{ display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-top:32px; }
+
+/* ─────────── FICHE DOSSIER ─────────── */
+.dossier-card{
+  position:relative; border:1px solid var(--line); background:rgba(var(--scrim),.5);
+  backdrop-filter:blur(10px); padding:14px;
+  box-shadow:0 40px 90px -40px rgba(var(--shadow-rgb),var(--shadow-a));
+}
+.dossier-card .corner{ position:absolute; width:14px; height:14px; border:1px solid var(--gold); }
+.dossier-card .corner.tl{ top:-1px; left:-1px; border-right:0; border-bottom:0; }
+.dossier-card .corner.tr{ top:-1px; right:-1px; border-left:0; border-bottom:0; }
+.dossier-card .corner.bl{ bottom:-1px; left:-1px; border-right:0; border-top:0; }
+.dossier-card .corner.br{ bottom:-1px; right:-1px; border-left:0; border-top:0; }
+.dossier-card .imgwrap{ position:relative; overflow:hidden; aspect-ratio:4/3; background:var(--void); }
+.dossier-card .imgwrap img{ width:100%; height:100%; object-fit:cover; filter:var(--img-filter-doc); }
+/* El barrido vive dentro de .imgwrap, pero la clase `in-view` la pone e3Sweep
+   sobre la tarjeta entera; de ahí el descendiente en vez del hijo directo. */
+.dossier-card.in-view .sweep{ animation:sweep 3.6s var(--ease) infinite; }
+.dossier-card .bar{ display:flex; align-items:center; justify-content:space-between; padding:12px 6px 4px; }
+.dossier-card .live{ display:inline-flex; align-items:center; gap:7px; }
+.dossier-card .live .dot{
+  width:7px; height:7px; border-radius:50%; background:var(--gold);
+  box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a)); animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{ box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a)); }
+  70%{ box-shadow:0 0 0 8px rgba(var(--gold-rgb),0); }
+  100%{ box-shadow:0 0 0 0 rgba(var(--gold-rgb),0); }
+}
+
+/* ─────────── [01] PROBLÈME ─────────── */
+.prob-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
+.prob-grid .cell{ background:var(--void); padding:46px 40px; }
+.prob-grid .n{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.prob-grid h3{ margin:24px 0 12px; }
+.prob-grid p{ margin:0; font-size:.96rem; }
+@media(max-width:720px){ .prob-grid{ grid-template-columns:1fr; } }
+/* Sobre `.alt` el fondo de la sección ya es --void-2; las celdas se repintan
+   con --void para que la retícula de 1 px siga siendo visible. */
+
+/* ─────────── [02] ÉTAPES ─────────── */
+.steps{ list-style:none; padding:0; margin:0; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
+@media(max-width:880px){ .steps{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .steps{ grid-template-columns:1fr; } }
+.steps .step{ background:var(--void); padding:38px 30px; }
+.steps .step .num{ font-family:var(--mono); font-size:.78rem; color:var(--gold); letter-spacing:.16em; }
+.steps .step h4{ font-family:var(--disp); font-weight:700; font-size:1.2rem; letter-spacing:-.02em; margin:18px 0 10px; color:var(--white); }
+.steps .step p{ margin:0; font-size:.92rem; }
+
+/* ─────────── [03] BÉNÉFICES ─────────── */
+.benefits{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
+@media(max-width:860px){ .benefits{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .benefits{ grid-template-columns:1fr; } }
+.benefits .b{ background:var(--void); padding:36px 30px; }
+.benefits .b .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.benefits .b h4{ font-family:var(--disp); font-weight:700; font-size:1.18rem; letter-spacing:-.02em; margin:16px 0 8px; color:var(--white); }
+.benefits .b p{ margin:0; font-size:.9rem; }
+
+/* ─────────── [04] EXIGENCES ─────────── */
+.req-list{ list-style:none; padding:0; margin:0 auto; max-width:840px; border-top:1px solid var(--line-2); }
+.req-list li{ padding:24px 0; border-bottom:1px solid var(--line-2); display:flex; gap:18px; align-items:flex-start; }
+.req-list .ic{ flex-shrink:0; width:18px; height:18px; margin-top:5px; color:var(--gold); }
+.req-list strong{ font-family:var(--disp); font-weight:700; color:var(--white); }
+.req-list span{ color:var(--white-dim); }
+
+/* ─────────── [05] DOMAINES ─────────── */
+.spec-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
+@media(max-width:860px){ .spec-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .spec-grid{ grid-template-columns:1fr; } }
+.spec{ background:var(--void); padding:34px 30px; }
+.spec .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.spec h4{ font-family:var(--disp); font-weight:700; font-size:1.3rem; letter-spacing:-.02em; margin:14px 0 8px; color:var(--white); }
+.spec p{ margin:0 0 18px; font-size:.9rem; }
+.spec .avail{ font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); padding:5px 10px; display:inline-block; border-radius:100px; }
+.spec .avail.full{ color:var(--white-faint); border-color:var(--line); }
+
+/* ─────────── [06] FAQ ─────────── */
+.faq-list{ max-width:880px; margin:0 auto; border-top:1px solid var(--line-2); }
+.faq-item{ border-bottom:1px solid var(--line-2); }
+.faq-q{ width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:20px; padding:26px 0; font-family:var(--disp); font-weight:700; font-size:1.15rem; letter-spacing:-.01em; color:var(--white); }
+.faq-q .plus{ font-family:var(--mono); color:var(--gold); font-size:1.4rem; transition:transform .3s; flex-shrink:0; }
+.faq-item.open .faq-q .plus{ transform:rotate(45deg); }
+/* Acordeón sin medir el DOM: la fila pasa de 0fr a 1fr y el navegador
+   interpola la altura real. Sustituye al `maxHeight = scrollHeight` del
+   script original, que había que recalcular al cambiar de idioma. */
+.faq-a{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s var(--ease); }
+.faq-item.open .faq-a{ grid-template-rows:1fr; }
+.faq-a .inner-wrap{ overflow:hidden; }
+.faq-a .inner{ padding:0 0 26px; margin:0; color:var(--white-dim); font-size:.98rem; max-width:64ch; }
+
+/* ─────────── [07] FORMULAIRE ─────────── */
+.form-wrap{ max-width:880px; margin:0 auto; border:1px solid var(--line); padding:44px; background:var(--void); }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.field{ display:flex; flex-direction:column; gap:8px; }
+.field.full{ grid-column:1 / -1; }
+@media(max-width:620px){ .form-grid{ grid-template-columns:1fr; } .field.full{ grid-column:auto; } .form-wrap{ padding:28px 22px; } }
+.field label, .field legend{ font-family:var(--mono); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-faint); }
+.field legend{ margin-bottom:8px; }
+.field input, .field textarea{ font-family:var(--disp); font-size:1rem; color:var(--white); background:var(--void-2); border:1px solid var(--line); border-radius:0; padding:13px 15px; transition:border-color .25s; }
+.field input:focus, .field textarea:focus{ outline:none; border-color:var(--gold); }
+.field textarea{ min-height:110px; resize:vertical; }
+.field .is-invalid{ border-color:var(--burgundy-bright); }
+.checks{ display:flex; flex-wrap:wrap; gap:12px; }
+.check{ font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; color:var(--white-dim); display:inline-flex; gap:8px; align-items:center; border:1px solid var(--line); padding:9px 14px; border-radius:100px; cursor:pointer; }
+.check input{ accent-color:var(--gold); }
+.form-foot{ display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap; margin-top:30px; padding-top:26px; border-top:1px solid var(--line-2); }
+.form-note{ font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--white-faint); margin:0; max-width:40ch; }
+.form-success{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:0; }
+
+/* ─────────── MANIFESTE FINAL ─────────── */
+.cta{ overflow:hidden; }
+.cta .inner{ text-align:center; position:relative; z-index:1; }
+.manifesto{ font-family:var(--disp); font-weight:900; font-size:clamp(2rem,4.6vw,3.6rem); line-height:1.05; letter-spacing:-.03em; color:var(--white); max-width:20ch; margin:0 auto; text-align:center; }
+.cta-lede{ margin:30px auto 36px; text-align:center; max-width:48ch; }
+
+@media(prefers-reduced-motion: reduce){
+  .dossier-card .live .dot{ animation:none; }
+  .faq-a{ transition:none; }
+}

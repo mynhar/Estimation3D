@@ -1176,7 +1176,9 @@
       "specialties": "Especialidades",
       "login": "Iniciar sesión",
       "cta": "Crear mi expediente",
-      "menu": "Menú"
+      "menu": "Menú",
+      "journal": "El Diario",
+      "contractors": "Contratistas"
     },
     "hero": {
       "kicker": "Montréal · Plataforma piloto 2026",
@@ -1348,7 +1350,9 @@
       "account": "Cuenta",
       "city": "Montréal, QC",
       "pilot": "Piloto 2026",
-      "sign": "DIRECTION v3 / CINÉMA"
+      "sign": "DIRECTION v3 / CINÉMA",
+      "explore": "Explorar",
+      "apply": "Postular"
     },
     "controls": {
       "language": "Idioma",
@@ -2221,5 +2225,310 @@
     "err_delete": "No se pudo eliminar el imprevisto.",
     "err_codigo_dup": "Ese código ya existe.",
     "delete_confirm": "¿Eliminar este imprevisto?"
+  },
+  "journal": {
+    "crumbs": {
+      "home": "Inicio",
+      "current": "El Diario"
+    },
+    "hero": {
+      "title_gold": "Entender",
+      "title_rest": " lo que pasa en su casa.",
+      "lede": "Artículos, guías e historias para decidir mejor cuando un problema afecta su propiedad."
+    },
+    "filter": {
+      "aria": "Filtrar por categoría"
+    },
+    "cats": {
+      "all": "Todo",
+      "moisissures": "Moho",
+      "eau": "Agua",
+      "amiante": "Amianto",
+      "fondations": "Cimientos",
+      "decider": "Decidir mejor",
+      "histoires": "Historias"
+    },
+    "cards": {
+      "moisissure-danger": {
+        "title": "Cómo saber si el moho en su casa es peligroso",
+        "sum": "Manchas, olores, especies: qué mirar, qué hacer y qué no hacer nunca.",
+        "meta": "12 feb. 2026 · 6 min"
+      },
+      "degat-eau-48h": {
+        "title": "Daño por agua: las primeras 48 horas que lo cambian todo",
+        "sum": "Por qué los dos primeros días determinan la magnitud del daño — y la factura final.",
+        "meta": "5 feb. 2026 · 5 min"
+      },
+      "comparer-soum": {
+        "title": "Comparar tres presupuestos: lo que de verdad importa más allá del precio",
+        "sum": "Una guía de lectura simple para no caer en la trampa del precio más bajo.",
+        "meta": "29 ene. 2026 · 7 min"
+      },
+      "avant-1980": {
+        "title": "Casas construidas antes de 1980: lo que todo propietario debe saber",
+        "sum": "Dónde se esconde el amianto, cómo detectarlo y por qué nunca debe tocarlo usted mismo.",
+        "meta": "22 ene. 2026 · 8 min"
+      },
+      "cave-rosemont": {
+        "title": "Un sótano húmedo en Rosemont: del diagnóstico a la solución",
+        "sum": "El caso de una propietaria que creía tener un simple problema de humedad.",
+        "meta": "15 ene. 2026 · 6 min"
+      },
+      "fissures-fond": {
+        "title": "Fisuras en los cimientos: ¿estructurales o cosméticas?",
+        "sum": "Las señales que lo cambian todo, y las que pueden esperar.",
+        "meta": "8 ene. 2026 · 6 min"
+      },
+      "une-visite": {
+        "title": "Por qué una sola visita basta (y por qué tres son demasiadas)",
+        "sum": "El cálculo económico y humano detrás de la documentación en una sola visita.",
+        "meta": "18 dic. 2025 · 5 min"
+      },
+      "vermiculite": {
+        "title": "Vermiculita en el ático: por qué es tan delicada",
+        "sum": "Un aislante frecuente en las casas antiguas de Quebec — y una trampa que manejar con cuidado.",
+        "meta": "11 dic. 2025 · 7 min"
+      },
+      "assechement": {
+        "title": "El secado tras un daño por agua: cuánto tiempo, y por qué",
+        "sum": "Por qué un muro parece seco en la superficie pero no lo está.",
+        "meta": "4 dic. 2025 · 5 min"
+      }
+    },
+    "featured": {
+      "label": "Destacado",
+      "sub": "lectura del mes",
+      "title": "Entender su expediente: lo que cada sección le dice de verdad.",
+      "text": "Mediciones, clasificaciones, planos, garantías: un expediente Estimation3D se lee como un cuaderno de bitácora. Así se lee — y qué mirar primero.",
+      "meta": "19 mar. 2026 · 9 min",
+      "img_alt": "Plano 3D documentado de una propiedad"
+    },
+    "footer": {
+      "sign": "JOURNAL"
+    }
+  },
+  "entrepreneurs": {
+    "crumbs": {
+      "home": "Inicio",
+      "current": "Contratistas"
+    },
+    "hero": {
+      "kicker": "Fase piloto — 15 contratistas socios seleccionados en 2026",
+      "title_1": "Reciba expedientes completos.",
+      "title_2": "Presupueste sin visitar.",
+      "lede": "Estimation3D le envía proyectos pre-documentados por todo Montréal. Usted analiza el expediente, presupuesta. Sin desplazarse a estimar. Sin carrera al precio más bajo.",
+      "cta": "Postular como socio",
+      "cta_how": "Ver el proceso",
+      "img_alt": "Expediente 3D pre-documentado enviado al contratista",
+      "badge_ready": "Expediente listo",
+      "badge_bids": "3 pres."
+    },
+    "problem": {
+      "title_1": "Estimar gratis,",
+      "title_2": "una y otra vez.",
+      "sub": "A usted le pagan por ejecutar, no por estimar gratis. Hoy el modelo pide lo contrario.",
+      "cells": {
+        "estimer": {
+          "title": "Estimar sin visita pagada",
+          "text": "Usted se desplaza, mide, redacta. Y a menudo, el contrato no llega."
+        },
+        "temps": {
+          "title": "Tiempo perdido en visitas",
+          "text": "Horas de manejo cada semana por proyectos que nunca se concretan."
+        },
+        "opaque": {
+          "title": "Competencia opaca",
+          "text": "Usted presupuesta a ciegas, contra un número desconocido de contratistas, sobre bases distintas."
+        },
+        "visibilite": {
+          "title": "Sin visibilidad real",
+          "text": "No conoce ni la calidad del proyecto, ni la seriedad del cliente, ni el perímetro exacto."
+        }
+      }
+    },
+    "how": {
+      "title_1": "Cuatro pasos.",
+      "title_2": "Ninguna zona gris.",
+      "sub": "Desde el expediente que recibe hasta el pago que se le debe, cada etapa está documentada.",
+      "steps": {
+        "dossier": {
+          "title": "Recibe un expediente completo",
+          "text": "Escaneo, mediciones, fotos, clasificación del problema. Usted decide si presupuesta o no."
+        },
+        "soumission": {
+          "title": "Presupuesta sin desplazarse",
+          "text": "Precio, plazo, garantía. El cliente compara hasta tres propuestas estructuradas."
+        },
+        "execution": {
+          "title": "Ejecuta con seguimiento estructurado",
+          "text": "Informe diario, fotos, validación del cliente. Todo queda documentado."
+        },
+        "paiement": {
+          "title": "Se le paga según el contrato",
+          "text": "Sin pagos bloqueados, sin sorpresas. El contrato protege a ambas partes."
+        }
+      }
+    },
+    "benefits": {
+      "label": "Lo que obtiene",
+      "title_1": "Tiempo. Claridad.",
+      "title_2": "Dignidad.",
+      "items": {
+        "prequalifies": {
+          "title": "Expedientes pre-calificados",
+          "text": "El cliente ya pagó por estructurar el proyecto. Va en serio."
+        },
+        "sans-visite": {
+          "title": "Sin visita de estimación",
+          "text": "Ahorra horas cada semana."
+        },
+        "concurrence": {
+          "title": "Competencia leal",
+          "text": "Hasta 3 contratistas máximo por proyecto. Sin carrera de doce."
+        },
+        "documentation": {
+          "title": "Documentación completa",
+          "text": "Mediciones, superficie, clasificación. Sabe exactamente qué presupuestar."
+        },
+        "suivi": {
+          "title": "Seguimiento estructurado",
+          "text": "Plataforma de informes diarios. Sin WhatsApp disperso."
+        },
+        "reputation": {
+          "title": "Reputación que construye",
+          "text": "Sus proyectos bien ejecutados alimentan su perfil. La calidad paga."
+        }
+      }
+    },
+    "req": {
+      "title_1": "Una exigencia clara,",
+      "title_2": "asumida por ambas partes.",
+      "sub": "Lo que esperamos de cada contratista socio.",
+      "items": {
+        "rbq": {
+          "strong": "Licencia RBQ en regla",
+          "rest": "para su especialidad."
+        },
+        "assurance": {
+          "strong": "Seguro de responsabilidad civil activo",
+          "rest": "(mínimo 2 M$)."
+        },
+        "certifications": {
+          "strong": "Certificaciones específicas",
+          "rest": "(CNESST para amianto, Ley R-20, etc.)."
+        },
+        "rapports": {
+          "strong": "Capacidad de entregar informes diarios",
+          "rest": "durante las obras."
+        },
+        "protocoles": {
+          "strong": "Compromiso de respetar los protocolos",
+          "rest": "documentados en la plataforma."
+        },
+        "disponibilite": {
+          "strong": "Disponibilidad para servir a Montréal",
+          "rest": "y la corona inmediata."
+        }
+      }
+    },
+    "specs": {
+      "title_1": "Seis ámbitos.",
+      "title_2": "Unas pocas plazas, con cuidado.",
+      "sub": "Seleccionamos 15 contratistas socios para la fase piloto. La selección no es volumen — es una marca de confianza.",
+      "items": {
+        "moisissures": {
+          "title": "Moho",
+          "text": "Identificación, perímetro, protocolo de descontaminación."
+        },
+        "eau": {
+          "title": "Daños por agua",
+          "text": "Origen, extensión, secado, reconstrucción."
+        },
+        "amiante": {
+          "title": "Amianto y vermiculita",
+          "text": "Pruebas, encapsulación, retiro CNESST."
+        },
+        "demolition": {
+          "title": "Demolición selectiva",
+          "text": "Plan de evacuación y gestión de residuos."
+        },
+        "isolation": {
+          "title": "Aislamiento",
+          "text": "Áticos, muros, sótano. Valores R, puentes térmicos."
+        },
+        "fondations": {
+          "title": "Cimientos y drenaje",
+          "text": "Fisuras, infiltraciones, drenaje francés."
+        }
+      },
+      "avail": {
+        "p1": "1 plaza disponible",
+        "p2": "2 plazas disponibles",
+        "p3": "3 plazas disponibles",
+        "full": "Completo"
+      }
+    },
+    "faq": {
+      "title": "Antes de postular.",
+      "items": {
+        "cout": {
+          "q": "¿Cuánto cuesta unirse a la plataforma?",
+          "a": "Sin cuota de inscripción. Cobramos una comisión de servicio sobre los proyectos ejecutados, alineada con los estándares del mercado. Detalles completos durante la calificación."
+        },
+        "attribution": {
+          "q": "¿Cómo se asignan los proyectos?",
+          "a": "Cada proyecto se abre a un máximo de 3 contratistas calificados para el servicio correspondiente, en la zona geográfica del cliente. El cliente elige con total autonomía."
+        },
+        "obligation": {
+          "q": "¿Estoy obligado a presupuestar todos los proyectos que recibo?",
+          "a": "No. Usted ve cada expediente completo y decide libremente. Sin penalización por declinar."
+        },
+        "paiement": {
+          "q": "¿Cómo funciona el pago?",
+          "a": "El contrato define las modalidades. El seguimiento documentado de la plataforma activa la liberación de pagos según las etapas acordadas con el cliente."
+        },
+        "imprevu": {
+          "q": "¿Qué pasa si surge un imprevisto durante la ejecución?",
+          "a": "Cada servicio tiene sus protocolos de imprevistos pre-documentados. Usted notifica por la plataforma, presenta un presupuesto adicional, el cliente aprueba. Ninguna zona gris."
+        }
+      }
+    },
+    "form": {
+      "title": "Cuéntenos sobre su empresa.",
+      "sub": "Unos pocos datos bastan para iniciar la conversación.",
+      "company": "Nombre de la empresa",
+      "company_ph": "Atelier Boréal Construction inc.",
+      "contact": "Persona de contacto",
+      "contact_ph": "Marie-Claude Lavoie",
+      "phone": "Teléfono",
+      "phone_ph": "514 555 0123",
+      "email": "Correo electrónico",
+      "email_ph": "contact@exemple.ca",
+      "rbq": "Número de licencia RBQ",
+      "rbq_ph": "0000-0000-00",
+      "specialties": "Especialidades",
+      "s_moisissures": "Moho",
+      "s_amiante": "Amianto",
+      "s_eau": "Agua",
+      "s_demolition": "Demolición",
+      "s_isolation": "Aislamiento",
+      "s_fondations": "Cimientos",
+      "years": "Años de experiencia",
+      "area": "Zona de servicio",
+      "area_ph": "Montréal y la corona norte",
+      "message": "Mensaje (opcional)",
+      "message_ph": "Unas palabras sobre su enfoque, sus obras recientes o sus preguntas.",
+      "note": "Revisamos cada candidatura individualmente. Respuesta en 5 días hábiles.",
+      "submit": "Enviar mi candidatura",
+      "success": "Candidatura recibida"
+    },
+    "cta": {
+      "manifesto_1": "La construcción merece algo mejor que estimaciones gratis",
+      "manifesto_2": "en serie.",
+      "lede": "Únase a los contratistas que eligen la claridad."
+    },
+    "footer": {
+      "sign": "CONTRATISTAS"
+    }
   }
 }

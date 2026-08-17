@@ -1,12 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy,
-  ViewEncapsulation, afterNextRender, effect, inject, signal, viewChild,
+  ViewEncapsulation, afterNextRender, inject, signal, viewChild,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { SiteTheme, SiteThemeService } from '../public-site/site-theme.service';
 import { Lang, LangService } from '../services/lang.service';
 import { PointCloudDirective } from './directives/point-cloud.directive';
 import { RevealDirective } from './directives/reveal.directive';
@@ -16,11 +17,6 @@ import {
   COMPARE_ROWS, HERO_PINS, IMMERSION_WORDS, MEDIA, PLAN_PINS, PROBLEM_CELLS,
   PROBLEM_OPTIONS, PROPERTY_TYPES, SPECIALTIES, TICKER_KEYS,
 } from './landing.data';
-
-type LandingTheme = 'dark' | 'light';
-
-/** Clave propia: el tema de la landing es independiente del resto de la app. */
-const THEME_KEY = 'e3-landing-theme';
 
 /** Secciones vigiladas por el scan-spy de la cabecera. */
 const SPY_IDS = ['processus', 'services'] as const;
@@ -57,6 +53,11 @@ export class LandingPageComponent implements OnDestroy {
   readonly langs = this.lang.langs;
   readonly year = new Date().getFullYear();
 
+  // El tema vive en un servicio compartido con Le Journal y Entrepreneurs: así
+  // el conmutador se recuerda al navegar entre las tres páginas públicas.
+  private themeSvc = inject(SiteThemeService);
+  readonly theme = this.themeSvc.theme;
+
   // ── Datos estructurales ───────────────────────────────────────────────────
   readonly specialties = SPECIALTIES;
   readonly problemCells = PROBLEM_CELLS;
@@ -70,7 +71,6 @@ export class LandingPageComponent implements OnDestroy {
   readonly media = MEDIA;
 
   // ── Estado de interfaz ────────────────────────────────────────────────────
-  readonly theme = signal<LandingTheme>('dark');
   readonly menuOpen = signal(false);
   readonly scrolled = signal(false);
   readonly activeSection = signal<string | null>(null);
@@ -99,22 +99,7 @@ export class LandingPageComponent implements OnDestroy {
   private removeScroll?: () => void;
 
   constructor() {
-    this.restoreTheme();
-
-    // El tema se refleja como atributo del host y se persiste.
-    effect(() => {
-      const t = this.theme();
-      try { localStorage.setItem(THEME_KEY, t); } catch { /* modo privado */ }
-    });
-
     afterNextRender(() => this.zone.runOutsideAngular(() => this.bindScroll()));
-  }
-
-  private restoreTheme(): void {
-    try {
-      const saved = localStorage.getItem(THEME_KEY);
-      if (saved === 'dark' || saved === 'light') this.theme.set(saved);
-    } catch { /* modo privado */ }
   }
 
   // ── Cabecera, barra de progreso, regla de medición y scan-spy ─────────────
@@ -171,7 +156,7 @@ export class LandingPageComponent implements OnDestroy {
 
   setLang(l: Lang): void { this.lang.set(l); }
 
-  setTheme(t: LandingTheme): void { this.theme.set(t); }
+  setTheme(t: SiteTheme): void { this.themeSvc.set(t); }
 
   toggleMenu(): void { this.menuOpen.update(v => !v); }
 
@@ -185,6 +170,17 @@ export class LandingPageComponent implements OnDestroy {
     if (!el) return;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  /**
+   * Vuelve al principio de la landing. Hace falta además del `routerLink="/"`:
+   * al estar ya en `/` el router ignora la navegación y el scroll no se movería.
+   */
+  goTop(event?: Event): void {
+    event?.preventDefault();
+    this.closeMenu();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
   }
 
   /** Alterna una casilla del bloque "type de problème". */

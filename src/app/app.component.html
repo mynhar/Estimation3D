@@ -1,8 +1,10 @@
-<div [class.app-shell]="!!user()"
-     [class.sidebar-collapsed]="collapsed() && !!user()"
-     [class.sidebar-open]="mobileOpen() && !!user()">
+<div [class.app-shell]="mostrarArmazon()"
+     [class.sidebar-collapsed]="collapsed() && mostrarArmazon()"
+     [class.sidebar-open]="mobileOpen() && mostrarArmazon()">
 
-  @if (user()) {
+  <!-- El armazón (menú lateral, barra móvil, pie) se omite sin sesión y también
+       en el sitio público: allí cada página trae su propia cabecera y pie. -->
+  @if (mostrarArmazon()) {
 
     <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
     <aside class="app-sidebar" aria-label="Navegación principal">
@@ -409,9 +411,9 @@
   }
 
   <!-- ── Router outlet único — nunca se destruye ──────────────────────────── -->
-  <main [class.app-main]="!!user()">
+  <main [class.app-main]="mostrarArmazon()">
     <router-outlet />
-    @if (user()) {
+    @if (mostrarArmazon()) {
       <app-footer />
     }
     <app-toast />

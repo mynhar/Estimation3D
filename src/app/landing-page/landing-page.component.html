@@ -9,7 +9,8 @@
   <div class="in">
     <span class="hdr-progress" #progressBar></span>
 
-    <a routerLink="/" class="brand" [attr.aria-label]="'landing.nav.home_aria' | translate">
+    <a routerLink="/" class="brand" (click)="goTop($event)"
+       [attr.aria-label]="'landing.nav.home_aria' | translate">
       <span class="reticle"><i></i></span>
       <span class="e3">Estimation<b>3D</b></span>
     </a>
@@ -19,6 +20,8 @@
          [class.active]="activeSection() === 'processus'">{{ 'landing.nav.process' | translate }}</a>
       <a href="#services" (click)="goTo('services', $event)"
          [class.active]="activeSection() === 'services'">{{ 'landing.nav.specialties' | translate }}</a>
+      <a routerLink="/journal">{{ 'landing.nav.journal' | translate }}</a>
+      <a routerLink="/entrepreneurs">{{ 'landing.nav.contractors' | translate }}</a>
       <a routerLink="/login">{{ 'landing.nav.login' | translate }}</a>
     </nav>
 
@@ -38,8 +41,10 @@
 <nav class="mobile-nav" [class.open]="menuOpen()">
   <a href="#processus" (click)="goTo('processus', $event)"><span class="num">01</span><span>{{ 'landing.nav.process' | translate }}</span></a>
   <a href="#services" (click)="goTo('services', $event)"><span class="num">02</span><span>{{ 'landing.nav.specialties' | translate }}</span></a>
-  <a routerLink="/login" (click)="closeMenu()"><span class="num">03</span><span>{{ 'landing.nav.login' | translate }}</span></a>
-  <a href="#dossier" (click)="goTo('dossier', $event)"><span class="num">04</span><span>{{ 'landing.nav.cta' | translate }}</span></a>
+  <a routerLink="/journal" (click)="closeMenu()"><span class="num">03</span><span>{{ 'landing.nav.journal' | translate }}</span></a>
+  <a routerLink="/entrepreneurs" (click)="closeMenu()"><span class="num">04</span><span>{{ 'landing.nav.contractors' | translate }}</span></a>
+  <a routerLink="/login" (click)="closeMenu()"><span class="num">05</span><span>{{ 'landing.nav.login' | translate }}</span></a>
+  <a href="#dossier" (click)="goTo('dossier', $event)"><span class="num">06</span><span>{{ 'landing.nav.cta' | translate }}</span></a>
 </nav>
 
 <main id="top">
@@ -468,8 +473,11 @@
       </div>
 
       <div>
-        <h5>{{ 'landing.footer.account' | translate }}</h5>
+        <h5>{{ 'landing.footer.explore' | translate }}</h5>
         <ul>
+          <li><a routerLink="/journal">{{ 'landing.nav.journal' | translate }}</a></li>
+          <li><a routerLink="/entrepreneurs">{{ 'landing.nav.contractors' | translate }}</a></li>
+          <li><a routerLink="/entrepreneurs" fragment="form">{{ 'landing.footer.apply' | translate }}</a></li>
           <li><a routerLink="/login">{{ 'landing.nav.login' | translate }}</a></li>
         </ul>
       </div>
