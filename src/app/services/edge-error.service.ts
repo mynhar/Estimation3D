@@ -56,6 +56,14 @@ const CLAVE_POR_CODIGO: Record<string, string> = {
   ultimo_mensaje_usuario:  'edge_errors.ultimo_mensaje_usuario',
   expediente_sin_acceso:   'edge_errors.expediente_sin_acceso',
   asistente_no_disponible: 'edge_errors.asistente_no_disponible',
+  // crear-dossier-landing (formulario público de la landing)
+  metodo_no_permitido:     'edge_errors.error_interno',
+  email_invalido:          'edge_errors.email_invalido',
+  postal_invalido:         'edge_errors.postal_invalido',
+  servicio_requerido:      'edge_errors.servicio_requerido',
+  servicio_no_encontrado:  'edge_errors.servicio_no_encontrado',
+  expediente_error:        'edge_errors.expediente_error',
+  limite_alcanzado:        'edge_errors.limite_alcanzado',
   // Validaciones del propio cliente, antes de llamar a ninguna función
   archivo_muy_grande:      'admin_users.err_file_size',
 };

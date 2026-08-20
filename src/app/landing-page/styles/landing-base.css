@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Landing v4 — base : tokens, reset, tipografía, botones, cabecera, cinta.
-   Portado de assets/site.css (v4).
+   Landing — base : tokens, reset, tipografía, botones, cabecera, cinta.
+   Portado de assets/site.css (dirección v3 / CINÉMA).
 
    Todo vive bajo `:host` en vez de `:root` / `body`: la encapsulación emulada
    de Angular aísla estos ~200 selectores del design system de la app y de
@@ -24,7 +24,6 @@
      aplasta la imagen y luego se lava con beige. Por eso la polaridad se
      invierte: en claro la foto va luminosa y el velo de papel cubre solo la
      franja donde hay texto. Misma receta, dos polaridades. */
-  --hero-vid-gray:.5;  --hero-vid-bright:.6;  --hero-vid-contrast:1.06; --hero-vid-sat:1;
   --vid-gray:.14;      --vid-bright:.84;      --vid-contrast:1.04;      --vid-sat:1;
   --svc-gray:.4;       --svc-bright:.74;      --svc-bright-hover:.88;
   /* velo de papel sobre la foto de cada especialidad */
@@ -65,12 +64,6 @@
   --shadow-a:.9;
   --shadow-a-soft:.65;
   --shadow-a-inset:.4;
-  /* Nube de puntos del hero y del visor orbital. El canvas no puede usar
-     `var()`, así que `PointCloudDirective` lee estos dos tokens en canal RGB y
-     los relee cuando cambia `data-theme`. Punto encendido por el barrido /
-     punto en reposo. */
-  --cloud-lit-rgb:235,203,133;
-  --cloud-dim-rgb:226,228,232;
   --burgundy:#8B2D3A;
   --burgundy-bright:#B24355;
 
@@ -126,8 +119,6 @@
   --shadow-a:.16;
   --shadow-a-soft:.12;
   --shadow-a-inset:.05;
-  --cloud-lit-rgb:176,150,74;             /* --ds-gold-active #B0964A     */
-  --cloud-dim-rgb:74,74,74;               /* --ds-ink-secondary #4A4A4A   */
 
   /* Error (icono "mal" del comparativo, campos inválidos) = danger de la app */
   --burgundy:var(--ds-danger);            /* #A14545                      */
@@ -139,7 +130,6 @@
      Nada de oscurecer: sobre papel, bajar el brillo y luego velar con beige
      produce gris sucio. La foto va a brillo pleno o por encima, con la
      saturación intacta; el velo se reserva para la franja del texto. */
-  --hero-vid-gray:.06; --hero-vid-bright:1.06; --hero-vid-contrast:1.02; --hero-vid-sat:1.06;
   --vid-gray:0;        --vid-bright:1.04;      --vid-contrast:1.02;      --vid-sat:1.06;
   --svc-gray:0;        --svc-bright:1.04;      --svc-bright-hover:1.1;
   /* El velo de la foto cae rápido: papel sólido bajo el texto, foto limpia
@@ -243,7 +233,7 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
   border-bottom:1px solid transparent;
 }
 .hdr.scrolled{ background:rgba(var(--scrim),.72); backdrop-filter:blur(14px); border-color:var(--line-2); }
-.hdr .in{ position:relative; max-width:var(--maxw); margin:0 auto; padding:20px var(--pad-x); display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.hdr .in{ max-width:var(--maxw); margin:0 auto; padding:20px var(--pad-x); display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .brand{ display:inline-flex; align-items:baseline; gap:9px; font-weight:800; font-size:1.3rem; letter-spacing:-.03em; }
 .brand .e3{ position:relative; }
 .brand .e3 b{ color:var(--gold); font-weight:800; }
@@ -251,37 +241,13 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 .brand .reticle::before,.brand .reticle::after{ content:""; position:absolute; background:var(--gold); }
 .brand .reticle::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-.5px); }
 .brand .reticle::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-.5px); }
-.brand .reticle i{ position:absolute; inset:3px; border:1px solid var(--gold); border-radius:50%; animation:reticlePulse 3.4s var(--ease) infinite; }
-@keyframes reticlePulse{ 0%,100%{ opacity:.6; transform:scale(1);} 50%{ opacity:1; transform:scale(1.12);} }
+.brand .reticle i{ position:absolute; inset:3px; border:1px solid var(--gold); border-radius:50%; }
 
 .nav-links{ display:flex; align-items:center; gap:34px; }
-.nav-links a{ position:relative; padding-bottom:3px; font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); transition:color .25s; }
+.nav-links a{ font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); transition:color .25s; }
 .nav-links a:hover{ color:var(--gold); }
-.nav-links a::after{
-  content:""; position:absolute; left:0; right:100%; bottom:-2px; height:1px;
-  background:var(--gold); transition:right .35s var(--ease);
-}
-.nav-links a:hover::after{ right:0; }
-.nav-links a.active{ color:var(--gold-bright); }
-.nav-links a.active::after{ right:0; box-shadow:var(--scan-glow-sm); }
-.nav-links a.active::before{
-  content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
-  width:4px; height:4px; border-radius:50%; background:var(--gold);
-  box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a)); animation:navPulse 2s infinite;
-}
-@keyframes navPulse{ 0%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),var(--pulse-a));} 70%{box-shadow:0 0 0 6px rgba(var(--gold-rgb),0);} 100%{box-shadow:0 0 0 0 rgba(var(--gold-rgb),0);} }
 
 .hdr .e3-btn{ padding:12px 20px; font-size:.74rem; }
-
-/* barra de progreso de lectura (escrita por scaleX desde el componente) */
-.hdr-progress{
-  position:absolute; left:0; bottom:0; height:2px; width:100%;
-  transform:scaleX(0); transform-origin:left center;
-  background:linear-gradient(90deg, var(--gold-deep), var(--scan-line));
-  box-shadow:var(--scan-glow-sm);
-  transition:transform .12s linear; z-index:2;
-}
-.hdr:not(.scrolled) .hdr-progress{ opacity:.5; }
 
 .burger{ display:none; width:30px; height:22px; position:relative; }
 .burger span{ position:absolute; left:0; right:0; height:1.5px; background:var(--white); transition:.3s; }
@@ -322,7 +288,5 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 /* Sin animaciones para quien las ha desactivado en el sistema. */
 @media(prefers-reduced-motion: reduce){
   .rv{ opacity:1; transform:none; transition:none; }
-  .ticker-track,
-  .brand .reticle i,
-  .nav-links a.active::before{ animation:none; }
+  .ticker-track{ animation:none; }
 }

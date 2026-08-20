@@ -1,14 +1,12 @@
 <!-- ═══════════════════════════════════════════════════════════════════════════
-     Estimation3D — landing v4
-     Portado de "Estimation3D v4.html". El texto vive en i18n bajo `landing.*`.
+     Estimation3D — landing (dirección v3 / CINÉMA)
+     Calcada de "Estimation3D (hors-ligne).html". El texto vive en i18n bajo `landing.*`.
      Clases `.e3-btn` / `.e3-container` renombradas para no chocar con Bootstrap.
      ═══════════════════════════════════════════════════════════════════════════ -->
 
 <!-- ─────────── HEADER ─────────── -->
 <header class="hdr" [class.scrolled]="scrolled()">
   <div class="in">
-    <span class="hdr-progress" #progressBar></span>
-
     <a routerLink="/" class="brand" (click)="goTop($event)"
        [attr.aria-label]="'landing.nav.home_aria' | translate">
       <span class="reticle"><i></i></span>
@@ -16,10 +14,8 @@
     </a>
 
     <nav class="nav-links">
-      <a href="#processus" (click)="goTo('processus', $event)"
-         [class.active]="activeSection() === 'processus'">{{ 'landing.nav.process' | translate }}</a>
-      <a href="#services" (click)="goTo('services', $event)"
-         [class.active]="activeSection() === 'services'">{{ 'landing.nav.specialties' | translate }}</a>
+      <a href="#processus" (click)="goTo('processus', $event)">{{ 'landing.nav.process' | translate }}</a>
+      <a href="#services" (click)="goTo('services', $event)">{{ 'landing.nav.specialties' | translate }}</a>
       <a routerLink="/journal">{{ 'landing.nav.journal' | translate }}</a>
       <a routerLink="/entrepreneurs">{{ 'landing.nav.contractors' | translate }}</a>
       <a routerLink="/login">{{ 'landing.nav.login' | translate }}</a>
@@ -50,24 +46,16 @@
 <main id="top">
 
   <!-- ─────────── HERO ─────────── -->
-  <section class="hero" id="hero" #heroSection>
+  <section class="hero" id="hero">
     <div class="hero-bg">
       <video autoplay muted loop playsinline preload="metadata"
              [poster]="media.heroPoster" [src]="media.heroVideo" aria-hidden="true"></video>
+      <div class="grade"></div>
     </div>
-
-    <canvas class="cloud" e3PointCloud="1"
-            [centerXf]="0.62" [centerYf]="0.48"
-            [observeTarget]="heroSection" aria-hidden="true"></canvas>
-
-    <div class="grade-v4"></div>
 
     <div class="e3-container">
       <div class="hero-copy">
-        <span class="kicker">
-          {{ 'landing.hero.kicker' | translate }}
-          <span class="scan-live"><i></i></span>
-        </span>
+        <span class="kicker">{{ 'landing.hero.kicker' | translate }}</span>
 
         <h1>
           <span class="line"><span>{{ 'landing.hero.l1' | translate }}</span></span>
@@ -257,20 +245,14 @@
         <span class="gold-txt">{{ 'landing.immersion.title_b' | translate }}</span>
       </h2>
 
-      <div class="orbit" [e3Reveal]="2" e3Sweep #orbitFrame>
+      <div class="render" [e3Reveal]="2" e3Sweep>
         <span class="hud-corner hc-tl">{{ 'landing.immersion.hud_project' | translate }}</span>
-        <span class="hud-corner hc-tr">● {{ 'landing.immersion.hud_live' | translate }}</span>
-        <span class="hud-corner hc-bl" #orbitReadout>AZ 000° · EL +00°</span>
+        <span class="hud-corner hc-tr">● {{ 'landing.immersion.hud_capture' | translate }}</span>
+        <span class="hud-corner hc-bl">{{ 'landing.immersion.hud_render' | translate }}</span>
         <span class="hud-corner hc-br">EST3D — {{ year }}</span>
 
-        <canvas e3PointCloud="1.5" [interactive]="true"
-                [centerXf]="0.5" [centerYf]="0.52"
-                [rotY0]="-0.6" [rotX0]="0.2"
-                [readoutTarget]="orbitReadout"
-                [observeTarget]="orbitFrame"
-                [attr.aria-label]="'landing.immersion.hint' | translate"></canvas>
-
-        <span class="orbit-hint">{{ 'landing.immersion.hint' | translate }}</span>
+        <img [src]="media.immersionRender" [alt]="'landing.immersion.render_alt' | translate" />
+        <div class="sweep"></div>
       </div>
 
       <div class="words" [e3Reveal]="2">
@@ -379,10 +361,17 @@
       <form class="form-wrap" e3Reveal [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="form-grid">
           <div class="field">
-            <label for="f-nom">{{ 'landing.form.name' | translate }}</label>
-            <input id="f-nom" type="text" formControlName="nom"
+            <label for="f-prenom">{{ 'landing.form.firstname' | translate }}</label>
+            <input id="f-prenom" type="text" formControlName="prenom" autocomplete="given-name"
+                   [class.is-invalid]="invalid('prenom')"
+                   [placeholder]="'landing.form.firstname_ph' | translate" />
+          </div>
+
+          <div class="field">
+            <label for="f-nom">{{ 'landing.form.lastname' | translate }}</label>
+            <input id="f-nom" type="text" formControlName="nom" autocomplete="family-name"
                    [class.is-invalid]="invalid('nom')"
-                   [placeholder]="'landing.form.name_ph' | translate" />
+                   [placeholder]="'landing.form.lastname_ph' | translate" />
           </div>
 
           <div class="field">
@@ -409,24 +398,93 @@
             </select>
           </div>
 
-          <div class="field full">
-            <label for="f-adr">{{ 'landing.form.address' | translate }}</label>
-            <input id="f-adr" type="text" formControlName="adresse"
-                   [class.is-invalid]="invalid('adresse')"
-                   [placeholder]="'landing.form.address_ph' | translate" />
-          </div>
+          <fieldset class="field full" formGroupName="adresse">
+            <legend>{{ 'landing.form.address' | translate }}</legend>
+
+            <div class="addr-grid">
+              <div class="addr-unit">
+                <label for="f-adr-unit">
+                  {{ 'landing.form.addr_unit' | translate }}
+                  <span class="opt">({{ 'landing.form.optional' | translate }})</span>
+                </label>
+                <input id="f-adr-unit" type="text" formControlName="numero_unidad"
+                       [placeholder]="'landing.form.addr_unit_ph' | translate" />
+              </div>
+
+              <div class="addr-street">
+                <label for="f-adr-rue">{{ 'landing.form.addr_street' | translate }}</label>
+                <input id="f-adr-rue" type="text" formControlName="calle"
+                       autocomplete="street-address"
+                       [class.is-invalid]="invalidAddr('calle')"
+                       [placeholder]="'landing.form.addr_street_ph' | translate" />
+                @if (invalidAddr('calle')) {
+                  <p class="addr-error" role="alert">{{ 'landing.form.required' | translate }}</p>
+                }
+              </div>
+
+              <div class="addr-city">
+                <label for="f-adr-ville">{{ 'landing.form.addr_city' | translate }}</label>
+                <input id="f-adr-ville" type="text" formControlName="ciudad"
+                       autocomplete="address-level2"
+                       [class.is-invalid]="invalidAddr('ciudad')"
+                       [placeholder]="'landing.form.addr_city_ph' | translate" />
+                @if (invalidAddr('ciudad')) {
+                  <p class="addr-error" role="alert">{{ 'landing.form.required' | translate }}</p>
+                }
+              </div>
+
+              <div class="addr-prov">
+                <label for="f-adr-prov">{{ 'landing.form.addr_prov' | translate }}</label>
+                <select id="f-adr-prov" formControlName="provincia_ca" autocomplete="address-level1"
+                        [class.is-invalid]="invalidAddr('provincia_ca')">
+                  <option value="">{{ 'landing.form.addr_prov_choose' | translate }}</option>
+                  @for (p of provincesCanada; track p.code) {
+                    <option [value]="p.code">{{ p.code }} — {{ p.nombre }}</option>
+                  }
+                </select>
+                @if (invalidAddr('provincia_ca')) {
+                  <p class="addr-error" role="alert">{{ 'landing.form.required' | translate }}</p>
+                }
+              </div>
+
+              <div class="addr-postal">
+                <label for="f-adr-cp">{{ 'landing.form.addr_postal' | translate }}</label>
+                <input id="f-adr-cp" type="text" class="up" formControlName="codigo_postal"
+                       autocomplete="postal-code" maxlength="7"
+                       [class.is-invalid]="invalidAddr('codigo_postal')"
+                       [placeholder]="'landing.form.addr_postal_ph' | translate" />
+                @if (invalidAddr('codigo_postal')) {
+                  <p class="addr-error" role="alert">
+                    @if (form.controls.adresse.controls.codigo_postal.hasError('required')) {
+                      {{ 'landing.form.required' | translate }}
+                    } @else {
+                      {{ 'landing.form.addr_postal_invalid' | translate }}
+                    }
+                  </p>
+                }
+              </div>
+            </div>
+          </fieldset>
 
           <fieldset class="field full">
-            <legend>{{ 'landing.form.problem' | translate }}</legend>
-            <div class="checks">
-              @for (p of problemOptions; track p) {
-                <label class="check">
-                  <input type="checkbox" [checked]="hasProblem(p)"
-                         (change)="toggleProblem(p, $any($event.target).checked)" />
-                  <span>{{ 'landing.form.p_' + p | translate }}</span>
-                </label>
+            <legend>{{ 'landing.form.service_type' | translate }}</legend>
+            @if (loadingServices()) {
+              <p class="checks-note">{{ 'landing.form.services_loading' | translate }}</p>
+            } @else {
+              <div class="checks" role="radiogroup"
+                   [class.checks--err]="invalid('servicioId')"
+                   [attr.aria-label]="'landing.form.service_type' | translate">
+                @for (s of services(); track s.id) {
+                  <label class="check" [class.check--on]="form.controls.servicioId.value === s.id">
+                    <input type="radio" formControlName="servicioId" [value]="s.id" />
+                    <span>{{ s.nombre }}</span>
+                  </label>
+                }
+              </div>
+              @if (invalid('servicioId')) {
+                <p class="checks-error" role="alert">{{ 'landing.form.required' | translate }}</p>
               }
-            </div>
+            }
           </fieldset>
 
           <div class="field full">
@@ -442,12 +500,16 @@
           @if (sent()) {
             <p class="form-success" role="status">✓ {{ 'landing.form.success' | translate }}</p>
           } @else {
-            <button type="submit" class="e3-btn">
-              {{ 'landing.nav.cta' | translate }}
+            <button type="submit" class="e3-btn" [disabled]="sending()">
+              {{ (sending() ? 'landing.form.sending' : 'landing.nav.cta') | translate }}
               <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
             </button>
           }
         </div>
+
+        @if (sendError()) {
+          <p class="form-error" role="alert">{{ sendError() | translate }}</p>
+        }
       </form>
     </div>
   </section>

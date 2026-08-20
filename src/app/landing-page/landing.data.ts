@@ -54,14 +54,8 @@ export const PLAN_PINS: readonly PlanPin[] = [
 /** Especialidades que desfilan en la cinta. Se repite dos veces para el bucle. */
 export const TICKER_KEYS = ['mold', 'water', 'asbestos', 'demolition', 'insulation', 'foundations'] as const;
 
-/** Casillas del formulario "type de problème". */
-export const PROBLEM_OPTIONS = [
-  'mold', 'water', 'asbestos', 'demolition', 'insulation', 'foundations', 'unsure',
-] as const;
-export type ProblemOption = (typeof PROBLEM_OPTIONS)[number];
-
 /** Opciones del selector "type de propriété". */
-export const PROPERTY_TYPES = ['house', 'condo', 'duplex', 'commercial'] as const;
+export const PROPERTY_TYPES = ['house', 'apartment', 'building', 'commercial', 'other'] as const;
 export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
 export const MEDIA = {
@@ -70,6 +64,7 @@ export const MEDIA = {
   ctaVideo: IMG + 'loop-kitchen-after.mp4',
   ctaPoster: IMG + 'scan-render-2.jpg',
   scanCard: IMG + 'scan-dollhouse-jolicoeur.jpg',
+  immersionRender: IMG + 'scan-render-1.jpg',
   planOutremont: IMG + 'scan-plan-outremont.jpg',
   planJolicoeur: IMG + 'scan-plan-jolicoeur.jpg',
 } as const;
