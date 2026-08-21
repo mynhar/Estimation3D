@@ -315,8 +315,114 @@
               </div>
             </div>
 
-            <!-- ── Compañía (sólo constructor) ─────────────────────────────── -->
+            <!-- ── Datos del constructor ────────────────────────────────── -->
             @if (esConstructor()) {
+              <!-- ── Perfil profesional (sólo constructor) ───────────────── -->
+              <div class="form-section-divider"></div>
+
+              <div class="form-section mt-5">
+                <div class="form-section__header">
+                  <i class="bi bi-tools" aria-hidden="true"></i>
+                  {{ 'admin_users.builder_data' | translate }}
+                </div>
+                <p class="form-text mb-3">{{ 'admin_users.builder_hint' | translate }}</p>
+                <div class="row g-3">
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label" for="bRbq">{{ 'admin_users.rbq' | translate }}</label>
+                    <input id="bRbq" type="text" class="form-control" formControlName="rbq"
+                           inputmode="numeric" maxlength="12" placeholder="0000-0000-00"
+                           (input)="formatearRbq($event)"
+                           [class.is-invalid]="f['rbq'].invalid && f['rbq'].touched"
+                           [attr.aria-invalid]="f['rbq'].invalid && f['rbq'].touched">
+                    <div class="invalid-feedback">
+                      @if (f['rbq'].errors?.['required']) {
+                        {{ 'admin_users.rbq_required' | translate }}
+                      } @else {
+                        {{ 'admin_users.rbq_invalid' | translate }}
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label" for="bAnios">{{ 'admin_users.years_experience' | translate }}</label>
+                    <input id="bAnios" type="number" class="form-control" formControlName="anios_experiencia"
+                           min="0" max="80" step="1" placeholder="12"
+                           [class.is-invalid]="f['anios_experiencia'].invalid && f['anios_experiencia'].touched"
+                           [attr.aria-invalid]="f['anios_experiencia'].invalid && f['anios_experiencia'].touched">
+                    <div class="invalid-feedback">
+                      @if (f['anios_experiencia'].errors?.['required']) {
+                        {{ 'admin_users.years_required' | translate }}
+                      } @else {
+                        {{ 'admin_users.years_range' | translate }}
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label" for="bZona">{{ 'admin_users.service_zone' | translate }}</label>
+                    <input id="bZona" type="text" class="form-control" formControlName="zona_servicio"
+                           [placeholder]="'admin_users.service_zone_ph' | translate"
+                           [class.is-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched"
+                           [attr.aria-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched">
+                    <div class="invalid-feedback">{{ 'admin_users.service_zone_required' | translate }}</div>
+                  </div>
+
+                  <!-- Especialidades: «Todos los servicios» y las casillas sueltas
+                       son excluyentes. Al marcarlo, las de abajo quedan inertes en
+                       vez de desaparecer, para que se siga viendo qué cubre. -->
+                  <div class="col-12">
+                    <fieldset class="spec-field">
+                      <legend class="form-label spec-field__legend">
+                        {{ 'admin_users.specialties' | translate }}
+                      </legend>
+                      <p class="form-text mt-0 mb-2">{{ 'admin_users.specialties_hint' | translate }}</p>
+
+                      @if (cargandoServicios()) {
+                        <p class="form-text">{{ 'common.loading' | translate }}</p>
+                      } @else {
+                        <div class="spec-grid"
+                             [class.spec-grid--invalid]="f['especialidad_ids'].invalid && f['especialidad_ids'].touched">
+                          <label class="form-check spec-check spec-check--all">
+                            <input class="form-check-input" type="checkbox"
+                                   [checked]="todosLosServicios"
+                                   (change)="alternarTodosLosServicios($any($event.target).checked)">
+                            <span class="form-check-label">{{ 'admin_users.specialty_all' | translate }}</span>
+                          </label>
+                          @for (e of especialidades(); track e.id) {
+                            <label class="form-check spec-check">
+                              <input class="form-check-input" type="checkbox"
+                                     [checked]="tieneEspecialidad(e.id)"
+                                     [disabled]="todosLosServicios"
+                                     (change)="alternarEspecialidad(e.id, $any($event.target).checked)">
+                              <span class="form-check-label">{{ e.nombre }}</span>
+                            </label>
+                          }
+                        </div>
+                      }
+
+                      @if (f['especialidad_ids'].invalid && f['especialidad_ids'].touched) {
+                        <p class="spec-error" role="alert">
+                          {{ 'admin_users.specialties_required' | translate }}
+                        </p>
+                      }
+                    </fieldset>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label" for="bMensaje">
+                      {{ 'admin_users.builder_message' | translate }}
+                      <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                    </label>
+                    <textarea id="bMensaje" class="form-control" rows="4" formControlName="mensaje"
+                              [placeholder]="'admin_users.builder_message_ph' | translate"></textarea>
+                    <div class="form-text">{{ 'admin_users.builder_message_hint' | translate }}</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- ── Compañía (sólo constructor) ─────────────────────── -->
               <div class="form-section-divider"></div>
 
               <div class="form-section mt-5">

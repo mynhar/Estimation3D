@@ -23,9 +23,18 @@ export interface DatosCompania {
 export interface DatosConstructor {
   /** Licencia RBQ de Quebec, formato «0000-0000-00». */
   rbq?:               string;
-  /** Tipo de servicio en el que se especializa: id de la tabla `servicio`. */
+  /**
+   * Tipos de servicio que cubre: ids de la tabla `servicio`. Es la respuesta
+   * completa, y vive en `perfil_especialidad`. Vacia cuando `especialidad_todas`.
+   */
+  especialidad_ids?:  number[];
+  /**
+   * Derivado de `especialidad_ids`: lo escribe la edge function con el unico id
+   * elegido, o null si hay varios. Se conserva porque hay lecturas antiguas que
+   * miran esta columna; no se envia desde el formulario.
+   */
   especialidad_id?:   number | null;
-  /** true = cubre todos los tipos de servicio. Excluyente con `especialidad_id`. */
+  /** true = cubre todos los tipos de servicio. Excluyente con la lista. */
   especialidad_todas?: boolean;
   anios_experiencia?: number | null;
   zona_servicio?:     string;

@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { PROVINCIAS_CANADA } from '../../../models/servicio.model';
+import { PROVINCIAS_CANADA, SERVICIOS_FALLBACK, Servicio } from '../../../models/servicio.model';
 import { AdminUserService, CrearUsuarioParams } from '../../../services/admin-user.service';
+import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
 import { Lang, LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { RolUsuario } from '../../../types/supabase';
+import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
 
 @Component({
   selector: 'app-estimator-client-create',
@@ -18,8 +20,9 @@ import { RolUsuario } from '../../../types/supabase';
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
-export class EstimatorClientCreateComponent {
+export class EstimatorClientCreateComponent implements OnInit {
   private fb        = inject(FormBuilder);
+  private auth      = inject(AuthSupabaseService);
   private service   = inject(AdminUserService);
   private toast     = inject(ToastService);
   private router    = inject(Router);
@@ -42,11 +45,29 @@ export class EstimatorClientCreateComponent {
   readonly roles: RolUsuario[] = ['cliente', 'constructor'];
 
   /** fr | en | es, en el orden en que los ofrece el selector de la aplicación. */
-  readonly idiomas = inject(LangService).langs;
+  private readonly lang = inject(LangService);
+  readonly idiomas = this.lang.langs;
 
   readonly provinciasCanada = PROVINCIAS_CANADA;
   /** Código postal canadiense: A1A 1A1 (también acepta «A1A-1A1» y sin separador). */
   private readonly CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+  /** Licencia RBQ de Quebec: diez dígitos en tres bloques, «0000-0000-00». */
+  private readonly RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
+
+  /** Tipos de servicio activos: las especialidades del constructor salen de aquí. */
+  readonly servicios = signal<Servicio[]>([]);
+  readonly cargandoServicios = signal(false);
+
+  /** Los servicios con el nombre ya resuelto al idioma en curso. */
+  readonly especialidades = computed(() => {
+    const l = this.lang.current();
+    return this.servicios().map(s => ({
+      id: s.id,
+      nombre: l === 'en' ? (s.nombre_en || s.nombre_fr)
+            : l === 'es' ? (s.nombre_es || s.nombre_fr)
+            :              (s.nombre_fr || s.nombre_es),
+    }));
+  });
 
   form = this.fb.group({
     email:      ['', [Validators.required, Validators.email]],
@@ -74,6 +95,18 @@ export class EstimatorClientCreateComponent {
     compania_telefono:  [''],
     compania_email:     ['', Validators.email],
     compania_direccion: [''],
+    // Sección Constructor: los validadores se activan y se retiran según el rol
+    // (ver `sincronizarValidadoresConstructor`), porque estos campos son
+    // obligatorios para el constructor e inexistentes para el cliente.
+    rbq:               [''],
+    // «Todos los servicios» es una respuesta por derecho propio, no la ausencia
+    // de respuesta: viaja en su propio campo y no como una lista vacía. Las dos
+    // son excluyentes, y para el constructor una de las dos es obligatoria.
+    especialidad_todas: [false],
+    especialidad_ids:   this.fb.nonNullable.control<number[]>([], especialidadesRequeridas),
+    anios_experiencia: [null as number | null],
+    zona_servicio:     [''],
+    mensaje:           [''],
   });
 
   /** El rol elegido, como signal, para mostrar/ocultar la sección Compañía. */
@@ -81,6 +114,106 @@ export class EstimatorClientCreateComponent {
     initialValue: this.form.controls.rol.value,
   });
   esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
+
+  /** Campos de la sección Constructor que son obligatorios para ese rol. */
+  private readonly CAMPOS_CONSTRUCTOR = [
+    'rbq', 'anios_experiencia', 'zona_servicio',
+  ] as const;
+
+  constructor() {
+    // El rol se puede cambiar en cualquier momento: los validadores del bloque
+    // Constructor tienen que seguirlo, o el formulario quedaría inválido por
+    // campos que ya no están en pantalla.
+    effect(() => this.sincronizarValidadoresConstructor(this.esConstructor()));
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.cargarServicios();
+  }
+
+  private async cargarServicios(): Promise<void> {
+    this.cargandoServicios.set(true);
+    const { data, error } = await this.auth.client
+      .from('servicio')
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es')
+      .eq('activo', true)
+      .order('codigo');
+    if (error) console.error('[EstimatorClientCreate] servicios:', error.message);
+    this.servicios.set(data?.length ? (data as unknown as Servicio[]) : SERVICIOS_FALLBACK);
+    this.cargandoServicios.set(false);
+  }
+
+  private sincronizarValidadoresConstructor(activo: boolean): void {
+    for (const campo of this.CAMPOS_CONSTRUCTOR) {
+      const ctrl = this.form.get(campo)!;
+      if (activo) {
+        const extra = campo === 'rbq'
+          ? [Validators.pattern(this.RBQ_RE)]
+          : campo === 'anios_experiencia'
+          ? [Validators.min(0), Validators.max(80)]
+          : [];
+        ctrl.setValidators([Validators.required, ...extra]);
+      } else {
+        ctrl.clearValidators();
+        ctrl.reset(campo === 'anios_experiencia' ? null : '', { emitEvent: false });
+      }
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+    // Las especialidades no están en `CAMPOS_CONSTRUCTOR` porque su validador no
+    // es `required` a secas: se pone y se quita entero.
+    const esp = this.form.controls.especialidad_ids;
+    esp.setValidators(activo ? [especialidadesRequeridas] : []);
+    esp.updateValueAndValidity({ emitEvent: false });
+
+    if (!activo) {
+      this.form.controls.especialidad_todas.reset(false, { emitEvent: false });
+      esp.reset([], { emitEvent: false });
+      this.form.controls.mensaje.reset('', { emitEvent: false });
+    }
+  }
+
+  // ── Especialidades ────────────────────────────────────────────────────────
+  //
+  // «Todos los servicios» y las casillas sueltas son excluyentes: al marcarlo,
+  // las de abajo quedan inertes en vez de desaparecer, para que se siga viendo
+  // qué cubre esa respuesta.
+
+  get todosLosServicios(): boolean {
+    return this.form.controls.especialidad_todas.value === true;
+  }
+
+  tieneEspecialidad(id: number): boolean {
+    return this.form.controls.especialidad_ids.value.includes(id);
+  }
+
+  alternarTodosLosServicios(marcado: boolean): void {
+    this.form.controls.especialidad_todas.setValue(marcado);
+    const esp = this.form.controls.especialidad_ids;
+    if (marcado) esp.setValue([]);
+    esp.updateValueAndValidity();
+    esp.markAsTouched();
+  }
+
+  alternarEspecialidad(id: number, marcado: boolean): void {
+    const esp = this.form.controls.especialidad_ids;
+    const lista = esp.value;
+    esp.setValue(marcado ? [...lista, id] : lista.filter(v => v !== id));
+    esp.markAsTouched();
+  }
+
+  /**
+   * Va dando forma «0000-0000-00» mientras se escribe: se queda con los dígitos
+   * y coloca los guiones. Así el campo no puede salir con un formato que el
+   * CHECK de la base rechazaría después.
+   */
+  formatearRbq(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const d = input.value.replace(/\D/g, '').slice(0, 10);
+    const partes = [d.slice(0, 4), d.slice(4, 8), d.slice(8, 10)].filter(p => p !== '');
+    const valor = partes.join('-');
+    input.value = valor;
+    this.form.controls.rbq.setValue(valor);
+  }
 
   /** Idioma en el que se redactará la invitación. */
   idiomaInvitacion = toSignal(this.form.controls.idioma.valueChanges, {
@@ -118,6 +251,14 @@ export class EstimatorClientCreateComponent {
         compania_telefono:  v.compania_telefono  ?? '',
         compania_email:     v.compania_email     ?? '',
         compania_direccion: v.compania_direccion ?? '',
+        rbq:                v.rbq ?? '',
+        // «Todos los servicios» tiene columna propia: no se guarda como lista
+        // vacía. El `especialidad_id` escalar lo deriva la edge function.
+        especialidad_todas: v.especialidad_todas === true,
+        especialidad_ids:   v.especialidad_todas === true ? [] : (v.especialidad_ids ?? []),
+        anios_experiencia:  v.anios_experiencia != null ? Number(v.anios_experiencia) : null,
+        zona_servicio:      v.zona_servicio ?? '',
+        mensaje:            v.mensaje       ?? '',
       } : {}),
     };
   }

@@ -442,19 +442,6 @@
                   </div>
 
                   <div class="col-12 col-md-6">
-                    <label class="form-label" for="bEspecialidad">{{ 'admin_users.specialty' | translate }}</label>
-                    <select id="bEspecialidad" class="form-select" formControlName="especialidad">
-                      <option [ngValue]="ESPECIALIDAD_TODAS">{{ 'admin_users.specialty_all' | translate }}</option>
-                      @for (e of especialidades(); track e.id) {
-                        <option [ngValue]="e.id">{{ e.nombre }}</option>
-                      }
-                    </select>
-                    @if (cargandoServicios()) {
-                      <div class="form-text">{{ 'common.loading' | translate }}</div>
-                    }
-                  </div>
-
-                  <div class="col-12 col-md-4">
                     <label class="form-label" for="bAnios">{{ 'admin_users.years_experience' | translate }}</label>
                     <input id="bAnios" type="number" class="form-control" formControlName="anios_experiencia"
                            min="0" max="80" step="1" placeholder="12"
@@ -469,13 +456,54 @@
                     </div>
                   </div>
 
-                  <div class="col-12 col-md-8">
+                  <div class="col-12">
                     <label class="form-label" for="bZona">{{ 'admin_users.service_zone' | translate }}</label>
                     <input id="bZona" type="text" class="form-control" formControlName="zona_servicio"
                            [placeholder]="'admin_users.service_zone_ph' | translate"
                            [class.is-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched"
                            [attr.aria-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched">
                     <div class="invalid-feedback">{{ 'admin_users.service_zone_required' | translate }}</div>
+                  </div>
+
+                  <!-- Especialidades: «Todos los servicios» y las casillas sueltas
+                       son excluyentes. Al marcarlo, las de abajo quedan inertes en
+                       vez de desaparecer, para que se siga viendo qué cubre. -->
+                  <div class="col-12">
+                    <fieldset class="spec-field">
+                      <legend class="form-label spec-field__legend">
+                        {{ 'admin_users.specialties' | translate }}
+                      </legend>
+                      <p class="form-text mt-0 mb-2">{{ 'admin_users.specialties_hint' | translate }}</p>
+
+                      @if (cargandoServicios()) {
+                        <p class="form-text">{{ 'common.loading' | translate }}</p>
+                      } @else {
+                        <div class="spec-grid"
+                             [class.spec-grid--invalid]="f['especialidad_ids'].invalid && f['especialidad_ids'].touched">
+                          <label class="form-check spec-check spec-check--all">
+                            <input class="form-check-input" type="checkbox"
+                                   [checked]="todosLosServicios"
+                                   (change)="alternarTodosLosServicios($any($event.target).checked)">
+                            <span class="form-check-label">{{ 'admin_users.specialty_all' | translate }}</span>
+                          </label>
+                          @for (e of especialidades(); track e.id) {
+                            <label class="form-check spec-check">
+                              <input class="form-check-input" type="checkbox"
+                                     [checked]="tieneEspecialidad(e.id)"
+                                     [disabled]="todosLosServicios"
+                                     (change)="alternarEspecialidad(e.id, $any($event.target).checked)">
+                              <span class="form-check-label">{{ e.nombre }}</span>
+                            </label>
+                          }
+                        </div>
+                      }
+
+                      @if (f['especialidad_ids'].invalid && f['especialidad_ids'].touched) {
+                        <p class="spec-error" role="alert">
+                          {{ 'admin_users.specialties_required' | translate }}
+                        </p>
+                      }
+                    </fieldset>
                   </div>
 
                   <div class="col-12">

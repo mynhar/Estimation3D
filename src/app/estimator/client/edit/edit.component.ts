@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { PROVINCIAS_CANADA } from '../../../models/servicio.model';
+import { PROVINCIAS_CANADA, SERVICIOS_FALLBACK, Servicio } from '../../../models/servicio.model';
 import { AdminUserService, EnvioCredenciales } from '../../../services/admin-user.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
+import { LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
+import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
 
 function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | null {
   const v = ctrl.value as string;
@@ -69,6 +71,24 @@ export class EstimatorClientEditComponent implements OnInit {
   readonly provinciasCanada = PROVINCIAS_CANADA;
   /** Código postal canadiense: A1A 1A1 (también acepta «A1A-1A1» y sin separador). */
   private readonly CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+  /** Licencia RBQ de Quebec: diez dígitos en tres bloques, «0000-0000-00». */
+  private readonly RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
+
+  /** Tipos de servicio activos: de ahí salen las especialidades del constructor. */
+  readonly servicios = signal<Servicio[]>([]);
+  readonly cargandoServicios = signal(false);
+  private readonly lang = inject(LangService);
+
+  /** Los servicios con el nombre ya resuelto al idioma en curso. */
+  readonly especialidades = computed(() => {
+    const l = this.lang.current();
+    return this.servicios().map(s => ({
+      id: s.id,
+      nombre: l === 'en' ? (s.nombre_en || s.nombre_fr)
+            : l === 'es' ? (s.nombre_es || s.nombre_fr)
+            :              (s.nombre_fr || s.nombre_es),
+    }));
+  });
 
   form = this.fb.group({
     nombre:     ['', Validators.required],
@@ -92,6 +112,18 @@ export class EstimatorClientEditComponent implements OnInit {
     compania_telefono:  [''],
     compania_email:     ['', Validators.email],
     compania_direccion: [''],
+    // Perfil profesional: los validadores se activan y se retiran según el rol
+    // (ver `sincronizarValidadoresConstructor`), porque estos campos son
+    // obligatorios para el constructor e inexistentes para el cliente.
+    rbq:               [''],
+    // «Todos los servicios» es una respuesta por derecho propio, no la ausencia
+    // de respuesta: viaja en su propio campo y no como una lista vacía. Las dos
+    // son excluyentes, y para el constructor una de las dos es obligatoria.
+    especialidad_todas: [false],
+    especialidad_ids:   this.fb.nonNullable.control<number[]>([], especialidadesRequeridas),
+    anios_experiencia: [null as number | null],
+    zona_servicio:     [''],
+    mensaje:           [''],
   });
 
   rolSeleccionado = toSignal(this.form.controls.rol.valueChanges, {
@@ -101,6 +133,134 @@ export class EstimatorClientEditComponent implements OnInit {
   tituloClave   = computed(() =>
     this.esConstructor() ? 'admin_users.edit_builder_title' : 'admin_users.edit_client_title'
   );
+
+  /** Campos de Perfil profesional obligatorios para el constructor. */
+  private readonly CAMPOS_CONSTRUCTOR = [
+    'rbq', 'anios_experiencia', 'zona_servicio',
+  ] as const;
+
+  constructor() {
+    // El rol se puede cambiar aquí mismo —una cuenta pasa de cliente a
+    // constructor y al revés—, así que los validadores del bloque Perfil
+    // profesional tienen que seguirlo: si no, el formulario quedaría inválido
+    // por campos que ya no están en pantalla.
+    effect(() => this.sincronizarValidadoresConstructor(this.esConstructor()));
+  }
+
+  private sincronizarValidadoresConstructor(activo: boolean): void {
+    for (const campo of this.CAMPOS_CONSTRUCTOR) {
+      const ctrl = this.form.get(campo)!;
+      if (activo) {
+        const extra = campo === 'rbq'
+          ? [Validators.pattern(this.RBQ_RE)]
+          : campo === 'anios_experiencia'
+          ? [Validators.min(0), Validators.max(80)]
+          : [];
+        ctrl.setValidators([Validators.required, ...extra]);
+      } else {
+        ctrl.clearValidators();
+        ctrl.reset(campo === 'anios_experiencia' ? null : '', { emitEvent: false });
+      }
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+    // Las especialidades no están en `CAMPOS_CONSTRUCTOR` porque su validador no
+    // es `required` a secas: se pone y se quita entero.
+    const esp = this.form.controls.especialidad_ids;
+    esp.setValidators(activo ? [especialidadesRequeridas] : []);
+    esp.updateValueAndValidity({ emitEvent: false });
+
+    if (!activo) {
+      this.form.controls.especialidad_todas.reset(false, { emitEvent: false });
+      esp.reset([], { emitEvent: false });
+      this.form.controls.mensaje.reset('', { emitEvent: false });
+    }
+  }
+
+  // ── Especialidades ────────────────────────────────────────────────────────
+  //
+  // «Todos los servicios» y las casillas sueltas son excluyentes: al marcarlo,
+  // las de abajo quedan inertes en vez de desaparecer, para que se siga viendo
+  // qué cubre esa respuesta.
+
+  get todosLosServicios(): boolean {
+    return this.form.controls.especialidad_todas.value === true;
+  }
+
+  tieneEspecialidad(id: number): boolean {
+    return this.form.controls.especialidad_ids.value.includes(id);
+  }
+
+  alternarTodosLosServicios(marcado: boolean): void {
+    this.form.controls.especialidad_todas.setValue(marcado);
+    const esp = this.form.controls.especialidad_ids;
+    if (marcado) esp.setValue([]);
+    esp.updateValueAndValidity();
+    esp.markAsTouched();
+  }
+
+  alternarEspecialidad(id: number, marcado: boolean): void {
+    const esp = this.form.controls.especialidad_ids;
+    const lista = esp.value;
+    esp.setValue(marcado ? [...lista, id] : lista.filter(v => v !== id));
+    esp.markAsTouched();
+  }
+
+  /**
+   * Especialidades ya registradas. La lista completa vive en
+   * `perfil_especialidad`; los perfiles anteriores a esa tabla sólo tienen la
+   * columna escalar `especialidad_id`, y de ahí sale entonces la única marca.
+   *
+   * Se descartan los ids que no estén en el catálogo activo: no se pueden
+   * mostrar, y reenviarlos al guardar haría fallar la edge function.
+   */
+  private async cargarEspecialidades(perfil: DbPerfil): Promise<void> {
+    if (perfil.rol !== 'constructor') return;
+
+    this.form.controls.especialidad_todas.setValue(perfil.especialidad_todas === true, { emitEvent: false });
+    if (perfil.especialidad_todas) return;
+
+    const { data, error } = await this.auth.client
+      .from('perfil_especialidad')
+      .select('servicio_id')
+      .eq('perfil_id', perfil.id);
+    if (error) console.error('[EstimatorClientEdit] especialidades:', error.message);
+
+    const activos   = new Set(this.servicios().map(s => s.id));
+    const listados  = (data ?? []).map(r => Number(r.servicio_id));
+    const guardados = listados.length ? listados
+                    : perfil.especialidad_id != null ? [perfil.especialidad_id]
+                    : [];
+
+    this.form.controls.especialidad_ids.setValue(
+      guardados.filter(id => activos.has(id)), { emitEvent: false },
+    );
+  }
+
+  private async cargarServicios(): Promise<void> {
+    this.cargandoServicios.set(true);
+    const { data, error } = await this.auth.client
+      .from('servicio')
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es')
+      .eq('activo', true)
+      .order('codigo');
+    if (error) console.error('[EstimatorClientEdit] servicios:', error.message);
+    this.servicios.set(data?.length ? (data as unknown as Servicio[]) : SERVICIOS_FALLBACK);
+    this.cargandoServicios.set(false);
+  }
+
+  /**
+   * Va dando forma «0000-0000-00» mientras se escribe: se queda con los dígitos
+   * y coloca los guiones. Así el campo no puede salir con un formato que el
+   * CHECK de la base rechazaría después.
+   */
+  formatearRbq(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const d = input.value.replace(/\D/g, '').slice(0, 10);
+    const partes = [d.slice(0, 4), d.slice(4, 8), d.slice(8, 10)].filter(p => p !== '');
+    const valor = partes.join('-');
+    input.value = valor;
+    this.form.controls.rbq.setValue(valor);
+  }
 
   get f() { return this.form.controls; }
   get esProveedorEmail(): boolean { return this.usuario()?.proveedor === 'email'; }
@@ -114,6 +274,8 @@ export class EstimatorClientEditComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate(['/estimator/client/list']); return; }
+
+    await this.cargarServicios();
 
     try {
       const { data, error } = await this.auth.client
@@ -144,7 +306,14 @@ export class EstimatorClientEditComponent implements OnInit {
         compania_telefono:  data.compania_telefono  ?? '',
         compania_email:     data.compania_email     ?? '',
         compania_direccion: data.compania_direccion ?? '',
+        rbq:               data.rbq ?? '',
+        anios_experiencia: data.anios_experiencia ?? null,
+        zona_servicio:     data.zona_servicio ?? '',
+        mensaje:           data.mensaje ?? '',
       });
+
+      // Después del patch, porque `cargarEspecialidades` mira el rol ya cargado.
+      await this.cargarEspecialidades(data);
 
       if (this.esProveedorEmail) {
         this.f['email'].setValidators([Validators.required, Validators.email]);
@@ -176,12 +345,21 @@ export class EstimatorClientEditComponent implements OnInit {
         direccion_ciudad:        v.direccion_ciudad        ?? '',
         direccion_provincia:     v.direccion_provincia     ?? '',
         direccion_codigo_postal: v.direccion_codigo_postal ?? '',
-        // Al pasar a cliente no se envían: la edge function limpia la compañía.
+        // Al pasar a cliente no se envían: la edge function limpia la compañía
+        // y el perfil profesional, incluidas las especialidades.
         ...(this.esConstructor() ? {
           compania_nombre:    v.compania_nombre    ?? '',
           compania_telefono:  v.compania_telefono  ?? '',
           compania_email:     v.compania_email     ?? '',
           compania_direccion: v.compania_direccion ?? '',
+          rbq:                v.rbq ?? '',
+          // «Todos los servicios» tiene columna propia: no se guarda como lista
+          // vacía. El `especialidad_id` escalar lo deriva la edge function.
+          especialidad_todas: v.especialidad_todas === true,
+          especialidad_ids:   v.especialidad_todas === true ? [] : (v.especialidad_ids ?? []),
+          anios_experiencia:  v.anios_experiencia != null ? Number(v.anios_experiencia) : null,
+          zona_servicio:      v.zona_servicio ?? '',
+          mensaje:            v.mensaje       ?? '',
         } : {}),
       };
 

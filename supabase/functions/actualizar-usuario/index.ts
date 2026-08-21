@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
     const {
       id, nombre, apellido, telefono, avatar_url, activo, email, password, rol,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
-      rbq, especialidad_id, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
+      rbq, especialidad_ids, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
     } = body;
 
     if (!id || !nombre || !apellido || !rol) {
@@ -120,12 +120,14 @@ Deno.serve(async (req: Request) => {
     // Datos profesionales del constructor: licencia RBQ, especialidad, años de
     // experiencia, zona cubierta y nota libre. Mismo criterio que la dirección:
     // sólo se tocan si el cuerpo trae la sección, para que un llamador que no la
-    // envíe (edición de cliente desde el estimador) no la borre. Al dejar de ser
-    // constructor sí se limpian siempre, como los datos de compañía.
+    // envíe no borre lo que ya había. Al dejar de ser constructor sí se limpian
+    // siempre, como los datos de compañía.
     const CAMPOS_CONSTRUCTOR = [
-      'rbq', 'especialidad_id', 'especialidad_todas',
+      'rbq', 'especialidad_ids', 'especialidad_todas',
       'anios_experiencia', 'zona_servicio', 'mensaje',
     ];
+    // `null` = el cuerpo no traía la sección y `perfil_especialidad` no se toca.
+    let especialidades: number[] | null = null;
     if (rol !== 'constructor') {
       perfilPayload['rbq']                = null;
       perfilPayload['especialidad_id']    = null;
@@ -133,6 +135,8 @@ Deno.serve(async (req: Request) => {
       perfilPayload['anios_experiencia']  = null;
       perfilPayload['zona_servicio']      = null;
       perfilPayload['mensaje']            = null;
+      // Al dejar de ser constructor, la lista se borra con el resto.
+      especialidades = [];
     } else if (CAMPOS_CONSTRUCTOR.some(c => c in body)) {
       const entero = (v: unknown): number | null => {
         const n = typeof v === 'number' ? v : parseInt(String(v ?? ''), 10);
@@ -146,11 +150,31 @@ Deno.serve(async (req: Request) => {
       if (anios !== null && (anios < 0 || anios > 80)) {
         return fail('anios_experiencia_rango', 'Los años de experiencia deben estar entre 0 y 80', 400);
       }
-      // «Todos los servicios» y un servicio concreto son excluyentes (lo
-      // garantiza también un CHECK en la tabla).
+      // Especialidades: «Todos los servicios» y una lista concreta son
+      // excluyentes (lo garantiza también un CHECK en la tabla), y para el
+      // constructor una de las dos es obligatoria. La lista completa vive en
+      // `perfil_especialidad`; `especialidad_id` se conserva como resumen —el
+      // único id elegido, o NULL si hay varios— porque hay lecturas antiguas
+      // que miran esa columna.
       const todas = especialidad_todas === true;
+      const ids   = todas ? [] : idsUnicos(especialidad_ids);
+      if (!todas && ids.length === 0) {
+        return fail('especialidad_requerida', 'Debe indicar al menos una especialidad', 400);
+      }
+      if (ids.length > MAX_ESPECIALIDADES) {
+        return fail('especialidad_requerida', 'Demasiadas especialidades', 400);
+      }
+      // El catálogo lo pinta el navegador, así que el cuerpo puede venir
+      // manipulado: los ids tienen que existir y estar activos.
+      const desconocido = await servicioInactivo(adminClient, ids);
+      if (desconocido instanceof Response) return desconocido;
+      if (desconocido !== null) {
+        return fail('servicio_no_encontrado', `Servicio ${desconocido} no encontrado o inactivo`, 400);
+      }
+      especialidades = ids;
+
       perfilPayload['rbq']                = rbqLimpio;
-      perfilPayload['especialidad_id']    = todas ? null : entero(especialidad_id);
+      perfilPayload['especialidad_id']    = ids.length === 1 ? ids[0] : null;
       perfilPayload['especialidad_todas'] = todas;
       perfilPayload['anios_experiencia']  = anios;
       perfilPayload['zona_servicio']      = limpiar(zona_servicio);
@@ -174,12 +198,62 @@ Deno.serve(async (req: Request) => {
 
     if (updateError) return fail('perfil_error', updateError.message, 500, updateError.message);
 
+    // Especialidades: se reescriben enteras, porque lo que llega es la foto
+    // actual de lo que cubre este constructor y no un añadido a lo anterior.
+    if (especialidades !== null) {
+      const { error: errBorrado } = await adminClient
+        .from('perfil_especialidad')
+        .delete()
+        .eq('perfil_id', id);
+      if (errBorrado) return fail('perfil_error', errBorrado.message, 500, errBorrado.message);
+
+      if (especialidades.length > 0) {
+        const { error: errAlta } = await adminClient
+          .from('perfil_especialidad')
+          .insert(especialidades.map((servicio_id) => ({ perfil_id: id, servicio_id })));
+        if (errAlta) return fail('perfil_error', errAlta.message, 500, errAlta.message);
+      }
+    }
+
     return json({ ok: true }, 200);
 
   } catch (err: any) {
     return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
   }
 });
+
+/** Tope de especialidades; el catálogo real es mucho menor. */
+const MAX_ESPECIALIDADES = 40;
+
+/** Ids enteros, sin repetidos y sin basura, en el orden en que llegaron. */
+function idsUnicos(v: unknown): number[] {
+  if (!Array.isArray(v)) return [];
+  const vistos = new Set<number>();
+  for (const x of v) {
+    const n = typeof x === 'number' ? x : parseInt(String(x ?? ''), 10);
+    if (Number.isInteger(n) && n > 0) vistos.add(n);
+  }
+  return [...vistos];
+}
+
+/**
+ * Devuelve el primer id que no corresponda a un servicio activo, `null` si
+ * todos valen, o la respuesta de error si la consulta al catálogo falla.
+ */
+async function servicioInactivo(
+  client: { from: (t: string) => any },
+  ids: number[],
+): Promise<number | null | Response> {
+  if (ids.length === 0) return null;
+  const { data, error } = await client
+    .from('servicio')
+    .select('id')
+    .eq('activo', true)
+    .in('id', ids);
+  if (error) return fail('error_interno', error.message, 500, error.message);
+  const activos = new Set((data ?? []).map((s: { id: number }) => Number(s.id)));
+  return ids.find((id) => !activos.has(id)) ?? null;
+}
 
 /** GoTrue no expone un código estable en todas las versiones: se comprueban ambos. */
 function esEmailDuplicado(err: { code?: string; message?: string }): boolean {

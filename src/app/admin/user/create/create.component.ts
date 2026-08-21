@@ -10,6 +10,7 @@ import { EdgeErrorService } from '../../../services/edge-error.service';
 import { Lang, LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { RolUsuario } from '../../../types/supabase';
+import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
 
 @Component({
   selector: 'app-admin-user-create',
@@ -48,10 +49,7 @@ export class AdminUserCreateComponent implements OnInit {
   /** Licencia RBQ de Quebec: diez dígitos en tres bloques, «0000-0000-00». */
   private readonly RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
 
-  /** Valor del selector de especialidad cuando el constructor cubre todo. */
-  readonly ESPECIALIDAD_TODAS = 'todas' as const;
-
-  /** Tipos de servicio activos: la especialidad del constructor sale de aquí. */
+  /** Tipos de servicio activos: las especialidades del constructor salen de aquí. */
   readonly servicios = signal<Servicio[]>([]);
   readonly cargandoServicios = signal(false);
   private readonly lang = inject(LangService);
@@ -97,9 +95,11 @@ export class AdminUserCreateComponent implements OnInit {
     // (ver `sincronizarValidadoresConstructor`), porque estos campos son
     // obligatorios para el constructor e inexistentes para el resto de roles.
     rbq:               [''],
-    // 'todas' = «Todos los servicios», la opción por defecto; si no, el id del
-    // tipo de servicio. Nunca queda vacío, así que no lleva `required`.
-    especialidad:      ['todas' as number | 'todas'],
+    // «Todos los servicios» es una respuesta por derecho propio, no la ausencia
+    // de respuesta: viaja en su propio campo y no como una lista vacía. Las dos
+    // son excluyentes, y para el constructor una de las dos es obligatoria.
+    especialidad_todas: [false],
+    especialidad_ids:   this.fb.nonNullable.control<number[]>([], especialidadesRequeridas),
     anios_experiencia: [null as number | null],
     zona_servicio:     [''],
     mensaje:           [''],
@@ -155,10 +155,46 @@ export class AdminUserCreateComponent implements OnInit {
       }
       ctrl.updateValueAndValidity({ emitEvent: false });
     }
+    // Las especialidades no están en `CAMPOS_CONSTRUCTOR` porque su validador no
+    // es `required` a secas: se pone y se quita entero.
+    const esp = this.form.controls.especialidad_ids;
+    esp.setValidators(activo ? [especialidadesRequeridas] : []);
+    esp.updateValueAndValidity({ emitEvent: false });
+
     if (!activo) {
-      this.form.controls.especialidad.reset(this.ESPECIALIDAD_TODAS, { emitEvent: false });
+      this.form.controls.especialidad_todas.reset(false, { emitEvent: false });
+      esp.reset([], { emitEvent: false });
       this.form.controls.mensaje.reset('', { emitEvent: false });
     }
+  }
+
+  // ── Especialidades ────────────────────────────────────────────────────────
+  //
+  // «Todos los servicios» y las casillas sueltas son excluyentes: al marcarlo,
+  // las de abajo quedan inertes en vez de desaparecer, para que se siga viendo
+  // qué cubre esa respuesta.
+
+  get todosLosServicios(): boolean {
+    return this.form.controls.especialidad_todas.value === true;
+  }
+
+  tieneEspecialidad(id: number): boolean {
+    return this.form.controls.especialidad_ids.value.includes(id);
+  }
+
+  alternarTodosLosServicios(marcado: boolean): void {
+    this.form.controls.especialidad_todas.setValue(marcado);
+    const esp = this.form.controls.especialidad_ids;
+    if (marcado) esp.setValue([]);
+    esp.updateValueAndValidity();
+    esp.markAsTouched();
+  }
+
+  alternarEspecialidad(id: number, marcado: boolean): void {
+    const esp = this.form.controls.especialidad_ids;
+    const lista = esp.value;
+    esp.setValue(marcado ? [...lista, id] : lista.filter(v => v !== id));
+    esp.markAsTouched();
   }
 
   /**
@@ -206,9 +242,10 @@ export class AdminUserCreateComponent implements OnInit {
         compania_email:     v.compania_email     ?? '',
         compania_direccion: v.compania_direccion ?? '',
         rbq:                v.rbq ?? '',
-        // «Todos los servicios» tiene columna propia: no se guarda como id nulo.
-        especialidad_todas: v.especialidad === this.ESPECIALIDAD_TODAS,
-        especialidad_id:    v.especialidad === this.ESPECIALIDAD_TODAS ? null : Number(v.especialidad),
+        // «Todos los servicios» tiene columna propia: no se guarda como lista
+        // vacía. El `especialidad_id` escalar lo deriva la edge function.
+        especialidad_todas: v.especialidad_todas === true,
+        especialidad_ids:   v.especialidad_todas === true ? [] : (v.especialidad_ids ?? []),
         anios_experiencia:  v.anios_experiencia != null ? Number(v.anios_experiencia) : null,
         zona_servicio:      v.zona_servicio ?? '',
         mensaje:            v.mensaje       ?? '',

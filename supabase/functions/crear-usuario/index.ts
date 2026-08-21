@@ -48,7 +48,7 @@ Deno.serve(async (req: Request) => {
     const {
       email, password, nombre, apellido, telefono, avatar_url, rol, activo, idioma,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
-      rbq, especialidad_id, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
+      rbq, especialidad_ids, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
       direccion_unidad, direccion_calle, direccion_ciudad,
       direccion_provincia, direccion_codigo_postal,
     } = body;
@@ -103,13 +103,38 @@ Deno.serve(async (req: Request) => {
     if (esConstructor && anios !== null && (anios < 0 || anios > 80)) {
       return fail('anios_experiencia_rango', 'Los años de experiencia deben estar entre 0 y 80', 400);
     }
-    // «Todos los servicios» y un servicio concreto son excluyentes (lo garantiza
-    // también un CHECK en la tabla): si viene la marca, el id se descarta.
+    // Especialidades: «Todos los servicios» y una lista concreta son excluyentes
+    // (lo garantiza también un CHECK en la tabla), y para el constructor una de
+    // las dos es obligatoria. La lista completa vive en `perfil_especialidad`;
+    // `especialidad_id` se conserva como resumen —el único id elegido, o NULL si
+    // hay varios— porque hay lecturas antiguas que miran esa columna.
+    //
+    // Sólo se exigen si el cuerpo trae la sección. Las dos pantallas de alta
+    // —administrador y estimador— la envían siempre que el rol sea constructor;
+    // la puerta queda para cualquier llamador que no la mande, que entonces
+    // crea el constructor sin especialidades en vez de recibir un 400.
     const todas = especialidad_todas === true;
+    const ids   = todas ? [] : idsUnicos(especialidad_ids);
+    const traeEspecialidades = 'especialidad_ids' in body || 'especialidad_todas' in body;
+    if (esConstructor && traeEspecialidades) {
+      if (!todas && ids.length === 0) {
+        return fail('especialidad_requerida', 'Debe indicar al menos una especialidad', 400);
+      }
+      if (ids.length > MAX_ESPECIALIDADES) {
+        return fail('especialidad_requerida', 'Demasiadas especialidades', 400);
+      }
+      // El catálogo lo pinta el navegador, así que el cuerpo puede venir
+      // manipulado: los ids tienen que existir y estar activos.
+      const desconocido = await servicioInactivo(adminClient, ids);
+      if (desconocido instanceof Response) return desconocido;
+      if (desconocido !== null) {
+        return fail('servicio_no_encontrado', `Servicio ${desconocido} no encontrado o inactivo`, 400);
+      }
+    }
     const constructor = esConstructor
       ? {
           rbq:                rbqLimpio,
-          especialidad_id:    todas ? null : entero(especialidad_id),
+          especialidad_id:    ids.length === 1 ? ids[0] : null,
           especialidad_todas: todas,
           anios_experiencia:  anios,
           zona_servicio:      limpiar(zona_servicio),
@@ -182,12 +207,59 @@ Deno.serve(async (req: Request) => {
       return fail('perfil_error', upsertError.message, 500, upsertError.message);
     }
 
+    // 6. Especialidades del constructor
+    // El alta es una sola cosa: si la lista no entra, el usuario tampoco se
+    // queda — quedaría un constructor sin las especialidades que se le
+    // asignaron, y el administrador no tendría forma de saberlo.
+    if (ids.length > 0) {
+      const { error: espError } = await adminClient
+        .from('perfil_especialidad')
+        .insert(ids.map((servicio_id) => ({ perfil_id: userId, servicio_id })));
+      if (espError) {
+        await adminClient.auth.admin.deleteUser(userId);
+        return fail('perfil_error', espError.message, 500, espError.message);
+      }
+    }
+
     return json({ id: userId }, 201);
 
   } catch (err: any) {
     return fail('error_interno', err?.message ?? 'Error interno', 500, err?.message);
   }
 });
+
+/** Tope de especialidades; el catálogo real es mucho menor. */
+const MAX_ESPECIALIDADES = 40;
+
+/** Ids enteros, sin repetidos y sin basura, en el orden en que llegaron. */
+function idsUnicos(v: unknown): number[] {
+  if (!Array.isArray(v)) return [];
+  const vistos = new Set<number>();
+  for (const x of v) {
+    const n = typeof x === 'number' ? x : parseInt(String(x ?? ''), 10);
+    if (Number.isInteger(n) && n > 0) vistos.add(n);
+  }
+  return [...vistos];
+}
+
+/**
+ * Devuelve el primer id que no corresponda a un servicio activo, `null` si
+ * todos valen, o la respuesta de error si la consulta al catálogo falla.
+ */
+async function servicioInactivo(
+  client: { from: (t: string) => any },
+  ids: number[],
+): Promise<number | null | Response> {
+  if (ids.length === 0) return null;
+  const { data, error } = await client
+    .from('servicio')
+    .select('id')
+    .eq('activo', true)
+    .in('id', ids);
+  if (error) return fail('error_interno', error.message, 500, error.message);
+  const activos = new Set((data ?? []).map((s: { id: number }) => Number(s.id)));
+  return ids.find((id) => !activos.has(id)) ?? null;
+}
 
 /** GoTrue no expone un código estable en todas las versiones: se comprueban ambos. */
 function esEmailDuplicado(err: { code?: string; message?: string }): boolean {

@@ -11,6 +11,7 @@ import { EdgeErrorService } from '../../../services/edge-error.service';
 import { LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
+import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
 
 function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | null {
   const v = ctrl.value as string;
@@ -70,10 +71,7 @@ export class AdminUserEditComponent implements OnInit {
   /** Licencia RBQ de Quebec: diez digitos en tres bloques, 0000-0000-00. */
   private readonly RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
 
-  /** Valor del selector de especialidad cuando el constructor cubre todo. */
-  readonly ESPECIALIDAD_TODAS = 'todas' as const;
-
-  /** Tipos de servicio activos: de ahi sale la especialidad del constructor. */
+  /** Tipos de servicio activos: de ahi salen las especialidades del constructor. */
   readonly servicios = signal<Servicio[]>([]);
   readonly cargandoServicios = signal(false);
   private readonly lang = inject(LangService);
@@ -115,9 +113,11 @@ export class AdminUserEditComponent implements OnInit {
     // el rol (ver `sincronizarValidadoresConstructor`), porque estos campos son
     // obligatorios para el constructor e inexistentes para los demas roles.
     rbq:               [''],
-    // 'todas' = «Todos los servicios», la opcion por defecto; si no, el id del
-    // tipo de servicio. Nunca queda vacio, asi que no lleva `required`.
-    especialidad:      ['todas' as number | 'todas'],
+    // «Todos los servicios» es una respuesta por derecho propio, no la ausencia
+    // de respuesta: viaja en su propio campo y no como una lista vacia. Las dos
+    // son excluyentes, y para el constructor una de las dos es obligatoria.
+    especialidad_todas: [false],
+    especialidad_ids:   this.fb.nonNullable.control<number[]>([], especialidadesRequeridas),
     anios_experiencia: [null as number | null],
     zona_servicio:     [''],
     mensaje:           [''],
@@ -157,10 +157,77 @@ export class AdminUserEditComponent implements OnInit {
       }
       ctrl.updateValueAndValidity({ emitEvent: false });
     }
+    // Las especialidades no estan en `CAMPOS_CONSTRUCTOR` porque su validador no
+    // es `required` a secas: se pone y se quita entero.
+    const esp = this.form.controls.especialidad_ids;
+    esp.setValidators(activo ? [especialidadesRequeridas] : []);
+    esp.updateValueAndValidity({ emitEvent: false });
+
     if (!activo) {
-      this.form.controls.especialidad.reset(this.ESPECIALIDAD_TODAS, { emitEvent: false });
+      this.form.controls.especialidad_todas.reset(false, { emitEvent: false });
+      esp.reset([], { emitEvent: false });
       this.form.controls.mensaje.reset('', { emitEvent: false });
     }
+  }
+
+  // ── Especialidades ────────────────────────────────────────────────────────
+  //
+  // «Todos los servicios» y las casillas sueltas son excluyentes: al marcarlo,
+  // las de abajo quedan inertes en vez de desaparecer, para que se siga viendo
+  // que cubre esa respuesta.
+
+  get todosLosServicios(): boolean {
+    return this.form.controls.especialidad_todas.value === true;
+  }
+
+  tieneEspecialidad(id: number): boolean {
+    return this.form.controls.especialidad_ids.value.includes(id);
+  }
+
+  alternarTodosLosServicios(marcado: boolean): void {
+    this.form.controls.especialidad_todas.setValue(marcado);
+    const esp = this.form.controls.especialidad_ids;
+    if (marcado) esp.setValue([]);
+    esp.updateValueAndValidity();
+    esp.markAsTouched();
+  }
+
+  alternarEspecialidad(id: number, marcado: boolean): void {
+    const esp = this.form.controls.especialidad_ids;
+    const lista = esp.value;
+    esp.setValue(marcado ? [...lista, id] : lista.filter(v => v !== id));
+    esp.markAsTouched();
+  }
+
+  /**
+   * Especialidades ya registradas. La lista completa vive en
+   * `perfil_especialidad`; los perfiles anteriores a esa tabla solo tienen la
+   * columna escalar `especialidad_id`, y de ahi sale entonces la unica marca.
+   *
+   * Se descartan los ids que no esten en el catalogo activo: no se pueden
+   * mostrar, y reenviarlos al guardar haria fallar la edge function.
+   */
+  private async cargarEspecialidades(perfil: DbPerfil): Promise<void> {
+    if (perfil.rol !== 'constructor') return;
+
+    this.form.controls.especialidad_todas.setValue(perfil.especialidad_todas === true, { emitEvent: false });
+    if (perfil.especialidad_todas) return;
+
+    const { data, error } = await this.auth.client
+      .from('perfil_especialidad')
+      .select('servicio_id')
+      .eq('perfil_id', perfil.id);
+    if (error) console.error('[AdminUserEdit] especialidades:', error.message);
+
+    const activos  = new Set(this.servicios().map(s => s.id));
+    const listados = (data ?? []).map(r => Number(r.servicio_id));
+    const guardados = listados.length ? listados
+                    : perfil.especialidad_id != null ? [perfil.especialidad_id]
+                    : [];
+
+    this.form.controls.especialidad_ids.setValue(
+      guardados.filter(id => activos.has(id)), { emitEvent: false },
+    );
   }
 
   private async cargarServicios(): Promise<void> {
@@ -233,14 +300,13 @@ export class AdminUserEditComponent implements OnInit {
         compania_email:     data.compania_email     ?? '',
         compania_direccion: data.compania_direccion ?? '',
         rbq:               data.rbq ?? '',
-        // «Todos los servicios» es tambien lo que ve un perfil anterior a este
-        // campo: no tiene especialidad registrada y el selector no puede
-        // quedarse sin valor.
-        especialidad:      data.especialidad_id ?? this.ESPECIALIDAD_TODAS,
         anios_experiencia: data.anios_experiencia ?? null,
         zona_servicio:     data.zona_servicio ?? '',
         mensaje:           data.mensaje ?? '',
       });
+
+      // Despues del patch, porque `cargarEspecialidades` mira el rol ya cargado.
+      await this.cargarEspecialidades(data);
 
       if (this.esProveedorEmail) {
         this.f['email'].setValidators([Validators.required, Validators.email]);
@@ -287,9 +353,10 @@ export class AdminUserEditComponent implements OnInit {
         params.compania_email     = v.compania_email     ?? '';
         params.compania_direccion = v.compania_direccion ?? '';
         params.rbq                = v.rbq ?? '';
-        // «Todos los servicios» tiene columna propia: no se guarda como id nulo.
-        params.especialidad_todas = v.especialidad === this.ESPECIALIDAD_TODAS;
-        params.especialidad_id    = v.especialidad === this.ESPECIALIDAD_TODAS ? null : Number(v.especialidad);
+        // «Todos los servicios» tiene columna propia: no se guarda como lista
+        // vacia. El `especialidad_id` escalar lo deriva la edge function.
+        params.especialidad_todas = v.especialidad_todas === true;
+        params.especialidad_ids   = v.especialidad_todas === true ? [] : (v.especialidad_ids ?? []);
         params.anios_experiencia  = v.anios_experiencia != null ? Number(v.anios_experiencia) : null;
         params.zona_servicio      = v.zona_servicio ?? '';
         params.mensaje            = v.mensaje ?? '';

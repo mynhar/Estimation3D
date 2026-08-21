@@ -925,6 +925,39 @@ export type Database = {
           },
         ]
       }
+      perfil_especialidad: {
+        Row: {
+          creado_en: string
+          perfil_id: string
+          servicio_id: number
+        }
+        Insert: {
+          creado_en?: string
+          perfil_id: string
+          servicio_id: number
+        }
+        Update: {
+          creado_en?: string
+          perfil_id?: string
+          servicio_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfil_especialidad_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perfil_especialidad_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reporte_actividad: {
         Row: {
           actividad_id: string
