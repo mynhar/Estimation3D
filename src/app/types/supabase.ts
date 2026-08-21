@@ -833,6 +833,12 @@ export type Database = {
           compania_email: string | null
           compania_nombre: string | null
           compania_telefono: string | null
+          rbq: string | null
+          especialidad_id: number | null
+          especialidad_todas: boolean
+          anios_experiencia: number | null
+          zona_servicio: string | null
+          mensaje: string | null
           direccion_unidad: string | null
           direccion_calle: string | null
           direccion_ciudad: string | null
@@ -857,6 +863,12 @@ export type Database = {
           compania_email?: string | null
           compania_nombre?: string | null
           compania_telefono?: string | null
+          rbq?: string | null
+          especialidad_id?: number | null
+          especialidad_todas?: boolean
+          anios_experiencia?: number | null
+          zona_servicio?: string | null
+          mensaje?: string | null
           direccion_unidad?: string | null
           direccion_calle?: string | null
           direccion_ciudad?: string | null
@@ -881,6 +893,12 @@ export type Database = {
           compania_email?: string | null
           compania_nombre?: string | null
           compania_telefono?: string | null
+          rbq?: string | null
+          especialidad_id?: number | null
+          especialidad_todas?: boolean
+          anios_experiencia?: number | null
+          zona_servicio?: string | null
+          mensaje?: string | null
           direccion_unidad?: string | null
           direccion_calle?: string | null
           direccion_ciudad?: string | null
@@ -897,7 +915,15 @@ export type Database = {
           rol?: Database["public"]["Enums"]["rol_usuario"]
           telefono?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "perfil_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reporte_actividad: {
         Row: {

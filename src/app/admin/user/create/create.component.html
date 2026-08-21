@@ -199,10 +199,13 @@
                 </div>
 
                 <div class="col-12 col-md-6">
-                  <label class="form-label">{{ 'common.phone' | translate }}</label>
-                  <input type="tel" class="form-control"
+                  <label class="form-label" for="telefono">{{ 'common.phone' | translate }}</label>
+                  <input id="telefono" type="tel" class="form-control"
                          formControlName="telefono"
-                         placeholder="+1 514-555-0100">
+                         placeholder="+1 514-555-0100"
+                         [class.is-invalid]="f['telefono'].invalid && f['telefono'].touched"
+                         [attr.aria-invalid]="f['telefono'].invalid && f['telefono'].touched">
+                  <div class="invalid-feedback">{{ 'admin_users.phone_required' | translate }}</div>
                 </div>
 
                 <!-- Avatar -->
@@ -306,8 +309,86 @@
               </div>
             </div>
 
-            <!-- ── Compañía (sólo constructor) ─────────────────────────────── -->
+            <!-- ── Datos del constructor ────────────────────────────────── -->
             @if (esConstructor()) {
+              <!-- ── Perfil profesional (sólo constructor) ───────────────── -->
+              <div class="form-section-divider"></div>
+
+              <div class="form-section mt-5">
+                <div class="form-section__header">
+                  <i class="bi bi-tools" aria-hidden="true"></i>
+                  {{ 'admin_users.builder_data' | translate }}
+                </div>
+                <p class="form-text mb-3">{{ 'admin_users.builder_hint' | translate }}</p>
+                <div class="row g-3">
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label" for="bRbq">{{ 'admin_users.rbq' | translate }}</label>
+                    <input id="bRbq" type="text" class="form-control" formControlName="rbq"
+                           inputmode="numeric" maxlength="12" placeholder="0000-0000-00"
+                           (input)="formatearRbq($event)"
+                           [class.is-invalid]="f['rbq'].invalid && f['rbq'].touched"
+                           [attr.aria-invalid]="f['rbq'].invalid && f['rbq'].touched">
+                    <div class="invalid-feedback">
+                      @if (f['rbq'].errors?.['required']) {
+                        {{ 'admin_users.rbq_required' | translate }}
+                      } @else {
+                        {{ 'admin_users.rbq_invalid' | translate }}
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-6">
+                    <label class="form-label" for="bEspecialidad">{{ 'admin_users.specialty' | translate }}</label>
+                    <select id="bEspecialidad" class="form-select" formControlName="especialidad">
+                      <option [ngValue]="ESPECIALIDAD_TODAS">{{ 'admin_users.specialty_all' | translate }}</option>
+                      @for (e of especialidades(); track e.id) {
+                        <option [ngValue]="e.id">{{ e.nombre }}</option>
+                      }
+                    </select>
+                    @if (cargandoServicios()) {
+                      <div class="form-text">{{ 'common.loading' | translate }}</div>
+                    }
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="bAnios">{{ 'admin_users.years_experience' | translate }}</label>
+                    <input id="bAnios" type="number" class="form-control" formControlName="anios_experiencia"
+                           min="0" max="80" step="1" placeholder="12"
+                           [class.is-invalid]="f['anios_experiencia'].invalid && f['anios_experiencia'].touched"
+                           [attr.aria-invalid]="f['anios_experiencia'].invalid && f['anios_experiencia'].touched">
+                    <div class="invalid-feedback">
+                      @if (f['anios_experiencia'].errors?.['required']) {
+                        {{ 'admin_users.years_required' | translate }}
+                      } @else {
+                        {{ 'admin_users.years_range' | translate }}
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-md-8">
+                    <label class="form-label" for="bZona">{{ 'admin_users.service_zone' | translate }}</label>
+                    <input id="bZona" type="text" class="form-control" formControlName="zona_servicio"
+                           [placeholder]="'admin_users.service_zone_ph' | translate"
+                           [class.is-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched"
+                           [attr.aria-invalid]="f['zona_servicio'].invalid && f['zona_servicio'].touched">
+                    <div class="invalid-feedback">{{ 'admin_users.service_zone_required' | translate }}</div>
+                  </div>
+
+                  <div class="col-12">
+                    <label class="form-label" for="bMensaje">
+                      {{ 'admin_users.builder_message' | translate }}
+                      <span class="opt-label">({{ 'common.optional' | translate }})</span>
+                    </label>
+                    <textarea id="bMensaje" class="form-control" rows="4" formControlName="mensaje"
+                              [placeholder]="'admin_users.builder_message_ph' | translate"></textarea>
+                    <div class="form-text">{{ 'admin_users.builder_message_hint' | translate }}</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- ── Compañía (sólo constructor) ─────────────────────── -->
               <div class="form-section-divider"></div>
 
               <div class="form-section mt-5">

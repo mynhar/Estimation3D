@@ -17,6 +17,23 @@ export interface DatosCompania {
 }
 
 /**
+ * Datos profesionales del constructor. Igual que los de compañía, la edge
+ * function los ignora (y limpia) para cualquier otro rol.
+ */
+export interface DatosConstructor {
+  /** Licencia RBQ de Quebec, formato «0000-0000-00». */
+  rbq?:               string;
+  /** Tipo de servicio en el que se especializa: id de la tabla `servicio`. */
+  especialidad_id?:   number | null;
+  /** true = cubre todos los tipos de servicio. Excluyente con `especialidad_id`. */
+  especialidad_todas?: boolean;
+  anios_experiencia?: number | null;
+  zona_servicio?:     string;
+  /** Nota libre sobre su enfoque, obras recientes o preguntas. */
+  mensaje?:           string;
+}
+
+/**
  * Dirección personal del usuario (canadiense). Los cinco campos son opcionales
  * y se guardan tal cual para cualquier rol.
  */
@@ -28,7 +45,7 @@ export interface DatosDireccion {
   direccion_codigo_postal?: string;
 }
 
-export interface CrearUsuarioParams extends DatosCompania, DatosDireccion {
+export interface CrearUsuarioParams extends DatosCompania, DatosConstructor, DatosDireccion {
   email:      string;
   password:   string;
   nombre:     string;
@@ -44,7 +61,7 @@ export interface CrearUsuarioParams extends DatosCompania, DatosDireccion {
   idioma?:    Lang;
 }
 
-export interface ActualizarUsuarioParams extends DatosCompania, DatosDireccion {
+export interface ActualizarUsuarioParams extends DatosCompania, DatosConstructor, DatosDireccion {
   nombre:     string;
   apellido:   string;
   telefono:   string;

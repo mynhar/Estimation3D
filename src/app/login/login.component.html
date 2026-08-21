@@ -1,7 +1,7 @@
 <div class="lg-root">
 
   <!-- ── Panel izquierdo (oscuro — editorial) ──────────────────────────────── -->
-  <aside class="lg-side" aria-label="Información de la plataforma">
+  <aside class="lg-side" [attr.aria-label]="'auth.aria_platform_info' | translate">
 
     <!-- Fondo punteado decorativo -->
     <div class="lg-side__bg" aria-hidden="true"></div>
@@ -15,16 +15,16 @@
         </div>
         <div>
           <span class="lg-logo">Estimation3D</span>
-          <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+          <p class="lg-logo-sub">{{ 'auth.brand_tagline' | translate }}</p>
         </div>
       </div>
 
       <!-- Headline editorial -->
       <div class="lg-side__headline">
         <h2 class="lg-side__title">
-          {{ 'landing.title' | translate }}
+          {{ 'auth.side_title' | translate }}
         </h2>
-        <p class="lg-side__lead">{{ 'landing.subtitle' | translate }}</p>
+        <p class="lg-side__lead">{{ 'auth.side_lead' | translate }}</p>
       </div>
 
       <!-- Trust points -->
@@ -33,13 +33,13 @@
           <span class="lg-point__icon" aria-hidden="true">
             <i class="bi bi-box"></i>
           </span>
-          <span>{{ 'landing.badge_3d' | translate }}</span>
+          <span>{{ 'auth.side_point_3d' | translate }}</span>
         </li>
         <li class="lg-point">
           <span class="lg-point__icon" aria-hidden="true">
             <i class="bi bi-patch-check"></i>
           </span>
-          <span>{{ 'landing.badge_verified' | translate }}</span>
+          <span>{{ 'auth.side_point_verified' | translate }}</span>
         </li>
         <li class="lg-point">
           <span class="lg-point__icon" aria-hidden="true">
@@ -51,7 +51,7 @@
           <span class="lg-point__icon" aria-hidden="true">
             <i class="bi bi-gift"></i>
           </span>
-          <span>{{ 'landing.badge_free' | translate }}</span>
+          <span>{{ 'auth.side_point_free' | translate }}</span>
         </li>
       </ul>
 
@@ -75,7 +75,7 @@
         <i class="bi bi-arrow-left" aria-hidden="true"></i>
         {{ 'auth.back_to_home' | translate }}
       </a>
-      <div class="lg-lang" role="group" [attr.aria-label]="'Idioma'">
+      <div class="lg-lang" role="group" [attr.aria-label]="'auth.aria_language' | translate">
         @for (l of lang.langs; track l) {
           <button type="button" class="lg-lang__btn"
                   [class.lg-lang__btn--active]="lang.current() === l"
@@ -94,7 +94,7 @@
         </div>
         <div>
           <span class="lg-logo">Estimation3D</span>
-          <p class="lg-logo-sub">{{ 'landing.eyebrow' | translate }}</p>
+          <p class="lg-logo-sub">{{ 'auth.brand_tagline' | translate }}</p>
         </div>
       </div>
 
@@ -109,9 +109,9 @@
         </h1>
         <p class="lg-form-sub">
           @if (vista() === 'login') {
-            {{ 'landing.eyebrow' | translate }}
+            {{ 'auth.sign_in_sub' | translate }}
           } @else {
-            {{ 'landing.badge_free' | translate }}
+            {{ 'auth.sign_up_sub' | translate }}
           }
         </p>
       </div>
@@ -167,7 +167,7 @@
                      autocomplete="current-password"
                      [class.lg-field__input--error]="campoInvalido(loginForm, 'password')">
               <button type="button" class="lg-field__eye"
-                      [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                      [attr.aria-label]="(mostrarPassword ? 'auth.hide_password' : 'auth.show_password') | translate"
                       (click)="mostrarPassword = !mostrarPassword">
                 <i class="bi" aria-hidden="true"
                    [class.bi-eye]="!mostrarPassword"
@@ -294,7 +294,7 @@
                        [class.lg-field__input--error]="campoInvalido(registroForm, 'password')"
                        [attr.aria-invalid]="campoInvalido(registroForm, 'password')">
                 <button type="button" class="lg-field__eye"
-                        [attr.aria-label]="mostrarPassword ? 'Ocultar' : 'Mostrar'"
+                        [attr.aria-label]="(mostrarPassword ? 'auth.hide_password' : 'auth.show_password') | translate"
                         (click)="mostrarPassword = !mostrarPassword">
                   <i class="bi" aria-hidden="true"
                      [class.bi-eye]="!mostrarPassword"
@@ -302,7 +302,7 @@
                 </button>
               </div>
               @if (campoInvalido(registroForm, 'password')) {
-                <ul class="lg-pw-rules" role="list" aria-label="Requisitos de contraseña">
+                <ul class="lg-pw-rules" role="list" [attr.aria-label]="'auth.aria_password_rules' | translate">
                   @if (fr['password'].errors?.['pwMin'])     { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_min'     | translate }}</li> }
                   @if (fr['password'].errors?.['pwUpper'])   { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_upper'   | translate }}</li> }
                   @if (fr['password'].errors?.['pwLower'])   { <li><i class="bi bi-x-circle-fill" aria-hidden="true"></i>{{ 'validation.pw_lower'   | translate }}</li> }

@@ -48,6 +48,7 @@ Deno.serve(async (req: Request) => {
     const {
       email, password, nombre, apellido, telefono, avatar_url, rol, activo, idioma,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
+      rbq, especialidad_id, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
       direccion_unidad, direccion_calle, direccion_ciudad,
       direccion_provincia, direccion_codigo_postal,
     } = body;
@@ -85,6 +86,42 @@ Deno.serve(async (req: Request) => {
           compania_telefono:  null,
           compania_email:     null,
           compania_direccion: null,
+        };
+
+    // Datos profesionales del constructor: licencia RBQ, especialidad, años de
+    // experiencia, zona cubierta y una nota libre. Igual que los de compañía,
+    // se ignoran para cualquier otro rol.
+    const entero = (v: unknown): number | null => {
+      const n = typeof v === 'number' ? v : parseInt(String(v ?? ''), 10);
+      return Number.isFinite(n) ? n : null;
+    };
+    const rbqLimpio = limpiar(rbq);
+    if (esConstructor && rbqLimpio && !/^\d{4}-\d{4}-\d{2}$/.test(rbqLimpio)) {
+      return fail('rbq_formato', 'El número de licencia RBQ debe tener el formato 0000-0000-00', 400);
+    }
+    const anios = entero(anios_experiencia);
+    if (esConstructor && anios !== null && (anios < 0 || anios > 80)) {
+      return fail('anios_experiencia_rango', 'Los años de experiencia deben estar entre 0 y 80', 400);
+    }
+    // «Todos los servicios» y un servicio concreto son excluyentes (lo garantiza
+    // también un CHECK en la tabla): si viene la marca, el id se descarta.
+    const todas = especialidad_todas === true;
+    const constructor = esConstructor
+      ? {
+          rbq:                rbqLimpio,
+          especialidad_id:    todas ? null : entero(especialidad_id),
+          especialidad_todas: todas,
+          anios_experiencia:  anios,
+          zona_servicio:      limpiar(zona_servicio),
+          mensaje:            limpiar(mensaje),
+        }
+      : {
+          rbq:                null,
+          especialidad_id:    null,
+          especialidad_todas: false,
+          anios_experiencia:  null,
+          zona_servicio:      null,
+          mensaje:            null,
         };
 
     // Idioma del usuario: es en el que se le escribirá (enviar-credenciales lo
@@ -135,6 +172,7 @@ Deno.serve(async (req: Request) => {
       idioma:         idiomaElegido,
       perfil_completo,
       ...compania,
+      ...constructor,
       ...direccion,
     });
 

@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { PROVINCIAS_CANADA } from '../../../models/servicio.model';
+import { PROVINCIAS_CANADA, SERVICIOS_FALLBACK, Servicio } from '../../../models/servicio.model';
 import { AdminUserService, EnvioCredenciales } from '../../../services/admin-user.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { EdgeErrorService } from '../../../services/edge-error.service';
+import { LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
 
@@ -66,11 +67,32 @@ export class AdminUserEditComponent implements OnInit {
   readonly provinciasCanada = PROVINCIAS_CANADA;
   /** Código postal canadiense: A1A 1A1 (también acepta «A1A-1A1» y sin separador). */
   private readonly CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+  /** Licencia RBQ de Quebec: diez digitos en tres bloques, 0000-0000-00. */
+  private readonly RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
+
+  /** Valor del selector de especialidad cuando el constructor cubre todo. */
+  readonly ESPECIALIDAD_TODAS = 'todas' as const;
+
+  /** Tipos de servicio activos: de ahi sale la especialidad del constructor. */
+  readonly servicios = signal<Servicio[]>([]);
+  readonly cargandoServicios = signal(false);
+  private readonly lang = inject(LangService);
+
+  /** Los servicios con el nombre ya resuelto al idioma en curso. */
+  readonly especialidades = computed(() => {
+    const l = this.lang.current();
+    return this.servicios().map(s => ({
+      id: s.id,
+      nombre: l === 'en' ? (s.nombre_en || s.nombre_fr)
+            : l === 'es' ? (s.nombre_es || s.nombre_fr)
+            :              (s.nombre_fr || s.nombre_es),
+    }));
+  });
 
   form = this.fb.group({
     nombre:     ['', Validators.required],
     apellido:   ['', Validators.required],
-    telefono:   [''],
+    telefono:   ['', Validators.required],
     avatar_url: [''],
     rol:        ['cliente' as RolUsuario, Validators.required],
     activo:     [true, Validators.required],
@@ -89,6 +111,16 @@ export class AdminUserEditComponent implements OnInit {
     compania_telefono:  [''],
     compania_email:     ['', Validators.email],
     compania_direccion: [''],
+    // Seccion Perfil profesional: los validadores se activan y se retiran segun
+    // el rol (ver `sincronizarValidadoresConstructor`), porque estos campos son
+    // obligatorios para el constructor e inexistentes para los demas roles.
+    rbq:               [''],
+    // 'todas' = «Todos los servicios», la opcion por defecto; si no, el id del
+    // tipo de servicio. Nunca queda vacio, asi que no lleva `required`.
+    especialidad:      ['todas' as number | 'todas'],
+    anios_experiencia: [null as number | null],
+    zona_servicio:     [''],
+    mensaje:           [''],
   });
 
   /** El rol elegido, como signal, para mostrar/ocultar la sección Compañía. */
@@ -96,6 +128,66 @@ export class AdminUserEditComponent implements OnInit {
     initialValue: this.form.controls.rol.value,
   });
   esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
+
+  /** Campos de Perfil profesional obligatorios para el constructor. */
+  private readonly CAMPOS_CONSTRUCTOR = [
+    'rbq', 'anios_experiencia', 'zona_servicio',
+  ] as const;
+
+  constructor() {
+    // El rol se puede cambiar aqui mismo: los validadores del bloque Perfil
+    // profesional tienen que seguirlo, o el formulario quedaria invalido por
+    // campos que ya no estan en pantalla.
+    effect(() => this.sincronizarValidadoresConstructor(this.esConstructor()));
+  }
+
+  private sincronizarValidadoresConstructor(activo: boolean): void {
+    for (const campo of this.CAMPOS_CONSTRUCTOR) {
+      const ctrl = this.form.get(campo)!;
+      if (activo) {
+        const extra = campo === 'rbq'
+          ? [Validators.pattern(this.RBQ_RE)]
+          : campo === 'anios_experiencia'
+          ? [Validators.min(0), Validators.max(80)]
+          : [];
+        ctrl.setValidators([Validators.required, ...extra]);
+      } else {
+        ctrl.clearValidators();
+        ctrl.reset(campo === 'anios_experiencia' ? null : '', { emitEvent: false });
+      }
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    }
+    if (!activo) {
+      this.form.controls.especialidad.reset(this.ESPECIALIDAD_TODAS, { emitEvent: false });
+      this.form.controls.mensaje.reset('', { emitEvent: false });
+    }
+  }
+
+  private async cargarServicios(): Promise<void> {
+    this.cargandoServicios.set(true);
+    const { data, error } = await this.auth.client
+      .from('servicio')
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es')
+      .eq('activo', true)
+      .order('codigo');
+    if (error) console.error('[AdminUserEdit] servicios:', error.message);
+    this.servicios.set(data?.length ? (data as unknown as Servicio[]) : SERVICIOS_FALLBACK);
+    this.cargandoServicios.set(false);
+  }
+
+  /**
+   * Va dando forma 0000-0000-00 mientras se escribe: se queda con los digitos y
+   * coloca los guiones. Asi el campo no puede salir con un formato que el CHECK
+   * de la base rechazaria despues.
+   */
+  formatearRbq(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const d = input.value.replace(/\D/g, '').slice(0, 10);
+    const partes = [d.slice(0, 4), d.slice(4, 8), d.slice(8, 10)].filter(x => x !== '');
+    const valor = partes.join('-');
+    input.value = valor;
+    this.form.controls.rbq.setValue(valor);
+  }
 
   get f() { return this.form.controls; }
   get esProveedorEmail(): boolean { return this.usuario()?.proveedor === 'email'; }
@@ -109,6 +201,8 @@ export class AdminUserEditComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate(['/admin/user']); return; }
+
+    await this.cargarServicios();
 
     try {
       const { data, error } = await this.auth.client
@@ -138,6 +232,14 @@ export class AdminUserEditComponent implements OnInit {
         compania_telefono:  data.compania_telefono  ?? '',
         compania_email:     data.compania_email     ?? '',
         compania_direccion: data.compania_direccion ?? '',
+        rbq:               data.rbq ?? '',
+        // «Todos los servicios» es tambien lo que ve un perfil anterior a este
+        // campo: no tiene especialidad registrada y el selector no puede
+        // quedarse sin valor.
+        especialidad:      data.especialidad_id ?? this.ESPECIALIDAD_TODAS,
+        anios_experiencia: data.anios_experiencia ?? null,
+        zona_servicio:     data.zona_servicio ?? '',
+        mensaje:           data.mensaje ?? '',
       });
 
       if (this.esProveedorEmail) {
@@ -184,6 +286,13 @@ export class AdminUserEditComponent implements OnInit {
         params.compania_telefono  = v.compania_telefono  ?? '';
         params.compania_email     = v.compania_email     ?? '';
         params.compania_direccion = v.compania_direccion ?? '';
+        params.rbq                = v.rbq ?? '';
+        // «Todos los servicios» tiene columna propia: no se guarda como id nulo.
+        params.especialidad_todas = v.especialidad === this.ESPECIALIDAD_TODAS;
+        params.especialidad_id    = v.especialidad === this.ESPECIALIDAD_TODAS ? null : Number(v.especialidad);
+        params.anios_experiencia  = v.anios_experiencia != null ? Number(v.anios_experiencia) : null;
+        params.zona_servicio      = v.zona_servicio ?? '';
+        params.mensaje            = v.mensaje ?? '';
       }
 
       await this.service.actualizarUsuario(this.usuario()!.id, params);

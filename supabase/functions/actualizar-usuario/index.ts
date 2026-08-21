@@ -43,6 +43,7 @@ Deno.serve(async (req: Request) => {
     const {
       id, nombre, apellido, telefono, avatar_url, activo, email, password, rol,
       compania_nombre, compania_telefono, compania_email, compania_direccion,
+      rbq, especialidad_id, especialidad_todas, anios_experiencia, zona_servicio, mensaje,
     } = body;
 
     if (!id || !nombre || !apellido || !rol) {
@@ -114,6 +115,46 @@ Deno.serve(async (req: Request) => {
       perfilPayload['compania_telefono']  = null;
       perfilPayload['compania_email']     = null;
       perfilPayload['compania_direccion'] = null;
+    }
+
+    // Datos profesionales del constructor: licencia RBQ, especialidad, años de
+    // experiencia, zona cubierta y nota libre. Mismo criterio que la dirección:
+    // sólo se tocan si el cuerpo trae la sección, para que un llamador que no la
+    // envíe (edición de cliente desde el estimador) no la borre. Al dejar de ser
+    // constructor sí se limpian siempre, como los datos de compañía.
+    const CAMPOS_CONSTRUCTOR = [
+      'rbq', 'especialidad_id', 'especialidad_todas',
+      'anios_experiencia', 'zona_servicio', 'mensaje',
+    ];
+    if (rol !== 'constructor') {
+      perfilPayload['rbq']                = null;
+      perfilPayload['especialidad_id']    = null;
+      perfilPayload['especialidad_todas'] = false;
+      perfilPayload['anios_experiencia']  = null;
+      perfilPayload['zona_servicio']      = null;
+      perfilPayload['mensaje']            = null;
+    } else if (CAMPOS_CONSTRUCTOR.some(c => c in body)) {
+      const entero = (v: unknown): number | null => {
+        const n = typeof v === 'number' ? v : parseInt(String(v ?? ''), 10);
+        return Number.isFinite(n) ? n : null;
+      };
+      const rbqLimpio = limpiar(rbq);
+      if (rbqLimpio && !/^\d{4}-\d{4}-\d{2}$/.test(rbqLimpio)) {
+        return fail('rbq_formato', 'El número de licencia RBQ debe tener el formato 0000-0000-00', 400);
+      }
+      const anios = entero(anios_experiencia);
+      if (anios !== null && (anios < 0 || anios > 80)) {
+        return fail('anios_experiencia_rango', 'Los años de experiencia deben estar entre 0 y 80', 400);
+      }
+      // «Todos los servicios» y un servicio concreto son excluyentes (lo
+      // garantiza también un CHECK en la tabla).
+      const todas = especialidad_todas === true;
+      perfilPayload['rbq']                = rbqLimpio;
+      perfilPayload['especialidad_id']    = todas ? null : entero(especialidad_id);
+      perfilPayload['especialidad_todas'] = todas;
+      perfilPayload['anios_experiencia']  = anios;
+      perfilPayload['zona_servicio']      = limpiar(zona_servicio);
+      perfilPayload['mensaje']            = limpiar(mensaje);
     }
 
     // Dirección personal: aplica a todos los roles. Sólo se escriben las claves
