@@ -32,7 +32,11 @@
     "servicio_requerido": "Elija un tipo de servicio.",
     "servicio_no_encontrado": "Ese servicio ya no se ofrece. Elija otro.",
     "expediente_error": "No se pudo crear el expediente. Inténtelo de nuevo en un momento.",
-    "limite_alcanzado": "Demasiadas solicitudes enviadas hace poco. Inténtelo dentro de unas horas o escríbanos directamente."
+    "limite_alcanzado": "Demasiadas solicitudes enviadas hace poco. Inténtelo dentro de unas horas o escríbanos directamente.",
+    "rol_existente": "Este correo electrónico ya pertenece a una cuenta que no es de constructor. Comuníquese con el administrador.",
+    "rbq_formato": "El número de licencia RBQ debe tener el formato 0000-0000-00.",
+    "anios_experiencia_rango": "Los años de experiencia deben estar entre 0 y 80.",
+    "especialidad_requerida": "Elija al menos una especialidad."
   },
   "nav": {
     "section_principal": "Principal",
@@ -2555,12 +2559,6 @@
       "rbq": "Número de licencia RBQ",
       "rbq_ph": "0000-0000-00",
       "specialties": "Especialidades",
-      "s_moisissures": "Moho",
-      "s_amiante": "Amianto",
-      "s_eau": "Agua",
-      "s_demolition": "Demolición",
-      "s_isolation": "Aislamiento",
-      "s_fondations": "Cimientos",
       "years": "Años de experiencia",
       "area": "Zona de servicio",
       "area_ph": "Montréal y la corona norte",
@@ -2568,7 +2566,19 @@
       "message_ph": "Unas palabras sobre su enfoque, sus obras recientes o sus preguntas.",
       "note": "Revisamos cada candidatura individualmente. Respuesta en 5 días hábiles.",
       "submit": "Enviar mi candidatura",
-      "success": "Candidatura recibida"
+      "success": "Candidatura recibida",
+      "contact_first": "Nombre de la persona de contacto",
+      "contact_first_ph": "Marie-Claude",
+      "contact_last": "Apellido de la persona de contacto",
+      "contact_last_ph": "Lavoie",
+      "specialties_all": "Todos los servicios",
+      "err_required": "Campo obligatorio.",
+      "err_email": "Correo electrónico no válido.",
+      "err_rbq": "Formato esperado: 0000-0000-00.",
+      "err_years": "Indique un número entre 0 y 80.",
+      "err_specialties": "Elija al menos una especialidad.",
+      "sending": "Enviando…",
+      "success_mail": "Le enviamos un correo con su información y sus datos de acceso."
     },
     "cta": {
       "manifesto_1": "La construcción merece algo mejor que estimaciones gratis",

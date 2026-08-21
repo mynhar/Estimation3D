@@ -64,6 +64,11 @@ const CLAVE_POR_CODIGO: Record<string, string> = {
   servicio_no_encontrado:  'edge_errors.servicio_no_encontrado',
   expediente_error:        'edge_errors.expediente_error',
   limite_alcanzado:        'edge_errors.limite_alcanzado',
+  // crear-constructor-landing (candidatura pública de constructores)
+  rol_existente:           'edge_errors.rol_existente',
+  rbq_formato:             'edge_errors.rbq_formato',
+  anios_experiencia_rango: 'edge_errors.anios_experiencia_rango',
+  especialidad_requerida:  'edge_errors.especialidad_requerida',
   // Validaciones del propio cliente, antes de llamar a ninguna función
   archivo_muy_grande:      'admin_users.err_file_size',
 };

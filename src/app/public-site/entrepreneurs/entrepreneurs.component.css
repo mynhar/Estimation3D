@@ -116,12 +116,30 @@
 .field input:focus, .field textarea:focus{ outline:none; border-color:var(--gold); }
 .field textarea{ min-height:110px; resize:vertical; }
 .field .is-invalid{ border-color:var(--burgundy-bright); }
+.field .req{ color:var(--gold); margin-left:.3em; }
+.field-err{ font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--danger-text); margin:0; }
 .checks{ display:flex; flex-wrap:wrap; gap:12px; }
-.check{ font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; color:var(--white-dim); display:inline-flex; gap:8px; align-items:center; border:1px solid var(--line); padding:9px 14px; border-radius:100px; cursor:pointer; }
+.checks-note{ font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--white-faint); margin:0; }
+.check{ font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; color:var(--white-dim); display:inline-flex; gap:8px; align-items:center; border:1px solid var(--line); padding:9px 14px; border-radius:100px; cursor:pointer; transition:border-color .25s, color .25s, opacity .25s; }
 .check input{ accent-color:var(--gold); }
+.check:hover{ border-color:var(--white-faint); color:var(--white); }
+/* El anillo de foco se pinta en la píldora, no en la casilla: la casilla nativa
+   mide 13 px y su contorno se pierde contra el borde redondeado. */
+.check:has(input:focus-visible){ outline:2px solid var(--gold); outline-offset:2px; }
+.check:has(input:checked){ border-color:var(--gold); color:var(--gold); }
+.check--all:has(input:checked){ background:rgba(var(--gold-rgb),.10); }
+/* Inertes, no ausentes: con «todos los servicios» marcado se sigue viendo qué
+   cubre esa respuesta. */
+.check:has(input:disabled){ opacity:.34; cursor:not-allowed; }
+.check:has(input:disabled):hover{ border-color:var(--line); color:var(--white-dim); }
 .form-foot{ display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap; margin-top:30px; padding-top:26px; border-top:1px solid var(--line-2); }
 .form-note{ font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--white-faint); margin:0; max-width:40ch; }
-.form-success{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:0; }
+.form-success{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:0; max-width:42ch; }
+/* El acuse va en dos alturas: el titular en versalitas y, debajo, la frase que
+   dice qué se ha hecho —sin versalitas, que a esa longitud se leen mal—. */
+.form-success-detail{ display:block; margin-top:8px; text-transform:none; letter-spacing:.04em; font-size:.74rem; line-height:1.6; color:var(--white-dim); }
+.form-error{ font-family:var(--mono); font-size:.74rem; letter-spacing:.05em; line-height:1.6; color:var(--danger-text); margin:0; max-width:46ch; }
+.e3-btn:disabled{ opacity:.5; cursor:not-allowed; }
 
 /* ─────────── MANIFESTE FINAL ─────────── */
 .cta{ overflow:hidden; }

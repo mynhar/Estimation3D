@@ -32,7 +32,11 @@
     "servicio_requerido": "Choose a type of service.",
     "servicio_no_encontrado": "That service is no longer offered. Choose another one.",
     "expediente_error": "The file could not be created. Try again in a moment.",
-    "limite_alcanzado": "Too many requests sent recently. Try again in a few hours or write to us directly."
+    "limite_alcanzado": "Too many requests sent recently. Try again in a few hours or write to us directly.",
+    "rol_existente": "This email address already belongs to an account that is not a contractor account. Please contact the administrator.",
+    "rbq_formato": "The RBQ licence number must follow the format 0000-0000-00.",
+    "anios_experiencia_rango": "Years of experience must be between 0 and 80.",
+    "especialidad_requerida": "Choose at least one specialty."
   },
   "nav": {
     "section_principal": "Main",
@@ -2555,12 +2559,6 @@
       "rbq": "RBQ licence number",
       "rbq_ph": "0000-0000-00",
       "specialties": "Specialties",
-      "s_moisissures": "Mould",
-      "s_amiante": "Asbestos",
-      "s_eau": "Water",
-      "s_demolition": "Demolition",
-      "s_isolation": "Insulation",
-      "s_fondations": "Foundations",
       "years": "Years of experience",
       "area": "Service area",
       "area_ph": "Montréal and north ring",
@@ -2568,7 +2566,19 @@
       "message_ph": "A few words on your approach, recent job sites, or your questions.",
       "note": "We review each application individually. Response within 5 business days.",
       "submit": "Submit my application",
-      "success": "Application received"
+      "success": "Application received",
+      "contact_first": "Contact first name",
+      "contact_first_ph": "Marie-Claude",
+      "contact_last": "Contact last name",
+      "contact_last_ph": "Lavoie",
+      "specialties_all": "All services",
+      "err_required": "Required field.",
+      "err_email": "Invalid email address.",
+      "err_rbq": "Expected format: 0000-0000-00.",
+      "err_years": "Enter a number between 0 and 80.",
+      "err_specialties": "Choose at least one specialty.",
+      "sending": "Sending…",
+      "success_mail": "We have sent you an email with your information and your sign-in details."
     },
     "cta": {
       "manifesto_1": "Construction deserves better than free estimates",

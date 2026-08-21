@@ -258,63 +258,166 @@
       <form class="form-wrap" e3Reveal [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="form-grid">
           <div class="field full">
-            <label for="e-entreprise">{{ 'entrepreneurs.form.company' | translate }}</label>
-            <input id="e-entreprise" type="text" formControlName="entreprise"
+            <label for="e-entreprise">
+              {{ 'entrepreneurs.form.company' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-entreprise" type="text" formControlName="entreprise" aria-required="true"
                    [class.is-invalid]="invalid('entreprise')"
+                   [attr.aria-invalid]="invalid('entreprise') || null"
+                   [attr.aria-describedby]="invalid('entreprise') ? 'e-entreprise-err' : null"
                    [placeholder]="'entrepreneurs.form.company_ph' | translate" />
+            @if (invalid('entreprise')) {
+              <p class="field-err" id="e-entreprise-err">{{ 'entrepreneurs.form.err_required' | translate }}</p>
+            }
           </div>
 
           <div class="field">
-            <label for="e-contact">{{ 'entrepreneurs.form.contact' | translate }}</label>
-            <input id="e-contact" type="text" formControlName="contact"
-                   [class.is-invalid]="invalid('contact')"
-                   [placeholder]="'entrepreneurs.form.contact_ph' | translate" />
+            <label for="e-prenom">
+              {{ 'entrepreneurs.form.contact_first' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-prenom" type="text" formControlName="prenom" autocomplete="given-name" aria-required="true"
+                   [class.is-invalid]="invalid('prenom')"
+                   [attr.aria-invalid]="invalid('prenom') || null"
+                   [attr.aria-describedby]="invalid('prenom') ? 'e-prenom-err' : null"
+                   [placeholder]="'entrepreneurs.form.contact_first_ph' | translate" />
+            @if (invalid('prenom')) {
+              <p class="field-err" id="e-prenom-err">{{ 'entrepreneurs.form.err_required' | translate }}</p>
+            }
           </div>
 
           <div class="field">
-            <label for="e-tel">{{ 'entrepreneurs.form.phone' | translate }}</label>
-            <input id="e-tel" type="tel" formControlName="telephone"
+            <label for="e-nom">
+              {{ 'entrepreneurs.form.contact_last' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-nom" type="text" formControlName="nom" autocomplete="family-name" aria-required="true"
+                   [class.is-invalid]="invalid('nom')"
+                   [attr.aria-invalid]="invalid('nom') || null"
+                   [attr.aria-describedby]="invalid('nom') ? 'e-nom-err' : null"
+                   [placeholder]="'entrepreneurs.form.contact_last_ph' | translate" />
+            @if (invalid('nom')) {
+              <p class="field-err" id="e-nom-err">{{ 'entrepreneurs.form.err_required' | translate }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-tel">
+              {{ 'entrepreneurs.form.phone' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-tel" type="tel" formControlName="telephone" autocomplete="tel" aria-required="true"
                    [class.is-invalid]="invalid('telephone')"
+                   [attr.aria-invalid]="invalid('telephone') || null"
+                   [attr.aria-describedby]="invalid('telephone') ? 'e-tel-err' : null"
                    [placeholder]="'entrepreneurs.form.phone_ph' | translate" />
+            @if (invalid('telephone')) {
+              <p class="field-err" id="e-tel-err">{{ 'entrepreneurs.form.err_required' | translate }}</p>
+            }
           </div>
 
           <div class="field">
-            <label for="e-mail">{{ 'entrepreneurs.form.email' | translate }}</label>
-            <input id="e-mail" type="email" formControlName="courriel"
+            <label for="e-mail">
+              {{ 'entrepreneurs.form.email' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-mail" type="email" formControlName="courriel" autocomplete="email" aria-required="true"
                    [class.is-invalid]="invalid('courriel')"
+                   [attr.aria-invalid]="invalid('courriel') || null"
+                   [attr.aria-describedby]="invalid('courriel') ? 'e-mail-err' : null"
                    [placeholder]="'entrepreneurs.form.email_ph' | translate" />
+            @if (invalid('courriel')) {
+              <p class="field-err" id="e-mail-err">
+                @if (form.controls.courriel.errors?.['required']) {
+                  {{ 'entrepreneurs.form.err_required' | translate }}
+                } @else {
+                  {{ 'entrepreneurs.form.err_email' | translate }}
+                }
+              </p>
+            }
           </div>
 
           <div class="field">
-            <label for="e-rbq">{{ 'entrepreneurs.form.rbq' | translate }}</label>
-            <input id="e-rbq" type="text" formControlName="rbq"
+            <label for="e-rbq">
+              {{ 'entrepreneurs.form.rbq' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-rbq" type="text" formControlName="rbq" inputmode="numeric" maxlength="12"
+                   aria-required="true" (input)="formatRbq($event)"
                    [class.is-invalid]="invalid('rbq')"
+                   [attr.aria-invalid]="invalid('rbq') || null"
+                   [attr.aria-describedby]="invalid('rbq') ? 'e-rbq-err' : null"
                    [placeholder]="'entrepreneurs.form.rbq_ph' | translate" />
+            @if (invalid('rbq')) {
+              <p class="field-err" id="e-rbq-err">
+                @if (form.controls.rbq.errors?.['required']) {
+                  {{ 'entrepreneurs.form.err_required' | translate }}
+                } @else {
+                  {{ 'entrepreneurs.form.err_rbq' | translate }}
+                }
+              </p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-annees">
+              {{ 'entrepreneurs.form.years' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-annees" type="number" min="0" max="80" step="1" formControlName="annees"
+                   aria-required="true" placeholder="12"
+                   [class.is-invalid]="invalid('annees')"
+                   [attr.aria-invalid]="invalid('annees') || null"
+                   [attr.aria-describedby]="invalid('annees') ? 'e-annees-err' : null" />
+            @if (invalid('annees')) {
+              <p class="field-err" id="e-annees-err">
+                @if (form.controls.annees.errors?.['required']) {
+                  {{ 'entrepreneurs.form.err_required' | translate }}
+                } @else {
+                  {{ 'entrepreneurs.form.err_years' | translate }}
+                }
+              </p>
+            }
+          </div>
+
+          <div class="field">
+            <label for="e-zone">
+              {{ 'entrepreneurs.form.area' | translate }}<span class="req" aria-hidden="true">*</span>
+            </label>
+            <input id="e-zone" type="text" formControlName="zone" aria-required="true"
+                   [class.is-invalid]="invalid('zone')"
+                   [attr.aria-invalid]="invalid('zone') || null"
+                   [attr.aria-describedby]="invalid('zone') ? 'e-zone-err' : null"
+                   [placeholder]="'entrepreneurs.form.area_ph' | translate" />
+            @if (invalid('zone')) {
+              <p class="field-err" id="e-zone-err">{{ 'entrepreneurs.form.err_required' | translate }}</p>
+            }
           </div>
 
           <fieldset class="field full">
-            <legend>{{ 'entrepreneurs.form.specialties' | translate }}</legend>
-            <div class="checks">
-              @for (s of formSpecialties; track s) {
-                <label class="check">
-                  <input type="checkbox" [checked]="hasSpecialty(s)"
-                         (change)="toggleSpecialty(s, $any($event.target).checked)" />
-                  <span>{{ 'entrepreneurs.form.s_' + s | translate }}</span>
+            <legend>
+              {{ 'entrepreneurs.form.specialties' | translate }}<span class="req" aria-hidden="true">*</span>
+            </legend>
+            @if (loadingServices()) {
+              <p class="checks-note">{{ 'common.loading' | translate }}</p>
+            } @else {
+              <div class="checks">
+                <!-- «Todos los servicios» y las casillas sueltas se excluyen: al
+                     marcarlo, las de abajo quedan inertes en vez de desaparecer,
+                     para que se siga viendo qué cubre esa respuesta. -->
+                <label class="check check--all">
+                  <input type="checkbox" [checked]="todosLosServicios()"
+                         (change)="toggleAllSpecialties($any($event.target).checked)" />
+                  <span>{{ 'entrepreneurs.form.specialties_all' | translate }}</span>
                 </label>
-              }
-            </div>
+                @for (s of services(); track s.id) {
+                  <label class="check">
+                    <input type="checkbox" [checked]="hasSpecialty(s.id)"
+                           [disabled]="todosLosServicios()"
+                           (change)="toggleSpecialty(s.id, $any($event.target).checked)" />
+                    <span>{{ s.nombre }}</span>
+                  </label>
+                }
+              </div>
+            }
+            @if (invalid('specialites')) {
+              <p class="field-err">{{ 'entrepreneurs.form.err_specialties' | translate }}</p>
+            }
           </fieldset>
-
-          <div class="field">
-            <label for="e-annees">{{ 'entrepreneurs.form.years' | translate }}</label>
-            <input id="e-annees" type="number" min="0" formControlName="annees" placeholder="12" />
-          </div>
-
-          <div class="field">
-            <label for="e-zone">{{ 'entrepreneurs.form.area' | translate }}</label>
-            <input id="e-zone" type="text" formControlName="zone"
-                   [placeholder]="'entrepreneurs.form.area_ph' | translate" />
-          </div>
 
           <div class="field full">
             <label for="e-msg">{{ 'entrepreneurs.form.message' | translate }}</label>
@@ -327,10 +430,16 @@
           <p class="form-note">{{ 'entrepreneurs.form.note' | translate }}</p>
 
           @if (sent()) {
-            <p class="form-success" role="status">✓ {{ 'entrepreneurs.form.success' | translate }}</p>
+            <p class="form-success" role="status">
+              ✓ {{ 'entrepreneurs.form.success' | translate }}
+              <span class="form-success-detail">{{ 'entrepreneurs.form.success_mail' | translate }}</span>
+            </p>
           } @else {
-            <button type="submit" class="e3-btn">
-              {{ 'entrepreneurs.form.submit' | translate }}
+            @if (errorKey(); as clave) {
+              <p class="form-error" role="alert">{{ clave | translate }}</p>
+            }
+            <button type="submit" class="e3-btn" [disabled]="sending()">
+              {{ (sending() ? 'entrepreneurs.form.sending' : 'entrepreneurs.form.submit') | translate }}
               <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
             </button>
           }

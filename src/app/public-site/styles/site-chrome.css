@@ -60,6 +60,9 @@
 
   --burgundy:#8B2D3A;
   --burgundy-bright:#B24355;
+  /* --burgundy-bright vale como filete de error (3:1 basta en un borde), pero
+     sobre --void da 3,08:1 y no llega al 4,5:1 que pide un texto de error. */
+  --danger-text:var(--ds-danger-on-dark);
 
   --disp:"Archivo", "Helvetica Neue", sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, monospace;
@@ -111,6 +114,7 @@
 
   --burgundy:var(--ds-danger);            /* #A14545                      */
   --burgundy-bright:var(--ds-danger);
+  --danger-text:var(--ds-danger);         /* 5,48:1 sobre papel           */
 
   --scrim:245,243,238;                    /* --ds-bg en canal RGB         */
 

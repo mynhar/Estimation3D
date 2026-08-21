@@ -67,8 +67,3 @@ export const SPECIALTY_SLOTS: readonly SpecialtySlot[] = [
 export const FAQ_IDS: readonly string[] = [
   'cout', 'attribution', 'obligation', 'paiement', 'imprevu',
 ];
-
-/** [07] Casillas de especialidad del formulario de candidatura. */
-export const FORM_SPECIALTIES: readonly string[] = [
-  'moisissures', 'amiante', 'eau', 'demolition', 'isolation', 'fondations',
-];

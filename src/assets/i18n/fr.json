@@ -32,7 +32,11 @@
     "servicio_requerido": "Choisissez un type de service.",
     "servicio_no_encontrado": "Ce service n’est plus offert. Choisissez-en un autre.",
     "expediente_error": "Le dossier n’a pas pu être créé. Réessayez dans un moment.",
-    "limite_alcanzado": "Trop de demandes envoyées depuis peu. Réessayez dans quelques heures ou écrivez-nous directement."
+    "limite_alcanzado": "Trop de demandes envoyées depuis peu. Réessayez dans quelques heures ou écrivez-nous directement.",
+    "rol_existente": "Cette adresse courriel appartient déjà à un compte qui n’est pas un compte d’entrepreneur. Communiquez avec l’administrateur.",
+    "rbq_formato": "Le numéro de licence RBQ doit avoir le format 0000-0000-00.",
+    "anios_experiencia_rango": "Les années d’expérience doivent être comprises entre 0 et 80.",
+    "especialidad_requerida": "Choisissez au moins une spécialité."
   },
   "nav": {
     "section_principal": "Principal",
@@ -2555,12 +2559,6 @@
       "rbq": "Numéro de licence RBQ",
       "rbq_ph": "0000-0000-00",
       "specialties": "Spécialités",
-      "s_moisissures": "Moisissures",
-      "s_amiante": "Amiante",
-      "s_eau": "Eau",
-      "s_demolition": "Démolition",
-      "s_isolation": "Isolation",
-      "s_fondations": "Fondations",
       "years": "Années d'expérience",
       "area": "Zone desservie",
       "area_ph": "Montréal et couronne nord",
@@ -2568,7 +2566,19 @@
       "message_ph": "Quelques mots sur votre approche, vos chantiers récents, ou vos questions.",
       "note": "Nous étudions chaque candidature individuellement. Réponse sous 5 jours ouvrables.",
       "submit": "Soumettre ma candidature",
-      "success": "Candidature reçue"
+      "success": "Candidature reçue",
+      "contact_first": "Prénom de la personne contact",
+      "contact_first_ph": "Marie-Claude",
+      "contact_last": "Nom de la personne contact",
+      "contact_last_ph": "Lavoie",
+      "specialties_all": "Tous les services",
+      "err_required": "Champ requis.",
+      "err_email": "Courriel invalide.",
+      "err_rbq": "Format attendu : 0000-0000-00.",
+      "err_years": "Indiquez un nombre entre 0 et 80.",
+      "err_specialties": "Choisissez au moins une spécialité.",
+      "sending": "Envoi en cours…",
+      "success_mail": "Nous vous avons envoyé un courriel avec vos informations et vos identifiants de connexion."
     },
     "cta": {
       "manifesto_1": "La construction mérite mieux que des estimations gratuites",
