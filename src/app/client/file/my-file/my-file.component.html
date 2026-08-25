@@ -429,6 +429,13 @@
 
     </section>
 
+    <!-- ── Propiedad escaneada (Matterport) ───────────────────────── -->
+    @if (matterportModelos().length) {
+      <div class="mb-4">
+        <app-matterport-info [modelos]="matterportModelos()" />
+      </div>
+    }
+
     <!-- ── Grid principal ─────────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 

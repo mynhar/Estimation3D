@@ -69,6 +69,11 @@ const CLAVE_POR_CODIGO: Record<string, string> = {
   rbq_formato:             'edge_errors.rbq_formato',
   anios_experiencia_rango: 'edge_errors.anios_experiencia_rango',
   especialidad_requerida:  'edge_errors.especialidad_requerida',
+  // matterport-sync
+  matterport_no_configurado: 'edge_errors.matterport_no_configurado',
+  expediente_sin_tour:     'edge_errors.expediente_sin_tour',
+  matterport_error:        'edge_errors.matterport_error',
+  matterport_modelo_bloqueado: 'edge_errors.matterport_modelo_bloqueado',
   // Validaciones del propio cliente, antes de llamar a ninguna función
   archivo_muy_grande:      'admin_users.err_file_size',
 };

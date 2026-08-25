@@ -421,6 +421,15 @@
           </div>
         </section>
 
+        <!-- Ficha de la propiedad escaneada (Matterport) -->
+        <app-matterport-info
+          [modelos]="matterportModelos()"
+          [puedeSincronizar]="true"
+          [sincronizando]="sincronizandoMp()"
+          [errorClave]="errorMpClave()"
+          [exitoClave]="exitoMpClave()"
+          (sincronizar)="sincronizarMatterport()" />
+
         <!-- Documentos técnicos -->
         <section class="fued-card">
           <div class="fued-card__header">

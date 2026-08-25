@@ -1,0 +1,382 @@
+/* Hallmark · component: panel (data ficha) · genre: editorial · theme: locked (design.md)
+ * pre-emit critique: P5 H5 E5 S4 R5 V4
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass (tinta #1A1A1A / #4A4A4A / #7A7770 sobre crema #FBFAF6)
+ * Sistema bloqueado: todo color y tipografía sale de var(--ds-*).
+ */
+
+:host {
+  display: block;
+}
+
+/* ── Tarjeta ─────────────────────────────────────────────────────────────── */
+
+.mpi-card {
+  position: relative;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  overflow: hidden;
+}
+/* Filete dorado superior: misma firma que las tarjetas del expediente. */
+.mpi-card::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--ds-gold);
+}
+
+.mpi-card__header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.mpi-card__title {
+  display: flex; align-items: center; gap: var(--ds-space-2);
+  min-width: 0;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.mpi-card__title i { color: var(--ds-gold-active); }
+
+.mpi-card__body { padding: var(--ds-space-5); }
+
+.mpi-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px;
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+}
+
+/* ── Botón de sincronizar ────────────────────────────────────────────────── */
+
+.mpi-sync {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  background: transparent;
+  color: var(--ds-ink);
+  border: 1px solid var(--ds-gold);
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ds-duration-fast) var(--ds-ease-out),
+              border-color    var(--ds-duration-fast) var(--ds-ease-out),
+              transform        var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow       var(--ds-duration-fast) var(--ds-ease-out);
+}
+.mpi-sync i { font-size: var(--ds-text-sm); color: var(--ds-gold-active); }
+
+.mpi-sync:hover:not(:disabled),
+.mpi-sync.is-hover {
+  background: var(--ds-gold-faint);
+  border-color: var(--ds-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ds-shadow-gold);
+}
+/* El anillo aparece de golpe: no se anima. */
+.mpi-sync:focus-visible,
+.mpi-sync.is-focus {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+.mpi-sync:active:not(:disabled),
+.mpi-sync.is-active {
+  transform: translateY(0);
+  border-color: var(--ds-gold-active);
+  box-shadow: none;
+}
+.mpi-sync:disabled,
+.mpi-sync[aria-busy='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.mpi-spinner {
+  width: 12px; height: 12px;
+  border: 2px solid var(--ds-gold-soft);
+  border-top-color: var(--ds-gold-active);
+  border-radius: var(--ds-radius-circle);
+  animation: mpi-spin 700ms linear infinite;
+}
+@keyframes mpi-spin { to { transform: rotate(360deg); } }
+
+/* ── Acuses ──────────────────────────────────────────────────────────────── */
+
+.mpi-alert {
+  display: flex; align-items: flex-start; gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-normal);
+}
+.mpi-alert--danger  { background: var(--ds-danger-soft);  color: var(--ds-danger); }
+.mpi-alert--success { background: var(--ds-success-soft); color: var(--ds-success); }
+
+/* ── Cabecera de cada modelo ─────────────────────────────────────────────── */
+
+.mpi-modelo + .mpi-modelo {
+  margin-top: var(--ds-space-6);
+  padding-top: var(--ds-space-6);
+  border-top: 1px solid var(--ds-border-subtle);
+}
+
+.mpi-masthead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-4);
+}
+
+.mpi-masthead__thumb {
+  flex: 0 0 auto;
+  width: 96px; height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-alt);
+}
+.mpi-masthead__thumb--empty {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ds-ink-muted);
+  font-size: var(--ds-text-2xl);
+}
+
+.mpi-masthead__text { min-width: 0; }
+
+.mpi-masthead__name {
+  margin: 0;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-semibold);
+  font-style: normal;
+  line-height: var(--ds-leading-snug);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+
+.mpi-masthead__where {
+  display: flex; align-items: baseline; gap: var(--ds-space-2);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+}
+.mpi-masthead__where i { flex: 0 0 auto; color: var(--ds-ink-muted); }
+
+.mpi-masthead__meta {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--ds-space-2) var(--ds-space-4);
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+
+.mpi-chip {
+  padding: 2px var(--ds-space-2);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+}
+.mpi-chip--muted { background: var(--ds-bg-alt); color: var(--ds-ink-secondary); }
+
+.mpi-link {
+  display: inline-flex; align-items: center; gap: var(--ds-space-1);
+  color: var(--ds-gold-active);
+  font-weight: var(--ds-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--ds-radius-sm);
+  transition: var(--ds-transition-color);
+}
+.mpi-link:hover, .mpi-link.is-hover { color: var(--ds-ink); text-decoration: underline; }
+.mpi-link:focus-visible, .mpi-link.is-focus { outline: none; box-shadow: var(--ds-focus-ring); }
+.mpi-link:active, .mpi-link.is-active { color: var(--ds-gold-hover); }
+
+.mpi-descripcion {
+  margin: var(--ds-space-4) 0 0;
+  max-width: 68ch;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-relaxed);
+  color: var(--ds-ink-secondary);
+}
+
+/* ── Cifras ──────────────────────────────────────────────────────────────── */
+
+.mpi-cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 9.5rem));
+  gap: var(--ds-space-4) var(--ds-space-6);
+  margin: var(--ds-space-5) 0 0;
+  padding: var(--ds-space-5) 0 0;
+  border-top: 1px solid var(--ds-border-subtle);
+}
+
+.mpi-cifra { min-width: 0; }
+.mpi-cifra--wide { grid-column: span 2; }
+
+.mpi-cifra dt {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+.mpi-cifra dd {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-1) 0 0;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading-tight);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+/* La equivalencia en pie² acompaña a la cifra, no compite con ella. */
+.mpi-cifra__alt {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-normal);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Plantas ─────────────────────────────────────────────────────────────── */
+
+.mpi-plantas {
+  list-style: none;
+  margin: var(--ds-space-5) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--ds-border-subtle);
+}
+.mpi-planta {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-3) 0;
+  border-bottom: 1px solid var(--ds-border-subtle);
+  font-size: var(--ds-text-sm);
+}
+.mpi-planta__nombre { color: var(--ds-ink); overflow-wrap: anywhere; }
+.mpi-planta__dato {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-ink-secondary);
+}
+
+/* ── Detalle por habitación ──────────────────────────────────────────────── */
+
+.mpi-toggle {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2);
+  margin: var(--ds-space-4) 0 0;
+  padding: var(--ds-space-2) 0;
+  background: none;
+  border: none;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-ink-secondary);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.mpi-toggle:hover, .mpi-toggle.is-hover { color: var(--ds-ink); }
+.mpi-toggle:focus-visible, .mpi-toggle.is-focus { outline: none; box-shadow: var(--ds-focus-ring); }
+.mpi-toggle:active, .mpi-toggle.is-active { color: var(--ds-gold-active); }
+.mpi-toggle i { color: var(--ds-gold-active); }
+
+/* La tabla desborda dentro de su caja; la página nunca scrollea en horizontal. */
+.mpi-tabla-wrap {
+  margin-top: var(--ds-space-3);
+  overflow-x: auto;
+}
+
+.mpi-tabla {
+  width: 100%;
+  min-width: 30rem;
+  border-collapse: collapse;
+  font-size: var(--ds-text-sm);
+}
+.mpi-tabla th, .mpi-tabla td {
+  padding: var(--ds-space-3) var(--ds-space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+.mpi-tabla thead th {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-widest);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+  border-bottom-color: var(--ds-border);
+}
+.mpi-tabla tbody th {
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+}
+.mpi-tabla tbody td { color: var(--ds-ink-secondary); }
+.mpi-tabla tbody tr:hover { background: var(--ds-bg-alt); }
+.mpi-tabla__num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.mpi-tag {
+  margin-left: var(--ds-space-2);
+  padding: 1px var(--ds-space-2);
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-pill);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-regular);
+  color: var(--ds-ink-muted);
+  text-transform: lowercase;
+}
+
+/* ── Vacío y pie ─────────────────────────────────────────────────────────── */
+
+.mpi-vacio {
+  padding: var(--ds-space-6) var(--ds-space-4);
+  text-align: center;
+  color: var(--ds-ink-muted);
+}
+.mpi-vacio i { font-size: var(--ds-text-2xl); color: var(--ds-border-strong); }
+.mpi-vacio p { margin: var(--ds-space-3) 0 0; font-size: var(--ds-text-sm); }
+.mpi-vacio__hint { font-size: var(--ds-text-xs); }
+
+.mpi-pie {
+  margin: var(--ds-space-5) 0 0;
+  padding-top: var(--ds-space-3);
+  border-top: 1px solid var(--ds-border-subtle);
+  font-size: var(--ds-text-2xs);
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-ink-muted);
+}
+
+/* ── Móvil ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 575.98px) {
+  .mpi-card__header { padding: var(--ds-space-4); }
+  .mpi-card__body   { padding: var(--ds-space-4); }
+
+  .mpi-masthead { gap: var(--ds-space-3); }
+  .mpi-masthead__thumb { width: 64px; height: 48px; }
+  .mpi-masthead__name  { font-size: var(--ds-text-lg); }
+
+  /* Dos columnas de cifras entran a 320px; la ancha vuelve a ocupar la fila. */
+  .mpi-cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ds-space-4); }
+  .mpi-cifra dd { font-size: var(--ds-text-xl); }
+}

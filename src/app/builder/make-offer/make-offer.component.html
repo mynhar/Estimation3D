@@ -270,6 +270,13 @@
                   <span>{{ 'make_offer.no_tour' | translate }}</span>
                 </div>
               }
+
+              <!-- Datos de la propiedad escaneada -->
+              @if (matterportModelos().length) {
+                <div class="mt-3">
+                  <app-matterport-info [modelos]="matterportModelos()" />
+                </div>
+              }
             </div>
           }
 

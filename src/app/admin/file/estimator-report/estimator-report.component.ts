@@ -12,6 +12,9 @@ import { PerfilRepository, PerfilNombre, PerfilInvitable } from '../../../data/p
 import { ArchivoRow, debeAvanzarEstado } from '../../../models';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
 import { matterportThumb } from '../../../shared/util/matterport';
+import { MatterportService } from '../../../services/matterport.service';
+import { MatterportModelo } from '../../../models/matterport.model';
+import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
 
 /**
  * Informe del estimador de un expediente (admin).
@@ -22,7 +25,7 @@ import { matterportThumb } from '../../../shared/util/matterport';
   selector: 'app-admin-file-estimator-report',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
   templateUrl: './estimator-report.component.html',
   styleUrl: './estimator-report.component.css',
 })
@@ -34,6 +37,7 @@ export class AdminFileEstimatorReportComponent implements OnInit {
   private perfilRepo        = inject(PerfilRepository);
   private invitacionService = inject(InvitacionService);
   private edgeErr           = inject(EdgeErrorService);
+  private matterportService = inject(MatterportService);
 
   /** Id del expediente cuyo informe se edita. */
   expedienteId = input.required<string>();
@@ -58,6 +62,12 @@ export class AdminFileEstimatorReportComponent implements OnInit {
   costoMin: number | null = null;
   costoMax: number | null = null;
   urlsTour            = signal<string[]>([]);
+
+  // Ficha de la propiedad escaneada (Matterport)
+  matterportModelos = signal<MatterportModelo[]>([]);
+  sincronizandoMp   = signal(false);
+  errorMpClave      = signal('');
+  exitoMpClave      = signal('');
 
   guardandoEst  = signal(false);
   errorEst      = signal('');
@@ -119,6 +129,7 @@ export class AdminFileEstimatorReportComponent implements OnInit {
       this.cargarEstimacion(),
       this.cargarArchivos(),
       this.cargarInvitaciones(),
+      this.cargarMatterport(),
     ]);
   }
 
@@ -421,6 +432,8 @@ export class AdminFileEstimatorReportComponent implements OnInit {
       }
       this.urlsTour.set(nuevaLista);
       this.nuevoTourUrl = '';
+      // La ficha se rehace sola: nadie debería tener que pedirla.
+      if (this.hasEstimacion()) this.sincronizarMatterport(true);
     } catch (e: any) {
       this.errorTour.set(e.message ?? 'admin_file_edit.save_error');
     } finally {
@@ -437,10 +450,51 @@ export class AdminFileEstimatorReportComponent implements OnInit {
         await this.estimacionService.actualizarUrlsTour(this.expedienteId(), nuevaLista);
       }
       this.urlsTour.set(nuevaLista);
+      // La ficha se rehace sola: nadie debería tener que pedirla.
+      if (this.hasEstimacion()) this.sincronizarMatterport(true);
     } catch (e: any) {
       this.errorTour.set(e.message ?? 'admin_file_edit.save_error');
     } finally {
       this.guardandoTour.set(false);
+    }
+  }
+
+  // ── Ficha Matterport ───────────────────────────────────────────────────────
+
+  /** Ficha guardada. Un fallo aquí no debe tumbar el informe. */
+  private async cargarMatterport() {
+    try {
+      this.matterportModelos.set(await this.matterportService.getPorExpediente(this.expedienteId()));
+    } catch (e: any) {
+      console.error('[AdminFileEstimatorReport] matterport:', e.message);
+    }
+  }
+
+  /**
+   * Vuelve a pedir la ficha a Matterport y la guarda.
+   *
+   * `silencioso` es la llamada automática de después de tocar las URLs del
+   * tour: ahí no se anuncia nada, y un tour recién borrado (que devuelve
+   * `expediente_sin_tour`) tampoco es un error que enseñar.
+   */
+  async sincronizarMatterport(silencioso = false) {
+    if (this.sincronizandoMp()) return;
+    this.errorMpClave.set('');
+    this.exitoMpClave.set('');
+    this.sincronizandoMp.set(true);
+    try {
+      const resultado = await this.matterportService.sincronizar(this.expedienteId());
+      await this.cargarMatterport();
+      if (!silencioso) {
+        this.exitoMpClave.set(resultado.fallidos > 0 ? 'matterport.sync_partial' : 'matterport.sync_ok');
+      }
+    } catch (e: any) {
+      // La función borra las fichas huérfanas antes de fallar: hay que releer.
+      await this.cargarMatterport();
+      if (silencioso) return;
+      this.errorMpClave.set(this.edgeErr.clave(e, 'edge_errors.error_interno'));
+    } finally {
+      this.sincronizandoMp.set(false);
     }
   }
 

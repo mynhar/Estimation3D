@@ -154,6 +154,17 @@
         }
       </div>
 
+      <!-- ── Propiedad escaneada (Matterport) ────────────────── -->
+      <div class="col-12">
+        <app-matterport-info
+          [modelos]="matterportModelos()"
+          [puedeSincronizar]="true"
+          [sincronizando]="sincronizandoMp()"
+          [errorClave]="errorMpClave()"
+          [exitoClave]="exitoMpClave()"
+          (sincronizar)="sincronizarMatterport()" />
+      </div>
+
       <!-- ── Fotos del sitio ────────────────────────────────── -->
       <div class="col-12">
         <hr class="detail-divider mb-4" />

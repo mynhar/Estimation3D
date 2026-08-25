@@ -9,13 +9,16 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../../models';
 import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
+import { MatterportService } from '../../../services/matterport.service';
+import { MatterportModelo } from '../../../models/matterport.model';
+import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
 
 
 @Component({
   selector: 'app-my-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, MatterportInfoComponent],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',
 })
@@ -28,12 +31,15 @@ export class MyFileComponent implements OnInit {
   private documentosService = inject(DocumentosClienteService);
   private auth              = inject(AuthSupabaseService);
   private contratoRepo      = inject(ContratoRepository);
+  private matterportService = inject(MatterportService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
   private expedienteId = '';
 
   detalle        = signal<ExpedienteVistaCliente | null>(null);
+  // Ficha de la propiedad escaneada (Matterport), solo lectura.
+  matterportModelos = signal<MatterportModelo[]>([]);
   ofertaAceptada = signal<OfertaConConstructor | null>(null);
   fotos          = signal<ArchivoRow[]>([]);
   // "Fotos del sitio" / "Documentos técnicos": archivos del expediente de TODAS
@@ -121,6 +127,7 @@ export class MyFileComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando.set(false); return; }
     this.expedienteId = id;
+    this.cargarMatterport();
 
     try {
       const [detalle, ofertas, archivos, contrato, { data: { user } }] = await Promise.all([
@@ -148,6 +155,15 @@ export class MyFileComponent implements OnInit {
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  /** Ficha Matterport del expediente. Un fallo aquí no debe tumbar la página. */
+  private async cargarMatterport() {
+    try {
+      this.matterportModelos.set(await this.matterportService.getPorExpediente(this.expedienteId));
+    } catch (e: any) {
+      console.error('[MyFile] matterport:', e.message);
     }
   }
 

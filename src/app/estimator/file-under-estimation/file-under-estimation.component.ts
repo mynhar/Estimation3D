@@ -13,12 +13,15 @@ import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validato
 import { PerfilRepository, PerfilInvitable } from '../../data/perfil.repository';
 import { InvitacionService } from '../../services/invitacion.service';
 import { EdgeErrorService } from '../../services/edge-error.service';
+import { MatterportService } from '../../services/matterport.service';
+import { MatterportModelo } from '../../models/matterport.model';
+import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
 
 @Component({
   selector: 'app-file-under-estimation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
   templateUrl: './file-under-estimation.component.html',
   styleUrl:    './file-under-estimation.component.css',
 })
@@ -32,6 +35,7 @@ export class FileUnderEstimationComponent implements OnInit {
   private perfilRepo        = inject(PerfilRepository);
   private invitacionService = inject(InvitacionService);
   private edgeErr           = inject(EdgeErrorService);
+  private matterportService = inject(MatterportService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -115,6 +119,12 @@ export class FileUnderEstimationComponent implements OnInit {
   guardandoTour    = signal(false);
   errorTour        = signal('');
 
+  // Ficha de la propiedad escaneada (Matterport)
+  matterportModelos = signal<MatterportModelo[]>([]);
+  sincronizandoMp   = signal(false);
+  errorMpClave      = signal('');
+  exitoMpClave      = signal('');
+
   private expedienteId = '';
 
   get formularioCompleto(): boolean {
@@ -164,6 +174,7 @@ export class FileUnderEstimationComponent implements OnInit {
 
     this.cargarArchivos();
     this.cargarInvitaciones();
+    this.cargarMatterport();
   }
 
   async guardarEstimacion(): Promise<boolean> {
@@ -502,6 +513,45 @@ export class FileUnderEstimationComponent implements OnInit {
     return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
   }
 
+  // ── Ficha Matterport ───────────────────────────────────────────────────────
+
+  /** Ficha guardada. Un fallo aquí no debe tumbar la pantalla de estimación. */
+  private async cargarMatterport() {
+    try {
+      this.matterportModelos.set(await this.matterportService.getPorExpediente(this.expedienteId));
+    } catch (e: any) {
+      console.error('[FileUnderEstimation] matterport:', e.message);
+    }
+  }
+
+  /**
+   * Vuelve a pedir la ficha a Matterport y la guarda.
+   *
+   * `silencioso` es la llamada automática de después de tocar las URLs del
+   * tour: ahí no se anuncia nada, y un tour recién borrado (que devuelve
+   * `expediente_sin_tour`) tampoco es un error que enseñar.
+   */
+  async sincronizarMatterport(silencioso = false) {
+    if (this.sincronizandoMp()) return;
+    this.errorMpClave.set('');
+    this.exitoMpClave.set('');
+    this.sincronizandoMp.set(true);
+    try {
+      const resultado = await this.matterportService.sincronizar(this.expedienteId);
+      await this.cargarMatterport();
+      if (!silencioso) {
+        this.exitoMpClave.set(resultado.fallidos > 0 ? 'matterport.sync_partial' : 'matterport.sync_ok');
+      }
+    } catch (e: any) {
+      // La función borra las fichas huérfanas antes de fallar: hay que releer.
+      await this.cargarMatterport();
+      if (silencioso) return;
+      this.errorMpClave.set(this.edgeErr.clave(e, 'edge_errors.error_interno'));
+    } finally {
+      this.sincronizandoMp.set(false);
+    }
+  }
+
   mostrarFormAgregarVideo() {
     this.nuevoUrlInput = '';
     this.editandoIndex.set(null);
@@ -527,6 +577,8 @@ export class FileUnderEstimationComponent implements OnInit {
       this.urlsTour.set(nuevaLista);
       this.mostrandoFormAdd.set(false);
       this.nuevoUrlInput = '';
+      // La ficha se rehace sola: el estimador no debería tener que pedirla.
+      if (this.hasDraft()) this.sincronizarMatterport(true);
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
@@ -563,6 +615,8 @@ export class FileUnderEstimationComponent implements OnInit {
       this.urlsTour.set(nuevaLista);
       this.editandoIndex.set(null);
       this.editandoUrlTemp = '';
+      // La ficha se rehace sola: el estimador no debería tener que pedirla.
+      if (this.hasDraft()) this.sincronizarMatterport(true);
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {
@@ -587,6 +641,8 @@ export class FileUnderEstimationComponent implements OnInit {
       }
       this.collapsedSet.set(rebuilt);
       if (this.editandoIndex() === i) { this.editandoIndex.set(null); this.editandoUrlTemp = ''; }
+      // La ficha se rehace sola: el estimador no debería tener que pedirla.
+      if (this.hasDraft()) this.sincronizarMatterport(true);
     } catch (e: any) {
       this.errorTour.set(e.message);
     } finally {

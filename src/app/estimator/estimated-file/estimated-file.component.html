@@ -444,6 +444,15 @@
               }
             </div>
 
+            <!-- Ficha de la propiedad escaneada (Matterport) -->
+            <app-matterport-info
+              [modelos]="matterportModelos()"
+              [puedeSincronizar]="true"
+              [sincronizando]="sincronizandoMp()"
+              [errorClave]="errorMpClave()"
+              [exitoClave]="exitoMpClave()"
+              (sincronizar)="sincronizarMatterport()" />
+
             <div class="ef-divider"></div>
 
             <!-- ── Documentos ────────────────────────────────────────────── -->

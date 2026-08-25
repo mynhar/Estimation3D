@@ -7,6 +7,10 @@ import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
 import { ArchivoService, TipoArchivo } from '../../services/archivo.service';
+import { MatterportService } from '../../services/matterport.service';
+import { EdgeErrorService } from '../../services/edge-error.service';
+import { MatterportModelo } from '../../models/matterport.model';
+import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
 import {
   ExpedienteDetalle,
   EstimacionDetalle,
@@ -18,7 +22,7 @@ import {
   selector: 'app-estimated-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
   templateUrl: './estimated-file.component.html',
   styleUrl:    './estimated-file.component.css',
 })
@@ -29,6 +33,8 @@ export class EstimatedFileComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private estimacionService = inject(EstimacionService);
   private archivoService    = inject(ArchivoService);
+  private matterportService = inject(MatterportService);
+  private edgeErr           = inject(EdgeErrorService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -40,6 +46,12 @@ export class EstimatedFileComponent implements OnInit {
   fotos      = signal<ArchivoRow[]>([]);
   videos     = signal<ArchivoRow[]>([]);
   documentos = signal<ArchivoRow[]>([]);
+
+  // Ficha de la propiedad escaneada (Matterport)
+  matterportModelos = signal<MatterportModelo[]>([]);
+  sincronizandoMp   = signal(false);
+  errorMpClave      = signal('');
+  exitoMpClave      = signal('');
 
   // Estas secciones muestran SOLO lo que agregó el estimador del expediente
   // (no las fotos/documentos del cliente). El tour (url_tour) ya es del estimador.
@@ -113,9 +125,45 @@ export class EstimatedFileComponent implements OnInit {
     }
 
     this.cargarArchivos();
+    this.cargarMatterport();
   }
 
   // ── Archivos ──────────────────────────────────────────────────────────────
+
+  // ── Ficha Matterport ───────────────────────────────────────────────────────
+
+  /** Ficha guardada. Un fallo aquí no debe tumbar la vista del expediente. */
+  private async cargarMatterport() {
+    try {
+      this.matterportModelos.set(await this.matterportService.getPorExpediente(this.expedienteId));
+    } catch (e: any) {
+      console.error('[EstimatedFile] matterport:', e.message);
+    }
+  }
+
+  /**
+   * Vuelve a pedir la ficha a Matterport y la guarda. `silencioso` es la
+   * llamada automática tras tocar las URLs del tour.
+   */
+  async sincronizarMatterport(silencioso = false) {
+    if (this.sincronizandoMp()) return;
+    this.errorMpClave.set('');
+    this.exitoMpClave.set('');
+    this.sincronizandoMp.set(true);
+    try {
+      const resultado = await this.matterportService.sincronizar(this.expedienteId);
+      await this.cargarMatterport();
+      if (!silencioso) {
+        this.exitoMpClave.set(resultado.fallidos > 0 ? 'matterport.sync_partial' : 'matterport.sync_ok');
+      }
+    } catch (e: any) {
+      await this.cargarMatterport();
+      if (silencioso) return;
+      this.errorMpClave.set(this.edgeErr.clave(e, 'edge_errors.error_interno'));
+    } finally {
+      this.sincronizandoMp.set(false);
+    }
+  }
 
   private async cargarArchivos() {
     const { fotos, videos, documentos } = await this.archivoService.cargarTodos(this.expedienteId);
@@ -205,6 +253,7 @@ export class EstimatedFileComponent implements OnInit {
     this.guardandoTour.set(true);
     try {
       await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.sincronizarMatterport(true);
       this.urlsTour.set(nuevaLista);
       this.mostrandoFormAdd.set(false);
       this.nuevoUrlInput = '';
@@ -239,6 +288,7 @@ export class EstimatedFileComponent implements OnInit {
     this.guardandoTour.set(true);
     try {
       await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.sincronizarMatterport(true);
       this.urlsTour.set(nuevaLista);
       this.editandoIndex.set(null);
       this.editandoUrlTemp = '';
@@ -255,6 +305,7 @@ export class EstimatedFileComponent implements OnInit {
     this.guardandoTour.set(true);
     try {
       await this.estimacionService.actualizarUrlsTour(this.expedienteId, nuevaLista);
+      this.sincronizarMatterport(true);
       this.urlsTour.set(nuevaLista);
       if (this.expandedIndex() === i) this.expandedIndex.set(null);
       if (this.editandoIndex() === i) { this.editandoIndex.set(null); this.editandoUrlTemp = ''; }

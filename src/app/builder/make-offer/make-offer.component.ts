@@ -10,13 +10,16 @@ import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validato
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
+import { MatterportService } from '../../services/matterport.service';
+import { MatterportModelo } from '../../models/matterport.model';
+import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
 import { ExpedienteParaOferta, ArchivoRow, OfertaForm } from '../../models';
 
 @Component({
   selector: 'app-make-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent],
   templateUrl: './make-offer.component.html',
   styleUrl: './make-offer.component.css',
 })
@@ -27,6 +30,7 @@ export class MakeOfferComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);
   private archivoService    = inject(ArchivoService);
   private ofertaService     = inject(OfertaService);
+  private matterportService = inject(MatterportService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -34,6 +38,9 @@ export class MakeOfferComponent implements OnInit {
   detalle  = signal<ExpedienteParaOferta | null>(null);
   cargando = signal(true);
   errorMsg = signal('');
+
+  // Ficha de la propiedad escaneada (Matterport), solo lectura.
+  matterportModelos = signal<MatterportModelo[]>([]);
 
   // Archivos del expediente (solo lectura)
   fotos      = signal<ArchivoRow[]>([]);
@@ -96,6 +103,7 @@ export class MakeOfferComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.cargando.set(false); return; }
     this.expedienteId = id;
+    this.cargarMatterport();
 
     const userId = this.user()?.id;
 
@@ -127,6 +135,15 @@ export class MakeOfferComponent implements OnInit {
       this.errorMsg.set(e.message);
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  /** Ficha Matterport del expediente. Un fallo aquí no debe tumbar la página. */
+  private async cargarMatterport() {
+    try {
+      this.matterportModelos.set(await this.matterportService.getPorExpediente(this.expedienteId));
+    } catch (e: any) {
+      console.error('[MakeOffer] matterport:', e.message);
     }
   }
 

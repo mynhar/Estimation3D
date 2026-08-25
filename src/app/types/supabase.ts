@@ -764,6 +764,150 @@ export type Database = {
           },
         ]
       }
+      matterport_modelo: {
+        Row: {
+          alto_m: number | null
+          ancho_m: number | null
+          area_pared_m2: number | null
+          area_piso_ft2: number | null
+          area_piso_interior_ft2: number | null
+          area_piso_interior_m2: number | null
+          area_piso_m2: number | null
+          area_techo_m2: number | null
+          calle: string | null
+          ciudad: string | null
+          codigo_postal: string | null
+          creado_en: string
+          creado_matterport: string | null
+          datos_crudos: Json | null
+          descripcion: string | null
+          direccion: string | null
+          estado: string | null
+          expediente_id: string
+          habitaciones: Json
+          id: string
+          imagen_url: string | null
+          latitud: number | null
+          longitud: number | null
+          model_id: string
+          modificado_matterport: string | null
+          nombre: string | null
+          pais: string | null
+          pisos: Json
+          profundidad_m: number | null
+          publicado: boolean | null
+          region: string | null
+          resumen_publico: string | null
+          share_url: string | null
+          sincronizado_en: string
+          sincronizado_por: string | null
+          total_habitaciones: number | null
+          total_pisos: number | null
+          url_tour: string
+          visibilidad: string | null
+          volumen_m3: number | null
+        }
+        Insert: {
+          alto_m?: number | null
+          ancho_m?: number | null
+          area_pared_m2?: number | null
+          area_piso_ft2?: number | null
+          area_piso_interior_ft2?: number | null
+          area_piso_interior_m2?: number | null
+          area_piso_m2?: number | null
+          area_techo_m2?: number | null
+          calle?: string | null
+          ciudad?: string | null
+          codigo_postal?: string | null
+          creado_en?: string
+          creado_matterport?: string | null
+          datos_crudos?: Json | null
+          descripcion?: string | null
+          direccion?: string | null
+          estado?: string | null
+          expediente_id: string
+          habitaciones?: Json
+          id?: string
+          imagen_url?: string | null
+          latitud?: number | null
+          longitud?: number | null
+          model_id: string
+          modificado_matterport?: string | null
+          nombre?: string | null
+          pais?: string | null
+          pisos?: Json
+          profundidad_m?: number | null
+          publicado?: boolean | null
+          region?: string | null
+          resumen_publico?: string | null
+          share_url?: string | null
+          sincronizado_en?: string
+          sincronizado_por?: string | null
+          total_habitaciones?: number | null
+          total_pisos?: number | null
+          url_tour: string
+          visibilidad?: string | null
+          volumen_m3?: number | null
+        }
+        Update: {
+          alto_m?: number | null
+          ancho_m?: number | null
+          area_pared_m2?: number | null
+          area_piso_ft2?: number | null
+          area_piso_interior_ft2?: number | null
+          area_piso_interior_m2?: number | null
+          area_piso_m2?: number | null
+          area_techo_m2?: number | null
+          calle?: string | null
+          ciudad?: string | null
+          codigo_postal?: string | null
+          creado_en?: string
+          creado_matterport?: string | null
+          datos_crudos?: Json | null
+          descripcion?: string | null
+          direccion?: string | null
+          estado?: string | null
+          expediente_id?: string
+          habitaciones?: Json
+          id?: string
+          imagen_url?: string | null
+          latitud?: number | null
+          longitud?: number | null
+          model_id?: string
+          modificado_matterport?: string | null
+          nombre?: string | null
+          pais?: string | null
+          pisos?: Json
+          profundidad_m?: number | null
+          publicado?: boolean | null
+          region?: string | null
+          resumen_publico?: string | null
+          share_url?: string | null
+          sincronizado_en?: string
+          sincronizado_por?: string | null
+          total_habitaciones?: number | null
+          total_pisos?: number | null
+          url_tour?: string
+          visibilidad?: string | null
+          volumen_m3?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matterport_modelo_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matterport_modelo_sincronizado_por_fkey"
+            columns: ["sincronizado_por"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       oferta: {
         Row: {
           actualizado_en: string

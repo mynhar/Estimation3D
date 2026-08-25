@@ -1,0 +1,218 @@
+<section class="mpi-card">
+  <header class="mpi-card__header">
+    <div class="mpi-card__title">
+      <i class="bi bi-house-gear"></i>
+      {{ 'matterport.title' | translate }}
+      @if (modelos().length > 1) {
+        <span class="mpi-badge">{{ modelos().length }}</span>
+      }
+    </div>
+
+    @if (puedeSincronizar()) {
+      <button type="button" class="mpi-sync"
+              (click)="sincronizar.emit()"
+              [disabled]="sincronizando()"
+              [attr.aria-busy]="sincronizando()">
+        @if (sincronizando()) {
+          <span class="mpi-spinner" aria-hidden="true"></span>{{ 'matterport.syncing' | translate }}
+        } @else {
+          <i class="bi bi-arrow-repeat"></i>{{ 'matterport.sync' | translate }}
+        }
+      </button>
+    }
+  </header>
+
+  <div class="mpi-card__body">
+    @if (errorClave()) {
+      <p class="mpi-alert mpi-alert--danger" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>{{ errorClave() | translate }}
+      </p>
+    }
+    @if (exitoClave()) {
+      <p class="mpi-alert mpi-alert--success" role="status">
+        <i class="bi bi-check-circle"></i>{{ exitoClave() | translate }}
+      </p>
+    }
+
+    @for (vm of vistas(); track vm.modelo.id) {
+      <article class="mpi-modelo">
+
+        <!-- Identidad: portada + nombre + dirección de Matterport -->
+        <div class="mpi-masthead">
+          @if (vm.portada) {
+            <img class="mpi-masthead__thumb" [src]="vm.portada" alt="" loading="lazy" />
+          } @else {
+            <span class="mpi-masthead__thumb mpi-masthead__thumb--empty" aria-hidden="true">
+              <i class="bi bi-badge-3d"></i>
+            </span>
+          }
+
+          <div class="mpi-masthead__text">
+            <h4 class="mpi-masthead__name">
+              {{ vm.modelo.nombre || ('matterport.model_untitled' | translate) }}
+            </h4>
+
+            @if (vm.ubicacion) {
+              <p class="mpi-masthead__where">
+                <i class="bi bi-geo-alt"></i>{{ vm.ubicacion }}
+              </p>
+            }
+
+            <p class="mpi-masthead__meta">
+              @if (fecha(vm.modelo.creado_matterport); as f) {
+                <span>{{ 'matterport.scanned_on' | translate }} {{ f }}</span>
+              }
+              @if (vm.modelo.publicado === false) {
+                <span class="mpi-chip mpi-chip--muted">{{ 'matterport.unpublished' | translate }}</span>
+              }
+              <a class="mpi-link" [href]="vm.modelo.share_url || vm.modelo.url_tour"
+                 target="_blank" rel="noopener noreferrer">
+                {{ 'matterport.open_tour' | translate }}<i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </p>
+          </div>
+        </div>
+
+        @if (vm.modelo.descripcion) {
+          <p class="mpi-descripcion">{{ vm.modelo.descripcion }}</p>
+        }
+
+        <!-- Cifras del inmueble -->
+        <dl class="mpi-cifras">
+          @if (area(vm.modelo.area_piso_m2); as v) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.floor_area' | translate }}</dt>
+              <dd>
+                {{ v }}
+                @if (areaPies(vm.modelo.area_piso_ft2); as ft) {
+                  <span class="mpi-cifra__alt">{{ ft }}</span>
+                }
+              </dd>
+            </div>
+          }
+          @if (area(vm.modelo.area_piso_interior_m2); as v) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.indoor_area' | translate }}</dt>
+              <dd>
+                {{ v }}
+                @if (areaPies(vm.modelo.area_piso_interior_ft2); as ft) {
+                  <span class="mpi-cifra__alt">{{ ft }}</span>
+                }
+              </dd>
+            </div>
+          }
+          @if (area(vm.modelo.area_pared_m2); as v) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.wall_area' | translate }}</dt>
+              <dd>{{ v }}</dd>
+            </div>
+          }
+          @if (area(vm.modelo.area_techo_m2); as v) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.ceiling_area' | translate }}</dt>
+              <dd>{{ v }}</dd>
+            </div>
+          }
+          @if (volumen(vm.modelo.volumen_m3); as v) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.volume' | translate }}</dt>
+              <dd>{{ v }}</dd>
+            </div>
+          }
+          @if (vm.modelo.total_pisos) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.floors' | translate }}</dt>
+              <dd>{{ vm.modelo.total_pisos }}</dd>
+            </div>
+          }
+          @if (vm.modelo.total_habitaciones) {
+            <div class="mpi-cifra">
+              <dt>{{ 'matterport.rooms' | translate }}</dt>
+              <dd>{{ vm.modelo.total_habitaciones }}</dd>
+            </div>
+          }
+          @if (medidas(vm.modelo); as v) {
+            <div class="mpi-cifra mpi-cifra--wide">
+              <dt>{{ 'matterport.bounding' | translate }}</dt>
+              <dd>{{ v }}</dd>
+            </div>
+          }
+        </dl>
+
+        <!-- Plantas: superficie por piso -->
+        @if (vm.modelo.pisos.length) {
+          <ul class="mpi-plantas">
+            @for (piso of vm.modelo.pisos; track piso.id) {
+              <li class="mpi-planta">
+                <span class="mpi-planta__nombre">{{ etiquetaPiso(piso) }}</span>
+                <span class="mpi-planta__dato">
+                  @if (area(piso.area_piso_m2); as v) { {{ v }} } @else { — }
+                </span>
+              </li>
+            }
+          </ul>
+        }
+
+        <!-- Detalle habitación por habitación -->
+        @if (vm.modelo.habitaciones.length) {
+          <button type="button" class="mpi-toggle"
+                  (click)="alternarDetalle(vm.modelo.id)"
+                  [attr.aria-expanded]="estaDesplegado(vm.modelo.id)">
+            <i class="bi" [class.bi-chevron-down]="!estaDesplegado(vm.modelo.id)"
+                          [class.bi-chevron-up]="estaDesplegado(vm.modelo.id)"></i>
+            {{ (estaDesplegado(vm.modelo.id) ? 'matterport.hide_rooms' : 'matterport.show_rooms')
+                | translate:{ n: vm.modelo.habitaciones.length } }}
+          </button>
+
+          @if (estaDesplegado(vm.modelo.id)) {
+            <div class="mpi-tabla-wrap">
+              <table class="mpi-tabla">
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'matterport.room' | translate }}</th>
+                    <th scope="col">{{ 'matterport.floor' | translate }}</th>
+                    <th scope="col" class="mpi-tabla__num">{{ 'matterport.area' | translate }}</th>
+                    <th scope="col" class="mpi-tabla__num">{{ 'matterport.dimensions' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (grupo of vm.plantas; track $index) {
+                    @for (h of grupo.habitaciones; track h.id) {
+                      <tr>
+                        <th scope="row">
+                          {{ etiquetaHabitacion(h) }}
+                          @if (h.etiqueta && h.tags.length) {
+                            <span class="mpi-tag">{{ etiquetaTag(h.tags[0]) }}</span>
+                          }
+                        </th>
+                        <td>{{ etiquetaPiso(grupo.piso) }}</td>
+                        <td class="mpi-tabla__num">
+                          @if (area(h.area_piso_m2); as v) { {{ v }} } @else { — }
+                        </td>
+                        <td class="mpi-tabla__num">
+                          @if (medidas(h); as v) { {{ v }} } @else { — }
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </article>
+    } @empty {
+      <div class="mpi-vacio">
+        <i class="bi bi-house-gear"></i>
+        <p>{{ 'matterport.empty' | translate }}</p>
+        @if (puedeSincronizar()) {
+          <p class="mpi-vacio__hint">{{ 'matterport.empty_hint' | translate }}</p>
+        }
+      </div>
+    }
+
+    @if (fecha(sincronizadoEn()); as f) {
+      <p class="mpi-pie">{{ 'matterport.synced_on' | translate }} {{ f }}</p>
+    }
+  </div>
+</section>
