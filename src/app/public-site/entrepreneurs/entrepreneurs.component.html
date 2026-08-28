@@ -17,13 +17,19 @@
       <a routerLink="/" fragment="services">{{ 'landing.nav.specialties' | translate }}</a>
       <a routerLink="/journal">{{ 'landing.nav.journal' | translate }}</a>
       <a routerLink="/entrepreneurs" class="gold-txt" aria-current="page">{{ 'landing.nav.contractors' | translate }}</a>
-      <a routerLink="/login">{{ 'landing.nav.login' | translate }}</a>
+      <a class="tel" href="tel:+15145108819" [attr.aria-label]="'landing.nav.phone_aria' | translate">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 2.2 6.6 5 5.3 6.4a8.6 8.6 0 0 0 4.3 4.3L11 9.4l2.8 1.4v2.4a1 1 0 0 1-1.1 1A11.5 11.5 0 0 1 2.2 3.3a1 1 0 0 1 1-1.1h2Z"/></svg>
+        514&nbsp;510-8819
+      </a>
     </nav>
 
-    <a href="#form" class="e3-btn cta" (click)="goTo('form', $event)">
-      {{ 'landing.footer.apply' | translate }}
-      <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
-    </a>
+    <div class="hdr-actions">
+      <a href="#form" class="e3-btn cta" (click)="goTo('form', $event)">
+        {{ 'landing.footer.apply' | translate }}
+        <svg class="ar" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1 6h13M10 1l5 5-5 5"/></svg>
+      </a>
+      <a routerLink="/login" class="login">{{ 'landing.nav.login' | translate }}</a>
+    </div>
 
     <button class="burger" type="button" (click)="toggleMenu()"
             [attr.aria-label]="'landing.nav.menu' | translate"
@@ -38,8 +44,9 @@
   <a routerLink="/" fragment="services" (click)="closeMenu()"><span class="num">02</span><span>{{ 'landing.nav.specialties' | translate }}</span></a>
   <a routerLink="/journal" (click)="closeMenu()"><span class="num">03</span><span>{{ 'landing.nav.journal' | translate }}</span></a>
   <a routerLink="/entrepreneurs" (click)="closeMenu()"><span class="num">04</span><span>{{ 'landing.nav.contractors' | translate }}</span></a>
-  <a href="#form" (click)="goTo('form', $event)"><span class="num">05</span><span>{{ 'landing.footer.apply' | translate }}</span></a>
-  <a routerLink="/login" (click)="closeMenu()"><span class="num">06</span><span>{{ 'landing.nav.login' | translate }}</span></a>
+  <a href="tel:+15145108819" (click)="closeMenu()" [attr.aria-label]="'landing.nav.phone_aria' | translate"><span class="num">05</span><span>514&nbsp;510-8819</span></a>
+  <a href="#form" (click)="goTo('form', $event)"><span class="num">06</span><span>{{ 'landing.footer.apply' | translate }}</span></a>
+  <a routerLink="/login" (click)="closeMenu()"><span class="num">07</span><span>{{ 'landing.nav.login' | translate }}</span></a>
 </nav>
 
 <main>

@@ -1286,13 +1286,14 @@
       "cta": "Créer mon dossier",
       "menu": "Menu",
       "journal": "Le Journal",
-      "contractors": "Entrepreneurs"
+      "contractors": "Entrepreneurs",
+      "phone_aria": "Appeler le 514 510-8819"
     },
     "hero": {
       "kicker": "Montréal · Plateforme pilote 2026",
-      "l1": "Scannez",
-      "l2": "une fois.",
-      "l3": "Décidez mieux.",
+      "l1": "Une seule visite,",
+      "l2": "trois estimations",
+      "l3": "comparables.",
       "lede": "Un seul scan 3D documente toute votre propriété. Vous recevez jusqu'à trois soumissions strictement comparables — sans visites en série, sans angle mort, sans surprise.",
       "cta_secondary": "Voir le processus",
       "scan_alt": "Scan 3D d'une propriété documentée par Estimation3D",
@@ -1507,7 +1508,7 @@
     "back_to_home": "Retour à l'accueil",
     "account_inactive": "Votre compte est inactif. Veuillez contacter l'administrateur.",
     "brand_tagline": "Scan 3D · soumissions comparables",
-    "side_title": "Scannez une fois. Décidez mieux.",
+    "side_title": "Une seule visite, trois estimations comparables.",
     "side_lead": "Un seul scan 3D documente toute votre propriété. Vous recevez jusqu'à trois soumissions strictement comparables.",
     "side_point_3d": "Scan 3D complet de la propriété",
     "side_point_verified": "Entrepreneurs vérifiés",

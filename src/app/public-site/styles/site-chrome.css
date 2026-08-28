@@ -220,24 +220,46 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 .brand .reticle i{ position:absolute; inset:3px; border:1px solid var(--gold); border-radius:50%; animation:reticlePulse 3.4s var(--ease) infinite; }
 @keyframes reticlePulse{ 0%,100%{ opacity:.6; transform:scale(1);} 50%{ opacity:1; transform:scale(1.12);} }
 
-.nav-links{ display:flex; align-items:center; gap:34px; }
-.nav-links a{ position:relative; padding-bottom:3px; font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); transition:color .25s; }
-.nav-links a:hover{ color:var(--gold); }
-.nav-links a::after{
+/* gap 28 y no 34: la cabecera pasó de 4 enlaces a 5 (entra el teléfono) y
+   además el login salió del nav para colocarse tras el botón. Con 34 el
+   conjunto no cabía dentro de --maxw en las cadenas más largas. Mismo ajuste
+   que en la landing (landing-base.css). */
+.nav-links{ display:flex; align-items:center; gap:28px; }
+/* El login ya no vive en el nav —va después del botón— pero es el mismo tipo
+   de enlace, así que comparte estilo en vez de duplicarlo. */
+.nav-links a, .hdr-actions .login{ position:relative; padding-bottom:3px; font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); white-space:nowrap; transition:color .25s; }
+.nav-links a:hover, .hdr-actions .login:hover{ color:var(--gold); }
+.nav-links a::after, .hdr-actions .login::after{
   content:""; position:absolute; left:0; right:100%; bottom:-2px; height:1px;
   background:var(--gold); transition:right .35s var(--ease);
 }
-.nav-links a:hover::after{ right:0; }
+.nav-links a:hover::after, .hdr-actions .login:hover::after{ right:0; }
 /* página actual: el original la marca con `.gold-txt` */
 .nav-links a.gold-txt::after{ right:0; box-shadow:var(--scan-glow-sm); }
+
+/* El teléfono no es navegación: es contacto. Se separa de los otros enlaces
+   subiendo a tinta plena y con el icono de línea; no lleva filete divisorio
+   porque el ancho de la cabecera ya va justo. Cifras con paso tabular y menos
+   letter-spacing —el .1em de las etiquetas descuadra un número. Tampoco lleva
+   el subrayado de página: no es un destino, no puede ser "la página actual". */
+.nav-links .tel{ display:inline-flex; align-items:center; gap:8px; color:var(--white); letter-spacing:.05em; font-variant-numeric:tabular-nums; }
+.nav-links .tel::after{ content:none; }
+.nav-links .tel svg{ width:15px; height:15px; flex:none; opacity:.72; transition:opacity .25s; }
+.nav-links .tel:hover svg{ opacity:1; }
+
+/* Botón primero, login después. */
+.hdr-actions{ display:flex; align-items:center; gap:22px; }
 
 .hdr .e3-btn{ padding:12px 20px; font-size:.74rem; }
 
 .burger{ display:none; width:30px; height:22px; position:relative; }
 .burger span{ position:absolute; left:0; right:0; height:1.5px; background:var(--white); transition:.3s; }
 .burger span:nth-child(1){ top:2px; } .burger span:nth-child(2){ top:10px; } .burger span:nth-child(3){ top:18px; }
-@media(max-width:1040px){
-  .nav-links, .hdr .e3-btn.cta{ display:none; }
+/* Sube de 1040 a 1300: con el teléfono dentro y el login fuera del nav, la
+   cabecera necesita ~1290px para no apretarse. Por debajo manda la hamburguesa,
+   y .mobile-nav ya lleva los mismos siete destinos en el mismo orden. */
+@media(max-width:1300px){
+  .nav-links, .hdr-actions{ display:none; }
   .burger{ display:block; }
 }
 
@@ -245,7 +267,16 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
   position:fixed; inset:0; z-index:99; background:rgba(var(--scrim),.97); backdrop-filter:blur(8px);
   display:flex; flex-direction:column; justify-content:center; gap:8px; padding:var(--pad-x);
   transform:translateY(-100%); transition:transform .5s var(--ease);
+  /* Con siete destinos el bloque ya no cabe centrado en una pantalla corta, y
+     en flex un desbordamiento centrado deja los extremos FUERA DE ALCANCE: no
+     hay forma de llegar al primer enlace ni al último. `safe center` deja de
+     centrar en cuanto no cabe (los navegadores que no lo entienden se quedan
+     con la línea anterior) y el scroll recupera lo que sobresalga. */
+  justify-content:safe center;
+  overflow-y:auto; overscroll-behavior:contain;
 }
+/* Y en pantallas bajas el listado se ajusta antes de tener que desplazarse. */
+@media(max-height:720px){ .mobile-nav a{ font-size:1.9rem; padding:7px 0; } }
 .mobile-nav.open{ transform:none; }
 .mobile-nav a{ font-family:var(--disp); font-weight:800; font-size:2.4rem; letter-spacing:-.03em; padding:10px 0; border-bottom:1px solid var(--line-2); }
 .mobile-nav a .num{ font-family:var(--mono); font-size:.8rem; color:var(--gold); font-weight:500; margin-right:14px; vertical-align:super; }

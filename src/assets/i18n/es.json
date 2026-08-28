@@ -1286,13 +1286,14 @@
       "cta": "Crear mi expediente",
       "menu": "Menú",
       "journal": "El Diario",
-      "contractors": "Contratistas"
+      "contractors": "Contratistas",
+      "phone_aria": "Llamar al 514 510-8819"
     },
     "hero": {
       "kicker": "Montréal · Plataforma piloto 2026",
-      "l1": "Escanee",
-      "l2": "una vez.",
-      "l3": "Decida mejor.",
+      "l1": "Una sola visita,",
+      "l2": "tres estimaciones",
+      "l3": "comparables.",
       "lede": "Un solo escaneo 3D documenta toda su propiedad. Recibe hasta tres presupuestos estrictamente comparables — sin visitas repetidas, sin puntos ciegos, sin sorpresas.",
       "cta_secondary": "Ver el proceso",
       "scan_alt": "Escaneo 3D de una propiedad documentada por Estimation3D",
@@ -1507,7 +1508,7 @@
     "back_to_home": "Volver al inicio",
     "account_inactive": "Su cuenta está inactiva. Por favor contacte al administrador.",
     "brand_tagline": "Escaneo 3D · ofertas comparables",
-    "side_title": "Escanee una vez. Decida mejor.",
+    "side_title": "Una sola visita, tres estimaciones comparables.",
     "side_lead": "Un solo escaneo 3D documenta toda su propiedad. Recibe hasta tres ofertas estrictamente comparables.",
     "side_point_3d": "Escaneo 3D completo de la propiedad",
     "side_point_verified": "Constructores verificados",

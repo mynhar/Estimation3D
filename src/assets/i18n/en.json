@@ -1286,13 +1286,14 @@
       "cta": "Create my file",
       "menu": "Menu",
       "journal": "The Journal",
-      "contractors": "Contractors"
+      "contractors": "Contractors",
+      "phone_aria": "Call 514 510-8819"
     },
     "hero": {
       "kicker": "Montréal · Pilot platform 2026",
-      "l1": "Scan",
-      "l2": "once.",
-      "l3": "Decide better.",
+      "l1": "A single visit,",
+      "l2": "three comparable",
+      "l3": "estimates.",
       "lede": "A single 3D scan documents your entire property. You receive up to three strictly comparable bids — no repeat visits, no blind spots, no surprises.",
       "cta_secondary": "See how it works",
       "scan_alt": "3D scan of a property documented by Estimation3D",
@@ -1507,7 +1508,7 @@
     "back_to_home": "Back to home",
     "account_inactive": "Your account is inactive. Please contact the administrator.",
     "brand_tagline": "3D scan · comparable bids",
-    "side_title": "Scan once. Decide better.",
+    "side_title": "A single visit, three comparable estimates.",
     "side_lead": "A single 3D scan documents your entire property. You receive up to three strictly comparable bids.",
     "side_point_3d": "Complete 3D scan of the property",
     "side_point_verified": "Verified contractors",
