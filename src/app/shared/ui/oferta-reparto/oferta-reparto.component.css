@@ -1,0 +1,216 @@
+/* Barra de reparto de ofertas. Compartida por admin/offer/edit y
+   admin/file/builder-bids; por eso el prefijo propio `rep-` en vez de heredar
+   el de ninguno de los dos. Sólo tokens --ds-*. */
+
+:host {
+  display: block;
+}
+
+.rep-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  flex-wrap: wrap;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  margin-bottom: var(--ds-space-3);
+}
+
+.rep-bar__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.rep-bar__count {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin-left: auto;
+}
+
+.rep-blocked {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border: 1px dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin-bottom: var(--ds-space-3);
+}
+
+.rep-actions {
+  display: flex;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-space-3);
+}
+
+.rep-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-gold-soft);
+  border-left: 3px solid var(--ds-gold);
+  border-radius: var(--ds-radius-md);
+  margin-bottom: var(--ds-space-3);
+}
+
+.rep-confirm__msg {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  margin: 0;
+}
+
+.rep-confirm__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+
+.rep-confirm__btns {
+  display: flex;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+.rep-error {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+  margin: 0 0 var(--ds-space-3);
+}
+
+/* Base de los botones; cada variante aporta sólo color y borde. */
+.rep-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-border-strong);
+  background: var(--ds-surface);
+  color: var(--ds-ink-secondary);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  cursor: pointer;
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.rep-btn:hover:not(:disabled) {
+  border-color: var(--ds-ink-muted);
+  color: var(--ds-ink);
+}
+
+.rep-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.rep-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.rep-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.rep-btn--accept:hover:not(:disabled) {
+  border-color: var(--ds-success);
+  background: var(--ds-success-soft);
+  color: var(--ds-success);
+}
+
+.rep-btn--reject:hover:not(:disabled) {
+  border-color: var(--ds-danger);
+  background: var(--ds-danger-soft);
+  color: var(--ds-danger);
+}
+
+.rep-btn--primary {
+  background: var(--ds-gold);
+  border-color: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.rep-btn--primary:hover:not(:disabled) {
+  background: var(--ds-gold-hover);
+  border-color: var(--ds-gold-hover);
+  color: var(--ds-ink-on-accent);
+  box-shadow: var(--ds-shadow-gold);
+}
+
+.rep-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-gold-active);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.rep-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+  border-radius: var(--ds-radius-sm);
+}
+
+/* 18px de casilla con 32px de área de pulsación: cómodo en táctil sin engordar
+   la fila. La clase la reutilizan los padres en la casilla de cada tarjeta, por
+   eso también se declara en sus hojas. */
+.rep-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ds-gold-active);
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.rep-check:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+  border-radius: var(--ds-radius-sm);
+}
+
+.rep-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ds-border);
+  border-top-color: var(--ds-ink);
+  border-radius: var(--ds-radius-circle);
+  animation: rep-spin var(--ds-duration-slow) linear infinite;
+}
+
+@keyframes rep-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rep-spinner { animation-duration: 2s; }
+  .rep-btn { transition-duration: 0.01ms; }
+}

@@ -1,0 +1,97 @@
+@if (activas().length > 0) {
+  @if (bloqueado()) {
+    <p class="rep-blocked">
+      <i class="bi bi-lock" aria-hidden="true"></i>
+      {{ 'admin_offer.reparto_bloqueado' | translate }}
+    </p>
+  } @else {
+    <div class="rep-bar">
+      <label class="rep-bar__all">
+        <input type="checkbox" class="rep-check"
+               [checked]="todasSeleccionadas()"
+               (change)="alternarTodas()">
+        <span>{{ 'admin_offer.reparto_todas' | translate }}</span>
+      </label>
+
+      @if (seleccionadas().length > 0) {
+        <span class="rep-bar__count">
+          {{ 'admin_offer.reparto_contador' | translate:{ n: seleccionadas().length, total: activas().length } }}
+        </span>
+        <button class="rep-link" type="button" (click)="limpiar()">
+          {{ 'admin_offer.reparto_limpiar' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (seleccionadas().length > 0) {
+      <div class="rep-actions">
+        <button class="rep-btn rep-btn--accept" type="button"
+                (click)="confirmando.set('aceptar')" [disabled]="aplicando()">
+          <i class="bi bi-check2-circle" aria-hidden="true"></i>
+          {{ 'admin_offer.reparto_aceptar' | translate }}
+        </button>
+        <button class="rep-btn rep-btn--reject" type="button"
+                (click)="confirmando.set('rechazar')" [disabled]="aplicando()">
+          <i class="bi bi-x-circle" aria-hidden="true"></i>
+          {{ 'admin_offer.reparto_rechazar' | translate }}
+        </button>
+        @if (seleccionadasRechazadas().length > 0) {
+          <button class="rep-btn" type="button"
+                  (click)="confirmando.set('reactivar')" [disabled]="aplicando()">
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            {{ 'admin_offer.reparto_reactivar' | translate:{ n: seleccionadasRechazadas().length } }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- La confirmación da los números exactos. La de aceptar es la que más
+         sorprende, porque toca las que NO están marcadas. -->
+    @if (confirmando()) {
+      <div class="rep-confirm">
+        <p class="rep-confirm__msg">
+          @switch (confirmando()) {
+            @case ('aceptar') {
+              <i class="bi bi-check2-circle" aria-hidden="true"></i>
+              {{ 'admin_offer.reparto_confirm_aceptar' | translate:{ n: seleccionadas().length, rechazadas: noSeleccionadas().length } }}
+            }
+            @case ('rechazar') {
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              {{ 'admin_offer.reparto_confirm_rechazar' | translate:{ n: seleccionadas().length } }}
+            }
+            @default {
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+              {{ 'admin_offer.reparto_confirm_reactivar' | translate:{ n: seleccionadasRechazadas().length } }}
+            }
+          }
+        </p>
+        <p class="rep-confirm__note">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          {{ 'admin_offer.reparto_sin_contrato' | translate }}
+        </p>
+        <div class="rep-confirm__btns">
+          <button class="rep-btn rep-btn--primary" type="button"
+                  (click)="aplicar()" [disabled]="aplicando()">
+            @if (aplicando()) {
+              <span class="rep-spinner"></span>
+            } @else {
+              <i class="bi bi-check-lg" aria-hidden="true"></i>
+            }
+            {{ 'common.confirm' | translate }}
+          </button>
+          <button class="rep-btn" type="button"
+                  (click)="confirmando.set(null)" [disabled]="aplicando()">
+            {{ 'common.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (error()) {
+      <p class="rep-error">
+        <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+        {{ error() }}
+      </p>
+    }
+  }
+}

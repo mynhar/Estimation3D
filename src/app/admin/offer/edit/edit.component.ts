@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,12 +11,13 @@ import { OfertaService } from '../../../services/oferta.service';
 import { ContratoService } from '../../../services/contrato.service';
 import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
 import { ContratoPdfData, ExpedienteParaOferta, ArchivoRow, OfertaForm, OfertaConConstructor } from '../../../models';
+import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
 
 @Component({
   selector: 'app-admin-offer-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -70,16 +71,64 @@ export class AdminOfferEditComponent implements OnInit {
   confirmandoEliminar   = signal(false);
   confirmandoEliminarId = signal<string | null>(null);
   errorEliminarLista    = signal('');
+  /** Fallo al leer «Ofertas recibidas»; se muestra dentro de esa columna. */
+  errorOfertas          = signal('');
 
   adjudicando            = signal(false);
   errorAdjudicar         = signal('');
   confirmandoAdjudicarId = signal<string | null>(null);
 
+  restaurando    = signal<string | null>(null);
+  errorRestaurar = signal('');
+
+  // ── Reparto en bloque ──────────────────────────────────────────────────────
+  // La barra, las acciones y la confirmación viven en <app-oferta-reparto>,
+  // compartido con admin/file/builder-bids. Aquí queda sólo lo que la tarjeta
+  // necesita: el conjunto marcado y su alternador.
+  //
+  // Ojo con la palabra «seleccionar»: aquí hay dos. Pulsar la tarjeta abre la
+  // oferta en el formulario de la derecha (eso es `ofertaId`); la casilla marca
+  // la oferta para el reparto (esto). Son independientes a propósito.
+  seleccion = signal<ReadonlySet<string>>(new Set());
+
+  /** Con contrato vivo no hay reparto; la casilla tampoco se pinta. */
+  get puedeRepartir(): boolean {
+    const estado = this.detalle()?.estado ?? '';
+    return estado !== 'adjudicado' && estado !== 'contratado';
+  }
+
+  estaSeleccionada(oferta: OfertaConConstructor): boolean {
+    return this.seleccion().has(oferta.id);
+  }
+
+  alternarSeleccion(oferta: OfertaConConstructor): void {
+    this.seleccion.update(actual => alternarEnSeleccion(actual, oferta.id));
+  }
+
+  /** El reparto se aplicó en la base: releer y refrescar el formulario. */
+  async onRepartoAplicado(): Promise<void> {
+    await this.recargarOfertas();
+    this.detalle.set(await this.expedienteService.getExpedienteParaOferta(this.expedienteId));
+    // El formulario abierto puede estar mostrando un estado ya caducado.
+    const abierta = this.todasLasOfertas().find(o => o.id === this.ofertaId());
+    if (abierta) this.popularFormulario(abierta);
+  }
+
   fotoAmpliada = signal<string | null>(null);
   tabMedia     = signal<'fotos' | 'tour' | 'docs'>('tour');
 
   todasLasOfertas = signal<OfertaConConstructor[]>([]);
-  private expedienteId = '';
+  /**
+   * Las dadas de baja siguen en la lista —ese es el requisito— pero no cuentan
+   * para el tope de 5 ni para el selector de constructor.
+   */
+  ofertasActivas = computed(() => this.todasLasOfertas().filter(o => !o.eliminada_en));
+  /** Lo lee la plantilla para pasárselo a <app-oferta-reparto>. */
+  expedienteId = '';
+
+  esEliminada(oferta: OfertaConConstructor): boolean {
+    return !!oferta.eliminada_en;
+  }
 
   get completedSteps(): number {
     let n = 0;
@@ -148,32 +197,57 @@ export class AdminOfferEditComponent implements OnInit {
     if (!id) { this.cargando.set(false); return; }
     this.expedienteId = id;
 
-    try {
-      const [detalle, archivosExpediente, constructoresList, ofertas] = await Promise.all([
-        this.expedienteService.getExpedienteParaOferta(id),
-        this.archivoService.listarPorExpediente(id),
-        this.perfilRepo.findActivosByRoles(['constructor']),
-        this.ofertaService.getOfertasDeExpediente(id),
-      ]);
+    // `allSettled` y no `all`: «Ofertas recibidas» tiene que salir siempre. Con
+    // `all`, un fallo en cualquiera de las otras tres cargas (fotos del
+    // expediente, lista de constructores) abortaba el bloque entero, `detalle`
+    // se quedaba en null y la plantilla pintaba «expediente no encontrado»,
+    // ocultando ofertas que sí existían. Sólo el expediente es fatal: sin él no
+    // hay página que pintar; lo demás degrada y deja la columna en pie.
+    const [detalleRes, archivosRes, constructoresRes, ofertasRes] = await Promise.allSettled([
+      this.expedienteService.getExpedienteParaOferta(id),
+      this.archivoService.listarPorExpediente(id),
+      this.perfilRepo.findActivosByRoles(['constructor']),
+      this.ofertaService.getOfertasDeExpediente(id, true),
+    ]);
 
-      this.detalle.set(detalle);
-      this.fotos.set(archivosExpediente.fotos);
-      this.documentos.set(archivosExpediente.documentos);
+    try {
+      if (detalleRes.status === 'rejected') {
+        this.errorMsg.set(detalleRes.reason?.message ?? 'file.not_found');
+        return;
+      }
+      this.detalle.set(detalleRes.value);
+
+      if (archivosRes.status === 'fulfilled') {
+        this.fotos.set(archivosRes.value.fotos);
+        this.documentos.set(archivosRes.value.documentos);
+      }
+
+      const ofertas = ofertasRes.status === 'fulfilled'
+        ? this.ordenarOfertas(ofertasRes.value)
+        : [];
+      if (ofertasRes.status === 'rejected') {
+        this.errorOfertas.set(ofertasRes.reason?.message ?? 'common.error');
+      }
+      this.todasLasOfertas.set(ofertas);
 
       // Los constructores con oferta existente se conservan como opción aunque
       // hoy estén inactivos u otro rol, para no perder las ofertas guardadas.
-      let lista = constructoresList;
+      let lista = constructoresRes.status === 'fulfilled' ? constructoresRes.value : [];
       const faltantes = [...new Set(ofertas.map(o => o.constructor_id))]
         .filter(cid => !lista.some(c => c.id === cid));
       if (faltantes.length) {
-        const extras = await this.perfilRepo.findByIds(faltantes);
-        lista = [...extras, ...lista];
+        try {
+          const extras = await this.perfilRepo.findByIds(faltantes);
+          lista = [...extras, ...lista];
+        } catch { /* sin nombres extra: la oferta se sigue listando */ }
       }
       this.constructores.set(lista);
-      this.todasLasOfertas.set(ofertas);
 
-      const ofertaAceptada = ofertas.find(o => o.estado === 'aceptada');
-      const ofertaPrimaria = ofertaAceptada ?? (ofertas.length ? ofertas[0] : null);
+      // El formulario sólo edita ofertas vivas: una dada de baja se ve en la
+      // lista pero no se carga para editar.
+      const vivas          = ofertas.filter(o => !o.eliminada_en);
+      const ofertaAceptada = vivas.find(o => o.estado === 'aceptada');
+      const ofertaPrimaria = ofertaAceptada ?? (vivas.length ? vivas[0] : null);
       if (ofertaPrimaria) {
         this.constructorSeleccionadoId.set(ofertaPrimaria.constructor_id);
         this.popularFormulario(ofertaPrimaria);
@@ -183,6 +257,30 @@ export class AdminOfferEditComponent implements OnInit {
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  /**
+   * El repositorio ordena por precio ascendente, útil para comparar. Encima de
+   * eso se agrupa por estado —aceptada, pendiente, rechazada— para que se vea
+   * de un vistazo en qué punto está cada oferta y las descartadas no se
+   * intercalen entre las vivas. Dentro de cada grupo se respeta el precio.
+   */
+  private ordenarOfertas(ofertas: OfertaConConstructor[]): OfertaConConstructor[] {
+    const peso: Record<string, number> = { aceptada: 0, pendiente: 1, rechazada: 2 };
+    // Las dadas de baja bajan al final en bloque: siguen visibles, pero no se
+    // mezclan con las vivas que el administrador está comparando.
+    const rango = (o: OfertaConConstructor) =>
+      (o.eliminada_en ? 10 : 0) + (peso[o.estado] ?? 3);
+    return [...ofertas].sort((a, b) => rango(a) - rango(b));
+  }
+
+  /** Relee las ofertas del expediente conservando el orden por estado. */
+  private async recargarOfertas(): Promise<OfertaConConstructor[]> {
+    const ofertas = this.ordenarOfertas(
+      await this.ofertaService.getOfertasDeExpediente(this.expedienteId, true),
+    );
+    this.todasLasOfertas.set(ofertas);
+    return ofertas;
   }
 
   private popularFormulario(oferta: OfertaConConstructor) {
@@ -220,7 +318,7 @@ export class AdminOfferEditComponent implements OnInit {
   onConstructorChange(constructorId: string) {
     this.constructorSeleccionadoId.set(constructorId);
     if (!constructorId) { this.limpiarFormulario(); return; }
-    const oferta = this.todasLasOfertas().find(o => o.constructor_id === constructorId);
+    const oferta = this.ofertasActivas().find(o => o.constructor_id === constructorId);
     if (oferta) {
       this.popularFormulario(oferta);
     } else {
@@ -326,8 +424,8 @@ export class AdminOfferEditComponent implements OnInit {
         );
         this.enviada.set(true);
         this.exitoMsg.set('make_offer.success_sent');
-        this.todasLasOfertas.set(await this.ofertaService.getOfertasDeExpediente(this.expedienteId));
-        const newOffer = this.todasLasOfertas().find(o => o.constructor_id === constructorId);
+        const ofertas  = await this.recargarOfertas();
+        const newOffer = ofertas.find(o => o.constructor_id === constructorId);
         if (newOffer) {
           this.ofertaId.set(newOffer.id);
           await this.refrescarArchivos(newOffer.id);
@@ -342,6 +440,9 @@ export class AdminOfferEditComponent implements OnInit {
         if (docs.length || this.videoOferta()) {
           await this.refrescarArchivos(this.ofertaId()!);
         }
+        // Sin esto la tarjeta de «Ofertas recibidas» seguía mostrando el precio
+        // y el plazo anteriores hasta recargar la página.
+        await this.recargarOfertas();
         this.exitoMsg.set('make_offer.success_updated');
       }
     } catch (e: any) {
@@ -472,11 +573,11 @@ export class AdminOfferEditComponent implements OnInit {
 
       // Refrescar estado de la UI y obtener el nuevo contrato en paralelo
       const [ofertas, detalle, nuevoContrato] = await Promise.all([
-        this.ofertaService.getOfertasDeExpediente(this.expedienteId),
+        this.ofertaService.getOfertasDeExpediente(this.expedienteId, true),
         this.expedienteService.getExpedienteParaOferta(this.expedienteId),
         this.contratoService.buscarPorExpediente(this.expedienteId),
       ]);
-      this.todasLasOfertas.set(ofertas);
+      this.todasLasOfertas.set(this.ordenarOfertas(ofertas));
       this.detalle.set(detalle);
 
       // Generar y guardar PDF
@@ -537,6 +638,9 @@ export class AdminOfferEditComponent implements OnInit {
   }
 
   seleccionarOferta(oferta: OfertaConConstructor) {
+    // Una oferta dada de baja se consulta, no se edita: cargarla en el
+    // formulario daría a entender que se puede guardar encima.
+    if (this.esEliminada(oferta)) return;
     this.constructorSeleccionadoId.set(oferta.constructor_id);
     this.popularFormulario(oferta);
     this.confirmandoEliminar.set(false);
@@ -545,19 +649,44 @@ export class AdminOfferEditComponent implements OnInit {
     this.errorEliminarLista.set('');
   }
 
+  /**
+   * Deshace la baja. El RPC rechaza la restauración si el constructor ya
+   * volvió a ofertar o si el expediente llegó a cinco ofertas activas; ese
+   * mensaje se muestra tal cual, que es lo que el administrador necesita saber.
+   */
+  async restaurarOferta(oferta: OfertaConConstructor) {
+    if (this.restaurando()) return;
+    this.restaurando.set(oferta.id);
+    this.errorRestaurar.set('');
+    try {
+      await this.ofertaService.restaurarOferta(oferta.id, this.expedienteId);
+      const [ofertas, detalle] = await Promise.all([
+        this.ofertaService.getOfertasDeExpediente(this.expedienteId, true),
+        this.expedienteService.getExpedienteParaOferta(this.expedienteId),
+      ]);
+      this.todasLasOfertas.set(this.ordenarOfertas(ofertas));
+      this.detalle.set(detalle);
+    } catch (e: any) {
+      this.errorRestaurar.set(e.message);
+    } finally {
+      this.restaurando.set(null);
+    }
+  }
+
   async eliminarOfertaLista(oferta: OfertaConConstructor) {
     if (this.eliminando()) return;
     this.eliminando.set(true);
     this.errorEliminarLista.set('');
     try {
       await this.ofertaService.eliminarOferta(oferta.id, this.expedienteId);
-      this.todasLasOfertas.set(
-        await this.ofertaService.getOfertasDeExpediente(this.expedienteId),
-      );
+      const restantes = await this.recargarOfertas();
+      // La baja también cambia el estado del expediente (a 'estimado' si era la
+      // última, o de vuelta a 'en_oferta' si era la adjudicada).
+      this.detalle.set(await this.expedienteService.getExpedienteParaOferta(this.expedienteId));
       if (oferta.id === this.ofertaId()) {
         this.limpiarFormulario();
         this.constructorSeleccionadoId.set('');
-        const first = this.todasLasOfertas()[0];
+        const first = restantes.find(o => !o.eliminada_en);
         if (first) {
           this.constructorSeleccionadoId.set(first.constructor_id);
           this.popularFormulario(first);
@@ -572,8 +701,15 @@ export class AdminOfferEditComponent implements OnInit {
     }
   }
 
+  /**
+   * `estado` viaja como `string` en el modelo, así que un valor nuevo del enum
+   * `estado_oferta` se colaría hasta la plantilla y ngx-translate pintaría la
+   * clave cruda («admin_offer.oferta_retirada»). Ante lo desconocido, el propio
+   * valor es más legible que una clave sin traducir.
+   */
   estadoOfertaKey(estado: string): string {
-    return `admin_offer.oferta_${estado}`;
+    const conocidos = ['pendiente', 'aceptada', 'rechazada'];
+    return conocidos.includes(estado) ? `admin_offer.oferta_${estado}` : estado;
   }
 
   initiales(nombre: string): string {

@@ -68,21 +68,25 @@ export class ArchivoRepository {
   }
 
   async findByOfertaId(ofertaId: string): Promise<ArchivoConTipo[]> {
-    const { data } = await this.db
+    const { data, error } = await this.db
       .from('archivo')
       .select('id, nombre_archivo, url_storage, mime_type, tamano_bytes, tipo')
       .eq('oferta_id', ofertaId)
       .order('creado_en', { ascending: false });
+    // Antes se ignoraba `error` y un fallo devolvía []. Quien lo usa para
+    // recoger rutas antes de borrar acababa creyendo que no había ficheros.
+    if (error) throw new Error(error.message);
     return (data ?? []) as unknown as ArchivoConTipo[];
   }
 
   async findByOfertaIdAndTipo(ofertaId: string, tipo: TipoArchivo): Promise<{ id: string; url_storage: string } | null> {
-    const { data } = await this.db
+    const { data, error } = await this.db
       .from('archivo')
       .select('id, url_storage')
       .eq('oferta_id', ofertaId)
       .eq('tipo', tipo)
       .maybeSingle();
+    if (error) throw new Error(error.message);
     return data as { id: string; url_storage: string } | null;
   }
 
@@ -120,14 +124,37 @@ export class ArchivoRepository {
     if (error) throw new Error(error.message);
   }
 
+  /**
+   * `remove()` de supabase-js no lanza: devuelve `{ data, error }`. Antes no se
+   * miraba `error`, así que un borrado denegado por RLS pasaba en silencio y la
+   * fila de `archivo` se borraba igual — de ahí las carpetas huérfanas en el
+   * bucket. Ahora falla ruidosamente y el llamante decide.
+   */
   async removeFromStorage(paths: string[]): Promise<void> {
-    if (paths.length) await this.db.storage.from(BUCKET).remove(paths);
+    if (!paths.length) return;
+    const { error } = await this.db.storage.from(BUCKET).remove(paths);
+    if (error) throw new Error(error.message);
+  }
+
+  /**
+   * Variante para deshacer una subida a medias: ahí el error que importa es el
+   * original, no el del rollback. Devuelve si pudo limpiar.
+   */
+  async tryRemoveFromStorage(paths: string[]): Promise<boolean> {
+    try {
+      await this.removeFromStorage(paths);
+      return true;
+    } catch (e) {
+      console.error('[Archivo] rollback de storage fallido:', paths, e);
+      return false;
+    }
   }
 
   async listFromStorage(prefix: string): Promise<{ id: string; name: string; metadata: Record<string, unknown> }[]> {
-    const { data } = await this.db.storage
+    const { data, error } = await this.db.storage
       .from(BUCKET)
       .list(prefix, { sortBy: { column: 'created_at', order: 'desc' } });
+    if (error) throw new Error(error.message);
     return (data ?? []) as { id: string; name: string; metadata: Record<string, unknown> }[];
   }
 

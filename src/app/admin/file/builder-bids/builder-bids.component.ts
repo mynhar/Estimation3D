@@ -9,6 +9,7 @@ import { ArchivoService } from '../../../services/archivo.service';
 import {
   OfertaForm, OfertaConConstructor, ArchivoRow, ESTADO_BADGE_OFERTA,
 } from '../../../models';
+import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
 
 /**
  * Ofertas de constructores de un expediente (admin).
@@ -20,7 +21,7 @@ import {
   selector: 'app-admin-file-builder-bids',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, OfertaRepartoComponent],
   templateUrl: './builder-bids.component.html',
   styleUrl: './builder-bids.component.css',
 })
@@ -93,6 +94,27 @@ export class AdminFileBuilderBidsComponent implements OnInit {
 
   esSeleccionada(ofertaId: string): boolean { return this.ofertaId() === ofertaId; }
 
+  // ── Reparto en bloque ──────────────────────────────────────────────────────
+  // Dos «selecciones» conviven aquí y no son lo mismo: `ofertaId` es la oferta
+  // abierta abajo para editar (una sola), y `seleccion` es el conjunto marcado
+  // con las casillas para aceptar o rechazar en bloque. La barra y las acciones
+  // están en <app-oferta-reparto>, compartido con admin/offer/edit.
+  seleccion = signal<ReadonlySet<string>>(new Set());
+
+  /** Una oferta dada de baja se ve, pero no se marca ni se edita. */
+  esEliminada(oferta: OfertaConConstructor): boolean { return !!oferta.eliminada_en; }
+
+  estaMarcada(oferta: OfertaConConstructor): boolean { return this.seleccion().has(oferta.id); }
+
+  alternarMarca(oferta: OfertaConConstructor): void {
+    this.seleccion.update(actual => alternarEnSeleccion(actual, oferta.id));
+  }
+
+  /** El reparto ya se aplicó en la base: releer. */
+  async onRepartoAplicado(): Promise<void> {
+    await this.cargarOfertas();
+  }
+
   ofertaBadgeClass(estado: string): string {
     return ESTADO_BADGE_OFERTA[estado] ?? 'bg-secondary-subtle text-secondary';
   }
@@ -121,14 +143,26 @@ export class AdminFileBuilderBidsComponent implements OnInit {
     await this.cargarOfertas();
   }
 
+  /**
+   * `true` = incluir las dadas de baja: esta pantalla es de administración y el
+   * requisito es que «Ofertas recibidas» no esconda nada. Se ordenan por estado
+   * —aceptada, pendiente, rechazada— y las bajas al final, para que las vivas
+   * que se están comparando no queden intercaladas.
+   */
   private async cargarOfertas() {
     try {
-      const lista = await this.ofertaService.getOfertasDeExpediente(this.expedienteId());
-      this.ofertas.set(lista);
-      const primaria = lista.find(o => o.estado === 'aceptada') ?? lista[0] ?? null;
+      const lista = await this.ofertaService.getOfertasDeExpediente(this.expedienteId(), true);
+      const peso: Record<string, number> = { aceptada: 0, pendiente: 1, rechazada: 2 };
+      const rango = (o: OfertaConConstructor) => (o.eliminada_en ? 10 : 0) + (peso[o.estado] ?? 3);
+      this.ofertas.set([...lista].sort((a, b) => rango(a) - rango(b)));
+
+      // El formulario de abajo sólo edita ofertas vivas.
+      const vivas    = this.ofertas().filter(o => !o.eliminada_en);
+      const primaria = vivas.find(o => o.estado === 'aceptada') ?? vivas[0] ?? null;
       if (primaria) this.seleccionarOferta(primaria);
     } catch (e: any) {
       console.error('[AdminFileBuilderBids] cargarOfertas:', e.message);
+      this.errorOf.set(e.message);
     }
   }
 
@@ -200,8 +234,13 @@ export class AdminFileBuilderBidsComponent implements OnInit {
 
       // 7 — Reflejar el nuevo estado sin recargar la página.
       this.estadoChange.emit('adjudicado');
+      // `aceptar_oferta` no toca las dadas de baja: su estado quedó congelado
+      // el día que se eliminaron. Reflejarlo aquí también, o la lista mentiría
+      // hasta la siguiente recarga.
       this.ofertas.update(lista =>
-        lista.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' })),
+        lista.map(o => o.eliminada_en
+          ? o
+          : { ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }),
       );
       this.adjudicada.emit();
       this.exitoAdj.set('builder_offer.success_accepted');
@@ -249,6 +288,9 @@ export class AdminFileBuilderBidsComponent implements OnInit {
 
   // ── Edición de la oferta seleccionada ──────────────────────────────────────
   seleccionarOferta(oferta: OfertaConConstructor) {
+    // Una oferta dada de baja se consulta, no se edita: cargarla en el
+    // formulario daría a entender que se puede guardar encima.
+    if (this.esEliminada(oferta)) return;
     this.ofertaId.set(oferta.id);
     this.constructorId    = oferta.constructor_id;
     this.precio           = oferta.precio;
@@ -286,7 +328,7 @@ export class AdminFileBuilderBidsComponent implements OnInit {
     this.guardandoOf.set(true);
     try {
       await this.ofertaService.actualizar(this.ofertaId()!, this.constructorId, form, null);
-      this.ofertas.set(await this.ofertaService.getOfertasDeExpediente(this.expedienteId()));
+      await this.cargarOfertas();
       this.exitoOf.set(true);
     } catch (e: any) {
       this.errorOf.set(e.message ?? 'admin_file_edit.save_error');

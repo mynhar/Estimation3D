@@ -177,3 +177,69 @@
   .btn-save { width: 100%; }
   .offers-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Reparto en bloque ──────────────────────────────────────────────────────
+   La barra vive en <app-oferta-reparto>; aquí sólo lo que toca a la tarjeta:
+   la casilla y los dos estados que añade (marcada / dada de baja). */
+
+.offer-card__pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* La encapsulación de Angular aísla el CSS del hijo, así que la casilla que se
+   pinta aquí necesita su propia declaración. */
+.rep-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ds-gold-active);
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.rep-check:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+  border-radius: var(--ds-radius-sm);
+}
+
+.offer-card--marcada {
+  border-color: var(--ds-gold-soft);
+  background: var(--ds-gold-faint);
+}
+
+/* Dada de baja: se retira del primer plano pero sigue legible — ése es el
+   motivo de que ya no se borre físicamente. Sin opacity. */
+.offer-card--eliminada {
+  background: var(--ds-bg-alt);
+  border-style: dashed;
+  box-shadow: none;
+  cursor: default;
+}
+
+.offer-card--eliminada .offer-price,
+.offer-card--eliminada .offer-builder-name {
+  color: var(--ds-ink-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ds-border-strong);
+}
+
+.offer-card__removed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--ds-space-2);
+  border-radius: var(--ds-radius-pill);
+  border: 1px dashed var(--ds-border-strong);
+  font-size: var(--ds-text-2xs);
+  color: var(--ds-ink-muted);
+  white-space: nowrap;
+}

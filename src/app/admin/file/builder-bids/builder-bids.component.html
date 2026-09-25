@@ -25,22 +25,44 @@
         {{ 'builder_offer.no_offers' | translate }}
       </div>
     } @else {
+      <!-- Aceptar / rechazar / reactivar en bloque. Mismo componente que en
+           admin/offer/edit: una sola implementación para las dos pantallas. -->
+      <app-oferta-reparto
+        [expedienteId]="expedienteId()"
+        [ofertas]="ofertas()"
+        [estadoExpediente]="estado()"
+        [(seleccion)]="seleccion"
+        (aplicado)="onRepartoAplicado()" />
+
       <div class="offers-grid">
         @for (oferta of ofertas(); track oferta.id; let i = $index) {
           <div class="offer-card"
                [class.offer-card--selected]="esSeleccionada(oferta.id)"
-               [class.offer-card--aceptada]="oferta.estado === 'aceptada'"
-               [class.offer-card--rechazada]="oferta.estado === 'rechazada'"
-               role="button" tabindex="0"
-               [attr.aria-pressed]="esSeleccionada(oferta.id)"
+               [class.offer-card--aceptada]="oferta.estado === 'aceptada' && !esEliminada(oferta)"
+               [class.offer-card--rechazada]="oferta.estado === 'rechazada' && !esEliminada(oferta)"
+               [class.offer-card--eliminada]="esEliminada(oferta)"
+               [class.offer-card--marcada]="estaMarcada(oferta)"
+               [attr.role]="esEliminada(oferta) ? null : 'button'"
+               [attr.tabindex]="esEliminada(oferta) ? null : 0"
+               [attr.aria-pressed]="esEliminada(oferta) ? null : esSeleccionada(oferta.id)"
                (click)="seleccionarOferta(oferta)"
                (keydown.enter)="seleccionarOferta(oferta)"
                (keydown.space)="$event.preventDefault(); seleccionarOferta(oferta)">
 
             <div class="offer-card__top">
+              <!-- Marca la oferta para el reparto. No abre nada: detiene la
+                   propagación para no confundirse con la selección de edición. -->
+              @if (!yaContratado() && !esEliminada(oferta)) {
+                <label class="offer-card__pick" (click)="$event.stopPropagation()">
+                  <input type="checkbox" class="rep-check"
+                         [checked]="estaMarcada(oferta)"
+                         (change)="alternarMarca(oferta)"
+                         [attr.aria-label]="('admin_offer.reparto_marcar' | translate) + ' ' + oferta.constructor_nombre">
+                </label>
+              }
               <span class="offer-card__index">#{{ i + 1 }}</span>
               <div class="d-flex align-items-center gap-1">
-                @if (esSeleccionada(oferta.id)) {
+                @if (esSeleccionada(oferta.id) && !esEliminada(oferta)) {
                   <span class="selected-badge" [title]="'builder_offer.selected_badge' | translate">
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2"
@@ -49,9 +71,17 @@
                     </svg>
                   </span>
                 }
+                <!-- El estado se conserva aunque esté dada de baja: el badge de
+                     baja se añade al lado, no lo sustituye. -->
                 <span class="badge rounded-pill px-2 py-1 {{ ofertaBadgeClass(oferta.estado) }}">
                   {{ ('state.' + oferta.estado) | translate }}
                 </span>
+                @if (esEliminada(oferta)) {
+                  <span class="offer-card__removed-badge" [title]="oferta.eliminada_en">
+                    <i class="bi bi-archive" aria-hidden="true"></i>
+                    {{ 'admin_offer.oferta_eliminada' | translate }}
+                  </span>
+                }
               </div>
             </div>
 

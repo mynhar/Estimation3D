@@ -914,6 +914,8 @@ export type Database = {
           constructor_id: string
           creado_en: string
           descripcion: string
+          eliminada_en: string | null
+          eliminada_por: string | null
           estado: Database["public"]["Enums"]["estado_oferta"]
           expediente_id: string
           fecha_inicio: string | null
@@ -928,6 +930,8 @@ export type Database = {
           constructor_id: string
           creado_en?: string
           descripcion: string
+          eliminada_en?: string | null
+          eliminada_por?: string | null
           estado?: Database["public"]["Enums"]["estado_oferta"]
           expediente_id: string
           fecha_inicio?: string | null
@@ -942,6 +946,8 @@ export type Database = {
           constructor_id?: string
           creado_en?: string
           descripcion?: string
+          eliminada_en?: string | null
+          eliminada_por?: string | null
           estado?: Database["public"]["Enums"]["estado_oferta"]
           expediente_id?: string
           fecha_inicio?: string | null
@@ -1429,6 +1435,22 @@ export type Database = {
       eliminar_oferta_admin: {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
+      }
+      restaurar_oferta_admin: {
+        Args: { p_expediente_id: string; p_oferta_id: string }
+        Returns: undefined
+      }
+      aceptar_seleccion_ofertas: {
+        Args: { p_expediente_id: string; p_ofertas: string[] }
+        Returns: number
+      }
+      rechazar_ofertas: {
+        Args: { p_expediente_id: string; p_ofertas: string[] }
+        Returns: number
+      }
+      reactivar_ofertas: {
+        Args: { p_expediente_id: string; p_ofertas: string[] }
+        Returns: number
       }
       firmar_contrato: { Args: { p_contrato_id: string }; Returns: undefined }
       firmar_contrato_admin: {

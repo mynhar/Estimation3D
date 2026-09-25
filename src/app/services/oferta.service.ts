@@ -15,8 +15,15 @@ export class OfertaService {
   private perfilRepo     = inject(PerfilRepository);
   private estimacionRepo = inject(EstimacionRepository);
 
-  async getOfertasDeExpediente(expedienteId: string): Promise<OfertaConConstructor[]> {
-    const ofertas = await this.ofertaRepo.findByExpedienteId(expedienteId);
+  /**
+   * `incluirEliminadas` sólo lo activan las pantallas de administración. Para
+   * cliente y constructor una oferta dada de baja no existe.
+   */
+  async getOfertasDeExpediente(
+    expedienteId: string,
+    incluirEliminadas = false,
+  ): Promise<OfertaConConstructor[]> {
+    const ofertas = await this.ofertaRepo.findByExpedienteId(expedienteId, incluirEliminadas);
     if (!ofertas.length) return [];
 
     const constructorIds = [...new Set(ofertas.map(o => o.constructor_id))];
@@ -40,6 +47,7 @@ export class OfertaService {
         fecha_inicio:      o.fecha_inicio  ?? '',
         descripcion:       o.descripcion,
         estado:            o.estado,
+        eliminada_en:      o.eliminada_en ?? null,
         constructor_nombre:   perfil ? `${perfil.nombre} ${perfil.apellido}`.trim() || '—' : '—',
         constructor_telefono: perfil?.telefono ?? '—',
         constructor_email:    perfil?.email    ?? '—',
@@ -119,7 +127,9 @@ export class OfertaService {
         oferta_id:      ofertaId,
       });
     } catch (err) {
-      await this.archivoRepo.removeFromStorage([path]);
+      // Rollback silencioso: el error que tiene que subir es el del insert, no
+      // el de la limpieza. Si la limpieza falla queda registrado en consola.
+      await this.archivoRepo.tryRemoveFromStorage([path]);
       throw err;
     }
   }
@@ -266,12 +276,36 @@ export class OfertaService {
     await this.ofertaRepo.updateEstadoExpedienteEnOferta(expedienteId);
   }
 
+  /**
+   * Baja lógica. Antes esto borraba los ficheros del storage y las filas de
+   * `archivo` antes de lanzar el RPC, que a su vez hacía DELETE físico: la
+   * oferta se perdía entera y sin rastro. Ahora no se toca nada de eso —los
+   * documentos son justo lo que hace falta para restaurarla— y el RPC se limita
+   * a marcarla y dejar constancia en `oferta_auditoria`.
+   */
   async eliminarOferta(ofertaId: string, expedienteId: string): Promise<void> {
-    const archivos = await this.archivoRepo.findByOfertaId(ofertaId);
-    const paths = archivos.map(a => a.url_storage);
-    if (paths.length) await this.archivoRepo.removeFromStorage(paths);
-    await this.archivoRepo.deleteByOfertaId(ofertaId);
-    // RPC: borra el contrato FK (si existe), la oferta y ajusta el estado del expediente
     await this.ofertaRepo.eliminarConCascada(ofertaId, expedienteId);
+  }
+
+  /** Deshace la baja. Falla si el constructor ya tiene otra oferta activa. */
+  async restaurarOferta(ofertaId: string, expedienteId: string): Promise<void> {
+    await this.ofertaRepo.restaurar(ofertaId, expedienteId);
+  }
+
+  // ── Reparto en bloque ───────────────────────────────────────────────────────
+
+  /** Acepta las seleccionadas y rechaza todas las demás. No genera contrato. */
+  async aceptarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    return this.ofertaRepo.aceptarSeleccion(expedienteId, ofertaIds);
+  }
+
+  /** Rechaza las indicadas, sin tocar el resto. */
+  async rechazarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    return this.ofertaRepo.rechazarVarias(expedienteId, ofertaIds);
+  }
+
+  /** Devuelve a 'pendiente' las rechazadas indicadas. */
+  async reactivarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    return this.ofertaRepo.reactivarVarias(expedienteId, ofertaIds);
   }
 }

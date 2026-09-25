@@ -15,7 +15,24 @@ export type OfertaRaw = {
   descripcion:       string;
   estado:            string;
   creado_en:         string;
+  /**
+   * Baja lógica. Sólo lo pide `findByExpedienteId` (pantalla de administración,
+   * que tiene que enseñar también las eliminadas); el resto de consultas filtran
+   * por ofertas vivas y no seleccionan estas columnas.
+   */
+  eliminada_en?:     string | null;
+  eliminada_por?:    string | null;
 };
+
+/**
+ * Columnas de `oferta` comunes a casi todas las consultas. Tiene que ser un
+ * literal en una sola línea: el cliente tipado de supabase-js analiza la cadena
+ * del `select` a nivel de tipos, y una concatenación se infiere como `string`.
+ */
+const COLS_OFERTA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en';
+
+/** Igual que `COLS_OFERTA` más las columnas de baja lógica. */
+const COLS_OFERTA_CON_BAJA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en, eliminada_en, eliminada_por';
 
 export type OfertaAceptada = {
   expediente_id: string;
@@ -50,18 +67,30 @@ export class OfertaRepository {
     if (!expedienteIds.length) return [];
     const { data, error } = await this.db
       .from('oferta')
-      .select('id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en')
+      .select(COLS_OFERTA)
       .in('expediente_id', expedienteIds)
+      .is('eliminada_en', null)
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as OfertaRaw[];
   }
 
-  async findByExpedienteId(expedienteId: string): Promise<OfertaRaw[]> {
-    const { data, error } = await this.db
+  /**
+   * Por defecto sólo ofertas vivas — lo que necesitan cliente y constructor.
+   * `incluirEliminadas` es para las pantallas de administración, donde el
+   * requisito es que no desaparezca nada de «Ofertas recibidas». Se pide
+   * explícitamente a propósito: que las bajas se colasen por omisión fue
+   * exactamente el fallo que este parámetro evita.
+   */
+  async findByExpedienteId(
+    expedienteId: string,
+    incluirEliminadas = false,
+  ): Promise<OfertaRaw[]> {
+    const q = this.db
       .from('oferta')
-      .select('id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en')
-      .eq('expediente_id', expedienteId)
+      .select(COLS_OFERTA_CON_BAJA)
+      .eq('expediente_id', expedienteId);
+    const { data, error } = await (incluirEliminadas ? q : q.is('eliminada_en', null))
       .order('precio', { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as OfertaRaw[];
@@ -73,9 +102,10 @@ export class OfertaRepository {
   ): Promise<OfertaRaw | null> {
     const { data, error } = await this.db
       .from('oferta')
-      .select('id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en')
+      .select(COLS_OFERTA)
       .eq('expediente_id', expedienteId)
       .eq('constructor_id', constructorId)
+      .is('eliminada_en', null)
       .maybeSingle();
     if (error) throw new Error(error.message);
     return data as OfertaRaw | null;
@@ -85,7 +115,8 @@ export class OfertaRepository {
     const { data, error } = await this.db
       .from('oferta')
       .select('expediente_id')
-      .eq('constructor_id', constructorId);
+      .eq('constructor_id', constructorId)
+      .is('eliminada_en', null);
     if (error) throw new Error(error.message);
     return (data ?? []).map((o: { expediente_id: string }) => o.expediente_id);
   }
@@ -103,6 +134,7 @@ export class OfertaRepository {
         )
       `)
       .eq('constructor_id', constructorId)
+      .is('eliminada_en', null)
       .order('creado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return (data ?? []) as unknown as OfertaConExpediente[];
@@ -132,7 +164,8 @@ export class OfertaRepository {
       .from('oferta')
       .select('expediente_id, precio, fecha_inicio')
       .in('expediente_id', expedienteIds)
-      .eq('estado', 'aceptada');
+      .eq('estado', 'aceptada')
+      .is('eliminada_en', null);
     if (error) throw new Error(error.message);
     return (data ?? []) as OfertaAceptada[];
   }
@@ -142,16 +175,19 @@ export class OfertaRepository {
     const { data, error } = await this.db
       .from('oferta')
       .select('expediente_id')
-      .in('expediente_id', expedienteIds);
+      .in('expediente_id', expedienteIds)
+      .is('eliminada_en', null);
     if (error) throw new Error(error.message);
     return (data ?? []) as { expediente_id: string }[];
   }
 
+  /** Cuenta para el tope de 5: las dadas de baja no ocupan plaza. */
   async countByExpedienteId(expedienteId: string): Promise<number> {
     const { count, error } = await this.db
       .from('oferta')
       .select('id', { count: 'exact', head: true })
-      .eq('expediente_id', expedienteId);
+      .eq('expediente_id', expedienteId)
+      .is('eliminada_en', null);
     if (error) throw new Error(error.message);
     return count ?? 0;
   }
@@ -193,17 +229,60 @@ export class OfertaRepository {
     if (error) throw new Error(error.message);
   }
 
-  async deleteById(ofertaId: string): Promise<void> {
-    const { error } = await this.db.from('oferta').delete().eq('id', ofertaId);
-    if (error) throw new Error(error.message);
-  }
-
+  /**
+   * Baja lógica vía RPC: marca `eliminada_en`, escribe en `oferta_auditoria` y
+   * ajusta el estado del expediente. La fila y sus ficheros se conservan, así
+   * que `restaurar` puede deshacerlo.
+   */
   async eliminarConCascada(ofertaId: string, expedienteId: string): Promise<void> {
     const { error } = await this.db.rpc('eliminar_oferta_admin', {
       p_oferta_id:     ofertaId,
       p_expediente_id: expedienteId,
     });
     if (error) throw new Error(error.message);
+  }
+
+  async restaurar(ofertaId: string, expedienteId: string): Promise<void> {
+    const { error } = await this.db.rpc('restaurar_oferta_admin', {
+      p_oferta_id:     ofertaId,
+      p_expediente_id: expedienteId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  // ── Reparto en bloque (administración) ──────────────────────────────────────
+  // Los tres RPC son atómicos y dejan una fila por oferta en `oferta_auditoria`.
+  // Ninguno genera contrato: eso sigue siendo cosa de `aceptar` (el trofeo).
+  // Devuelven cuántas ofertas cambiaron realmente de estado.
+
+  /** Las indicadas pasan a 'aceptada'; TODAS las demás vivas, a 'rechazada'. */
+  async aceptarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    const { data, error } = await this.db.rpc('aceptar_seleccion_ofertas', {
+      p_expediente_id: expedienteId,
+      p_ofertas:       ofertaIds,
+    });
+    if (error) throw new Error(error.message);
+    return data ?? 0;
+  }
+
+  /** Las indicadas pasan a 'rechazada'; el resto no se toca. */
+  async rechazarVarias(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    const { data, error } = await this.db.rpc('rechazar_ofertas', {
+      p_expediente_id: expedienteId,
+      p_ofertas:       ofertaIds,
+    });
+    if (error) throw new Error(error.message);
+    return data ?? 0;
+  }
+
+  /** Devuelve a 'pendiente' las que estuvieran 'rechazada'. */
+  async reactivarVarias(expedienteId: string, ofertaIds: string[]): Promise<number> {
+    const { data, error } = await this.db.rpc('reactivar_ofertas', {
+      p_expediente_id: expedienteId,
+      p_ofertas:       ofertaIds,
+    });
+    if (error) throw new Error(error.message);
+    return data ?? 0;
   }
 
   async restoreEstadoEstimado(expedienteId: string): Promise<void> {
@@ -245,6 +324,7 @@ export class OfertaRepository {
       .from('oferta')
       .select('id, creado_en, estado')
       .eq('expediente_id', expedienteId)
+      .is('eliminada_en', null)
       .order('creado_en', { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as OfertaHistorialItem[];

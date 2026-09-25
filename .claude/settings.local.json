@@ -179,7 +179,17 @@
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.hallmark/log.json','utf8'\\)\\); console.log\\('log.json OK'\\)\")",
       "Bash(grep -n \"^\\\\.fte-[a-z-]*\\\\\\(,\\\\| \\\\|:\\\\|{\\\\\\)\" \"c:/desarrollo/estimation3d-A18-v01/src/app/estimator/file-to-be-estimated/file-to-be-estimated.component.css\")",
       "PowerShell(npx supabase functions deploy enviar-invitacion --project-ref ckdksfvxjimxuqceoeyr)",
-      "Bash(grep -n \"^\\\\.fue[a-z-]*[ ,:{]\" file-under-estimation.component.css)"
+      "Bash(grep -n \"^\\\\.fue[a-z-]*[ ,:{]\" file-under-estimation.component.css)",
+      "Bash(npm -v)",
+      "Bash(npm install *)",
+      "Bash(git check-ignore *)",
+      "Bash(npm audit *)",
+      "Bash(npm start *)",
+      "Bash(lsof -i :4200 -sTCP:LISTEN -P -n)",
+      "Bash(ps -eo pid,ppid,etime,cmd --sort=start_time)",
+      "Bash(ps -eo pid,ppid,stat,etime,cmd)",
+      "Bash(ps -p 45363 -o pid,ppid,cmd --no-headers)",
+      "Bash(ps -eo pid,ppid,etime,cmd)"
     ]
   }
 }

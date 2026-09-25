@@ -326,6 +326,14 @@
   border-color: transparent;
 }
 
+/* Baja lógica. Neutro a propósito: convive con el badge de estado
+   (pendiente / aceptada / rechazada) sin competir con él por atención. */
+.fued-badge--removed {
+  background: transparent;
+  color: var(--ds-ink-muted);
+  border: 1px dashed var(--ds-border-strong);
+}
+
 /* ============================================================
    3-COLUMN WORKSPACE
    ============================================================ */
@@ -517,6 +525,71 @@
   box-shadow: var(--ds-shadow-sm);
 }
 
+/* Casilla de reparto. 18px con área de pulsación de 32px: cómoda en táctil sin
+   engordar la fila. */
+.fued-check {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ds-gold-active);
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.fued-check:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+  border-radius: var(--ds-radius-sm);
+}
+
+.fued-offer-card__pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.fued-offer-card--picked {
+  border-color: var(--ds-gold-soft);
+  background: var(--ds-gold-faint);
+}
+
+/* Offer card: dada de baja.
+   Se retira del primer plano —papel alterno, borde discontinuo, sin sombra ni
+   cursor— pero NO se atenúa con opacity: la tarjeta tiene que seguir leyéndose,
+   que es justamente el motivo por el que ya no se borra físicamente. */
+.fued-offer-card--removed {
+  background: var(--ds-bg-alt);
+  border-style: dashed;
+  border-left-color: var(--ds-border-strong);
+  box-shadow: none;
+  cursor: default;
+}
+
+.fued-offer-card--removed:hover {
+  border-color: var(--ds-border-strong);
+  border-left-color: var(--ds-border-strong);
+  box-shadow: none;
+}
+
+.fued-offer-card--removed .fued-offer-card__name,
+.fued-offer-card--removed .fued-offer-card__price {
+  color: var(--ds-ink-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ds-border-strong);
+}
+
+.fued-offer-card--removed .fued-offer-card__avatar {
+  background: transparent;
+  border-style: dashed;
+  color: var(--ds-ink-muted);
+}
+
 /* Offer card: avatar */
 .fued-offer-card__avatar {
   width: 44px;
@@ -681,19 +754,30 @@
   color: var(--ds-danger);
 }
 
+.fued-btn-del:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.fued-btn-del:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Papelera con la confirmación desplegada. Se queda marcada para que se vea de
+   dónde salió la fila de confirmación, y volver a pulsarla la cierra. */
+.fued-btn-del--armed {
+  background: var(--ds-danger-soft);
+  border-color: var(--ds-danger);
+  color: var(--ds-danger);
+}
+
+/* Botón que borra de verdad. Vive en la fila de ancho completo, con etiqueta:
+   nunca debe caer bajo el cursor que acaba de pulsar la papelera. */
 .fued-btn-del-confirm {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--ds-radius-md);
-  border: 1px solid var(--ds-danger);
+  border-color: var(--ds-danger);
   background: var(--ds-danger-soft);
   color: var(--ds-danger);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+  font-weight: var(--ds-weight-semibold);
 }
 
 .fued-btn-del-confirm:hover:not(:disabled) {
@@ -701,31 +785,33 @@
   color: var(--ds-ink-inverse);
 }
 
-.fued-btn-del-cancel {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--ds-radius-md);
-  border: 1px solid var(--ds-border);
-  background: var(--ds-surface);
-  color: var(--ds-ink-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+/* Restaurar: acción constructiva sobre una tarjeta apagada, así que lleva
+   etiqueta y no sólo icono — es la única salida de ese estado. */
+.fued-btn-restore {
+  padding: var(--ds-space-2) var(--ds-space-3);
+  font-size: var(--ds-text-xs);
 }
 
-.fued-btn-del-cancel:hover:not(:disabled) {
-  border-color: var(--ds-border-strong);
+.fued-btn-restore:hover:not(:disabled) {
+  border-color: var(--ds-gold);
+  background: var(--ds-gold-faint);
   color: var(--ds-ink);
 }
 
-.fued-btn-del:disabled,
-.fued-btn-del-confirm:disabled,
-.fued-btn-del-cancel:disabled {
+.fued-btn-del:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* En columna estrecha la etiqueta de restaurar estorba; el icono y el title
+   bastan. Nunca se parte en dos líneas. */
+.fued-btn-restore__label {
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .fued-btn-restore__label { display: none; }
+  .fued-btn-restore { padding: var(--ds-space-2); }
 }
 
 /* Offer card: award confirm row (second flex row, full width) */
@@ -753,41 +839,33 @@
   margin: 0;
 }
 
+/* Aclara que la baja es reversible: sin esto, confirmar un borrado se lee como
+   una pérdida definitiva y el administrador duda. */
+.fued-offer-card__confirm-note {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+
 .fued-offer-card__confirm-btns {
   display: flex;
   gap: var(--ds-space-2);
 }
 
 .fued-btn-award-confirm {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  padding: var(--ds-space-2) var(--ds-space-4);
   background: var(--ds-gold);
-  border: 1px solid var(--ds-gold);
-  border-radius: var(--ds-radius-md);
-  font-family: var(--ds-font-body);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-semibold);
+  border-color: var(--ds-gold);
   color: var(--ds-ink-on-accent);
-  cursor: pointer;
-  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+  font-weight: var(--ds-weight-semibold);
 }
 
 .fued-btn-award-confirm:hover:not(:disabled) {
   background: var(--ds-gold-hover);
   border-color: var(--ds-gold-hover);
   box-shadow: var(--ds-shadow-gold);
-}
-
-.fued-btn-award-confirm:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
-}
-
-.fued-btn-award-confirm:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Awarded card visual variant */

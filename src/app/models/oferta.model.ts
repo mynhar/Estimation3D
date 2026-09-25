@@ -11,6 +11,8 @@ export interface OfertaConConstructor {
   fecha_inicio: string;
   descripcion: string;
   estado: string;
+  /** Fecha de baja lógica, o `null` si la oferta está activa. */
+  eliminada_en: string | null;
   constructor_nombre:   string;
   constructor_telefono: string;
   constructor_email:    string;

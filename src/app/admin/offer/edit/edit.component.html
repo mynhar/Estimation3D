@@ -56,9 +56,9 @@
             <span class="fued-meta-chip">
               <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
             </span>
-            @if (todasLasOfertas().length > 0) {
+            @if (ofertasActivas().length > 0) {
               <span class="fued-meta-chip fued-meta-chip--gold">
-                <i class="bi bi-people"></i>{{ todasLasOfertas().length }}/5 {{ 'available_files.offers_label' | translate }}
+                <i class="bi bi-people"></i>{{ ofertasActivas().length }}/5 {{ 'available_files.offers_label' | translate }}
               </span>
             }
           </div>
@@ -286,22 +286,36 @@
               <i class="bi bi-people" aria-hidden="true"></i>
               {{ 'admin_offer.offers_section_title' | translate }}
             </h2>
-            <div class="fued-slots-row" [title]="todasLasOfertas().length + '/5'">
+            <div class="fued-slots-row" [title]="ofertasActivas().length + '/5'">
               @for (s of [1,2,3,4,5]; track s) {
-                <div class="fued-slot" [class.fued-slot--used]="s <= todasLasOfertas().length"></div>
+                <div class="fued-slot" [class.fued-slot--used]="s <= ofertasActivas().length"></div>
               }
             </div>
           </div>
           <button class="fued-btn-nueva" type="button"
                   (click)="nuevaOferta()"
                   [class.fued-btn-nueva--active]="!ofertaId()"
-                  [disabled]="todasLasOfertas().length >= 5">
+                  [disabled]="ofertasActivas().length >= 5">
             <i class="bi bi-plus" aria-hidden="true"></i>
             {{ 'make_offer.new_badge' | translate }}
           </button>
         </div>
 
-        @if (todasLasOfertas().length === 0) {
+        <app-oferta-reparto
+          [expedienteId]="expedienteId"
+          [ofertas]="todasLasOfertas()"
+          [estadoExpediente]="detalle()!.estado"
+          [(seleccion)]="seleccion"
+          (aplicado)="onRepartoAplicado()" />
+
+        @if (errorOfertas()) {
+          <!-- Un fallo de lectura no puede disfrazarse de «no hay ofertas»:
+               el expediente puede tener ofertas que no hemos podido traer. -->
+          <div class="fued-alert fued-alert--danger">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorOfertas() | translate }}
+          </div>
+        } @else if (todasLasOfertas().length === 0) {
           <div class="fued-offers-empty">
             <i class="bi bi-inbox" aria-hidden="true"></i>
             <p>{{ 'admin_offer.offers_empty' | translate }}</p>
@@ -311,14 +325,28 @@
             @for (oferta of todasLasOfertas(); track oferta.id) {
               <div class="fued-offer-card"
                    [class.fued-offer-card--active]="oferta.id === ofertaId()"
-                   [class.fued-offer-card--awarded]="oferta.estado === 'aceptada'"
-                   role="button" tabindex="0"
+                   [class.fued-offer-card--awarded]="oferta.estado === 'aceptada' && !esEliminada(oferta)"
+                   [class.fued-offer-card--removed]="esEliminada(oferta)"
+                   [class.fued-offer-card--picked]="estaSeleccionada(oferta)"
+                   [attr.role]="esEliminada(oferta) ? null : 'button'"
+                   [attr.tabindex]="esEliminada(oferta) ? null : 0"
                    (click)="seleccionarOferta(oferta)"
                    (keydown.enter)="seleccionarOferta(oferta)">
 
+                <!-- Marca la oferta para el reparto en bloque. No abre el
+                     formulario: por eso detiene la propagación. -->
+                @if (puedeRepartir && !esEliminada(oferta)) {
+                  <label class="fued-offer-card__pick" (click)="$event.stopPropagation()">
+                    <input type="checkbox" class="fued-check"
+                           [checked]="estaSeleccionada(oferta)"
+                           (change)="alternarSeleccion(oferta)"
+                           [attr.aria-label]="('admin_offer.reparto_marcar' | translate) + ' ' + oferta.constructor_nombre">
+                  </label>
+                }
+
                 <div class="fued-offer-card__avatar"
                      [class.fued-offer-card__avatar--active]="oferta.id === ofertaId()"
-                     [class.fued-offer-card__avatar--awarded]="oferta.estado === 'aceptada'">
+                     [class.fued-offer-card__avatar--awarded]="oferta.estado === 'aceptada' && !esEliminada(oferta)">
                   {{ initiales(oferta.constructor_nombre) }}
                 </div>
 
@@ -328,12 +356,21 @@
                     <p class="fued-offer-card__price">CA$ {{ oferta.precio | number:'1.0-0' }}</p>
                   </div>
                   <div class="fued-offer-card__row2">
+                    <!-- El estado se conserva aunque la oferta esté dada de
+                         baja: el badge de baja se añade al lado, no lo tapa. -->
                     <span class="fued-badge fued-badge--sm"
-                          [class.fued-badge--success]="oferta.estado === 'aceptada'"
-                          [class.fued-badge--warning]="oferta.estado === 'pendiente'"
-                          [class.fued-badge--danger]="oferta.estado === 'rechazada'">
+                          [class.fued-badge--success]="oferta.estado === 'aceptada' && !esEliminada(oferta)"
+                          [class.fued-badge--warning]="oferta.estado === 'pendiente' && !esEliminada(oferta)"
+                          [class.fued-badge--danger]="oferta.estado === 'rechazada' && !esEliminada(oferta)">
                       {{ estadoOfertaKey(oferta.estado) | translate }}
                     </span>
+                    @if (esEliminada(oferta)) {
+                      <span class="fued-badge fued-badge--sm fued-badge--removed"
+                            [title]="oferta.eliminada_en">
+                        <i class="bi bi-archive" aria-hidden="true"></i>
+                        {{ 'admin_offer.oferta_eliminada' | translate }}
+                      </span>
+                    }
                     @if (oferta.plazo_semanas_min) {
                       <span class="fued-offer-card__meta">
                         <i class="bi bi-hourglass" aria-hidden="true"></i>
@@ -356,7 +393,7 @@
                 </div>
 
                 <!-- Award action -->
-                @if (puedeAdjudicar) {
+                @if (puedeAdjudicar && !esEliminada(oferta)) {
                   <div class="fued-offer-card__award" (click)="$event.stopPropagation()">
                     @if (oferta.estado === 'aceptada') {
                       <span class="fued-award-badge"
@@ -374,10 +411,58 @@
                   </div>
                 }
 
-                <!-- Delete actions -->
-                @if (puedeEliminarOfertas) {
+                <!-- Restore action (sólo en ofertas dadas de baja) -->
+                @if (esEliminada(oferta)) {
                   <div class="fued-offer-card__actions" (click)="$event.stopPropagation()">
-                    @if (confirmandoEliminarId() === oferta.id) {
+                    <button class="fued-btn-restore" type="button"
+                            (click)="restaurarOferta(oferta)"
+                            [disabled]="!!restaurando()"
+                            [title]="'admin_offer.restaurar_btn' | translate">
+                      @if (restaurando() === oferta.id) {
+                        <span class="fued-spinner-sm"></span>
+                      } @else {
+                        <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                      }
+                      <span class="fued-btn-restore__label">{{ 'admin_offer.restaurar_btn' | translate }}</span>
+                    </button>
+                  </div>
+                }
+
+                <!-- Delete action.
+                     La papelera sólo ARMA la confirmación; el botón que borra de
+                     verdad vive en la fila de ancho completo de más abajo. Antes
+                     el confirmar aparecía en este mismo hueco de 30×30, así que
+                     un doble clic sobre la papelera daba de baja la oferta sin
+                     que nadie leyera nada. -->
+                @if (puedeEliminarOfertas && !esEliminada(oferta)) {
+                  <div class="fued-offer-card__actions" (click)="$event.stopPropagation()">
+                    <button class="fued-btn-del" type="button"
+                            [class.fued-btn-del--armed]="confirmandoEliminarId() === oferta.id"
+                            (click)="confirmandoEliminarId.set(confirmandoEliminarId() === oferta.id ? null : oferta.id)"
+                            [attr.aria-expanded]="confirmandoEliminarId() === oferta.id"
+                            [title]="'admin_offer.delete_btn' | translate"
+                            [disabled]="eliminando()">
+                      <i class="bi bi-trash3" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                }
+
+                <!-- Delete confirm row (mismo patrón de fila completa que la
+                     adjudicación: lejos del cursor y con el nombre delante). -->
+                @if (puedeEliminarOfertas && !esEliminada(oferta) && confirmandoEliminarId() === oferta.id) {
+                  <div class="fued-offer-card__confirm-row" (click)="$event.stopPropagation()">
+                    <p class="fued-offer-card__confirm-msg">
+                      <i class="bi bi-trash3" aria-hidden="true"></i>
+                      {{ 'admin_offer.delete_confirm' | translate:{ nombre: oferta.constructor_nombre } }}
+                    </p>
+                    <p class="fued-offer-card__confirm-note">
+                      <i class="bi bi-archive" aria-hidden="true"></i>
+                      {{ 'admin_offer.delete_reversible' | translate }}
+                    </p>
+                    @if (errorEliminarLista()) {
+                      <p class="fued-offer-card__confirm-error">{{ errorEliminarLista() }}</p>
+                    }
+                    <div class="fued-offer-card__confirm-btns">
                       <button class="fued-btn-del-confirm" type="button"
                               (click)="eliminarOfertaLista(oferta)" [disabled]="eliminando()">
                         @if (eliminando()) {
@@ -385,24 +470,18 @@
                         } @else {
                           <i class="bi bi-trash3" aria-hidden="true"></i>
                         }
+                        {{ 'admin_offer.delete_btn' | translate }}
                       </button>
-                      <button class="fued-btn-del-cancel" type="button"
+                      <button class="fued-btn-cancel" type="button"
                               (click)="confirmandoEliminarId.set(null)" [disabled]="eliminando()">
-                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        {{ 'common.cancel' | translate }}
                       </button>
-                    } @else {
-                      <button class="fued-btn-del" type="button"
-                              (click)="confirmandoEliminarId.set(oferta.id)"
-                              [title]="'admin_offer.delete_btn' | translate"
-                              [disabled]="eliminando()">
-                        <i class="bi bi-trash3" aria-hidden="true"></i>
-                      </button>
-                    }
+                    </div>
                   </div>
                 }
 
                 <!-- Award confirm row (full-width second row inside card) -->
-                @if (puedeAdjudicar && confirmandoAdjudicarId() === oferta.id) {
+                @if (puedeAdjudicar && !esEliminada(oferta) && confirmandoAdjudicarId() === oferta.id) {
                   <div class="fued-offer-card__confirm-row" (click)="$event.stopPropagation()">
                     <p class="fued-offer-card__confirm-msg">
                       @if (detalle()!.estado === 'adjudicado') {
@@ -443,6 +522,13 @@
           <div class="fued-alert fued-alert--danger">
             <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
             {{ errorEliminarLista() }}
+          </div>
+        }
+
+        @if (errorRestaurar()) {
+          <div class="fued-alert fued-alert--danger">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorRestaurar() }}
           </div>
         }
 
@@ -748,7 +834,11 @@
               } @else {
                 <p class="fued-danger-zone__confirm-msg">
                   <i class="bi bi-exclamation-triangle"></i>
-                  {{ 'admin_offer.delete_confirm' | translate }}
+                  {{ 'admin_offer.delete_confirm' | translate:{ nombre: constructorSeleccionadoNombre } }}
+                </p>
+                <p class="fued-offer-card__confirm-note">
+                  <i class="bi bi-archive" aria-hidden="true"></i>
+                  {{ 'admin_offer.delete_reversible' | translate }}
                 </p>
                 <div class="fued-danger-zone__actions">
                   <button class="fued-btn-danger-confirm" type="button"
