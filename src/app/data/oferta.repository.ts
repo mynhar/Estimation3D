@@ -255,16 +255,6 @@ export class OfertaRepository {
   // Ninguno genera contrato: eso sigue siendo cosa de `aceptar` (el trofeo).
   // Devuelven cuántas ofertas cambiaron realmente de estado.
 
-  /** Las indicadas pasan a 'aceptada'; TODAS las demás vivas, a 'rechazada'. */
-  async aceptarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
-    const { data, error } = await this.db.rpc('aceptar_seleccion_ofertas', {
-      p_expediente_id: expedienteId,
-      p_ofertas:       ofertaIds,
-    });
-    if (error) throw new Error(error.message);
-    return data ?? 0;
-  }
-
   /** Las indicadas pasan a 'rechazada'; el resto no se toca. */
   async rechazarVarias(expedienteId: string, ofertaIds: string[]): Promise<number> {
     const { data, error } = await this.db.rpc('rechazar_ofertas', {

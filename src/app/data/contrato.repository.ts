@@ -22,6 +22,15 @@ export type ContratoClienteView = {
   descripcion_trabajo: string;
 };
 
+/**
+ * Un contrato del expediente con el constructor al que pertenece. Desde que se
+ * adjudica a varios, el nombre es lo único que distingue una tarjeta de otra.
+ */
+export type ContratoExpedienteView = ContratoClienteView & {
+  oferta_id:          string;
+  constructor_nombre: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class ContratoRepository {
   private auth = inject(AuthSupabaseService);
@@ -32,9 +41,13 @@ export class ContratoRepository {
       .from('contrato')
       .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
       .eq('expediente_id', expedienteId)
-      .maybeSingle();
+      // El más reciente, no `maybeSingle()`: un expediente puede tener varios
+      // contratos desde que administración adjudica a varios constructores, y
+      // `maybeSingle()` lanzaría «multiple rows returned».
+      .order('generado_en', { ascending: false })
+      .limit(1);
     if (error) return null;
-    return data as ContratoHistorialItem | null;
+    return (data?.[0] ?? null) as ContratoHistorialItem | null;
   }
 
   async findHistorialByClienteId(clienteId: string): Promise<{
@@ -57,19 +70,81 @@ export class ContratoRepository {
       .from('contrato')
       .select('id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo')
       .eq('expediente_id', expedienteId)
-      .maybeSingle();
+      // Idem: el más reciente. Ver findHistorialByExpedienteId.
+      .order('generado_en', { ascending: false })
+      .limit(1);
     if (error) return null;
-    return data as ContratoClienteView | null;
+    return (data?.[0] ?? null) as ContratoClienteView | null;
   }
 
-  async findSimpleByExpedienteId(expedienteId: string): Promise<{ id: string; url_pdf: string | null } | null> {
+  /**
+   * Todos los contratos del expediente, el más reciente primero.
+   *
+   * Antes esto era un `maybeSingle()` que asumía un contrato por expediente.
+   * Desde que administración puede adjudicar varias ofertas a la vez —un
+   * contrato por oferta— esa consulta lanzaba «multiple rows returned» y se
+   * llevaba por delante la pantalla de contrato del cliente.
+   */
+  async findSimplesByExpedienteId(
+    expedienteId: string,
+  ): Promise<{ id: string; oferta_id: string; url_pdf: string | null }[]> {
     const { data, error } = await this.db
       .from('contrato')
-      .select('id, url_pdf')
+      .select('id, oferta_id, url_pdf')
       .eq('expediente_id', expedienteId)
-      .maybeSingle();
+      .order('generado_en', { ascending: false });
     if (error) throw new Error(error.message);
-    return data as { id: string; url_pdf: string | null } | null;
+    return (data ?? []) as { id: string; oferta_id: string; url_pdf: string | null }[];
+  }
+
+  /**
+   * TODOS los contratos del expediente, con el nombre de su constructor y el
+   * más reciente primero. Es lo que necesita administración: un expediente
+   * adjudicado a varios tiene un contrato por oferta y ninguno debe esconderse.
+   */
+  async findAllByExpedienteId(expedienteId: string): Promise<ContratoExpedienteView[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select('id, oferta_id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor:constructor_id ( nombre, apellido )')
+      .eq('expediente_id', expedienteId)
+      .order('generado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+
+    return (data ?? []).map(row => {
+      const r = row as unknown as ContratoClienteView & {
+        oferta_id: string;
+        constructor: { nombre: string; apellido: string } | null;
+      };
+      const c = r.constructor;
+      return {
+        ...r,
+        constructor_nombre: c ? `${c.nombre} ${c.apellido}`.trim() || '—' : '—',
+      } as ContratoExpedienteView;
+    });
+  }
+
+  /** El contrato más reciente, para los flujos que sólo manejan uno. */
+  async findSimpleByExpedienteId(
+    expedienteId: string,
+  ): Promise<{ id: string; oferta_id: string; url_pdf: string | null } | null> {
+    return (await this.findSimplesByExpedienteId(expedienteId))[0] ?? null;
+  }
+
+  /**
+   * Adjudica varias ofertas de una vez: un contrato por oferta, en una sola
+   * transacción. Devuelve los contratos creados para que la aplicación genere
+   * un PDF por cada uno.
+   */
+  async adjudicarOfertas(
+    expedienteId: string,
+    ofertaIds: string[],
+  ): Promise<{ id_contrato: string; id_oferta: string }[]> {
+    const { data, error } = await this.db.rpc('adjudicar_ofertas', {
+      p_expediente_id: expedienteId,
+      p_ofertas:       ofertaIds,
+    });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as { id_contrato: string; id_oferta: string }[];
   }
 
   async findByClienteId(clienteId: string): Promise<any[]> {
@@ -313,8 +388,14 @@ export class ContratoRepository {
     await this.db.storage.from('contratos').remove([path]);
   }
 
-  async cancelar(expedienteId: string): Promise<void> {
-    const { error } = await this.db.rpc('cancelar_contrato', { p_expediente_id: expedienteId });
+  /**
+   * El cliente cancela UN contrato suyo. Antes esto llamaba a
+   * `cancelar_contrato(p_expediente_id)`, que borraba todos los contratos del
+   * expediente y reseteaba todas las ofertas: con varios constructores
+   * adjudicados, cancelar uno se llevaba por delante a los demás.
+   */
+  async cancelarCliente(contratoId: string): Promise<void> {
+    const { error } = await this.db.rpc('cancelar_contrato_cliente', { p_contrato_id: contratoId });
     if (error) throw new Error(error.message);
   }
 

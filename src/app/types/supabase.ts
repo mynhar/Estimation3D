@@ -1421,6 +1421,10 @@ export type Database = {
         Args: { p_contrato_id: string }
         Returns: undefined
       }
+      cancelar_contrato_cliente: {
+        Args: { p_contrato_id: string }
+        Returns: undefined
+      }
       completar_contrato_admin: {
         Args: { p_contrato_id: string }
         Returns: undefined
@@ -1440,10 +1444,6 @@ export type Database = {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
       }
-      aceptar_seleccion_ofertas: {
-        Args: { p_expediente_id: string; p_ofertas: string[] }
-        Returns: number
-      }
       rechazar_ofertas: {
         Args: { p_expediente_id: string; p_ofertas: string[] }
         Returns: number
@@ -1451,6 +1451,10 @@ export type Database = {
       reactivar_ofertas: {
         Args: { p_expediente_id: string; p_ofertas: string[] }
         Returns: number
+      }
+      adjudicar_ofertas: {
+        Args: { p_expediente_id: string; p_ofertas: string[] }
+        Returns: { id_contrato: string; id_oferta: string }[]
       }
       firmar_contrato: { Args: { p_contrato_id: string }; Returns: undefined }
       firmar_contrato_admin: {

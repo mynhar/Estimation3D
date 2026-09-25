@@ -76,15 +76,6 @@
   margin: 0;
 }
 
-.rep-confirm__note {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ds-space-2);
-  font-size: var(--ds-text-xs);
-  color: var(--ds-ink-muted);
-  margin: 0;
-}
-
 .rep-confirm__btns {
   display: flex;
   gap: var(--ds-space-2);
@@ -134,12 +125,6 @@
 .rep-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.rep-btn--accept:hover:not(:disabled) {
-  border-color: var(--ds-success);
-  background: var(--ds-success-soft);
-  color: var(--ds-success);
 }
 
 .rep-btn--reject:hover:not(:disabled) {

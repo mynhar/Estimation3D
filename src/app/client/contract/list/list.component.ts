@@ -104,7 +104,7 @@ export class ContractListComponent implements OnInit {
     if (this.cancelandoId()) return;
     this.cancelandoId.set(c.id);
     try {
-      await this.contratoService.cancelarContrato(c.expediente_id);
+      await this.contratoService.cancelarContrato(c.id);
       this.contratos.update(list =>
         list.map(item => item.id === c.id ? { ...item, estado: 'cancelado' } : item)
       );

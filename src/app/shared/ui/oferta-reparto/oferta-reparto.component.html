@@ -25,11 +25,6 @@
 
     @if (seleccionadas().length > 0) {
       <div class="rep-actions">
-        <button class="rep-btn rep-btn--accept" type="button"
-                (click)="confirmando.set('aceptar')" [disabled]="aplicando()">
-          <i class="bi bi-check2-circle" aria-hidden="true"></i>
-          {{ 'admin_offer.reparto_aceptar' | translate }}
-        </button>
         <button class="rep-btn rep-btn--reject" type="button"
                 (click)="confirmando.set('rechazar')" [disabled]="aplicando()">
           <i class="bi bi-x-circle" aria-hidden="true"></i>
@@ -45,29 +40,17 @@
       </div>
     }
 
-    <!-- La confirmación da los números exactos. La de aceptar es la que más
-         sorprende, porque toca las que NO están marcadas. -->
+    <!-- La confirmación da los números exactos antes de aplicar. -->
     @if (confirmando()) {
       <div class="rep-confirm">
         <p class="rep-confirm__msg">
-          @switch (confirmando()) {
-            @case ('aceptar') {
-              <i class="bi bi-check2-circle" aria-hidden="true"></i>
-              {{ 'admin_offer.reparto_confirm_aceptar' | translate:{ n: seleccionadas().length, rechazadas: noSeleccionadas().length } }}
-            }
-            @case ('rechazar') {
-              <i class="bi bi-x-circle" aria-hidden="true"></i>
-              {{ 'admin_offer.reparto_confirm_rechazar' | translate:{ n: seleccionadas().length } }}
-            }
-            @default {
-              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-              {{ 'admin_offer.reparto_confirm_reactivar' | translate:{ n: seleccionadasRechazadas().length } }}
-            }
+          @if (confirmando() === 'rechazar') {
+            <i class="bi bi-x-circle" aria-hidden="true"></i>
+            {{ 'admin_offer.reparto_confirm_rechazar' | translate:{ n: seleccionadas().length } }}
+          } @else {
+            <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+            {{ 'admin_offer.reparto_confirm_reactivar' | translate:{ n: seleccionadasRechazadas().length } }}
           }
-        </p>
-        <p class="rep-confirm__note">
-          <i class="bi bi-info-circle" aria-hidden="true"></i>
-          {{ 'admin_offer.reparto_sin_contrato' | translate }}
         </p>
         <div class="rep-confirm__btns">
           <button class="rep-btn rep-btn--primary" type="button"

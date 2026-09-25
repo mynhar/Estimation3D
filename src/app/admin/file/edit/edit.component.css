@@ -450,3 +450,47 @@
   .exp-title { font-size: var(--ds-text-xl); }
   .btn-save { width: 100%; }
 }
+
+/* ── Contratos del expediente ───────────────────────────────────────────────
+   Un expediente adjudicado a varios constructores tiene un contrato por oferta.
+   Cada uno se identifica por su constructor, porque el precio y el estado ya no
+   bastan para saber de quién es. */
+
+.exp-progress__builder {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-gold-active);
+  margin: 0.15rem 0 0;
+}
+
+.contrato-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--ds-space-3);
+}
+
+.contrato-item__builder {
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Cancelado: se retira del primer plano sin dejar de leerse. */
+.contrato-item--cancelado .contrato-item__builder,
+.contrato-item--cancelado .precio-valor {
+  color: var(--ds-ink-muted);
+}
+
+.contrato-item--cancelado .precio-valor {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ds-border-strong);
+}

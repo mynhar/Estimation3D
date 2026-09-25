@@ -308,6 +308,65 @@
           [(seleccion)]="seleccion"
           (aplicado)="onRepartoAplicado()" />
 
+        <!-- Adjudicar. A diferencia de las acciones de la barra, esto SÍ crea
+             contratos: uno por cada oferta marcada, cada uno con su PDF. Vive
+             aquí y no en el componente compartido porque el PDF se arma con
+             datos del expediente que sólo esta pantalla tiene cargados. -->
+        @if (seleccionadasParaAdjudicar().length > 0) {
+          @if (!confirmandoAdjudicarSeleccion()) {
+            <button class="fued-btn-adjudicar" type="button"
+                    (click)="confirmandoAdjudicarSeleccion.set(true)"
+                    [disabled]="adjudicando() || !puedeAdjudicarSeleccion">
+              <i class="bi bi-trophy" aria-hidden="true"></i>
+              {{ 'admin_offer.adjudicar_seleccion' | translate:{ n: seleccionadasParaAdjudicar().length } }}
+            </button>
+          } @else {
+            <div class="fued-adjudicar-confirm">
+              <p class="fued-offer-card__confirm-msg">
+                <i class="bi bi-trophy" aria-hidden="true"></i>
+                {{ 'admin_offer.adjudicar_confirm_n' | translate:{ n: seleccionadasParaAdjudicar().length } }}
+              </p>
+              <ul class="fued-adjudicar-list">
+                @for (o of seleccionadasParaAdjudicar(); track o.id) {
+                  <li>{{ o.constructor_nombre }} — CA$ {{ o.precio | number:'1.0-0' }}</li>
+                }
+              </ul>
+              <p class="fued-offer-card__confirm-note">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                {{ 'admin_offer.adjudicar_reemplaza' | translate }}
+              </p>
+              <div class="fued-offer-card__confirm-btns">
+                <button class="fued-btn-award-confirm" type="button"
+                        (click)="adjudicarSeleccion()" [disabled]="adjudicando()">
+                  @if (adjudicando()) {
+                    <span class="fued-spinner-sm"></span>
+                  } @else {
+                    <i class="bi bi-check-lg" aria-hidden="true"></i>
+                  }
+                  {{ 'common.confirm' | translate }}
+                </button>
+                <button class="fued-btn-cancel" type="button"
+                        (click)="confirmandoAdjudicarSeleccion.set(false)" [disabled]="adjudicando()">
+                  {{ 'common.cancel' | translate }}
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (exitoAdjudicar()) {
+          <div class="fued-alert fued-alert--success">
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            {{ exitoAdjudicar() }}
+          </div>
+        }
+        @if (errorAdjudicar() && !confirmandoAdjudicarId()) {
+          <div class="fued-alert fued-alert--danger">
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            {{ errorAdjudicar() }}
+          </div>
+        }
+
         @if (errorOfertas()) {
           <!-- Un fallo de lectura no puede disfrazarse de «no hay ofertas»:
                el expediente puede tener ofertas que no hemos podido traer. -->
@@ -335,7 +394,7 @@
 
                 <!-- Marca la oferta para el reparto en bloque. No abre el
                      formulario: por eso detiene la propagación. -->
-                @if (puedeRepartir && !esEliminada(oferta)) {
+                @if (puedeSeleccionar && !esEliminada(oferta)) {
                   <label class="fued-offer-card__pick" (click)="$event.stopPropagation()">
                     <input type="checkbox" class="fued-check"
                            [checked]="estaSeleccionada(oferta)"

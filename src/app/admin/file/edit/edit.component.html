@@ -107,7 +107,7 @@
     </header>
 
     <!-- ── Avance · expediente + contrato ──────────────────────────── -->
-    <section class="avance-grid mb-4" [class.avance-grid--dual]="contrato()">
+    <section class="avance-grid mb-4" [class.avance-grid--dual]="contratos().length > 0">
 
       <!-- Avance del expediente -->
       <article class="exp-progress"
@@ -154,38 +154,43 @@
         </div>
       </article>
 
-      <!-- Avance del contrato -->
-      @if (contrato()) {
+      <!-- Avance de CADA contrato. Uno por oferta adjudicada: pueden ir a
+           ritmos distintos (uno firmado, otro aún generado), así que cada uno
+           lleva su propia barra y su cabecera con el constructor. -->
+      @for (c of contratos(); track c.id) {
         <article class="exp-progress exp-progress--contrato"
-                 [class.exp-progress--cancelado]="contratoCancelado()">
+                 [class.exp-progress--cancelado]="contratoCancelado(c)">
           <div class="exp-progress__top">
             <div class="exp-progress__meta">
               <div class="exp-progress__text">
                 <span class="exp-progress__heading">{{ 'dashboard_client.avance_contrato' | translate }}</span>
-                @if (!contratoCancelado()) {
-                  <p class="exp-progress__desc">{{ ('contrato_estado_desc.' + contratoEstado()) | translate }}</p>
+                <p class="exp-progress__builder">
+                  <i class="bi bi-person-badge" aria-hidden="true"></i>{{ c.constructor_nombre }}
+                </p>
+                @if (!contratoCancelado(c)) {
+                  <p class="exp-progress__desc">{{ ('contrato_estado_desc.' + c.estado) | translate }}</p>
                 }
               </div>
-              @if (contratoCancelado()) {
+              @if (contratoCancelado(c)) {
                 <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'contrato_estado.cancelado' | translate }}</span>
               } @else {
-                <span class="exp-progress__pct">{{ contratoProgreso() }}<span class="exp-progress__unit">%</span></span>
+                <span class="exp-progress__pct">{{ contratoProgreso(c) }}<span class="exp-progress__unit">%</span></span>
               }
             </div>
             <div class="exp-progress__track">
               <div class="exp-progress__fill"
-                   [style.width.%]="contratoProgreso()"
-                   [class.exp-progress__fill--cancelado]="contratoCancelado()"></div>
+                   [style.width.%]="contratoProgreso(c)"
+                   [class.exp-progress__fill--cancelado]="contratoCancelado(c)"></div>
             </div>
           </div>
           <div class="exp-steps" role="list">
             @for (paso of CONTRATO_PASOS; track paso.key; let last = $last) {
               <div class="exp-step" role="listitem"
-                   [class.exp-step--done]="contratoPasoActivo(paso.key) === 'done'"
-                   [class.exp-step--active]="contratoPasoActivo(paso.key) === 'active'">
+                   [class.exp-step--done]="contratoPasoActivo(c, paso.key) === 'done'"
+                   [class.exp-step--active]="contratoPasoActivo(c, paso.key) === 'active'">
                 <div class="exp-step__top">
                   <div class="exp-step__circle" aria-hidden="true">
-                    @if (contratoPasoActivo(paso.key) === 'done') {
+                    @if (contratoPasoActivo(c, paso.key) === 'done') {
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                            fill="none" stroke="currentColor" stroke-width="2.5"
                            stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
@@ -195,7 +200,7 @@
                   </div>
                   @if (!last) {
                     <div class="exp-step__line"
-                         [class.exp-step__line--done]="contratoPasoActivo(paso.key) === 'done'"></div>
+                         [class.exp-step__line--done]="contratoPasoActivo(c, paso.key) === 'done'"></div>
                   }
                 </div>
                 <span class="exp-step__label">{{ ('contrato_estado.' + paso.key) | translate }}</span>
@@ -624,7 +629,9 @@
           <!-- ───────────────────────────────────────────────────────
                TARJETA 4 · CONTRATO (solo lectura)
           ──────────────────────────────────────────────────────── -->
-          @if (contrato()) {
+          <!-- Un contrato por oferta adjudicada. La tarjeta lleva el
+               constructor delante: con varios es lo único que las distingue. -->
+          @if (contratos().length > 0) {
             <div class="detail-card">
               <div class="detail-card__head">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -635,28 +642,38 @@
                   <path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/>
                 </svg>
                 <span class="section-label">{{ 'file.contract' | translate }}</span>
+                <span class="archivo-count ms-auto">{{ contratos().length }}</span>
               </div>
               <div class="detail-card__body">
-                <div class="mb-3">
-                  <p class="info-label mb-2">{{ 'dashboard_client.contract_status' | translate }}</p>
-                  <span class="badge rounded-pill px-3 py-1
-                    {{ contrato()!.estado === 'firmado' || contrato()!.estado === 'completado'
-                        ? 'bg-success-subtle text-success'
-                        : contrato()!.estado === 'cancelado'
-                          ? 'bg-secondary-subtle text-secondary'
-                          : 'bg-warning-subtle text-warning-emphasis' }}">
-                    {{ ('contrato_estado.' + contrato()!.estado) | translate }}
-                  </span>
-                </div>
-                <div class="precio-block mb-3">
-                  <p class="info-label mb-1">{{ 'dashboard_client.contract_price' | translate }}</p>
-                  <p class="precio-valor mb-0">{{ formatCosto(contrato()!.precio_final) }}</p>
-                </div>
-                @if (contrato()!.descripcion_trabajo) {
-                  <hr class="detail-divider my-3" />
-                  <p class="info-label">{{ 'dashboard_client.work_description' | translate }}</p>
-                  <p class="descripcion-block mb-0">{{ contrato()!.descripcion_trabajo }}</p>
+                @for (c of contratos(); track c.id; let last = $last) {
+                  <div class="contrato-item" [class.contrato-item--cancelado]="contratoCancelado(c)">
+                    <div class="contrato-item__head">
+                      <p class="contrato-item__builder mb-0">
+                        <i class="bi bi-person-badge me-1" aria-hidden="true"></i>{{ c.constructor_nombre }}
+                      </p>
+                      <span class="badge rounded-pill px-3 py-1
+                        {{ c.estado === 'firmado' || c.estado === 'completado'
+                            ? 'bg-success-subtle text-success'
+                            : c.estado === 'cancelado'
+                              ? 'bg-secondary-subtle text-secondary'
+                              : 'bg-warning-subtle text-warning-emphasis' }}">
+                        {{ ('contrato_estado.' + c.estado) | translate }}
+                      </span>
+                    </div>
+
+                    <div class="precio-block">
+                      <p class="info-label mb-1">{{ 'dashboard_client.contract_price' | translate }}</p>
+                      <p class="precio-valor mb-0">{{ formatCosto(c.precio_final) }}</p>
+                    </div>
+
+                    @if (c.descripcion_trabajo) {
+                      <p class="info-label mt-3">{{ 'dashboard_client.work_description' | translate }}</p>
+                      <p class="descripcion-block mb-0">{{ c.descripcion_trabajo }}</p>
+                    }
+                  </div>
+                  @if (!last) { <hr class="detail-divider my-3" /> }
                 }
+
                 <div class="contract-note mt-3">
                   <i class="bi bi-info-circle me-2" aria-hidden="true"></i>{{ 'admin_file_edit.contract_note' | translate }}
                 </div>

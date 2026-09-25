@@ -1973,3 +1973,77 @@
     gap: var(--ds-space-1);
   }
 }
+
+/* ── Adjudicar selección ────────────────────────────────────────────────────
+   Acción dorada y separada de la barra de reparto: es la única de la columna
+   que crea contratos, y conviene que no se confunda con «Aceptar selección». */
+
+.fued-btn-adjudicar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  width: 100%;
+  justify-content: center;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-gold);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  cursor: pointer;
+  margin-bottom: var(--ds-space-3);
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.fued-btn-adjudicar:hover:not(:disabled) {
+  background: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+  box-shadow: var(--ds-shadow-gold);
+  transform: translateY(-1px);
+}
+
+.fued-btn-adjudicar:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.fued-btn-adjudicar:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.fued-btn-adjudicar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.fued-adjudicar-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-gold-soft);
+  border-left: 3px solid var(--ds-gold);
+  border-radius: var(--ds-radius-md);
+  margin-bottom: var(--ds-space-3);
+}
+
+/* Enumerar a quién se adjudica evita el error de confirmar a ciegas cuando la
+   selección se hizo hace varios clics. */
+.fued-adjudicar-list {
+  margin: 0;
+  padding-left: var(--ds-space-5);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+}
+
+.fued-adjudicar-list li + li {
+  margin-top: var(--ds-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fued-btn-adjudicar { transition-duration: 0.01ms; }
+  .fued-btn-adjudicar:hover:not(:disabled) { transform: none; }
+}

@@ -97,9 +97,29 @@ export class AdminFileBuilderBidsComponent implements OnInit {
   // ── Reparto en bloque ──────────────────────────────────────────────────────
   // Dos «selecciones» conviven aquí y no son lo mismo: `ofertaId` es la oferta
   // abierta abajo para editar (una sola), y `seleccion` es el conjunto marcado
-  // con las casillas para aceptar o rechazar en bloque. La barra y las acciones
-  // están en <app-oferta-reparto>, compartido con admin/offer/edit.
+  // con las casillas para rechazar, reactivar o adjudicar en bloque. Rechazar y
+  // reactivar están en <app-oferta-reparto>, compartido con admin/offer/edit;
+  // adjudicar vive aquí porque el PDF se arma con datos propios de la pantalla.
   seleccion = signal<ReadonlySet<string>>(new Set());
+
+  /**
+   * Cuándo se pinta la casilla. Más amplio que el bloqueo de la barra a
+   * propósito: en 'adjudicado' rechazar y reactivar están vetados (la base los
+   * rechaza con un contrato vivo), pero re-adjudicar SÍ se permite, y sin
+   * casillas no habría forma de elegir a quién.
+   */
+  puedeSeleccionar = computed(() => this.estado() !== 'contratado');
+
+  confirmandoAdjudicarSeleccion = signal(false);
+
+  /** Marcadas que se pueden adjudicar: las vivas. */
+  seleccionadasParaAdjudicar = computed(() =>
+    this.ofertas().filter(o => !o.eliminada_en && this.seleccion().has(o.id)));
+
+  /** El RPC sólo adjudica desde 'en_oferta' o 'adjudicado'. */
+  puedeAdjudicarSeleccion = computed(() =>
+    this.ESTADOS_ADJUDICABLES.includes(this.estado())
+    && this.seleccionadasParaAdjudicar().length > 0);
 
   /** Una oferta dada de baja se ve, pero no se marca ni se edita. */
   esEliminada(oferta: OfertaConConstructor): boolean { return !!oferta.eliminada_en; }
@@ -166,86 +186,103 @@ export class AdminFileBuilderBidsComponent implements OnInit {
     }
   }
 
-  /**
-   * Adjudica la oferta seleccionada: RPC (expediente → adjudicado, resto de
-   * ofertas → rechazadas, contrato nuevo), regenera el PDF y sustituye el
-   * anterior. Los datos del PDF se releen de la BD para que reflejen lo
-   * persistido y no ediciones del formulario sin guardar.
-   */
+  /** El botón de la oferta abierta: adjudicar sólo ésa. */
   async adjudicarOferta() {
     const ofertaId = this.ofertaId();
-    const oferta   = this.ofertaSeleccionada();
-    if (!ofertaId || !oferta || !this.puedeAdjudicar()) return;
+    if (!ofertaId || !this.puedeAdjudicar()) return;
+    await this.adjudicar([ofertaId]);
+  }
+
+  /** «Adjudicar selección»: una, varias o todas las marcadas. */
+  async adjudicarSeleccion() {
+    this.confirmandoAdjudicarSeleccion.set(false);
+    await this.adjudicar(this.seleccionadasParaAdjudicar().map(o => o.id));
+  }
+
+  /**
+   * Adjudica N ofertas: el RPC crea UN CONTRATO POR OFERTA en una transacción y
+   * devuelve los contratos creados; aquí se genera y sube un PDF para cada uno.
+   *
+   * Los datos del expediente, el cliente y el servicio se leen UNA vez y se
+   * reutilizan en todos los PDF: son los mismos para todos los contratos y
+   * repetir las consultas por cada oferta no aporta nada.
+   *
+   * Un fallo generando un PDF no deshace la adjudicación: los contratos ya están
+   * en la base. Se informa de cuántos PDF salieron para poder reintentarlo.
+   */
+  private async adjudicar(ofertaIds: string[]) {
+    if (this.adjudicando() || !ofertaIds.length) return;
 
     this.adjudicando.set(true);
     this.errorAdj.set('');
     this.exitoAdj.set('');
     try {
-      // 1 — Ruta del PDF anterior antes de que el RPC borre el contrato.
-      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.expedienteId());
-      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+      // Rutas de los PDF que el RPC va a sustituir: después ya no hay fila de
+      // la que leerlas y quedarían huérfanas en el bucket.
+      const pdfsAnteriores = (await this.contratoService.listarPorExpediente(this.expedienteId()))
+        .map(c => c.url_pdf)
+        .filter((u): u is string => !!u);
 
-      // 2 — Adjudicación en BD.
-      await this.ofertaService.aceptarOferta(this.expedienteId(), ofertaId);
+      const creados = await this.contratoService.adjudicarOfertas(this.expedienteId(), ofertaIds);
 
-      // 3 — Borrar el PDF anterior (best-effort: no interrumpe el flujo).
-      if (urlPdfAnterior) {
-        await this.contratoService.eliminarPdfStorage(urlPdfAnterior).catch(() => {});
+      for (const url of pdfsAnteriores) {
+        await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
 
-      // 4 — Contrato recién creado por el RPC.
-      const contratoRow = await this.contratoService.buscarPorExpediente(this.expedienteId());
-      if (!contratoRow) throw new Error('admin_file_edit.save_error');
-
-      // 5 — PDF con los datos persistidos del expediente.
       const datos = await this.expedienteService.getExpedienteParaEdicion(this.expedienteId());
       const [cli, svc] = await Promise.all([
         this.buscarCliente(datos.cliente_id),
         this.buscarServicio(datos.servicio_id),
       ]);
-      const lang = this.translate.currentLang ?? 'fr';
+      const lang  = this.translate.currentLang ?? 'fr';
+      const fecha = this.formatFecha(new Date().toISOString());
 
-      const pdfBlob = this.contratoService.generarPdfBlob({
-        contratoId:          contratoRow.id,
-        expedienteNumero:    datos.numero,
-        fechaGenerado:       this.formatFecha(new Date().toISOString()),
-        clienteNombre:       cli ?? '—',
-        constructorNombre:   oferta.constructor_nombre,
-        constructorTelefono: oferta.constructor_telefono,
-        constructorEmail:    oferta.constructor_email,
-        servicioNombre:      svc?.nombre      ?? '—',
-        servicioDescripcion: svc?.descripcion ?? '',
-        direccion:           datos.direccion ?? '—',
-        canton:              datos.canton    ?? '—',
-        provincia:           datos.provincia ?? '—',
-        distrito:            datos.distrito  ?? '',
-        precioFinal:         oferta.precio,
-        plazoMin:            oferta.plazo_semanas_min,
-        plazoMax:            oferta.plazo_semanas_max,
-        garantiaAnos:        oferta.garantia_anos,
-        fechaInicio:         oferta.fecha_inicio,
-        descripcionTrabajo:  oferta.descripcion,
-        lang,
-      });
+      await this.cargarOfertas();
 
-      // 6 — Subir el PDF y enlazarlo al contrato.
-      const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoRow.id);
-      await this.contratoService.actualizarUrlPdf(contratoRow.id, urlPdf);
+      let fallidos = 0;
+      for (const { id_contrato, id_oferta } of creados) {
+        const oferta = this.ofertas().find(o => o.id === id_oferta);
+        if (!oferta) { fallidos++; continue; }
+        try {
+          const pdfBlob = this.contratoService.generarPdfBlob({
+            contratoId:          id_contrato,
+            expedienteNumero:    datos.numero,
+            fechaGenerado:       fecha,
+            clienteNombre:       cli ?? '—',
+            constructorNombre:   oferta.constructor_nombre,
+            constructorTelefono: oferta.constructor_telefono,
+            constructorEmail:    oferta.constructor_email,
+            servicioNombre:      svc?.nombre      ?? '—',
+            servicioDescripcion: svc?.descripcion ?? '',
+            direccion:           datos.direccion ?? '—',
+            canton:              datos.canton    ?? '—',
+            provincia:           datos.provincia ?? '—',
+            distrito:            datos.distrito  ?? '',
+            precioFinal:         oferta.precio,
+            plazoMin:            oferta.plazo_semanas_min,
+            plazoMax:            oferta.plazo_semanas_max,
+            garantiaAnos:        oferta.garantia_anos,
+            fechaInicio:         oferta.fecha_inicio,
+            descripcionTrabajo:  oferta.descripcion,
+            lang,
+          });
+          const urlPdf = await this.contratoService.subirPdf(pdfBlob, id_contrato);
+          await this.contratoService.actualizarUrlPdf(id_contrato, urlPdf);
+        } catch {
+          fallidos++;
+        }
+      }
 
-      // 7 — Reflejar el nuevo estado sin recargar la página.
+      this.seleccion.set(new Set());
       this.estadoChange.emit('adjudicado');
-      // `aceptar_oferta` no toca las dadas de baja: su estado quedó congelado
-      // el día que se eliminaron. Reflejarlo aquí también, o la lista mentiría
-      // hasta la siguiente recarga.
-      this.ofertas.update(lista =>
-        lista.map(o => o.eliminada_en
-          ? o
-          : { ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }),
-      );
       this.adjudicada.emit();
-      this.exitoAdj.set('builder_offer.success_accepted');
+      this.exitoAdj.set(
+        fallidos
+          ? this.translate.instant('admin_offer.adjudicar_pdf_parcial', { n: creados.length - fallidos, total: creados.length })
+          : this.translate.instant('admin_offer.adjudicar_ok', { n: creados.length }),
+      );
     } catch (e: any) {
-      console.error('[AdminFileBuilderBids] adjudicarOferta:', e);
+      console.error('[AdminFileBuilderBids] adjudicar:', e);
       this.errorAdj.set(e.message ?? 'admin_file_edit.save_error');
     } finally {
       this.adjudicando.set(false);

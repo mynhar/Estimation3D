@@ -57,8 +57,30 @@ export class ContratoService {
 
   // ── Buscar contrato existente por expediente ─────────────────────────────
 
-  async buscarPorExpediente(expedienteId: string): Promise<{ id: string; url_pdf: string | null } | null> {
+  /** El contrato más reciente del expediente. Para flujos de un solo contrato. */
+  async buscarPorExpediente(
+    expedienteId: string,
+  ): Promise<{ id: string; oferta_id: string; url_pdf: string | null } | null> {
     return this.contratoRepo.findSimpleByExpedienteId(expedienteId);
+  }
+
+  /** Todos los contratos del expediente: administración puede adjudicar varios. */
+  async listarPorExpediente(
+    expedienteId: string,
+  ): Promise<{ id: string; oferta_id: string; url_pdf: string | null }[]> {
+    return this.contratoRepo.findSimplesByExpedienteId(expedienteId);
+  }
+
+  /**
+   * Adjudica varias ofertas: un contrato por oferta, atómico. Devuelve los
+   * contratos creados; el PDF de cada uno lo genera quien llama, que es quien
+   * tiene los datos del expediente a mano.
+   */
+  async adjudicarOfertas(
+    expedienteId: string,
+    ofertaIds: string[],
+  ): Promise<{ id_contrato: string; id_oferta: string }[]> {
+    return this.contratoRepo.adjudicarOfertas(expedienteId, ofertaIds);
   }
 
   async eliminarContrato(contratoId: string, pdfPath: string | null): Promise<void> {
@@ -70,8 +92,9 @@ export class ContratoService {
     return this.contratoRepo.removePdfFromStorage(pdfPath);
   }
 
-  async cancelarContrato(expedienteId: string): Promise<void> {
-    return this.contratoRepo.cancelar(expedienteId);
+  /** El cliente cancela uno de sus contratos. No toca los demás del expediente. */
+  async cancelarContrato(contratoId: string): Promise<void> {
+    return this.contratoRepo.cancelarCliente(contratoId);
   }
 
   async rechazarOferta(expedienteId: string, ofertaId: string): Promise<void> {

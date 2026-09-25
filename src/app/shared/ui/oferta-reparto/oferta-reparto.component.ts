@@ -4,7 +4,7 @@ import { OfertaService } from '../../../services/oferta.service';
 import { OfertaConConstructor } from '../../../models';
 
 /** Acción de reparto pendiente de confirmar. */
-export type AccionReparto = 'aceptar' | 'rechazar' | 'reactivar';
+export type AccionReparto = 'rechazar' | 'reactivar';
 
 /**
  * Barra de reparto en bloque de «Ofertas recibidas».
@@ -14,12 +14,14 @@ export type AccionReparto = 'aceptar' | 'rechazar' | 'reactivar';
  * confirmación, errores—; el padre sólo pinta la casilla dentro de su propia
  * tarjeta y enlaza `[(seleccion)]`.
  *
- * Qué hace cada acción (los tres RPC son atómicos y quedan en `oferta_auditoria`):
- *   · aceptar   → las marcadas a 'aceptada' y TODAS las demás vivas a 'rechazada'
+ * Qué hace cada acción (los dos RPC son atómicos y quedan en `oferta_auditoria`):
  *   · rechazar  → las marcadas a 'rechazada'; el resto no se toca
  *   · reactivar → las marcadas que estén 'rechazada' vuelven a 'pendiente'
  *
- * Ninguna genera contrato: eso sigue siendo del botón de adjudicar.
+ * Aquí NO hay «aceptar». Lo hubo, y hacía exactamente lo mismo que adjudicar
+ * salvo crear los contratos, así que sobraba: dos botones contiguos donde uno
+ * era subconjunto del otro. Aceptar ofertas es hoy parte de adjudicar, que vive
+ * en cada pantalla porque el PDF se arma con datos que sólo ella tiene.
  */
 @Component({
   selector: 'app-oferta-reparto',
@@ -57,10 +59,6 @@ export class OfertaRepartoComponent {
 
   seleccionadas = computed(() =>
     this.activas().filter(o => this.seleccion().has(o.id)));
-
-  /** Las que `aceptar` mandaría a 'rechazada'. */
-  noSeleccionadas = computed(() =>
-    this.activas().filter(o => !this.seleccion().has(o.id)));
 
   seleccionadasRechazadas = computed(() =>
     this.seleccionadas().filter(o => o.estado === 'rechazada'));
@@ -107,9 +105,8 @@ export class OfertaRepartoComponent {
     this.error.set('');
     try {
       const id = this.expedienteId();
-      if (accion === 'aceptar')       await this.ofertaService.aceptarSeleccion(id, ids);
-      else if (accion === 'rechazar') await this.ofertaService.rechazarSeleccion(id, ids);
-      else                            await this.ofertaService.reactivarSeleccion(id, ids);
+      if (accion === 'rechazar') await this.ofertaService.rechazarSeleccion(id, ids);
+      else                       await this.ofertaService.reactivarSeleccion(id, ids);
 
       this.seleccion.set(new Set());
       this.confirmando.set(null);

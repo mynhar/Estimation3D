@@ -243,3 +243,140 @@
   color: var(--ds-ink-muted);
   white-space: nowrap;
 }
+
+/* ── Adjudicar selección ────────────────────────────────────────────────────
+   Acción dorada y separada de la barra de reparto: es la única que crea
+   contratos, y no debe confundirse con rechazar o reactivar. */
+
+.bids-btn-adjudicar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  width: 100%;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  border: 1px solid var(--ds-gold);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-active);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  cursor: pointer;
+  margin-bottom: var(--ds-space-4);
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.bids-btn-adjudicar:hover:not(:disabled) {
+  background: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+  box-shadow: var(--ds-shadow-gold);
+  transform: translateY(-1px);
+}
+
+.bids-btn-adjudicar:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.bids-btn-adjudicar:active:not(:disabled) { transform: translateY(1px); }
+.bids-btn-adjudicar:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.bids-adjudicar-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-gold-soft);
+  border-left: 3px solid var(--ds-gold);
+  border-radius: var(--ds-radius-md);
+  margin-bottom: var(--ds-space-4);
+}
+
+.bids-confirm-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  margin: 0;
+}
+
+.bids-confirm-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  margin: 0;
+}
+
+/* Enumerar a quién se adjudica evita confirmar a ciegas una selección hecha
+   varios clics antes. */
+.bids-adjudicar-list {
+  margin: 0;
+  padding-left: var(--ds-space-5);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+}
+
+.bids-adjudicar-list li + li { margin-top: var(--ds-space-1); }
+
+.bids-confirm-btns {
+  display: flex;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+
+.bids-btn-confirm,
+.bids-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  cursor: pointer;
+  transition: all var(--ds-duration-fast) var(--ds-ease-out);
+}
+
+.bids-btn-confirm {
+  border: 1px solid var(--ds-gold);
+  background: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.bids-btn-confirm:hover:not(:disabled) {
+  background: var(--ds-gold-hover);
+  border-color: var(--ds-gold-hover);
+  box-shadow: var(--ds-shadow-gold);
+}
+
+.bids-btn-cancel {
+  border: 1px solid var(--ds-border-strong);
+  background: var(--ds-surface);
+  color: var(--ds-ink-secondary);
+}
+
+.bids-btn-cancel:hover:not(:disabled) {
+  border-color: var(--ds-ink-muted);
+  color: var(--ds-ink);
+}
+
+.bids-btn-confirm:focus-visible,
+.bids-btn-cancel:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.bids-btn-confirm:disabled,
+.bids-btn-cancel:disabled { opacity: 0.45; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bids-btn-adjudicar { transition-duration: 0.01ms; }
+  .bids-btn-adjudicar:hover:not(:disabled) { transform: none; }
+}

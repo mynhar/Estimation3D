@@ -7,7 +7,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
-import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
+import { ContratoRepository, ContratoExpedienteView } from '../../../data/contrato.repository';
 import {
   Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK,
 } from '../../../models';
@@ -191,13 +191,19 @@ export class AdminFileEditComponent implements OnInit {
   // ── Avance del contrato ────────────────────────────────────────────────────
   readonly CONTRATO_PASOS = CONTRATO_PASOS;
 
-  contratoEstado    = computed(() => this.contrato()?.estado ?? '');
-  contratoCancelado = computed(() => this.contratoEstado() === 'cancelado');
-  contratoProgreso  = computed(() => CONTRATO_PCT[this.contratoEstado()] ?? 0);
+  // Cada contrato lleva su propio avance: uno puede estar firmado y otro aún
+  // generado, así que el progreso no se puede calcular a nivel de expediente.
+  contratoCancelado(c: ContratoExpedienteView): boolean {
+    return c.estado === 'cancelado';
+  }
 
-  contratoPasoActivo(pasoKey: string): 'done' | 'active' | 'pending' {
-    if (this.contratoCancelado()) return 'pending';
-    const pct     = this.contratoProgreso();
+  contratoProgreso(c: ContratoExpedienteView): number {
+    return CONTRATO_PCT[c.estado] ?? 0;
+  }
+
+  contratoPasoActivo(c: ContratoExpedienteView, pasoKey: string): 'done' | 'active' | 'pending' {
+    if (this.contratoCancelado(c)) return 'pending';
+    const pct     = this.contratoProgreso(c);
     const pasoPct = CONTRATO_PCT[pasoKey] ?? 0;
     if (pct > pasoPct)               return 'done';
     if (pct === pasoPct && pct > 0)  return 'active';
@@ -307,8 +313,10 @@ export class AdminFileEditComponent implements OnInit {
     await this.cargarContrato();
   }
 
-  // ── Contrato (solo lectura) ────────────────────────────────────────────────
-  contrato = signal<ContratoClienteView | null>(null);
+  // ── Contratos (solo lectura) ───────────────────────────────────────────────
+  // Lista, no uno: un expediente adjudicado a varios constructores tiene un
+  // contrato por oferta y todos tienen que verse.
+  contratos = signal<ContratoExpedienteView[]>([]);
 
   // ── Utilidades ─────────────────────────────────────────────────────────────
   invalid(form: ReturnType<FormBuilder['group']>, campo: string): boolean {
@@ -493,8 +501,8 @@ export class AdminFileEditComponent implements OnInit {
 
   private async cargarContrato() {
     try {
-      this.contrato.set(await this.contratoRepo.findForClientByExpedienteId(this.id));
-    } catch { /* contrato opcional */ }
+      this.contratos.set(await this.contratoRepo.findAllByExpedienteId(this.id));
+    } catch { /* contratos opcionales */ }
   }
 
   // ── Guardar: EXPEDIENTE ────────────────────────────────────────────────────

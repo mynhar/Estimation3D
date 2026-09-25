@@ -294,11 +294,6 @@ export class OfertaService {
 
   // ── Reparto en bloque ───────────────────────────────────────────────────────
 
-  /** Acepta las seleccionadas y rechaza todas las demás. No genera contrato. */
-  async aceptarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
-    return this.ofertaRepo.aceptarSeleccion(expedienteId, ofertaIds);
-  }
-
   /** Rechaza las indicadas, sin tocar el resto. */
   async rechazarSeleccion(expedienteId: string, ofertaIds: string[]): Promise<number> {
     return this.ofertaRepo.rechazarVarias(expedienteId, ofertaIds);

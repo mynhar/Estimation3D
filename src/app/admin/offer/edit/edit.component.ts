@@ -76,6 +76,7 @@ export class AdminOfferEditComponent implements OnInit {
 
   adjudicando            = signal(false);
   errorAdjudicar         = signal('');
+  exitoAdjudicar         = signal('');
   confirmandoAdjudicarId = signal<string | null>(null);
 
   restaurando    = signal<string | null>(null);
@@ -91,10 +92,15 @@ export class AdminOfferEditComponent implements OnInit {
   // la oferta para el reparto (esto). Son independientes a propósito.
   seleccion = signal<ReadonlySet<string>>(new Set());
 
-  /** Con contrato vivo no hay reparto; la casilla tampoco se pinta. */
-  get puedeRepartir(): boolean {
+  /**
+   * Cuándo se pinta la casilla. Más amplio que el bloqueo de la barra a
+   * propósito: en 'adjudicado' las tres acciones de estado están vetadas (la
+   * base las rechaza con un contrato vivo), pero re-adjudicar SÍ se permite, y
+   * sin casillas no habría forma de elegir a quién.
+   */
+  get puedeSeleccionar(): boolean {
     const estado = this.detalle()?.estado ?? '';
-    return estado !== 'adjudicado' && estado !== 'contratado';
+    return estado === 'en_oferta' || estado === 'adjudicado';
   }
 
   estaSeleccionada(oferta: OfertaConConstructor): boolean {
@@ -103,6 +109,30 @@ export class AdminOfferEditComponent implements OnInit {
 
   alternarSeleccion(oferta: OfertaConConstructor): void {
     this.seleccion.update(actual => alternarEnSeleccion(actual, oferta.id));
+  }
+
+  limpiarSeleccion(): void {
+    this.seleccion.set(new Set());
+    this.confirmandoAdjudicarSeleccion.set(false);
+  }
+
+  /**
+   * Las marcadas que se pueden adjudicar. Una oferta dada de baja no entra
+   * aunque la casilla se hubiera quedado marcada de antes.
+   */
+  seleccionadasParaAdjudicar = computed(() =>
+    this.ofertasActivas().filter(o => this.seleccion().has(o.id)));
+
+  confirmandoAdjudicarSeleccion = signal(false);
+
+  /**
+   * El RPC sólo adjudica desde 'en_oferta' o 'adjudicado', así que el botón se
+   * bloquea antes de llegar a la base.
+   */
+  get puedeAdjudicarSeleccion(): boolean {
+    const estado = this.detalle()?.estado ?? '';
+    return (estado === 'en_oferta' || estado === 'adjudicado')
+      && this.seleccionadasParaAdjudicar().length > 0;
   }
 
   /** El reparto se aplicó en la base: releer y refrescar el formulario. */
@@ -558,69 +588,113 @@ export class AdminOfferEditComponent implements OnInit {
     this.errorEliminar.set('');
   }
 
+  /** El trofeo de una tarjeta: adjudicar esa sola oferta. */
   async adjudicarOferta(oferta: OfertaConConstructor) {
-    if (this.adjudicando()) return;
+    this.confirmandoAdjudicarId.set(null);
+    await this.adjudicar([oferta.id]);
+  }
+
+  /** «Adjudicar selección»: una, varias o todas las marcadas. */
+  async adjudicarSeleccion() {
+    this.confirmandoAdjudicarSeleccion.set(false);
+    await this.adjudicar(this.seleccionadasParaAdjudicar().map(o => o.id));
+  }
+
+  /**
+   * Adjudica N ofertas: el RPC crea UN CONTRATO POR OFERTA en una sola
+   * transacción y devuelve los contratos creados; aquí se genera y sube un PDF
+   * para cada uno.
+   *
+   * Los PDF de los contratos que el RPC sustituye se capturan ANTES de llamar,
+   * porque después ya no hay fila de la que leer la ruta y quedarían huérfanos
+   * en el bucket.
+   *
+   * Un fallo generando un PDF no deshace la adjudicación: los contratos ya
+   * están en la base y son lo que cuenta. Se informa de cuántos PDF fallaron
+   * para poder reintentarlo.
+   */
+  private async adjudicar(ofertaIds: string[]) {
+    if (this.adjudicando() || !ofertaIds.length) return;
     this.adjudicando.set(true);
     this.errorAdjudicar.set('');
-    this.confirmandoAdjudicarId.set(null);
+    this.exitoAdjudicar.set('');
     try {
-      // Capturar url_pdf del contrato anterior antes de que el RPC lo elimine
-      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.expedienteId);
-      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+      const pdfsAnteriores = (await this.contratoService.listarPorExpediente(this.expedienteId))
+        .map(c => c.url_pdf)
+        .filter((u): u is string => !!u);
 
-      // RPC: adjudica oferta + crea nuevo contrato en DB
-      await this.ofertaService.aceptarOferta(this.expedienteId, oferta.id);
+      const creados = await this.contratoService.adjudicarOfertas(this.expedienteId, ofertaIds);
 
-      // Refrescar estado de la UI y obtener el nuevo contrato en paralelo
-      const [ofertas, detalle, nuevoContrato] = await Promise.all([
+      const [ofertas, detalle] = await Promise.all([
         this.ofertaService.getOfertasDeExpediente(this.expedienteId, true),
         this.expedienteService.getExpedienteParaOferta(this.expedienteId),
-        this.contratoService.buscarPorExpediente(this.expedienteId),
       ]);
       this.todasLasOfertas.set(this.ordenarOfertas(ofertas));
       this.detalle.set(detalle);
+      this.limpiarSeleccion();
 
-      // Generar y guardar PDF
-      if (nuevoContrato) {
-        if (urlPdfAnterior) {
-          await this.contratoService.eliminarPdfStorage(urlPdfAnterior);
-        }
-        const d    = this.detalle()!;
-        const lang = this.translate.currentLang;
-        const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
-        const locale      = localeMap[lang] ?? 'fr-CA';
-        const fechaHoy    = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
-        const pdfData: ContratoPdfData = {
-          contratoId:          nuevoContrato.id,
-          expedienteNumero:    d.numero,
-          fechaGenerado:       fechaHoy,
-          clienteNombre:       d.cliente_nombre,
-          constructorNombre:   oferta.constructor_nombre,
-          constructorTelefono: oferta.constructor_telefono,
-          constructorEmail:    oferta.constructor_email,
-          servicioNombre:      this.servicioNombre(),
-          servicioDescripcion: this.servicioDescripcion(),
-          direccion:           d.direccion,
-          canton:              d.canton,
-          provincia:           d.provincia,
-          distrito:            d.distrito,
-          precioFinal:         oferta.precio,
-          plazoMin:            oferta.plazo_semanas_min,
-          plazoMax:            oferta.plazo_semanas_max,
-          garantiaAnos:        oferta.garantia_anos,
-          fechaInicio:         oferta.fecha_inicio,
-          descripcionTrabajo:  oferta.descripcion,
-          lang,
-        };
-        const pdfBlob = this.contratoService.generarPdfBlob(pdfData);
-        const pdfPath = await this.contratoService.subirPdf(pdfBlob, nuevoContrato.id);
-        await this.contratoService.actualizarUrlPdf(nuevoContrato.id, pdfPath);
+      // Best-effort: si la limpieza falla, el contrato nuevo sigue siendo válido.
+      for (const url of pdfsAnteriores) {
+        await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
+
+      let fallidos = 0;
+      for (const { id_contrato, id_oferta } of creados) {
+        const oferta = this.todasLasOfertas().find(o => o.id === id_oferta);
+        if (!oferta) { fallidos++; continue; }
+        try {
+          await this.generarPdfContrato(id_contrato, oferta);
+        } catch {
+          fallidos++;
+        }
+      }
+
+      this.exitoAdjudicar.set(
+        fallidos
+          ? this.translate.instant('admin_offer.adjudicar_pdf_parcial', { n: creados.length - fallidos, total: creados.length })
+          : this.translate.instant('admin_offer.adjudicar_ok', { n: creados.length }),
+      );
     } catch (e: any) {
       this.errorAdjudicar.set(e.message);
     } finally {
       this.adjudicando.set(false);
     }
+  }
+
+  /** Genera el PDF de un contrato y lo enlaza a su fila. */
+  private async generarPdfContrato(contratoId: string, oferta: OfertaConConstructor) {
+    const d    = this.detalle()!;
+    const lang = this.translate.currentLang;
+    const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
+    const locale   = localeMap[lang] ?? 'fr-CA';
+    const fechaHoy = new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+
+    const pdfData: ContratoPdfData = {
+      contratoId,
+      expedienteNumero:    d.numero,
+      fechaGenerado:       fechaHoy,
+      clienteNombre:       d.cliente_nombre,
+      constructorNombre:   oferta.constructor_nombre,
+      constructorTelefono: oferta.constructor_telefono,
+      constructorEmail:    oferta.constructor_email,
+      servicioNombre:      this.servicioNombre(),
+      servicioDescripcion: this.servicioDescripcion(),
+      direccion:           d.direccion,
+      canton:              d.canton,
+      provincia:           d.provincia,
+      distrito:            d.distrito,
+      precioFinal:         oferta.precio,
+      plazoMin:            oferta.plazo_semanas_min,
+      plazoMax:            oferta.plazo_semanas_max,
+      garantiaAnos:        oferta.garantia_anos,
+      fechaInicio:         oferta.fecha_inicio,
+      descripcionTrabajo:  oferta.descripcion,
+      lang,
+    };
+
+    const pdfBlob = this.contratoService.generarPdfBlob(pdfData);
+    const pdfPath = await this.contratoService.subirPdf(pdfBlob, contratoId);
+    await this.contratoService.actualizarUrlPdf(contratoId, pdfPath);
   }
 
   cancelarAdjudicar() {
