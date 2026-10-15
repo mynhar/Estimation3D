@@ -79,7 +79,7 @@
                 }
               </div>
               <p class="text-ink-secondary mt-1 mb-0" style="font-size:var(--ds-text-sm)">
-                {{ servicioNombre() }}
+                {{ multiServicio() ? serviciosTexto() : servicioNombre() }}
               </p>
             </div>
           </div>
@@ -117,10 +117,20 @@
               <i class="bi bi-tools"></i>
             </div>
             <div class="context-content">
-              <p class="context-label">{{ 'make_offer.service_label' | translate }}</p>
-              <p class="context-value">{{ servicioNombre() }}</p>
-              @if (servicioDescripcion()) {
-                <p class="context-sub">{{ servicioDescripcion() }}</p>
+              @if (multiServicio()) {
+                <!-- Varios: uno por línea, el principal primero -->
+                <p class="context-label" id="mo-servicios-label">{{ 'service_selector.name' | translate }}</p>
+                <ul class="context-list" aria-labelledby="mo-servicios-label">
+                  @for (s of serviciosNombres(); track s.id) {
+                    <li class="context-value">{{ s.nombre }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="context-label">{{ 'make_offer.service_label' | translate }}</p>
+                <p class="context-value">{{ servicioNombre() }}</p>
+                @if (servicioDescripcion()) {
+                  <p class="context-sub">{{ servicioDescripcion() }}</p>
+                }
               }
             </div>
           </div>
@@ -330,15 +340,15 @@
                   {{ ofertaId() ? ('make_offer.update_title' | translate) : ('make_offer.form_title' | translate) }}
                 </span>
                 <span class="progress-label">
-                  <span class="progress-label__num">{{ completedSteps }}</span>/5
+                  <span class="progress-label__num">{{ completedSteps }}</span>/{{ totalSteps }}
                   {{ 'make_offer.steps_done' | translate }}
                 </span>
               </div>
               <div class="progress-track">
-                <div class="progress-fill" [style.width.%]="(completedSteps / 5) * 100"></div>
+                <div class="progress-fill" [style.width.%]="(completedSteps / totalSteps) * 100"></div>
               </div>
               <div class="progress-steps">
-                @for (step of [1,2,3,4,5]; track step) {
+                @for (step of pasos; track step) {
                   <div class="progress-step"
                        [class.progress-step--done]="completedSteps >= step"></div>
                 }
@@ -348,11 +358,34 @@
             <div class="form-card__body">
 
               <!-- â”€â”€ Precio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+              <!-- Servicios de la oferta (solo con varios en el expediente) -->
+              @if (multiServicio()) {
+                <div class="form-field mb-4">
+                  <p class="form-field__label mb-1" id="mo-oferta-servicios-label">
+                    <i class="bi bi-tools me-1"></i>{{ 'offer_services.label' | translate }}
+                    <span class="req-mark">*</span>
+                  </p>
+                  <p class="field-hint mt-0 mb-2" id="mo-oferta-servicios-hint">{{ 'offer_services.hint' | translate }}</p>
+                  <app-servicio-selector
+                    [opciones]="opcionesServicio()"
+                    [(seleccion)]="servicioIdsOferta"
+                    [validar]="intentado()"
+                    [disabled]="enviando()"
+                    [mostrarPrincipal]="false"
+                    [compacto]="true"
+                    labelledBy="mo-oferta-servicios-label"
+                    describedBy="mo-oferta-servicios-hint" />
+                </div>
+              }
+
               <div class="form-field mb-4">
                 <label class="form-field__label">
                   <i class="bi bi-coin me-1"></i>{{ 'make_offer.total_price' | translate }}
                   <span class="req-mark">*</span>
                 </label>
+                @if (multiServicio()) {
+                  <p class="field-hint mt-0 mb-2">{{ 'offer_services.price_hint' | translate }}</p>
+                }
                 <div class="price-wrap" [class.price-wrap--focus]="false">
                   <span class="price-currency">CA$</span>
                   <input type="number" class="price-input"

@@ -930,6 +930,7 @@
 /* Timeline — eventos de obra */
 .adm-tl__dot--obra   { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
 .adm-tl__badge--obra { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.adm-tl__svc    { color: var(--ds-ink-secondary); overflow-wrap: anywhere; }
 .adm-tl__avance { font-weight: var(--ds-weight-semibold); color: var(--ds-gold-active); }
 .adm-tl__estado {
   display: inline-flex;

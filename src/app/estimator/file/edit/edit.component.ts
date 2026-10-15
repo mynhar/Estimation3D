@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
+import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 import { TipoInmueble } from '../../../types/supabase';
 
 interface ClienteRow {
@@ -27,14 +28,15 @@ interface ClienteRow {
 /**
  * Edición de un expediente por el estimador. Gemelo visual de
  * `estimator/file/create`; la diferencia está en la carga inicial y en que
- * guarda con `actualizarExpediente`, que solo escribe `expediente` y
- * `localizacion`. La dirección del perfil del cliente jamás se modifica aquí.
+ * guarda con `actualizarExpediente`, que solo escribe `expediente`,
+ * `localizacion` y la lista de servicios (`expediente_servicio`). La dirección
+ * del perfil del cliente jamás se modifica aquí.
  */
 @Component({
   selector: 'app-estimator-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -102,10 +104,31 @@ export class EstimatorFileEditComponent implements OnInit {
   });
 
   // ── Servicios ──────────────────────────────────────────────────────────────
+  /** Catálogo completo, incluidos los dados de baja (ver `opcionesServicio`). */
   servicios         = signal<Servicio[]>([]);
   cargandoServicios = signal(true);
-  servicioId        = signal<number | null>(null);
-  servicioRequerido = signal(false);
+  /** Servicios del expediente, en orden de prioridad: el primero es el principal. */
+  servicioIds       = signal<number[]>([]);
+  /** Los que tenía el expediente al abrirlo. */
+  private serviciosGuardados = signal<ReadonlySet<number>>(new Set());
+
+  /**
+   * Activos + los dados de baja que el expediente ya tenía. Sin estos últimos,
+   * un servicio desactivado después del alta no se vería y el siguiente
+   * guardado lo quitaría sin avisar.
+   */
+  opcionesServicio = computed<ServicioOpcion[]>(() => {
+    const guardados = this.serviciosGuardados();
+    return this.serviciosLocalizados()
+      .filter(s => s.activo !== false || guardados.has(s.id))
+      .map(s => ({
+        id:          s.id,
+        codigo:      s.codigo,
+        nombre:      s.nombre_local,
+        descripcion: s.descripcion_local,
+        inactivo:    s.activo === false,
+      }));
+  });
 
   serviciosLocalizados = computed(() => {
     const lang = this.currentLang();
@@ -123,6 +146,8 @@ export class EstimatorFileEditComponent implements OnInit {
   });
 
   // ── Estado general ─────────────────────────────────────────────────────────
+  /** Se intentó guardar: los campos sin tocar empiezan a mostrar su error. */
+  intentado         = signal(false);
   enviando          = signal(false);
   error             = signal('');
   ubicacionCargando = signal(false);
@@ -135,7 +160,7 @@ export class EstimatorFileEditComponent implements OnInit {
 
   readonly STEPS = [
     'admin_file_create.step2_name',
-    'file_create.step1_name',
+    'service_selector.name',
     'file_create.step3_name',
     'file_create.step4_name',
   ];
@@ -143,7 +168,7 @@ export class EstimatorFileEditComponent implements OnInit {
   /** Etiquetas + icono de cada fila del resumen lateral. Mismo orden que STEPS. */
   readonly RESUMEN_META = [
     { label: 'admin_file_create.step2_name', icon: 'bi-person'    },
-    { label: 'file_create.step1_name',       icon: 'bi-tools'     },
+    { label: 'service_selector.name',        icon: 'bi-tools'     },
     { label: 'file_create.step3_name',       icon: 'bi-calendar3' },
     { label: 'file_create.step4_name',       icon: 'bi-geo-alt'   },
   ];
@@ -182,7 +207,7 @@ export class EstimatorFileEditComponent implements OnInit {
 
   // ── Computed: per-step completion ──────────────────────────────────────────
   step1Complete = computed(() => !!this.clienteId());
-  step2Complete = computed(() => !!this.servicioId());
+  step2Complete = computed(() => this.servicioIds().length > 0);
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
 
@@ -200,7 +225,6 @@ export class EstimatorFileEditComponent implements OnInit {
   // ── Resumen lateral ────────────────────────────────────────────────────────
   private resumenValores = computed<(string | null)[]>(() => {
     const cli = this.clienteSeleccionado();
-    const srv = this.serviciosLocalizados().find(s => s.id === this.servicioId());
     const ev  = this.expedienteValue();
     const lv  = this.localizacionValue();
 
@@ -212,11 +236,16 @@ export class EstimatorFileEditComponent implements OnInit {
 
     return [
       cli ? `${cli.nombre} ${cli.apellido}` : null,
-      srv?.nombre_local ?? null,
+      this.resumenServicios(),
       visita,
       partes.filter(Boolean).join(', ') || null,
     ];
   });
+
+  private resumenServicios = computed(() =>
+    resumirServicios(this.servicioIds(), this.opcionesServicio(),
+      total => this.translate.instant('service_selector.all', { total }))
+  );
 
   resumen = computed(() =>
     this.RESUMEN_META.map((meta, i) => ({
@@ -233,24 +262,6 @@ export class EstimatorFileEditComponent implements OnInit {
 
   estadoLabel(): string {
     return this.estado() ? `state.${this.estado()}` : 'common.none';
-  }
-
-  serviceIcon(codigo: string): string {
-    const c = codigo.toLowerCase();
-    if (c.includes('moho'))                          return 'bi-biohazard';
-    if (c.includes('agua') || c.includes('dano'))    return 'bi-droplet';
-    if (c.includes('desamian'))                      return 'bi-layers';
-    if (c.includes('demolic'))                       return 'bi-buildings';
-    if (c.includes('aisla'))                         return 'bi-layers';
-    if (c.includes('fund') || c.includes('dren'))    return 'bi-water';
-    if (c.includes('elect'))                         return 'bi-lightning-charge';
-    if (c.includes('pint'))                          return 'bi-brush';
-    if (c.includes('techo') || c.includes('teja'))   return 'bi-house';
-    if (c.includes('piso')  || c.includes('cer'))    return 'bi-grid-3x3';
-    if (c.includes('carpint') || c.includes('mad'))  return 'bi-hammer';
-    if (c.includes('alumin') || c.includes('vidri')) return 'bi-window';
-    if (c.includes('jardin') || c.includes('plant')) return 'bi-tree';
-    return 'bi-tools';
   }
 
   invalid(form: ReturnType<FormBuilder['group']>, campo: string): boolean {
@@ -353,8 +364,7 @@ export class EstimatorFileEditComponent implements OnInit {
     this.cargandoServicios.set(true);
     const { data, error } = await this.auth.client
       .from('servicio')
-      .select('id, codigo, nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es')
-      .eq('activo', true)
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es, activo')
       .order('codigo');
     if (error) console.error('[EstimatorFileEdit] servicios:', error.message);
     this.servicios.set(data?.length ? (data as unknown as Servicio[]) : SERVICIOS_FALLBACK);
@@ -380,7 +390,9 @@ export class EstimatorFileEditComponent implements OnInit {
 
       this.numero.set(exp.numero);
       this.estado.set(exp.estado);
-      this.servicioId.set(exp.servicio_id);
+      const servicioIds = await this.cargarServiciosExpediente(exp.servicio_id);
+      this.servicioIds.set(servicioIds);
+      this.serviciosGuardados.set(new Set(servicioIds));
       this.clienteId.set(exp.cliente_id);
 
       const cli = this.clientes().find(c => c.id === exp.cliente_id);
@@ -414,6 +426,19 @@ export class EstimatorFileEditComponent implements OnInit {
     }
   }
 
+  /**
+   * Lista completa de servicios. Si `expediente_servicio` no responde (p. ej.
+   * migración aún sin aplicar) se cae al principal, que siempre existe.
+   */
+  private async cargarServiciosExpediente(principalId: number): Promise<number[]> {
+    try {
+      return await this.expedienteService.getServiciosExpediente(this.expedienteId, principalId);
+    } catch (e) {
+      console.error('[EstimatorFileEdit] servicios del expediente:', e);
+      return [principalId];
+    }
+  }
+
   /** "2026-08-13T09:30:00+00:00" → { fecha: "2026-08-13", hora: "09:30" }. */
   private partirFechaVisita(valor: string): { fecha: string; hora: string } {
     if (!valor) return { fecha: '', hora: '' };
@@ -437,7 +462,7 @@ export class EstimatorFileEditComponent implements OnInit {
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
     this.clienteRequerido.set(!this.clienteId());
-    this.servicioRequerido.set(!this.servicioId());
+    this.intentado.set(true);
 
     if (!this.allComplete()) return;
 
@@ -452,11 +477,12 @@ export class EstimatorFileEditComponent implements OnInit {
         ? `${lv.numero_unidad}-${lv.calle}`
         : (lv.calle ?? '');
 
-      // Solo se escriben `expediente` y `localizacion`: la dirección del perfil
-      // del cliente queda intacta.
+      // Solo se escriben `expediente`, `localizacion` y sus servicios: la
+      // dirección del perfil del cliente queda intacta.
       await this.expedienteService.actualizarExpediente(this.expedienteId, {
         clienteId:   this.clienteId()!,
-        servicioId:  this.servicioId()!,
+        servicioId:  this.servicioIds()[0],
+        servicioIds: this.servicioIds(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
         localizacion: {
@@ -474,7 +500,8 @@ export class EstimatorFileEditComponent implements OnInit {
       this.router.navigate(['/estimator/file/list']);
     } catch (e: any) {
       console.error('[EstimatorFileEdit] onSubmit:', e);
-      this.error.set('admin_file_edit.save_error');
+      // Los errores con clave propia (p. ej. servicio con ofertas) se enseñan tal cual.
+      this.error.set(e?.message?.startsWith('service_selector.') ? e.message : 'admin_file_edit.save_error');
     } finally {
       this.enviando.set(false);
     }

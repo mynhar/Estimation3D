@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
+import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 
 /**
  * Dirección del PERFIL del cliente. Solo se lee: es el punto de partida de la
@@ -24,7 +25,7 @@ interface PerfilDireccion {
   selector: 'app-file-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ServicioSelectorComponent],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -60,8 +61,25 @@ export class FileCreateComponent implements OnInit {
     }));
   });
   cargandoServicios = signal(true);
-  servicioId        = signal<number | null>(null);
-  servicioRequerido = signal(false);
+  /**
+   * Servicios marcados, en el orden en que se marcaron. El primero es el
+   * principal (`expediente.servicio_id`); la lista entera va a
+   * `expediente_servicio`.
+   */
+  servicioIds       = signal<number[]>([]);
+  servicioPrincipal = computed(() => this.servicioIds()[0] ?? null);
+
+  opcionesServicio = computed<ServicioOpcion[]>(() =>
+    this.serviciosLocalizados().map(s => ({
+      id:          s.id,
+      codigo:      s.codigo,
+      nombre:      s.nombre_local,
+      descripcion: s.descripcion_local,
+    }))
+  );
+
+  /** Se intentó enviar: los campos sin tocar empiezan a mostrar su error. */
+  intentado         = signal(false);
   enviando          = signal(false);
   error             = signal('');
   ubicacionCargando = signal(false);
@@ -73,7 +91,7 @@ export class FileCreateComponent implements OnInit {
   readonly CA_POSTAL_RE     = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
   readonly STEPS = [
-    'file_create.step1_name',
+    'service_selector.name',
     'file_create.step2_name',
     'file_create.step3_name',
     'file_create.step4_name',
@@ -81,7 +99,7 @@ export class FileCreateComponent implements OnInit {
 
   /** Filas del resumen en vivo del raíl, en el mismo orden que STEPS. */
   readonly RESUMEN_META = [
-    { label: 'file_create.step1_name', icon: 'bi-tools'     },
+    { label: 'service_selector.name',  icon: 'bi-tools'     },
     { label: 'file_create.step2_name', icon: 'bi-person'    },
     { label: 'file_create.step3_name', icon: 'bi-calendar3' },
     { label: 'file_create.step4_name', icon: 'bi-geo-alt'   },
@@ -197,7 +215,7 @@ export class FileCreateComponent implements OnInit {
   }
 
   // ── Computed: per-step completion ──────────────────────────────────────────
-  step1Complete = computed(() => !!this.servicioId());
+  step1Complete = computed(() => this.servicioIds().length > 0);
   step2Complete = computed(() => this.perfilStatus()       === 'VALID');
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
@@ -216,8 +234,8 @@ export class FileCreateComponent implements OnInit {
   // ── Resumen en vivo del raíl ───────────────────────────────────────────────
   /** Valor legible de cada paso, o null si aún no hay nada que enseñar. */
   private resumenValores = computed<(string | null)[]>(() => {
-    const sid  = this.servicioId();
-    const serv = sid ? this.serviciosLocalizados().find(s => s.id === sid)?.nombre_local ?? null : null;
+    const serv = resumirServicios(this.servicioIds(), this.opcionesServicio(),
+      total => this.translate.instant('service_selector.all', { total }));
 
     const pv       = this.perfilValue();
     const contacto = [pv.nombre, pv.apellido].filter(Boolean).join(' ').trim() || null;
@@ -248,24 +266,6 @@ export class FileCreateComponent implements OnInit {
   // ── Helpers ────────────────────────────────────────────────────────────────
   stepDone(idx: number): boolean {
     return [this.step1Complete(), this.step2Complete(), this.step3Complete(), this.step4Complete()][idx] ?? false;
-  }
-
-  serviceIcon(codigo: string): string {
-    const c = codigo.toLowerCase();
-    if (c.includes('moho'))                         return 'bi-biohazard';
-    if (c.includes('agua') || c.includes('dano'))   return 'bi-droplet-half';
-    if (c.includes('desamian'))                     return 'bi-layers';
-    if (c.includes('demolic'))                      return 'bi-buildings';
-    if (c.includes('aisla'))                        return 'bi-layers';
-    if (c.includes('fund') || c.includes('dren'))   return 'bi-water';
-    if (c.includes('elect'))                        return 'bi-lightning-charge-fill';
-    if (c.includes('pint'))                         return 'bi-brush-fill';
-    if (c.includes('techo') || c.includes('teja'))  return 'bi-house-fill';
-    if (c.includes('piso')  || c.includes('cer'))   return 'bi-grid-3x3';
-    if (c.includes('carpint') || c.includes('mad')) return 'bi-hammer';
-    if (c.includes('alumin') || c.includes('vidri'))return 'bi-window';
-    if (c.includes('jardin') || c.includes('plant'))return 'bi-tree';
-    return 'bi-tools';
   }
 
   invalid(form: ReturnType<FormBuilder['group']>, campo: string): boolean {
@@ -348,7 +348,7 @@ export class FileCreateComponent implements OnInit {
     this.perfilForm.markAllAsTouched();
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
-    this.servicioRequerido.set(!this.servicioId());
+    this.intentado.set(true);
 
     if (!this.allComplete()) return;
 
@@ -380,7 +380,8 @@ export class FileCreateComponent implements OnInit {
 
       await this.expedienteService.crear({
         clienteId:   userId,
-        servicioId:  this.servicioId()!,
+        servicioId:  this.servicioPrincipal()!,
+        servicioIds: this.servicioIds(),
         numero:      this.generarNumeroExpediente(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
@@ -418,7 +419,7 @@ export class FileCreateComponent implements OnInit {
     this.perfilForm.reset();
     this.expedienteForm.reset();
     this.localizacionForm.reset();
-    this.servicioId.set(null);
+    this.servicioIds.set([]);
     this.router.navigate(['/client/file/my-files']);
   }
 }

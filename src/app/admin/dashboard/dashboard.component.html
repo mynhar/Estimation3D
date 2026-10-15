@@ -509,6 +509,9 @@
                       <span class="adm-tl__ref">{{ ev.referencia }}</span>
                       {{ ev.descKey | translate }}
                       @if (ev.precio) { <span class="adm-tl__price">· {{ ev.precio }}</span> }
+                      @if (servicioEvento(ev)) {
+                        <span class="adm-tl__svc">· {{ servicioEvento(ev) }}</span>
+                      }
                       @if (ev.avance != null) {
                         <span class="adm-tl__avance">· {{ ev.avance }}%</span>
                       }
@@ -570,6 +573,9 @@
                       <span class="adm-tl__ref">{{ ev.referencia }}</span>
                       {{ ev.descKey | translate }}
                       @if (ev.precio) { <span class="adm-tl__price">· {{ ev.precio }}</span> }
+                      @if (servicioEvento(ev)) {
+                        <span class="adm-tl__svc">· {{ servicioEvento(ev) }}</span>
+                      }
                       @if (ev.avance != null) {
                         <span class="adm-tl__avance">· {{ ev.avance }}%</span>
                       }

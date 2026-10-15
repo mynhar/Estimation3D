@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoPdfData, ContratoListItem } from '../models';
+import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoPdfData, ContratoListItem, ServicioContrato } from '../models';
 import { ContratoRepository } from '../data/contrato.repository';
 import { OfertaRepository } from '../data/oferta.repository';
 import { EstimacionRepository } from '../data/estimacion.repository';
+import { ServicioRepository } from '../data/servicio.repository';
 import { generarContratoPdfBlob } from '../shared/contrato-pdf';
 import { matterportThumbFromTour } from '../shared/util/matterport';
 
@@ -11,11 +12,18 @@ export class ContratoService {
   private contratoRepo = inject(ContratoRepository);
   private ofertaRepo   = inject(OfertaRepository);
   private estimacionRepo = inject(EstimacionRepository);
+  private servicioRepo   = inject(ServicioRepository);
 
   // ── Listar contratos del cliente ─────────────────────────────────────────
 
   async getMisContratos(clienteId: string): Promise<ContratoListItem[]> {
-    const rows = await this.contratoRepo.findByClienteId(clienteId);
+    const rows  = await this.contratoRepo.findByClienteId(clienteId);
+    const items = this.mapMisContratos(rows);
+    await this.adjuntarServicios(items, rows);
+    return items;
+  }
+
+  private mapMisContratos(rows: any[]): ContratoListItem[] {
     return rows.map((c: any) => {
       const svc    = c.expediente?.servicio;
       const locArr = c.expediente?.localizacion;
@@ -148,6 +156,53 @@ export class ContratoService {
 
   // ── Admin: detalle de un contrato ────────────────────────────────────────
 
+  /** El servicio principal del expediente como lista de uno: lo que se enseñaba antes. */
+  private respaldoPrincipal(principal: Record<string, string | null> | null): ServicioContrato[] {
+    return principal ? [{
+      id:             -1,
+      nombre_es:      principal['nombre_es'] ?? '—',
+      nombre_en:      principal['nombre_en'] ?? null,
+      nombre_fr:      principal['nombre_fr'] ?? null,
+      descripcion_es: principal['descripcion_es'] ?? null,
+      descripcion_en: principal['descripcion_en'] ?? null,
+      descripcion_fr: principal['descripcion_fr'] ?? null,
+    }] : [];
+  }
+
+  /** Catálogo de servicios por id. Si falla, vacío: cada contrato cae a su principal. */
+  private async catalogoServicios(ids: number[]): Promise<Map<number, ServicioContrato>> {
+    try {
+      const catalogo = await this.servicioRepo.findByIdsCompleto([...new Set(ids)]);
+      return new Map(catalogo.map(s => [s.id, s]));
+    } catch (e) {
+      console.error('[ContratoService] servicios del contrato:', e);
+      return new Map();
+    }
+  }
+
+  /**
+   * Servicios de un contrato (`contrato.servicio_ids`, copia de los de su
+   * oferta al adjudicar), en el orden guardado. Sin ellos, el principal.
+   */
+  private serviciosDe(
+    servicioIds: number[] | null | undefined,
+    catalogo:    Map<number, ServicioContrato>,
+    principal:   Record<string, string | null> | null,
+  ): ServicioContrato[] {
+    const lista = (servicioIds ?? [])
+      .map(id => catalogo.get(id))
+      .filter((s): s is ServicioContrato => !!s);
+    return lista.length ? lista : this.respaldoPrincipal(principal);
+  }
+
+  private async serviciosDelContrato(
+    servicioIds: number[] | null | undefined,
+    principal:   Record<string, string | null> | null,
+  ): Promise<ServicioContrato[]> {
+    const catalogo = servicioIds?.length ? await this.catalogoServicios(servicioIds) : new Map();
+    return this.serviciosDe(servicioIds, catalogo, principal);
+  }
+
   async getContratoAdminById(contratoId: string): Promise<ContratoAdminDetalle> {
     const c   = await this.contratoRepo.findDetalleById(contratoId);
     const exp = Array.isArray(c.expediente) ? c.expediente[0] : c.expediente;
@@ -168,6 +223,8 @@ export class ContratoService {
         estimadorEmail    = p.email    ?? null;
       }
     }
+
+    const servicios = await this.serviciosDelContrato(c.servicio_ids, svc);
 
     return {
       id:                   c.id,
@@ -202,6 +259,7 @@ export class ContratoService {
       estimador_telefono:   estimadorTelefono,
       estimador_email:      estimadorEmail,
       oferta_id:            ofe?.id                ?? '',
+      servicios,
       oferta_fecha_inicio:  ofe?.fecha_inicio      ?? null,
       plazo_semanas_min:    ofe?.plazo_semanas_min ?? null,
       plazo_semanas_max:    ofe?.plazo_semanas_max ?? null,
@@ -252,6 +310,7 @@ export class ContratoService {
       estimador_telefono:   null,
       estimador_email:      null,
       oferta_id:            ofe?.id                ?? '',
+      servicios:            await this.serviciosDelContrato(c.servicio_ids, svc),
       oferta_fecha_inicio:  ofe?.fecha_inicio      ?? null,
       plazo_semanas_min:    ofe?.plazo_semanas_min ?? null,
       plazo_semanas_max:    ofe?.plazo_semanas_max ?? null,
@@ -263,7 +322,7 @@ export class ContratoService {
   async getContratosConstructor(constructorId: string): Promise<ContratoConstructorListItem[]> {
     const rows  = await this.contratoRepo.findByConstructorId(constructorId);
     const items = rows.map((c: any) => this.mapContratoListItem(c));
-    await this.adjuntarFotos(items);
+    await Promise.all([this.adjuntarFotos(items), this.adjuntarServicios(items, rows)]);
     return items;
   }
 
@@ -272,7 +331,7 @@ export class ContratoService {
   async getContratosEstimador(estimadorId: string): Promise<ContratoConstructorListItem[]> {
     const rows  = await this.contratoRepo.findByEstimadorId(estimadorId);
     const items = rows.map((c: any) => this.mapContratoListItem(c));
-    await this.adjuntarFotos(items);
+    await Promise.all([this.adjuntarFotos(items), this.adjuntarServicios(items, rows)]);
     return items;
   }
 
@@ -281,8 +340,21 @@ export class ContratoService {
   async getContratosMonitoringAdmin(): Promise<ContratoConstructorListItem[]> {
     const rows  = await this.contratoRepo.findAllForMonitoring();
     const items = rows.map((c: any) => this.mapContratoListItem(c));
-    await this.adjuntarFotos(items);
+    await Promise.all([this.adjuntarFotos(items), this.adjuntarServicios(items, rows)]);
     return items;
+  }
+
+  /**
+   * Rellena `servicios` de cada contrato de una lista, con una sola consulta
+   * al catálogo. `rows` son las filas crudas, en el mismo orden que `items`.
+   */
+  private async adjuntarServicios(items: { servicios?: ServicioContrato[] }[], rows: any[]): Promise<void> {
+    const catalogo = await this.catalogoServicios(
+      rows.flatMap((c: any) => (c.servicio_ids ?? []) as number[]),
+    );
+    items.forEach((it, i) => {
+      it.servicios = this.serviciosDe(rows[i].servicio_ids, catalogo, rows[i].expediente?.servicio ?? null);
+    });
   }
 
   // Rellena `foto` con la miniatura del tour 3D (Matterport) de cada expediente.
@@ -300,6 +372,16 @@ export class ContratoService {
       const f = it.expediente_id ? fotoPorExpediente.get(it.expediente_id) : null;
       if (f) it.foto = f;
     }
+  }
+
+  /**
+   * La obra llegó al 100 % (la base marca el seguimiento como `completado`)
+   * pero el contrato sigue abierto: el administrador aún tiene que completarlo.
+   * Solo sabe responder si la fila trae `seguimiento`.
+   */
+  private obraTerminada(c: any): boolean {
+    const seg = Array.isArray(c.seguimiento) ? c.seguimiento[0] : c.seguimiento;
+    return seg?.estado === 'completado' && c.estado !== 'completado' && c.estado !== 'cancelado';
   }
 
   // Mapea una fila de contrato (con joins expediente/servicio/loc/cliente/oferta)
@@ -325,6 +407,7 @@ export class ContratoService {
       precio_final:       c.precio_final,
       garantia_anos:      c.garantia_anos       ?? null,
       estado:             c.estado,
+      obra_terminada:     this.obraTerminada(c),
       generado_en:        c.generado_en         ?? '',
       firmado_en:         c.firmado_en          ?? null,
       actualizado_en:     c.actualizado_en      ?? '',
@@ -365,9 +448,13 @@ export class ContratoService {
         .filter((id): id is string => !!id),
     )];
 
-    const [perfiles, estimaciones] = await Promise.all([
+    // Servicios de todos los contratos de la lista, en una sola consulta.
+    const servicioIds = rows.flatMap((c: any) => (c.servicio_ids ?? []) as number[]);
+
+    const [perfiles, estimaciones, catalogo] = await Promise.all([
       this.contratoRepo.findPerfilesByIds(estimadorIds),
       this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
+      this.catalogoServicios(servicioIds),
     ]);
 
     const estimadoresMap: Record<string, string> = {};
@@ -402,6 +489,8 @@ export class ContratoService {
         servicio_nombre:     svc?.nombre_es        ?? '—',
         servicio_nombre_en:  svc?.nombre_en ?? svc?.nombre_es ?? '—',
         servicio_nombre_fr:  svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+        servicios:           this.serviciosDe(c.servicio_ids, catalogo, svc),
+        obra_terminada:      this.obraTerminada(c),
         cliente_nombre:      cli ? `${cli.nombre ?? ''} ${cli.apellido ?? ''}`.trim() || '—' : '—',
         estimador_nombre:    exp?.estimador_id ? (estimadoresMap[exp.estimador_id] ?? null) : null,
         constructor_nombre:  con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || null : null,

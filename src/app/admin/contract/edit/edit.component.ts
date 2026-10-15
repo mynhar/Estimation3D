@@ -10,7 +10,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
-import { ContratoAdminDetalle, ContratoPdfData } from '../../../models';
+import {
+  ContratoAdminDetalle, ContratoPdfData, nombreServicio, descripcionServicio, serviciosParaContrato,
+} from '../../../models';
 
 type LangPdf = 'es' | 'en' | 'fr';
 
@@ -41,9 +43,6 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
   confirmandoFirmar = signal(false);
   errorFirmar       = signal<string | null>(null);
 
-  ejecutando          = signal(false);
-  confirmandoEjecutar = signal(false);
-  errorEjecutar       = signal<string | null>(null);
 
   completando          = signal(false);
   confirmandoCompletar = signal(false);
@@ -96,7 +95,11 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     return this.contrato()?.estado === 'generado';
   }
 
-  get puedeEjecutar(): boolean {
+  /**
+   * Firmado y aún sin arrancar. Solo se indica: la ejecución la inicia el
+   * primer parte diario del seguimiento de obra, no esta pantalla.
+   */
+  get ejecucionPendiente(): boolean {
     return this.contrato()?.estado === 'firmado';
   }
 
@@ -142,16 +145,6 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     this.errorFirmar.set(null);
   }
 
-  iniciarEjecutar() {
-    this.confirmandoEjecutar.set(true);
-    this.errorEjecutar.set(null);
-  }
-
-  cancelarEjecucion() {
-    this.confirmandoEjecutar.set(false);
-    this.errorEjecutar.set(null);
-  }
-
   iniciarCompletar() {
     this.confirmandoCompletar.set(true);
     this.errorCompletar.set(null);
@@ -176,23 +169,6 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
       this.errorCompletar.set(e.message);
     } finally {
       this.completando.set(false);
-    }
-  }
-
-  async confirmarEjecutar() {
-    const c = this.contrato();
-    if (!c || this.ejecutando()) return;
-    this.ejecutando.set(true);
-    this.errorEjecutar.set(null);
-    try {
-      await this.contratoService.iniciarEjecucionContratoAdmin(c.id);
-      const actualizado = await this.contratoService.getContratoAdminById(c.id);
-      this.contrato.set(actualizado);
-      this.confirmandoEjecutar.set(false);
-    } catch (e: any) {
-      this.errorEjecutar.set(e.message);
-    } finally {
-      this.ejecutando.set(false);
     }
   }
 
@@ -226,13 +202,6 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
             .format(new Date(c.generado_en.includes('T') ? c.generado_en : `${c.generado_en}T00:00:00`))
         : '';
 
-      const svcNombre = lang === 'en' ? (c.servicio_nombre_en || c.servicio_nombre)
-                      : lang === 'fr' ? (c.servicio_nombre_fr || c.servicio_nombre)
-                      : c.servicio_nombre;
-      const svcDesc   = lang === 'en' ? (c.servicio_desc_en || c.servicio_desc)
-                      : lang === 'fr' ? (c.servicio_desc_fr || c.servicio_desc)
-                      : c.servicio_desc;
-
       const pdfData: ContratoPdfData = {
         contratoId:          c.id,
         expedienteNumero:    c.expediente_numero,
@@ -241,8 +210,8 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
         constructorNombre:   c.constructor_nombre,
         constructorTelefono: c.constructor_telefono,
         constructorEmail:    c.constructor_email,
-        servicioNombre:      svcNombre,
-        servicioDescripcion: svcDesc,
+        // Todos los servicios del contrato (los de su oferta), con su descripción.
+        servicios:           serviciosParaContrato(c.servicios, lang),
         direccion:           c.direccion,
         canton:              c.canton,
         provincia:           c.provincia,
@@ -275,18 +244,14 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     this.pdfTamano.set(this.pdfTamano() === 'grande' ? 'normal' : 'grande');
   }
 
-  servicioNombre(c: ContratoAdminDetalle): string {
+  /** Servicios del contrato en el idioma activo, cada uno con su descripción. */
+  serviciosContrato(c: ContratoAdminDetalle): { id: number; nombre: string; descripcion: string }[] {
     const lang = this.translate.currentLang;
-    if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
-    if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
-    return c.servicio_nombre;
-  }
-
-  servicioDesc(c: ContratoAdminDetalle): string {
-    const lang = this.translate.currentLang;
-    if (lang === 'en') return c.servicio_desc_en || c.servicio_desc;
-    if (lang === 'fr') return c.servicio_desc_fr || c.servicio_desc;
-    return c.servicio_desc;
+    return c.servicios.map(s => ({
+      id:          s.id,
+      nombre:      nombreServicio(s, lang),
+      descripcion: descripcionServicio(s, lang),
+    }));
   }
 
   badgeExpediente(estado: string): string {

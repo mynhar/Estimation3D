@@ -13,6 +13,7 @@ const L: Record<string, Record<string, string>> = {
     phone:          'Teléfono',
     email:          'Correo',
     service:        'SERVICIO',
+    services:       'SERVICIOS',
     serviceName:    'Tipo de servicio',
     description:    'Descripción',
     address:        'Dirección',
@@ -43,6 +44,7 @@ const L: Record<string, Record<string, string>> = {
     phone:          'Phone',
     email:          'Email',
     service:        'SERVICE',
+    services:       'SERVICES',
     serviceName:    'Service type',
     description:    'Description',
     address:        'Address',
@@ -73,6 +75,7 @@ const L: Record<string, Record<string, string>> = {
     phone:          'Téléphone',
     email:          'Courriel',
     service:        'SERVICE',
+    services:       'SERVICES',
     serviceName:    'Type de service',
     description:    'Description',
     address:        'Adresse',
@@ -130,16 +133,19 @@ export function generarContratoPdfBlob(d: ContratoPdfData): Blob {
   };
 
   const row = (label: string, value: string, indent = 0) => {
-    newPageIfNeeded(7);
-    doc.setFont('helvetica', 'bold');
+    // Las líneas se calculan antes del salto de página: una descripción larga
+    // tiene que caber entera o empezar en la página siguiente, no cortarse.
     doc.setFontSize(8);
+    const lines = doc.splitTextToSize(value || '—', BODY - 45 - indent);
+    const alto  = Math.max(lines.length * 5, 5.5);
+    newPageIfNeeded(alto + 1.5);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(100, 80, 30);
     doc.text(`${label}:`, PAD + indent, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 30, 30);
-    const lines = doc.splitTextToSize(value || '—', BODY - 45 - indent);
     doc.text(lines, PAD + 45 + indent, y);
-    y += Math.max(lines.length * 5, 5.5);
+    y += alto;
   };
 
   const para = (text: string) => {
@@ -198,9 +204,17 @@ export function generarContratoPdfBlob(d: ContratoPdfData): Blob {
   hRule();
 
   // ── SERVICE ────────────────────────────────────────────────────────────────
-  sectionHeader(l['service']);
-  row(l['serviceName'], d.servicioNombre);
-  if (d.servicioDescripcion) row(l['description'], d.servicioDescripcion);
+  // Todos los servicios del contrato, cada uno con su descripción. Sin la
+  // lista (pantallas antiguas) se pinta el servicio único de siempre.
+  const servicios = d.servicios?.length
+    ? d.servicios
+    : [{ nombre: d.servicioNombre ?? '—', descripcion: d.servicioDescripcion ?? '' }];
+  sectionHeader(servicios.length > 1 ? l['services'] : l['service']);
+  servicios.forEach((s, i) => {
+    if (i > 0) y += 2;
+    row(l['serviceName'], s.nombre);
+    if (s.descripcion) row(l['description'], s.descripcion);
+  });
   y += 2;
   row(l['address'], d.direccion);
   row('', `${d.canton}  ${d.provincia}  ${d.distrito}`);

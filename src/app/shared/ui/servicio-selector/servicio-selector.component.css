@@ -1,0 +1,183 @@
+/* Hallmark · component: multi-select card group · genre: editorial · theme: design.md (locked)
+ * states: default · hover · focus · active · disabled · error · selected
+ * (loading lo pinta el padre mientras carga el catálogo)
+ * contrast: casilla vacía --ds-ink-muted ≈ 4.3:1 sobre --ds-surface
+ *
+ * Compartido por admin/file/create y admin/file/edit; por eso el prefijo
+ * propio `srv-` en vez de heredar el de ninguno de los dos. Sólo tokens --ds-*.
+ */
+
+:host { display: block; }
+
+.srv { min-width: 0; }
+
+/* ── Barra: contador + «todos» ─────────────────────────────────────────── */
+.srv-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-1) var(--ds-space-4);
+  margin-bottom: var(--ds-space-3);
+}
+
+.srv-count {
+  margin: 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.srv-all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  white-space: nowrap;
+}
+.srv-all:focus-visible {
+  outline: var(--ds-focus-ring);
+  outline-offset: 2px;
+}
+.srv-all:disabled { color: var(--ds-ink-muted); }
+
+/* ── Rejilla ───────────────────────────────────────────────────────────── */
+.srv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+  gap: var(--ds-space-3);
+}
+
+.srv-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  cursor: pointer;
+  background: var(--ds-surface);
+  transition:
+    border-color var(--ds-duration-fast) var(--ds-ease-out),
+    background-color var(--ds-duration-fast) var(--ds-ease-out),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-out),
+    transform var(--ds-duration-fast) var(--ds-ease-out);
+}
+.srv-card:hover:not(:has(:disabled)) {
+  border-color: var(--ds-gold);
+  background: var(--ds-gold-faint);
+  box-shadow: var(--ds-shadow-sm);
+}
+.srv-card:has(:focus-visible) {
+  outline: var(--ds-focus-ring);
+  outline-offset: 2px;
+}
+.srv-card:active:not(:has(:disabled)) { transform: translateY(1px); }
+.srv-card--selected {
+  border-color: var(--ds-gold);
+  background: var(--ds-gold-faint);
+  box-shadow: var(--ds-shadow-gold);
+}
+.srv-card:has(:disabled) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.srv-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.25rem; height: 2.25rem;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-bg-alt);
+  font-size: 1rem;
+  color: var(--ds-ink-muted);
+  flex-shrink: 0;
+  transition: var(--ds-transition-color);
+}
+.srv-card--selected .srv-icon { background: var(--ds-gold-soft); color: var(--ds-gold-active); }
+
+.srv-text { flex: 1 1 auto; min-width: 0; }
+.srv-name {
+  display: block;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  line-height: var(--ds-leading-snug);
+  overflow-wrap: anywhere;
+}
+.srv-desc {
+  display: block;
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-normal);
+}
+
+/* ── Etiquetas: principal (con 2+ marcados) e inactivo ─────────────────── */
+.srv-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+  margin-top: var(--ds-space-2);
+}
+.srv-tag {
+  display: inline-flex;
+  padding: 0.125rem var(--ds-space-2);
+  border: 1px solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-bg-alt);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-secondary);
+}
+.srv-tag--principal {
+  border-color: var(--ds-gold-soft);
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+}
+
+/* ── Casilla dibujada ──────────────────────────────────────────────────── */
+/* Borde vacío en --ds-ink-muted: --ds-border-strong no llega a 3:1 sobre
+ * crema. Marcada, la contrasta el check en tinta sobre dorado. */
+.srv-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.25rem; height: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ds-ink-muted);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface);
+  color: transparent;
+  font-size: 0.8rem;
+  transition: var(--ds-transition-color);
+}
+.srv-card:hover:not(:has(:disabled)) .srv-box { border-color: var(--ds-gold-active); }
+.srv-card--selected .srv-box {
+  background: var(--ds-gold);
+  border-color: var(--ds-gold-active);
+  color: var(--ds-ink);
+}
+
+/* ── Compacto (columnas estrechas: formulario de oferta) ────────────────── */
+:host(.srv-compacto) .srv-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  gap: var(--ds-space-2);
+}
+:host(.srv-compacto) .srv-card {
+  align-items: center;
+  padding: var(--ds-space-2) var(--ds-space-3);
+}
+:host(.srv-compacto) .srv-icon { width: 1.75rem; height: 1.75rem; font-size: 0.85rem; }
+:host(.srv-compacto) .srv-box  { margin-top: 0; }
+
+/* ── Error ─────────────────────────────────────────────────────────────── */
+.srv-error {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-3) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-danger);
+}

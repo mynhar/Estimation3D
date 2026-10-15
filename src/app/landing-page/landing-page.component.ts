@@ -119,7 +119,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
       provincia_ca: ['QC', Validators.required],
       codigo_postal: ['', [Validators.required, Validators.pattern(CA_POSTAL_RE)]],
     }),
-    // Un solo servicio por dossier, igual que en client/file/create.
+    // Un solo servicio por dossier. Las altas internas admiten varios
+    // (expediente_servicio); este formulario público sigue con uno.
     servicioId: this.fb.control<number | null>(null, Validators.required),
     description: [''],
   });

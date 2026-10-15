@@ -271,7 +271,8 @@ export class ExpedienteRepository {
 
   async update(id: string, payload: {
     cliente_id:   string;
-    servicio_id:  number;
+    /** Ausente cuando los servicios se guardan aparte con `guardar_servicios_expediente`. */
+    servicio_id?: number;
     fecha_visita: string;
     descripcion:  string | null;
   }): Promise<void> {

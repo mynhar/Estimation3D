@@ -564,81 +564,8 @@
   font-size: var(--ds-text-sm);
 }
 
-/* ══ Paso 2 · rejilla de servicios ════════════════════════════════════════ */
-/* auto-fill: a ancho completo caben 4–6 tarjetas por fila en vez de 3. */
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
-  gap: var(--ds-space-3);
-}
-
-.service-card {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--ds-space-3);
-  padding: var(--ds-space-4);
-  border: 1px solid var(--ds-border-strong);
-  border-radius: var(--ds-radius-md);
-  cursor: pointer;
-  background: var(--ds-surface);
-  position: relative;
-  transition:
-    border-color var(--ds-duration-fast) var(--ds-ease-out),
-    background-color var(--ds-duration-fast) var(--ds-ease-out),
-    box-shadow var(--ds-duration-fast) var(--ds-ease-out);
-}
-.service-card:hover {
-  border-color: var(--ds-gold);
-  background: var(--ds-gold-faint);
-  box-shadow: var(--ds-shadow-sm);
-}
-.service-card:has(:focus-visible) {
-  outline: var(--ds-focus-ring);
-  outline-offset: 2px;
-}
-.service-card--selected {
-  border-color: var(--ds-gold);
-  background: var(--ds-gold-faint);
-  box-shadow: var(--ds-shadow-gold);
-}
-
-.service-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 2.25rem; height: 2.25rem;
-  border-radius: var(--ds-radius-circle);
-  background: var(--ds-bg-alt);
-  font-size: 1rem;
-  color: var(--ds-ink-muted);
-  flex-shrink: 0;
-  transition: var(--ds-transition-color);
-}
-.service-icon--selected { background: var(--ds-gold-soft); color: var(--ds-gold-active); }
-
-.service-text { flex: 1 1 auto; min-width: 0; }
-.service-name {
-  display: block;
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-semibold);
-  color: var(--ds-ink);
-  line-height: var(--ds-leading-snug);
-  overflow-wrap: anywhere;
-  margin-bottom: var(--ds-space-1);
-}
-.service-desc {
-  display: block;
-  font-size: var(--ds-text-xs);
-  color: var(--ds-ink-secondary);
-  line-height: var(--ds-leading-normal);
-}
-
-.service-check {
-  flex-shrink: 0;
-  color: var(--ds-gold-active);
-  font-size: 1.05rem;
-  opacity: 0;
-  transition: opacity var(--ds-duration-fast) var(--ds-ease-out);
-}
-.service-card--selected .service-check { opacity: 1; }
+/* ══ Paso 2 · servicios ═══════════════════════════════════════════════════ */
+/* La rejilla vive en shared/ui/servicio-selector (compartida con las demás altas y ediciones). */
 
 /* ══ Paso 4 · tipo de inmueble ════════════════════════════════════════════ */
 .tipo-group {

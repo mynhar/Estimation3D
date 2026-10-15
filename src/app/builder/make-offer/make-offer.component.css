@@ -130,6 +130,16 @@
   letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--ds-ink-muted); margin-bottom: 0.2rem;
 }
+/* Varios servicios en el contexto: uno por línea. */
+.context-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .context-value {
   font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold);
   color: var(--ds-ink); margin-bottom: 0;

@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
@@ -13,13 +14,15 @@ import { OfertaService } from '../../services/oferta.service';
 import { MatterportService } from '../../services/matterport.service';
 import { MatterportModelo } from '../../models/matterport.model';
 import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
-import { ExpedienteParaOferta, ArchivoRow, OfertaForm } from '../../models';
+import { ExpedienteParaOferta, ArchivoRow, OfertaForm, nombreServicio } from '../../models';
+import { ServicioCompleto } from '../../data/servicio.repository';
+import { ServicioOpcion, ServicioSelectorComponent } from '../../shared/ui/servicio-selector/servicio-selector.component';
 
 @Component({
   selector: 'app-make-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent],
   templateUrl: './make-offer.component.html',
   styleUrl: './make-offer.component.css',
 })
@@ -36,6 +39,31 @@ export class MakeOfferComponent implements OnInit {
 
   user     = toSignal(this.auth.user$);
   detalle  = signal<ExpedienteParaOferta | null>(null);
+
+  private currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.currentLang || 'fr' },
+  );
+
+  /** Todos los servicios del expediente, el principal primero. */
+  servicios = signal<ServicioCompleto[]>([]);
+  /** Con un solo servicio no hay nada que elegir: la oferta lo cubre. */
+  multiServicio = computed(() => this.servicios().length > 1);
+
+  opcionesServicio = computed<ServicioOpcion[]>(() => {
+    const lang = this.currentLang();
+    return this.servicios().map(s => ({
+      id:          s.id,
+      codigo:      s.codigo ?? '',
+      nombre:      nombreServicio(s, lang),
+      descripcion: '',
+    }));
+  });
+
+  /** Servicios a los que se presenta la oferta. Una nueva empieza sin ninguno. */
+  servicioIdsOferta = signal<number[]>([]);
+  /** Se intentó enviar: el selector de servicios muestra su error. */
+  intentado = signal(false);
   cargando = signal(true);
   errorMsg = signal('');
 
@@ -77,8 +105,22 @@ export class MakeOfferComponent implements OnInit {
 
   private expedienteId = '';
 
+  /** 5 pasos; 6 si el expediente tiene varios servicios y hay que elegirlos. */
+  get totalSteps(): number {
+    return this.multiServicio() ? 6 : 5;
+  }
+
+  get pasos(): number[] {
+    return Array.from({ length: this.totalSteps }, (_, i) => i + 1);
+  }
+
+  get serviciosOfertaInvalidos(): boolean {
+    return this.multiServicio() && this.servicioIdsOferta().length === 0;
+  }
+
   get completedSteps(): number {
     let n = 0;
+    if (this.multiServicio() && this.servicioIdsOferta().length) n++;
     if (this.precio && this.precio > 0) n++;
     if (this.plazoMin && this.plazoMin > 0 && this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0)) n++;
     if (this.fechaInicio) n++;
@@ -90,6 +132,7 @@ export class MakeOfferComponent implements OnInit {
   get formularioCompleto(): boolean {
     const esNueva = !this.ofertaId();
     return !!(
+      !this.serviciosOfertaInvalidos &&
       this.precio && this.precio > 0 &&
       this.plazoMin && this.plazoMin > 0 &&
       this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
@@ -108,17 +151,24 @@ export class MakeOfferComponent implements OnInit {
     const userId = this.user()?.id;
 
     try {
-      const [detalle, archivosExpediente, ofertaExistente] = await Promise.all([
+      const [detalle, archivosExpediente, ofertaExistente, servicios] = await Promise.all([
         this.expedienteService.getExpedienteParaOferta(id),
         this.archivoService.listarPorExpediente(id),
         userId ? this.ofertaService.getOfertaPorExpediente(id, userId) : Promise.resolve(null),
+        // Sin la lista, la pantalla se comporta como con un solo servicio.
+        this.expedienteService.getServiciosCompletos(id).catch(e => {
+          console.error('[MakeOffer] servicios:', e?.message ?? e);
+          return [] as ServicioCompleto[];
+        }),
       ]);
       this.detalle.set(detalle);
+      this.servicios.set(servicios);
       this.fotos.set(archivosExpediente.fotos);
       this.documentos.set(archivosExpediente.documentos);
 
       if (ofertaExistente) {
         this.ofertaId.set(ofertaExistente.id);
+        this.servicioIdsOferta.set(ofertaExistente.servicio_ids ?? []);
         this.precio       = ofertaExistente.precio;
         this.plazoMin     = ofertaExistente.plazo_semanas_min;
         this.plazoMax     = ofertaExistente.plazo_semanas_max;
@@ -215,7 +265,12 @@ export class MakeOfferComponent implements OnInit {
   async enviarOferta() {
     this.errorEnvio.set('');
     this.exitoMsg.set('');
+    this.intentado.set(true);
 
+    if (this.serviciosOfertaInvalidos) {
+      this.errorEnvio.set('service_selector.required');
+      return;
+    }
     if (!this.precio || this.precio <= 0) {
       this.errorEnvio.set('make_offer.err_price');
       return;
@@ -254,6 +309,8 @@ export class MakeOfferComponent implements OnInit {
       garantia_anos:     this.garantiaAnos,
       fecha_inicio:      this.fechaInicio,
       descripcion:       this.descripcion.trim(),
+      // Con un solo servicio no se envía: el alta lo asigna y la edición no lo toca.
+      ...(this.multiServicio() ? { servicio_ids: this.servicioIdsOferta() } : {}),
     };
 
     this.enviando.set(true);
@@ -310,6 +367,15 @@ export class MakeOfferComponent implements OnInit {
     if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
     if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
     return d.servicio_nombre;
+  }
+
+  /** Nombres de todos los servicios del expediente; el principal primero. */
+  serviciosNombres(): { id: number; nombre: string }[] {
+    return this.opcionesServicio().map(o => ({ id: o.id, nombre: o.nombre }));
+  }
+
+  serviciosTexto(): string {
+    return this.serviciosNombres().map(s => s.nombre).join(' · ');
   }
 
   servicioDescripcion(): string {

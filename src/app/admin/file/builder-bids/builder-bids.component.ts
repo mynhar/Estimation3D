@@ -8,6 +8,7 @@ import { ContratoService } from '../../../services/contrato.service';
 import { ArchivoService } from '../../../services/archivo.service';
 import {
   OfertaForm, OfertaConConstructor, ArchivoRow, ESTADO_BADGE_OFERTA,
+  serviciosParaContrato, serviciosDeOferta,
 } from '../../../models';
 import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
 
@@ -203,7 +204,7 @@ export class AdminFileBuilderBidsComponent implements OnInit {
    * Adjudica N ofertas: el RPC crea UN CONTRATO POR OFERTA en una transacción y
    * devuelve los contratos creados; aquí se genera y sube un PDF para cada uno.
    *
-   * Los datos del expediente, el cliente y el servicio se leen UNA vez y se
+   * Los datos del expediente, el cliente y los servicios se leen UNA vez y se
    * reutilizan en todos los PDF: son los mismos para todos los contratos y
    * repetir las consultas por cada oferta no aporta nada.
    *
@@ -229,12 +230,12 @@ export class AdminFileBuilderBidsComponent implements OnInit {
         await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
 
-      const datos = await this.expedienteService.getExpedienteParaEdicion(this.expedienteId());
-      const [cli, svc] = await Promise.all([
-        this.buscarCliente(datos.cliente_id),
-        this.buscarServicio(datos.servicio_id),
-      ]);
       const lang  = this.translate.currentLang ?? 'fr';
+      const datos = await this.expedienteService.getExpedienteParaEdicion(this.expedienteId());
+      const [cli, serviciosExp] = await Promise.all([
+        this.buscarCliente(datos.cliente_id),
+        this.expedienteService.getServiciosCompletos(this.expedienteId()),
+      ]);
       const fecha = this.formatFecha(new Date().toISOString());
 
       await this.cargarOfertas();
@@ -244,6 +245,8 @@ export class AdminFileBuilderBidsComponent implements OnInit {
         const oferta = this.ofertas().find(o => o.id === id_oferta);
         if (!oferta) { fallidos++; continue; }
         try {
+          // Cada contrato lleva los servicios de SU oferta, no los del expediente.
+          const svc = serviciosParaContrato(serviciosDeOferta(serviciosExp, oferta), lang);
           const pdfBlob = this.contratoService.generarPdfBlob({
             contratoId:          id_contrato,
             expedienteNumero:    datos.numero,
@@ -252,8 +255,7 @@ export class AdminFileBuilderBidsComponent implements OnInit {
             constructorNombre:   oferta.constructor_nombre,
             constructorTelefono: oferta.constructor_telefono,
             constructorEmail:    oferta.constructor_email,
-            servicioNombre:      svc?.nombre      ?? '—',
-            servicioDescripcion: svc?.descripcion ?? '',
+            servicios:           svc,
             direccion:           datos.direccion ?? '—',
             canton:              datos.canton    ?? '—',
             provincia:           datos.provincia ?? '—',
@@ -298,29 +300,6 @@ export class AdminFileBuilderBidsComponent implements OnInit {
       .eq('id', clienteId)
       .maybeSingle();
     return data ? `${data.nombre} ${data.apellido}`.trim() : null;
-  }
-
-  /** Nombre y descripción localizados del servicio para el PDF del contrato. */
-  private async buscarServicio(servicioId: number | null): Promise<{ nombre: string; descripcion: string } | null> {
-    if (servicioId == null) return null;
-    const { data } = await this.auth.client
-      .from('servicio')
-      .select('nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es')
-      .eq('id', servicioId)
-      .maybeSingle();
-    if (!data) return null;
-    const lang = this.translate.currentLang;
-    const s = data as Record<string, string | null>;
-    return {
-      nombre:
-        lang === 'en' ? (s['nombre_en'] || s['nombre_fr'] || s['nombre_es'] || '')
-      : lang === 'es' ? (s['nombre_es'] || s['nombre_fr'] || '')
-      :                 (s['nombre_fr'] || s['nombre_es'] || ''),
-      descripcion:
-        lang === 'en' ? (s['descripcion_en'] || s['descripcion_fr'] || s['descripcion_es'] || '')
-      : lang === 'es' ? (s['descripcion_es'] || s['descripcion_fr'] || '')
-      :                 (s['descripcion_fr'] || s['descripcion_es'] || ''),
-    };
   }
 
   // ── Edición de la oferta seleccionada ──────────────────────────────────────

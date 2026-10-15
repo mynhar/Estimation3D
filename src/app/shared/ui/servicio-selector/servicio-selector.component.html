@@ -1,0 +1,64 @@
+<!-- El fieldset agrupa las casillas para lectores de pantalla y las bloquea
+     todas de una vez mientras el padre guarda. -->
+<fieldset class="srv" [disabled]="disabled()"
+          [attr.aria-labelledby]="labelledBy()"
+          [attr.aria-describedby]="descripcion()">
+
+  <div class="srv-toolbar">
+    <p class="srv-count" aria-live="polite">
+      {{ 'service_selector.count' | translate: { n: totalMarcados(), total: opciones().length } }}
+    </p>
+    <button type="button" class="btn btn-link srv-all" (click)="alternarTodos()">
+      @if (todos()) {
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+        {{ 'service_selector.clear' | translate }}
+      } @else {
+        <i class="bi bi-check2-all" aria-hidden="true"></i>
+        {{ 'service_selector.select_all' | translate }}
+      }
+    </button>
+  </div>
+
+  <!-- auto-fill: el número de columnas lo decide el ancho real disponible -->
+  <div class="srv-grid">
+    @for (s of opciones(); track s.id) {
+      @let sel = marcado(s.id);
+      @let esPrincipal = hayVarios() && principal() === s.id;
+      <label class="srv-card" [class.srv-card--selected]="sel">
+        <input type="checkbox" class="visually-hidden"
+               [value]="s.id"
+               [checked]="sel"
+               (change)="alternar(s.id)" />
+        <span class="srv-icon">
+          <i class="bi {{ icono(s.codigo) }}" aria-hidden="true"></i>
+        </span>
+        <span class="srv-text">
+          <span class="srv-name">{{ s.nombre }}</span>
+          @if (s.descripcion && !compacto()) {
+            <span class="srv-desc">{{ s.descripcion }}</span>
+          }
+          @if (esPrincipal || s.inactivo) {
+            <span class="srv-tags">
+              @if (esPrincipal) {
+                <span class="srv-tag srv-tag--principal">{{ 'service_selector.principal' | translate }}</span>
+              }
+              @if (s.inactivo) {
+                <span class="srv-tag">{{ 'service_selector.inactive' | translate }}</span>
+              }
+            </span>
+          }
+        </span>
+        <span class="srv-box" aria-hidden="true">
+          <i class="bi bi-check-lg"></i>
+        </span>
+      </label>
+    }
+  </div>
+</fieldset>
+
+@if (error()) {
+  <p class="srv-error" [id]="errorId" role="alert">
+    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+    {{ 'service_selector.required' | translate }}
+  </p>
+}

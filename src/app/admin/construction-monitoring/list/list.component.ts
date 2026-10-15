@@ -10,7 +10,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
-import { ContratoConstructorListItem } from '../../../models';
+import { ContratoConstructorListItem, nombreServicio } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import {
   coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta,
@@ -52,7 +52,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
         const haystack = [
           c.expediente_numero,
           c.cliente_nombre,
-          this.servicioNombre(c),
+          this.serviciosTexto(c),
           c.constructor_nombre,
           c.estado,
           // Dirección: en Canadá `direccion` lleva unidad + nº y calle,
@@ -133,8 +133,15 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
     }
   }
 
-  servicioNombre(c: ContratoConstructorListItem): string {
+  /**
+   * Todos los servicios del contrato (los de su oferta) en el idioma activo.
+   * Si no se pudieron leer, el principal del expediente, como antes.
+   */
+  serviciosTexto(c: ContratoConstructorListItem): string {
     const lang = this.translate.currentLang;
+    if (c.servicios?.length) {
+      return c.servicios.map(s => nombreServicio(s, lang)).join(' · ');
+    }
     if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
     if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
     return c.servicio_nombre;

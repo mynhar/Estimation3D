@@ -16,6 +16,11 @@ export type OfertaRaw = {
   estado:            string;
   creado_en:         string;
   /**
+   * Servicios del expediente que cubre la oferta (ver
+   * `20261015_oferta_servicios.sql`). Solo en las consultas que lo piden.
+   */
+  servicio_ids?:     number[];
+  /**
    * Baja lógica. Sólo lo pide `findByExpedienteId` (pantalla de administración,
    * que tiene que enseñar también las eliminadas); el resto de consultas filtran
    * por ofertas vivas y no seleccionan estas columnas.
@@ -29,10 +34,10 @@ export type OfertaRaw = {
  * literal en una sola línea: el cliente tipado de supabase-js analiza la cadena
  * del `select` a nivel de tipos, y una concatenación se infiere como `string`.
  */
-const COLS_OFERTA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en';
+const COLS_OFERTA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en, servicio_ids';
 
 /** Igual que `COLS_OFERTA` más las columnas de baja lógica. */
-const COLS_OFERTA_CON_BAJA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en, eliminada_en, eliminada_por';
+const COLS_OFERTA_CON_BAJA = 'id, expediente_id, constructor_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos, fecha_inicio, descripcion, estado, creado_en, servicio_ids, eliminada_en, eliminada_por';
 
 export type OfertaAceptada = {
   expediente_id: string;
@@ -145,7 +150,7 @@ export class OfertaRepository {
       .from('oferta')
       .select(`
         id, expediente_id, precio, plazo_semanas_min, plazo_semanas_max, garantia_anos,
-        fecha_inicio, descripcion, estado, creado_en, constructor_id,
+        fecha_inicio, descripcion, estado, creado_en, constructor_id, servicio_ids,
         expediente:expediente_id (
           numero, fecha_visita,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
@@ -204,6 +209,8 @@ export class OfertaRepository {
     fecha_inicio:      string | null;
     descripcion:       string;
     estado:            EstadoOferta;
+    /** Vacío o ausente = todos los del expediente (lo resuelve el trigger). */
+    servicio_ids?:     number[];
   }): Promise<string> {
     const { data, error } = await this.db
       .from('oferta')
@@ -224,6 +231,7 @@ export class OfertaRepository {
         garantia_anos:     form.garantia_anos ?? null,
         fecha_inicio:      form.fecha_inicio  || null,
         descripcion:       form.descripcion,
+        ...(form.servicio_ids ? { servicio_ids: form.servicio_ids } : {}),
       } as TablesUpdate<'oferta'>)
       .eq('id', ofertaId);
     if (error) throw new Error(error.message);

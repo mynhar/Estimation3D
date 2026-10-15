@@ -215,6 +215,8 @@
 /* ── Stacked cells ────────────────────────────────────────────────────────── */
 .cell-primary   { display: block; font-weight: var(--ds-weight-medium); color: var(--ds-ink); line-height: var(--ds-leading-snug); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cell-secondary { display: flex; align-items: center; gap: 0.2em; font-size: var(--ds-text-xs); color: var(--ds-ink-muted); line-height: var(--ds-leading-snug); margin-top: 1px; white-space: nowrap; }
+/* Servicios del contrato: pueden ser varios; envuelven en vez de ensanchar la columna. */
+.cell-servicios { display: block; white-space: normal; overflow-wrap: anywhere; max-width: 22rem; }
 .cell-muted     { color: var(--ds-ink-muted); font-size: var(--ds-text-sm); }
 .cell-precio    { font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold); color: var(--ds-ink); white-space: nowrap; }
 
@@ -429,4 +431,15 @@
   .status-chips::-webkit-scrollbar { display: none; }
   .col-date   { display: none; }
   .col-precio { display: none; }
+}
+
+/* «Obra terminada al 100 %»: el contrato sigue abierto y falta completarlo.
+   Usa .tag/.tag-gold del sistema; aquí solo encaje y separación. */
+.obra-terminada {
+  display: flex;
+  align-self: flex-start;
+  width: fit-content;
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  white-space: nowrap;
 }

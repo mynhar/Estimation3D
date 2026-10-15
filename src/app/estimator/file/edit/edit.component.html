@@ -210,8 +210,8 @@
             @if (step2Complete()) { <i class="bi bi-check-lg"></i> } @else { 2 }
           </span>
           <span class="section-head__text">
-            <span class="section-title">{{ 'file_create.step1_title' | translate }}</span>
-            <small class="section-hint">{{ 'file_create.step1_hint' | translate }}</small>
+            <span class="section-title" id="srv-title">{{ 'file_create.step1_title' | translate }}</span>
+            <small class="section-hint" id="srv-hint">{{ 'service_selector.hint' | translate }}</small>
           </span>
           @if (step2Complete()) {
             <span class="done-pill">
@@ -228,32 +228,13 @@
               {{ 'file_create.loading_services' | translate }}
             </div>
           } @else {
-            <div class="service-grid" role="radiogroup"
-                 [attr.aria-label]="'file_create.step1_title' | translate">
-              @for (s of serviciosLocalizados(); track s.id) {
-                <label class="service-card" [class.service-card--selected]="servicioId() === s.id">
-                  <input type="radio" class="visually-hidden"
-                         name="servicio"
-                         [value]="s.id"
-                         [checked]="servicioId() === s.id"
-                         (change)="servicioId.set(s.id)" />
-                  <span class="service-icon" [class.service-icon--selected]="servicioId() === s.id">
-                    <i class="bi {{ serviceIcon(s.codigo) }}" aria-hidden="true"></i>
-                  </span>
-                  <span class="service-text">
-                    <span class="service-name">{{ s.nombre_local }}</span>
-                    <span class="service-desc">{{ s.descripcion_local }}</span>
-                  </span>
-                  <i class="bi bi-check-circle service-check" aria-hidden="true"></i>
-                </label>
-              }
-            </div>
-            @if (servicioRequerido()) {
-              <p class="field-error mt-3" role="alert">
-                <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-                {{ 'file_create.service_required' | translate }}
-              </p>
-            }
+            <app-servicio-selector
+              [opciones]="opcionesServicio()"
+              [(seleccion)]="servicioIds"
+              [validar]="intentado()"
+              [disabled]="enviando()"
+              labelledBy="srv-title"
+              describedBy="srv-hint" />
           }
         </div>
       </section>

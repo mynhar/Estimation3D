@@ -3,7 +3,9 @@ import { SeguimientoService } from './seguimiento.service';
 import { ArchivoService, ReporteArchivoRow } from './archivo.service';
 import { ReporteZona } from '../data/seguimiento.repository';
 import { ActividadServicio, FaseServicio, ReporteDiario } from '../models/seguimiento.model';
-import { ActividadAvance, FaseAvance, ObraVM } from '../models';
+import {
+  ActividadAvance, ActividadesServicio, FaseAvance, FasesServicio, ObraVM, ParteDia, ServicioContrato,
+} from '../models';
 
 // Datos mínimos de contrato necesarios para construir el ObraVM. Lo cumplen
 // tanto ContratoListItem (cliente) como ContratoConstructorListItem (estimador).
@@ -13,6 +15,8 @@ export interface ObraContratoInput {
   servicio_nombre:    string;
   servicio_nombre_en: string;
   servicio_nombre_fr: string;
+  /** Todos los servicios del contrato, si el que llama los tiene. */
+  servicios?:         ServicioContrato[];
   estado:             string;
   plazo_semanas_min:  number | null;
   plazo_semanas_max:  number | null;
@@ -27,40 +31,34 @@ export class ObraVmService {
   private seguimientoService = inject(SeguimientoService);
   private archivoService     = inject(ArchivoService);
 
+  /** Días que enseña el historial de la tarjeta (con todos los partes de cada uno). */
+  private static readonly DIAS_EVENTOS = 6;
+
   async construirObra(c: ObraContratoInput): Promise<ObraVM | null> {
     const seg = await this.seguimientoService.getSeguimientoByContratoId(c.id);
     if (!seg) return null;
 
-    const hoyISO = this.fechaISO(new Date());
+    // Fases y actividades de todos los servicios del contrato: los paneles se
+    // agrupan por servicio y el historial nombra la fase de cada parte.
+    const servicioIds = this.idsServicios(c, seg.servicio_id);
 
-    const [fasesRaw, actividadesRaw, actsAgg, recientes, reporteHoy, stats] =
-      await Promise.all([
-        seg.servicio_id != null ? this.seguimientoService.getFasesByServicioId(seg.servicio_id)      : Promise.resolve([]),
-        seg.servicio_id != null ? this.seguimientoService.getActividadesByServicioId(seg.servicio_id) : Promise.resolve([]),
-        this.seguimientoService.getActividadesAgregadas(seg.id),
-        this.seguimientoService.getReportesRecientes(seg.id, 6),
-        this.seguimientoService.getReporteByFecha(seg.id, hoyISO),
-        this.seguimientoService.getStatsReportes(seg.id),
-      ]);
+    const [fasesRaw, actividadesRaw, actsAgg, recientesRaw, stats] = await Promise.all([
+      servicioIds.length
+        ? this.seguimientoService.getFasesByServicioIds(servicioIds)
+        : Promise.resolve([]),
+      servicioIds.length
+        ? this.seguimientoService.getActividadesByServicioIds(servicioIds)
+        : Promise.resolve([]),
+      this.seguimientoService.getActividadesAgregadas(seg.id),
+      // De sobra para cubrir los últimos días aunque cada uno tenga varios partes.
+      this.seguimientoService.getReportesRecientes(seg.id, ObraVmService.DIAS_EVENTOS * 5),
+      this.seguimientoService.getStatsReportes(seg.id),
+    ]);
 
-    const ultimoReporte = reporteHoy ?? recientes[0] ?? null;
-
-    let zonas: ReporteZona[]            = [];
-    let fotos: ReporteArchivoRow[]      = [];
-    let videos: ReporteArchivoRow[]     = [];
-    let documentos: ReporteArchivoRow[] = [];
-    if (ultimoReporte) {
-      const [z, media] = await Promise.all([
-        this.seguimientoService.getZonasReporte(ultimoReporte.id),
-        this.archivoService.cargarPorReporte(ultimoReporte.id),
-      ]);
-      zonas      = z;
-      fotos      = media.fotos;
-      videos     = media.videos;
-      documentos = media.documentos;
-    }
-
-    const avanceGlobal = c.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance);
+    const eventos         = this.ultimosDias(recientesRaw);
+    const partesUltimoDia = await this.cargarPartes(this.partesDelPrimerDia(eventos));
+    const avanceGlobal    = c.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance);
+    const fasesPrincipal  = fasesRaw.filter(f => f.servicio_id === seg.servicio_id);
 
     return {
       contratoId:          c.id,
@@ -69,20 +67,25 @@ export class ObraVmService {
       servicioNombre:      c.servicio_nombre,
       servicioNombreEn:    c.servicio_nombre_en,
       servicioNombreFr:    c.servicio_nombre_fr,
+      servicios:           c.servicios ?? [],
       estadoContrato:      c.estado,
       avanceGlobal,
       ultimaActualizacion: seg.actualizado_en,
       plazoMin:            c.plazo_semanas_min,
       plazoMax:            c.plazo_semanas_max,
-      llegadaFecha:        ultimoReporte?.fecha ?? null,
-      llegadaHora:         ultimoReporte?.hora_inicio ?? null,
-      horasDia:            ultimoReporte?.horas_trabajadas ?? null,
-      fases:               this.calcularFases(fasesRaw, avanceGlobal),
-      actividades:         this.calcularActividades(actividadesRaw, actsAgg, stats.total_dias),
-      zonas,
-      eventos:             recientes,
-      reporteMediaFecha:   ultimoReporte?.fecha ?? null,
-      fotos, videos, documentos,
+      fases:               this.calcularFases(fasesPrincipal, avanceGlobal),
+      fasesPorServicio:    this.fasesDeServicios(
+        servicioIds, fasesRaw, stats.avance_por_servicio, c.estado === 'completado',
+      ),
+      actividades:         this.calcularActividades(
+        actividadesRaw.filter(a => a.servicio_id === seg.servicio_id), actsAgg, stats.total_dias,
+      ),
+      actividadesPorServicio: this.actividadesDeServicios(
+        servicioIds, actividadesRaw, actsAgg, stats.dias_por_servicio,
+      ),
+      fasesCatalogo:       fasesRaw,
+      eventos,
+      partesUltimoDia,
     };
   }
 
@@ -102,8 +105,10 @@ export class ObraVmService {
 
     const segByContrato  = new Map(seguimientos.map(s => [s.contrato_id, s]));
     const seguimientoIds = seguimientos.map(s => s.id);
-    const servicioIds    = [...new Set(
-      seguimientos.map(s => s.servicio_id).filter((id): id is number => id != null),
+    // Fases y actividades de todos los servicios de los contratos: los paneles
+    // se agrupan por servicio y el historial nombra la fase de cada parte.
+    const servicioIds = [...new Set(
+      contratos.flatMap(c => this.idsServicios(c, segByContrato.get(c.id)?.servicio_id ?? null)),
     )];
 
     const [fasesRaw, actividadesRaw, reportesRaw, aggRaw] = await Promise.all([
@@ -124,20 +129,16 @@ export class ObraVmService {
       aggPorSeg.set(row.seguimiento_id, arr);
     }
 
-    const hoyISO = this.fechaISO(new Date());
-
-    // Último parte por seguimiento: el de hoy si existe, si no el más reciente.
-    const ultimoPorSeg = new Map<string, ReporteDiario | null>();
+    // Últimos días de cada obra y, de ellos, todos los partes del más reciente.
+    const eventosPorSeg = new Map<string, ReporteDiario[]>();
+    const ultimosPorSeg = new Map<string, ReporteDiario[]>();
     for (const seg of seguimientos) {
-      const reportes = reportesPorSeg.get(seg.id) ?? [];
-      const hoy = reportes.find(r => this.soloFecha(r.fecha) === hoyISO);
-      ultimoPorSeg.set(seg.id, hoy ?? reportes[0] ?? null);
+      const eventos = this.ultimosDias(reportesPorSeg.get(seg.id) ?? []);
+      eventosPorSeg.set(seg.id, eventos);
+      ultimosPorSeg.set(seg.id, this.partesDelPrimerDia(eventos));
     }
 
-    const ultimoIds = [...ultimoPorSeg.values()]
-      .filter((r): r is ReporteDiario => r !== null)
-      .map(r => r.id);
-
+    const ultimoIds = [...ultimosPorSeg.values()].flat().map(r => r.id);
     const [zonasRaw, mediaPorReporte] = await Promise.all([
       this.seguimientoService.getZonasByReporteIds(ultimoIds),
       this.archivoService.cargarPorReportes(ultimoIds),
@@ -149,13 +150,13 @@ export class ObraVmService {
       const seg = segByContrato.get(c.id);
       if (!seg) continue; // sin seguimiento → no se muestra (igual que construirObra → null)
 
-      const reportes      = reportesPorSeg.get(seg.id) ?? [];
-      const recientes     = reportes.slice(0, 6);
-      const ultimoReporte = ultimoPorSeg.get(seg.id) ?? null;
-      const totalDias     = reportes.length;
-      const avanceGlobal  = c.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance);
-      const media         = ultimoReporte ? mediaPorReporte.get(ultimoReporte.id) : undefined;
-      const svcId         = seg.servicio_id ?? -1;
+      const reportes     = reportesPorSeg.get(seg.id) ?? [];
+      // Días, no partes: un día con dos servicios trabajados tiene dos partes.
+      const totalDias    = new Set(reportes.map(r => this.soloFecha(r.fecha))).size;
+      const avanceGlobal = c.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance);
+      const svcId        = seg.servicio_id ?? -1;
+      const idsServicios = this.idsServicios(c, seg.servicio_id);
+      const idsObra      = new Set(idsServicios);
 
       obras.push({
         contratoId:          c.id,
@@ -164,25 +165,140 @@ export class ObraVmService {
         servicioNombre:      c.servicio_nombre,
         servicioNombreEn:    c.servicio_nombre_en,
         servicioNombreFr:    c.servicio_nombre_fr,
+        servicios:           c.servicios ?? [],
         estadoContrato:      c.estado,
         avanceGlobal,
         ultimaActualizacion: seg.actualizado_en,
         plazoMin:            c.plazo_semanas_min,
         plazoMax:            c.plazo_semanas_max,
-        llegadaFecha:        ultimoReporte?.fecha ?? null,
-        llegadaHora:         ultimoReporte?.hora_inicio ?? null,
-        horasDia:            ultimoReporte?.horas_trabajadas ?? null,
         fases:               this.calcularFases(fasesPorServicio.get(svcId) ?? [], avanceGlobal),
+        fasesPorServicio:    this.fasesDeServicios(
+          idsServicios, fasesRaw, this.avancePorServicio(reportes), c.estado === 'completado',
+        ),
         actividades:         this.calcularActividades(actsPorServicio.get(svcId) ?? [], aggPorSeg.get(seg.id) ?? [], totalDias),
-        zonas:               ultimoReporte ? (zonasPorReporte.get(ultimoReporte.id) ?? []) : [],
-        eventos:             recientes,
-        reporteMediaFecha:   ultimoReporte?.fecha ?? null,
-        fotos:               media?.fotos      ?? [],
-        videos:              media?.videos     ?? [],
-        documentos:          media?.documentos ?? [],
+        actividadesPorServicio: this.actividadesDeServicios(
+          idsServicios, actividadesRaw, aggPorSeg.get(seg.id) ?? [], this.diasPorServicio(reportes),
+        ),
+        fasesCatalogo:       fasesRaw.filter(f => idsObra.has(f.servicio_id)),
+        eventos:             eventosPorSeg.get(seg.id) ?? [],
+        partesUltimoDia:     this.armarPartes(ultimosPorSeg.get(seg.id) ?? [], zonasPorReporte, mediaPorReporte),
       });
     }
     return obras;
+  }
+
+  /**
+   * Detalle de los partes de un día: zonas y archivos de cada uno, en el orden
+   * en que se guardaron. Lo usa también la tarjeta al elegir otro día.
+   */
+  async cargarPartes(reportes: ReporteDiario[]): Promise<ParteDia[]> {
+    if (!reportes.length) return [];
+    const ids = reportes.map(r => r.id);
+    const [zonasRaw, media] = await Promise.all([
+      this.seguimientoService.getZonasByReporteIds(ids),
+      this.archivoService.cargarPorReportes(ids),
+    ]);
+    return this.armarPartes(reportes, this.agruparPor(zonasRaw, z => z.reporte_id), media);
+  }
+
+  private armarPartes(
+    reportes:        ReporteDiario[],
+    zonasPorReporte: Map<string, ReporteZona[]>,
+    media:           Map<string, { fotos: ReporteArchivoRow[]; videos: ReporteArchivoRow[]; documentos: ReporteArchivoRow[] }>,
+  ): ParteDia[] {
+    return [...reportes]
+      .sort((a, b) => (a.creado_en ?? '').localeCompare(b.creado_en ?? ''))
+      .map(r => {
+        const m = media.get(r.id);
+        return {
+          reporte:    r,
+          zonas:      zonasPorReporte.get(r.id) ?? [],
+          fotos:      m?.fotos      ?? [],
+          videos:     m?.videos     ?? [],
+          documentos: m?.documentos ?? [],
+        };
+      });
+  }
+
+  /**
+   * Fases de cada servicio del contrato, repartiendo el avance de ESE servicio
+   * (no el global). Con el contrato completado, todos al 100 %.
+   */
+  private fasesDeServicios(
+    servicioIds:       number[],
+    fasesRaw:          FaseServicio[],
+    avancePorServicio: Record<number, number>,
+    completado:        boolean,
+  ): FasesServicio[] {
+    return servicioIds.map(servicioId => {
+      const avance = completado ? 100 : Math.round(Math.min(100, avancePorServicio[servicioId] ?? 0));
+      return {
+        servicioId,
+        avance,
+        fases: this.calcularFases(fasesRaw.filter(f => f.servicio_id === servicioId), avance),
+      };
+    });
+  }
+
+  /**
+   * Actividades de cada servicio del contrato. El % de cada una es sobre los
+   * días trabajados en SU servicio, no sobre todos los días de la obra.
+   */
+  private actividadesDeServicios(
+    servicioIds:     number[],
+    actividadesRaw:  ActividadServicio[],
+    agg:             { actividad_id: string; dias: number }[],
+    diasPorServicio: Record<number, number>,
+  ): ActividadesServicio[] {
+    return servicioIds.map(servicioId => ({
+      servicioId,
+      actividades: this.calcularActividades(
+        actividadesRaw.filter(a => a.servicio_id === servicioId), agg, diasPorServicio[servicioId] ?? 0,
+      ),
+    }));
+  }
+
+  /** Días trabajados en cada servicio: un parte por servicio y día. */
+  private diasPorServicio(reportes: ReporteDiario[]): Record<number, number> {
+    const dias: Record<number, number> = {};
+    for (const r of reportes) {
+      if (r.servicio_id == null) continue;
+      dias[r.servicio_id] = (dias[r.servicio_id] ?? 0) + 1;
+    }
+    return dias;
+  }
+
+  /** Avance de cada servicio a partir de sus partes (cada uno hasta el 100 %). */
+  private avancePorServicio(reportes: ReporteDiario[]): Record<number, number> {
+    const avance: Record<number, number> = {};
+    for (const r of reportes) {
+      if (r.servicio_id == null) continue;
+      avance[r.servicio_id] = Math.min(100, (avance[r.servicio_id] ?? 0) + Number(r.porcentaje_avance_dia ?? 0));
+    }
+    return avance;
+  }
+
+  /** Servicios de la obra: los del contrato y, si no vienen, el principal. */
+  private idsServicios(c: ObraContratoInput, principal: number | null): number[] {
+    const ids = (c.servicios ?? []).map(s => s.id).filter(id => id > 0);
+    if (principal != null && !ids.includes(principal)) ids.push(principal);
+    return ids;
+  }
+
+  /**
+   * Partes de los últimos días trabajados —todos los de cada día—, del más
+   * reciente al más antiguo. `reportes` viene ordenado por fecha descendente.
+   */
+  private ultimosDias(reportes: ReporteDiario[], n = ObraVmService.DIAS_EVENTOS): ReporteDiario[] {
+    const dias = new Set([...new Set(reportes.map(r => this.soloFecha(r.fecha)))].slice(0, n));
+    return reportes.filter(r => dias.has(this.soloFecha(r.fecha)));
+  }
+
+  /** Los partes del día más reciente de la lista. */
+  private partesDelPrimerDia(eventos: ReporteDiario[]): ReporteDiario[] {
+    if (!eventos.length) return [];
+    const dia = this.soloFecha(eventos[0].fecha);
+    return eventos.filter(r => this.soloFecha(r.fecha) === dia);
   }
 
   private agruparPor<T, K>(items: T[], key: (t: T) => K): Map<K, T[]> {
@@ -200,9 +316,9 @@ export class ObraVmService {
     return valor.includes('T') ? valor.split('T')[0] : valor;
   }
 
-  // Avance por fase: reparte el avance global entre las fases ordenadas.
-  // Cada fase ocupa un segmento igual; su % es la porción del avance global
-  // que cae dentro de su segmento.
+  // Avance por fase: reparte un avance (el del servicio, o el global con un
+  // solo servicio) entre las fases ordenadas. Cada fase ocupa un segmento
+  // igual; su % es la porción del avance que cae dentro de su segmento.
   private calcularFases(fases: FaseServicio[], avanceGlobal: number): FaseAvance[] {
     const n = fases.length;
     if (n === 0) return [];
@@ -229,9 +345,5 @@ export class ObraVmService {
       const pct  = totalDias > 0 ? Math.round((dias / totalDias) * 100) : 0;
       return { actividad, dias, pct, hecha: dias > 0 };
     });
-  }
-
-  private fechaISO(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 }

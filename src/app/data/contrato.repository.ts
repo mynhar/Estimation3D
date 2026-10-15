@@ -151,7 +151,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo,
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, servicio_ids,
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -171,7 +171,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor_id,
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor_id, servicio_ids,
         expediente:expediente_id (
           id, numero, estado, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -191,7 +191,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo, servicio_ids,
         expediente:expediente_id (
           id, numero, estado, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr ),
@@ -212,14 +212,15 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo, servicio_ids,
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
           localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
-        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .eq('constructor_id', constructorId)
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
@@ -257,14 +258,15 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo, servicio_ids,
         expediente:expediente_id!inner (
           numero, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
           localizacion ( direccion, provincia, canton, distrito )
         ),
         cliente:cliente_id ( nombre, apellido ),
-        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .in('expediente_id', expedienteIds)
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
@@ -279,7 +281,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo,
+        id, expediente_id, precio_final, garantia_anos, estado, generado_en, firmado_en, actualizado_en, url_pdf, descripcion_trabajo, servicio_ids,
         expediente:expediente_id (
           numero,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
@@ -287,7 +289,8 @@ export class ContratoRepository {
         ),
         cliente:cliente_id ( nombre, apellido ),
         constructor:constructor_id ( nombre, apellido, telefono, email ),
-        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
       .order('actualizado_en', { ascending: false });
@@ -299,7 +302,7 @@ export class ContratoRepository {
     const { data, error } = await this.db
       .from('contrato')
       .select(`
-        id, precio_final, garantia_anos, estado, generado_en, firmado_en,
+        id, precio_final, garantia_anos, estado, generado_en, firmado_en, servicio_ids,
         expediente:expediente_id (
           id, numero, estado, estimador_id,
           servicio:servicio_id ( nombre_es, nombre_en, nombre_fr ),
@@ -307,7 +310,8 @@ export class ContratoRepository {
         ),
         cliente:cliente_id ( nombre, apellido ),
         constructor:constructor_id ( nombre, apellido ),
-        oferta:oferta_id ( fecha_inicio )
+        oferta:oferta_id ( fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .order('generado_en', { ascending: false });
     if (error) throw new Error(error.message);

@@ -48,6 +48,7 @@ export class OfertaService {
         descripcion:       o.descripcion,
         estado:            o.estado,
         eliminada_en:      o.eliminada_en ?? null,
+        servicio_ids:      o.servicio_ids ?? [],
         constructor_nombre:   perfil ? `${perfil.nombre} ${perfil.apellido}`.trim() || '—' : '—',
         constructor_telefono: perfil?.telefono ?? '—',
         constructor_email:    perfil?.email    ?? '—',
@@ -80,6 +81,7 @@ export class OfertaService {
       garantia_anos:     data.garantia_anos ?? null,
       fecha_inicio:      data.fecha_inicio  ?? '',
       descripcion:       data.descripcion,
+      servicio_ids:      data.servicio_ids ?? [],
     };
   }
 
@@ -157,6 +159,7 @@ export class OfertaService {
     return {
       id:                    data.id,
       expediente_id:         expedienteId,
+      servicio_ids:          data.servicio_ids ?? [],
       precio:                data.precio,
       plazo_semanas_min:     data.plazo_semanas_min,
       plazo_semanas_max:     data.plazo_semanas_max,
@@ -264,6 +267,7 @@ export class OfertaService {
       fecha_inicio:      form.fecha_inicio  || null,
       descripcion:       form.descripcion,
       estado:            'pendiente',
+      servicio_ids:      form.servicio_ids ?? [],
     });
 
     if (documentoFiles.length) {

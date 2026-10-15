@@ -19,7 +19,9 @@ export interface TimelineEvent {
   autor:      string;
   referencia: string;
   entityId?:  string;
-  avance?:    number;   // % de avance de la obra (eventos tipo 'obra')
+  avance?:    number;   // % de avance del servicio del parte (eventos tipo 'obra')
+  /** Servicio del parte (eventos tipo 'obra'): el % es el de este servicio. */
+  servicio?:  { nombre_es: string; nombre_en: string | null; nombre_fr: string | null };
   estadoObra?: string;  // estado del seguimiento (eventos tipo 'obra')
   foto?:      string;   // miniatura del tour 3D (Matterport) del expediente
 }
@@ -113,7 +115,7 @@ export class AdminDashboardService {
         .limit(25),
       this.db
         .from('reporte_diario')
-        .select('id, creado_en, porcentaje_acumulado, constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, contrato_id, expediente:expediente_id(numero))')
+        .select('id, creado_en, porcentaje_acumulado, servicio:servicio_id(nombre_es, nombre_en, nombre_fr), constructor:constructor_id(nombre, apellido), seguimiento:seguimiento_id(estado, contrato_id, expediente:expediente_id(numero))')
         .order('creado_en', { ascending: false })
         .limit(25),
       this.db
@@ -190,7 +192,9 @@ export class AdminDashboardService {
         id: `rep-${r.id}`, timestamp: r.creado_en, tipo: 'obra',
         descKey: 'admin_dashboard.tl_event_obra_report',
         autor: nombre(r.constructor), referencia: exp?.numero ?? '—',
+        // Acumulado del servicio del parte: cada servicio avanza por su cuenta.
         avance: Math.round(r.porcentaje_acumulado ?? 0),
+        servicio: (Array.isArray(r.servicio) ? r.servicio[0] : r.servicio) ?? undefined,
         estadoObra: seg?.estado ?? undefined,
         entityId: seg?.contrato_id,   // → /admin/construction-monitoring/monitoring/:contratoId
       });

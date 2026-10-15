@@ -6,6 +6,8 @@ export interface ContratoListItem {
   servicio_nombre:    string;
   servicio_nombre_en: string;
   servicio_nombre_fr: string;
+  /** Servicios del contrato (`contrato.servicio_ids`); si no se pudieron leer, el principal. */
+  servicios?:         ServicioContrato[];
   constructor_nombre: string;
   precio_final:       number;
   garantia_anos:      number | null;
@@ -75,6 +77,11 @@ export interface ContratoAdminDetalle {
   estimador_telefono:   string | null;
   estimador_email:      string | null;
   oferta_id:            string;
+  /**
+   * Servicios del contrato: los que cubre su oferta, en el orden del
+   * expediente. Si no se pudieron leer, el principal (`servicio_*`).
+   */
+  servicios:            ServicioContrato[];
   oferta_fecha_inicio:  string | null;
   plazo_semanas_min:    number | null;
   plazo_semanas_max:    number | null;
@@ -94,6 +101,10 @@ export interface ContratoAdminListItem {
   servicio_nombre:     string;
   servicio_nombre_en:  string;
   servicio_nombre_fr:  string;
+  /** Servicios del contrato (los de su oferta); si no se pudieron leer, el principal. */
+  servicios:           ServicioContrato[];
+  /** La obra llegó al 100 % y el contrato sigue abierto: falta completarlo. */
+  obra_terminada:      boolean;
   cliente_nombre:      string;
   estimador_nombre:    string | null;
   constructor_nombre:  string | null;
@@ -114,6 +125,14 @@ export interface ContratoConstructorListItem {
   servicio_nombre:    string;
   servicio_nombre_en: string;
   servicio_nombre_fr: string;
+  /**
+   * Servicios del contrato (`contrato.servicio_ids`); si no se pudieron leer,
+   * el principal. Lo rellenan las listas de seguimiento (admin, estimador,
+   * constructor).
+   */
+  servicios?:         ServicioContrato[];
+  /** La obra llegó al 100 % y el contrato sigue abierto (si la consulta trae el seguimiento). */
+  obra_terminada?:    boolean;
   cliente_nombre:     string;
   constructor_nombre:   string;
   constructor_telefono: string;
@@ -137,6 +156,23 @@ export interface ContratoConstructorListItem {
   foto:               string | null;  // miniatura del tour 3D (Matterport) del expediente
 }
 
+/** Un servicio tal como aparece en el PDF del contrato, ya traducido. */
+export interface ServicioPdf {
+  nombre:      string;
+  descripcion: string;
+}
+
+/** Textos de un servicio en los tres idiomas (catálogo `servicio`). */
+export interface ServicioContrato {
+  id:             number;
+  nombre_es:      string;
+  nombre_en:      string | null;
+  nombre_fr:      string | null;
+  descripcion_es: string | null;
+  descripcion_en: string | null;
+  descripcion_fr: string | null;
+}
+
 export interface ContratoPdfData {
   contratoId:          string;
   expedienteNumero:    string;
@@ -145,8 +181,14 @@ export interface ContratoPdfData {
   constructorNombre:   string;
   constructorTelefono: string;
   constructorEmail:    string;
-  servicioNombre:      string;
-  servicioDescripcion: string;
+  /**
+   * Servicios del contrato (los de su oferta), cada uno con su descripción.
+   * Si llega, sustituye a `servicioNombre` / `servicioDescripcion`.
+   */
+  servicios?:          ServicioPdf[];
+  /** Forma antigua, un solo servicio. La usan las pantallas que aún no pasan `servicios`. */
+  servicioNombre?:      string;
+  servicioDescripcion?: string;
   direccion:           string;
   canton:              string;
   provincia:           string;

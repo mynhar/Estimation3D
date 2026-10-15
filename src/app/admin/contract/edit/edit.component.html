@@ -25,16 +25,13 @@
       </button>
     }
 
-    @if (!cargando() && !error() && puedeEjecutar) {
-      <button
-        class="btn-ejecutar"
-        type="button"
-        [disabled]="ejecutando()"
-        (click)="iniciarEjecutar()"
-      >
-        <i class="bi bi-play-circle"></i>
-        {{ 'admin_contract_detail.ejecutar_btn' | translate }}
-      </button>
+    <!-- Contrato firmado: solo se indica el siguiente paso. La ejecución
+         arranca sola con el primer parte diario del seguimiento de obra. -->
+    @if (!cargando() && !error() && ejecucionPendiente) {
+      <span class="estado-ejecutar">
+        <i class="bi bi-play-circle" aria-hidden="true"></i>
+        {{ 'admin_contract_detail.ejecutar_indicador' | translate }}
+      </span>
     }
 
     @if (!cargando() && !error() && puedeFirmar) {
@@ -136,43 +133,6 @@
     </div>
   }
 
-  <!-- ── CONFIRMACIÓN EJECUTAR ─────────────────────────────────────────── -->
-  @if (confirmandoEjecutar()) {
-    <div class="confirm-panel confirm-panel--ejecutar" role="alert">
-      <div class="confirm-panel__body">
-        <i class="bi bi-play-circle confirm-panel__icon confirm-panel__icon--ejecutar"></i>
-        <div>
-          <p class="confirm-panel__title confirm-panel__title--ejecutar">{{ 'admin_contract_detail.ejecutar_confirm_title' | translate }}</p>
-          <p class="confirm-panel__desc confirm-panel__desc--ejecutar">{{ 'admin_contract_detail.ejecutar_confirm_desc' | translate }}</p>
-          @if (errorEjecutar()) {
-            <p class="confirm-panel__error">{{ errorEjecutar() }}</p>
-          }
-        </div>
-      </div>
-      <div class="confirm-panel__actions">
-        <button
-          class="btn-confirm-ejecutar"
-          type="button"
-          [disabled]="ejecutando()"
-          (click)="confirmarEjecutar()"
-        >
-          @if (ejecutando()) {
-            <span class="spinner-xs"></span>
-          }
-          {{ 'admin_contract_detail.ejecutar_confirm_ok' | translate }}
-        </button>
-        <button
-          class="btn-confirm-no"
-          type="button"
-          [disabled]="ejecutando()"
-          (click)="cancelarEjecucion()"
-        >
-          {{ 'common.cancel' | translate }}
-        </button>
-      </div>
-    </div>
-  }
-
   <!-- ── CONFIRMACIÓN FIRMAR ───────────────────────────────────────────── -->
   @if (confirmandoFirmar()) {
     <div class="confirm-panel confirm-panel--firm" role="alert">
@@ -253,12 +213,33 @@
             <dt>{{ 'admin_contract_detail.numero' | translate }}</dt>
             <dd>{{ c.expediente_numero }}</dd>
 
-            <dt>{{ 'admin_contract_detail.servicio' | translate }}</dt>
-            <dd>{{ servicioNombre(c) }}</dd>
+            @let servicios = serviciosContrato(c);
+            @if (servicios.length > 1) {
+              <!-- Varios: cada servicio con su descripción -->
+              <dt>{{ 'admin_contract_detail.servicios' | translate }}</dt>
+              <dd>
+                <ul class="servicios-list">
+                  @for (s of servicios; track s.id) {
+                    <li>
+                      <span class="servicios-list__nombre">{{ s.nombre }}</span>
+                      @if (s.descripcion) {
+                        <span class="servicios-list__desc text-muted-sm">{{ s.descripcion }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
+              </dd>
+            } @else if (servicios.length === 1) {
+              <dt>{{ 'admin_contract_detail.servicio' | translate }}</dt>
+              <dd>{{ servicios[0].nombre }}</dd>
 
-            @if (servicioDesc(c)) {
-              <dt>{{ 'admin_contract_detail.servicio_desc' | translate }}</dt>
-              <dd class="text-muted-sm">{{ servicioDesc(c) }}</dd>
+              @if (servicios[0].descripcion) {
+                <dt>{{ 'admin_contract_detail.servicio_desc' | translate }}</dt>
+                <dd class="text-muted-sm">{{ servicios[0].descripcion }}</dd>
+              }
+            } @else {
+              <dt>{{ 'admin_contract_detail.servicio' | translate }}</dt>
+              <dd>—</dd>
             }
 
             <dt>{{ 'admin_contract_detail.estado_exp' | translate }}</dt>

@@ -68,6 +68,20 @@
           <div class="mon-progress__track">
             <span class="mon-progress__fill" [style.width.%]="avanceGlobal()"></span>
           </div>
+          <!-- Avance de cada servicio (0–100 %). El global es su media. -->
+          @if (multiServicio()) {
+            <ul class="mon-svc-progress" [attr.aria-label]="'monitoring.avance_por_servicio' | translate">
+              @for (s of serviciosObra(); track s.id) {
+                <li class="mon-svc-progress__row">
+                  <span class="mon-svc-progress__name">{{ s.nombre }}</span>
+                  <span class="mon-svc-progress__track" aria-hidden="true">
+                    <span class="mon-svc-progress__fill" [style.width.%]="avanceDeServicio(s.id)"></span>
+                  </span>
+                  <strong class="mon-svc-progress__pct">{{ avanceDeServicio(s.id) }}%</strong>
+                </li>
+              }
+            </ul>
+          }
         </div>
         <div class="mon-header__kpis">
           <div class="mon-hkpi">
@@ -79,7 +93,7 @@
             <span>{{ 'monitoring.kpi_horas' | translate }}</span>
           </div>
           <div class="mon-hkpi">
-            <strong>{{ faseOrdinalActual() }}/{{ fases().length }}</strong>
+            <strong>{{ faseOrdinalActual() }}/{{ fasesServicio().length }}</strong>
             <span>{{ 'monitoring.kpi_fases' | translate }}</span>
           </div>
           @if (seguimiento()?.fecha_inicio_real) {
@@ -125,6 +139,45 @@
         {{ 'monitoring.obra_completada' | translate }}
       </div>
     }
+    <!-- Obra al 100 % con el contrato aún abierto: se avisa a todos y el
+         administrador lo completa tras revisar. -->
+    @if (obraTerminada()) {
+      <div class="mon-banner mon-banner--terminada" role="status">
+        <i class="bi bi-flag" aria-hidden="true"></i>
+        <span class="mon-banner__text">
+          <strong>{{ 'monitoring.obra_terminada' | translate }}</strong>
+          {{ (esAdmin ? 'monitoring.obra_terminada_admin' : 'monitoring.obra_terminada_constructor') | translate }}
+        </span>
+        @if (esAdmin) {
+          <span class="mon-banner__actions">
+            @if (!confirmandoCompletar()) {
+              <button type="button" class="mon-btn mon-btn--primary mon-btn--sm"
+                      (click)="confirmandoCompletar.set(true)">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                {{ 'monitoring.completar_contrato' | translate }}
+              </button>
+            } @else {
+              <span class="mon-banner__confirm">{{ 'monitoring.completar_confirm' | translate }}</span>
+              <button type="button" class="mon-btn mon-btn--primary mon-btn--sm"
+                      (click)="completarContrato()" [disabled]="completando()">
+                @if (completando()) { <span class="mon-spinner"></span> }
+                {{ 'monitoring.completar_confirm_ok' | translate }}
+              </button>
+              <button type="button" class="mon-btn mon-btn--ghost mon-btn--sm"
+                      (click)="confirmandoCompletar.set(false)" [disabled]="completando()">
+                {{ 'common.cancel' | translate }}
+              </button>
+            }
+          </span>
+        }
+      </div>
+      @if (errorCompletar()) {
+        <div class="mon-banner mon-banner--cancelled" role="alert">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          {{ errorCompletar()! | translate }}
+        </div>
+      }
+    }
 
     <!-- ── 3-column workbench body ── -->
     <div class="mon-body">
@@ -149,6 +202,39 @@
                      [disabled]="guardando()">
             </div>
 
+            <!-- Servicio (solo con varios en el contrato). Cada servicio
+                 trabajado ese día tiene su propio parte: elegir uno abre el
+                 suyo, con su fase, actividades, zona, descripción y archivos. -->
+            @if (multiServicio()) {
+              <div class="mon-field">
+                <span class="mon-label" id="mon-servicio-label">
+                  {{ 'monitoring.servicio_label' | translate }}
+                  <span class="mon-hint">{{ 'monitoring.servicio_hint' | translate }}</span>
+                </span>
+                <div class="mon-chips" role="radiogroup" aria-labelledby="mon-servicio-label">
+                  @for (s of serviciosObra(); track s.id) {
+                    <button type="button" class="mon-chip mon-chip--servicio"
+                            role="radio"
+                            [attr.aria-checked]="servicioReporte() === s.id"
+                            [class.is-on]="servicioReporte() === s.id"
+                            (click)="setServicio(s.id)"
+                            [disabled]="!puedeGuardar() || guardando()">
+                      @if (servicioReporte() === s.id) {
+                        <i class="bi bi-check-lg" aria-hidden="true"></i>
+                      }
+                      {{ s.nombre }}
+                      @if (serviciosConParte().has(s.id)) {
+                        <i class="bi bi-journal-check mon-chip__saved" aria-hidden="true"
+                           [title]="'monitoring.servicio_con_parte' | translate"></i>
+                        <span class="visually-hidden">({{ 'monitoring.servicio_con_parte' | translate }})</span>
+                      }
+                    </button>
+                  }
+                </div>
+                <p class="mon-hint mon-hint--block">{{ 'monitoring.servicio_parte_hint' | translate }}</p>
+              </div>
+            }
+
             <div class="mon-form-row">
               <div class="mon-field">
                 <label class="mon-label">{{ 'monitoring.hora_inicio' | translate }}</label>
@@ -172,7 +258,11 @@
             <div class="mon-field">
               <label class="mon-label">
                 {{ 'monitoring.avance_dia' | translate }}
-                <span class="mon-hint">{{ 'monitoring.avance_dia_hint' | translate }}</span>
+                @if (multiServicio() && servicioReporteNombre()) {
+                  <span class="mon-hint">{{ 'monitoring.avance_dia_servicio_hint' | translate: { servicio: servicioReporteNombre() } }}</span>
+                } @else {
+                  <span class="mon-hint">{{ 'monitoring.avance_dia_hint' | translate }}</span>
+                }
               </label>
               <div class="mon-slider-row">
                 <input type="range" class="mon-slider" min="0" [max]="maxAvanceDia()"
@@ -182,22 +272,31 @@
                 <strong class="mon-slider-val">{{ avanceDia() }}%</strong>
               </div>
               <p class="mon-hint mon-hint--block">
-                {{ 'monitoring.avance_acumulado' | translate }}: <strong>{{ avancePreview() }}%</strong>
+                @if (multiServicio() && servicioReporteNombre()) {
+                  {{ 'monitoring.avance_acumulado_servicio' | translate: { servicio: servicioReporteNombre() } }}: <strong>{{ avancePreview() }}%</strong>
+                } @else {
+                  {{ 'monitoring.avance_acumulado' | translate }}: <strong>{{ avancePreview() }}%</strong>
+                }
                 @if (maxAvanceDia() < 100) {
                   &nbsp;·&nbsp;
                   {{ 'monitoring.avance_restante' | translate }}: <strong>{{ maxAvanceDia() - avanceDia() }}%</strong>
                 }
               </p>
+              @if (multiServicio()) {
+                <p class="mon-hint mon-hint--block">
+                  {{ 'monitoring.avance_global_tras_hoy' | translate }}: <strong>{{ avanceGlobalPreview() }}%</strong>
+                </p>
+              }
             </div>
 
-            @if (fases().length > 0) {
+            @if (fasesServicio().length > 0) {
               <div class="mon-field">
                 <label class="mon-label">
                   {{ 'monitoring.fase_label' | translate }}
                   <span class="mon-hint">{{ 'monitoring.fase_hint' | translate }}</span>
                 </label>
                 <div class="mon-phase-list">
-                  @for (fase of fases(); track fase.id) {
+                  @for (fase of fasesServicio(); track fase.id) {
                     <div class="mon-phase"
                          [class.is-done]="faseOrdinalActual() > fase.orden"
                          [class.is-current]="faseId() === fase.id"
@@ -217,14 +316,14 @@
               </div>
             }
 
-            @if (actividades().length > 0) {
+            @if (actividadesServicio().length > 0) {
               <div class="mon-field">
                 <label class="mon-label">
                   {{ 'monitoring.actividades_label' | translate }}
                   <span class="mon-hint">{{ 'monitoring.actividades_hint' | translate }}</span>
                 </label>
                 <div class="mon-chips">
-                  @for (act of actividades(); track act.id) {
+                  @for (act of actividadesServicio(); track act.id) {
                     <button class="mon-chip"
                             [class.is-on]="actividadesOn().has(act.id)"
                             (click)="puedeGuardar() && toggleActividad(act.id)"
@@ -285,7 +384,7 @@
             @if (errorGuardar()) {
               <div class="mon-alert mon-alert--error">
                 <i class="bi bi-exclamation-triangle"></i>
-                {{ errorGuardar() }}
+                {{ errorGuardar()! | translate }}
               </div>
             }
             @if (c.estado === 'firmado') {
@@ -454,6 +553,12 @@
                         <span class="mon-event__acum">{{ r.porcentaje_acumulado ?? avanceGlobal() }}%</span>
                         <span class="mon-event__delta">+{{ r.porcentaje_avance_dia }}%</span>
                       </div>
+                      @if (multiServicio() && servicioNombreById(r.servicio_id)) {
+                        <p class="mon-event__fase">
+                          <i class="bi bi-tools" aria-hidden="true"></i>
+                          {{ servicioNombreById(r.servicio_id) }}
+                        </p>
+                      }
                       @if (faseNameById(r.fase_id)) {
                         <p class="mon-event__fase">
                           <i class="bi bi-layers"></i>

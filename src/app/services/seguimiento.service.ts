@@ -35,8 +35,14 @@ export class SeguimientoService {
     return this.repo.findActividadesByServicioId(servicioId);
   }
 
-  getReporteByFecha(seguimientoId: string, fecha: string): Promise<ReporteDiario | null> {
-    return this.repo.findReporteByFecha(seguimientoId, fecha);
+  /** Con `servicioId`, el parte de ese servicio; sin él, el último del día. */
+  getReporteByFecha(seguimientoId: string, fecha: string, servicioId?: number | null): Promise<ReporteDiario | null> {
+    return this.repo.findReporteByFecha(seguimientoId, fecha, servicioId);
+  }
+
+  /** Todos los partes de una fecha: uno por servicio trabajado ese día. */
+  getReportesDeFecha(seguimientoId: string, fecha: string): Promise<ReporteDiario[]> {
+    return this.repo.findReportesDeFecha(seguimientoId, fecha);
   }
 
   getReportesRecientes(seguimientoId: string, limit = 5): Promise<ReporteDiario[]> {

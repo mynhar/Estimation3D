@@ -7,6 +7,51 @@ export interface Servicio {
   descripcion_fr?: string;
   descripcion_en?: string;
   descripcion_es?: string;
+  /** Solo lo traen las consultas que también leen servicios dados de baja. */
+  activo?: boolean;
+}
+
+type TextosServicio = {
+  nombre_es?: string | null; nombre_en?: string | null; nombre_fr?: string | null;
+  descripcion_es?: string | null; descripcion_en?: string | null; descripcion_fr?: string | null;
+};
+
+/** Nombre del servicio en el idioma pedido, con el mismo orden de respaldo en toda la app. */
+export function nombreServicio(s: TextosServicio, lang: string): string {
+  return lang === 'en' ? (s.nombre_en || s.nombre_fr || s.nombre_es || '')
+       : lang === 'es' ? (s.nombre_es || s.nombre_fr || '')
+       :                 (s.nombre_fr || s.nombre_es || '');
+}
+
+export function descripcionServicio(s: TextosServicio, lang: string): string {
+  return lang === 'en' ? (s.descripcion_en || s.descripcion_fr || s.descripcion_es || '')
+       : lang === 'es' ? (s.descripcion_es || s.descripcion_fr || '')
+       :                 (s.descripcion_fr || s.descripcion_es || '');
+}
+
+/** Servicios para el PDF del contrato: cada uno con su nombre y su descripción. */
+export function serviciosParaContrato(
+  servicios: TextosServicio[],
+  lang:      string,
+): { nombre: string; descripcion: string }[] {
+  return servicios.map(s => ({
+    nombre:      nombreServicio(s, lang),
+    descripcion: descripcionServicio(s, lang),
+  }));
+}
+
+/**
+ * Los servicios del expediente que cubre una oferta, en el orden del
+ * expediente. Una oferta sin servicios (no debería existir: la base lo impide)
+ * se entiende como el expediente entero, que es lo que significaba antes.
+ */
+export function serviciosDeOferta<T extends { id: number }>(
+  delExpediente: T[],
+  oferta:        { servicio_ids?: number[] | null },
+): T[] {
+  const ids = oferta.servicio_ids ?? [];
+  if (!ids.length) return delExpediente;
+  return delExpediente.filter(s => ids.includes(s.id));
 }
 
 export const PROVINCIAS_CANADA: { code: string; nombre: string }[] = [

@@ -79,7 +79,7 @@
                 </span>
               </div>
               <p class="text-ink-secondary mt-1 mb-0" style="font-size:var(--ds-text-sm)">
-                {{ servicioNombre() }}
+                {{ serviciosTexto() }}
               </p>
             </div>
           </div>
@@ -118,8 +118,19 @@
           <div class="context-row">
             <div class="context-icon context-icon--service"><i class="bi bi-tools"></i></div>
             <div class="context-content">
-              <p class="context-label">{{ 'my_offer.service' | translate }}</p>
-              <p class="context-value mb-0">{{ servicioNombre() }}</p>
+              @let nombres = serviciosNombres();
+              @if (nombres.length > 1) {
+                <!-- Varios: uno por línea, en el orden del expediente -->
+                <p class="context-label" id="mof-servicios-label">{{ 'offer_services.label' | translate }}</p>
+                <ul class="context-list" aria-labelledby="mof-servicios-label">
+                  @for (n of nombres; track n) {
+                    <li class="context-value">{{ n }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="context-label">{{ 'my_offer.service' | translate }}</p>
+                <p class="context-value mb-0">{{ serviciosTexto() }}</p>
+              }
             </div>
           </div>
 

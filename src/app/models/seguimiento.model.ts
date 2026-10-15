@@ -48,6 +48,8 @@ export interface ReporteDiario {
   horas_trabajadas:      number;
   porcentaje_avance_dia: number;
   porcentaje_acumulado:  number | null;
+  /** Servicio del contrato en el que se trabajó ese día (ver `20261017_reporte_servicio.sql`). */
+  servicio_id:           number | null;
   fase_id:               string | null;
   descripcion:           string | null;
   creado_en:             string;
@@ -78,5 +80,9 @@ export interface InspeccionInput {
 
 export interface StatsReportes {
   total_dias:  number;
+  /** Avance de cada servicio (suma de sus partes, máximo 100), por id de servicio. */
+  avance_por_servicio: Record<number, number>;
+  /** Días trabajados en cada servicio, por id de servicio. */
+  dias_por_servicio:   Record<number, number>;
   total_horas: number;
 }

@@ -4,7 +4,9 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
-import { ArchivoRow, OfertaDetalle } from '../../models';
+import { ExpedienteService } from '../../services/expediente.service';
+import { ArchivoRow, OfertaDetalle, nombreServicio, serviciosDeOferta } from '../../models';
+import { ServicioCompleto } from '../../data/servicio.repository';
 
 const ESTADO_ICON: Record<string, string> = {
   pendiente: 'bi-hourglass',
@@ -21,14 +23,17 @@ const ESTADO_ICON: Record<string, string> = {
   styleUrl: './my-offer.component.css',
 })
 export class MyOfferComponent implements OnInit {
-  private ofertaService  = inject(OfertaService);
-  private archivoService = inject(ArchivoService);
+  private ofertaService     = inject(OfertaService);
+  private expedienteService = inject(ExpedienteService);
+  private archivoService    = inject(ArchivoService);
   private sanitizer      = inject(DomSanitizer);
   private translate      = inject(TranslateService);
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
 
   detalle    = signal<OfertaDetalle | null>(null);
+  /** Servicios a los que se presentó la oferta, en el orden del expediente. */
+  serviciosOferta = signal<ServicioCompleto[]>([]);
   documentos = signal<ArchivoRow[]>([]);
   videos     = signal<ArchivoRow[]>([]);
   cargando   = signal(true);
@@ -57,9 +62,17 @@ export class MyOfferComponent implements OnInit {
       this.documentos.set(archivosOferta.documentos);
       this.videos.set(archivosOferta.videos);
 
-      const archivosExp = await this.archivoService.listarPorExpediente(detalle.expediente_id);
+      const [archivosExp, serviciosExp] = await Promise.all([
+        this.archivoService.listarPorExpediente(detalle.expediente_id),
+        // Sin la lista se enseña el servicio principal, como antes.
+        this.expedienteService.getServiciosCompletos(detalle.expediente_id).catch(e => {
+          console.error('[MyOffer] servicios:', e?.message ?? e);
+          return [] as ServicioCompleto[];
+        }),
+      ]);
       this.fotosExp.set(archivosExp.fotos);
       this.documentosExp.set(archivosExp.documentos);
+      this.serviciosOferta.set(serviciosDeOferta(serviciosExp, detalle));
     } catch (e: any) {
       console.error('[MyOffer]', e.message);
       this.errorMsg.set(e.message);
@@ -89,6 +102,17 @@ export class MyOfferComponent implements OnInit {
     if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
     if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
     return d.servicio_nombre;
+  }
+
+  /** Nombres de los servicios de la oferta; vacío si no se pudieron leer. */
+  serviciosNombres(): string[] {
+    const lang = this.translate.currentLang;
+    return this.serviciosOferta().map(s => nombreServicio(s, lang));
+  }
+
+  serviciosTexto(): string {
+    const nombres = this.serviciosNombres();
+    return nombres.length ? nombres.join(' · ') : this.servicioNombre();
   }
 
   estadoIcon(estado: string): string {

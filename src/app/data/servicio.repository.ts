@@ -9,6 +9,8 @@ export type ServicioNombres = {
 };
 
 export type ServicioCompleto = ServicioNombres & {
+  /** Solo lo trae `findByIdsCompleto` (para el icono del selector). */
+  codigo?:        string;
   descripcion_es: string | null;
   descripcion_en: string | null;
   descripcion_fr: string | null;
@@ -43,7 +45,7 @@ export class ServicioRepository {
     if (!ids.length) return [];
     const { data, error } = await this.db
       .from('servicio')
-      .select('id, nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr')
+      .select('id, codigo, nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr')
       .in('id', ids);
     if (error) throw new Error(error.message);
     return (data ?? []) as ServicioCompleto[];

@@ -14,6 +14,7 @@ import {
 import { TipoInmueble } from '../../../types/supabase';
 import { AdminFileEstimatorReportComponent } from '../estimator-report/estimator-report.component';
 import { AdminFileBuilderBidsComponent } from '../builder-bids/builder-bids.component';
+import { ServicioOpcion, ServicioSelectorComponent } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 
 interface ClienteRow {
   id: string;
@@ -46,7 +47,7 @@ const CONTRATO_PCT: Record<string, number> = {
   selector: 'app-admin-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent],
+  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -101,10 +102,34 @@ export class AdminFileEditComponent implements OnInit {
   });
 
   // ── Servicios ──────────────────────────────────────────────────────────────
+  /** Catálogo completo, incluidos los dados de baja (ver `opcionesServicio`). */
   servicios         = signal<Servicio[]>([]);
   cargandoServicios = signal(true);
-  servicioId        = signal<number | null>(null);
-  servicioRequerido = signal(false);
+  /** Servicios del expediente, en orden de prioridad: el primero es el principal. */
+  servicioIds       = signal<number[]>([]);
+  /** Los que tenía el expediente al abrirlo. */
+  private serviciosGuardados = signal<ReadonlySet<number>>(new Set());
+
+  /**
+   * Activos + los dados de baja que el expediente ya tenía. Sin estos últimos,
+   * un servicio desactivado después del alta no se vería y el siguiente
+   * guardado lo quitaría sin avisar.
+   */
+  opcionesServicio = computed<ServicioOpcion[]>(() => {
+    const guardados = this.serviciosGuardados();
+    return this.serviciosLocalizados()
+      .filter(s => s.activo !== false || guardados.has(s.id))
+      .map(s => ({
+        id:          s.id,
+        codigo:      s.codigo,
+        nombre:      s.nombre_local,
+        descripcion: s.descripcion_local,
+        inactivo:    s.activo === false,
+      }));
+  });
+
+  /** Servicios además del principal, para la cabecera. */
+  serviciosExtra = computed(() => Math.max(this.servicioIds().length - 1, 0));
 
   serviciosLocalizados = computed(() => {
     const lang = this.currentLang();
@@ -122,11 +147,13 @@ export class AdminFileEditComponent implements OnInit {
   });
 
   servicioNombre = computed(() => {
-    const s = this.serviciosLocalizados().find(x => x.id === this.servicioId());
+    const s = this.serviciosLocalizados().find(x => x.id === this.servicioIds()[0]);
     return s?.nombre_local ?? '—';
   });
 
   // ── Estado del guardado por sección ────────────────────────────────────────
+  /** Se intentó guardar: los campos sin tocar empiezan a mostrar su error. */
+  intentado       = signal(false);
   guardandoExp    = signal(false);
   errorExp        = signal('');
   exitoExp        = signal(false);
@@ -328,24 +355,6 @@ export class AdminFileEditComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
-  serviceIcon(codigo: string): string {
-    const c = codigo.toLowerCase();
-    if (c.includes('moho'))                          return 'bi-biohazard';
-    if (c.includes('agua') || c.includes('dano'))    return 'bi-droplet-half';
-    if (c.includes('desamian'))                      return 'bi-layers';
-    if (c.includes('demolic'))                       return 'bi-buildings';
-    if (c.includes('aisla'))                         return 'bi-layers';
-    if (c.includes('fund') || c.includes('dren'))    return 'bi-water';
-    if (c.includes('elect'))                         return 'bi-lightning-charge-fill';
-    if (c.includes('pint'))                          return 'bi-brush-fill';
-    if (c.includes('techo') || c.includes('teja'))   return 'bi-house-fill';
-    if (c.includes('piso')  || c.includes('cer'))    return 'bi-grid-3x3';
-    if (c.includes('carpint') || c.includes('mad'))  return 'bi-hammer';
-    if (c.includes('alumin') || c.includes('vidri')) return 'bi-window';
-    if (c.includes('jardin') || c.includes('plant')) return 'bi-tree';
-    return 'bi-tools';
-  }
-
   iniciales(nombre: string | null | undefined, apellido: string | null | undefined): string {
     const a = (nombre ?? '').trim()[0] ?? '';
     const b = (apellido ?? '').trim()[0] ?? '';
@@ -429,8 +438,7 @@ export class AdminFileEditComponent implements OnInit {
     this.cargandoServicios.set(true);
     const { data, error } = await this.auth.client
       .from('servicio')
-      .select('id, codigo, nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es')
-      .eq('activo', true)
+      .select('id, codigo, nombre_fr, nombre_en, nombre_es, descripcion_fr, descripcion_en, descripcion_es, activo')
       .order('codigo');
     if (error) console.error('[AdminFileEdit] servicios:', error.message);
     this.servicios.set(data?.length ? (data as unknown as Servicio[]) : SERVICIOS_FALLBACK);
@@ -459,7 +467,9 @@ export class AdminFileEditComponent implements OnInit {
 
       this.numero.set(datos.numero);
       this.estadoActual.set(datos.estado);
-      this.servicioId.set(datos.servicio_id);
+      const servicioIds = await this.cargarServiciosExpediente(datos.servicio_id);
+      this.servicioIds.set(servicioIds);
+      this.serviciosGuardados.set(new Set(servicioIds));
       this.estimadorActual.set(
         detalle.estimador_id && detalle.estimador_nombre !== '—' ? detalle.estimador_nombre : null
       );
@@ -499,6 +509,19 @@ export class AdminFileEditComponent implements OnInit {
     }
   }
 
+  /**
+   * Lista completa de servicios. Si `expediente_servicio` no responde (p. ej.
+   * migración aún sin aplicar) se cae al principal, que siempre existe.
+   */
+  private async cargarServiciosExpediente(principalId: number): Promise<number[]> {
+    try {
+      return await this.expedienteService.getServiciosExpediente(this.id, principalId);
+    } catch (e) {
+      console.error('[AdminFileEdit] servicios del expediente:', e);
+      return [principalId];
+    }
+  }
+
   private async cargarContrato() {
     try {
       this.contratos.set(await this.contratoRepo.findAllByExpedienteId(this.id));
@@ -510,13 +533,13 @@ export class AdminFileEditComponent implements OnInit {
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
     this.clienteRequerido.set(!this.clienteId());
-    this.servicioRequerido.set(!this.servicioId());
+    this.intentado.set(true);
     this.exitoExp.set(false);
     this.errorExp.set('');
 
     if (
       this.expedienteForm.invalid || this.localizacionForm.invalid ||
-      !this.clienteId() || !this.servicioId()
+      !this.clienteId() || !this.servicioIds().length
     ) {
       this.errorExp.set('admin_file_edit.form_incomplete');
       return;
@@ -534,7 +557,8 @@ export class AdminFileEditComponent implements OnInit {
 
       await this.expedienteService.actualizarExpediente(this.id, {
         clienteId:   this.clienteId()!,
-        servicioId:  this.servicioId()!,
+        servicioId:  this.servicioIds()[0],
+        servicioIds: this.servicioIds(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,
         localizacion: {
@@ -551,7 +575,8 @@ export class AdminFileEditComponent implements OnInit {
       this.exitoExp.set(true);
     } catch (e: any) {
       console.error('[AdminFileEdit] guardarExpediente:', e);
-      this.errorExp.set('admin_file_edit.save_error');
+      // Los errores con clave propia (p. ej. servicio con ofertas) se enseñan tal cual.
+      this.errorExp.set(e?.message?.startsWith('service_selector.') ? e.message : 'admin_file_edit.save_error');
     } finally {
       this.guardandoExp.set(false);
     }

@@ -18,6 +18,8 @@ export interface ReporteInput {
   horas_trabajadas:      number;
   porcentaje_avance_dia: number;
   porcentaje_acumulado:  number;
+  /** Servicio del contrato en el que se trabajó. Sin él, la base toma el de la fase o el primero del contrato. */
+  servicio_id?:          number | null;
   fase_id?:              string;
   descripcion?:          string | null;
 }
@@ -149,15 +151,39 @@ export class SeguimientoRepository {
 
   // ── Reportes diarios ──────────────────────────────────────────────────────
 
-  async findReporteByFecha(seguimientoId: string, fecha: string): Promise<ReporteDiario | null> {
+  /**
+   * Parte de una fecha. Hay uno por servicio trabajado ese día: con
+   * `servicioId`, el de ese servicio; sin él, el último guardado ese día.
+   */
+  async findReporteByFecha(
+    seguimientoId: string,
+    fecha:         string,
+    servicioId?:   number | null,
+  ): Promise<ReporteDiario | null> {
+    let q = this.db
+      .from('reporte_diario')
+      .select('*')
+      .eq('seguimiento_id', seguimientoId)
+      .eq('fecha', fecha);
+    if (servicioId != null) q = q.eq('servicio_id', servicioId);
+    const { data, error } = await q
+      .order('creado_en', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data as ReporteDiario | null;
+  }
+
+  /** Todos los partes de una fecha: uno por servicio trabajado ese día. */
+  async findReportesDeFecha(seguimientoId: string, fecha: string): Promise<ReporteDiario[]> {
     const { data, error } = await this.db
       .from('reporte_diario')
       .select('*')
       .eq('seguimiento_id', seguimientoId)
       .eq('fecha', fecha)
-      .maybeSingle();
+      .order('creado_en', { ascending: true });
     if (error) throw new Error(error.message);
-    return data as ReporteDiario | null;
+    return (data ?? []) as ReporteDiario[];
   }
 
   async findReportesRecientes(seguimientoId: string, limit = 5): Promise<ReporteDiario[]> {
@@ -202,12 +228,27 @@ export class SeguimientoRepository {
   async findStats(seguimientoId: string): Promise<StatsReportes> {
     const { data, error } = await this.db
       .from('reporte_diario')
-      .select('horas_trabajadas')
+      .select('fecha, horas_trabajadas, servicio_id, porcentaje_avance_dia')
       .eq('seguimiento_id', seguimientoId);
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as { horas_trabajadas: number }[];
+    const rows = (data ?? []) as {
+      fecha: string; horas_trabajadas: number; servicio_id: number; porcentaje_avance_dia: number;
+    }[];
+    // Cada servicio avanza por su cuenta hasta el 100 % (lo garantiza la base).
+    const avance_por_servicio: Record<number, number> = {};
+    for (const r of rows) {
+      avance_por_servicio[r.servicio_id] = Math.min(
+        100, (avance_por_servicio[r.servicio_id] ?? 0) + Number(r.porcentaje_avance_dia ?? 0),
+      );
+    }
+    // Un parte por servicio y día: cada parte es un día de su servicio.
+    const dias_por_servicio: Record<number, number> = {};
+    for (const r of rows) dias_por_servicio[r.servicio_id] = (dias_por_servicio[r.servicio_id] ?? 0) + 1;
     return {
-      total_dias:  rows.length,
+      // Días, no partes: un día con dos servicios trabajados tiene dos partes.
+      total_dias:  new Set(rows.map(r => r.fecha)).size,
+      avance_por_servicio,
+      dias_por_servicio,
       total_horas: rows.reduce((sum, r) => sum + (r.horas_trabajadas ?? 0), 0),
     };
   }
@@ -224,10 +265,11 @@ export class SeguimientoRepository {
           horas_trabajadas:      input.horas_trabajadas,
           porcentaje_avance_dia: input.porcentaje_avance_dia,
           porcentaje_acumulado:  input.porcentaje_acumulado,
+          servicio_id:           input.servicio_id ?? null,
           fase_id:               input.fase_id ?? null,
           descripcion:           input.descripcion ?? null,
         },
-        { onConflict: 'seguimiento_id,fecha' }
+        { onConflict: 'seguimiento_id,fecha,servicio_id' }
       )
       .select()
       .single();

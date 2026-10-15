@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { AdminDashboardService, DashboardStats, TimelineEvent } from './admin-dashboard.service';
+import { nombreServicio } from '../../models';
 
 const EXP_PIPELINE = ['nuevo','en_estimacion','estimado','en_oferta','adjudicado','contratado'] as const;
 const OFE_ESTADOS  = ['pendiente','aceptada','rechazada'] as const;
@@ -172,6 +173,11 @@ export class AdminDashboardComponent implements OnInit {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: false,
     }).format(d);
+  }
+
+  /** Servicio de un parte de obra, en el idioma activo. */
+  servicioEvento(ev: TimelineEvent): string {
+    return ev.servicio ? nombreServicio(ev.servicio, this.translate.currentLang ?? 'fr') : '';
   }
 
   tipoIcon(tipo: string): string {

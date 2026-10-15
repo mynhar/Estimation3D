@@ -610,6 +610,39 @@ export type Database = {
           },
         ]
       }
+      expediente_servicio: {
+        Row: {
+          creado_en: string
+          expediente_id: string
+          servicio_id: number
+        }
+        Insert: {
+          creado_en?: string
+          expediente_id: string
+          servicio_id: number
+        }
+        Update: {
+          creado_en?: string
+          expediente_id?: string
+          servicio_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expediente_servicio_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_servicio_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fase_servicio: {
         Row: {
           activo: boolean
@@ -924,6 +957,7 @@ export type Database = {
           plazo_semanas_max: number | null
           plazo_semanas_min: number | null
           precio: number
+          servicio_ids: number[]
         }
         Insert: {
           actualizado_en?: string
@@ -940,6 +974,7 @@ export type Database = {
           plazo_semanas_max?: number | null
           plazo_semanas_min?: number | null
           precio: number
+          servicio_ids?: number[]
         }
         Update: {
           actualizado_en?: string
@@ -956,6 +991,7 @@ export type Database = {
           plazo_semanas_max?: number | null
           plazo_semanas_min?: number | null
           precio?: number
+          servicio_ids?: number[]
         }
         Relationships: [
           {
@@ -1159,6 +1195,7 @@ export type Database = {
           porcentaje_acumulado: number | null
           porcentaje_avance_dia: number
           seguimiento_id: string
+          servicio_id: number | null
         }
         Insert: {
           actualizado_en?: string
@@ -1174,6 +1211,7 @@ export type Database = {
           porcentaje_acumulado?: number | null
           porcentaje_avance_dia?: number
           seguimiento_id: string
+          servicio_id?: number | null
         }
         Update: {
           actualizado_en?: string
@@ -1189,6 +1227,7 @@ export type Database = {
           porcentaje_acumulado?: number | null
           porcentaje_avance_dia?: number
           seguimiento_id?: string
+          servicio_id?: number | null
         }
         Relationships: [
           {
@@ -1463,6 +1502,10 @@ export type Database = {
       }
       fn_rol_actual: { Args: never; Returns: string }
       get_rol_usuario: { Args: never; Returns: string }
+      guardar_servicios_expediente: {
+        Args: { p_expediente_id: string; p_servicios: number[] }
+        Returns: undefined
+      }
       iniciar_ejecucion_contrato: {
         Args: { p_contrato_id: string }
         Returns: undefined

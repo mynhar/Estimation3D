@@ -88,33 +88,26 @@
   cursor: not-allowed;
 }
 
-/* ── ejecutar button ────────────────────────────────────────────────────── */
+/* ── ejecución pendiente (indicador, sin acción) ────────────────────────── */
+/* Píldora y sin hover/cursor para que no se lea como botón. El texto va en
+ * tinta: --ds-success sobre --ds-success-soft se queda en 4.0:1. */
 
-.btn-ejecutar {
+.estado-ejecutar {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 1rem;
-  border: 1.5px solid var(--ds-success);
-  border-radius: 8px;
-  background: var(--ds-success);
-  color: var(--ds-ink-inverse);
-  font-size: 0.875rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--ds-success);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-success-soft);
+  color: var(--ds-ink);
+  font-size: 0.8125rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
   margin-left: auto;
+  cursor: default;
 }
-.btn-ejecutar:hover:not(:disabled) {
-  background: var(--ds-success);
-  border-color: var(--ds-success);
-  filter: brightness(0.88);
-}
-.btn-ejecutar:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
+.estado-ejecutar i { color: var(--ds-success); }
 
 /* ── firm button ────────────────────────────────────────────────────────── */
 
@@ -282,34 +275,6 @@
 .btn-confirm-completar:hover:not(:disabled) { background: var(--ds-info); filter: brightness(0.88); }
 .btn-confirm-completar:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ── ejecutar confirm panel overrides ───────────────────────────────────── */
-
-.confirm-panel--ejecutar {
-  background: var(--ds-success-soft);
-  border-color: var(--ds-success);
-}
-
-.confirm-panel__icon--ejecutar  { color: var(--ds-success); }
-.confirm-panel__title--ejecutar { color: var(--ds-success); }
-.confirm-panel__desc--ejecutar  { color: var(--ds-success); }
-
-.btn-confirm-ejecutar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 1.1rem;
-  background: var(--ds-success);
-  color: var(--ds-ink-inverse);
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.btn-confirm-ejecutar:hover:not(:disabled) { background: var(--ds-success); filter: brightness(0.88); }
-.btn-confirm-ejecutar:disabled { opacity: 0.6; cursor: not-allowed; }
-
 /* ── firm confirm panel overrides ───────────────────────────────────────── */
 
 .confirm-panel--firm {
@@ -469,6 +434,26 @@
 .text-muted-sm {
   font-size: 0.82rem !important;
   color: var(--ds-ink-muted) !important;
+}
+
+/* Varios servicios: uno por bloque, nombre y debajo su descripción. */
+.servicios-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.servicios-list__nombre {
+  display: block;
+  font-weight: 600;
+  color: var(--ds-ink);
+}
+.servicios-list__desc {
+  display: block;
+  margin-top: 0.1rem;
+  line-height: 1.45;
 }
 
 .precio-valor {

@@ -60,6 +60,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 .mon-header__number {
   font-family: var(--ds-font-display);
@@ -75,6 +76,8 @@
   color: var(--ds-ink-muted);
   text-transform: uppercase;
   letter-spacing: var(--ds-tracking-wide);
+  /* Pueden ser varios servicios: envuelven en vez de desbordar la fila. */
+  overflow-wrap: anywhere;
 }
 
 .mon-header__meta {
@@ -163,6 +166,39 @@
   );
   transition: width var(--ds-duration-slow) var(--ds-ease-out);
 }
+
+/* Avance por servicio, bajo el global (solo con varios servicios). */
+.mon-svc-progress {
+  list-style: none;
+  margin: var(--ds-space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+.mon-svc-progress__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4rem, 2fr) auto;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+}
+.mon-svc-progress__name { overflow-wrap: anywhere; min-width: 0; }
+.mon-svc-progress__track {
+  height: 6px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-bg-alt);
+  overflow: hidden;
+}
+.mon-svc-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ds-gold);
+  transition: width var(--ds-duration-base) var(--ds-ease-out);
+}
+.mon-svc-progress__pct { color: var(--ds-ink); font-variant-numeric: tabular-nums; }
 
 .mon-header__kpis {
   display: flex;
@@ -260,6 +296,17 @@
 }
 .mon-banner--cancelled { background: var(--ds-danger-soft);  color: var(--ds-danger);  border-bottom: 1px solid var(--ds-danger); }
 .mon-banner--completed { background: var(--ds-success-soft); color: var(--ds-success); border-bottom: 1px solid var(--ds-success); }
+/* Obra al 100 % con el contrato abierto. Texto en tinta: legible y con acción. */
+.mon-banner--terminada {
+  flex-wrap: wrap;
+  background: var(--ds-gold-faint);
+  color: var(--ds-ink);
+  border-bottom: 1px solid var(--ds-gold-soft);
+}
+.mon-banner--terminada > i { color: var(--ds-gold-active); }
+.mon-banner__text    { flex: 1 1 18rem; min-width: 0; }
+.mon-banner__actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); }
+.mon-banner__confirm { font-weight: var(--ds-weight-regular); color: var(--ds-ink-secondary); }
 
 /* ── 8. 3-column body ────────────────────────────────────────── */
 
@@ -455,6 +502,14 @@
 .mon-chip.is-on                 { background: var(--ds-success-soft); border-color: var(--ds-success); color: var(--ds-success); font-weight: var(--ds-weight-medium); }
 .mon-chip:disabled              { opacity: 0.5; cursor: not-allowed; }
 .mon-chip:focus-visible         { outline: none; box-shadow: var(--ds-focus-ring); }
+/* Servicio del parte: elección única; un poco más grande que las actividades. */
+.mon-chip--servicio             { display: inline-flex; align-items: center; gap: var(--ds-space-1); font-size: var(--ds-text-sm); padding: var(--ds-space-1) var(--ds-space-4); }
+/* Texto en tinta: --ds-success sobre --ds-success-soft se queda en 4.0:1. */
+.mon-chip--servicio.is-on       { color: var(--ds-ink); }
+.mon-chip--servicio.is-on i     { color: var(--ds-success); }
+/* Marca de «este servicio ya tiene parte ese día». */
+.mon-chip__saved                { color: var(--ds-ink-muted); }
+.mon-chip--servicio.is-on .mon-chip__saved { color: var(--ds-success); }
 
 /* ── 14. Buttons ─────────────────────────────────────────────── */
 

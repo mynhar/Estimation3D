@@ -38,7 +38,7 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
-.cm-obra__service { color: var(--ds-ink-secondary); font-size: var(--ds-text-sm); }
+.cm-obra__service { color: var(--ds-ink-secondary); font-size: var(--ds-text-sm); overflow-wrap: anywhere; }
 
 /* ── Hero: avance + estado/KPIs ── */
 .cm-hero {
@@ -273,6 +273,11 @@
 .cm-event__delta { font-size: var(--ds-text-xs); color: var(--ds-success); font-variant-numeric: tabular-nums; }
 .cm-event__fase { font-size: var(--ds-text-xs); color: var(--ds-ink-secondary); display: inline-flex; align-items: center; gap: 4px; }
 .cm-event__desc { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); overflow-wrap: anywhere; }
+/* Un día puede tener varios partes (uno por servicio): cada uno en su bloque. */
+.cm-event__parte { display: flex; flex-direction: column; gap: 2px; }
+.cm-event__parte + .cm-event__parte { padding-top: 4px; border-top: 1px dashed var(--ds-border); }
+.cm-event__svc { font-size: var(--ds-text-xs); font-weight: var(--ds-weight-semibold); color: var(--ds-ink); display: inline-flex; align-items: center; gap: 4px; overflow-wrap: anywhere; }
+.cm-event__svc i { color: var(--ds-ink-muted); }
 
 /* ── Media (banda a todo el ancho) ── */
 .cm-media-grid {
@@ -340,6 +345,19 @@
   display: inline-flex; align-items: center; gap: var(--ds-space-2);
 }
 .cm-muted--sm { font-size: var(--ds-text-xs); }
+
+/* Rótulo del servicio de cada parte (zonas y archivos de un día con varios). */
+.cm-group {
+  margin: var(--ds-space-3) 0 var(--ds-space-2);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+}
+.cm-group:first-child { margin-top: 0; }
+.cm-media-grid--grupo + .cm-group { padding-top: var(--ds-space-3); border-top: 1px solid var(--ds-border); }
 
 /* ── Badges ── */
 .cm-badge {

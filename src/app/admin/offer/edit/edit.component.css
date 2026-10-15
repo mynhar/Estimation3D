@@ -650,6 +650,18 @@
   flex-shrink: 0;
 }
 
+/* Servicios que cubre la oferta (solo con varios en el expediente). */
+.fued-offer-card__services {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ds-space-1);
+  margin: 2px 0 var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+}
+.fued-offer-card__services i { color: var(--ds-ink-muted); }
+
 .fued-offer-card__row2 {
   display: flex;
   align-items: center;
@@ -1007,6 +1019,54 @@
 }
 
 /* ============================================================
+   SUMA DE OFERTAS (expediente con varios servicios)
+   ============================================================ */
+
+.fued-offers-sum {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  margin-bottom: var(--ds-space-3);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-bg-alt);
+}
+
+.fued-offers-sum__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+}
+
+.fued-offers-sum__row strong {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fued-offers-sum__row--sel {
+  padding-top: var(--ds-space-2);
+  border-top: 1px solid var(--ds-border);
+}
+
+.fued-offers-sum__note {
+  display: flex;
+  align-items: baseline;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+}
+.fued-offers-sum__note i { color: var(--ds-warning); }
+
+/* ============================================================
    FACT STRIP
    ============================================================ */
 
@@ -1068,6 +1128,37 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Varios servicios: uno por línea. A diferencia de __value, aquí el nombre
+ * envuelve en vez de cortarse con «…»: en una lista, perder el final de un
+ * nombre es perder el dato. */
+.fued-fact__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fued-fact__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+
+.fued-fact__tag {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-secondary);
 }
 
 /* ============================================================

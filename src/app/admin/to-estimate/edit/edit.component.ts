@@ -14,7 +14,8 @@ import { EdgeErrorService } from '../../../services/edge-error.service';
 import { MatterportService } from '../../../services/matterport.service';
 import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
-import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../../models';
+import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado, nombreServicio } from '../../../models';
+import { ServicioCompleto } from '../../../data/servicio.repository';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
 
 @Component({
@@ -41,6 +42,8 @@ export class AdminToEstimateEditComponent implements OnInit {
 
   user     = toSignal(this.auth.user$);
   detalle  = signal<ExpedienteDetalle | null>(null);
+  /** Todos los servicios del expediente, el principal primero. */
+  servicios = signal<ServicioCompleto[]>([]);
   cargando = signal(true);
   errorMsg = signal<string>('');
 
@@ -133,12 +136,18 @@ export class AdminToEstimateEditComponent implements OnInit {
     this.expedienteId = id;
 
     try {
-      const [detalle, estimacion, estimadoresList] = await Promise.all([
+      const [detalle, estimacion, estimadoresList, servicios] = await Promise.all([
         this.expedienteService.getDetalle(id),
         this.estimacionService.get(id),
         this.perfilRepo.findActivosByRoles(['estimador']),
+        // Sin la lista, la ficha cae al principal de `detalle`: no tumba la página.
+        this.expedienteService.getServiciosCompletos(id).catch(e => {
+          console.error('[AdminToEstimateEdit] servicios:', e?.message ?? e);
+          return [] as ServicioCompleto[];
+        }),
       ]);
       this.detalle.set(detalle);
+      this.servicios.set(servicios);
 
       // El estimador ya asignado se conserva como opción aunque hoy esté
       // inactivo o tenga otro rol, para no perder la asignación existente.
@@ -741,6 +750,13 @@ export class AdminToEstimateEditComponent implements OnInit {
     if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
     if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
     return d.servicio_nombre;
+  }
+
+  /** Nombres de todos los servicios en el idioma activo; el principal primero. */
+  get serviciosNombres(): { id: number; nombre: string }[] {
+    const lang = this.translate.currentLang;
+    const lista = this.servicios().map(s => ({ id: s.id, nombre: nombreServicio(s, lang) }));
+    return lista.length ? lista : [{ id: -1, nombre: this.servicioNombre }];
   }
 
   get puedeEliminar(): boolean {

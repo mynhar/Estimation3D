@@ -12,7 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
-import { ContratoConstructorListItem } from '../../../models';
+import { ContratoConstructorListItem, nombreServicio } from '../../../models';
 import { PaginationComponent } from '../../../shared/pagination/pagination.component';
 import {
   direccionLinea1, direccionLinea2, direccionCompleta,
@@ -104,8 +104,15 @@ export class ConstructionMonitoringListComponent implements OnInit {
   direccionLinea2   = direccionLinea2;
   direccionCompleta = direccionCompleta;
 
-  servicioNombre(c: ContratoConstructorListItem): string {
+  /**
+   * Todos los servicios del contrato en el idioma activo. Si no se pudieron
+   * leer, el principal del expediente, como antes.
+   */
+  serviciosTexto(c: ContratoConstructorListItem): string {
     const lang = this.translate.currentLang;
+    if (c.servicios?.length) {
+      return c.servicios.map(s => nombreServicio(s, lang)).join(' · ');
+    }
     if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
     if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
     return c.servicio_nombre;

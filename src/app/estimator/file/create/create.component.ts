@@ -8,6 +8,7 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
+import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 
 interface ClienteRow {
   id: string;
@@ -28,7 +29,7 @@ interface ClienteRow {
   selector: 'app-estimator-file-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -92,8 +93,23 @@ export class EstimatorFileCreateComponent implements OnInit {
   // ── Servicios ──────────────────────────────────────────────────────────────
   servicios         = signal<Servicio[]>([]);
   cargandoServicios = signal(true);
-  servicioId        = signal<number | null>(null);
-  servicioRequerido = signal(false);
+  /**
+   * Servicios marcados, en el orden en que se marcaron. El primero es el
+   * principal (`expediente.servicio_id`); la lista entera va a
+   * `expediente_servicio`.
+   */
+  servicioIds       = signal<number[]>([]);
+
+  servicioPrincipal = computed(() => this.servicioIds()[0] ?? null);
+
+  opcionesServicio = computed<ServicioOpcion[]>(() =>
+    this.serviciosLocalizados().map(s => ({
+      id:          s.id,
+      codigo:      s.codigo,
+      nombre:      s.nombre_local,
+      descripcion: s.descripcion_local,
+    }))
+  );
 
   serviciosLocalizados = computed(() => {
     const lang = this.currentLang();
@@ -111,6 +127,8 @@ export class EstimatorFileCreateComponent implements OnInit {
   });
 
   // ── Estado general ─────────────────────────────────────────────────────────
+  /** Se intentó enviar: los campos sin tocar empiezan a mostrar su error. */
+  intentado         = signal(false);
   enviando          = signal(false);
   error             = signal('');
   ubicacionCargando = signal(false);
@@ -123,7 +141,7 @@ export class EstimatorFileCreateComponent implements OnInit {
 
   readonly STEPS = [
     'admin_file_create.step2_name',
-    'file_create.step1_name',
+    'service_selector.name',
     'file_create.step3_name',
     'file_create.step4_name',
   ];
@@ -131,7 +149,7 @@ export class EstimatorFileCreateComponent implements OnInit {
   /** Etiquetas + icono de cada fila del resumen lateral. Mismo orden que STEPS. */
   readonly RESUMEN_META = [
     { label: 'admin_file_create.step2_name', icon: 'bi-person'    },
-    { label: 'file_create.step1_name',       icon: 'bi-tools'     },
+    { label: 'service_selector.name',        icon: 'bi-tools'     },
     { label: 'file_create.step3_name',       icon: 'bi-calendar3' },
     { label: 'file_create.step4_name',       icon: 'bi-geo-alt'   },
   ];
@@ -170,7 +188,7 @@ export class EstimatorFileCreateComponent implements OnInit {
 
   // ── Computed: per-step completion ──────────────────────────────────────────
   step1Complete = computed(() => !!this.clienteId());
-  step2Complete = computed(() => !!this.servicioId());
+  step2Complete = computed(() => this.servicioIds().length > 0);
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
 
@@ -191,7 +209,6 @@ export class EstimatorFileCreateComponent implements OnInit {
   // estimador necesita releer antes de guardar.
   private resumenValores = computed<(string | null)[]>(() => {
     const cli = this.clienteSeleccionado();
-    const srv = this.serviciosLocalizados().find(s => s.id === this.servicioId());
     const ev  = this.expedienteValue();
     const lv  = this.localizacionValue();
 
@@ -203,11 +220,16 @@ export class EstimatorFileCreateComponent implements OnInit {
 
     return [
       cli ? `${cli.nombre} ${cli.apellido}` : null,
-      srv?.nombre_local ?? null,
+      this.resumenServicios(),
       visita,
       partes.filter(Boolean).join(', ') || null,
     ];
   });
+
+  private resumenServicios = computed(() =>
+    resumirServicios(this.servicioIds(), this.opcionesServicio(),
+      total => this.translate.instant('service_selector.all', { total }))
+  );
 
   resumen = computed(() =>
     this.RESUMEN_META.map((meta, i) => ({
@@ -220,24 +242,6 @@ export class EstimatorFileCreateComponent implements OnInit {
   // ── Helpers ────────────────────────────────────────────────────────────────
   stepDone(idx: number): boolean {
     return [this.step1Complete(), this.step2Complete(), this.step3Complete(), this.step4Complete()][idx] ?? false;
-  }
-
-  serviceIcon(codigo: string): string {
-    const c = codigo.toLowerCase();
-    if (c.includes('moho'))                          return 'bi-biohazard';
-    if (c.includes('agua') || c.includes('dano'))    return 'bi-droplet';
-    if (c.includes('desamian'))                      return 'bi-layers';
-    if (c.includes('demolic'))                       return 'bi-buildings';
-    if (c.includes('aisla'))                         return 'bi-layers';
-    if (c.includes('fund') || c.includes('dren'))    return 'bi-water';
-    if (c.includes('elect'))                         return 'bi-lightning-charge';
-    if (c.includes('pint'))                          return 'bi-brush';
-    if (c.includes('techo') || c.includes('teja'))   return 'bi-house';
-    if (c.includes('piso')  || c.includes('cer'))    return 'bi-grid-3x3';
-    if (c.includes('carpint') || c.includes('mad'))  return 'bi-hammer';
-    if (c.includes('alumin') || c.includes('vidri')) return 'bi-window';
-    if (c.includes('jardin') || c.includes('plant')) return 'bi-tree';
-    return 'bi-tools';
   }
 
   invalid(form: ReturnType<FormBuilder['group']>, campo: string): boolean {
@@ -362,7 +366,7 @@ export class EstimatorFileCreateComponent implements OnInit {
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
     this.clienteRequerido.set(!this.clienteId());
-    this.servicioRequerido.set(!this.servicioId());
+    this.intentado.set(true);
 
     if (!this.allComplete()) return;
 
@@ -379,7 +383,8 @@ export class EstimatorFileCreateComponent implements OnInit {
 
       await this.expedienteService.crear({
         clienteId:   this.clienteId()!,
-        servicioId:  this.servicioId()!,
+        servicioId:  this.servicioPrincipal()!,
+        servicioIds: this.servicioIds(),
         numero:      this.generarNumeroExpediente(),
         fechaVisita: `${ev.fecha_visita}T${ev.hora_visita}`,
         descripcion: ev.descripcion || null,

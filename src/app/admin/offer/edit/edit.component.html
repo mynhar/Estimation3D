@@ -56,6 +56,12 @@
             <span class="fued-meta-chip">
               <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
             </span>
+            @if (servicios().length > 1) {
+              <span class="fued-meta-chip">
+                <i class="bi bi-tools"></i>
+                {{ (servicios().length === 2 ? 'admin_file_edit.more_services_one' : 'admin_file_edit.more_services_other') | translate: { n: servicios().length - 1 } }}
+              </span>
+            }
             @if (ofertasActivas().length > 0) {
               <span class="fued-meta-chip fued-meta-chip--gold">
                 <i class="bi bi-people"></i>{{ ofertasActivas().length }}/5 {{ 'available_files.offers_label' | translate }}
@@ -94,10 +100,27 @@
               <div class="fued-fact">
                 <div class="fued-fact__icon-wrap"><i class="bi bi-tools" aria-hidden="true"></i></div>
                 <div class="fued-fact__body">
-                  <p class="fued-fact__label">{{ 'make_offer.service_label' | translate }}</p>
-                  <p class="fued-fact__value">{{ servicioNombre() }}</p>
-                  @if (servicioDescripcion()) {
-                    <p class="fued-fact__sub">{{ servicioDescripcion() }}</p>
+                  @let srvs = serviciosNombres();
+                  @if (srvs.length > 1) {
+                    <!-- Varios: uno por línea, el principal primero. Sin
+                         descripciones: con varias, el resumen dejaría de serlo. -->
+                    <p class="fued-fact__label" id="fact-servicios">{{ 'service_selector.name' | translate }}</p>
+                    <ul class="fued-fact__list" aria-labelledby="fact-servicios">
+                      @for (s of srvs; track s.id; let first = $first) {
+                        <li class="fued-fact__item">
+                          <span>{{ s.nombre }}</span>
+                          @if (first) {
+                            <span class="fued-fact__tag">{{ 'service_selector.principal' | translate }}</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="fued-fact__label">{{ 'make_offer.service_label' | translate }}</p>
+                    <p class="fued-fact__value">{{ servicioNombre() }}</p>
+                    @if (servicioDescripcion()) {
+                      <p class="fued-fact__sub">{{ servicioDescripcion() }}</p>
+                    }
                   }
                 </div>
               </div>
@@ -380,6 +403,29 @@
             <p>{{ 'admin_offer.offers_empty' | translate }}</p>
           </div>
         } @else {
+          <!-- Suma de precios (solo con varios servicios): cada oferta tiene un
+               precio para sus servicios y el cliente puede contratar varias. -->
+          @if (multiServicio() && ofertasActivas().length > 0) {
+            <div class="fued-offers-sum" aria-live="polite">
+              <div class="fued-offers-sum__row">
+                <span>{{ (ofertasActivas().length === 1 ? 'offer_services.sum_all_one' : 'offer_services.sum_all_other') | translate: { n: ofertasActivas().length } }}</span>
+                <strong>CA$ {{ sumaOfertas() | number:'1.0-0' }}</strong>
+              </div>
+              @if (seleccionadasParaAdjudicar().length > 0) {
+                <div class="fued-offers-sum__row fued-offers-sum__row--sel">
+                  <span>{{ (seleccionadasParaAdjudicar().length === 1 ? 'offer_services.sum_selected_one' : 'offer_services.sum_selected_other') | translate: { n: seleccionadasParaAdjudicar().length } }}</span>
+                  <strong>CA$ {{ sumaSeleccionadas() | number:'1.0-0' }}</strong>
+                </div>
+                @if (serviciosSinCubrir().length) {
+                  <p class="fued-offers-sum__note">
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                    {{ 'offer_services.uncovered' | translate: { lista: serviciosSinCubrir().join(', ') } }}
+                  </p>
+                }
+              }
+            </div>
+          }
+
           <div class="fued-offers-list">
             @for (oferta of todasLasOfertas(); track oferta.id) {
               <div class="fued-offer-card"
@@ -414,6 +460,13 @@
                     <p class="fued-offer-card__name">{{ oferta.constructor_nombre }}</p>
                     <p class="fued-offer-card__price">CA$ {{ oferta.precio | number:'1.0-0' }}</p>
                   </div>
+                  @if (multiServicio()) {
+                    <p class="fued-offer-card__services">
+                      <i class="bi bi-tools" aria-hidden="true"></i>
+                      <span class="visually-hidden">{{ 'offer_services.label' | translate }}:</span>
+                      {{ serviciosDeOfertaTexto(oferta) ?? '—' }}
+                    </p>
+                  }
                   <div class="fued-offer-card__row2">
                     <!-- El estado se conserva aunque la oferta esté dada de
                          baja: el badge de baja se añade al lado, no lo tapa. -->
@@ -637,12 +690,35 @@
               }
             </div>
 
+            <!-- Servicios de la oferta (solo con varios en el expediente) -->
+            @if (multiServicio()) {
+              <div class="fued-field">
+                <p class="fued-label mb-0" id="oferta-servicios-label">
+                  <i class="bi bi-tools"></i>{{ 'offer_services.label' | translate }}
+                  <span class="fued-req">*</span>
+                </p>
+                <p class="fued-field-hint" id="oferta-servicios-hint">{{ 'offer_services.hint' | translate }}</p>
+                <app-servicio-selector
+                  [opciones]="opcionesServicio()"
+                  [(seleccion)]="servicioIdsOferta"
+                  [validar]="intentado()"
+                  [disabled]="enviando()"
+                  [mostrarPrincipal]="false"
+                  [compacto]="true"
+                  labelledBy="oferta-servicios-label"
+                  describedBy="oferta-servicios-hint" />
+              </div>
+            }
+
             <!-- Precio -->
             <div class="fued-field">
               <label class="fued-label">
                 <i class="bi bi-coin"></i>{{ 'make_offer.total_price' | translate }}
                 <span class="fued-req">*</span>
               </label>
+              @if (multiServicio()) {
+                <p class="fued-field-hint">{{ 'offer_services.price_hint' | translate }}</p>
+              }
               <div class="fued-input-group">
                 <span class="fued-input-prefix">CA$</span>
                 <input type="number" class="fued-input" placeholder="0" min="1" step="1000"

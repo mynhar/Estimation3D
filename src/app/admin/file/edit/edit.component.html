@@ -93,6 +93,11 @@
           <span class="badge rounded-pill px-3 py-1 {{ estadoClase(estadoActual()) }}">
             {{ ('state.' + estadoActual()) | translate }}
           </span>
+          @if (serviciosExtra() > 0) {
+            <span class="tag">
+              {{ (serviciosExtra() === 1 ? 'admin_file_edit.more_services_one' : 'admin_file_edit.more_services_other') | translate: { n: serviciosExtra() } }}
+            </span>
+          }
           <span class="exp-edit-hint">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="1.5"
@@ -318,45 +323,25 @@
               }
             </div>
 
-            <!-- Servicio -->
+            <!-- Servicios · uno, varios o todos; el primero es el principal -->
             <div class="mb-4">
-              <label class="form-label">
-                {{ 'file.service' | translate }} <span class="req-mark" aria-hidden="true">*</span>
-              </label>
+              <p class="form-label mb-1" id="edit-srv-label">
+                {{ 'service_selector.name' | translate }} <span class="req-mark" aria-hidden="true">*</span>
+              </p>
+              <p class="form-text mt-0 mb-3" id="edit-srv-hint">{{ 'service_selector.hint' | translate }}</p>
               @if (cargandoServicios()) {
                 <div class="loading-inline">
                   <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
                   {{ 'file_create.loading_services' | translate }}
                 </div>
               } @else {
-                <div class="row g-2" role="radiogroup">
-                  @for (s of serviciosLocalizados(); track s.id) {
-                    <div class="col-sm-6">
-                      <label class="service-card h-100" [class.service-card--selected]="servicioId() === s.id">
-                        <input type="radio" class="visually-hidden" name="servicio" [value]="s.id"
-                               [checked]="servicioId() === s.id" (change)="servicioId.set(s.id)" />
-                        <div class="d-flex align-items-start gap-3">
-                          <div class="service-icon" [class.service-icon--selected]="servicioId() === s.id">
-                            <i class="bi {{ serviceIcon(s.codigo) }}" aria-hidden="true"></i>
-                          </div>
-                          <div class="flex-grow-1 min-w-0">
-                            <p class="service-name mb-1">{{ s.nombre_local }}</p>
-                            @if (s.descripcion_local) {
-                              <p class="service-desc mb-0">{{ s.descripcion_local }}</p>
-                            }
-                          </div>
-                        </div>
-                        @if (servicioId() === s.id) { <div class="service-bar" aria-hidden="true"></div> }
-                      </label>
-                    </div>
-                  }
-                </div>
-                @if (servicioRequerido()) {
-                  <p class="field-error mt-2" role="alert">
-                    <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
-                    {{ 'file_create.service_required' | translate }}
-                  </p>
-                }
+                <app-servicio-selector
+                  [opciones]="opcionesServicio()"
+                  [(seleccion)]="servicioIds"
+                  [validar]="intentado()"
+                  [disabled]="guardandoExp()"
+                  labelledBy="edit-srv-label"
+                  describedBy="edit-srv-hint" />
               }
             </div>
 

@@ -18,7 +18,7 @@ import { ContratoService } from '../../../services/contrato.service';
 import { SeguimientoService } from '../../../services/seguimiento.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ArchivoService, ReporteArchivoRow, ReporteMediaTipo } from '../../../services/archivo.service';
-import { ContratoAdminDetalle, ContratoPdfData } from '../../../models';
+import { ContratoAdminDetalle, ContratoPdfData, nombreServicio, serviciosParaContrato } from '../../../models';
 import {
   ActividadServicio,
   FaseServicio,
@@ -63,8 +63,34 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   error       = signal<string | null>(null);
 
   // ── Catálogos desde BD ────────────────────────────────────────────────────
+  // Fases y actividades de TODOS los servicios del contrato. El formulario
+  // enseña solo las del servicio elegido (`fasesServicio`, `actividadesServicio`);
+  // el historial necesita las de todos para nombrar la fase de cada parte.
   fases       = signal<FaseServicio[]>([]);
   actividades = signal<ActividadServicio[]>([]);
+
+  /**
+   * Servicios del contrato, traducidos. Si el contrato no los trae (lista de
+   * respaldo con id -1), el principal del expediente vía el seguimiento.
+   */
+  serviciosObra = computed<{ id: number; nombre: string }[]>(() => {
+    const lang  = this.currentLang();
+    const lista = (this.contrato()?.servicios ?? [])
+      .filter(s => s.id > 0)
+      .map(s => ({ id: s.id, nombre: nombreServicio(s, lang) }));
+    if (lista.length) return lista;
+    const principal = this.seguimiento()?.servicio_id;
+    const c = this.contrato();
+    return principal != null && c ? [{ id: principal, nombre: this.servicioNombre(c) }] : [];
+  });
+
+  /** Con un solo servicio no hay nada que elegir y el formulario queda como antes. */
+  multiServicio = computed(() => this.serviciosObra().length > 1);
+
+  fasesServicio = computed(() =>
+    this.fases().filter(f => f.servicio_id === this.servicioReporte()));
+  actividadesServicio = computed(() =>
+    this.actividades().filter(a => a.servicio_id === this.servicioReporte()));
 
   // ── Formulario: reporte del día ───────────────────────────────────────────
   fechaReporte    = signal(this.fechaISO(new Date()));
@@ -72,6 +98,8 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   horaInicio      = signal('07:00');
   horasTrabajadas = signal(8);
   avanceDia       = signal(5);
+  /** Servicio del contrato en el que se trabajó ese día. */
+  servicioReporte = signal<number | null>(null);
   faseId          = signal<string | null>(null);
   actividadesOn   = signal<Set<string>>(new Set());
   zonaDesc        = signal('');
@@ -83,9 +111,19 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   errorGuardar = signal<string | null>(null);
 
   // ── Datos de reportes ─────────────────────────────────────────────────────
+  /**
+   * Partes de la fecha elegida: uno por servicio trabajado ese día. El
+   * formulario edita el del servicio elegido (`reporteHoy`).
+   */
+  reportesDelDia      = signal<ReporteDiario[]>([]);
+  /** Servicios que ya tienen parte en la fecha elegida. */
+  serviciosConParte   = computed(() => new Set(this.reportesDelDia().map(r => r.servicio_id)));
+  /** El parte de la fecha y el servicio elegidos, si ya existe. */
   reporteHoy          = signal<ReporteDiario | null>(null);
+  /** Evita que una carga lenta pise a otra más reciente al cambiar rápido de servicio o fecha. */
+  private cargaParte  = 0;
   reportesRecientes   = signal<ReporteDiario[]>([]);
-  statsReportes       = signal<StatsReportes>({ total_dias: 0, total_horas: 0 });
+  statsReportes       = signal<StatsReportes>({ total_dias: 0, total_horas: 0, avance_por_servicio: {}, dias_por_servicio: {} });
   fechasTrabajadasMes = signal<Set<string>>(new Set());
   fechasInspeccionMes = signal<Set<string>>(new Set());
   inspecciones        = signal<Inspeccion[]>([]);
@@ -152,23 +190,51 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
 
   // ── Computados ────────────────────────────────────────────────────────────
 
+  /**
+   * Avance global de la obra: la media del avance de sus servicios (lo calcula
+   * la base, `recalcular_avance_seguimiento`). Llega al 100 % cuando todos los
+   * servicios llegan al 100 %.
+   */
   avanceGlobal = computed(() => {
     const estado = this.contrato()?.estado;
     if (estado === 'completado') return 100;
     if (estado === 'cancelado')  return 0;
-    return this.seguimiento()?.porcentaje_avance ?? 0;
+    return Math.round(this.seguimiento()?.porcentaje_avance ?? 0);
   });
 
-  avancePreview = computed(() => {
-    const savedToday = this.reporteHoy()?.porcentaje_avance_dia ?? 0;
-    return Math.min(100, this.avanceGlobal() - savedToday + this.avanceDia());
+  /** Avance guardado de un servicio (0–100). */
+  avanceDeServicio(servicioId: number): number {
+    return Math.round(this.statsReportes().avance_por_servicio[servicioId] ?? 0);
+  }
+
+  /** Avance guardado del servicio del parte, sin contar lo que ya aporta este parte. */
+  private avanceServicioSinEste = computed(() => {
+    const id = this.servicioReporte();
+    if (id == null) return 0;
+    const guardado = this.statsReportes().avance_por_servicio[id] ?? 0;
+    return Math.max(0, guardado - (this.reporteHoy()?.porcentaje_avance_dia ?? 0));
   });
 
-  // Max contribution allowed for the current date: remaining budget excluding today's saved value
-  maxAvanceDia = computed(() => {
-    const spent = this.avanceGlobal() - (this.reporteHoy()?.porcentaje_avance_dia ?? 0);
-    return Math.max(0, 100 - spent);
+  /** Avance del servicio del parte tras guardar este día. */
+  avancePreview = computed(() =>
+    Math.round(Math.min(100, this.avanceServicioSinEste() + this.avanceDia())));
+
+  /** Lo máximo que este parte puede sumar: cada servicio llega como mucho al 100 %. */
+  maxAvanceDia = computed(() => Math.max(0, Math.round(100 - this.avanceServicioSinEste())));
+
+  /** Avance global de la obra tras guardar: media de servicios con este ya actualizado. */
+  avanceGlobalPreview = computed(() => {
+    const servicios = this.serviciosObra();
+    if (!servicios.length) return this.avanceGlobal();
+    const actual = this.servicioReporte();
+    const total  = servicios.reduce((t, s) =>
+      t + (s.id === actual ? this.avancePreview() : (this.statsReportes().avance_por_servicio[s.id] ?? 0)), 0);
+    return Math.round(Math.min(100, total / servicios.length));
   });
+
+  /** Nombre del servicio del parte (para los textos del formulario). */
+  servicioReporteNombre = computed(() =>
+    this.serviciosObra().find(s => s.id === this.servicioReporte())?.nombre ?? '');
 
   diasTrabajados = computed(() => this.statsReportes().total_dias);
 
@@ -215,6 +281,35 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   });
   cancelado  = computed(() => this.contrato()?.estado === 'cancelado');
   completado = computed(() => this.contrato()?.estado === 'completado');
+
+  /**
+   * La obra llegó al 100 % (lo marca la base al recalcular el avance) pero el
+   * contrato sigue abierto. El contrato no se completa solo: el 100 % lo
+   * declara quien registra los partes, y el administrador lo confirma.
+   */
+  obraTerminada = computed(() =>
+    !this.completado() && !this.cancelado() && this.seguimiento()?.estado === 'completado');
+
+  confirmandoCompletar = signal(false);
+  completando          = signal(false);
+  errorCompletar       = signal<string | null>(null);
+
+  /** Administrador: completa el contrato desde el seguimiento (mismo RPC que admin/contract/edit). */
+  async completarContrato(): Promise<void> {
+    const c = this.contrato();
+    if (!c || !this.esAdmin || this.completando()) return;
+    this.completando.set(true);
+    this.errorCompletar.set(null);
+    try {
+      await this.contratoService.completarContratoAdmin(c.id);
+      this.contrato.set(await this.contratoService.getContratoAdminById(c.id));
+      this.confirmandoCompletar.set(false);
+    } catch (e: any) {
+      this.errorCompletar.set(e?.message ?? 'admin_file_edit.save_error');
+    } finally {
+      this.completando.set(false);
+    }
+  }
 
   todayLabel = computed(() => {
     const d = new Date(`${this.fechaReporte()}T00:00:00`);
@@ -431,21 +526,24 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     const hoy    = new Date();
     const hoyISO = this.fechaISO(hoy);
 
+    // Fases y actividades de todos los servicios del contrato (ya cargado).
+    const servicioIds = this.serviciosObra().map(s => s.id);
+
     const [
       fases, actividades, stats,
-      fechasMes, inspeccionesMes, inspProximas, reporteHoy, reportesRecientes,
+      fechasMes, inspeccionesMes, inspProximas, reportesHoy, reportesRecientes,
     ] = await Promise.all([
-      seg.servicio_id != null
-        ? this.seguimientoService.getFasesByServicioId(seg.servicio_id)
+      servicioIds.length
+        ? this.seguimientoService.getFasesByServicioIds(servicioIds)
         : Promise.resolve([]),
-      seg.servicio_id != null
-        ? this.seguimientoService.getActividadesByServicioId(seg.servicio_id)
+      servicioIds.length
+        ? this.seguimientoService.getActividadesByServicioIds(servicioIds)
         : Promise.resolve([]),
       this.seguimientoService.getStatsReportes(seg.id),
       this.seguimientoService.getFechasTrabajadasMes(seg.id, hoy.getFullYear(), hoy.getMonth() + 1),
       this.seguimientoService.getInspeccionesMes(seg.id, hoy.getFullYear(), hoy.getMonth() + 1),
       this.seguimientoService.getProximasInspecciones(seg.id, 3),
-      this.seguimientoService.getReporteByFecha(seg.id, hoyISO),
+      this.seguimientoService.getReportesDeFecha(seg.id, hoyISO),
       this.seguimientoService.getReportesRecientes(seg.id, 8),
     ]);
 
@@ -455,32 +553,80 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     this.fechasTrabajadasMes.set(new Set(fechasMes));
     this.fechasInspeccionMes.set(new Set(inspeccionesMes.map(i => i.fecha)));
     this.inspecciones.set(inspProximas);
-    this.reporteHoy.set(reporteHoy);
     this.reportesRecientes.set(reportesRecientes);
+    this.reportesDelDia.set(reportesHoy);
 
-    // Load media for today's report if it exists
-    if (reporteHoy) await this.cargarMedia(reporteHoy.id);
+    this.servicioReporte.set(this.servicioPorDefecto(seg.fase_actual_id));
+    await this.aplicarParteDelServicio();
+  }
 
-    // Prefill form with today's saved report
-    if (reporteHoy) {
-      this.horaInicio.set(reporteHoy.hora_inicio?.substring(0, 5) ?? '07:00');
-      this.horasTrabajadas.set(reporteHoy.horas_trabajadas ?? 8);
-      this.avanceDia.set(reporteHoy.porcentaje_avance_dia ?? 5);
-      this.notas.set(reporteHoy.descripcion ?? '');
-      if (reporteHoy.fase_id) this.faseId.set(reporteHoy.fase_id);
+  /**
+   * Pone en el formulario el parte de la fecha y el servicio elegidos, o lo
+   * deja en blanco si ese servicio aún no tiene parte ese día. Cada parte
+   * tiene su fase, actividades, zona, descripción y archivos.
+   */
+  private async aplicarParteDelServicio(): Promise<void> {
+    const token      = ++this.cargaParte;
+    const servicioId = this.servicioReporte();
+    const reporte    = this.reportesDelDia().find(r => r.servicio_id === servicioId) ?? null;
 
-      const [actsHoy, zonasHoy] = await Promise.all([
-        this.seguimientoService.getActividadesReporte(reporteHoy.id),
-        this.seguimientoService.getZonasReporte(reporteHoy.id),
-      ]);
-      this.actividadesOn.set(new Set(actsHoy.map(a => a.actividad_id)));
-      if (zonasHoy.length > 0) {
-        this.zonaDesc.set(zonasHoy[0].zona);
-        this.zonaPct.set(zonasHoy[0].porcentaje_avance ?? null);
-      }
-    } else if (seg.fase_actual_id) {
-      this.faseId.set(seg.fase_actual_id);
+    this.reporteHoy.set(reporte);
+    this.guardado.set(false);
+    this.errorGuardar.set(null);
+
+    if (!reporte) {
+      this.horaInicio.set('07:00');
+      this.horasTrabajadas.set(8);
+      this.avanceDia.set(5);
+      this.notas.set('');
+      // La fase: la última trabajada, si es de este servicio.
+      const faseActual = this.fases().find(f => f.id === this.seguimiento()?.fase_actual_id);
+      this.faseId.set(faseActual && faseActual.servicio_id === servicioId ? faseActual.id : null);
+      this.actividadesOn.set(new Set());
+      this.zonaDesc.set('');
+      this.zonaPct.set(null);
+      this.mediaFotos.set([]);
+      this.mediaVideos.set([]);
+      this.mediaDocs.set([]);
+      return;
     }
+
+    this.horaInicio.set(reporte.hora_inicio?.substring(0, 5) ?? '07:00');
+    this.horasTrabajadas.set(reporte.horas_trabajadas ?? 8);
+    this.avanceDia.set(reporte.porcentaje_avance_dia ?? 5);
+    this.notas.set(reporte.descripcion ?? '');
+    this.faseId.set(reporte.fase_id);
+
+    const [acts, zonas, media] = await Promise.all([
+      this.seguimientoService.getActividadesReporte(reporte.id),
+      this.seguimientoService.getZonasReporte(reporte.id),
+      this.archivoService.cargarPorReporte(reporte.id),
+    ]);
+    if (token !== this.cargaParte) return;
+
+    this.actividadesOn.set(new Set(acts.map(a => a.actividad_id)));
+    this.zonaDesc.set(zonas[0]?.zona ?? '');
+    this.zonaPct.set(zonas[0]?.porcentaje_avance ?? null);
+    this.mediaFotos.set(media.fotos);
+    this.mediaVideos.set(media.videos);
+    this.mediaDocs.set(media.documentos);
+  }
+
+  /**
+   * Servicio con el que arranca una fecha: con un solo servicio, ese; si no,
+   * el del último parte de esa fecha, el de la última fase trabajada o el del
+   * parte más reciente. Con varios y sin historial queda sin elegir.
+   */
+  private servicioPorDefecto(faseActualId: string | null): number | null {
+    const ids = this.serviciosObra().map(s => s.id);
+    if (ids.length === 1) return ids[0];
+    const delDia = this.reportesDelDia().at(-1)?.servicio_id;
+    if (delDia != null && ids.includes(delDia)) return delDia;
+    const deFase = this.fases().find(f => f.id === faseActualId)?.servicio_id;
+    if (deFase != null && ids.includes(deFase)) return deFase;
+    const reciente = this.reportesRecientes()[0]?.servicio_id;
+    if (reciente != null && ids.includes(reciente)) return reciente;
+    return null;
   }
 
   // ── Navegación ────────────────────────────────────────────────────────────
@@ -497,36 +643,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   private async cargarReporteParaFecha(fecha: string): Promise<void> {
     const seg = this.seguimiento();
     if (!seg) return;
-    const reporte = await this.seguimientoService.getReporteByFecha(seg.id, fecha);
-    this.reporteHoy.set(reporte);
-    if (reporte) {
-      this.horaInicio.set(reporte.hora_inicio?.substring(0, 5) ?? '07:00');
-      this.horasTrabajadas.set(reporte.horas_trabajadas ?? 8);
-      this.avanceDia.set(reporte.porcentaje_avance_dia ?? 5);
-      this.notas.set(reporte.descripcion ?? '');
-      if (reporte.fase_id) this.faseId.set(reporte.fase_id);
-      const [acts, zonas] = await Promise.all([
-        this.seguimientoService.getActividadesReporte(reporte.id),
-        this.seguimientoService.getZonasReporte(reporte.id),
-      ]);
-      this.actividadesOn.set(new Set(acts.map(a => a.actividad_id)));
-      this.zonaDesc.set(zonas[0]?.zona ?? '');
-      this.zonaPct.set(zonas[0]?.porcentaje_avance ?? null);
-      await this.cargarMedia(reporte.id);
-    } else {
-      this.horaInicio.set('07:00');
-      this.horasTrabajadas.set(8);
-      this.avanceDia.set(5);
-      this.notas.set('');
-      this.actividadesOn.set(new Set());
-      this.zonaDesc.set('');
-      this.zonaPct.set(null);
-      this.mediaFotos.set([]);
-      this.mediaVideos.set([]);
-      this.mediaDocs.set([]);
+    this.reportesDelDia.set(await this.seguimientoService.getReportesDeFecha(seg.id, fecha));
+    // Se queda en el servicio elegido; si no hay ninguno, el que toque.
+    if (this.servicioReporte() == null) {
+      this.servicioReporte.set(this.servicioPorDefecto(seg.fase_actual_id));
     }
-    this.guardado.set(false);
-    this.errorGuardar.set(null);
+    await this.aplicarParteDelServicio();
   }
 
   setHoraInicio(e: Event)  { this.horaInicio.set((e.target as HTMLInputElement).value); }
@@ -535,6 +657,17 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   setZonaDesc(e: Event)    { this.zonaDesc.set((e.target as HTMLInputElement).value); }
   setZonaPct(e: Event)     { const v = parseFloat((e.target as HTMLInputElement).value); this.zonaPct.set(isNaN(v) ? null : v); }
   setNotas(e: Event)       { this.notas.set((e.target as HTMLTextAreaElement).value); }
+
+  /**
+   * Cambia de servicio, es decir, de parte: cada servicio trabajado ese día
+   * tiene el suyo. Carga el de ese servicio o deja el formulario en blanco.
+   * Lo no guardado del servicio anterior se descarta.
+   */
+  async setServicio(servicioId: number) {
+    if (this.servicioReporte() === servicioId) return;
+    this.servicioReporte.set(servicioId);
+    await this.aplicarParteDelServicio();
+  }
 
   setFase(faseId: string) {
     this.faseId.set(faseId);
@@ -554,11 +687,27 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     const userId = this.user()?.id;
     if (!seg || !userId) return;
 
+    // Con varios servicios, el parte tiene que decir en cuál se trabajó.
+    if (this.multiServicio() && this.servicioReporte() == null) {
+      this.errorGuardar.set('monitoring.servicio_requerido');
+      return;
+    }
+    // Una fase de otro servicio (p. ej. la última trabajada) no se envía.
+    const fase = this.fases().find(f => f.id === this.faseId());
+    const faseValida = fase && fase.servicio_id === this.servicioReporte() ? fase.id : undefined;
+
     this.guardando.set(true);
     this.errorGuardar.set(null);
 
+    // El parte que se guarda. Si mientras tanto se abre otro (historial), lo
+    // que llega al final no debe pisar el formulario de ese otro parte.
+    const fechaGuardada    = this.fechaReporte();
+    const servicioGuardado = this.servicioReporte();
+    const sigueAbierto = () =>
+      this.fechaReporte() === fechaGuardada && this.servicioReporte() === servicioGuardado;
+
     try {
-      const hoy       = this.fechaReporte();
+      const hoy       = fechaGuardada;
       const acumulado = this.avancePreview();
 
       const reporte = await this.seguimientoService.upsertReporte({
@@ -569,12 +718,17 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
         horas_trabajadas:      this.horasTrabajadas(),
         porcentaje_avance_dia: this.avanceDia(),
         porcentaje_acumulado:  acumulado,
-        fase_id:               this.faseId() ?? undefined,
+        servicio_id:           this.servicioReporte(),
+        fase_id:               faseValida,
         descripcion:           this.notas() || null,
       });
 
+      // Solo las actividades del servicio del parte.
+      const delServicio = new Set(this.actividadesServicio().map(a => a.id));
       await Promise.all([
-        this.seguimientoService.setActividadesReporte(reporte.id, [...this.actividadesOn()]),
+        this.seguimientoService.setActividadesReporte(
+          reporte.id, [...this.actividadesOn()].filter(id => delServicio.has(id)),
+        ),
         this.zonaDesc()
           ? this.seguimientoService.upsertZona(reporte.id, this.zonaDesc(), null, this.zonaPct())
           : Promise.resolve(),
@@ -592,8 +746,17 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
       // Update reporteHoy with the just-saved row — do NOT call cargarDatosSeguimiento
       // because that always reloads for today's date and would overwrite the form.
       // Also sync avanceDia from the DB value: the BEFORE trigger may have clamped it.
-      this.reporteHoy.set(reporte);
-      this.avanceDia.set(reporte.porcentaje_avance_dia);
+      // El parte guardado sustituye al de su servicio en la lista del día.
+      if (this.fechaReporte() === fechaGuardada) {
+        this.reportesDelDia.update(lista => [
+          ...lista.filter(r => r.id !== reporte.id && r.servicio_id !== reporte.servicio_id),
+          reporte,
+        ]);
+      }
+      if (sigueAbierto()) {
+        this.reporteHoy.set(reporte);
+        this.avanceDia.set(Number(reporte.porcentaje_avance_dia));
+      }
 
       // Refresh surrounding context only (KPIs, calendar, event log, global progress).
       const hoyCtx = new Date();
@@ -608,8 +771,10 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
       this.fechasTrabajadasMes.set(new Set(fechasMes));
       this.reportesRecientes.set(recientes);
 
-      await this.cargarMedia(reporte.id);
-      this.guardado.set(true);
+      if (sigueAbierto()) {
+        await this.cargarMedia(reporte.id);
+        this.guardado.set(true);
+      }
     } catch (e: any) {
       this.errorGuardar.set(e.message);
     } finally {
@@ -640,17 +805,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
         ? new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
             .format(new Date(c.generado_en.includes('T') ? c.generado_en : `${c.generado_en}T00:00:00`))
         : '';
-      const svcNombre = lang === 'en' ? (c.servicio_nombre_en || c.servicio_nombre)
-                      : lang === 'fr' ? (c.servicio_nombre_fr || c.servicio_nombre)
-                      : c.servicio_nombre;
-      const svcDesc   = lang === 'en' ? (c.servicio_desc_en || c.servicio_desc)
-                      : lang === 'fr' ? (c.servicio_desc_fr || c.servicio_desc)
-                      : c.servicio_desc;
       const pdfData: ContratoPdfData = {
         contratoId: c.id, expedienteNumero: c.expediente_numero, fechaGenerado: fechaGen,
         clienteNombre: c.cliente_nombre, constructorNombre: c.constructor_nombre,
         constructorTelefono: c.constructor_telefono, constructorEmail: c.constructor_email,
-        servicioNombre: svcNombre, servicioDescripcion: svcDesc,
+        // Todos los servicios del contrato, cada uno con su descripción.
+        servicios: serviciosParaContrato(c.servicios, lang),
         direccion: c.direccion, canton: c.canton, provincia: c.provincia, distrito: c.distrito ?? '',
         precioFinal: c.precio_final, plazoMin: c.plazo_semanas_min, plazoMax: c.plazo_semanas_max,
         garantiaAnos: c.garantia_anos, fechaInicio: c.oferta_fecha_inicio ?? '',
@@ -681,8 +841,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     return act.nombre_es;
   }
 
+  /** Todos los servicios del contrato; si no vienen, el principal como antes. */
   servicioNombre(c: ContratoAdminDetalle): string {
     const lang = this.currentLang();
+    if (c.servicios?.length) {
+      return c.servicios.map(s => nombreServicio(s, lang)).join(' · ');
+    }
     if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
     if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
     return c.servicio_nombre;
@@ -789,6 +953,12 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Nombre del servicio de un parte, para el historial (solo con varios). */
+  servicioNombreById(servicioId: number | null): string {
+    if (servicioId == null) return '';
+    return this.serviciosObra().find(s => s.id === servicioId)?.nombre ?? '';
+  }
+
   faseNameById(faseId: string | null): string {
     if (!faseId) return '';
     const fase = this.fases().find(f => f.id === faseId);
@@ -803,8 +973,10 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
 
   // ── Flujo de eventos: seleccionar / eliminar ──────────────────────────────
 
+  /** Abre un parte del historial: su fecha y su servicio. */
   seleccionarEvento(r: ReporteDiario): void {
     this.fechaReporte.set(r.fecha);
+    if (r.servicio_id != null) this.servicioReporte.set(r.servicio_id);
     this.cargarReporteParaFecha(r.fecha);
   }
 

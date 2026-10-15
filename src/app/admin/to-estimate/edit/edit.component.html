@@ -45,6 +45,12 @@
             <span class="fued-meta-item">
               <i class="bi bi-geo-alt"></i>{{ detalle()!.canton }}, {{ detalle()!.provincia }}
             </span>
+            @if (servicios().length > 1) {
+              <span class="fued-meta-item">
+                <i class="bi bi-tools"></i>
+                {{ (servicios().length === 2 ? 'admin_file_edit.more_services_one' : 'admin_file_edit.more_services_other') | translate: { n: servicios().length - 1 } }}
+              </span>
+            }
             @if (estimadorSeleccionadoNombre) {
               <span class="fued-meta-item">
                 <i class="bi bi-person-badge"></i>{{ estimadorSeleccionadoNombre }}
@@ -87,6 +93,23 @@
             </div>
           </div>
           <div class="fued-card__body">
+
+            <!-- Todos los servicios del expediente; el principal primero -->
+            @let srvs = serviciosNombres;
+            <p class="fued-section-label" id="fued-servicios-label">{{ 'service_selector.name' | translate }}</p>
+            <ul class="fued-servicios" aria-labelledby="fued-servicios-label">
+              @for (s of srvs; track s.id; let first = $first) {
+                @let principal = first && srvs.length > 1;
+                <li class="fued-servicio" [class.fued-servicio--principal]="principal">
+                  {{ s.nombre }}
+                  @if (principal) {
+                    <span class="fued-servicio__tag">{{ 'service_selector.principal' | translate }}</span>
+                  }
+                </li>
+              }
+            </ul>
+
+            <div class="fued-divider"></div>
 
             <p class="fued-section-label">{{ 'builder_offer.client_label' | translate }}</p>
             <div class="fued-info-grid">

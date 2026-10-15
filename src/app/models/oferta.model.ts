@@ -13,6 +13,8 @@ export interface OfertaConConstructor {
   estado: string;
   /** Fecha de baja lógica, o `null` si la oferta está activa. */
   eliminada_en: string | null;
+  /** Servicios del expediente que cubre (orden del expediente, principal primero). */
+  servicio_ids: number[];
   constructor_nombre:   string;
   constructor_telefono: string;
   constructor_email:    string;
@@ -23,6 +25,8 @@ export interface OfertaConConstructor {
 export interface OfertaDetalle {
   id: string;
   expediente_id: string;
+  /** Servicios del expediente que cubre la oferta. */
+  servicio_ids: number[];
   expediente_numero: string;
   servicio_nombre: string;
   servicio_nombre_en: string;
@@ -48,6 +52,11 @@ export interface OfertaDetalle {
 
 export interface OfertaForm {
   precio: number | null;
+  /**
+   * Servicios que cubre la oferta, con un único precio para todos. Ausente =
+   * no se tocan (en un alta, la base asigna todos los del expediente).
+   */
+  servicio_ids?: number[];
   plazo_semanas_min: number | null;
   plazo_semanas_max: number | null;
   garantia_anos: number | null;

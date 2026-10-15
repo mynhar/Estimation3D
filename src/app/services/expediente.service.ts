@@ -18,6 +18,7 @@ import { EstadoExpediente, TipoInmueble } from '../types/supabase';
 import {
   ExpedienteRepository,
   LocalizacionRepository,
+  ExpedienteServicioRepository,
   PerfilRepository,
   ServicioRepository,
   EstimacionRepository,
@@ -25,6 +26,7 @@ import {
   ContratoRepository,
 } from '../data';
 import { OfertaRaw, OfertaHistorialItem } from '../data/oferta.repository';
+import { ServicioCompleto } from '../data/servicio.repository';
 import { ContratoHistorialItem } from '../data/contrato.repository';
 import { matterportThumbFromTour } from '../shared/util/matterport';
 export type { OfertaHistorialItem } from '../data/oferta.repository';
@@ -34,6 +36,7 @@ export type { ContratoHistorialItem } from '../data/contrato.repository';
 export class ExpedienteService {
   private expedienteRepo  = inject(ExpedienteRepository);
   private localizacionRepo = inject(LocalizacionRepository);
+  private expServicioRepo  = inject(ExpedienteServicioRepository);
   private perfilRepo      = inject(PerfilRepository);
   private servicioRepo    = inject(ServicioRepository);
   private estimacionRepo  = inject(EstimacionRepository);
@@ -204,7 +207,14 @@ export class ExpedienteService {
 
   async crear(payload: {
     clienteId:   string;
+    /** Servicio principal: el que leen estimación, seguimiento y listados. */
     servicioId:  number;
+    /**
+     * Lista completa cuando el expediente tiene varios servicios (altas de
+     * administrador, estimador y cliente). Puede incluir el principal o no: el trigger de
+     * `expediente_servicio` ya lo inserta y aquí se descarta.
+     */
+    servicioIds?: number[];
     numero:      string;
     fechaVisita: string;
     descripcion?: string | null;
@@ -252,6 +262,10 @@ export class ExpedienteService {
       latitud:    payload.localizacion.latitud    ?? null,
       longitud:   payload.localizacion.longitud   ?? null,
     });
+
+    const adicionales = [...new Set(payload.servicioIds ?? [])]
+      .filter(sid => sid !== payload.servicioId);
+    await this.expServicioRepo.insertMany(id, adicionales);
     return id;
   }
 
@@ -641,9 +655,45 @@ export class ExpedienteService {
     };
   }
 
+  /** Servicios del expediente, el principal primero; el resto, en orden de alta. */
+  async getServiciosExpediente(id: string, principalId: number): Promise<number[]> {
+    const ids = await this.expServicioRepo.findServicioIds(id);
+    return [principalId, ...ids.filter(x => x !== principalId)];
+  }
+
+  /**
+   * Servicios del expediente con nombres y descripciones en los tres idiomas,
+   * el principal primero. Si `expediente_servicio` no responde (migración
+   * pendiente) devuelve solo el principal, que siempre existe.
+   */
+  async getServiciosCompletos(id: string): Promise<ServicioCompleto[]> {
+    const exp = await this.expedienteRepo.findForEdicion(id);
+    if (!exp) throw new Error('file.not_found');
+
+    let ids: number[];
+    try {
+      ids = await this.getServiciosExpediente(id, exp.servicio_id);
+    } catch (e) {
+      console.error('[ExpedienteService] servicios del expediente:', e);
+      ids = [exp.servicio_id];
+    }
+
+    const catalogo = await this.servicioRepo.findByIdsCompleto(ids);
+    return ids
+      .map(sid => catalogo.find(s => s.id === sid))
+      .filter((s): s is ServicioCompleto => !!s);
+  }
+
   async actualizarExpediente(id: string, payload: {
     clienteId:   string;
     servicioId:  number;
+    /**
+     * Lista completa, principal primero (`admin/file/edit` y
+     * `estimator/file/edit`). Si llega,
+     * principal y lista se guardan juntos en un RPC atómico y el UPDATE de
+     * `expediente` deja `servicio_id` sin tocar.
+     */
+    servicioIds?: number[];
     fechaVisita: string;
     descripcion?: string | null;
     localizacion: {
@@ -657,14 +707,16 @@ export class ExpedienteService {
       longitud?:   number | null;
     };
   }): Promise<void> {
+    const conLista = !!payload.servicioIds?.length;
     await Promise.all([
       this.expedienteRepo.update(id, {
         cliente_id:   payload.clienteId,
-        servicio_id:  payload.servicioId,
+        ...(conLista ? {} : { servicio_id: payload.servicioId }),
         fecha_visita: payload.fechaVisita,
         descripcion:  payload.descripcion ?? null,
       }),
       this.localizacionRepo.update(id, payload.localizacion),
+      conLista ? this.expServicioRepo.guardar(id, payload.servicioIds!) : Promise.resolve(),
     ]);
   }
 

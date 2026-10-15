@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,14 +12,21 @@ import { ArchivoService } from '../../../services/archivo.service';
 import { OfertaService } from '../../../services/oferta.service';
 import { ContratoService } from '../../../services/contrato.service';
 import { PerfilRepository, PerfilNombre } from '../../../data/perfil.repository';
-import { ContratoPdfData, ExpedienteParaOferta, ArchivoRow, OfertaForm, OfertaConConstructor } from '../../../models';
+import {
+  ContratoPdfData, ExpedienteParaOferta, ArchivoRow, OfertaForm, OfertaConConstructor, ServicioPdf,
+  nombreServicio, serviciosParaContrato, serviciosDeOferta,
+} from '../../../models';
+import { ServicioCompleto } from '../../../data/servicio.repository';
 import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
+import {
+  ServicioOpcion, ServicioSelectorComponent, resumirServicios,
+} from '../../../shared/ui/servicio-selector/servicio-selector.component';
 
 @Component({
   selector: 'app-admin-offer-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -33,6 +42,35 @@ export class AdminOfferEditComponent implements OnInit {
   private router            = inject(Router);
 
   detalle  = signal<ExpedienteParaOferta | null>(null);
+  /** Todos los servicios del expediente, el principal primero. */
+  servicios = signal<ServicioCompleto[]>([]);
+
+  private currentLang = toSignal(
+    this.translate.onLangChange.pipe(map(e => e.lang)),
+    { initialValue: this.translate.currentLang || 'fr' },
+  );
+
+  /**
+   * Con un solo servicio no hay nada que elegir: la oferta lo cubre y la
+   * pantalla se queda como estaba. Todo lo de «a qué servicios» y la suma de
+   * ofertas solo aparece con dos o más.
+   */
+  multiServicio = computed(() => this.servicios().length > 1);
+
+  opcionesServicio = computed<ServicioOpcion[]>(() => {
+    const lang = this.currentLang();
+    return this.servicios().map(s => ({
+      id:          s.id,
+      codigo:      s.codigo ?? '',
+      nombre:      nombreServicio(s, lang),
+      descripcion: '',
+    }));
+  });
+
+  /** Servicios que cubre la oferta del formulario (alta o edición). */
+  servicioIdsOferta = signal<number[]>([]);
+  /** Se intentó guardar: el selector de servicios muestra su error. */
+  intentado = signal(false);
   cargando = signal(true);
   errorMsg = signal('');
 
@@ -123,6 +161,27 @@ export class AdminOfferEditComponent implements OnInit {
   seleccionadasParaAdjudicar = computed(() =>
     this.ofertasActivas().filter(o => this.seleccion().has(o.id)));
 
+  // ── Suma de ofertas (solo con varios servicios) ────────────────────────────
+  // Cada oferta tiene un único precio para los servicios que cubre. Con varios
+  // servicios el cliente puede acabar contratando varias ofertas, así que se
+  // enseña lo que suman: todas las vivas y, si hay marcadas, las marcadas.
+
+  sumaOfertas = computed(() =>
+    this.ofertasActivas().reduce((total, o) => total + (o.precio ?? 0), 0));
+
+  sumaSeleccionadas = computed(() =>
+    this.seleccionadasParaAdjudicar().reduce((total, o) => total + (o.precio ?? 0), 0));
+
+  /** Servicios del expediente que ninguna oferta marcada cubre. */
+  serviciosSinCubrir = computed(() => {
+    const marcadas = this.seleccionadasParaAdjudicar();
+    if (!marcadas.length) return [];
+    const cubiertos = new Set(
+      marcadas.flatMap(o => serviciosDeOferta(this.opcionesServicio(), o).map(s => s.id)),
+    );
+    return this.opcionesServicio().filter(s => !cubiertos.has(s.id)).map(s => s.nombre);
+  });
+
   confirmandoAdjudicarSeleccion = signal(false);
 
   /**
@@ -163,6 +222,7 @@ export class AdminOfferEditComponent implements OnInit {
   get completedSteps(): number {
     let n = 0;
     if (this.constructorSeleccionadoId()) n++;
+    if (this.multiServicio() && this.servicioIdsOferta().length) n++;
     if (this.precio && this.precio > 0) n++;
     if (this.plazoMin && this.plazoMin > 0 && this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0)) n++;
     if (this.fechaInicio) n++;
@@ -187,10 +247,16 @@ export class AdminOfferEditComponent implements OnInit {
     return !this.ofertaId() && this.documentosOferta().length === 0;
   }
 
+  /** Con varios servicios, la oferta tiene que decir a cuáles se presenta. */
+  get serviciosOfertaInvalidos(): boolean {
+    return this.multiServicio() && this.servicioIdsOferta().length === 0;
+  }
+
   get formularioCompleto(): boolean {
     const esNueva = !this.ofertaId();
     return !!(
       this.constructorSeleccionadoId() &&
+      !this.serviciosOfertaInvalidos &&
       this.precio && this.precio > 0 &&
       this.plazoMin && this.plazoMin > 0 &&
       this.plazoMax && this.plazoMax >= (this.plazoMin ?? 0) &&
@@ -233,11 +299,12 @@ export class AdminOfferEditComponent implements OnInit {
     // se quedaba en null y la plantilla pintaba «expediente no encontrado»,
     // ocultando ofertas que sí existían. Sólo el expediente es fatal: sin él no
     // hay página que pintar; lo demás degrada y deja la columna en pie.
-    const [detalleRes, archivosRes, constructoresRes, ofertasRes] = await Promise.allSettled([
+    const [detalleRes, archivosRes, constructoresRes, ofertasRes, serviciosRes] = await Promise.allSettled([
       this.expedienteService.getExpedienteParaOferta(id),
       this.archivoService.listarPorExpediente(id),
       this.perfilRepo.findActivosByRoles(['constructor']),
       this.ofertaService.getOfertasDeExpediente(id, true),
+      this.expedienteService.getServiciosCompletos(id),
     ]);
 
     try {
@@ -246,6 +313,13 @@ export class AdminOfferEditComponent implements OnInit {
         return;
       }
       this.detalle.set(detalleRes.value);
+
+      // Sin la lista, el resumen cae al servicio principal de `detalle`.
+      if (serviciosRes.status === 'fulfilled') {
+        this.servicios.set(serviciosRes.value);
+      } else {
+        console.error('[AdminOfferEdit] servicios:', serviciosRes.reason?.message ?? serviciosRes.reason);
+      }
 
       if (archivosRes.status === 'fulfilled') {
         this.fotos.set(archivosRes.value.fotos);
@@ -315,6 +389,8 @@ export class AdminOfferEditComponent implements OnInit {
 
   private popularFormulario(oferta: OfertaConConstructor) {
     this.ofertaId.set(oferta.id);
+    this.servicioIdsOferta.set(oferta.servicio_ids ?? []);
+    this.intentado.set(false);
     this.precio       = oferta.precio;
     this.plazoMin     = oferta.plazo_semanas_min;
     this.plazoMax     = oferta.plazo_semanas_max;
@@ -331,6 +407,9 @@ export class AdminOfferEditComponent implements OnInit {
 
   private limpiarFormulario() {
     this.ofertaId.set(null);
+    // Una oferta nueva empieza sin servicios: hay que decir a cuáles se presenta.
+    this.servicioIdsOferta.set([]);
+    this.intentado.set(false);
     this.precio       = null;
     this.plazoMin     = 1;   // vuelve al valor por defecto, no a vacío
     this.plazoMax     = null;
@@ -426,7 +505,9 @@ export class AdminOfferEditComponent implements OnInit {
     this.exitoMsg.set('');
 
     const constructorId = this.constructorSeleccionadoId();
+    this.intentado.set(true);
     if (!constructorId) { this.errorEnvio.set('admin_offer.err_constructor'); return; }
+    if (this.serviciosOfertaInvalidos) { this.errorEnvio.set('service_selector.required'); return; }
     if (!this.precio || this.precio <= 0) { this.errorEnvio.set('make_offer.err_price'); return; }
     if (!this.plazoMin || this.plazoMin <= 0) { this.errorEnvio.set('make_offer.err_plazo_min'); return; }
     if (!this.plazoMax || this.plazoMax < this.plazoMin) { this.errorEnvio.set('make_offer.err_plazo_max'); return; }
@@ -444,6 +525,8 @@ export class AdminOfferEditComponent implements OnInit {
       garantia_anos:     this.garantiaAnos,
       fecha_inicio:      this.fechaInicio,
       descripcion:       this.descripcion.trim(),
+      // Con un solo servicio no se envía: el alta lo asigna y la edición no lo toca.
+      ...(this.multiServicio() ? { servicio_ids: this.servicioIdsOferta() } : {}),
     };
 
     this.enviando.set(true);
@@ -505,6 +588,21 @@ export class AdminOfferEditComponent implements OnInit {
     if (lang === 'en') return d.servicio_nombre_en || d.servicio_nombre;
     if (lang === 'fr') return d.servicio_nombre_fr || d.servicio_nombre;
     return d.servicio_nombre;
+  }
+
+  /** Servicios que cubre una oferta, para su tarjeta: nombres o «Todos los servicios». */
+  serviciosDeOfertaTexto(oferta: OfertaConConstructor): string | null {
+    return resumirServicios(
+      serviciosDeOferta(this.opcionesServicio(), oferta).map(s => s.id),
+      this.opcionesServicio(),
+      total => this.translate.instant('service_selector.all', { total }),
+    );
+  }
+
+  /** Nombres de todos los servicios en el idioma activo; el principal primero. */
+  serviciosNombres(): { id: number; nombre: string }[] {
+    const lang = this.translate.currentLang;
+    return this.servicios().map(s => ({ id: s.id, nombre: nombreServicio(s, lang) }));
   }
 
   servicioDescripcion(): string {
@@ -638,12 +736,18 @@ export class AdminOfferEditComponent implements OnInit {
         await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
 
+      // Servicios del expediente, leídos una vez; cada PDF lleva los de su oferta.
+      const serviciosExp = await this.expedienteService.getServiciosCompletos(this.expedienteId);
+      const lang         = this.translate.currentLang;
+
       let fallidos = 0;
       for (const { id_contrato, id_oferta } of creados) {
         const oferta = this.todasLasOfertas().find(o => o.id === id_oferta);
         if (!oferta) { fallidos++; continue; }
         try {
-          await this.generarPdfContrato(id_contrato, oferta);
+          await this.generarPdfContrato(
+            id_contrato, oferta, serviciosParaContrato(serviciosDeOferta(serviciosExp, oferta), lang),
+          );
         } catch {
           fallidos++;
         }
@@ -662,7 +766,11 @@ export class AdminOfferEditComponent implements OnInit {
   }
 
   /** Genera el PDF de un contrato y lo enlaza a su fila. */
-  private async generarPdfContrato(contratoId: string, oferta: OfertaConConstructor) {
+  private async generarPdfContrato(
+    contratoId: string,
+    oferta:     OfertaConConstructor,
+    servicios:  ServicioPdf[],
+  ) {
     const d    = this.detalle()!;
     const lang = this.translate.currentLang;
     const localeMap: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' };
@@ -677,8 +785,7 @@ export class AdminOfferEditComponent implements OnInit {
       constructorNombre:   oferta.constructor_nombre,
       constructorTelefono: oferta.constructor_telefono,
       constructorEmail:    oferta.constructor_email,
-      servicioNombre:      this.servicioNombre(),
-      servicioDescripcion: this.servicioDescripcion(),
+      servicios,
       direccion:           d.direccion,
       canton:              d.canton,
       provincia:           d.provincia,
