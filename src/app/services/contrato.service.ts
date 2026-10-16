@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoPdfData, ContratoListItem, ServicioContrato } from '../models';
+import { ContratoAdminDetalle, ContratoAdminListItem, ContratoConstructorListItem, ContratoInput, ContratoObraResumen, ContratoPanelCliente, ContratoPdfData, ContratoListItem, ObraEstadoPanel, ServicioContrato } from '../models';
 import { ContratoRepository } from '../data/contrato.repository';
 import { OfertaRepository } from '../data/oferta.repository';
 import { EstimacionRepository } from '../data/estimacion.repository';
@@ -59,8 +59,90 @@ export class ContratoService {
         generado_en:        c.generado_en  ?? '',
         firmado_en:         c.firmado_en   ?? null,
         url_pdf:            c.url_pdf      ?? null,
+        obra_terminada:     this.obraTerminada(c),
       } as ContratoListItem;
     });
+  }
+
+  // ── Listas del cliente: qué contratos tienen la obra al 100 % ───────────
+
+  /**
+   * Contratos de varios expedientes con su marca de obra terminada y sus
+   * servicios (para nombrar cada contrato). El más antiguo primero.
+   */
+  async getResumenObraExpedientes(expedienteIds: string[]): Promise<ContratoObraResumen[]> {
+    const rows  = await this.contratoRepo.findResumenObraByExpedienteIds(expedienteIds);
+    const items: ContratoObraResumen[] = rows.map((c: any) => ({
+      id:             c.id,
+      expediente_id:  c.expediente_id,
+      oferta_id:      c.oferta_id,
+      estado:         c.estado,
+      servicios:      [],
+      obra_terminada: this.obraTerminada(c),
+    }));
+    await this.adjuntarServicios(items, rows);
+    return items;
+  }
+
+  // ── Panel del cliente: contratos de un expediente ───────────────────────
+
+  /**
+   * Todos los contratos del expediente con el avance de su obra, para el panel
+   * del cliente. Los cancelados vienen también: el panel los enseña, pero no
+   * cuentan en el costo ni en el avance global.
+   */
+  async getPanelClienteExpediente(expedienteId: string): Promise<ContratoPanelCliente[]> {
+    const rows  = await this.contratoRepo.findPanelClienteByExpedienteId(expedienteId);
+    const items = rows.map((c: any) => this.mapPanelCliente(c));
+
+    const paths = rows.map((c: any) => c.url_pdf as string | null).filter((p): p is string => !!p);
+    const [urls] = await Promise.all([
+      this.contratoRepo.getSignedUrls(paths).catch(() => new Map<string, string>()),
+      this.adjuntarServicios(items, rows),
+    ]);
+    items.forEach((it, i) => {
+      it.pdf_url = rows[i].url_pdf ? urls.get(rows[i].url_pdf) ?? null : null;
+    });
+    return items;
+  }
+
+  private mapPanelCliente(c: any): ContratoPanelCliente {
+    const con = Array.isArray(c.constructor) ? c.constructor[0] : c.constructor;
+    const ofe = Array.isArray(c.oferta)      ? c.oferta[0]      : c.oferta;
+    const seg = Array.isArray(c.seguimiento) ? c.seguimiento[0] : c.seguimiento;
+
+    // Un contrato completado es una obra al 100 %, la haya cerrado o no el
+    // seguimiento. Sin seguimiento la obra no ha arrancado: 0 %.
+    const avance = c.estado === 'completado'
+      ? 100
+      : Math.min(100, Math.max(0, Math.round(Number(seg?.porcentaje_avance ?? 0))));
+
+    let obraEstado: ObraEstadoPanel;
+    if (c.estado === 'cancelado')                                       obraEstado = 'cancelada';
+    else if (c.estado === 'completado' || seg?.estado === 'completado') obraEstado = 'completada';
+    else if (seg?.estado === 'pausado')                                 obraEstado = 'pausada';
+    else if (seg?.estado === 'en_progreso' || avance > 0)               obraEstado = 'en_curso';
+    else                                                                obraEstado = 'por_iniciar';
+
+    return {
+      id:                   c.id,
+      estado:               c.estado,
+      precio_final:         Number(c.precio_final ?? 0),
+      garantia_anos:        c.garantia_anos       ?? null,
+      descripcion_trabajo:  c.descripcion_trabajo ?? '',
+      generado_en:          c.generado_en         ?? '',
+      firmado_en:           c.firmado_en          ?? null,
+      actualizado_en:       c.actualizado_en      ?? '',
+      fecha_inicio:         ofe?.fecha_inicio     ?? null,
+      pdf_url:              null,
+      constructor_nombre:   con ? `${con.nombre ?? ''} ${con.apellido ?? ''}`.trim() || '—' : '—',
+      constructor_telefono: con?.telefono ?? null,
+      constructor_email:    con?.email    ?? null,
+      servicios:            [],
+      avance_obra:          avance,
+      obra_estado:          obraEstado,
+      obra_actualizado_en:  seg?.actualizado_en ?? null,
+    };
   }
 
   // ── Buscar contrato existente por expediente ─────────────────────────────

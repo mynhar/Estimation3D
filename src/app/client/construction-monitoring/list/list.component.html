@@ -31,10 +31,58 @@
     </div>
   }
 
-  <!-- Una tarjeta por obra -->
   @else {
-    @for (o of obras(); track o.contratoId) {
-      <app-obra-card [obra]="o" />
-    }
+    <!-- Franja de resumen (como Mis documentos) -->
+    <div class="cm-stats">
+      <div class="cm-stat">
+        <span class="cm-stat__num">{{ resumen().obras }}</span>
+        <span class="cm-stat__label">{{ 'client_monitoring.stat_obras' | translate }}</span>
+      </div>
+      <div class="cm-stat">
+        <span class="cm-stat__num">{{ resumen().enCurso }}</span>
+        <span class="cm-stat__label">{{ 'client_monitoring.stat_en_curso' | translate }}</span>
+      </div>
+      <div class="cm-stat">
+        <span class="cm-stat__num">{{ resumen().terminadas }}</span>
+        <span class="cm-stat__label">{{ 'client_monitoring.stat_terminadas' | translate }}</span>
+      </div>
+      <div class="cm-stat cm-stat--accent">
+        <span class="cm-stat__num">{{ resumen().expedientes }}</span>
+        <span class="cm-stat__label">{{ 'client_monitoring.stat_expedientes' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Una tarjeta plegable por expediente; dentro, una tarjeta por obra -->
+    <div class="cm-accordion">
+      @for (g of grupos(); track g.numero) {
+        <app-expediente-panel [numero]="g.numero" [abierto]="isExpandido(g.numero)" [bandeja]="true"
+                              (alternar)="toggle(g.numero)">
+          <span panelMeta class="cm-meta">
+            <span class="cm-meta__item">
+              <i class="bi bi-hammer" aria-hidden="true"></i>
+              @if (g.obras.length === 1) {
+                {{ 'client_monitoring.obras_one' | translate }}
+              } @else {
+                {{ 'client_monitoring.obras_n' | translate: { n: g.obras.length } }}
+              }
+            </span>
+            <span class="cm-meta__item cm-meta__avance">
+              {{ 'client_monitoring.avance_medio' | translate: { n: g.avanceMedio } }}
+            </span>
+            @if (g.terminadas > 0) {
+              <span class="tag tag-gold cm-meta__obra"
+                    [title]="'monitoring.obra_terminada_badge' | translate">
+                <i class="bi bi-flag" aria-hidden="true"></i>{{ g.terminadas }}
+                <span class="visually-hidden">{{ 'monitoring.obra_terminada_badge' | translate }}</span>
+              </span>
+            }
+          </span>
+
+          @for (o of g.obras; track o.contratoId) {
+            <app-obra-card [obra]="o" />
+          }
+        </app-expediente-panel>
+      }
+    </div>
   }
 </div>

@@ -150,7 +150,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   font-size: 1.75rem;
 }
 
@@ -238,7 +238,7 @@
 .fue-chip--active {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 
 .fue-chip__badge {
@@ -409,7 +409,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 
@@ -444,7 +444,7 @@
 
 .fue-view-toggle__btn + .fue-view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .fue-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
-.fue-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.fue-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .fue-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* ── Vista tabla (escritorio) ────────────────────────────────────────────── */
@@ -523,7 +523,7 @@
 }
 
 .fue-table__fecha--vencida { color: var(--ds-danger);  font-weight: var(--ds-weight-semibold); }
-.fue-table__fecha--hoy     { color: var(--ds-warning); font-weight: var(--ds-weight-semibold); }
+.fue-table__fecha--hoy     { color: var(--ds-warning-ink); font-weight: var(--ds-weight-semibold); }
 
 .fue-table__fecha .fue-card__hora { margin-left: 0; }
 .fue-table__col-date .fue-badge   { margin-top: 2px; }
@@ -538,7 +538,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 .fue-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -579,10 +579,10 @@
   font-weight: var(--ds-weight-semibold);
 }
 
-.fue-badge--danger   { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger);  }
-.fue-badge--warning  { background: var(--ds-warning-soft); color: var(--ds-warning); border: 1px solid var(--ds-warning); }
-.fue-badge--info     { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info);    }
-.fue-badge--success  { background: var(--ds-success-soft); color: var(--ds-success); border: 1px solid var(--ds-success); }
+.fue-badge--danger   { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  border: 1px solid var(--ds-danger);  }
+.fue-badge--warning  { background: var(--ds-warning-soft); color: var(--ds-warning-ink); border: 1px solid var(--ds-warning); }
+.fue-badge--info     { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border: 1px solid var(--ds-info);    }
+.fue-badge--success  { background: var(--ds-success-soft); color: var(--ds-success-ink); border: 1px solid var(--ds-success); }
 .fue-badge--reciente { background: var(--ds-gold-faint);   color: var(--ds-ink-secondary); border: 1px solid var(--ds-gold-soft); }
 
 /* ── Service name ────────────────────────────────────────────────────────── */
@@ -643,8 +643,8 @@
   padding: var(--ds-space-2) var(--ds-space-3);
 }
 
-.fue-card__fecha--vencida { background: var(--ds-danger-soft);  color: var(--ds-danger);  }
-.fue-card__fecha--hoy     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.fue-card__fecha--vencida { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  }
+.fue-card__fecha--hoy     { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
 
 .fue-card__hora {
   margin-left: auto;
@@ -700,7 +700,7 @@
 
 .fue-btn-release:hover {
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   background: var(--ds-danger-soft);
 }
 
@@ -742,7 +742,7 @@
   border: 1px solid var(--ds-danger);
   border-radius: var(--ds-radius-md);
   font-size: var(--ds-text-xs);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   line-height: var(--ds-leading-relaxed);
 }
 

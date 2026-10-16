@@ -93,8 +93,8 @@ export interface OfertaDashboard extends OfertaRow {
 
 export const ESTADO_BADGE_OFERTA: Record<string, string> = {
   pendiente: 'bg-warning-subtle text-warning-emphasis',
-  aceptada:  'bg-success-subtle text-success',
-  rechazada: 'bg-danger-subtle text-danger',
+  aceptada:  'bg-success-subtle text-success-emphasis',
+  rechazada: 'bg-danger-subtle text-danger-emphasis',
 };
 
 export const ESTADO_LABEL_OFERTA: Record<string, string> = {

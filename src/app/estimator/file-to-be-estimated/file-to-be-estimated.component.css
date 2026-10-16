@@ -52,7 +52,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
-  color: var(--ds-warning);
+  color: var(--ds-warning-ink);
 }
 
 .fte-state-empty__title {
@@ -106,7 +106,7 @@
   border-radius: 50%;
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   cursor: pointer;
   font-size: var(--ds-text-base);
   flex-shrink: 0;
@@ -156,7 +156,7 @@
   color: var(--ds-ink-muted);
 }
 
-.fte-meta-sep { color: var(--ds-border-strong); }
+.fte-meta-sep { color: var(--ds-ink-faint); }
 
 .fte-header__badges {
   display: flex;
@@ -177,9 +177,9 @@
   font-weight: var(--ds-weight-semibold);
 }
 
-.fte-badge--success { background: var(--ds-success-soft); color: var(--ds-success); border: 1px solid var(--ds-success); }
-.fte-badge--warning { background: var(--ds-warning-soft); color: var(--ds-warning); border: 1px solid var(--ds-warning); }
-.fte-badge--info    { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info);    }
+.fte-badge--success { background: var(--ds-success-soft); color: var(--ds-success-ink); border: 1px solid var(--ds-success); }
+.fte-badge--warning { background: var(--ds-warning-soft); color: var(--ds-warning-ink); border: 1px solid var(--ds-warning); }
+.fte-badge--info    { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border: 1px solid var(--ds-info);    }
 
 /* ── Main grid ───────────────────────────────────────────────────────────── */
 .fte-main {
@@ -330,9 +330,9 @@
   line-height: var(--ds-leading-relaxed);
 }
 
-.fte-alert--danger  { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger);  }
-.fte-alert--info    { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info);    }
-.fte-alert--success { background: var(--ds-success-soft); color: var(--ds-success); border: 1px solid var(--ds-success); }
+.fte-alert--danger  { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  border: 1px solid var(--ds-danger);  }
+.fte-alert--info    { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border: 1px solid var(--ds-info);    }
+.fte-alert--success { background: var(--ds-success-soft); color: var(--ds-success-ink); border: 1px solid var(--ds-success); }
 
 /* ── Upload empty ────────────────────────────────────────────────────────── */
 .fte-upload-empty {
@@ -782,7 +782,7 @@
 }
 
 .fte-cost-sep {
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-semibold);
   margin-bottom: var(--ds-space-2);
   flex-shrink: 0;
@@ -837,7 +837,7 @@
   color: var(--ds-ink-muted);
 }
 
-.fte-checklist-item--done { color: var(--ds-success); }
+.fte-checklist-item--done { color: var(--ds-success-ink); }
 
 /* ── Form action buttons ─────────────────────────────────────────────────── */
 .fte-actions { display: flex; flex-direction: column; gap: var(--ds-space-2); }
@@ -954,7 +954,7 @@
   display: inline-flex; align-items: center; gap: var(--ds-space-1);
   padding: 2px var(--ds-space-2);
   border-radius: var(--ds-radius-pill);
-  background: var(--ds-success-soft); color: var(--ds-success);
+  background: var(--ds-success-soft); color: var(--ds-success-ink);
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-semibold);
   white-space: nowrap;
 }

@@ -80,6 +80,33 @@ export class ObraCardComponent implements OnDestroy {
   /** Con varios servicios en el contrato, cada parte dice el suyo. */
   multiServicio = computed(() => (this.obra().servicios?.length ?? 0) > 1);
 
+  /**
+   * Flujo de eventos por servicio (contratos con varios): un bloque por
+   * servicio, en el orden del contrato, con sus días y SU parte de cada día
+   * (acumulado y avance del servicio, no de la obra). Los partes sin servicio
+   * reconocible van a un último bloque para que no se pierdan.
+   */
+  eventosPorServicio = computed(() => {
+    const o    = this.obra();
+    const lang = this.currentLang() ?? 'fr';
+    const ids  = new Set((o.servicios ?? []).map(s => s.id));
+    const diasDe = (pred: (p: ReporteDiario) => boolean) => this.dias()
+      .map(dia => ({ dia, parte: dia.partes.find(pred) }))
+      .filter((x): x is { dia: DiaObra; parte: ReporteDiario } => !!x.parte);
+
+    const grupos = (o.servicios ?? []).map(s => {
+      const dias = diasDe(p => p.servicio_id === s.id);
+      const avance = o.fasesPorServicio.find(g => g.servicioId === s.id)?.avance
+        ?? Math.max(0, ...dias.map(x => x.parte.porcentaje_acumulado ?? 0));
+      return { clave: String(s.id), nombre: nombreServicio(s, lang), avance: Math.round(avance), dias };
+    });
+
+    const otros = diasDe(p => p.servicio_id == null || !ids.has(p.servicio_id));
+    return otros.length
+      ? [...grupos, { clave: 'otros', nombre: '', avance: null as number | null, dias: otros }]
+      : grupos;
+  });
+
   // Día seleccionado en el historial y el detalle de todos sus partes.
   fechaSel    = signal<string | null>(null);
   partesDia   = signal<ParteDia[]>([]);

@@ -486,7 +486,35 @@
     "avance_obra": "Avance de la obra",
     "view_monitoring": "Ver seguimiento",
     "contrato_pendiente": "El contrato estará disponible cuando se seleccione un constructor.",
-    "contrato_cancelado": "Este contrato ha sido cancelado."
+    "contrato_cancelado": "Este contrato ha sido cancelado.",
+    "contratos_title": "Contratos del expediente",
+    "contratos_count_one": "1 contrato",
+    "contratos_count": "{{n}} contratos",
+    "contrato_estado_corto": {
+      "generado": "Generado",
+      "firmado": "Firmado",
+      "en_ejecucion": "En ejecución",
+      "completado": "Completado",
+      "cancelado": "Cancelado"
+    },
+    "obra_estado": {
+      "por_iniciar": "Obra por iniciar",
+      "en_curso": "Obra en curso",
+      "pausada": "Obra en pausa",
+      "completada": "Obra terminada al 100 %",
+      "cancelada": "Contrato cancelado"
+    },
+    "obra_actualizada": "actualizado el {{date}}",
+    "contrato_detalles": "Detalles del contrato",
+    "costo_total": "Costo total",
+    "costo_total_nota_one": "Importe del contrato vigente.",
+    "costo_total_nota": "Suma de los {{n}} contratos vigentes.",
+    "costo_total_ninguno": "No hay contratos vigentes.",
+    "costo_total_cancelados": "Los cancelados no suman.",
+    "avance_contratos": "Avance de los contratos",
+    "avance_contratos_desc": "Media del avance de obra de los contratos vigentes.",
+    "contratos_cancelados": "Todos los contratos de este expediente fueron cancelados.",
+    "obras_completadas": "Obras completadas: {{done}}/{{total}}"
   },
   "timeline": {
     "created": "Expediente creado",
@@ -638,7 +666,8 @@
     "my_videos": "Mis videos",
     "my_docs": "Mis documentos",
     "contract": "Contrato",
-    "photo_viewer": "Visor de fotos"
+    "photo_viewer": "Visor de fotos",
+    "services": "Servicios"
   },
   "offer": {
     "price": "Precio",
@@ -661,7 +690,9 @@
     "not_selected": "No seleccionado por el cliente",
     "no_offers": "Sin ofertas enviadas",
     "accepted_note": "¡Tu oferta ha sido seleccionada!",
-    "rejected_note": "El cliente eligió otra oferta."
+    "rejected_note": "El cliente eligió otra oferta.",
+    "selected_builders": "Constructores seleccionados",
+    "proposal_and_files": "Propuesta y archivos"
   },
   "offers_received": {
     "title": "Ofertas recibidas",
@@ -795,7 +826,27 @@
     "reject_text": "Se eliminará el contrato generado. El expediente volverá al estado estimado.",
     "reject_confirm": "Sí, rechazar",
     "rejecting": "Rechazando…",
-    "success_rejected": "Oferta rechazada. El expediente ha vuelto al estado estimado."
+    "success_rejected": "Oferta rechazada. El expediente ha vuelto al estado estimado.",
+    "select_hint_title_multi": "Selecciona una o varias ofertas",
+    "select_hint_multi": "Haz clic en las ofertas para seleccionarlas: una para todos los servicios, una para cada servicio o varias para el mismo servicio.",
+    "covers": "Cubre",
+    "selected_title_n": "Ofertas seleccionadas",
+    "remove_offer": "Quitar de la selección",
+    "coverage_title": "Cobertura por servicio",
+    "coverage_none": "Sin oferta",
+    "coverage_n": "{{n}} ofertas",
+    "total_selected": "Total de la selección",
+    "locked": "Hay contratos firmados en este expediente: la selección ya no se puede cambiar.",
+    "already_accepted_n": "Estas ofertas están aceptadas.",
+    "update_btn": "Actualizar selección",
+    "accept_n_btn": "Aceptar {{n}} ofertas",
+    "replace_warning_n": "Las ofertas que no estén en la selección quedarán rechazadas y los contratos sin firmar se generarán de nuevo.",
+    "success_accepted_n": "{{n}} ofertas aceptadas: se generó un contrato para cada una.",
+    "pdf_partial": "Ofertas aceptadas, pero solo se generaron {{n}} de {{total}} PDF de contrato. Vuelve a aceptar para reintentarlo.",
+    "reject_all_btn": "Rechazar las ofertas aceptadas",
+    "reject_all_title": "¿Rechazar las ofertas aceptadas?",
+    "reject_all_text": "Se eliminarán los contratos sin firmar. El expediente volverá al estado estimado.",
+    "success_rejected_n": "Ofertas rechazadas. El expediente ha vuelto al estado estimado."
   },
   "make_offer": {
     "editing_badge": "Modificación de oferta",
@@ -1902,7 +1953,10 @@
     "cancel_close": "No, mantener contrato",
     "cancelling": "Cancelando…",
     "success_cancelled": "Contrato cancelado correctamente.",
-    "err_cancel": "No se pudo cancelar el contrato. Intenta de nuevo."
+    "err_cancel": "No se pudo cancelar el contrato. Intenta de nuevo.",
+    "cancel_disabled_obra": "Obra terminada: el contrato ya no se puede cancelar.",
+    "contracts_one": "1 contrato",
+    "contracts_n": "{{n}} contratos"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -2288,7 +2342,16 @@
     "inspecciones_title": "Próxima inspección",
     "sin_inspecciones": "No hay inspecciones programadas.",
     "media_title": "Fotos de hoy",
-    "sin_media": "Sin archivos."
+    "sin_media": "Sin archivos.",
+    "obras_one": "1 obra",
+    "obras_n": "{{n}} obras",
+    "avance_medio": "Avance {{n}} %",
+    "stat_obras": "Obras",
+    "stat_en_curso": "En curso",
+    "stat_terminadas": "Terminadas al 100 %",
+    "stat_expedientes": "Expedientes",
+    "sin_eventos_servicio": "Sin partes de este servicio todavía.",
+    "otros_partes": "Otros partes"
   },
   "admin_ai_events": {
     "title": "Eventos del asistente IA",

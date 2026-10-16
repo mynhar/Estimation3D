@@ -206,7 +206,7 @@
   gap: var(--ds-space-2);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-medium);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   text-transform: uppercase;
   letter-spacing: var(--ds-tracking-widest);
 }
@@ -267,7 +267,7 @@
 .fued-meta-chip--gold {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-medium);
 }
 
@@ -304,25 +304,25 @@
 
 .fued-badge--success {
   background: var(--ds-success-soft);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   border-color: transparent;
 }
 
 .fued-badge--warning {
   background: var(--ds-warning-soft);
-  color: var(--ds-warning);
+  color: var(--ds-warning-ink);
   border-color: transparent;
 }
 
 .fued-badge--danger {
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border-color: transparent;
 }
 
 .fued-badge--info {
   background: var(--ds-info-soft);
-  color: var(--ds-info);
+  color: var(--ds-info-ink);
   border-color: transparent;
 }
 
@@ -682,7 +682,7 @@
   align-items: center;
   gap: 3px;
   font-size: var(--ds-text-xs);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-medium);
 }
 
@@ -702,7 +702,7 @@
   background: var(--ds-gold-soft);
   border: 1px solid var(--ds-gold);
   border-radius: var(--ds-radius-circle);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 13px;
 }
 
@@ -724,7 +724,7 @@
 .fued-btn-award:hover:not(:disabled) {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 .fued-btn-award:focus-visible {
@@ -763,7 +763,7 @@
 .fued-btn-del:hover:not(:disabled) {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 
 .fued-btn-del:focus-visible {
@@ -780,7 +780,7 @@
 .fued-btn-del--armed {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 
 /* Botón que borra de verdad. Vive en la fila de ancho completo, con etiqueta:
@@ -788,7 +788,7 @@
 .fued-btn-del-confirm {
   border-color: var(--ds-danger);
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   font-weight: var(--ds-weight-semibold);
 }
 
@@ -1064,7 +1064,7 @@
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-secondary);
 }
-.fued-offers-sum__note i { color: var(--ds-warning); }
+.fued-offers-sum__note i { color: var(--ds-warning-ink); }
 
 /* ============================================================
    FACT STRIP
@@ -1092,7 +1092,7 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -1182,7 +1182,7 @@
 }
 
 .fued-prob-block__icon {
-  color: var(--ds-warning);
+  color: var(--ds-warning-ink);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -1207,7 +1207,7 @@
 .fued-cost-banner__label {
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-medium);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   text-transform: uppercase;
   letter-spacing: var(--ds-tracking-widest);
   margin: 0 0 var(--ds-space-1);
@@ -1267,7 +1267,7 @@
   height: 16px;
   padding: 0 4px;
   background: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border-radius: var(--ds-radius-pill);
   font-size: 10px;
   font-weight: var(--ds-weight-semibold);
@@ -1425,7 +1425,7 @@
 .fued-btn-icon:hover {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 /* ============================================================
@@ -1630,7 +1630,7 @@
   cursor: pointer;
   transition: var(--ds-transition-color);
 }
-.fued-doc-remove:hover:not(:disabled) { background: var(--ds-danger-soft); color: var(--ds-danger); }
+.fued-doc-remove:hover:not(:disabled) { background: var(--ds-danger-soft); color: var(--ds-danger-ink); }
 .fued-doc-remove:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .fued-attach-icon {
@@ -1689,11 +1689,11 @@
 .fued-doc-remove { flex-shrink: 0; }
 
 .fued-attach-status--new {
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
 }
 
 .fued-attach-status--saved {
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
 }
 
 .fued-attach-empty {
@@ -1734,14 +1734,14 @@
   border: none;
   padding: 0;
   font-size: inherit;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   text-decoration: underline;
   cursor: pointer;
   font-family: inherit;
 }
 
 .fued-view-link:hover {
-  color: var(--ds-gold-hover);
+  color: var(--ds-gold-ink);
 }
 
 /* ============================================================
@@ -1776,7 +1776,7 @@
 .fued-prog-dot--done {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 /* ============================================================
@@ -1795,13 +1795,13 @@
 
 .fued-alert--danger {
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border-color: var(--ds-danger-soft);
 }
 
 .fued-alert--success {
   background: var(--ds-success-soft);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   border-color: var(--ds-success-soft);
 }
 
@@ -2079,7 +2079,7 @@
   border-radius: var(--ds-radius-md);
   border: 1px solid var(--ds-gold);
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-family: var(--ds-font-body);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);

@@ -23,14 +23,11 @@ import {
   ServicioRepository,
   EstimacionRepository,
   OfertaRepository,
-  ContratoRepository,
 } from '../data';
 import { OfertaRaw, OfertaHistorialItem } from '../data/oferta.repository';
 import { ServicioCompleto } from '../data/servicio.repository';
-import { ContratoHistorialItem } from '../data/contrato.repository';
 import { matterportThumbFromTour } from '../shared/util/matterport';
 export type { OfertaHistorialItem } from '../data/oferta.repository';
-export type { ContratoHistorialItem } from '../data/contrato.repository';
 
 @Injectable({ providedIn: 'root' })
 export class ExpedienteService {
@@ -41,7 +38,6 @@ export class ExpedienteService {
   private servicioRepo    = inject(ServicioRepository);
   private estimacionRepo  = inject(EstimacionRepository);
   private ofertaRepo      = inject(OfertaRepository);
-  private contratoRepo    = inject(ContratoRepository);
 
   // ── Módulo cliente ────────────────────────────────────────────────────────
 
@@ -745,14 +741,11 @@ export class ExpedienteService {
 
   // ── Historial del dashboard de cliente ───────────────────────────────────
 
-  async getHistorialExpediente(expedienteId: string): Promise<{
-    ofertas:  OfertaHistorialItem[];
-    contrato: ContratoHistorialItem | null;
-  }> {
-    const [ofertas, contrato] = await Promise.all([
-      this.ofertaRepo.findHistorialByExpedienteId(expedienteId),
-      this.contratoRepo.findHistorialByExpedienteId(expedienteId),
-    ]);
-    return { ofertas, contrato };
+  /**
+   * Ofertas recibidas del expediente, para el historial. Los contratos (todos,
+   * no solo el último) los trae `ContratoService.getPanelClienteExpediente`.
+   */
+  getOfertasHistorial(expedienteId: string): Promise<OfertaHistorialItem[]> {
+    return this.ofertaRepo.findHistorialByExpedienteId(expedienteId);
   }
 }

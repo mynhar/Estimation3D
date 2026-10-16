@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
+import { ContratoService } from '../../services/contrato.service';
 import {
   ExpedienteConOfertas,
   OfertaResumen,
@@ -25,6 +26,7 @@ type VistaExpedientes = 'tabla' | 'tarjetas';
 export class OffersReceivedComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);
   private expedienteService = inject(ExpedienteService);
+  private contratoService   = inject(ContratoService);
   private translate         = inject(TranslateService);
   private router            = inject(Router);
 
@@ -32,6 +34,9 @@ export class OffersReceivedComponent implements OnInit {
   expedientes = signal<ExpedienteConOfertas[]>([]);
   cargando    = signal(true);
   vista       = signal<VistaExpedientes>('tarjetas');
+
+  /** Ofertas cuyo contrato tiene la obra al 100 % y sigue abierto. */
+  private ofertasObraTerminada = signal<ReadonlySet<string>>(new Set());
 
   /** Ids cuya miniatura 3D falló al cargar → se muestra el marcador de posición. */
   private fotosFallidas = signal<Set<string>>(new Set<string>());
@@ -50,7 +55,9 @@ export class OffersReceivedComponent implements OnInit {
     const userId = this.user()?.id;
     if (!userId) { this.router.navigate(['/login']); return; }
     try {
-      this.expedientes.set(await this.expedienteService.getExpedientesConOfertas(userId));
+      const exps = await this.expedienteService.getExpedientesConOfertas(userId);
+      this.expedientes.set(exps);
+      await this.cargarObraTerminada(exps.map(e => e.id));
     } catch (e: unknown) {
       console.error('[OffersReceived]', e instanceof Error ? e.message : e);
     } finally {
@@ -68,8 +75,23 @@ export class OffersReceivedComponent implements OnInit {
     return exp.ofertas.length ? Math.max(...exp.ofertas.map(o => o.precio)) : 0;
   }
 
-  ofertaAceptada(exp: ExpedienteConOfertas): OfertaResumen | null {
-    return exp.ofertas.find(o => o.estado === 'aceptada') ?? null;
+  /** Todas las ofertas aceptadas: administración puede adjudicar varias (un contrato por oferta). */
+  aceptadas(exp: ExpedienteConOfertas): OfertaResumen[] {
+    return exp.ofertas.filter(o => o.estado === 'aceptada');
+  }
+
+  obraTerminada(oferta: OfertaResumen): boolean {
+    return this.ofertasObraTerminada().has(oferta.id);
+  }
+
+  /** Marca qué ofertas tienen el contrato con la obra al 100 %. Si falla, sin marcas. */
+  private async cargarObraTerminada(expedienteIds: string[]): Promise<void> {
+    try {
+      const contratos = await this.contratoService.getResumenObraExpedientes(expedienteIds);
+      this.ofertasObraTerminada.set(new Set(contratos.filter(c => c.obra_terminada).map(c => c.oferta_id)));
+    } catch (e: unknown) {
+      console.error('[OffersReceived] obra:', e instanceof Error ? e.message : e);
+    }
   }
 
   // ── Estado del expediente (badge) ───────────────────────────────────────────

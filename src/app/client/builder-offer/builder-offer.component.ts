@@ -16,7 +16,12 @@ import {
   ExpedienteDetalleCliente,
   ESTADO_BADGE_OFERTA,
   OfertaConConstructor,
+  descripcionServicio,
+  nombreServicio,
+  serviciosDeOferta,
+  serviciosParaContrato,
 } from '../../models';
+import { ServicioCompleto } from '../../data/servicio.repository';
 
 @Component({
   selector: 'app-builder-offer',
@@ -43,6 +48,8 @@ export class BuilderOfferComponent implements OnInit {
 
   // ── Datos ──────────────────────────────────────────────────────────────────
   expediente    = signal<ExpedienteDetalleCliente | null>(null);
+  /** Todos los servicios del expediente (principal primero), con su descripción. */
+  servicios     = signal<ServicioCompleto[]>([]);
   estimacion    = signal<EstimacionDetalle | null>(null);
   ofertas       = signal<OfertaConConstructor[]>([]);
   fotosExp      = signal<ArchivoRow[]>([]);
@@ -60,8 +67,10 @@ export class BuilderOfferComponent implements OnInit {
   rechazando              = signal(false);
   confirmandoRechazo      = signal(false);
 
-  // ── Selección de oferta ───────────────────────────────────────────────────
-  ofertaSeleccionadaId = signal<string | null>(null);
+  // ── Selección de ofertas ──────────────────────────────────────────────────
+  // Varias a la vez: una para todos los servicios, una para cada servicio o
+  // varias para el mismo. Al aceptar, un contrato por oferta (adjudicar_ofertas).
+  seleccion = signal<ReadonlySet<string>>(new Set());
 
   // ── Lightbox de fotos ─────────────────────────────────────────────────────
   fotoAmpliada = signal<string | null>(null);
@@ -75,19 +84,41 @@ export class BuilderOfferComponent implements OnInit {
     return estado === 'adjudicado' || estado === 'contratado';
   });
 
-  puedeAceptar = computed(() => {
-    if (!this.ofertaSeleccionadaId() || this.aceptando()) return false;
-    if (this.yaContratado()) {
-      // En modo "cambiar selección" solo se puede seleccionar una oferta diferente
-      return this.ofertaSeleccionada()?.estado !== 'aceptada';
-    }
-    return true;
+  /**
+   * Con contratos firmados la selección ya no se puede cambiar (la base lo
+   * impide: adjudicar_ofertas solo acepta 'en_oferta' / 'adjudicado').
+   */
+  bloqueado = computed(() => this.expediente()?.estado === 'contratado');
+
+  /** El expediente tiene varios servicios: cada oferta dice cuáles cubre. */
+  multiServicio = computed(() => this.servicios().length > 1);
+
+  ofertasSeleccionadas = computed(() =>
+    this.ofertas().filter(o => this.seleccion().has(o.id)));
+
+  /** Suma del precio de todas las ofertas seleccionadas. */
+  totalSeleccion = computed(() =>
+    this.ofertasSeleccionadas().reduce((s, o) => s + Number(o.precio ?? 0), 0));
+
+  private aceptadasIds = computed(() =>
+    new Set(this.ofertas().filter(o => o.estado === 'aceptada').map(o => o.id)));
+
+  /** La selección difiere de lo ya aceptado (hay algo que guardar). */
+  seleccionCambiada = computed(() => {
+    const sel = this.seleccion(), acc = this.aceptadasIds();
+    return sel.size !== acc.size || [...sel].some(id => !acc.has(id));
   });
 
-  ofertaSeleccionada = computed(() => {
-    const id = this.ofertaSeleccionadaId();
-    return id ? (this.ofertas().find(o => o.id === id) ?? null) : null;
-  });
+  /** Para cada servicio del expediente, las ofertas seleccionadas que lo cubren. */
+  cobertura = computed(() =>
+    this.servicios().map(s => ({
+      servicio: s,
+      ofertas:  this.ofertasSeleccionadas().filter(o => this.cubre(o, s.id)),
+    })));
+
+  puedeAceptar = computed(() =>
+    !this.aceptando() && !this.bloqueado()
+    && this.seleccion().size > 0 && this.seleccionCambiada());
 
   private expedienteId = '';
 
@@ -99,22 +130,27 @@ export class BuilderOfferComponent implements OnInit {
     this.expedienteId = id;
 
     try {
-      const [exp, estimacion, ofertas, archivos] = await Promise.all([
+      const [exp, estimacion, ofertas, archivos, servicios] = await Promise.all([
         this.expedienteService.getDetalleParaCliente(id),
         this.estimacionService.get(id),
         this.ofertaService.getOfertasDeExpediente(id),
         this.archivoService.cargarTodos(id),
+        // Si falla, la ficha enseña solo el servicio principal, como antes.
+        this.expedienteService.getServiciosCompletos(id).catch((e: any) => {
+          console.error('[BuilderOffer] servicios:', e?.message);
+          return [] as ServicioCompleto[];
+        }),
       ]);
 
       this.expediente.set(exp);
+      this.servicios.set(servicios);
       this.estimacion.set(estimacion);
       this.ofertas.set(ofertas);
       this.fotosExp.set(archivos.fotos);
       this.documentosExp.set(archivos.documentos);
 
-      // Pre-seleccionar la oferta aceptada si ya existe
-      const aceptada = ofertas.find(o => o.estado === 'aceptada');
-      if (aceptada) this.ofertaSeleccionadaId.set(aceptada.id);
+      // Pre-seleccionar las ofertas ya aceptadas
+      this.seleccion.set(new Set(ofertas.filter(o => o.estado === 'aceptada').map(o => o.id)));
 
       // "Fotos del sitio" / "Documentos técnicos": solo lo del estimador.
       await this.cargarArchivosEstimador();
@@ -127,129 +163,169 @@ export class BuilderOfferComponent implements OnInit {
     }
   }
 
-  // ── Selección de oferta ───────────────────────────────────────────────────
+  // ── Selección de ofertas ──────────────────────────────────────────────────
 
+  /** Marca o desmarca una oferta. Con contratos firmados no cambia nada. */
   seleccionar(ofertaId: string) {
-    this.ofertaSeleccionadaId.set(ofertaId);
+    if (this.bloqueado() || this.aceptando()) return;
+    this.seleccion.update(sel => {
+      const next = new Set(sel);
+      if (next.has(ofertaId)) next.delete(ofertaId); else next.add(ofertaId);
+      return next;
+    });
     this.exitoMsg.set('');
     this.errorMsg.set('');
+    this.confirmandoRechazo.set(false);
   }
 
   esSeleccionada(ofertaId: string): boolean {
-    return this.ofertaSeleccionadaId() === ofertaId;
+    return this.seleccion().has(ofertaId);
   }
 
-  async aceptarOferta() {
-    const ofertaId = this.ofertaSeleccionadaId();
-    const oferta   = this.ofertaSeleccionada();
-    const exp      = this.expediente();
-    const userId   = this.user()?.id;
-    if (!ofertaId || !oferta || !exp || !userId) return;
+  /** Una oferta sin servicios (no debería existir) cubre el expediente entero. */
+  cubre(oferta: OfertaConConstructor, servicioId: number): boolean {
+    const ids = oferta.servicio_ids ?? [];
+    return !ids.length || ids.includes(servicioId);
+  }
+
+  /** Nombres de los servicios que cubre la oferta, en el orden del expediente. */
+  serviciosDeOfertaTexto(oferta: OfertaConConstructor): string {
+    return serviciosDeOferta(this.servicios(), oferta).map(s => this.nombreDe(s)).join(' · ');
+  }
+
+  /**
+   * Acepta la selección: un contrato por oferta, en una sola transacción
+   * (adjudicar_ofertas); las ofertas no seleccionadas quedan rechazadas y los
+   * contratos sin firmar anteriores se sustituyen. Después, un PDF por contrato
+   * con los servicios de SU oferta. Mismo flujo que administración.
+   *
+   * Un fallo generando un PDF no deshace la aceptación: los contratos ya están
+   * en la base. Se avisa de cuántos PDF salieron.
+   */
+  async aceptarSeleccion() {
+    const ids = [...this.seleccion()];
+    const exp = this.expediente();
+    if (!ids.length || !exp || !this.puedeAceptar()) return;
 
     this.aceptando.set(true);
     this.errorMsg.set('');
     this.exitoMsg.set('');
 
     try {
-      // 1 — Capturar ruta del PDF anterior antes de que el RPC elimine el contrato
-      const contratoAnterior = await this.contratoService.buscarPorExpediente(this.expedienteId);
-      const urlPdfAnterior   = contratoAnterior?.url_pdf ?? null;
+      // Rutas de los PDF que el RPC va a sustituir: después ya no hay fila de
+      // la que leerlas y quedarían huérfanas en el bucket.
+      const pdfsAnteriores = (await this.contratoService.listarPorExpediente(this.expedienteId))
+        .map(c => c.url_pdf)
+        .filter((u): u is string => !!u);
 
-      // 2 — Cambiar estado expediente + oferta + reemplazar contrato en DB (via RPC)
-      await this.ofertaService.aceptarOferta(this.expedienteId, ofertaId);
+      const creados = await this.contratoService.adjudicarOfertas(this.expedienteId, ids);
 
-      // 3 — Eliminar PDF anterior del storage (best-effort: el flujo no se interrumpe si falla)
-      if (urlPdfAnterior) {
-        await this.contratoService.eliminarPdfStorage(urlPdfAnterior).catch(() => {});
+      for (const url of pdfsAnteriores) {
+        await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
 
-      // 4 — Obtener el nuevo contrato creado por el RPC
-      const contratoRow = await this.contratoService.buscarPorExpediente(this.expedienteId);
-      if (!contratoRow) throw new Error('No se pudo obtener el contrato generado.');
-      const contratoId = contratoRow.id;
-
-      // 5 — Generar PDF
-      const lang = this.translate.currentLang ?? 'fr';
-      const fechaGenerado = new Intl.DateTimeFormat(
+      const lang  = this.translate.currentLang ?? 'fr';
+      const fecha = new Intl.DateTimeFormat(
         lang === 'en' ? 'en-CA' : lang === 'fr' ? 'fr-CA' : 'es-CA',
         { day: 'numeric', month: 'long', year: 'numeric' },
       ).format(new Date());
 
-      const pdfBlob = this.contratoService.generarPdfBlob({
-        contratoId,
-        expedienteNumero:    exp.numero,
-        fechaGenerado,
-        clienteNombre:       exp.cliente_nombre,
-        constructorNombre:   oferta.constructor_nombre,
-        constructorTelefono: oferta.constructor_telefono,
-        constructorEmail:    oferta.constructor_email,
-        servicioNombre:      this.servicioNombre(),
-        servicioDescripcion: this.servicioDescripcion(),
-        direccion:           exp.direccion,
-        canton:              exp.canton,
-        provincia:           exp.provincia,
-        distrito:            exp.distrito,
-        precioFinal:         oferta.precio,
-        plazoMin:            oferta.plazo_semanas_min,
-        plazoMax:            oferta.plazo_semanas_max,
-        garantiaAnos:        oferta.garantia_anos,
-        fechaInicio:         oferta.fecha_inicio,
-        descripcionTrabajo:  oferta.descripcion,
-        lang,
-      });
+      let fallidos = 0;
+      for (const { id_contrato, id_oferta } of creados) {
+        const oferta = this.ofertas().find(o => o.id === id_oferta);
+        if (!oferta) { fallidos++; continue; }
+        try {
+          await this.generarPdfContrato(id_contrato, oferta, exp, lang, fecha);
+        } catch {
+          fallidos++;
+        }
+      }
 
-      // 6 — Subir PDF y guardar ruta en el contrato
-      const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoId);
-      await this.contratoService.actualizarUrlPdf(contratoId, urlPdf);
-
-      // 7 — Actualizar estado local sin recargar
+      // Estado local sin recargar
+      const sel = new Set(ids);
       this.expediente.update(e => e ? { ...e, estado: 'adjudicado' } : e);
       this.ofertas.update(list =>
-        list.map(o => ({ ...o, estado: o.id === ofertaId ? 'aceptada' : 'rechazada' }))
-      );
+        list.map(o => o.eliminada_en ? o : { ...o, estado: sel.has(o.id) ? 'aceptada' : 'rechazada' }));
 
-      this.exitoMsg.set('builder_offer.success_accepted');
+      this.exitoMsg.set(fallidos
+        ? this.translate.instant('builder_offer.pdf_partial', { n: creados.length - fallidos, total: creados.length })
+        : this.translate.instant(creados.length === 1 ? 'builder_offer.success_accepted' : 'builder_offer.success_accepted_n',
+                                 { n: creados.length }));
     } catch (e: any) {
-      console.error('[BuilderOffer] aceptarOferta:', e.message);
+      console.error('[BuilderOffer] aceptarSeleccion:', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.aceptando.set(false);
     }
   }
 
-  // ── Rechazo de oferta aceptada ────────────────────────────────────────────
+  /** PDF de un contrato: los servicios de SU oferta, no los del expediente. */
+  private async generarPdfContrato(
+    contratoId: string, oferta: OfertaConConstructor, exp: ExpedienteDetalleCliente, lang: string, fecha: string,
+  ): Promise<void> {
+    const pdfBlob = this.contratoService.generarPdfBlob({
+      contratoId,
+      expedienteNumero:    exp.numero,
+      fechaGenerado:       fecha,
+      clienteNombre:       exp.cliente_nombre,
+      constructorNombre:   oferta.constructor_nombre,
+      constructorTelefono: oferta.constructor_telefono,
+      constructorEmail:    oferta.constructor_email,
+      // Sin lista de servicios (fallo de carga), la forma antigua: el principal.
+      servicios:           this.servicios().length
+                             ? serviciosParaContrato(serviciosDeOferta(this.servicios(), oferta), lang)
+                             : undefined,
+      servicioNombre:      this.servicioNombre(),
+      servicioDescripcion: this.servicioDescripcion(),
+      direccion:           exp.direccion,
+      canton:              exp.canton,
+      provincia:           exp.provincia,
+      distrito:            exp.distrito,
+      precioFinal:         oferta.precio,
+      plazoMin:            oferta.plazo_semanas_min,
+      plazoMax:            oferta.plazo_semanas_max,
+      garantiaAnos:        oferta.garantia_anos,
+      fechaInicio:         oferta.fecha_inicio,
+      descripcionTrabajo:  oferta.descripcion,
+      lang,
+    });
+    const urlPdf = await this.contratoService.subirPdf(pdfBlob, contratoId);
+    await this.contratoService.actualizarUrlPdf(contratoId, urlPdf);
+  }
 
-  async rechazarOferta() {
-    const ofertaId = this.ofertaSeleccionadaId();
-    if (!ofertaId) return;
+  // ── Rechazo de las ofertas aceptadas ──────────────────────────────────────
+
+  /**
+   * Con la selección vacía, rechaza todas las aceptadas: sus contratos sin
+   * firmar se eliminan y el expediente vuelve a 'estimado' (la base solo lo
+   * hace cuando ya no queda ninguna aceptada).
+   */
+  async rechazarAceptadas() {
+    const aceptadas = [...this.aceptadasIds()];
+    if (!aceptadas.length || this.bloqueado()) return;
 
     this.rechazando.set(true);
     this.errorMsg.set('');
     this.exitoMsg.set('');
 
     try {
-      // 1 — Capturar ruta del PDF antes de que el RPC elimine el contrato
-      const contrato = await this.contratoService.buscarPorExpediente(this.expedienteId);
-      const urlPdf   = contrato?.url_pdf ?? null;
+      // Rutas de los PDF antes de que el RPC elimine los contratos
+      const contratos = await this.contratoService.listarPorExpediente(this.expedienteId);
 
-      // 2 — Rechazar oferta: oferta → rechazada, expediente → estimado, elimina contrato en DB
-      await this.contratoService.rechazarOferta(this.expedienteId, ofertaId);
-
-      // 3 — Eliminar PDF del storage (best-effort)
-      if (urlPdf) {
-        await this.contratoService.eliminarPdfStorage(urlPdf).catch(() => {});
+      for (const ofertaId of aceptadas) {
+        await this.contratoService.rechazarOferta(this.expedienteId, ofertaId);
+        const url = contratos.find(c => c.oferta_id === ofertaId)?.url_pdf;
+        if (url) await this.contratoService.eliminarPdfStorage(url).catch(() => {});
       }
 
-      // 4 — Actualizar estado local sin recargar
       this.expediente.update(e => e ? { ...e, estado: 'estimado' } : e);
       this.ofertas.update(list =>
-        list.map(o => o.id === ofertaId ? { ...o, estado: 'rechazada' } : o)
-      );
-      this.ofertaSeleccionadaId.set(null);
+        list.map(o => aceptadas.includes(o.id) ? { ...o, estado: 'rechazada' } : o));
+      this.seleccion.set(new Set());
       this.confirmandoRechazo.set(false);
-      this.exitoMsg.set('builder_offer.success_rejected');
+      this.exitoMsg.set(aceptadas.length === 1 ? 'builder_offer.success_rejected' : 'builder_offer.success_rejected_n');
     } catch (e: any) {
-      console.error('[BuilderOffer] rechazarOferta:', e.message);
+      console.error('[BuilderOffer] rechazarAceptadas:', e.message);
       this.errorMsg.set(e.message);
     } finally {
       this.rechazando.set(false);
@@ -322,6 +398,14 @@ export class BuilderOfferComponent implements OnInit {
   }
 
   // ── Servicio i18n ─────────────────────────────────────────────────────────
+
+  nombreDe(s: ServicioCompleto): string {
+    return nombreServicio(s, this.translate.currentLang);
+  }
+
+  descripcionDe(s: ServicioCompleto): string {
+    return descripcionServicio(s, this.translate.currentLang);
+  }
 
   servicioNombre(): string {
     const e = this.expediente();

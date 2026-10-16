@@ -486,7 +486,35 @@
     "avance_obra": "Avancement du chantier",
     "view_monitoring": "Voir le suivi",
     "contrato_pendiente": "Le contrat sera disponible une fois un constructeur sélectionné.",
-    "contrato_cancelado": "Ce contrat a été annulé."
+    "contrato_cancelado": "Ce contrat a été annulé.",
+    "contratos_title": "Contrats du dossier",
+    "contratos_count_one": "1 contrat",
+    "contratos_count": "{{n}} contrats",
+    "contrato_estado_corto": {
+      "generado": "Généré",
+      "firmado": "Signé",
+      "en_ejecucion": "En cours",
+      "completado": "Terminé",
+      "cancelado": "Annulé"
+    },
+    "obra_estado": {
+      "por_iniciar": "Chantier à démarrer",
+      "en_curso": "Chantier en cours",
+      "pausada": "Chantier en pause",
+      "completada": "Chantier terminé à 100 %",
+      "cancelada": "Contrat annulé"
+    },
+    "obra_actualizada": "mis à jour le {{date}}",
+    "contrato_detalles": "Détails du contrat",
+    "costo_total": "Coût total",
+    "costo_total_nota_one": "Montant du contrat en vigueur.",
+    "costo_total_nota": "Somme des {{n}} contrats en vigueur.",
+    "costo_total_ninguno": "Aucun contrat en vigueur.",
+    "costo_total_cancelados": "Les contrats annulés ne sont pas comptés.",
+    "avance_contratos": "Avancement des contrats",
+    "avance_contratos_desc": "Moyenne de l’avancement des chantiers des contrats en vigueur.",
+    "contratos_cancelados": "Tous les contrats de ce dossier ont été annulés.",
+    "obras_completadas": "Chantiers terminés : {{done}}/{{total}}"
   },
   "timeline": {
     "created": "Dossier créé",
@@ -638,7 +666,8 @@
     "my_videos": "Mes vidéos",
     "my_docs": "Mes documents",
     "contract": "Contrat",
-    "photo_viewer": "Visionneuse de photos"
+    "photo_viewer": "Visionneuse de photos",
+    "services": "Services"
   },
   "offer": {
     "price": "Prix",
@@ -661,7 +690,9 @@
     "not_selected": "Non sélectionné par le client",
     "no_offers": "Aucune offre envoyée",
     "accepted_note": "Votre offre a été sélectionnée !",
-    "rejected_note": "Le client a choisi une autre offre."
+    "rejected_note": "Le client a choisi une autre offre.",
+    "selected_builders": "Constructeurs sélectionnés",
+    "proposal_and_files": "Proposition et fichiers"
   },
   "offers_received": {
     "title": "Offres reçues",
@@ -795,7 +826,27 @@
     "reject_text": "Le contrat généré sera supprimé. Le dossier reviendra à l'état estimé.",
     "reject_confirm": "Oui, rejeter",
     "rejecting": "Rejet en cours…",
-    "success_rejected": "Offre rejetée. Le dossier est revenu à l'état estimé."
+    "success_rejected": "Offre rejetée. Le dossier est revenu à l'état estimé.",
+    "select_hint_title_multi": "Sélectionnez une ou plusieurs offres",
+    "select_hint_multi": "Cliquez sur les offres pour les sélectionner : une pour tous les services, une par service ou plusieurs pour le même service.",
+    "covers": "Couvre",
+    "selected_title_n": "Offres sélectionnées",
+    "remove_offer": "Retirer de la sélection",
+    "coverage_title": "Couverture par service",
+    "coverage_none": "Aucune offre",
+    "coverage_n": "{{n}} offres",
+    "total_selected": "Total de la sélection",
+    "locked": "Ce dossier a des contrats signés : la sélection ne peut plus être modifiée.",
+    "already_accepted_n": "Ces offres ont été acceptées.",
+    "update_btn": "Mettre à jour la sélection",
+    "accept_n_btn": "Accepter {{n}} offres",
+    "replace_warning_n": "Les offres hors de la sélection seront refusées et les contrats non signés seront générés de nouveau.",
+    "success_accepted_n": "{{n}} offres acceptées : un contrat a été généré pour chacune.",
+    "pdf_partial": "Offres acceptées, mais seuls {{n}} PDF de contrat sur {{total}} ont été générés. Acceptez de nouveau pour réessayer.",
+    "reject_all_btn": "Refuser les offres acceptées",
+    "reject_all_title": "Refuser les offres acceptées ?",
+    "reject_all_text": "Les contrats non signés seront supprimés. Le dossier reviendra à l’état estimé.",
+    "success_rejected_n": "Offres refusées. Le dossier est revenu à l’état estimé."
   },
   "make_offer": {
     "editing_badge": "Modification de l'offre",
@@ -1902,7 +1953,10 @@
     "cancel_close": "Non, conserver le contrat",
     "cancelling": "Annulation en cours…",
     "success_cancelled": "Contrat annulé avec succès.",
-    "err_cancel": "Impossible d'annuler le contrat. Veuillez réessayer."
+    "err_cancel": "Impossible d'annuler le contrat. Veuillez réessayer.",
+    "cancel_disabled_obra": "Chantier terminé : le contrat ne peut plus être annulé.",
+    "contracts_one": "1 contrat",
+    "contracts_n": "{{n}} contrats"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -2288,7 +2342,16 @@
     "inspecciones_title": "Prochaine inspection",
     "sin_inspecciones": "Aucune inspection programmée.",
     "media_title": "Photos du jour",
-    "sin_media": "Aucun fichier."
+    "sin_media": "Aucun fichier.",
+    "obras_one": "1 chantier",
+    "obras_n": "{{n}} chantiers",
+    "avance_medio": "Avancement {{n}} %",
+    "stat_obras": "Chantiers",
+    "stat_en_curso": "En cours",
+    "stat_terminadas": "Terminés à 100 %",
+    "stat_expedientes": "Dossiers",
+    "sin_eventos_servicio": "Aucun rapport pour ce service pour l’instant.",
+    "otros_partes": "Autres rapports"
   },
   "admin_ai_events": {
     "title": "Événements de l'assistant IA",

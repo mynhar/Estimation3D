@@ -19,7 +19,8 @@
      ---------------------------------------------------------- */
   --ds-ink:               #1A1A1A;  /* Texto principal */
   --ds-ink-secondary:     #4A4A4A;  /* Texto secundario */
-  --ds-ink-muted:         #7A7770;  /* Texto terciario, captions */
+  --ds-ink-muted:         #615E58;  /* Texto terciario, captions — ≥ 4.6:1 sobre todo fondo claro y -soft (antes #7A7770: 3.8:1 sobre bg-alt) */
+  --ds-ink-faint:         #7A7770;  /* SOLO gráficos decorativos (iconos de vacío, separadores, flechas): ≥ 3.2:1. Nunca texto */
   --ds-ink-on-accent:     #1A1A1A;  /* Texto sobre fondo dorado */
   --ds-ink-inverse:       #FBFAF6;  /* Texto sobre fondos oscuros (raro) */
 
@@ -50,6 +51,21 @@
   --ds-danger-soft:       #EFD9D9;
   --ds-info:              #4A6B7A;  /* Azul pizarra */
   --ds-info-soft:         #DBE5E9;
+
+  /* ----------------------------------------------------------
+     COLOR — Texto sobre fondos suaves (insignias, chips, alertas)
+     El color semántico base se queda corto sobre su propio fondo
+     suave (mostaza 2.7:1, dorado 2.5:1, oliva 4.0:1). Estas variantes
+     mantienen el tono y dan ≥ 5:1 sobre su -soft / -faint y también
+     sobre --ds-bg, --ds-bg-alt y --ds-surface (WCAG AA con margen).
+     Regla: texto sobre -soft / -faint → -ink. El color base sigue
+     para rellenos, barras, bordes e iconos.
+     ---------------------------------------------------------- */
+  --ds-success-ink:       #4C6A40;  /* 5.0:1 sobre success-soft */
+  --ds-warning-ink:       #8A5700;  /* 5.0:1 sobre warning-soft */
+  --ds-danger-ink:        #993E3E;  /* 5.0:1 sobre danger-soft  */
+  --ds-info-ink:          #426372;  /* 5.0:1 sobre info-soft    */
+  --ds-gold-ink:          #70540C;  /* 5.1:1 sobre gold-soft · 6.2:1 sobre gold-faint */
 
   /* ----------------------------------------------------------
      COLOR — Dark chrome (sidebar / panel de login)

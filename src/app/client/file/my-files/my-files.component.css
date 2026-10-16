@@ -95,7 +95,7 @@
 .mf-chip--finalizados.status-chip--active {
   background: var(--ds-success-soft) !important;
   border-color: var(--ds-success) !important;
-  color: var(--ds-success) !important;
+  color: var(--ds-success-ink) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -222,7 +222,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.5rem;
 }
 
@@ -267,6 +267,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 .mf-card {
   display: flex;
+  position: relative;   /* ancla del enlace estirado (.mf-card__btn-main::after) */
   border-radius: var(--ds-radius-xl);
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
@@ -425,6 +426,31 @@
   margin: 0;
 }
 
+/* «Obra terminada al 100 %» por contrato: .tag/.tag-gold del sistema + los
+   servicios del contrato, que lo distinguen de los demás del expediente. */
+.mf-obras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+.mf-obras--table { margin-top: var(--ds-space-2); gap: var(--ds-space-1); }
+.mf-obra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-1) var(--ds-space-2);
+  min-width: 0;
+}
+.mf-obra__tag { font-size: var(--ds-text-2xs); white-space: nowrap; }
+.mf-obra__svc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+}
+
 /* Acciones */
 .mf-card__actions {
   display: flex;
@@ -436,10 +462,22 @@
 .mf-card__btn-main {
   width: 100%;
   justify-content: center;
+  position: static;     /* el ::after se mide contra la tarjeta, no contra el botón */
+}
+/* Toda la tarjeta abre el expediente: el área de clic del enlace principal se
+   estira sobre ella. Sigue siendo un único enlace real (foco, Enter, Ctrl+clic,
+   clic central) y el anillo de foco lo pinta .mf-card:focus-within. */
+.mf-card__btn-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 /* CTA de oferta */
 .mf-card__btn-offer {
+  position: relative;   /* por encima del enlace estirado: conserva su destino */
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -448,7 +486,7 @@
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   border-radius: var(--ds-radius-md);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
   text-decoration: none;
@@ -458,7 +496,7 @@
 .mf-card__btn-offer:hover {
   background: var(--ds-gold-soft);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .mf-card__btn-offer:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
 
@@ -472,7 +510,7 @@
   background: var(--ds-success-soft);
   border: 1px solid var(--ds-success);
   border-radius: var(--ds-radius-md);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
 }
@@ -539,10 +577,10 @@
   white-space: nowrap;
 }
 .mf-pipe-node--current .mf-pipe-lbl {
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-bold);
 }
-.mf-pipe-node--done .mf-pipe-lbl { color: var(--ds-gold); }
+.mf-pipe-node--done .mf-pipe-lbl { color: var(--ds-gold-ink); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    FOTO DEL EXPEDIENTE (miniatura del tour 3D) — banner superior de la card
@@ -570,7 +608,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 
@@ -604,7 +642,7 @@
 }
 .view-toggle__btn + .view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .view-toggle__btn:hover { color: var(--ds-ink); background: var(--ds-gold-faint); }
-.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -645,12 +683,22 @@
   cursor: pointer;
   transition: background-color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.mf-table__row:hover { background: var(--ds-gold-faint); }
+.mf-table__row:hover,
+.mf-table__row:focus-within { background: var(--ds-gold-faint); }
+.mf-table__link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--ds-radius-sm);
+}
+.mf-table__link:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
 
 .mf-table__col-photo  { width: 64px; }
 .mf-table__col-num    { white-space: nowrap; }
 .mf-table__col-date   { white-space: nowrap; color: var(--ds-ink-secondary); }
-.mf-table__col-action { width: 40px; text-align: center; color: var(--ds-border-strong); }
+.mf-table__col-action { width: 40px; text-align: center; color: var(--ds-ink-faint); }
 
 .mf-table__thumb {
   width: 48px;
@@ -661,7 +709,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 .mf-table__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mf-table__service { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }

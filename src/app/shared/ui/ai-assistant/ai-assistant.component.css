@@ -72,7 +72,7 @@
   white-space: nowrap;
   transition: color 160ms var(--ds-ease-out), border-color 160ms var(--ds-ease-out), background 160ms var(--ds-ease-out);
 }
-.ai-clearbtn:hover { color: var(--ds-danger); border-color: var(--ds-danger); background: var(--ds-danger-soft); }
+.ai-clearbtn:hover { color: var(--ds-danger-ink); border-color: var(--ds-danger); background: var(--ds-danger-soft); }
 .ai-clearbtn:focus-visible { outline: 2px solid var(--ds-gold-active); outline-offset: 1px; }
 .ai-clearbtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -117,7 +117,7 @@
   display: grid; place-items: center;
   width: 56px; height: 56px;
   font-size: var(--ds-text-2xl);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-soft);
   border-radius: var(--ds-radius-xl);
   margin-bottom: var(--ds-space-2);
@@ -222,7 +222,7 @@
   display: grid; place-items: center;
   width: 60px; height: 60px;
   font-size: var(--ds-text-2xl);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-soft);
   border-radius: var(--ds-radius-xl);
 }
@@ -249,7 +249,7 @@
   display: grid; place-items: center;
   width: 40px; height: 40px;
   font-size: var(--ds-text-base);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-bg-alt);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-md);
@@ -273,7 +273,7 @@
   display: grid; place-items: center;
   width: 34px; height: 34px;
   font-size: var(--ds-text-base);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-soft);
   border-radius: var(--ds-radius-circle);
 }

@@ -189,12 +189,12 @@ export class AdminFileEditComponent implements OnInit {
   ];
 
   readonly ESTADO_CLASE: Record<string, string> = {
-    nuevo:         'bg-primary-subtle text-primary',
+    nuevo:         'bg-primary-subtle text-primary-emphasis',
     en_estimacion: 'bg-info-subtle text-info-emphasis',
-    estimado:      'bg-success-subtle text-success',
+    estimado:      'bg-success-subtle text-success-emphasis',
     en_oferta:     'bg-warning-subtle text-warning-emphasis',
     adjudicado:    'bg-warning-subtle text-warning-emphasis',
-    contratado:    'bg-success-subtle text-success',
+    contratado:    'bg-success-subtle text-success-emphasis',
     cancelado:     'bg-secondary-subtle text-secondary',
   };
   estadoClase(estado: string): string {

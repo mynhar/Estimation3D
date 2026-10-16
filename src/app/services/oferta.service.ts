@@ -58,10 +58,6 @@ export class OfertaService {
     });
   }
 
-  async aceptarOferta(expedienteId: string, ofertaId: string): Promise<void> {
-    return this.ofertaRepo.aceptar(expedienteId, ofertaId);
-  }
-
   async getExpedienteIdsConOferta(constructorId: string): Promise<Set<string>> {
     const ids = await this.ofertaRepo.findExpedienteIdsByConstructorId(constructorId);
     return new Set(ids);

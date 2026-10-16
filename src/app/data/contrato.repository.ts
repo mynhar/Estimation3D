@@ -2,15 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { AuthSupabaseService } from '../services/auth-supabase.service';
 import { ContratoInput } from '../models';
 
-export type ContratoHistorialItem = {
-  id:             string;
-  estado:         string;
-  generado_en:    string;
-  firmado_en:     string | null;
-  actualizado_en: string;
-  oferta:         { fecha_inicio: string | null } | null;
-};
-
 export type ContratoClienteView = {
   id:                  string;
   precio_final:        number;
@@ -36,20 +27,6 @@ export class ContratoRepository {
   private auth = inject(AuthSupabaseService);
   private get db() { return this.auth.client; }
 
-  async findHistorialByExpedienteId(expedienteId: string): Promise<ContratoHistorialItem | null> {
-    const { data, error } = await this.db
-      .from('contrato')
-      .select('id, estado, generado_en, firmado_en, actualizado_en, oferta(fecha_inicio)')
-      .eq('expediente_id', expedienteId)
-      // El más reciente, no `maybeSingle()`: un expediente puede tener varios
-      // contratos desde que administración adjudica a varios constructores, y
-      // `maybeSingle()` lanzaría «multiple rows returned».
-      .order('generado_en', { ascending: false })
-      .limit(1);
-    if (error) return null;
-    return (data?.[0] ?? null) as ContratoHistorialItem | null;
-  }
-
   async findHistorialByClienteId(clienteId: string): Promise<{
     id: string; expediente_id: string; estado: string;
     generado_en: string; firmado_en: string | null; actualizado_en: string;
@@ -63,18 +40,6 @@ export class ContratoRepository {
       id: string; expediente_id: string; estado: string;
       generado_en: string; firmado_en: string | null; actualizado_en: string;
     }[];
-  }
-
-  async findForClientByExpedienteId(expedienteId: string): Promise<ContratoClienteView | null> {
-    const { data, error } = await this.db
-      .from('contrato')
-      .select('id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo')
-      .eq('expediente_id', expedienteId)
-      // Idem: el más reciente. Ver findHistorialByExpedienteId.
-      .order('generado_en', { ascending: false })
-      .limit(1);
-    if (error) return null;
-    return (data?.[0] ?? null) as ContratoClienteView | null;
   }
 
   /**
@@ -123,6 +88,65 @@ export class ContratoRepository {
     });
   }
 
+  /**
+   * Todos los contratos del expediente para el panel del cliente, con su
+   * constructor, la fecha de inicio de la oferta y el seguimiento de la obra.
+   * El más reciente primero. `expediente.servicio` es el respaldo de los
+   * contratos sin `servicio_ids`.
+   */
+  async findPanelClienteByExpedienteId(expedienteId: string): Promise<any[]> {
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, estado, precio_final, garantia_anos, descripcion_trabajo, url_pdf, generado_en, firmado_en, actualizado_en, servicio_ids,
+        expediente:expediente_id (
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr )
+        ),
+        constructor:constructor_id ( nombre, apellido, telefono, email ),
+        oferta:oferta_id ( fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance, actualizado_en )
+      `)
+      .eq('expediente_id', expedienteId)
+      .order('generado_en', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  /**
+   * Resumen de obra de los contratos de varios expedientes: estado, oferta,
+   * servicios y seguimiento. Lo justo para marcar «obra terminada» en listas.
+   */
+  async findResumenObraByExpedienteIds(expedienteIds: string[]): Promise<any[]> {
+    if (!expedienteIds.length) return [];
+    const { data, error } = await this.db
+      .from('contrato')
+      .select(`
+        id, expediente_id, oferta_id, estado, servicio_ids,
+        expediente:expediente_id (
+          servicio:servicio_id ( nombre_es, nombre_en, nombre_fr, descripcion_es, descripcion_en, descripcion_fr )
+        ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
+      `)
+      .in('expediente_id', expedienteIds)
+      .order('generado_en', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  /** URLs firmadas de varios PDF en una sola llamada, por ruta. Las que fallan no vienen. */
+  async getSignedUrls(paths: string[], expiresInSeconds = 3600): Promise<Map<string, string>> {
+    if (!paths.length) return new Map();
+    const { data, error } = await this.db.storage
+      .from('contratos')
+      .createSignedUrls(paths, expiresInSeconds);
+    if (error) throw new Error(error.message);
+    const urls = new Map<string, string>();
+    for (const d of data ?? []) {
+      if (d.path && d.signedUrl && !d.error) urls.set(d.path, d.signedUrl);
+    }
+    return urls;
+  }
+
   /** El contrato más reciente, para los flujos que sólo manejan uno. */
   async findSimpleByExpedienteId(
     expedienteId: string,
@@ -159,7 +183,8 @@ export class ContratoRepository {
         ),
         constructor:constructor_id ( nombre, apellido, telefono, email ),
         cliente:cliente_id ( nombre, apellido ),
-        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio )
+        oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio ),
+        seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .eq('cliente_id', clienteId)
       .order('generado_en', { ascending: false });

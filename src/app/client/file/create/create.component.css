@@ -55,7 +55,7 @@
 .back-btn:hover {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   box-shadow: var(--ds-shadow-sm);
 }
 .back-btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
@@ -69,7 +69,7 @@
   font-weight: var(--ds-weight-semibold);
   letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 .create-title {
@@ -102,12 +102,12 @@
 .step-count__num {
   font-size: var(--ds-text-2xl);
   font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-variant-numeric: tabular-nums;
 }
 .step-count__den {
   font-size: var(--ds-text-lg);
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-muted);
 }
 .step-count__lbl {
   font-family: var(--ds-font-body);
@@ -165,7 +165,7 @@
   transition: color var(--ds-duration-base) var(--ds-ease-out);
 }
 .stepper__item--done .stepper__lbl {
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   font-weight: var(--ds-weight-medium);
 }
 
@@ -297,7 +297,7 @@
   padding: 0.2em 0.75em;
   border-radius: var(--ds-radius-pill);
   background: var(--ds-success-soft);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   border: 1px solid color-mix(in oklab, var(--ds-success) 30%, transparent);
   white-space: nowrap;
   flex-shrink: 0;
@@ -361,7 +361,7 @@
   background: var(--ds-danger-soft);
   border: 1px solid var(--ds-danger);
   border-radius: var(--ds-radius-md);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   padding: var(--ds-space-3) var(--ds-space-4);
   font-size: var(--ds-text-sm);
 }
@@ -374,7 +374,7 @@
   color: var(--ds-ink-muted);
   font-size: var(--ds-text-sm);
 }
-.loading-inline .spinner-border { color: var(--ds-gold); }
+.loading-inline .spinner-border { color: var(--ds-gold-ink); }
 
 .field-error {
   display: flex;
@@ -404,7 +404,7 @@
   border: 1px solid color-mix(in oklab, var(--ds-info) 30%, transparent);
   border-radius: var(--ds-radius-md);
   padding: var(--ds-space-3) var(--ds-space-4);
-  color: var(--ds-info);
+  color: var(--ds-info-ink);
   font-size: var(--ds-text-sm);
   line-height: var(--ds-leading-relaxed);
 }
@@ -442,7 +442,7 @@
   border: 1px solid color-mix(in oklab, var(--ds-info) 30%, transparent);
   border-radius: var(--ds-radius-md);
   padding: var(--ds-space-3) var(--ds-space-4);
-  color: var(--ds-info);
+  color: var(--ds-info-ink);
   font-size: var(--ds-text-sm);
   line-height: var(--ds-leading-relaxed);
 }
@@ -519,7 +519,7 @@
   background: var(--ds-gold-faint);
   color: var(--ds-ink);
 }
-.tipo-btn:hover .tipo-btn__icon { color: var(--ds-gold-active); }
+.tipo-btn:hover .tipo-btn__icon { color: var(--ds-gold-ink); }
 .tipo-btn:active { transform: translateY(1px); }
 
 .btn-check:checked + .tipo-btn {
@@ -541,7 +541,7 @@
   border-radius: var(--ds-radius-pill);
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
   white-space: nowrap;
@@ -568,7 +568,7 @@
 .gps-toggle:hover {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .gps-toggle:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
 .gps-toggle__caret { margin-left: auto; font-size: var(--ds-text-xs); }
@@ -648,7 +648,7 @@
 .rail-row__icon {
   font-size: 0.95rem;
   line-height: 1.4;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   flex-shrink: 0;
   transition: color var(--ds-duration-base) var(--ds-ease-out);
 }
@@ -676,7 +676,7 @@
 }
 
 .rail-row__check {
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   font-size: 0.95rem;
   line-height: 1.4;
   flex-shrink: 0;
@@ -722,7 +722,7 @@
   border-radius: var(--ds-radius-circle);
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-2xs);
   flex-shrink: 0;
@@ -732,7 +732,7 @@
 .proc__num--end {
   background: var(--ds-success-soft);
   border-color: var(--ds-success);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
 }
 
 .proc__body { grid-column: 2; grid-row: 1; min-width: 0; }

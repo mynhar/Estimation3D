@@ -12,12 +12,10 @@ import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { DocumentosClienteService, ArchivoVM } from '../../services/documentos-cliente.service';
 import { EstimacionService } from '../../services/estimacion.service';
-import { SeguimientoService } from '../../services/seguimiento.service';
-import { ArchivoRow, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
-import {
-  ContratoHistorialItem,
-  OfertaHistorialItem,
-} from '../../services/expediente.service';
+import { ContratoService } from '../../services/contrato.service';
+import { ArchivoRow, ContratoPanelCliente, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
+import { ContratosExpedienteComponent } from '../../shared/ui/contratos-expediente/contratos-expediente.component';
+import { OfertaHistorialItem } from '../../services/expediente.service';
 
 // ── 5 visual phases for the progress bar ─────────────────────────────────────
 
@@ -40,18 +38,6 @@ const FASE_MAP: Record<string, number> = {
   cancelado:     0,
 };
 
-interface ContratoClienteInfo {
-  id:                   string;
-  precio_final:         number;
-  garantia_anos:        number | null;
-  estado:               string;
-  url_pdf:              string | null;
-  descripcion_trabajo:  string;
-  constructor_nombre:   string;
-  constructor_telefono: string | null;
-  constructor_email:    string | null;
-}
-
 // Token-based CSS class per estado
 const ESTADO_CLASE: Record<string, string> = {
   nuevo:         'estado-badge--nuevo',
@@ -63,16 +49,12 @@ const ESTADO_CLASE: Record<string, string> = {
   cancelado:     'estado-badge--cancelado',
 };
 
-// Avance contrato — pasos y porcentajes
-const CONTRATO_PASOS = [
-  { key: 'generado',     pct: 25,  icon: 'bi-file-earmark-text' },
-  { key: 'firmado',      pct: 50,  icon: 'bi-pen'               },
-  { key: 'en_ejecucion', pct: 75,  icon: 'bi-tools'             },
-  { key: 'completado',   pct: 100, icon: 'bi-house-check'       },
-] as const;
-
-const CONTRATO_PCT: Record<string, number> = {
-  generado: 25, firmado: 50, en_ejecucion: 75, completado: 100, cancelado: 0,
+// Último hito de un contrato según su estado. Fechado con `actualizado_en`:
+// la base no guarda cuándo empezó la ejecución ni cuándo terminó.
+const CONTRATO_EVENTO_FIN: Record<string, { tipo: string; icon: string; titulo: string }> = {
+  en_ejecucion: { tipo: 'ejecucion_iniciada',  icon: 'bi-play-circle', titulo: 'timeline.execution_started'  },
+  completado:   { tipo: 'contrato_completado', icon: 'bi-check2-all',  titulo: 'timeline.contract_completed' },
+  cancelado:    { tipo: 'contrato_cancelado',  icon: 'bi-x-circle',    titulo: 'timeline.contract_cancelled' },
 };
 
 export interface TimelineEvento {
@@ -96,7 +78,7 @@ function estadoPriority(e: ExpedienteCliente): number {
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, ContratosExpedienteComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -108,7 +90,7 @@ export class DashboardComponent implements OnInit {
   private expedienteService  = inject(ExpedienteService);
   private archivoService     = inject(ArchivoService);
   private documentosService  = inject(DocumentosClienteService);
-  private seguimientoService = inject(SeguimientoService);
+  private contratoService    = inject(ContratoService);
   private translate          = inject(TranslateService);
   private sanitizer          = inject(DomSanitizer);
 
@@ -131,23 +113,20 @@ export class DashboardComponent implements OnInit {
   videos      = signal<ArchivoRow[]>([]);
   mediaActiva = signal<number>(0);
 
-  // Historia del expediente activo
+  // Historia del expediente activo (los contratos salen de `contratos`)
   ofertasHistorial  = signal<OfertaHistorialItem[]>([]);
-  contratoHistorial = signal<ContratoHistorialItem | null>(null);
 
   fotosExp         = signal<ArchivoRow[]>([]);
   documentosExp    = signal<ArchivoRow[]>([]);
   // "Mis documentos": documentos del expediente de TODAS las fuentes (expediente,
   // estimación, oferta, contrato, obra) y roles — paridad con my-documents/list.
   documentosVM     = signal<ArchivoVM[]>([]);
-  contratoCompleto = signal<ContratoClienteInfo | null>(null);
-  contratoPdfUrl   = signal<string | null>(null);
-  // Seguimiento de obra — avance físico de los trabajos (seguimiento_obra).
-  obra             = signal<{ avance: number; estado: string; actualizadoEn: string } | null>(null);
+  // Contratos del expediente (uno por constructor adjudicado), con el avance
+  // de la obra de cada uno (seguimiento_obra).
+  contratos        = signal<ContratoPanelCliente[]>([]);
   eliminando       = signal<string | null>(null);
 
-  readonly FASES          = FASES;
-  readonly CONTRATO_PASOS = CONTRATO_PASOS;
+  readonly FASES = FASES;
 
   // ── KPI computed ──────────────────────────────────────────────────────────
 
@@ -196,16 +175,32 @@ export class DashboardComponent implements OnInit {
   tieneMedia   = computed(() => this.tieneTour() || this.tieneVideos());
 
   tieneEstimacion = computed(() => !!this.detalleActivo()?.estimador_nombre);
-  tieneContrato   = computed(() => !!this.contratoCompleto());
+  tieneContrato   = computed(() => this.contratos().length > 0);
 
   // ── Avance computed ───────────────────────────────────────────────────────
 
   expCancelado = computed(() => this.expedienteActivo()?.estado === 'cancelado');
 
-  contratoAvancePct = computed((): number => {
-    const ct = this.contratoCompleto();
-    return ct ? (CONTRATO_PCT[ct.estado] ?? 0) : 0;
+  /** Los cancelados no cuentan ni en el avance ni en el costo. */
+  contratosVigentes = computed(() => this.contratos().filter(c => c.estado !== 'cancelado'));
+
+  /**
+   * Avance de todos los contratos: media del avance de obra de los vigentes,
+   * todos con el mismo peso — la misma regla que la base aplica a los
+   * servicios de un contrato (`recalcular_avance_seguimiento`).
+   */
+  avanceContratos = computed((): number => {
+    const vs = this.contratosVigentes();
+    return vs.length ? Math.round(vs.reduce((s, c) => s + c.avance_obra, 0) / vs.length) : 0;
   });
+
+  /** Fechas clave: los contratos en el orden en que se adjudicaron. */
+  contratosCronologicos = computed(() =>
+    [...this.contratos()].sort((a, b) =>
+      new Date(a.generado_en).getTime() - new Date(b.generado_en).getTime()));
+
+  obrasCompletadas = computed(() =>
+    this.contratosVigentes().filter(c => c.obra_estado === 'completada').length);
 
   videoActivoUrl = computed((): string | null => {
     if (this.activaEsTour()) return null;
@@ -266,46 +261,35 @@ export class DashboardComponent implements OnInit {
       });
     }
 
-    // ── 6. Contrato (oferta aceptada → firmado → ejecución → fin) ────────
-    const contrato = this.contratoHistorial();
-    if (contrato) {
+    // ── 6. Contratos: uno por constructor adjudicado, cada uno con su
+    //       aceptación → firma → inicio → ejecución → fin. El nombre del
+    //       constructor distingue los eventos y el id los hace únicos (track).
+    for (const c of this.contratos()) {
+      const quien = c.constructor_nombre;
       events.push({
-        fecha: contrato.generado_en, tipo: 'oferta_aceptada',
-        icon: 'bi-handshake', titulo: 'timeline.offer_accepted',
+        fecha: c.generado_en, tipo: `oferta_aceptada_${c.id}`,
+        icon: 'bi-handshake', titulo: 'timeline.offer_accepted', subtitulo: quien,
       });
 
-      if (contrato.firmado_en) {
+      if (c.firmado_en) {
         events.push({
-          fecha: contrato.firmado_en, tipo: 'contrato_firmado',
-          icon: 'bi-pen', titulo: 'timeline.contract_signed',
+          fecha: c.firmado_en, tipo: `contrato_firmado_${c.id}`,
+          icon: 'bi-pen', titulo: 'timeline.contract_signed', subtitulo: quien,
         });
       }
 
-      if (contrato.oferta?.fecha_inicio) {
+      if (c.fecha_inicio) {
         events.push({
-          fecha: contrato.oferta.fecha_inicio, tipo: 'inicio_obras',
-          icon: 'bi-hammer', titulo: 'timeline.works_started',
+          fecha: c.fecha_inicio, tipo: `inicio_obras_${c.id}`,
+          icon: 'bi-hammer', titulo: 'timeline.works_started', subtitulo: quien,
         });
       }
 
-      if (contrato.estado === 'en_ejecucion') {
+      const fin = CONTRATO_EVENTO_FIN[c.estado];
+      if (fin) {
         events.push({
-          fecha: contrato.actualizado_en, tipo: 'ejecucion_iniciada',
-          icon: 'bi-play-circle', titulo: 'timeline.execution_started',
-        });
-      }
-
-      if (contrato.estado === 'completado') {
-        events.push({
-          fecha: contrato.actualizado_en, tipo: 'contrato_completado',
-          icon: 'bi-check2-all', titulo: 'timeline.contract_completed',
-        });
-      }
-
-      if (contrato.estado === 'cancelado') {
-        events.push({
-          fecha: contrato.actualizado_en, tipo: 'contrato_cancelado',
-          icon: 'bi-x-circle', titulo: 'timeline.contract_cancelled',
+          fecha: c.actualizado_en, tipo: `${fin.tipo}_${c.id}`,
+          icon: fin.icon, titulo: fin.titulo, subtitulo: quien,
         });
       }
     }
@@ -492,14 +476,6 @@ export class DashboardComponent implements OnInit {
   isFaseDone(idx: number): boolean   { return this.faseActual() > idx + 1; }
   isFaseActive(idx: number): boolean { return this.faseActual() === idx + 1; }
 
-  contratoPasoEstado(key: string): 'done' | 'active' | 'pending' {
-    const pct     = this.contratoAvancePct();
-    const pasoPct = CONTRATO_PCT[key] ?? 0;
-    if (pct > pasoPct)          return 'done';
-    if (pct === pasoPct && pct > 0) return 'active';
-    return 'pending';
-  }
-
   formatFecha(valor: string | null | undefined): string {
     if (!valor) return '—';
     const d = new Date(valor.includes('T') ? valor : `${valor}T00:00:00`);
@@ -522,23 +498,6 @@ export class DashboardComponent implements OnInit {
     return new Intl.NumberFormat('fr-CA', {
       style: 'currency', currency: 'CAD', maximumFractionDigits: 0,
     }).format(precio);
-  }
-
-  formatGarantia(anos: number | null): string {
-    if (!anos) return '—';
-    const lang = this.translate.currentLang;
-    if (lang === 'fr') return anos === 1 ? '1 an'  : `${anos} ans`;
-    if (lang === 'en') return anos === 1 ? '1 year' : `${anos} years`;
-    return anos === 1 ? '1 año' : `${anos} años`;
-  }
-
-  contratoEstadoTexto(estado: string): string {
-    const map: Record<string, Record<string, string>> = {
-      fr: { generado: 'Généré', firmado: 'Signé', en_ejecucion: 'En cours', completado: 'Complété', cancelado: 'Annulé' },
-      en: { generado: 'Generated', firmado: 'Signed', en_ejecucion: 'In progress', completado: 'Completed', cancelado: 'Cancelled' },
-      es: { generado: 'Generado', firmado: 'Firmado', en_ejecucion: 'En ejecución', completado: 'Completado', cancelado: 'Cancelado' },
-    };
-    return map[this.translate.currentLang]?.[estado] ?? estado;
   }
 
   mimeIcon(mime: string): string {
@@ -607,12 +566,9 @@ export class DashboardComponent implements OnInit {
     this.fotosExp.set([]);
     this.documentosExp.set([]);
     this.documentosVM.set([]);
-    this.contratoCompleto.set(null);
-    this.contratoPdfUrl.set(null);
-    this.obra.set(null);
+    this.contratos.set([]);
     this.eliminando.set(null);
     this.ofertasHistorial.set([]);
-    this.contratoHistorial.set(null);
     this.calExpandido.set(false);
     await this.cargarDetalle(id);
   }
@@ -679,11 +635,7 @@ export class DashboardComponent implements OnInit {
     const [detalleResult, vidsResult, contratoResult] = await Promise.allSettled([
       this.expedienteService.getVistaParaCliente(id),
       this.archivoService.cargarTodos(id),
-      this.auth.client
-        .from('contrato')
-        .select('id, precio_final, garantia_anos, estado, url_pdf, descripcion_trabajo, constructor:constructor_id ( nombre, apellido, telefono, email )')
-        .eq('expediente_id', id)
-        .maybeSingle() as unknown as Promise<{ data: any; error: any }>,
+      this.contratoService.getPanelClienteExpediente(id),
     ]);
 
     if (detalleResult.status === 'fulfilled') {
@@ -703,62 +655,18 @@ export class DashboardComponent implements OnInit {
       this.documentosExp.set([]);
     }
 
-    if (contratoResult.status === 'fulfilled' && !contratoResult.value.error) {
-      const cd = contratoResult.value.data;
-      if (cd) {
-        this.contratoCompleto.set({
-          id:                   cd.id,
-          precio_final:         cd.precio_final,
-          garantia_anos:        cd.garantia_anos,
-          estado:               cd.estado,
-          url_pdf:              cd.url_pdf,
-          descripcion_trabajo:  cd.descripcion_trabajo,
-          constructor_nombre:   cd.constructor
-            ? `${cd.constructor.nombre} ${cd.constructor.apellido}`.trim()
-            : '—',
-          constructor_telefono: cd.constructor?.telefono ?? null,
-          constructor_email:    cd.constructor?.email    ?? null,
-        });
-        if (cd.url_pdf) {
-          this.auth.client.storage
-            .from('contratos')
-            .createSignedUrl(cd.url_pdf, 3600)
-            .then(({ data }) => this.contratoPdfUrl.set(data?.signedUrl ?? null))
-            .catch(() => {});
-        }
-
-        // Seguimiento de obra: avance físico cuando la obra ya arrancó.
-        if (cd.estado === 'en_ejecucion' || cd.estado === 'completado') {
-          try {
-            const seg = await this.seguimientoService.getSeguimientoByContratoId(cd.id);
-            this.obra.set(seg ? {
-              avance:        cd.estado === 'completado' ? 100 : Math.round(seg.porcentaje_avance),
-              estado:        cd.estado,
-              actualizadoEn: seg.actualizado_en,
-            } : null);
-          } catch {
-            this.obra.set(null);
-          }
-        } else {
-          this.obra.set(null);
-        }
-      } else {
-        this.contratoCompleto.set(null);
-        this.obra.set(null);
-      }
+    if (contratoResult.status === 'fulfilled') {
+      this.contratos.set(contratoResult.value);
     } else {
-      this.contratoCompleto.set(null);
-      this.obra.set(null);
+      console.error('[Dashboard contratos]', (contratoResult.reason as any)?.message);
+      this.contratos.set([]);
     }
 
-    // Historial: ofertas y contrato del expediente
+    // Historial: ofertas del expediente (los contratos ya están en `contratos`)
     try {
-      const historial = await this.expedienteService.getHistorialExpediente(id);
-      this.ofertasHistorial.set(historial.ofertas);
-      this.contratoHistorial.set(historial.contrato);
+      this.ofertasHistorial.set(await this.expedienteService.getOfertasHistorial(id));
     } catch {
       this.ofertasHistorial.set([]);
-      this.contratoHistorial.set(null);
     }
 
     // "Mis documentos": carga los documentos del expediente de todas las fuentes

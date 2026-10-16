@@ -44,14 +44,22 @@
   /* opacidad inicial del anillo que late en los puntos "en vivo" */
   --pulse-a:.6;
   --white:#F3F0E9;
-  --white-dim:rgba(243,240,233,.62);
-  --white-faint:rgba(243,240,233,.34);
+  /* Opacidades con AA sobre los cuatro fondos oscuros (--void … --panel-2):
+     .57 da ≥ 4,6:1 al texto tenue; el secundario sube a .74 para que la
+     jerarquía siga leyéndose (antes .62 / .34: el tenue caía a 2,6:1). */
+  --white-dim:rgba(243,240,233,.74);
+  --white-faint:rgba(243,240,233,.57);
   --line:rgba(243,240,233,.10);
   --line-2:rgba(243,240,233,.06);
 
   --gold:#D4A857;
   --gold-bright:#EBCB85;
   --gold-deep:#A07A33;
+  /* Dorado como TEXTO o icono. Se separa de --gold (filetes, rellenos, halos)
+     porque en el tema claro el dorado de filete no llega a 3:1 sobre papel.
+     En oscuro coinciden: el dorado se lee de sobra sobre --void (7,7:1). */
+  --gold-text:var(--gold);
+  --gold-text-hi:var(--gold-bright);
   /* Rol propio: texto/iconos SOBRE relleno dorado. No puede ser `--void`: en el
      tema claro `--void` es papel, no tinta. */
   --on-gold:var(--void);
@@ -66,6 +74,9 @@
   --shadow-a-inset:.4;
   --burgundy:#8B2D3A;
   --burgundy-bright:#B24355;
+  /* --burgundy-bright vale como filete de error, pero como texto sobre --void
+     se queda en 3,08:1. El texto e icono de error usan este rol. */
+  --danger-text:var(--ds-danger-on-dark); /* 5,5:1 sobre --void          */
 
   --disp:"Archivo", "Helvetica Neue", sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, monospace;
@@ -102,18 +113,22 @@
   /* Tinta */
   --white:var(--ds-ink);                  /* #1A1A1A texto principal      */
   --white-dim:var(--ds-ink-secondary);    /* #4A4A4A texto secundario     */
-  --white-faint:var(--ds-ink-muted);      /* #7A7770 captions, datos      */
+  --white-faint:var(--ds-ink-muted);      /* #615E58 captions, datos      */
 
   /* Bordes */
   --line:var(--ds-border);                /* #E8E5DC borde estándar       */
   --line-2:var(--ds-border-subtle);       /* #EFEDE6 separador sutil      */
 
-  /* Dorado — mismos roles que en la app: `--ds-gold-active` para texto (es el
-     color de `.eyebrow` y `.text-gold`), dorado como relleno con tinta encima. */
-  --gold:var(--ds-gold-active);           /* #B0964A texto y filetes      */
+  /* Dorado — mismos roles que en la app: el dorado claro para filetes y
+     rellenos (con tinta encima); el texto dorado va en --gold-text. */
+  --gold:var(--ds-gold-active);           /* #B0964A filetes y rellenos   */
   --gold-bright:var(--ds-gold-hover);     /* #C2A85C realce / hover       */
   --gold-deep:var(--ds-gold);             /* #D4B96E extremo claro        */
   --on-gold:var(--ds-ink);                /* tinta sobre relleno dorado   */
+  /* Texto e iconos dorados: bronce del design system (≥ 6:1 sobre papel). El
+     dorado claro sigue para filetes, rellenos y halos (--gold). */
+  --gold-text:var(--ds-gold-ink);         /* #70540C texto/iconos dorados */
+  --gold-text-hi:var(--ds-gold-ink);      /* realce / hover de texto      */
   --gold-rgb:212,185,110;                 /* --ds-gold en canal RGB       */
   --shadow-rgb:26,26,26;                  /* sombras de tinta, nunca negro*/
   --shadow-a:.16;
@@ -123,6 +138,7 @@
   /* Error (icono "mal" del comparativo, campos inválidos) = danger de la app */
   --burgundy:var(--ds-danger);            /* #A14545                      */
   --burgundy-bright:var(--ds-danger);     /* sobre papel no hay variante clara */
+  --danger-text:var(--ds-danger);         /* 5,48:1 sobre papel           */
 
   --scrim:245,243,238;                    /* --ds-bg en canal RGB         */
 
@@ -166,7 +182,7 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 fieldset{ margin:0; padding:0; border:0; min-width:0; }
 legend{ padding:0; }
 ::selection{ background:var(--gold); color:var(--on-gold); }
-:focus-visible{ outline:1px solid var(--gold); outline-offset:3px; }
+:focus-visible{ outline:1px solid var(--gold-text); outline-offset:3px; }
 
 /* retícula de planos + grano sobre toda la landing */
 :host::before{
@@ -185,7 +201,7 @@ legend{ padding:0; }
 /* ════════════════════════ TIPOGRAFÍA ════════════════════════ */
 .kicker{
   font-family:var(--mono); font-weight:500; font-size:.72rem;
-  letter-spacing:.32em; text-transform:uppercase; color:var(--gold);
+  letter-spacing:.32em; text-transform:uppercase; color:var(--gold-text);
   display:inline-flex; align-items:center; gap:12px;
 }
 .kicker::before{ content:""; width:24px; height:1px; background:var(--gold); display:inline-block; }
@@ -200,7 +216,7 @@ h1{ font-size:clamp(3rem, 7.4vw, 7rem); font-weight:900; }
 h2{ font-size:clamp(2.2rem, 4.6vw, 4.2rem); }
 h3{ font-size:clamp(1.4rem, 2.2vw, 2rem); font-weight:700; letter-spacing:-.02em; }
 .display-dim{ color:var(--white-faint); }
-.gold-txt{ color:var(--gold); }
+.gold-txt{ color:var(--gold-text); }
 p{ margin:0 0 1.1em; color:var(--white-dim); }
 .lede{ font-size:1.18rem; line-height:1.6; color:var(--white-dim); max-width:46ch; }
 
@@ -210,7 +226,7 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 
 /* etiqueta de dato monoespaciada */
 .data{ font-family:var(--mono); font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-faint); }
-.data .v{ color:var(--gold); }
+.data .v{ color:var(--gold-text); }
 
 /* ════════════════════════ BOTONES ════════════════════════ */
 .e3-btn{
@@ -224,7 +240,7 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 .e3-btn .ar{ width:16px; height:12px; transition:transform .4s var(--ease); }
 .e3-btn:hover .ar{ transform:translateX(4px); }
 .e3-btn.ghost{ background:transparent; color:var(--white); border-color:var(--line); }
-.e3-btn.ghost:hover{ border-color:var(--gold); color:var(--gold-bright); box-shadow:none; transform:none; }
+.e3-btn.ghost:hover{ border-color:var(--gold); color:var(--gold-text-hi); box-shadow:none; transform:none; }
 
 /* ════════════════════════ CABECERA ════════════════════════ */
 .hdr{
@@ -233,10 +249,15 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
   border-bottom:1px solid transparent;
 }
 .hdr.scrolled{ background:rgba(var(--scrim),.72); backdrop-filter:blur(14px); border-color:var(--line-2); }
+/* Tema claro: la cabecera lleva papel desde arriba, no solo al hacer scroll.
+   Sin él, la tinta de la navegación caía sobre la zona oscura del vídeo de
+   portada y no se leía (≈1:1). Al .9 el texto pasa AA incluso sobre negro. */
+:host([data-theme="light"]) .hdr,
+:host([data-theme="light"]) .hdr.scrolled{ background:rgba(var(--scrim),.9); backdrop-filter:blur(14px); border-color:var(--line-2); }
 .hdr .in{ max-width:var(--maxw); margin:0 auto; padding:20px var(--pad-x); display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .brand{ display:inline-flex; align-items:baseline; gap:9px; font-weight:800; font-size:1.3rem; letter-spacing:-.03em; }
 .brand .e3{ position:relative; }
-.brand .e3 b{ color:var(--gold); font-weight:800; }
+.brand .e3 b{ color:var(--gold-text); font-weight:800; }
 .brand .reticle{ width:18px; height:18px; position:relative; }
 .brand .reticle::before,.brand .reticle::after{ content:""; position:absolute; background:var(--gold); }
 .brand .reticle::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-.5px); }
@@ -251,7 +272,7 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 /* El login ya no vive en el nav —va después del botón— pero es el mismo tipo
    de enlace, así que comparte estilo en vez de duplicarlo. */
 .nav-links a, .hdr-actions .login{ font-family:var(--mono); font-size:.76rem; letter-spacing:.1em; text-transform:uppercase; color:var(--white-dim); white-space:nowrap; transition:color .25s; }
-.nav-links a:hover, .hdr-actions .login:hover{ color:var(--gold); }
+.nav-links a:hover, .hdr-actions .login:hover{ color:var(--gold-text); }
 
 /* El teléfono no es navegación: es contacto. Se separa de los otros enlaces
    subiendo a tinta plena y con el icono de línea; no lleva filete divisorio
@@ -293,18 +314,18 @@ section{ position:relative; padding:130px 0; scroll-margin-top:var(--hdr-h); }
 @media(max-height:720px){ .mobile-nav a{ font-size:1.9rem; padding:7px 0; } }
 .mobile-nav.open{ transform:none; }
 .mobile-nav a{ font-family:var(--disp); font-weight:800; font-size:2.4rem; letter-spacing:-.03em; padding:10px 0; border-bottom:1px solid var(--line-2); }
-.mobile-nav a .num{ font-family:var(--mono); font-size:.8rem; color:var(--gold); font-weight:500; margin-right:14px; vertical-align:super; }
+.mobile-nav a .num{ font-family:var(--mono); font-size:.8rem; color:var(--gold-text); font-weight:500; margin-right:14px; vertical-align:super; }
 
 /* ════════════════════════ CINTA ════════════════════════ */
 .ticker{ padding:0; border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2); overflow:hidden; background:var(--void-2); }
 .ticker-track{ display:flex; gap:0; white-space:nowrap; animation:scrollX 32s linear infinite; }
 .ticker-item{ font-family:var(--mono); font-size:.8rem; letter-spacing:.18em; text-transform:uppercase; color:var(--white-dim); padding:22px 0; display:inline-flex; align-items:center; }
-.ticker-item .sep{ color:var(--gold); margin:0 30px; }
+.ticker-item .sep{ color:var(--gold-text); margin:0 30px; }
 @keyframes scrollX{ to{ transform:translateX(-50%); } }
 
 /* ════════════════════════ ENCABEZADO DE SECCIÓN ════════════════════════ */
 .sec-head{ display:grid; grid-template-columns:auto 1fr; gap:0 60px; align-items:end; margin-bottom:72px; }
-.sec-head .idx{ font-family:var(--mono); font-size:.78rem; letter-spacing:.2em; color:var(--gold); padding-top:8px; }
+.sec-head .idx{ font-family:var(--mono); font-size:.78rem; letter-spacing:.2em; color:var(--gold-text); padding-top:8px; }
 .sec-head h2{ max-width:18ch; }
 .sec-head .sub{ grid-column:2; margin-top:22px; max-width:52ch; }
 @media(max-width:760px){ .sec-head{ grid-template-columns:1fr; gap:18px; } .sec-head .sub{ grid-column:1; } }

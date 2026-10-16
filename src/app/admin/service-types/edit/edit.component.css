@@ -136,7 +136,7 @@
   align-items: center;
   justify-content: center;
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-xl);
   border-radius: var(--ds-radius-md);
   border: 1px solid rgba(212, 185, 110, 0.3);
@@ -168,8 +168,8 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.status-badge--active   { background: var(--ds-success-soft); color: var(--ds-success); }
-.status-badge--inactive { background: var(--ds-bg-alt); color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
+.status-badge--active   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.status-badge--inactive { background: var(--ds-bg-alt); color: var(--ds-ink-secondary); border: 1px solid var(--ds-border); }
 
 /* ════════════════════════════════════════════════════════════════════════════
    TARJETA DE FORMULARIO
@@ -232,9 +232,9 @@
   letter-spacing: var(--ds-tracking-wide);
   vertical-align: middle;
 }
-.lang-badge--fr { background: var(--ds-info-soft);    color: var(--ds-info);        border: 1px solid rgba(74,107,122,.2); }
-.lang-badge--en { background: var(--ds-gold-faint);   color: var(--ds-gold-active); border: 1px solid rgba(212,185,110,.3); }
-.lang-badge--es { background: var(--ds-success-soft); color: var(--ds-success);     border: 1px solid rgba(91,122,79,.2); }
+.lang-badge--fr { background: var(--ds-info-soft);    color: var(--ds-info-ink);        border: 1px solid rgba(74,107,122,.2); }
+.lang-badge--en { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); border: 1px solid rgba(212,185,110,.3); }
+.lang-badge--es { background: var(--ds-success-soft); color: var(--ds-success-ink);     border: 1px solid rgba(91,122,79,.2); }
 
 /* ── Textarea ─────────────────────────────────────────────────────────────── */
 .form-textarea { resize: vertical; }
@@ -298,7 +298,7 @@
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
-  color: var(--ds-ink-muted);
+  color: var(--ds-ink-secondary);
   background: var(--ds-bg-alt);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-pill);
@@ -321,7 +321,7 @@
   color: var(--ds-ink);
   margin-bottom: var(--ds-space-3);
 }
-.fase-form__title .bi { color: var(--ds-gold-active); }
+.fase-form__title .bi { color: var(--ds-gold-ink); }
 
 .fase-form__actions {
   display: flex;
@@ -375,7 +375,7 @@
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-bold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
   border: 1px solid rgba(212, 185, 110, 0.3);
   border-radius: var(--ds-radius-circle);
@@ -450,7 +450,7 @@
 }
 .fases-empty .bi {
   font-size: var(--ds-text-2xl);
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   display: block;
   margin-bottom: var(--ds-space-2);
 }
@@ -460,7 +460,7 @@
 .fases-error {
   padding: var(--ds-space-4);
   text-align: center;
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   background: var(--ds-danger-soft);
   border-radius: var(--ds-radius-lg);
   font-size: var(--ds-text-sm);
@@ -507,7 +507,7 @@
   gap: 0.3em;
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-semibold);
-  color: var(--ds-info);
+  color: var(--ds-info-ink);
   background: var(--ds-info-soft);
   border: 1px solid rgba(74, 107, 122, 0.2);
   border-radius: var(--ds-radius-pill);

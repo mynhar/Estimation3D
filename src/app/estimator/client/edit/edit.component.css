@@ -21,7 +21,7 @@
   font-weight: var(--ds-weight-semibold);
   letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .btn-back {
   display: inline-flex;
@@ -75,7 +75,7 @@
 }
 .identity-avatar--fallback {
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft);
   display: flex;
   align-items: center;
@@ -114,8 +114,8 @@
   border-radius: var(--ds-radius-pill);
   white-space: nowrap;
 }
-.status-badge--active   { background: var(--ds-success-soft); color: var(--ds-success); }
-.status-badge--inactive { background: var(--ds-bg-alt); color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
+.status-badge--active   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.status-badge--inactive { background: var(--ds-bg-alt); color: var(--ds-ink-secondary); border: 1px solid var(--ds-border); }
 
 /* ── Form card ───────────────────────────────────────────── */
 .form-card {
@@ -209,7 +209,7 @@
   color: var(--ds-ink-muted);
   line-height: 1.5;
 }
-.invite-block__lang { color: var(--ds-gold-active); font-weight: var(--ds-weight-semibold); }
+.invite-block__lang { color: var(--ds-gold-ink); font-weight: var(--ds-weight-semibold); }
 
 /* Confirmación en línea — no hay componente de diálogo en el proyecto. */
 .invite-confirm {
@@ -308,7 +308,7 @@
   gap: var(--ds-space-2);
   padding: var(--ds-space-3) var(--ds-space-4);
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border: 1px solid rgba(161, 69, 69, 0.2);
   border-radius: var(--ds-radius-md);
   font-size: var(--ds-text-sm);
@@ -343,7 +343,7 @@
   height: 64px;
   background: var(--ds-gold-faint);
   border: 1px dashed var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.25rem;
 }
 .avatar-overlay {

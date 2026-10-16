@@ -113,7 +113,7 @@
   border: 1px solid var(--ds-danger);
   border-radius: var(--ds-radius-md);
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   font-size: var(--ds-text-sm);
 }
 
@@ -164,7 +164,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   font-size: 1.75rem;
 }
 
@@ -224,7 +224,7 @@
 }
 
 .efl-group__icon { font-size: var(--ds-text-sm); color: var(--ds-ink-muted); }
-.efl-group--active .efl-group__icon { color: var(--ds-gold-active); }
+.efl-group--active .efl-group__icon { color: var(--ds-gold-ink); }
 
 .efl-group__count {
   display: inline-flex;
@@ -235,7 +235,7 @@
   padding: 0 5px;
   border-radius: 10px;
   background: var(--ds-bg-alt);
-  color: var(--ds-ink-muted);
+  color: var(--ds-ink-secondary);
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
 }
@@ -337,7 +337,7 @@
 
 .efl-view-toggle__btn + .efl-view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .efl-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
-.efl-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.efl-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .efl-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* ── Results bar ─────────────────────────────────────────────────────────── */
@@ -408,10 +408,10 @@
   border: 1px solid transparent;
 }
 
-.efl-state--nuevo     { background: var(--ds-info-soft);    color: var(--ds-info);    border-color: var(--ds-info);    }
-.efl-state--proceso   { background: var(--ds-warning-soft); color: var(--ds-warning); border-color: var(--ds-warning); }
-.efl-state--listo     { background: var(--ds-success-soft); color: var(--ds-success); border-color: var(--ds-success); }
-.efl-state--cancelado { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); border-color: var(--ds-border-strong); }
+.efl-state--nuevo     { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border-color: var(--ds-info);    }
+.efl-state--proceso   { background: var(--ds-warning-soft); color: var(--ds-warning-ink); border-color: var(--ds-warning); }
+.efl-state--listo     { background: var(--ds-success-soft); color: var(--ds-success-ink); border-color: var(--ds-success); }
+.efl-state--cancelado { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border-color: var(--ds-border-strong); }
 
 /* ── Número de expediente ────────────────────────────────────────────────── */
 .efl-num {
@@ -498,7 +498,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 .efl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -568,7 +568,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 

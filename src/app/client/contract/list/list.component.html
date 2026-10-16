@@ -65,37 +65,44 @@
       </div>
     </div>
 
-    <!-- ── Activos ───────────────────────────────────────────────────── -->
-    @if (activos().length > 0) {
-      <div class="cl-list">
-        @for (c of activos(); track c.id) {
-          <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
-        }
-      </div>
-    }
-
-    <!-- ── Finalizados (colapsable) ──────────────────────────────────── -->
-    @if (finalizados().length > 0) {
-      <section class="cl-finished">
-        <button class="cl-finished__head" type="button"
-                [attr.aria-expanded]="finalizadosAbierto()"
-                (click)="toggleFinalizados()">
-          <i class="bi bi-archive" aria-hidden="true"></i>
-          <span class="cl-finished__title">{{ 'contract_list.section_finished' | translate }}</span>
-          <span class="cl-finished__count">{{ finalizados().length }}</span>
-          <i class="bi cl-finished__chev"
-             [class.bi-chevron-down]="!finalizadosAbierto()"
-             [class.bi-chevron-up]="finalizadosAbierto()" aria-hidden="true"></i>
-        </button>
-        @if (finalizadosAbierto()) {
-          <div class="cl-list cl-list--dim">
-            @for (c of finalizados(); track c.id) {
-              <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
+    <!-- ── Una tarjeta plegable por expediente (como Mis documentos) ──── -->
+    <div class="cl-accordion">
+      @for (g of grupos(); track g.key) {
+        <app-expediente-panel [numero]="g.numero" [abierto]="isExpandido(g.key)" [bandeja]="true"
+                              (alternar)="toggle(g.key)">
+          <span panelMeta class="cl-meta">
+            <span class="cl-meta__item">
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+              @if (g.total === 1) {
+                {{ 'contract_list.contracts_one' | translate }}
+              } @else {
+                {{ 'contract_list.contracts_n' | translate: { n: g.total } }}
+              }
+            </span>
+            <span class="cl-meta__item cl-meta__value">{{ formatPrecio(g.valor) }}</span>
+            @if (g.obrasTerminadas > 0) {
+              <span class="tag tag-gold cl-meta__obra"
+                    [title]="'monitoring.obra_terminada_badge' | translate">
+                <i class="bi bi-flag" aria-hidden="true"></i>{{ g.obrasTerminadas }}
+                <span class="visually-hidden">{{ 'monitoring.obra_terminada_badge' | translate }}</span>
+              </span>
             }
-          </div>
-        }
-      </section>
-    }
+          </span>
+
+          @for (c of g.activos; track c.id) {
+            <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
+          }
+          @if (g.cerrados.length > 0) {
+            <!-- Cerrados (completados / cancelados), atenuados -->
+            <div class="cl-list cl-list--dim">
+              @for (c of g.cerrados; track c.id) {
+                <ng-container [ngTemplateOutlet]="card" [ngTemplateOutletContext]="{ $implicit: c }"></ng-container>
+              }
+            </div>
+          }
+        </app-expediente-panel>
+      }
+    </div>
   }
 </div>
 
@@ -118,10 +125,18 @@
           </p>
         </div>
       </div>
-      <span class="ct__badge ct__badge--{{ c.estado }}">
-        <i class="bi {{ iconoEstado(c.estado) }}" aria-hidden="true"></i>
-        {{ ('contract_list.status_' + c.estado) | translate }}
-      </span>
+      <div class="ct__status">
+        <span class="ct__badge ct__badge--{{ c.estado }}">
+          <i class="bi {{ iconoEstado(c.estado) }}" aria-hidden="true"></i>
+          {{ ('contract_list.status_' + c.estado) | translate }}
+        </span>
+        <!-- Obra al 100 % con el contrato aún abierto: falta que administración lo complete. -->
+        @if (c.obra_terminada) {
+          <span class="tag tag-gold ct__obra">
+            <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+          </span>
+        }
+      </div>
     </div>
 
     <!-- Cuerpo: cifras clave + contacto -->
@@ -210,11 +225,22 @@
         }
 
         @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
+          <!-- Obra al 100 %: el trabajo ya está hecho y el contrato no se cancela.
+               El motivo va en texto visible (un title en un botón desactivado no
+               siempre se muestra) y se enlaza con aria-describedby. -->
           <button class="btn-cancel-action" type="button"
-                  [disabled]="cancelandoId() === c.id" (click)="abrirPanelCancelacion(c.id)">
+                  [disabled]="cancelandoId() === c.id || c.obra_terminada"
+                  [attr.aria-describedby]="c.obra_terminada ? 'cancel-hint-' + c.id : null"
+                  (click)="abrirPanelCancelacion(c)">
             <i class="bi bi-x-circle" aria-hidden="true"></i>
             {{ 'contract_list.cancel_btn' | translate }}
           </button>
+          @if (c.obra_terminada) {
+            <span class="ct__cancel-hint" [id]="'cancel-hint-' + c.id">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              {{ 'contract_list.cancel_disabled_obra' | translate }}
+            </span>
+          }
         }
       </div>
     </div>

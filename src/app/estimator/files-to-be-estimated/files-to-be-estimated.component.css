@@ -150,7 +150,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   font-size: 1.75rem;
 }
 
@@ -242,7 +242,7 @@
 .ftbe-chip--active {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 
 .ftbe-chip__badge {
@@ -406,7 +406,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 
@@ -441,7 +441,7 @@
 
 .ftbe-view-toggle__btn + .ftbe-view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .ftbe-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
-.ftbe-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.ftbe-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .ftbe-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* ── Vista tabla (escritorio) ────────────────────────────────────────────── */
@@ -510,7 +510,7 @@
 
 .ftbe-table__fecha { display: block; }
 .ftbe-table__fecha--vencida { color: var(--ds-danger);  font-weight: var(--ds-weight-semibold); }
-.ftbe-table__fecha--hoy     { color: var(--ds-warning); font-weight: var(--ds-weight-semibold); }
+.ftbe-table__fecha--hoy     { color: var(--ds-warning-ink); font-weight: var(--ds-weight-semibold); }
 
 .ftbe-table__col-date .ftbe-badge { margin-top: 2px; }
 
@@ -524,7 +524,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 .ftbe-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -565,9 +565,9 @@
   font-weight: var(--ds-weight-semibold);
 }
 
-.ftbe-badge--danger  { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger);  }
-.ftbe-badge--warning { background: var(--ds-warning-soft); color: var(--ds-warning); border: 1px solid var(--ds-warning); }
-.ftbe-badge--info    { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info);    }
+.ftbe-badge--danger  { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  border: 1px solid var(--ds-danger);  }
+.ftbe-badge--warning { background: var(--ds-warning-soft); color: var(--ds-warning-ink); border: 1px solid var(--ds-warning); }
+.ftbe-badge--info    { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border: 1px solid var(--ds-info);    }
 .ftbe-badge--reciente {
   background: var(--ds-gold-faint);
   color: var(--ds-ink-secondary);
@@ -632,8 +632,8 @@
   padding: var(--ds-space-2) var(--ds-space-3);
 }
 
-.ftbe-card__fecha--vencida { background: var(--ds-danger-soft);  color: var(--ds-danger);  }
-.ftbe-card__fecha--hoy     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.ftbe-card__fecha--vencida { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  }
+.ftbe-card__fecha--hoy     { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
 
 /* ── CTA button ──────────────────────────────────────────────────────────── */
 .ftbe-btn-cta {

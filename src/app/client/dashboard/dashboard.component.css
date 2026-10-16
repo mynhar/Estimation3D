@@ -65,7 +65,7 @@
 
 .dash-header__name {
   font-style: italic;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -161,8 +161,8 @@
   color: var(--ds-ink);
   transition: color var(--ds-duration-base) var(--ds-ease-out);
 }
-.dash-kpi__num--gold    { color: var(--ds-gold-active); }
-.dash-kpi__num--success { color: var(--ds-success); }
+.dash-kpi__num--gold    { color: var(--ds-gold-ink); }
+.dash-kpi__num--success { color: var(--ds-success-ink); }
 
 .dash-kpi__lbl {
   font-size: var(--ds-text-2xs);
@@ -306,7 +306,7 @@
   min-width: 3ch;
   text-align: right;
 }
-.dash-exp-card--active .dash-exp-card__prog-pct { color: var(--ds-gold-active); }
+.dash-exp-card--active .dash-exp-card__prog-pct { color: var(--ds-gold-ink); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    LAYOUT PRINCIPAL — media (1fr) | detalle (380px)
@@ -394,7 +394,7 @@
   min-width: 0;
 }
 .dash-media-card__label i {
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 0.95rem;
   flex-shrink: 0;
 }
@@ -423,7 +423,7 @@
 }
 .dash-btn-fullscreen:hover {
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
   box-shadow: var(--ds-shadow-gold);
 }
@@ -487,7 +487,7 @@
 }
 .dash-pl-thumb--tour {
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft);
 }
 .dash-pl-label {
@@ -602,7 +602,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.1rem;
 }
 .dash-ph-badge {
@@ -648,7 +648,7 @@
   border-radius: 50%;
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-xs);
   display: flex;
@@ -662,7 +662,7 @@
   max-width: 8ch;
   text-align: left;
 }
-.dash-ph-arrow { color: var(--ds-border-strong); font-size: var(--ds-text-xs); }
+.dash-ph-arrow { color: var(--ds-ink-faint); font-size: var(--ds-text-xs); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    DETALLE DEL EXPEDIENTE — llena la columna derecha
@@ -670,7 +670,13 @@
 .dash-detail-card {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  /* Llena la columna, pero crece con su contenido en vez de comprimirlo: con
+     `flex: 1` la tarjeta quedaba fijada al alto de la columna (max-height) y,
+     al no caber (p. ej. fechas clave de varios contratos), encogía a sus hijos.
+     Los que tienen overflow no visible (barra de progreso, stepper de fases)
+     llegaban a 0 px y el texto de estado se pintaba encima. Si no cabe, la
+     columna se desplaza (overflow-y: auto). */
+  flex: 1 0 auto;
   background: var(--ds-surface);
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-xl);
@@ -678,6 +684,9 @@
   overflow: hidden;
   position: relative;
 }
+/* Ningún bloque de la tarjeta se aplasta. `.dash-dates` (más abajo) vuelve a
+   crecer con `flex: 1` para ocupar el sobrante cuando la tarjeta es corta. */
+.dash-detail-card > * { flex-shrink: 0; }
 .dash-detail-card__accent {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -742,7 +751,7 @@
   font-weight: var(--ds-weight-regular);
   letter-spacing: var(--ds-tracking-tight);
   line-height: 1;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .dash-pct-track {
   height: 5px;
@@ -762,19 +771,22 @@
 .dash-fases {
   display: flex;
   align-items: flex-start;
-  padding: var(--ds-space-4) var(--ds-space-4);
+  padding: var(--ds-space-4) var(--ds-space-3);
   overflow-x: auto;
   scrollbar-width: none;
   gap: 0;
 }
 .dash-fases::-webkit-scrollbar { display: none; }
 
+/* Cada fase mide lo que su palabra más larga: con min-width 60px y sin
+   encoger, las cinco no cabían en la tarjeta (328–368px) y la última etiqueta
+   quedaba cortada tras un scroll horizontal invisible. */
 .dash-fase {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-shrink: 0;
-  min-width: 60px;
+  flex: 0 1 auto;
+  min-width: 0;
   text-align: center;
 }
 .dash-fase__dot {
@@ -812,14 +824,17 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 1.2;
+  /* Etiquetas de dos palabras en dos líneas («En / révision»): libera el
+     ancho para los conectores. */
+  width: min-content;
 }
-.dash-fase--active .dash-fase__label { color: var(--ds-gold-active); }
-.dash-fase--done .dash-fase__label   { color: var(--ds-success); }
+.dash-fase--active .dash-fase__label { color: var(--ds-gold-ink); }
+.dash-fase--done .dash-fase__label   { color: var(--ds-success-ink); }
 
 .dash-fase__connector {
   flex: 1;
   height: 2px;
-  min-width: 12px;
+  min-width: 6px;
   background: var(--ds-border);
   margin-top: 14px;
   border-radius: 1px;
@@ -881,6 +896,25 @@
   color: var(--ds-ink);
   text-align: right;
 }
+/* Encabezado de las fechas de cada contrato: el constructor. Va pegado a sus
+   fechas y separado del bloque anterior, para que se lean como un grupo. */
+.dash-date-group {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-4) 0 0;
+  padding-bottom: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dash-date-group i {
+  font-size: 0.7rem;
+  color: var(--ds-success);
+  flex-shrink: 0;
+}
 
 /* Estado badges */
 .estado-badge {
@@ -894,13 +928,13 @@
   letter-spacing: 0.01em;
   flex-shrink: 0;
 }
-.estado-badge--nuevo         { background: var(--ds-info-soft);    color: var(--ds-info); }
-.estado-badge--en-estimacion { background: var(--ds-warning-soft); color: var(--ds-warning); }
-.estado-badge--estimado      { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
-.estado-badge--en-oferta     { background: var(--ds-gold-soft);    color: var(--ds-gold-active); }
-.estado-badge--adjudicado    { background: var(--ds-success-soft); color: var(--ds-success); }
-.estado-badge--contratado    { background: var(--ds-success-soft); color: var(--ds-success); }
-.estado-badge--cancelado     { background: var(--ds-bg-alt); color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
+.estado-badge--nuevo         { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
+.estado-badge--en-estimacion { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
+.estado-badge--estimado      { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); }
+.estado-badge--en-oferta     { background: var(--ds-gold-soft);    color: var(--ds-gold-ink); }
+.estado-badge--adjudicado    { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.estado-badge--contratado    { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.estado-badge--cancelado     { background: var(--ds-bg-alt); color: var(--ds-ink-secondary); border: 1px solid var(--ds-border); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    MÓDULOS DE ACCIÓN RÁPIDA — franja de ancho completo, 3 columnas
@@ -963,7 +997,7 @@
   font-size: 0.9rem;
   flex-shrink: 0;
 }
-.dash-module__icon--action  { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.dash-module__icon--action  { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); }
 .dash-module__icon--message { background: var(--ds-info-soft);    color: var(--ds-info); }
 .dash-module__icon--docs    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); }
 
@@ -996,7 +1030,7 @@
   text-align: center;
   padding: var(--ds-space-5) var(--ds-space-4);
 }
-.dash-module__empty-icon { font-size: 1.2rem; color: var(--ds-border-strong); }
+.dash-module__empty-icon { font-size: 1.2rem; color: var(--ds-ink-faint); }
 .dash-module__empty-text {
   font-size: var(--ds-text-xs);
   color: var(--ds-ink-muted);
@@ -1041,7 +1075,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-base);
   flex-shrink: 0;
 }
@@ -1081,7 +1115,7 @@
 }
 .dash-cal-btn:hover {
   border-color: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
 }
 .dash-cal-btn--toggle { border-color: transparent; }
@@ -1214,7 +1248,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.8rem;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -1293,7 +1327,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.5rem;
 }
 
@@ -1405,9 +1439,6 @@
   height: 2px;
   background: linear-gradient(90deg, var(--ds-gold-soft), var(--ds-gold));
 }
-.dash-info-card--success::before {
-  background: linear-gradient(90deg, var(--ds-success), var(--ds-success-soft));
-}
 
 .dash-info-card__head {
   display: flex;
@@ -1422,15 +1453,9 @@
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   display: flex; align-items: center; justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-base);
   flex-shrink: 0;
-}
-.dash-info-card__head-icon--success {
-  background: var(--ds-success-soft);
-  border-color: var(--ds-success);
-  color: var(--ds-success);
-  border-radius: var(--ds-radius-lg);
 }
 .dash-info-card__title {
   font-family: var(--ds-font-display);
@@ -1466,14 +1491,9 @@
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   display: flex; align-items: center; justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.6rem;
   flex-shrink: 0;
-}
-.dash-person-avatar--success {
-  background: var(--ds-success-soft);
-  border-color: var(--ds-success);
-  color: var(--ds-success);
 }
 .dash-person-details {
   display: flex;
@@ -1503,38 +1523,6 @@
 }
 .dash-person-meta i { font-size: 0.65rem; }
 .dash-person-meta--pending { color: var(--ds-ink-muted); }
-/* Contacto del constructor: chips accionables (teléfono / email) */
-.dash-person-contact {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  width: 100%;
-  padding: var(--ds-space-2) var(--ds-space-3);
-  font-size: var(--ds-text-xs);
-  color: var(--ds-ink-secondary);
-  text-decoration: none;
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-md);
-  transition: border-color var(--ds-duration-fast) var(--ds-ease-out),
-              color var(--ds-duration-fast) var(--ds-ease-out),
-              background var(--ds-duration-fast) var(--ds-ease-out);
-  /* Email/teléfono son tokens sin espacios: deben poder romperse para
-     no desbordar la columna ni la tarjeta. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-.dash-person-contact:hover {
-  border-color: var(--ds-success);
-  color: var(--ds-ink);
-  background: var(--ds-success-soft);
-}
-.dash-person-contact:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
-}
-.dash-person-contact i { font-size: 0.85rem; color: var(--ds-success); flex-shrink: 0; }
 
 /* ── Estimation / contrato column ──────────────── */
 .dash-estimation-col {
@@ -1563,7 +1551,7 @@
   font-size: var(--ds-text-3xl);
   font-weight: var(--ds-weight-regular);
   letter-spacing: var(--ds-tracking-tight);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   line-height: 1;
 }
 .dash-price-sep {
@@ -1587,103 +1575,6 @@
 }
 .dash-pending-state p { margin: 0; }
 
-/* ── Contrato · cifra principal (precio + estado) ──
-   Apilado: el precio ocupa su propia línea (nunca se parte) y el estado
-   va debajo. Sin emparejado lateral = sin desborde posible. */
-.dash-contract-hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-2);
-}
-.dash-contract-hero__main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-1);
-  min-width: 0;
-  /* Contenedor de consulta: el precio se mide contra el ancho real de la
-     columna, no del viewport (clave en el layout de 2 columnas). */
-  container-type: inline-size;
-}
-.dash-contract-hero__price {
-  font-family: var(--ds-font-display);
-  /* Tamaño fluido por ANCHO DE COLUMNA (cqi): el precio (CAD, p. ej.
-     "1 250 000 $CA") se mantiene en una sola línea y escala para no salirse
-     nunca. ~36px en columnas anchas → ~16px en columnas estrechas.
-     Verificado a 320/360px con precios de hasta 10 cifras. */
-  font-size: clamp(1rem, 9cqi, var(--ds-text-3xl));
-  font-weight: var(--ds-weight-regular);
-  letter-spacing: var(--ds-tracking-tight);
-  line-height: 1.1;
-  color: var(--ds-success);
-  margin: 0;
-  white-space: nowrap;
-  max-width: 100%;
-}
-.dash-contract-hero__status {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  flex-wrap: wrap;
-  min-width: 0;
-}
-.dash-contract-hero__status-label {
-  font-size: var(--ds-text-2xs);
-  font-weight: var(--ds-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ds-tracking-wide);
-  color: var(--ds-ink-muted);
-}
-
-/* ── Contrato · metadatos (garantía, inicio de obra) ── */
-.dash-contract-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: var(--ds-space-4);
-  padding: var(--ds-space-4) 0;
-  border-top: 1px solid var(--ds-border-subtle);
-  border-bottom: 1px solid var(--ds-border-subtle);
-}
-.dash-contract-stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-1);
-  min-width: 0;
-}
-.dash-contract-stat__label {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-1);
-  font-size: var(--ds-text-2xs);
-  font-weight: var(--ds-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--ds-tracking-wide);
-  color: var(--ds-ink-muted);
-}
-.dash-contract-stat__label i { font-size: 0.7rem; color: var(--ds-success); flex-shrink: 0; }
-.dash-contract-stat__value {
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-semibold);
-  color: var(--ds-ink);
-  overflow-wrap: anywhere;
-}
-.dash-contrato-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: var(--ds-text-xs);
-  font-weight: var(--ds-weight-semibold);
-  padding: 0.2em 0.65em;
-  border-radius: var(--ds-radius-pill);
-  white-space: nowrap;
-}
-.dash-contrato-badge--generado     { background: var(--ds-info-soft);    color: var(--ds-info); }
-.dash-contrato-badge--firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
-.dash-contrato-badge--en_ejecucion { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
-.dash-contrato-badge--completado   { background: var(--ds-success-soft); color: var(--ds-success); }
-.dash-contrato-badge--cancelado    {
-  background: var(--ds-bg-alt); color: var(--ds-ink-muted);
-  border: 1px solid var(--ds-border);
-}
-
 /* ══════════════════════════════════════════════════════════════════════════
    PRÓXIMO PASO — module body
    ══════════════════════════════════════════════════════════════════════════ */
@@ -1698,7 +1589,7 @@
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   display: flex; align-items: center; justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1rem;
   flex-shrink: 0;
 }
@@ -1784,7 +1675,7 @@
   min-width: 0;
   transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.dash-doc-link:hover { color: var(--ds-gold-active); }
+.dash-doc-link:hover { color: var(--ds-gold-ink); }
 
 /* ── Delete controls ─────────────────────────────────────── */
 @keyframes dash-spin{to{transform:rotate(360deg)}}
@@ -1856,12 +1747,11 @@
   background: linear-gradient(90deg, var(--ds-gold-soft), var(--ds-gold-active));
 }
 
-.dash-avance-card--contrato::before { background: var(--ds-success); }
 .dash-avance-card--empty::before    { background: var(--ds-border); }
 .dash-avance-card--obra::before     { background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-active)); }
 
 /* Avance de la obra — tarjeta de seguimiento físico */
-.dash-avance-pct--obra { color: var(--ds-gold-active); }
+.dash-avance-pct--obra { color: var(--ds-gold-ink); }
 .dash-avance-bar__fill--obra {
   background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-hover));
 }
@@ -1886,7 +1776,7 @@
   gap: var(--ds-space-1);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   text-decoration: none;
   white-space: nowrap;
   transition: gap var(--ds-duration-fast) var(--ds-ease-out);
@@ -1917,12 +1807,10 @@
   font-size: var(--ds-text-3xl);
   font-weight: var(--ds-weight-regular);
   line-height: 1;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   flex-shrink: 0;
   letter-spacing: var(--ds-tracking-tight);
 }
-
-.dash-avance-pct--contrato { color: var(--ds-success); }
 
 .dash-avance-pct__unit {
   font-family: var(--ds-font-body);
@@ -1942,7 +1830,7 @@
   letter-spacing: var(--ds-tracking-wide);
   text-transform: uppercase;
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   flex-shrink: 0;
 }
 
@@ -1982,9 +1870,6 @@
   background: var(--ds-gold);
 }
 
-.dash-avance-card--contrato .dash-avance-connector--done {
-  background: var(--ds-success);
-}
 
 /* Step node */
 .dash-avance-node {
@@ -2011,20 +1896,12 @@
   color: var(--ds-surface-elevated);
 }
 
-/* Expediente active = gold */
-.dash-avance-card:not(.dash-avance-card--contrato) .dash-avance-step--active .dash-avance-node {
+/* Paso activo = dorado */
+.dash-avance-step--active .dash-avance-node {
   background: var(--ds-gold);
   border-color: var(--ds-gold-active);
   color: var(--ds-ink-on-accent);
   box-shadow: var(--ds-shadow-gold);
-}
-
-/* Contrato active = success green with ring */
-.dash-avance-card--contrato .dash-avance-step--active .dash-avance-node {
-  background: var(--ds-success);
-  border-color: var(--ds-success);
-  color: var(--ds-surface-elevated);
-  box-shadow: 0 0 0 4px var(--ds-success-soft);
 }
 
 /* Step label */
@@ -2039,12 +1916,9 @@
   min-width: 0;
 }
 
-.dash-avance-step--active .dash-avance-label { color: var(--ds-gold-active); }
-.dash-avance-step--done   .dash-avance-label { color: var(--ds-success); }
+.dash-avance-step--active .dash-avance-label { color: var(--ds-gold-ink); }
+.dash-avance-step--done   .dash-avance-label { color: var(--ds-success-ink); }
 
-.dash-avance-card--contrato .dash-avance-step--active .dash-avance-label {
-  color: var(--ds-success);
-}
 
 /* Progress bar */
 .dash-avance-bar {
@@ -2061,9 +1935,6 @@
   transition: width 0.8s var(--ds-ease-out);
 }
 
-.dash-avance-bar__fill--contrato {
-  background: var(--ds-success);
-}
 
 /* Cancelled & empty states */
 .dash-avance-cancelled,

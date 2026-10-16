@@ -32,6 +32,13 @@
   color: var(--ds-gold);
 }
 
+/* Sobre la barra superior clara (móvil) el dorado translúcido del sidebar
+   oscuro no se lee (≈1.4:1): ahí va en dorado de texto. */
+:host-context(.mobile-topbar) .lang-btn { color: var(--ds-gold-ink); }
+:host-context(.mobile-topbar) .lang-btn:hover { color: var(--ds-ink); }
+:host-context(.mobile-topbar) .lang-btn--active,
+:host-context(.mobile-topbar) .lang-btn--active:hover { color: var(--ds-ink); }
+
 .lang-btn--active {
   background: var(--ds-gold);
   color: var(--ds-ink);

@@ -18,7 +18,7 @@
   font-weight: var(--ds-weight-semibold);
   letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   margin-bottom: var(--ds-space-2);
 }
 
@@ -28,7 +28,7 @@
   align-items: center;
   gap: var(--ds-space-1);
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-bold);
   padding: 0.3em 0.85em;
@@ -224,7 +224,7 @@
 }
 .offer-card__addr-icon {
   flex-shrink: 0;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   line-height: var(--ds-leading-normal);
 }
 .offer-card__addr-text {
@@ -269,13 +269,13 @@
 }
 .status-chip:hover {
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
 }
 .status-chip--active {
   background: var(--ds-gold-faint);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-semibold);
 }
 .status-chip__icon { font-size: 0.7rem; }
@@ -284,7 +284,7 @@
   align-items: center;
   justify-content: center;
   background: var(--ds-bg-alt);
-  color: var(--ds-ink-muted);
+  color: var(--ds-ink-secondary);
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
   min-width: 1.25rem;
@@ -294,7 +294,7 @@
 }
 .status-chip--active .status-chip__count {
   background: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 /* ── Table card ───────────────────────────────────────────────────────────── */
@@ -343,7 +343,7 @@
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-wide);
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   padding: 0.2em 0.6em;
   border-radius: var(--ds-radius-sm);
   white-space: nowrap;
@@ -369,10 +369,10 @@
   white-space: nowrap;
   line-height: 1.5;
 }
-.badge-firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
-.badge-en-ejecucion { background: var(--ds-success-soft); color: var(--ds-success); border: 1px solid var(--ds-success); }
-.badge-completado   { background: var(--ds-info-soft);    color: var(--ds-info);    border: 1px solid var(--ds-info); }
-.badge-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger);  border: 1px solid var(--ds-danger); }
+.badge-firmado      { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.badge-en-ejecucion { background: var(--ds-success-soft); color: var(--ds-success-ink); border: 1px solid var(--ds-success); }
+.badge-completado   { background: var(--ds-info-soft);    color: var(--ds-info-ink);    border: 1px solid var(--ds-info); }
+.badge-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  border: 1px solid var(--ds-danger); }
 
 /* ── Mobile cards (sustituyen la tabla < lg) ──────────────────────────────────
    Eliminan el scroll lateral: cada tarjeta es clicable → abre el seguimiento. */
@@ -436,7 +436,7 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.cm-meta i { font-size: 0.75rem; color: var(--ds-gold-active); flex-shrink: 0; }
+.cm-meta i { font-size: 0.75rem; color: var(--ds-gold-ink); flex-shrink: 0; }
 
 /* ── Empty state ──────────────────────────────────────────────────────────── */
 .empty-state {

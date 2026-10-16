@@ -486,7 +486,35 @@
     "avance_obra": "Site progress",
     "view_monitoring": "View tracking",
     "contrato_pendiente": "Contract will be available once a builder is selected.",
-    "contrato_cancelado": "This contract has been cancelled."
+    "contrato_cancelado": "This contract has been cancelled.",
+    "contratos_title": "Contracts for this file",
+    "contratos_count_one": "1 contract",
+    "contratos_count": "{{n}} contracts",
+    "contrato_estado_corto": {
+      "generado": "Generated",
+      "firmado": "Signed",
+      "en_ejecucion": "In progress",
+      "completado": "Completed",
+      "cancelado": "Cancelled"
+    },
+    "obra_estado": {
+      "por_iniciar": "Work not started",
+      "en_curso": "Work in progress",
+      "pausada": "Work paused",
+      "completada": "Work finished at 100%",
+      "cancelada": "Contract cancelled"
+    },
+    "obra_actualizada": "updated {{date}}",
+    "contrato_detalles": "Contract details",
+    "costo_total": "Total cost",
+    "costo_total_nota_one": "Amount of the active contract.",
+    "costo_total_nota": "Sum of the {{n}} active contracts.",
+    "costo_total_ninguno": "No active contracts.",
+    "costo_total_cancelados": "Cancelled contracts are not included.",
+    "avance_contratos": "Contracts progress",
+    "avance_contratos_desc": "Average site progress across active contracts.",
+    "contratos_cancelados": "All contracts for this file have been cancelled.",
+    "obras_completadas": "Completed works: {{done}}/{{total}}"
   },
   "timeline": {
     "created": "File created",
@@ -638,7 +666,8 @@
     "my_videos": "My videos",
     "my_docs": "My documents",
     "contract": "Contract",
-    "photo_viewer": "Photo viewer"
+    "photo_viewer": "Photo viewer",
+    "services": "Services"
   },
   "offer": {
     "price": "Price",
@@ -661,7 +690,9 @@
     "not_selected": "Not selected by the client",
     "no_offers": "No offers sent",
     "accepted_note": "Your offer has been selected!",
-    "rejected_note": "The client chose another offer."
+    "rejected_note": "The client chose another offer.",
+    "selected_builders": "Selected builders",
+    "proposal_and_files": "Proposal and files"
   },
   "offers_received": {
     "title": "Received offers",
@@ -795,7 +826,27 @@
     "reject_text": "The generated contract will be deleted. The file will return to estimated status.",
     "reject_confirm": "Yes, reject",
     "rejecting": "Rejecting…",
-    "success_rejected": "Offer rejected. The file has returned to estimated status."
+    "success_rejected": "Offer rejected. The file has returned to estimated status.",
+    "select_hint_title_multi": "Select one or more offers",
+    "select_hint_multi": "Click offers to select them: one for all services, one for each service, or several for the same service.",
+    "covers": "Covers",
+    "selected_title_n": "Selected offers",
+    "remove_offer": "Remove from selection",
+    "coverage_title": "Coverage by service",
+    "coverage_none": "No offer",
+    "coverage_n": "{{n}} offers",
+    "total_selected": "Selection total",
+    "locked": "This file has signed contracts: the selection can no longer be changed.",
+    "already_accepted_n": "These offers have been accepted.",
+    "update_btn": "Update selection",
+    "accept_n_btn": "Accept {{n}} offers",
+    "replace_warning_n": "Offers not in the selection will be rejected and unsigned contracts will be generated again.",
+    "success_accepted_n": "{{n}} offers accepted: a contract was generated for each one.",
+    "pdf_partial": "Offers accepted, but only {{n}} of {{total}} contract PDFs were generated. Accept again to retry.",
+    "reject_all_btn": "Reject the accepted offers",
+    "reject_all_title": "Reject the accepted offers?",
+    "reject_all_text": "Unsigned contracts will be deleted. The file will return to the estimated status.",
+    "success_rejected_n": "Offers rejected. The file has returned to the estimated status."
   },
   "make_offer": {
     "editing_badge": "Editing offer",
@@ -1902,7 +1953,10 @@
     "cancel_close": "No, keep contract",
     "cancelling": "Cancelling…",
     "success_cancelled": "Contract cancelled successfully.",
-    "err_cancel": "Could not cancel the contract. Please try again."
+    "err_cancel": "Could not cancel the contract. Please try again.",
+    "cancel_disabled_obra": "Work finished: the contract can no longer be cancelled.",
+    "contracts_one": "1 contract",
+    "contracts_n": "{{n}} contracts"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -2288,7 +2342,16 @@
     "inspecciones_title": "Next inspection",
     "sin_inspecciones": "No inspection scheduled.",
     "media_title": "Today's photos",
-    "sin_media": "No files."
+    "sin_media": "No files.",
+    "obras_one": "1 job",
+    "obras_n": "{{n}} jobs",
+    "avance_medio": "Progress {{n}}%",
+    "stat_obras": "Jobs",
+    "stat_en_curso": "In progress",
+    "stat_terminadas": "Finished at 100%",
+    "stat_expedientes": "Files",
+    "sin_eventos_servicio": "No reports for this service yet.",
+    "otros_partes": "Other reports"
   },
   "admin_ai_events": {
     "title": "AI assistant events",

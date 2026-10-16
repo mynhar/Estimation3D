@@ -194,7 +194,11 @@
           </thead>
           <tbody>
             @for (exp of expedientesPaginados(); track exp.id) {
+              <!-- Clic en cualquier parte de la fila abre el expediente. La fila sale
+                   del orden de tabulación (tabindex -1): el foco de teclado va al
+                   enlace del número, que sí responde a Enter. -->
               <tr class="mf-table__row" [routerLink]="['/client/file/my-file', exp.id]"
+                  tabindex="-1"
                   [attr.data-estado]="exp.estado">
                 <td class="mf-table__col-photo">
                   <div class="mf-table__thumb">
@@ -206,7 +210,10 @@
                   </div>
                 </td>
                 <td class="mf-table__col-num">
-                  <span class="mf-card__num">{{ exp.numero }}</span>
+                  <a class="mf-table__link" [routerLink]="['/client/file/my-file', exp.id]"
+                     (click)="$event.stopPropagation()">
+                    <span class="mf-card__num">{{ exp.numero }}</span>
+                  </a>
                 </td>
                 <td>
                   <span class="mf-table__service">{{ servicioNombre(exp.servicio) }}</span>
@@ -217,6 +224,18 @@
                     <i class="bi {{ estadoCfg(exp.estado).icono }}" aria-hidden="true"></i>
                     {{ ('state.' + exp.estado) | translate }}
                   </span>
+                  @if (obrasTerminadasDe(exp).length > 0) {
+                    <ul class="mf-obras mf-obras--table">
+                      @for (c of obrasTerminadasDe(exp); track c.id) {
+                        <li class="mf-obra">
+                          <span class="tag tag-gold mf-obra__tag">
+                            <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                          </span>
+                          <span class="mf-obra__svc">{{ serviciosContrato(c) }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
                 </td>
                 <td class="mf-table__col-action">
                   <i class="bi bi-chevron-right" aria-hidden="true"></i>
@@ -312,6 +331,20 @@
                   <p class="mf-card__hint-text">{{ ('state_hint.' + exp.estado) | translate }}</p>
                 </div>
 
+                <!-- Una marca por contrato con la obra al 100 % (contrato aún abierto) -->
+                @if (obrasTerminadasDe(exp).length > 0) {
+                  <ul class="mf-obras">
+                    @for (c of obrasTerminadasDe(exp); track c.id) {
+                      <li class="mf-obra">
+                        <span class="tag tag-gold mf-obra__tag">
+                          <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                        </span>
+                        <span class="mf-obra__svc">{{ serviciosContrato(c) }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+
                 <!-- Descripción breve -->
                 @if (exp.descripcion) {
                   <p class="mf-card__desc">{{ exp.descripcion }}</p>
@@ -319,8 +352,11 @@
 
                 <!-- Acciones -->
                 <div class="mf-card__actions">
+                  <!-- Enlace principal estirado (::after) sobre toda la tarjeta: un clic
+                       en cualquier parte abre el expediente. -->
                   <a [routerLink]="['/client/file/my-file', exp.id]"
-                     class="btn btn-outline-primary btn-sm mf-card__btn-main">
+                     class="btn btn-outline-primary btn-sm mf-card__btn-main"
+                     [attr.aria-label]="('file.see_file' | translate) + ' ' + exp.numero">
                     <i class="bi bi-folder2-open" aria-hidden="true"></i>
                     {{ 'file.see_file' | translate }}
                   </a>

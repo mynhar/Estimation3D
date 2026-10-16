@@ -72,7 +72,7 @@
   width: 40px;
   height: 40px;
   font-size: var(--ds-text-lg);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-soft);
   border-radius: var(--ds-radius-md);
 }
@@ -158,7 +158,7 @@
   padding: var(--ds-space-3) var(--ds-space-4);
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-medium);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   background: var(--ds-danger-soft);
   border: 1px solid color-mix(in srgb, var(--ds-danger) 25%, transparent);
   border-radius: var(--ds-radius-md);
@@ -223,7 +223,7 @@
   font-size: var(--ds-text-base);
   border-radius: var(--ds-radius-circle);
   background: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 2px solid var(--ds-surface);
   box-shadow: 0 0 0 1px var(--ds-gold);
 }
@@ -262,7 +262,7 @@
   padding: 1px var(--ds-space-2);
 }
 .hs-event__cat--obra,
-.hs-event__cat--contrato { color: var(--ds-gold-active); background: var(--ds-gold-soft); border-color: var(--ds-gold); }
+.hs-event__cat--contrato { color: var(--ds-gold-ink); background: var(--ds-gold-soft); border-color: var(--ds-gold); }
 .hs-event__meta {
   display: flex;
   flex-wrap: wrap;
@@ -273,7 +273,7 @@
   color: var(--ds-ink-muted);
 }
 .hs-event__date { color: var(--ds-ink-secondary); font-weight: var(--ds-weight-medium); }
-.hs-event__sep { color: var(--ds-border-strong); }
+.hs-event__sep { color: var(--ds-ink-faint); }
 .hs-event__detail { color: var(--ds-ink-secondary); }
 
 /* ── Spinner / vacío / error ── */
@@ -294,7 +294,7 @@
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-lg);
 }
-.hs-empty i { font-size: 2.5rem; color: var(--ds-gold); }
+.hs-empty i { font-size: 2.5rem; color: var(--ds-gold-ink); }
 .hs-empty__title { font-family: var(--ds-font-display); font-size: var(--ds-text-xl); margin: var(--ds-space-3) 0 var(--ds-space-1); }
 .hs-empty__hint { color: var(--ds-ink-muted); font-size: var(--ds-text-sm); margin: 0; }
 
@@ -306,7 +306,7 @@
 }
 .hs-alert--error {
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border: 1px solid color-mix(in srgb, var(--ds-danger) 25%, transparent);
 }
 .hs-alert p { margin: 0; }

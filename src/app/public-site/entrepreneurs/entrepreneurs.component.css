@@ -47,7 +47,7 @@
 /* ─────────── [01] PROBLÈME ─────────── */
 .prob-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
 .prob-grid .cell{ background:var(--void); padding:46px 40px; }
-.prob-grid .n{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.prob-grid .n{ font-family:var(--mono); font-size:.74rem; color:var(--gold-text); letter-spacing:.16em; }
 .prob-grid h3{ margin:24px 0 12px; }
 .prob-grid p{ margin:0; font-size:.96rem; }
 @media(max-width:720px){ .prob-grid{ grid-template-columns:1fr; } }
@@ -59,7 +59,7 @@
 @media(max-width:880px){ .steps{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:520px){ .steps{ grid-template-columns:1fr; } }
 .steps .step{ background:var(--void); padding:38px 30px; }
-.steps .step .num{ font-family:var(--mono); font-size:.78rem; color:var(--gold); letter-spacing:.16em; }
+.steps .step .num{ font-family:var(--mono); font-size:.78rem; color:var(--gold-text); letter-spacing:.16em; }
 .steps .step h4{ font-family:var(--disp); font-weight:700; font-size:1.2rem; letter-spacing:-.02em; margin:18px 0 10px; color:var(--white); }
 .steps .step p{ margin:0; font-size:.92rem; }
 
@@ -68,14 +68,14 @@
 @media(max-width:860px){ .benefits{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:520px){ .benefits{ grid-template-columns:1fr; } }
 .benefits .b{ background:var(--void); padding:36px 30px; }
-.benefits .b .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.benefits .b .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold-text); letter-spacing:.16em; }
 .benefits .b h4{ font-family:var(--disp); font-weight:700; font-size:1.18rem; letter-spacing:-.02em; margin:16px 0 8px; color:var(--white); }
 .benefits .b p{ margin:0; font-size:.9rem; }
 
 /* ─────────── [04] EXIGENCES ─────────── */
 .req-list{ list-style:none; padding:0; margin:0 auto; max-width:840px; border-top:1px solid var(--line-2); }
 .req-list li{ padding:24px 0; border-bottom:1px solid var(--line-2); display:flex; gap:18px; align-items:flex-start; }
-.req-list .ic{ flex-shrink:0; width:18px; height:18px; margin-top:5px; color:var(--gold); }
+.req-list .ic{ flex-shrink:0; width:18px; height:18px; margin-top:5px; color:var(--gold-text); }
 .req-list strong{ font-family:var(--disp); font-weight:700; color:var(--white); }
 .req-list span{ color:var(--white-dim); }
 
@@ -84,17 +84,17 @@
 @media(max-width:860px){ .spec-grid{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:520px){ .spec-grid{ grid-template-columns:1fr; } }
 .spec{ background:var(--void); padding:34px 30px; }
-.spec .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold); letter-spacing:.16em; }
+.spec .num{ font-family:var(--mono); font-size:.74rem; color:var(--gold-text); letter-spacing:.16em; }
 .spec h4{ font-family:var(--disp); font-weight:700; font-size:1.3rem; letter-spacing:-.02em; margin:14px 0 8px; color:var(--white); }
 .spec p{ margin:0 0 18px; font-size:.9rem; }
-.spec .avail{ font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); padding:5px 10px; display:inline-block; border-radius:100px; }
+.spec .avail{ font-family:var(--mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-text); border:1px solid var(--gold); padding:5px 10px; display:inline-block; border-radius:100px; }
 .spec .avail.full{ color:var(--white-faint); border-color:var(--line); }
 
 /* ─────────── [06] FAQ ─────────── */
 .faq-list{ max-width:880px; margin:0 auto; border-top:1px solid var(--line-2); }
 .faq-item{ border-bottom:1px solid var(--line-2); }
 .faq-q{ width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:20px; padding:26px 0; font-family:var(--disp); font-weight:700; font-size:1.15rem; letter-spacing:-.01em; color:var(--white); }
-.faq-q .plus{ font-family:var(--mono); color:var(--gold); font-size:1.4rem; transition:transform .3s; flex-shrink:0; }
+.faq-q .plus{ font-family:var(--mono); color:var(--gold-text); font-size:1.4rem; transition:transform .3s; flex-shrink:0; }
 .faq-item.open .faq-q .plus{ transform:rotate(45deg); }
 /* Acordeón sin medir el DOM: la fila pasa de 0fr a 1fr y el navegador
    interpola la altura real. Sustituye al `maxHeight = scrollHeight` del
@@ -116,17 +116,17 @@
 .field input:focus, .field textarea:focus{ outline:none; border-color:var(--gold); }
 .field textarea{ min-height:110px; resize:vertical; }
 .field .is-invalid{ border-color:var(--burgundy-bright); }
-.field .req{ color:var(--gold); margin-left:.3em; }
+.field .req{ color:var(--gold-text); margin-left:.3em; }
 .field-err{ font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--danger-text); margin:0; }
 .checks{ display:flex; flex-wrap:wrap; gap:12px; }
 .checks-note{ font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--white-faint); margin:0; }
 .check{ font-family:var(--mono); font-size:.74rem; letter-spacing:.06em; color:var(--white-dim); display:inline-flex; gap:8px; align-items:center; border:1px solid var(--line); padding:9px 14px; border-radius:100px; cursor:pointer; transition:border-color .25s, color .25s, opacity .25s; }
-.check input{ accent-color:var(--gold); }
+.check input{ accent-color:var(--gold-text); }
 .check:hover{ border-color:var(--white-faint); color:var(--white); }
 /* El anillo de foco se pinta en la píldora, no en la casilla: la casilla nativa
    mide 13 px y su contorno se pierde contra el borde redondeado. */
-.check:has(input:focus-visible){ outline:2px solid var(--gold); outline-offset:2px; }
-.check:has(input:checked){ border-color:var(--gold); color:var(--gold); }
+.check:has(input:focus-visible){ outline:2px solid var(--gold-text); outline-offset:2px; }
+.check:has(input:checked){ border-color:var(--gold); color:var(--gold-text); }
 .check--all:has(input:checked){ background:rgba(var(--gold-rgb),.10); }
 /* Inertes, no ausentes: con «todos los servicios» marcado se sigue viendo qué
    cubre esa respuesta. */
@@ -134,7 +134,7 @@
 .check:has(input:disabled):hover{ border-color:var(--line); color:var(--white-dim); }
 .form-foot{ display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap; margin-top:30px; padding-top:26px; border-top:1px solid var(--line-2); }
 .form-note{ font-family:var(--mono); font-size:.72rem; letter-spacing:.06em; color:var(--white-faint); margin:0; max-width:40ch; }
-.form-success{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:0; max-width:42ch; }
+.form-success{ font-family:var(--mono); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-text); margin:0; max-width:42ch; }
 /* El acuse va en dos alturas: el titular en versalitas y, debajo, la frase que
    dice qué se ha hecho —sin versalitas, que a esa longitud se leen mal—. */
 .form-success-detail{ display:block; margin-top:8px; text-transform:none; letter-spacing:.04em; font-size:.74rem; line-height:1.6; color:var(--white-dim); }

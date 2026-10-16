@@ -51,7 +51,8 @@ export class ObraVmService {
         : Promise.resolve([]),
       this.seguimientoService.getActividadesAgregadas(seg.id),
       // De sobra para cubrir los últimos días aunque cada uno tenga varios partes.
-      this.seguimientoService.getReportesRecientes(seg.id, ObraVmService.DIAS_EVENTOS * 5),
+      // Margen por servicio: el historial guarda los últimos días de CADA uno.
+      this.seguimientoService.getReportesRecientes(seg.id, ObraVmService.DIAS_EVENTOS * 5 * Math.max(1, servicioIds.length)),
       this.seguimientoService.getStatsReportes(seg.id),
     ]);
 
@@ -289,9 +290,22 @@ export class ObraVmService {
    * Partes de los últimos días trabajados —todos los de cada día—, del más
    * reciente al más antiguo. `reportes` viene ordenado por fecha descendente.
    */
+  /**
+   * Los últimos `n` días trabajados de CADA servicio (los partes llegan del más
+   * reciente al más antiguo). El flujo de eventos se muestra por servicio: con
+   * un tope común, un servicio trabajado antes que los demás se quedaba vacío
+   * aunque tuviera partes. Con un solo servicio, igual que antes.
+   */
   private ultimosDias(reportes: ReporteDiario[], n = ObraVmService.DIAS_EVENTOS): ReporteDiario[] {
-    const dias = new Set([...new Set(reportes.map(r => this.soloFecha(r.fecha)))].slice(0, n));
-    return reportes.filter(r => dias.has(this.soloFecha(r.fecha)));
+    const diasPorServicio = new Map<string, Set<string>>();
+    for (const r of reportes) {
+      const clave = String(r.servicio_id ?? '');
+      const dias  = diasPorServicio.get(clave) ?? new Set<string>();
+      if (dias.size < n) dias.add(this.soloFecha(r.fecha));
+      diasPorServicio.set(clave, dias);
+    }
+    return reportes.filter(r =>
+      diasPorServicio.get(String(r.servicio_id ?? ''))?.has(this.soloFecha(r.fecha)));
   }
 
   /** Los partes del día más reciente de la lista. */

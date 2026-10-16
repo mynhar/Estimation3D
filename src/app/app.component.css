@@ -405,7 +405,7 @@
   letter-spacing: var(--ds-tracking-tight);
   transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.mobile-topbar__brand i { color: var(--ds-gold); font-size: 1rem; }
+.mobile-topbar__brand i { color: var(--ds-gold-ink); font-size: 1rem; }
 .mobile-topbar__brand:hover { color: var(--ds-ink); text-decoration: none; }
 
 .mobile-topbar__right {

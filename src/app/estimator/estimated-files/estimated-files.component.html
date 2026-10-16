@@ -228,6 +228,19 @@
                   <span class="ef-badge badge rounded-pill {{ badgeClass(exp.estado) }}">
                     {{ estadoLabel(exp.estado) | translate }}
                   </span>
+                  <!-- Una marca por contrato con la obra al 100 % (contrato aún abierto) -->
+                  @if (obrasTerminadasDe(exp).length > 0) {
+                  <ul class="ef-obras ef-obras--table">
+                    @for (c of obrasTerminadasDe(exp); track c.id) {
+                      <li class="ef-obra">
+                        <span class="tag tag-gold ef-obra__tag">
+                          <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                        </span>
+                        <span class="ef-obra__svc">{{ serviciosContrato(c) }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
                 </td>
 
                 <td class="ef-table__col-action" (click)="$event.stopPropagation()">
@@ -352,6 +365,20 @@
                 <span class="ef-hora">{{ formatHora(exp.fecha_visita) }}</span>
               }
             </div>
+
+            <!-- Una marca por contrato con la obra al 100 % (contrato aún abierto) -->
+            @if (obrasTerminadasDe(exp).length > 0) {
+              <ul class="ef-obras">
+                @for (c of obrasTerminadasDe(exp); track c.id) {
+                  <li class="ef-obra">
+                    <span class="tag tag-gold ef-obra__tag">
+                      <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                    </span>
+                    <span class="ef-obra__svc">{{ serviciosContrato(c) }}</span>
+                  </li>
+                }
+              </ul>
+            }
 
             <!-- Acciones (los botones internos no deben disparar la navegación) -->
             <div class="ef-card__foot" (click)="$event.stopPropagation()"

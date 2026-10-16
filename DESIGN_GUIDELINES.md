@@ -36,7 +36,8 @@ La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan
 |-----------|-----|-----|
 | `--ds-ink` | `#1A1A1A` | Texto principal |
 | `--ds-ink-secondary` | `#4A4A4A` | Texto secundario |
-| `--ds-ink-muted` | `#7A7770` | Texto terciario, captions, hints |
+| `--ds-ink-muted` | `#615E58` | Texto terciario, captions, hints, placeholders (≥ 4.6:1 sobre cualquier fondo claro o `-soft`) |
+| `--ds-ink-faint` | `#7A7770` | **Solo gráficos decorativos**: iconos de estado vacío, separadores «·», flechas (≥ 3.2:1). Nunca texto |
 | `--ds-ink-on-accent` | `#1A1A1A` | Texto sobre fondo dorado |
 | `--ds-ink-inverse` | `#FBFAF6` | Texto sobre fondos oscuros (raro) |
 
@@ -46,7 +47,7 @@ La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan
 |-----------|-----|-----|
 | `--ds-gold` | `#D4B96E` | Dorado principal: CTAs, focus, realces |
 | `--ds-gold-hover` | `#C2A85C` | Hover de botones dorados |
-| `--ds-gold-active` | `#B0964A` | Estados activos/pressed, enlaces hover |
+| `--ds-gold-active` | `#B0964A` | Rellenos y bordes activos/pressed. **No para texto ni iconos** (2.5:1): usar `--ds-gold-ink` |
 | `--ds-gold-soft` | `#EBD9A8` | Fondos sutiles, highlights |
 | `--ds-gold-faint` | `#F7EFD9` | Backgrounds muy suaves |
 
@@ -71,6 +72,32 @@ La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan
 | `--ds-info` | `#4A6B7A` | Azul pizarra (información) |
 | `--ds-info-soft` | `#DBE5E9` | Fondo de avisos informativos |
 
+**Texto sobre fondos suaves** (insignias, chips, pastillas, alertas, estados activos)
+
+El color semántico base no llega a AA sobre su propio fondo suave (mostaza 2.7:1, dorado 2.5:1, oliva 4.0:1, pizarra 4.5:1). Para **texto** sobre un fondo `-soft` / `-faint` se usa siempre la variante `-ink`: mismo tono, ≥ 5:1 sobre su fondo suave y también sobre `--ds-bg`, `--ds-bg-alt` y `--ds-surface`.
+
+| Token CSS | Hex | Va sobre | Contraste |
+|-----------|-----|----------|-----------|
+| `--ds-success-ink` | `#4C6A40` | `--ds-success-soft` | 5.0:1 |
+| `--ds-warning-ink` | `#8A5700` | `--ds-warning-soft` | 5.0:1 |
+| `--ds-danger-ink` | `#993E3E` | `--ds-danger-soft` | 5.0:1 |
+| `--ds-info-ink` | `#426372` | `--ds-info-soft` | 5.0:1 |
+| `--ds-gold-ink` | `#70540C` | `--ds-gold-faint` / `--ds-gold-soft` | 6.2:1 / 5.1:1 |
+
+Insignias neutras (cancelado, inactivo, contadores) sobre `--ds-bg-alt`: texto en `--ds-ink-secondary` (7.6:1).
+
+```css
+/* Insignia de estado */
+.badge--ok   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.badge--gold { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); border-color: var(--ds-gold-soft); }
+```
+
+Con utilidades de Bootstrap: `bg-success-subtle text-success-emphasis` (nunca `text-success` ni `text-primary` sobre `-subtle`); las variables `--bs-*-text-emphasis` ya apuntan a los tokens `-ink`.
+
+El color base (`--ds-success`, `--ds-gold-active`…) se mantiene para rellenos, barras y bordes.
+
+**Dorado y mostaza como texto o icono, sobre cualquier fondo claro** → `--ds-gold-ink` / `--ds-warning-ink`. El dorado claro (`--ds-gold`, `--ds-gold-hover`, `--ds-gold-active`) no llega a 3:1 sobre beige ni crema (1.6–2.8:1): ni siquiera sirve para iconos o texto grande. El texto verde va en `--ds-success-ink` (el base cae a 4.1:1 sobre `--ds-bg-alt`). Excepción: sobre superficies oscuras (sidebar, panel del login) el dorado claro sí se usa como texto.
+
 ### Reglas no negociables de color
 
 - **PROHIBIDO** usar fondos negros (`#000`, `#0a0a0a`, etc.)
@@ -78,6 +105,9 @@ La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan
 - **PROHIBIDO** gradientes morado-rosa o estilos "AI por defecto"
 - El dorado se usa **solo** en elementos premium, hovers, focus rings y CTAs primarios
 - El negro tinta `#1A1A1A` aparece **solo** como texto y bordes de botones secundarios
+- Texto sobre fondo `-soft` / `-faint` → token `-ink` (`--ds-success-ink`, `--ds-gold-ink`…). **PROHIBIDO** `color: var(--ds-success)` / `var(--ds-gold-active)` sobre su fondo suave: no pasa AA
+- **PROHIBIDO** usar tokens de borde (`--ds-border*`, `--ds-gold-soft`, `--ds-gold-faint`) como `color` de texto o icono (1.2–1.3:1): texto → `--ds-ink-muted`, adorno → `--ds-ink-faint`
+- Texto e iconos dorados o mostaza sobre fondo claro → `--ds-gold-ink` / `--ds-warning-ink`. **PROHIBIDO** `color: var(--ds-gold | --ds-gold-hover | --ds-gold-active | --ds-warning)` sobre fondo claro
 
 ### Tipografía
 
@@ -85,7 +115,7 @@ La fuente de verdad es `src/styles/tokens.css`. Las tablas siguientes documentan
 - **Cuerpo** (texto general, botones, formularios): DM Sans
 - **Monoespaciada** (código, datos tabulares): DM Mono (`--ds-font-mono`)
 - **NUNCA**: Inter, Roboto, Arial, Open Sans, system fonts como principales
-- **Eyebrow** (etiquetas pequeñas sobre títulos): DM Sans uppercase, `letter-spacing: 0.18em`, dorado activo
+- **Eyebrow** (etiquetas pequeñas sobre títulos): DM Sans uppercase, `letter-spacing: 0.18em`, dorado de texto `--ds-gold-ink`
 
 **Familias**
 
@@ -266,7 +296,7 @@ export class ProductCardComponent {
 }
 
 .product-card__price {
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-weight: var(--ds-weight-semibold);
 }
 ```

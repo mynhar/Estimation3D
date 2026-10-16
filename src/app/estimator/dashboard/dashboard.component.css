@@ -124,9 +124,9 @@
 .estd-hstat--activo    { background: var(--ds-info-soft);    border-color: transparent; }
 .estd-hstat--activo    .estd-hstat__n { color: var(--ds-info); }
 .estd-hstat--disponible { background: var(--ds-gold-faint);   border-color: transparent; }
-.estd-hstat--disponible .estd-hstat__n { color: var(--ds-gold-active); }
+.estd-hstat--disponible .estd-hstat__n { color: var(--ds-gold-ink); }
 .estd-hstat--contratado { background: var(--ds-success-soft); border-color: transparent; }
-.estd-hstat--contratado .estd-hstat__n { color: var(--ds-success); }
+.estd-hstat--contratado .estd-hstat__n { color: var(--ds-success-ink); }
 .estd-hstat--monto     { background: var(--ds-bg-alt); }
 .estd-hstat--monto     .estd-hstat__n { color: var(--ds-ink); }
 
@@ -204,8 +204,8 @@ button.estd-kpi:focus-visible {
   flex-shrink: 0;
 }
 .estd-kpi__icon-wrap--activo     { background: var(--ds-info-soft);    color: var(--ds-info); }
-.estd-kpi__icon-wrap--disponible { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
-.estd-kpi__icon-wrap--mercado    { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.estd-kpi__icon-wrap--disponible { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); }
+.estd-kpi__icon-wrap--mercado    { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
 .estd-kpi__icon-wrap--contratado { background: var(--ds-success-soft); color: var(--ds-success); }
 
 /* Contenido */
@@ -221,9 +221,9 @@ button.estd-kpi:focus-visible {
   margin: 0;
 }
 .estd-kpi--activo     .estd-kpi__val { color: var(--ds-info); }
-.estd-kpi--disponible .estd-kpi__val { color: var(--ds-gold-active); }
-.estd-kpi--mercado    .estd-kpi__val { color: var(--ds-warning); }
-.estd-kpi--contratado .estd-kpi__val { color: var(--ds-success); }
+.estd-kpi--disponible .estd-kpi__val { color: var(--ds-gold-ink); }
+.estd-kpi--mercado    .estd-kpi__val { color: var(--ds-warning-ink); }
+.estd-kpi--contratado .estd-kpi__val { color: var(--ds-success-ink); }
 
 .estd-kpi__label {
   font-size: var(--ds-text-xs);
@@ -296,7 +296,7 @@ button.estd-kpi:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: var(--ds-text-sm);
   flex-shrink: 0;
 }
@@ -333,7 +333,7 @@ button.estd-kpi:focus-visible {
   transition: color var(--ds-duration-fast) var(--ds-ease-out),
               gap var(--ds-duration-fast) var(--ds-ease-out);
 }
-.estd-btn-link:hover { color: var(--ds-gold-active); gap: var(--ds-space-2); }
+.estd-btn-link:hover { color: var(--ds-gold-ink); gap: var(--ds-space-2); }
 
 /* ══════════════════════════════════════════════════════════════════════════
    EMPTY STATE INLINE (dentro de card)
@@ -377,7 +377,7 @@ button.estd-kpi:focus-visible {
   justify-content: center;
   min-width: 18px; height: 18px;
   background: var(--ds-ink-on-accent);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border-radius: var(--ds-radius-pill);
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
@@ -507,7 +507,7 @@ button.estd-kpi:focus-visible {
   color: var(--ds-ink-muted);
 }
 .estd-work-fecha--vencida { color: var(--ds-danger);  font-weight: var(--ds-weight-semibold); }
-.estd-work-fecha--hoy     { color: var(--ds-warning); font-weight: var(--ds-weight-semibold); }
+.estd-work-fecha--hoy     { color: var(--ds-warning-ink); font-weight: var(--ds-weight-semibold); }
 
 .estd-btn-continue {
   display: inline-flex;
@@ -596,7 +596,7 @@ button.estd-kpi:focus-visible {
 }
 .estd-action:not(.estd-action--primary) .estd-action__icon {
   background: var(--ds-surface);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 1px solid var(--ds-border);
 }
 /* Va después de la regla anterior a propósito, y repite el `:not()` para igualar
@@ -636,12 +636,12 @@ button.estd-kpi:focus-visible {
   font-weight: var(--ds-weight-bold);
   padding: 0 5px;
   background: var(--ds-bg-alt);
-  color: var(--ds-ink-muted);
+  color: var(--ds-ink-secondary);
   flex-shrink: 0;
 }
 .estd-action__badge--primary {
   background: var(--ds-ink-on-accent);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -653,7 +653,7 @@ button.estd-kpi:focus-visible {
   gap: var(--ds-space-1);
   padding: 0.2em 0.6em;
   background: var(--ds-success-soft);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   border: 1px solid var(--ds-success-soft);
   border-radius: var(--ds-radius-pill);
   font-size: var(--ds-text-xs);
@@ -778,7 +778,7 @@ button.estd-kpi:focus-visible {
 .estd-rate-strip__pct {
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-bold);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
   min-width: 28px;
   text-align: right;
   flex-shrink: 0;
@@ -792,7 +792,7 @@ button.estd-kpi:focus-visible {
   color: var(--ds-ink-muted);
   margin: 0;
 }
-.estd-rate-strip__label i { color: var(--ds-warning); font-size: 0.7rem; }
+.estd-rate-strip__label i { color: var(--ds-warning-ink); font-size: 0.7rem; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    PIPELINE POST-ESTIMACIÓN
@@ -836,7 +836,7 @@ button.estd-kpi:focus-visible {
 }
 .estd-view-toggle__btn + .estd-view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .estd-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
-.estd-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.estd-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .estd-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* Leyenda del pipeline */
@@ -872,7 +872,7 @@ button.estd-kpi:focus-visible {
 
 .estd-pipe-legend__arrow {
   font-size: 9px;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 /* ── Vista tabla (escritorio) ──────────────────────────────────────────── */
@@ -935,7 +935,7 @@ button.estd-kpi:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 .estd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -994,7 +994,7 @@ button.estd-kpi:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 
@@ -1042,7 +1042,7 @@ button.estd-kpi:focus-visible {
 }
 
 .estd-pipe-trophy {
-  color: var(--ds-warning);
+  color: var(--ds-warning-ink);
   font-size: var(--ds-text-sm);
 }
 
@@ -1063,7 +1063,7 @@ button.estd-kpi:focus-visible {
   color: var(--ds-ink-secondary);
 }
 .estd-pipe-meta i { color: var(--ds-ink-muted); font-size: 0.7rem; }
-.estd-pipe-sep    { color: var(--ds-border-strong); }
+.estd-pipe-sep    { color: var(--ds-ink-faint); }
 
 /* Track de estados */
 .estd-pipe-track {
@@ -1115,7 +1115,7 @@ button.estd-kpi:focus-visible {
 }
 .estd-pipe-badge--cancelado {
   background: var(--ds-bg-alt);
-  color: var(--ds-ink-muted);
+  color: var(--ds-ink-secondary);
   border-color: var(--ds-border);
 }
 
@@ -1138,7 +1138,7 @@ button.estd-kpi:focus-visible {
 }
 .estd-btn-eye:hover {
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
 }
 
@@ -1203,7 +1203,7 @@ button.estd-kpi:focus-visible {
 }
 
 /* KPI de obra */
-.estd-kpi__icon-wrap--obra { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.estd-kpi__icon-wrap--obra { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .estd-kpi__indicator--obra { background: var(--ds-gold); }
 
 /* ══════════════════════════════════════════════════════════════════════════

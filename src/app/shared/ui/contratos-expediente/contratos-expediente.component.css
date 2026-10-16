@@ -1,0 +1,402 @@
+/* Hallmark · component: ledger (contratos del expediente) · genre: editorial (warm-paper)
+ * design-system: design.md (locked) · parent: client/dashboard (Workbench)
+ * states: default · hover · focus · active · disabled (n/a: sin controles deshabilitables) ·
+ *         loading (lo cubre el padre: no se pinta hasta tener datos) · error (n/a) ·
+ *         success (contrato completado → barra verde)
+ * contrast: texto pequeño en --ds-ink / --ds-ink-secondary (AA). El dorado vive en barra,
+ *           fondos y bordes, nunca en texto pequeño. Insignias con los tokens -ink
+ *           del sistema (≥ 5:1 sobre su fondo suave).
+ * pre-emit critique: P5 H5 E5 S5 R5 V4
+ *
+ * Lista tipo libro de cuentas: una fila por contrato separada por filetes (sin
+ * tarjetas dentro de la tarjeta) y el costo total como línea de cierre, igual
+ * que el total de una factura. Prefijo propio `cx-`: el CSS de quien la usa no
+ * llega aquí (encapsulación del componente).
+ *
+ * Compartida por client/dashboard y client/file/my-file, con anchos distintos:
+ * por eso se adapta a SU ancho (container queries), no al del viewport.
+ */
+
+:host {
+  display: block;
+  container: cx / inline-size;
+}
+
+/* ── Tarjeta ─────────────────────────────────────────────────────────────── */
+.cx {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  box-shadow: var(--ds-shadow-xs);
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+.cx:hover { box-shadow: var(--ds-shadow-md); }
+.cx::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ds-success), var(--ds-success-soft));
+}
+
+.cx__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-bottom: 1px solid var(--ds-border-subtle);
+}
+.cx__head-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-success-soft);
+  border: 1px solid var(--ds-success);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ds-success);
+  font-size: var(--ds-text-base);
+  flex-shrink: 0;
+}
+.cx__title {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-base);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.cx__count {
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-secondary);
+  white-space: nowrap;
+}
+
+/* ── Filas ───────────────────────────────────────────────────────────────── */
+.cx__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cx-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  gap: var(--ds-space-4) var(--ds-space-6);
+  align-items: start;
+  padding: var(--ds-space-5);
+}
+.cx-row + .cx-row {
+  border-top: 1px solid var(--ds-border-subtle);
+}
+
+/* Quién y qué */
+.cx-row__who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  min-width: 0;
+}
+.cx-row__name {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-snug);
+  color: var(--ds-ink);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cx-row__services {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-normal);
+  margin: 0;
+}
+
+.cx-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  padding: 0.2em 0.65em;
+  border-radius: var(--ds-radius-pill);
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.cx-badge--generado     { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
+.cx-badge--firmado      { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.cx-badge--en_ejecucion { background: var(--ds-gold-faint);   color: var(--ds-ink);         border-color: var(--ds-gold-soft); }
+.cx-badge--completado   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.cx-badge--cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border-color: var(--ds-border); }
+
+/* Avance de la obra */
+.cx-row__obra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+  min-width: 0;
+}
+.cx-row__obra-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+}
+.cx-row__obra-label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-ink-secondary);
+}
+.cx-row__pct {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: 1;
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+}
+.cx-row__pct--done { color: var(--ds-success-ink); }
+.cx-row__pct-unit {
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  margin-left: 1px;
+}
+
+.cx-bar {
+  height: 6px;
+  background: var(--ds-border-subtle);
+  border-radius: var(--ds-radius-pill);
+  overflow: hidden;
+}
+.cx-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ds-gold), var(--ds-gold-hover));
+  border-radius: var(--ds-radius-pill);
+}
+.cx-bar__fill--done { background: var(--ds-success); }
+
+.cx-row__obra-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  margin: 0;
+}
+
+.cx-row__obra-off {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  margin: 0;
+}
+
+/* Importe y documento */
+.cx-row__money {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--ds-space-3);
+}
+.cx-row__price {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: 1.1;
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cx-row__doc {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  white-space: nowrap;
+}
+
+/* Contrato cancelado: se lista pero no cuenta. Atenuado con tinta secundaria,
+   no con opacidad ni --ds-ink-muted, para no bajar de AA. */
+.cx-row--cancelado .cx-row__name { color: var(--ds-ink-secondary); }
+.cx-row--cancelado .cx-row__price {
+  color: var(--ds-ink-secondary);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* ── Detalle desplegable ─────────────────────────────────────────────────── */
+.cx-row__more {
+  grid-column: 1 / -1;
+}
+.cx-row__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--ds-radius-sm);
+  transition: var(--ds-transition-color);
+}
+.cx-row__summary::-webkit-details-marker { display: none; }
+.cx-row__summary:hover {
+  color: var(--ds-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ds-gold);
+  text-underline-offset: 3px;
+}
+.cx-row__summary:active { color: var(--ds-ink); }
+.cx-row__summary:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+.cx-row__chevron {
+  font-size: var(--ds-text-xs);
+  transition: transform var(--ds-duration-fast) var(--ds-ease-out);
+}
+.cx-row__more[open] .cx-row__chevron { transform: rotate(90deg); }
+
+.cx-row__detail {
+  margin-top: var(--ds-space-3);
+  padding: var(--ds-space-4);
+  background: var(--ds-bg-alt);
+  border-radius: var(--ds-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+}
+
+.cx-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--ds-space-4);
+  margin: 0;
+}
+.cx-facts:empty { display: none; }
+.cx-fact { min-width: 0; }
+.cx-fact dt,
+.cx-desc__label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-wide);
+  color: var(--ds-ink-secondary);
+  margin: 0 0 var(--ds-space-1);
+}
+.cx-fact dd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  color: var(--ds-ink);
+  text-decoration: none;
+  border-radius: var(--ds-radius-sm);
+  overflow-wrap: anywhere;
+  transition: var(--ds-transition-color);
+}
+.cx-link i { color: var(--ds-success); flex-shrink: 0; }
+.cx-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--ds-gold);
+  text-underline-offset: 3px;
+}
+.cx-link:active { color: var(--ds-ink-secondary); }
+.cx-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.cx-desc__text {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-relaxed);
+  margin: 0;
+  white-space: pre-line;
+}
+
+/* ── Total ───────────────────────────────────────────────────────────────── */
+.cx__total {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-5);
+  background: var(--ds-bg-alt);
+  border-top: 1px solid var(--ds-border-strong);
+  /* El importe se mide contra el ancho de la tarjeta (cqi), no del viewport. */
+  container-type: inline-size;
+}
+.cx__total-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  min-width: 0;
+}
+.cx__total-label {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-secondary);
+}
+.cx__total-note {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-normal);
+}
+.cx__total-value {
+  font-family: var(--ds-font-display);
+  font-size: clamp(var(--ds-text-xl), 7cqi, var(--ds-text-3xl));
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: 1;
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Responsive (por ancho del componente) ───────────────────────────────── */
+@container cx (max-width: 760px) {
+  .cx-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .cx-row__money {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+@container cx (max-width: 520px) {
+  .cx__head,
+  .cx-row,
+  .cx__total { padding-inline: var(--ds-space-4); }
+  .cx-row { grid-template-columns: minmax(0, 1fr); }
+  .cx__total {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

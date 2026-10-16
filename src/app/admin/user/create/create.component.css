@@ -127,7 +127,7 @@
   height: 64px;
   background: var(--ds-gold-faint);
   border: 1px dashed var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-size: 1.25rem;
 }
 .avatar-overlay {
@@ -179,7 +179,7 @@
   color: var(--ds-ink-muted);
   line-height: 1.5;
 }
-.invite-block__lang { color: var(--ds-gold-active); font-weight: var(--ds-weight-semibold); }
+.invite-block__lang { color: var(--ds-gold-ink); font-weight: var(--ds-weight-semibold); }
 
 /* ── Especialidades del constructor ──────────────────────── */
 /* Rejilla de casillas: el catálogo de servicios es corto y cabe entero, así que

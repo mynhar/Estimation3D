@@ -1,0 +1,162 @@
+<section class="cx" aria-labelledby="cx-title">
+
+  <header class="cx__head">
+    <div class="cx__head-icon" aria-hidden="true">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+    <h2 id="cx-title" class="cx__title">{{ 'dashboard_client.contratos_title' | translate }}</h2>
+    <span class="cx__count">
+      @if (contratos().length === 1) {
+        {{ 'dashboard_client.contratos_count_one' | translate }}
+      } @else {
+        {{ 'dashboard_client.contratos_count' | translate: { n: contratos().length } }}
+      }
+    </span>
+  </header>
+
+  <ol class="cx__list">
+    @for (c of ordenados(); track c.id) {
+      <li class="cx-row" [class.cx-row--cancelado]="c.estado === 'cancelado'">
+
+        <!-- Quién y qué -->
+        <div class="cx-row__who">
+          <h3 class="cx-row__name">{{ c.constructor_nombre }}</h3>
+          @if (c.servicios.length) {
+            <p class="cx-row__services">{{ serviciosTexto(c) }}</p>
+          }
+          <span [class]="'cx-badge cx-badge--' + c.estado">
+            {{ ('dashboard_client.contrato_estado_corto.' + c.estado) | translate }}
+          </span>
+        </div>
+
+        <!-- Avance de la obra -->
+        <div class="cx-row__obra">
+          @if (c.estado === 'cancelado') {
+            <p class="cx-row__obra-off">
+              <i class="bi bi-x-circle" aria-hidden="true"></i>
+              {{ 'dashboard_client.obra_estado.cancelada' | translate }}
+            </p>
+          } @else {
+            <div class="cx-row__obra-head">
+              <span class="cx-row__obra-label">{{ 'dashboard_client.avance_obra' | translate }}</span>
+              <span class="cx-row__pct" [class.cx-row__pct--done]="c.avance_obra === 100">{{ c.avance_obra }}<span class="cx-row__pct-unit">%</span></span>
+            </div>
+            <div class="cx-bar"
+                 role="progressbar"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 [attr.aria-valuenow]="c.avance_obra"
+                 [attr.aria-label]="('dashboard_client.avance_obra' | translate) + ' · ' + c.constructor_nombre">
+              <div class="cx-bar__fill"
+                   [class.cx-bar__fill--done]="c.avance_obra === 100"
+                   [style.width.%]="c.avance_obra"></div>
+            </div>
+            <p class="cx-row__obra-meta">
+              {{ ('dashboard_client.obra_estado.' + c.obra_estado) | translate }}
+              @if (c.obra_actualizado_en) {
+                <span aria-hidden="true">·</span>
+                {{ 'dashboard_client.obra_actualizada' | translate: { date: formatFecha(c.obra_actualizado_en) } }}
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Importe y documento -->
+        <div class="cx-row__money">
+          <span class="cx-row__price">{{ formatPrecio(c.precio_final) }}</span>
+          @if (c.pdf_url) {
+            <a [href]="c.pdf_url" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm cx-row__doc">
+              <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+              {{ 'dashboard_client.view_contract' | translate }}
+            </a>
+          } @else {
+            <a routerLink="/client/contracts" class="btn btn-outline-primary btn-sm cx-row__doc">
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+              {{ 'dashboard_client.view_contract' | translate }}
+            </a>
+          }
+        </div>
+
+        <!-- Detalle: contacto, fechas, garantía, descripción -->
+        <details class="cx-row__more">
+          <summary class="cx-row__summary">
+            <i class="bi bi-chevron-right cx-row__chevron" aria-hidden="true"></i>
+            {{ 'dashboard_client.contrato_detalles' | translate }}
+          </summary>
+
+          <div class="cx-row__detail">
+            <dl class="cx-facts">
+              @if (c.constructor_telefono || c.constructor_email) {
+                <div class="cx-fact">
+                  <dt>{{ 'dashboard_client.constructor_label' | translate }}</dt>
+                  <dd>
+                    @if (c.constructor_telefono) {
+                      <a class="cx-link" [attr.href]="'tel:' + c.constructor_telefono">
+                        <i class="bi bi-telephone" aria-hidden="true"></i>{{ c.constructor_telefono }}
+                      </a>
+                    }
+                    @if (c.constructor_email) {
+                      <a class="cx-link" [attr.href]="'mailto:' + c.constructor_email">
+                        <i class="bi bi-envelope" aria-hidden="true"></i>{{ c.constructor_email }}
+                      </a>
+                    }
+                  </dd>
+                </div>
+              }
+              @if (c.generado_en) {
+                <div class="cx-fact">
+                  <dt>{{ 'admin_contract_detail.generado_en' | translate }}</dt>
+                  <dd>{{ formatFecha(c.generado_en) }}</dd>
+                </div>
+              }
+              @if (c.firmado_en) {
+                <div class="cx-fact">
+                  <dt>{{ 'timeline.contract_signed' | translate }}</dt>
+                  <dd>{{ formatFecha(c.firmado_en) }}</dd>
+                </div>
+              }
+              @if (c.fecha_inicio) {
+                <div class="cx-fact">
+                  <dt>{{ 'timeline.works_started' | translate }}</dt>
+                  <dd>{{ formatFecha(c.fecha_inicio) }}</dd>
+                </div>
+              }
+              @if (c.garantia_anos) {
+                <div class="cx-fact">
+                  <dt>{{ 'dashboard_client.contract_warranty' | translate }}</dt>
+                  <dd>{{ formatGarantia(c.garantia_anos) }}</dd>
+                </div>
+              }
+            </dl>
+            @if (c.descripcion_trabajo) {
+              <div class="cx-desc">
+                <p class="cx-desc__label">{{ 'dashboard_client.work_description' | translate }}</p>
+                <p class="cx-desc__text">{{ c.descripcion_trabajo }}</p>
+              </div>
+            }
+          </div>
+        </details>
+
+      </li>
+    }
+  </ol>
+
+  <!-- Costo total: cierra la lista como el total de una factura -->
+  <footer class="cx__total">
+    <div class="cx__total-text">
+      <span class="cx__total-label">{{ 'dashboard_client.costo_total' | translate }}</span>
+      <span class="cx__total-note">
+        @switch (vigentes().length) {
+          @case (0) { {{ 'dashboard_client.costo_total_ninguno' | translate }} }
+          @case (1) { {{ 'dashboard_client.costo_total_nota_one' | translate }} }
+          @default  { {{ 'dashboard_client.costo_total_nota' | translate: { n: vigentes().length } }} }
+        }
+        @if (cancelados() > 0 && vigentes().length > 0) {
+          {{ 'dashboard_client.costo_total_cancelados' | translate }}
+        }
+      </span>
+    </div>
+    <span class="cx__total-value">{{ formatPrecio(costoTotal()) }}</span>
+  </footer>
+
+</section>

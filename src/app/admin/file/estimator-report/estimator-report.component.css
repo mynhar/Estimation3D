@@ -25,7 +25,7 @@
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-widest); text-transform: uppercase; color: var(--ds-ink-muted); margin-bottom: 0;
 }
-.section-label__icon { color: var(--ds-gold-active); }
+.section-label__icon { color: var(--ds-gold-ink); }
 .detail-divider { border-color: var(--ds-border); opacity: 1; margin: 0; }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -64,7 +64,7 @@
 .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .save-msg { display: inline-flex; align-items: center; font-size: var(--ds-text-xs); font-weight: var(--ds-weight-medium); color: var(--ds-ink-muted); }
-.save-msg--ok   { color: var(--ds-success); }
+.save-msg--ok   { color: var(--ds-success-ink); }
 .save-msg--err  { color: var(--ds-danger); }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -74,7 +74,7 @@
 .archivo-count {
   display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px;
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   border-radius: var(--ds-radius-pill); padding: 0 5px;
 }
 
@@ -89,7 +89,7 @@
               background var(--ds-duration-fast) var(--ds-ease-out),
               color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.upload-btn:hover:not(.upload-btn--busy) { border-color: var(--ds-gold); background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.upload-btn:hover:not(.upload-btn--busy) { border-color: var(--ds-gold); background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .upload-btn--busy { opacity: 0.6; cursor: not-allowed; }
 
 /* Zona de carga: clic o arrastrar y soltar */
@@ -102,12 +102,12 @@
    salta al pasar sobre ellos y el resalte parpadea. Fuera del arrastre todo
    conserva sus eventos, así que los controles de dentro siguen funcionando. */
 .upload-btn--drag > * { pointer-events: none; }
-.upload-btn--drop .bi { font-size: var(--ds-text-2xl); color: var(--ds-gold-active); line-height: 1; }
+.upload-btn--drop .bi { font-size: var(--ds-text-2xl); color: var(--ds-gold-ink); line-height: 1; }
 .upload-btn__title { font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium); color: var(--ds-ink); }
 .upload-btn__sub   { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
 .upload-btn--drag  { border-color: var(--ds-gold-active); background: var(--ds-gold-soft); }
 .upload-btn--drag .upload-btn__title,
-.upload-btn--drag .upload-btn__sub { color: var(--ds-gold-active); }
+.upload-btn--drag .upload-btn__sub { color: var(--ds-gold-ink); }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 .upload-spinner {
@@ -131,13 +131,13 @@
 .tour-tile__frame:hover .tour-tile__img { transform: scale(1.05); }
 .tour-tile__placeholder {
   display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
-  background: var(--ds-bg-alt); color: var(--ds-gold-active);
+  background: var(--ds-bg-alt); color: var(--ds-gold-ink);
 }
 .tour-tile__badge {
   position: absolute; left: var(--ds-space-2); bottom: var(--ds-space-2);
   display: inline-flex; align-items: center; gap: 4px;
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft); border-radius: var(--ds-radius-pill); padding: 0.15em 0.6em;
 }
 
@@ -175,7 +175,7 @@
 .doc-tile__icon {
   width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   background: var(--ds-surface); border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-md); color: var(--ds-gold-active);
+  border-radius: var(--ds-radius-md); color: var(--ds-gold-ink);
 }
 .doc-tile__info { flex: 1; min-width: 0; }
 .doc-tile__name {
@@ -192,7 +192,7 @@
   font-weight: var(--ds-weight-medium); cursor: pointer;
   transition: border-color var(--ds-duration-fast) var(--ds-ease-out), background var(--ds-duration-fast) var(--ds-ease-out);
 }
-.btn-file-open:hover { border-color: var(--ds-gold-soft); background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.btn-file-open:hover { border-color: var(--ds-gold-soft); background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .btn-file-delete {
   display: inline-flex; align-items: center; padding: 5px 8px; background: transparent;
   border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); color: var(--ds-ink-muted);
@@ -257,7 +257,7 @@
 .invite-badge {
   display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft); border-radius: var(--ds-radius-pill); padding: 0.15em 0.6em;
 }
 
@@ -286,7 +286,7 @@
   margin: var(--ds-space-3) 0 0;
 }
 .invite-msg--err { color: var(--ds-danger); }
-.invite-msg--ok  { color: var(--ds-success); }
+.invite-msg--ok  { color: var(--ds-success-ink); }
 
 .invite-count   { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
 .invite-buttons { display: flex; align-items: center; gap: var(--ds-space-2); flex-wrap: wrap; }
@@ -308,7 +308,7 @@
 .btn-invite--ghost {
   background: var(--ds-surface); border: 1px solid var(--ds-border-strong); color: var(--ds-ink-secondary);
 }
-.btn-invite--ghost:hover:not(:disabled) { border-color: var(--ds-gold); background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.btn-invite--ghost:hover:not(:disabled) { border-color: var(--ds-gold); background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .btn-invite--ghost:active:not(:disabled) { background: var(--ds-gold-soft); }
 
 .btn-invite--primary { background: var(--ds-gold); border: 1px solid transparent; color: var(--ds-ink); }

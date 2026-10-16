@@ -78,8 +78,53 @@
         <span>{{ 'client_monitoring.eventos_title' | translate }}</span>
       </div>
       <div class="cm-panel__body cm-panel__body--scroll">
-        @if (dias().length > 0) {
-          <!-- Un elemento por día; dentro, un parte por servicio trabajado. -->
+        @if (dias().length > 0 && multiServicio()) {
+          <!-- Varios servicios: un flujo por servicio, cada uno con sus días y
+               SU acumulado. Elegir un día carga el detalle de ese día. -->
+          @for (g of eventosPorServicio(); track g.clave) {
+            <p class="cm-group">
+              @if (g.nombre) {
+                {{ g.nombre }}@if (g.avance !== null) { · {{ g.avance }}%}
+              } @else {
+                {{ 'client_monitoring.otros_partes' | translate }}
+              }
+            </p>
+            @if (g.dias.length > 0) {
+              <ul class="cm-events cm-events--servicio">
+                @for (x of g.dias; track x.dia.fecha) {
+                  <li>
+                    <button class="cm-event" type="button"
+                            [class.is-selected]="x.dia.fecha === fechaSel()"
+                            [attr.aria-pressed]="x.dia.fecha === fechaSel()"
+                            (click)="seleccionarDia(x.dia)">
+                      <span class="cm-event__when">
+                        <strong>{{ diaNum(x.dia.fecha) }}</strong>
+                        <small>{{ mesCorto(x.dia.fecha) }}</small>
+                      </span>
+                      <span class="cm-event__body">
+                        <span class="cm-event__row">
+                          <span class="cm-event__acum">{{ x.parte.porcentaje_acumulado ?? 0 }}%</span>
+                          <span class="cm-event__delta">+{{ x.parte.porcentaje_avance_dia }}%</span>
+                        </span>
+                        @if (faseNameById(x.parte.fase_id)) {
+                          <span class="cm-event__fase">
+                            <i class="bi bi-layers"></i> {{ faseNameById(x.parte.fase_id) }}
+                          </span>
+                        }
+                        @if (x.parte.descripcion) {
+                          <span class="cm-event__desc">{{ x.parte.descripcion }}</span>
+                        }
+                      </span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="cm-muted cm-events__vacio">{{ 'client_monitoring.sin_eventos_servicio' | translate }}</p>
+            }
+          }
+        } @else if (dias().length > 0) {
+          <!-- Un servicio: un elemento por día. -->
           <ul class="cm-events">
             @for (d of dias(); track d.fecha) {
               <li>

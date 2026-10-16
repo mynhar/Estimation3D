@@ -20,17 +20,18 @@
 .reveal-scan .doc-layer img{ filter:var(--doc-filter); }
 .reveal-scan .pin{
   position:absolute; font-family:var(--mono); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--white); background:rgba(var(--scrim),.7); border:1px solid var(--gold); padding:3px 8px; white-space:nowrap;
+  /* Velo .9: al .7 la foto se transparentaba y la etiqueta caía a 1,9:1. */
+  color:var(--white); background:rgba(var(--scrim),.9); border:1px solid var(--gold); padding:3px 8px; white-space:nowrap;
   transform:translate(-50%,-50%); animation:pinpop .5s var(--ease-out) both;
 }
-.reveal-scan .pin .v{ color:var(--gold-bright); }
+.reveal-scan .pin .v{ color:var(--gold-text-hi); }
 @keyframes pinpop{ from{ opacity:0; transform:translate(-50%,-40%) scale(.8); } }
 .reveal-scan .rs-label{
   position:absolute; top:16px; font-family:var(--mono); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase;
   padding:6px 12px; background:rgba(var(--scrim),.6); border:1px solid var(--line);
 }
 .reveal-scan .rs-label.left{ left:16px; color:var(--white-dim); }
-.reveal-scan .rs-label.right{ right:16px; color:var(--gold); }
+.reveal-scan .rs-label.right{ right:16px; color:var(--gold-text); }
 .reveal-scan .rs-handle{
   position:absolute; top:0; bottom:0; left:var(--rev); width:2px; background:var(--scan-line);
   box-shadow:var(--scan-glow-sm); transform:translateX(-1px); z-index:3;
@@ -56,7 +57,7 @@
 .dimline .seg::before, .dimline .seg::after{ content:""; position:absolute; top:50%; width:7px; height:7px; border-top:1px solid var(--gold); border-right:1px solid var(--gold); }
 .dimline .seg::before{ left:0; transform:translateY(-50%) rotate(-135deg); }
 .dimline .seg::after{ right:0; transform:translateY(-50%) rotate(45deg); }
-.dimline .lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+.dimline .lbl{ font-family:var(--mono); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold-text); white-space:nowrap; }
 .dimline .lbl b{ color:var(--white); font-weight:500; }
 
 /* ═══ FIRMA 3 · REGLA DE MEDICIÓN ═══ */
@@ -71,7 +72,7 @@
 .measure-rail .ticks.maj{ background-image:repeating-linear-gradient(var(--gold) 0 1px, transparent 1px 112px); width:16px; opacity:.5; }
 .measure-rail .readout{
   writing-mode:vertical-rl; font-family:var(--mono); font-size:.62rem; letter-spacing:.24em; text-transform:uppercase;
-  color:var(--gold); transform:rotate(180deg); font-variant-numeric:tabular-nums;
+  color:var(--gold-text); transform:rotate(180deg); font-variant-numeric:tabular-nums;
 }
 .measure-rail .cap{ writing-mode:vertical-rl; font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; color:var(--white-faint); }
 .measure-rail .reticle{ width:14px; height:14px; position:relative; }

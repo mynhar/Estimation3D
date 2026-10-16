@@ -173,10 +173,10 @@
   padding: 0.25em 0.8em; border-radius: var(--ds-radius-pill);
   letter-spacing: var(--ds-tracking-wide); text-transform: uppercase;
 }
-.role-badge--cliente       { background: var(--ds-info-soft);    color: var(--ds-info); }
-.role-badge--estimador     { background: var(--ds-gold-soft);    color: var(--ds-gold-active); }
-.role-badge--constructor   { background: var(--ds-success-soft); color: var(--ds-success); }
-.role-badge--administrador { background: var(--ds-danger-soft);  color: var(--ds-danger); }
+.role-badge--cliente       { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
+.role-badge--estimador     { background: var(--ds-gold-soft);    color: var(--ds-gold-ink); }
+.role-badge--constructor   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.role-badge--administrador { background: var(--ds-danger-soft);  color: var(--ds-danger-ink); }
 
 /* Badge Google */
 .google-badge {
@@ -216,7 +216,7 @@
   font-size: var(--ds-text-sm); color: var(--ds-ink-secondary);
   margin: 0; line-height: var(--ds-leading-snug);
 }
-.account-row__value--active { color: var(--ds-success); font-weight: var(--ds-weight-semibold); }
+.account-row__value--active { color: var(--ds-success-ink); font-weight: var(--ds-weight-semibold); }
 
 /* ════════════════════════════════════════════════════════════════════════════
    COLUMNA DERECHA — Formulario
@@ -242,14 +242,14 @@
   color: var(--ds-ink);
   display: flex; align-items: center; gap: var(--ds-space-2);
 }
-.form-card__title-icon { color: var(--ds-gold-active); }
+.form-card__title-icon { color: var(--ds-gold-ink); }
 
 .form-card__body { padding: var(--ds-space-5); }
 
 /* Pill "cambios sin guardar" */
 .cambios-pill {
   display: inline-flex; align-items: center;
-  background: var(--ds-warning-soft); color: var(--ds-warning);
+  background: var(--ds-warning-soft); color: var(--ds-warning-ink);
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-semibold);
   padding: 0.25em 0.75em; border-radius: var(--ds-radius-pill);
   border: 1px solid rgba(184, 134, 46, 0.25);
@@ -270,11 +270,11 @@
   border: 1px solid transparent;
 }
 .feedback-alert--success {
-  background: var(--ds-success-soft); color: var(--ds-success);
+  background: var(--ds-success-soft); color: var(--ds-success-ink);
   border-color: rgba(91, 122, 79, 0.2);
 }
 .feedback-alert--danger {
-  background: var(--ds-danger-soft); color: var(--ds-danger);
+  background: var(--ds-danger-soft); color: var(--ds-danger-ink);
   border-color: rgba(161, 69, 69, 0.2);
 }
 
@@ -306,7 +306,7 @@
   padding: var(--ds-space-3) var(--ds-space-4);
   font-size: var(--ds-text-sm); color: var(--ds-ink-secondary);
 }
-.info-note i { color: var(--ds-gold-active); }
+.info-note i { color: var(--ds-gold-ink); }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 991.98px) {

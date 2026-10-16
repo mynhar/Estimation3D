@@ -43,7 +43,7 @@
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   margin: 0 0 var(--ds-space-2);
 }
 
@@ -96,10 +96,10 @@
 .ef-kpi--contratado .ef-kpi__value { color: var(--ds-info); }
 
 .ef-kpi--adjudicado { border-color: var(--ds-warning); }
-.ef-kpi--adjudicado .ef-kpi__value { color: var(--ds-warning); }
+.ef-kpi--adjudicado .ef-kpi__value { color: var(--ds-warning-ink); }
 
 .ef-kpi--oferta { border-color: var(--ds-gold-soft); }
-.ef-kpi--oferta .ef-kpi__value { color: var(--ds-gold-active); }
+.ef-kpi--oferta .ef-kpi__value { color: var(--ds-gold-ink); }
 
 /* ── Loading ─────────────────────────────────────────────────────────────── */
 .ef-loading {
@@ -144,7 +144,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.875rem;
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   margin-bottom: var(--ds-space-2);
   flex-shrink: 0;
 }
@@ -222,11 +222,11 @@
   border-color: var(--ds-border-strong);
 }
 .ef-chip--active { font-weight: var(--ds-weight-semibold); }
-.ef-chip--active.ef-chip--estimado   { background: var(--ds-success-soft); border-color: var(--ds-success);       color: var(--ds-success); }
-.ef-chip--active.ef-chip--en_oferta  { background: var(--ds-info-soft);    border-color: var(--ds-info);          color: var(--ds-info); }
-.ef-chip--active.ef-chip--adjudicado { background: var(--ds-warning-soft); border-color: var(--ds-warning);       color: var(--ds-warning); }
-.ef-chip--active.ef-chip--contratado { background: var(--ds-info-soft);    border-color: var(--ds-info);          color: var(--ds-info); }
-.ef-chip--active.ef-chip--cancelado  { background: var(--ds-bg-alt);       border-color: var(--ds-border-strong); color: var(--ds-ink-muted); }
+.ef-chip--active.ef-chip--estimado   { background: var(--ds-success-soft); border-color: var(--ds-success);       color: var(--ds-success-ink); }
+.ef-chip--active.ef-chip--en_oferta  { background: var(--ds-info-soft);    border-color: var(--ds-info);          color: var(--ds-info-ink); }
+.ef-chip--active.ef-chip--adjudicado { background: var(--ds-warning-soft); border-color: var(--ds-warning);       color: var(--ds-warning-ink); }
+.ef-chip--active.ef-chip--contratado { background: var(--ds-info-soft);    border-color: var(--ds-info);          color: var(--ds-info-ink); }
+.ef-chip--active.ef-chip--cancelado  { background: var(--ds-bg-alt);       border-color: var(--ds-border-strong); color: var(--ds-ink-secondary); }
 
 .ef-chip__dot {
   width: 7px; height: 7px;
@@ -284,7 +284,7 @@
   border-color: var(--ds-gold);
   box-shadow: var(--ds-focus-ring);
 }
-.ef-search__input::placeholder { color: var(--ds-ink-muted); opacity: 0.7; }
+.ef-search__input::placeholder { color: var(--ds-ink-muted); opacity: 1; }
 .ef-search__clear {
   position: absolute;
   right: var(--ds-space-2);
@@ -316,7 +316,7 @@
   color: var(--ds-ink-secondary);
 }
 .ef-results-total { font-weight: var(--ds-weight-regular); color: var(--ds-ink-muted); }
-.ef-results-sep { color: var(--ds-border-strong); }
+.ef-results-sep { color: var(--ds-ink-faint); }
 .ef-results-hint {
   display: flex;
   align-items: center;
@@ -400,7 +400,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
   font-size: 2rem;
 }
 
@@ -435,7 +435,7 @@
 
 .ef-view-toggle__btn + .ef-view-toggle__btn { border-left: 1px solid var(--ds-border); }
 .ef-view-toggle__btn:hover { background: var(--ds-gold-faint); color: var(--ds-ink); }
-.ef-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-active); }
+.ef-view-toggle__btn--active { background: var(--ds-gold-faint); color: var(--ds-gold-ink); }
 .ef-view-toggle__btn:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
 
 /* ── Vista tabla (escritorio) ────────────────────────────────────────────── */
@@ -533,7 +533,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 .ef-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -541,7 +541,10 @@
 /* Card sections (with internal padding) */
 .ef-card__head {
   display: flex;
-  align-items: center;
+  /* Si número + «Reciente» + estado no caben, se reparten en líneas en vez de
+     montarse: antes la insignia de estado tapaba el número y «Reciente». */
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--ds-space-2);
   padding: var(--ds-space-4) var(--ds-space-4) 0;
@@ -550,8 +553,13 @@
 .ef-card__left {
   display: flex;
   align-items: center;
-  gap: var(--ds-space-2);
-  min-width: 0;
+  /* Base 0 y mínimo = su contenido más ancho (el número): primero baja
+     «Reciente» bajo el número; solo si ni así cabe, la insignia de estado pasa
+     a la línea siguiente. Nunca encoge por debajo del número (antes min-width:0
+     dejaba que se desbordara bajo la insignia). */
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1) var(--ds-space-2);
 }
 
 .ef-num {
@@ -560,15 +568,15 @@
   font-weight: var(--ds-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
   padding: 0.15em 0.55em;
   border-radius: var(--ds-radius-sm);
   white-space: nowrap;
 }
-.ef-card--en_oferta  .ef-num { color: var(--ds-info);       background: var(--ds-info-soft); }
-.ef-card--adjudicado .ef-num { color: var(--ds-warning);    background: var(--ds-warning-soft); }
-.ef-card--contratado .ef-num { color: var(--ds-info);       background: var(--ds-info-soft); }
+.ef-card--en_oferta  .ef-num { color: var(--ds-info-ink);       background: var(--ds-info-soft); }
+.ef-card--adjudicado .ef-num { color: var(--ds-warning-ink);    background: var(--ds-warning-soft); }
+.ef-card--contratado .ef-num { color: var(--ds-info-ink);       background: var(--ds-info-soft); }
 .ef-card--cancelado  .ef-num { color: var(--ds-ink-muted);  background: var(--ds-bg-alt); }
 
 .ef-reciente-tag {
@@ -576,7 +584,7 @@
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-wide);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   border-radius: var(--ds-radius-pill);
@@ -621,7 +629,7 @@
 
 /* Dirección postal en dos líneas: "615-150 rue Berlioz" / "Montréal QC H3E 1K3" */
 .ef-addr { align-items: flex-start; min-width: 0; }
-.ef-addr i { line-height: var(--ds-leading-normal); color: var(--ds-gold-active); }
+.ef-addr i { line-height: var(--ds-leading-normal); color: var(--ds-gold-ink); }
 .ef-addr__text {
   display: flex;
   flex-direction: column;
@@ -646,7 +654,32 @@
   padding: var(--ds-space-2) var(--ds-space-3);
   margin: var(--ds-space-3) var(--ds-space-4) 0;
 }
-.ef-fecha i { color: var(--ds-gold-active); flex-shrink: 0; }
+.ef-fecha i { color: var(--ds-gold-ink); flex-shrink: 0; }
+
+/* «Obra terminada al 100 %» por contrato: .tag/.tag-gold del sistema + los
+   servicios del contrato, que lo distinguen de los demás del expediente. */
+.ef-obras {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-2);
+}
+.ef-obras--table { margin-top: var(--ds-space-2); gap: var(--ds-space-1); }
+.ef-obra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-1) var(--ds-space-2);
+  min-width: 0;
+}
+.ef-obra__tag { font-size: var(--ds-text-2xs); white-space: nowrap; }
+.ef-obra__svc {
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  overflow-wrap: anywhere;
+}
 .ef-hora {
   margin-left: auto;
   font-weight: var(--ds-weight-semibold);
@@ -685,7 +718,7 @@
 .ef-btn--primary {
   flex: 1;
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft);
 }
 .ef-btn--primary:hover {
@@ -707,13 +740,13 @@
 .ef-btn--delete:hover {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 
 .ef-btn--danger {
   flex: 1;
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border: 1px solid var(--ds-danger);
 }
 .ef-btn--danger:hover:not(:disabled) {

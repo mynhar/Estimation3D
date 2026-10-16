@@ -1,5 +1,149 @@
 [
   {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (shared/construction-monitoring/obra-card · client/construction-monitoring/list y estimator monitoring)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "obra-card · el «Flujo de eventos de la obra» mezclaba día a día los partes de todos los servicios. Con varios servicios ahora hay un bloque por servicio (nombre · avance, como Fases y Actividades) con sus días y SU acumulado/avance del día, fase y descripción; elegir un día sigue cargando el detalle de ese día; partes sin servicio reconocible en un bloque «Otros partes». Un servicio: sin cambios. ObraVmService.ultimosDias pasa de 6 días de la obra a 6 días por servicio (y más margen en getReportesRecientes) para que ningún bloque quede vacío por tope común."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/contracts)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/contracts · cada tarjeta y el PDF que se ve/descarga desde aquí usaban el servicio principal del expediente para todos los contratos (EXP-20261015-4200: el contrato de José Perez Perez salía como «Aislamiento» en vez de «Daños por agua»). Ahora usan los servicios de cada contrato (ContratoListItem.servicios; PDF con serviciosParaContrato), con el principal como respaldo. Todas las pantallas que generan el PDF pasan ya los servicios del contrato."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "Ledger por expediente (client/contracts · client/construction-monitoring/list) — mismo acordeón que client/my-documents/list",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "Nuevo shared/ui/expediente-panel (cabecera idéntica a .md-exp de Mis documentos: carpeta dorada, «Expediente EXP-…» en Fraunces, cifras proyectadas [panelMeta], chevron, aria-expanded/aria-controls; cuerpo plegable, modo «bandeja» bg-alt para tarjetas dentro). client/contracts: contratos agrupados por expediente (con activos primero; dentro activos y luego cerrados atenuados), cabecera con nº de contratos, valor y nº de obras terminadas; sustituye la sección «Contratos cerrados». client/construction-monitoring/list: franja de cifras (obras, en curso, terminadas al 100 %, expedientes) + acordeón por expediente con nº de obras y avance medio; expansión inicial solo en la primera carga (Realtime conserva lo que abra el usuario). Primer expediente abierto. En ≤640 px las cifras se ocultan y el número se parte en vez de cortarse."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/contracts)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/contracts · con la obra al 100 % (obra_terminada) el botón «Cancelar contrato» queda desactivado, con el motivo en texto visible enlazado por aria-describedby (contract_list.cancel_disabled_obra) y abrirPanelCancelacion lo ignora. La base (cancelar_contrato_cliente) todavía no lo impide."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/builder-offer · selección múltiple de ofertas)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/builder-offer · el cliente selecciona varias ofertas (una para todos los servicios, una por servicio o varias para el mismo): tarjetas de oferta como conmutadores (aria-pressed) con «Cubre: …» si hay varios servicios; tarjeta lateral con lista (constructor, servicios, precio, quitar), cobertura por servicio (sin oferta / una / N) y total de la selección. Aceptar = adjudicar_ofertas (un contrato por oferta + PDF con los servicios de su oferta, PDF previos borrados), como administración. Dorado = seleccionada pendiente, verde = aceptada que sigue. Con contratos firmados, bloqueada. Selección vacía con aceptadas: rechazar todas. Requiere migración 20261021_adjudicar_ofertas_cliente (aplicada el 2026-10-15 y verificada)."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/builder-offer · tarjeta «Expediente»)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/builder-offer · la tarjeta «Expediente» mostraba solo el servicio principal: ahora lista todos los servicios del expediente (principal primero) con su descripción, separados por filete (ExpedienteService.getServiciosCompletos; fallback al principal). Etiqueta en plural si hay varios (file.services). El PDF del contrato que genera esta pantalla al aceptar pasa a llevar los servicios de la oferta (serviciosDeOferta + serviciosParaContrato, como administración). Sidebar sticky con max-height + scroll interno."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (estimator/estimated-files · cabecera de tarjeta)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/estimated-files · la insignia de estado tapaba el número y «Reciente»: .ef-card__left tenía min-width:0 con hijos nowrap y la insignia flex-shrink:0. Ahora la cabecera hace wrap y el grupo izquierdo es flex 1 1 0 con wrap y mínimo = número: primero baja «Reciente», y solo si no cabe la insignia pasa a otra línea. Verificado en reproducción: 16/30 combinaciones solapaban (300–360 px, es/en/fr) → 0."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (estimator/estimated-files)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "estimator/estimated-files · marca «Obra terminada al 100 %» por contrato (con sus servicios) en tarjeta y tabla, igual que client/file/my-files (ContratoService.getResumenObraExpedientes; RLS del estimador verificada). estimator/construction-monitoring/list ya la mostraba (una fila por contrato, obra_terminada desde getContratosEstimador): sin cambios."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/file/my-files · client/offers-received · client/contracts)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "Marca «Obra terminada al 100 %» por contrato en las tres listas del cliente, con la misma regla e insignia que administración (seguimiento completado + contrato abierto; .tag.tag-gold + bi-flag + monitoring.obra_terminada_badge). contracts: bajo el estado de cada tarjeta (findByClienteId trae el seguimiento; ContratoListItem.obra_terminada). my-files: una marca por contrato terminado con sus servicios, en tarjeta y tabla (ContratoService.getResumenObraExpedientes). offers-received: mostraba solo la primera oferta aceptada; ahora todas, con constructor, y la marca en la de contrato terminado; iconos de check pasan a trazo."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "sin cambios (client/file/my-file · columna lateral + nueva banda de contratos)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/file/my-file · mostraba una sola oferta aceptada (find) y un solo contrato (el más reciente). Ahora: tarjeta lateral 'Constructores seleccionados' con todas las ofertas aceptadas (propuesta y archivos plegables con <details> si hay varias, abiertos si hay una) y banda a todo el ancho con TODOS los contratos reutilizando ContratosExpedienteComponent (movido a shared/ui y pasado de @media a @container para adaptarse al ancho donde se monte; añade 'Generado el'). Sidebar sticky con max-height + scroll interno. DocumentosClienteService: PDF y media de obra de todos los contratos (antes solo del último). Eliminado ContratoRepository.findForClientByExpedienteId (sin usos)."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "Workbench (client/file/my-files · sin cambios de estructura)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/file/my-files · clic en cualquier parte del expediente lo abre. Tarjetas: enlace principal 'Ver expediente' estirado (::after, inset 0) sobre la tarjeta, que pasa a position:relative; 'Revisar ofertas' por encima (z-index 2) con su destino; aria-label con el número. Tabla: la fila ya abría con clic pero no con teclado (RouterLink en <tr> da tabindex 0 y solo escucha click): fila a tabindex -1 y el número pasa a <a> real (Enter), con fondo de fila en :focus-within."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "Workbench (client/dashboard · sin cambios; corrección de la tarjeta de detalle)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/dashboard · tarjeta de detalle (columna derecha): con las fechas clave de varios contratos el contenido superaba el max-height de la columna y, con `flex: 1`, la tarjeta encogía a sus hijos; los de overflow no visible (barra de progreso, stepper de fases) llegaban a 0 px y el texto de estado se pintaba encima. Ahora `flex: 1 0 auto` + hijos `flex-shrink: 0`: la tarjeta crece y la columna se desplaza; si es corta sigue llenando la columna. Stepper: fases sin min-width fijo y etiquetas a `width: min-content` (antes la última etiqueta quedaba cortada tras un scroll horizontal invisible). Verificado en reproducción con el CSS real a 1366/1200 px y es/en/fr."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "landing-page + public-site",
+    "macrostructure": "sin cambios (corrección de contraste de los dos temas)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent) / oscuro cinematográfico propio",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "--gold servía a la vez de texto y de filete: nuevo rol --gold-text / --gold-text-hi (oscuro = dorado; claro = --ds-gold-ink) para todo color de texto, acento de casilla y contorno de foco; --gold queda para filetes, rellenos y halos. Tema oscuro: --white-faint .34→.57 y --white-dim .62→.74 (AA sobre --void…--panel-2 sin perder jerarquía). Landing: --danger-text (--ds-danger-on-dark / --ds-danger) para errores e icono 'mal'. Cabecera del tema claro con papel .9 + blur desde arriba (la navegación caía sobre la zona negra del vídeo). Etiquetas .pin a velo .9. `.tag` renombrada a `.scan-tag`: la utilidad global .tag del design system pintaba fondo beige en el tema oscuro (1:1). `.opt` sin opacidad extra; `.step-n` de color de filete a --white-faint. Verificado en navegador: 6 páginas×tema, 0 fallos sobre fondo sólido (mín 5,32:1) y por píxel sobre foto/vídeo (cabecera ≥6:1, pins ≥5,2:1)."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "system",
+    "macrostructure": "sin cambios (corrección de contraste del sistema, pasada 2)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "AA en todo texto e icono sobre fondo claro. --ds-ink-muted #7A7770→#615E58 (≥ 4.6:1 sobre cualquier fondo claro o -soft); nuevo --ds-ink-faint #7A7770 solo para adornos (≥ 3.2:1, nunca texto). Dorado claro/mostaza como texto o icono → --ds-gold-ink / --ds-warning-ink y texto verde → --ds-success-ink (360 declaraciones en 64 CSS; sidebar y panel oscuro del login excluidos). Eyebrows (.page-eyebrow/.eyebrow) en --ds-gold-ink. Tokens de borde usados como color (61): texto informativo → ink-muted, adornos → ink-faint. styles.css legacy: enlaces, .text-*, .btn-success/-warning/-outline-*, .btn-outline-danger (antes #dc3545 de Bootstrap), alertas, .badge/.text-bg-*, cabeceras de tabla y placeholders a tokens del sistema. lang-toggle con :host-context(.mobile-topbar) para la barra clara. Verificado: 2.749 declaraciones estáticas sin fallos y 71 elementos globales ≥ 4.80:1 en navegador."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "system",
+    "macrostructure": "sin cambios (corrección de contraste del sistema)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "Insignias/chips/alertas: el color semántico base sobre su propio fondo suave no pasaba AA (mostaza 2.66, dorado 2.50, oliva 4.00, pizarra 4.46). Nuevos tokens --ds-{success,warning,danger,info,gold}-ink (mismo tono OKLCH, ≥ 5:1 sobre su -soft/-faint y sobre bg/bg-alt/surface) documentados en tokens.css, DESIGN_GUIDELINES.md y design.md con la regla 'texto sobre -soft/-faint → -ink'. Aplicado a 476 declaraciones de texto en 59 CSS (reglas con fondo suave + color semántico; iconos, puntos y :disabled excluidos) + 6 casos con el fondo en regla aparte; insignias neutras ink-muted→ink-secondary. Bootstrap: --bs-*-text-emphasis → -ink, styles.css .text-*-emphasis legacy → -ink, y bg-X-subtle text-X → text-X-emphasis en plantillas/modelos. Verificado: 0 pares de texto < 4.5 en 808 revisados. Pendiente: 89 iconos decorativos < 3:1 y 39 leyendas ink-muted sobre bg-alt."
+  },
+  {
+    "date": "2026-10-15",
+    "scope": "app",
+    "macrostructure": "Workbench (client/dashboard · sin cambios de página; nueva sección ledger de contratos)",
+    "theme": "custom (locked: design.md · warm editorial · beige paper · gold accent)",
+    "theme_axes": "light / serif-display / warm-gold",
+    "enrichment": "none",
+    "brief": "client/dashboard · un expediente tiene varios contratos (uno por oferta adjudicada) y el panel solo leía uno con maybeSingle(). Nuevo componente ContratosExpedienteComponent (standalone, OnPush, input()) en formato libro de cuentas: una fila por contrato con constructor, servicios, estado, avance de obra % (seguimiento_obra) e importe, detalle plegable con <details> (contacto, fechas, garantía, descripción) y el costo total como línea de cierre (sin cancelados). En la rejilla de avance, la tarjeta de contrato único y la de obra se sustituyen por 'Avance de los contratos' = media simple del avance de obra de los vigentes. Texto pequeño en --ds-ink/-secondary (AA); el dorado queda en barras, fondos y subrayados de hover. Datos: ContratoRepository.findPanelClienteByExpedienteId + getSignedUrls (lote) y ContratoService.getPanelClienteExpediente. Pasada 2: calendario/historial y 'Fechas clave' usan todos los contratos (antes solo el más reciente): eventos por contrato con el constructor como subtítulo y el id en la clave de track; fechas clave agrupadas por contrato (encabezado .dash-date-group con el constructor) en orden de adjudicación. Se retira ContratoRepository.findHistorialByExpedienteId y ExpedienteService.getHistorialExpediente pasa a getOfertasHistorial."
+  },
+  {
     "date": "2026-08-16",
     "scope": "landing-page",
     "macrostructure": "sin cambios (redesign de la capa de medios y acentos del tema claro)",

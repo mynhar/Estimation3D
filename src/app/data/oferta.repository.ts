@@ -301,14 +301,6 @@ export class OfertaRepository {
     if (error) throw new Error(error.message);
   }
 
-  async aceptar(expedienteId: string, ofertaId: string): Promise<void> {
-    const { error } = await this.db.rpc('aceptar_oferta', {
-      p_expediente_id: expedienteId,
-      p_oferta_id:     ofertaId,
-    });
-    if (error) throw new Error(error.message);
-  }
-
   async rechazar(expedienteId: string, ofertaId: string): Promise<void> {
     const { error } = await this.db.rpc('rechazar_oferta', {
       p_expediente_id: expedienteId,

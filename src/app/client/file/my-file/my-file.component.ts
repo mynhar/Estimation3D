@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExpedienteService } from '../../../services/expediente.service';
@@ -6,19 +7,20 @@ import { OfertaService } from '../../../services/oferta.service';
 import { ArchivoService, TipoArchivo } from '../../../services/archivo.service';
 import { DocumentosClienteService, ArchivoVM } from '../../../services/documentos-cliente.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow } from '../../../models';
-import { ContratoRepository, ContratoClienteView } from '../../../data/contrato.repository';
+import { ExpedienteVistaCliente, OfertaConConstructor, ArchivoRow, ContratoPanelCliente } from '../../../models';
+import { ContratoService } from '../../../services/contrato.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { MatterportService } from '../../../services/matterport.service';
 import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
+import { ContratosExpedienteComponent } from '../../../shared/ui/contratos-expediente/contratos-expediente.component';
 
 
 @Component({
   selector: 'app-my-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, MatterportInfoComponent],
+  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, MatterportInfoComponent, ContratosExpedienteComponent],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',
 })
@@ -30,7 +32,7 @@ export class MyFileComponent implements OnInit {
   private archivoService    = inject(ArchivoService);
   private documentosService = inject(DocumentosClienteService);
   private auth              = inject(AuthSupabaseService);
-  private contratoRepo      = inject(ContratoRepository);
+  private contratoService   = inject(ContratoService);
   private matterportService = inject(MatterportService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
@@ -40,7 +42,10 @@ export class MyFileComponent implements OnInit {
   detalle        = signal<ExpedienteVistaCliente | null>(null);
   // Ficha de la propiedad escaneada (Matterport), solo lectura.
   matterportModelos = signal<MatterportModelo[]>([]);
-  ofertaAceptada = signal<OfertaConConstructor | null>(null);
+  // Ofertas aceptadas: una por constructor seleccionado. Administración puede
+  // adjudicar varias a la vez (un contrato por oferta), así que no hay "la"
+  // oferta aceptada sino una lista.
+  ofertasSeleccionadas = signal<OfertaConConstructor[]>([]);
   fotos          = signal<ArchivoRow[]>([]);
   // "Fotos del sitio" / "Documentos técnicos": archivos del expediente de TODAS
   // las fuentes (expediente, oferta, contrato, obra) y roles — paridad con
@@ -49,13 +54,13 @@ export class MyFileComponent implements OnInit {
   documentosVM   = signal<ArchivoVM[]>([]);
   videos         = signal<ArchivoRow[]>([]);
   documentos     = signal<ArchivoRow[]>([]);
-  contrato       = signal<ContratoClienteView | null>(null);
+  // Todos los contratos del expediente, cancelados incluidos.
+  contratos      = signal<ContratoPanelCliente[]>([]);
   fotoAmpliada   = signal<string | null>(null);
   cargando       = signal(true);
   errorMsg       = signal('');
   subiendo        = signal<TipoArchivo | null>(null);
   errorSubida     = signal('');
-  contratoPdfUrl  = signal<string | null>(null);
   currentUserId   = signal<string | null>(null);
   eliminando      = signal<string | null>(null);
 
@@ -67,12 +72,12 @@ export class MyFileComponent implements OnInit {
   otrosVideos = computed(() => this.videos().filter(f => f.subido_por !== this.currentUserId()));
 
   readonly ESTADO_CFG: Record<string, { clase: string; icono: string }> = {
-    nuevo:         { clase: 'bg-primary-subtle text-primary',            icono: 'bi-inbox' },
+    nuevo:         { clase: 'bg-primary-subtle text-primary-emphasis',            icono: 'bi-inbox' },
     en_estimacion: { clase: 'bg-info-subtle text-info-emphasis',         icono: 'bi-clipboard2-pulse' },
-    estimado:      { clase: 'bg-success-subtle text-success',            icono: 'bi-check-circle' },
+    estimado:      { clase: 'bg-success-subtle text-success-emphasis',            icono: 'bi-check-circle' },
     en_oferta:     { clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-cash-coin' },
     adjudicado:    { clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-trophy' },
-    contratado:    { clase: 'bg-success-subtle text-success',            icono: 'bi-file-earmark-check' },
+    contratado:    { clase: 'bg-success-subtle text-success-emphasis',            icono: 'bi-file-earmark-check' },
     cancelado:     { clase: 'bg-secondary-subtle text-secondary',        icono: 'bi-x-circle' },
   };
 
@@ -130,25 +135,24 @@ export class MyFileComponent implements OnInit {
     this.cargarMatterport();
 
     try {
-      const [detalle, ofertas, archivos, contrato, { data: { user } }] = await Promise.all([
+      const [detalle, ofertas, archivos, contratos, { data: { user } }] = await Promise.all([
         this.expedienteService.getVistaParaCliente(id),
         this.ofertaService.getOfertasDeExpediente(id),
         this.archivoService.cargarTodos(id),
-        this.contratoRepo.findForClientByExpedienteId(id),
+        // Un fallo en los contratos no debe tumbar la ficha.
+        this.contratoService.getPanelClienteExpediente(id).catch((e: any) => {
+          console.error('[MyFile] contratos:', e?.message);
+          return [] as ContratoPanelCliente[];
+        }),
         this.auth.client.auth.getUser(),
       ]);
       this.currentUserId.set(user?.id ?? null);
       this.detalle.set(detalle);
-      this.ofertaAceptada.set(ofertas.find(o => o.estado === 'aceptada') ?? null);
+      this.ofertasSeleccionadas.set(ofertas.filter(o => o.estado === 'aceptada' && !o.eliminada_en));
       this.fotos.set(archivos.fotos);
       this.videos.set(archivos.videos);
       this.documentos.set(archivos.documentos);
-      this.contrato.set(contrato);
-      if (contrato?.url_pdf) {
-        this.contratoRepo.getSignedUrl(contrato.url_pdf)
-          .then(url => this.contratoPdfUrl.set(url))
-          .catch(() => {});
-      }
+      this.contratos.set(contratos);
       await this.cargarArchivosVM();
     } catch (e: any) {
       console.error('[MyFile]', e.message);

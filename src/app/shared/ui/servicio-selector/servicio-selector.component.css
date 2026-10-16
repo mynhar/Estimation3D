@@ -94,7 +94,7 @@
   flex-shrink: 0;
   transition: var(--ds-transition-color);
 }
-.srv-card--selected .srv-icon { background: var(--ds-gold-soft); color: var(--ds-gold-active); }
+.srv-card--selected .srv-icon { background: var(--ds-gold-soft); color: var(--ds-gold-ink); }
 
 .srv-text { flex: 1 1 auto; min-width: 0; }
 .srv-name {

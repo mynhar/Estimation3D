@@ -19,7 +19,7 @@
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.75rem; color: var(--ds-gold-active);
+  font-size: 1.75rem; color: var(--ds-gold-ink);
 }
 
 .empty-title {
@@ -34,7 +34,7 @@
 .btn-back {
   display: inline-flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; border-radius: 50%;
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft);
   cursor: pointer; flex-shrink: 0; font-size: var(--ds-text-sm);
   transition: background var(--ds-duration-fast) var(--ds-ease-out);
@@ -45,7 +45,7 @@
   font-family: var(--ds-font-mono);
   font-size: var(--ds-text-xs); font-weight: var(--ds-weight-bold);
   letter-spacing: 0.05em;
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   padding: 0.15em 0.55em; border-radius: var(--ds-radius-sm);
 }
 
@@ -57,9 +57,9 @@
   border-radius: var(--ds-radius-pill);
   border: 1px solid transparent; white-space: nowrap;
 }
-.estado-badge--pending  { background: var(--ds-warning-soft); color: var(--ds-warning);  border-color: rgba(184, 134, 46, 0.3); }
-.estado-badge--accepted { background: var(--ds-success-soft); color: var(--ds-success);  border-color: rgba(91, 122, 79, 0.3); }
-.estado-badge--rejected { background: var(--ds-danger-soft);  color: var(--ds-danger);   border-color: rgba(161, 69, 69, 0.3); }
+.estado-badge--pending  { background: var(--ds-warning-soft); color: var(--ds-warning-ink);  border-color: rgba(184, 134, 46, 0.3); }
+.estado-badge--accepted { background: var(--ds-success-soft); color: var(--ds-success-ink);  border-color: rgba(91, 122, 79, 0.3); }
+.estado-badge--rejected { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);   border-color: rgba(161, 69, 69, 0.3); }
 
 /* ── Header state variants ──────────────────────────────────────────── */
 .header--accepted { border-left: 3px solid var(--ds-success) !important; }
@@ -77,7 +77,7 @@
   display: block;
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-2xl); font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active); line-height: 1;
+  color: var(--ds-gold-ink); line-height: 1;
 }
 .price-hero__sub {
   display: block;
@@ -118,11 +118,11 @@
   display: flex; align-items: center; justify-content: center;
   font-size: var(--ds-text-sm); margin-top: 0.15rem;
 }
-.context-icon--service  { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.context-icon--service  { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); }
 .context-icon--location { background: var(--ds-danger-soft);  color: var(--ds-danger); }
 .context-icon--date     { background: var(--ds-info-soft);    color: var(--ds-info); }
 .context-icon--visit    { background: var(--ds-success-soft); color: var(--ds-success); }
-.context-icon--warn     { background: var(--ds-warning-soft); color: var(--ds-warning); }
+.context-icon--warn     { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
 
 .context-content { flex: 1; min-width: 0; }
 .context-label {
@@ -171,14 +171,14 @@
   border-bottom: 2px solid transparent; white-space: nowrap;
   transition: color var(--ds-duration-fast) var(--ds-ease-out);
 }
-.media-tab:hover   { color: var(--ds-gold-active); }
-.media-tab--active { color: var(--ds-gold-active); border-bottom-color: var(--ds-gold); }
+.media-tab:hover   { color: var(--ds-gold-ink); }
+.media-tab--active { color: var(--ds-gold-ink); border-bottom-color: var(--ds-gold); }
 
 .media-tab__count {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 18px; height: 18px;
   font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-bold);
-  background: var(--ds-gold-faint); color: var(--ds-gold-active);
+  background: var(--ds-gold-faint); color: var(--ds-gold-ink);
   border-radius: var(--ds-radius-pill); padding: 0 4px;
 }
 
@@ -226,7 +226,7 @@
 .tour-label {
   font-size: var(--ds-text-xs); font-weight: var(--ds-weight-bold);
   letter-spacing: 0.07em; text-transform: uppercase;
-  color: var(--ds-gold-active); margin: 0 0 0.4rem;
+  color: var(--ds-gold-ink); margin: 0 0 0.4rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -252,7 +252,7 @@
   font-size: var(--ds-text-sm); flex-shrink: 0;
 }
 .file-row__icon--doc   { background: var(--ds-danger-soft);  color: var(--ds-danger); }
-.file-row__icon--video { background: var(--ds-gold-faint);   color: var(--ds-gold-active); }
+.file-row__icon--video { background: var(--ds-gold-faint);   color: var(--ds-gold-ink); }
 
 .file-row__info { flex: 1; min-width: 0; }
 .file-row__name {
@@ -291,7 +291,7 @@
 .video-toggle-btn:hover { background: var(--ds-bg-alt); color: var(--ds-ink); }
 .video-toggle-btn--active {
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border-color: var(--ds-gold-soft);
 }
 
@@ -354,7 +354,7 @@
 .price-block__value {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-3xl); font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active); line-height: 1;
+  color: var(--ds-gold-ink); line-height: 1;
   letter-spacing: var(--ds-tracking-tight);
   margin-bottom: 0;
 }
@@ -392,9 +392,9 @@
   margin-bottom: 0.15rem;
 }
 .estado-banner__sub { font-size: var(--ds-text-xs); margin-bottom: 0; line-height: 1.5; }
-.estado-banner--accepted { background: var(--ds-success-soft); border-color: rgba(91, 122, 79, 0.3);   color: var(--ds-success); }
+.estado-banner--accepted { background: var(--ds-success-soft); border-color: rgba(91, 122, 79, 0.3);   color: var(--ds-success-ink); }
 .estado-banner--rejected { background: var(--ds-bg-alt);       border-color: var(--ds-border);          color: var(--ds-ink-secondary); }
-.estado-banner--pending  { background: var(--ds-gold-faint);   border-color: var(--ds-gold-soft);       color: var(--ds-warning); }
+.estado-banner--pending  { background: var(--ds-gold-faint);   border-color: var(--ds-gold-soft);       color: var(--ds-warning-ink); }
 
 /* ── Edit button (primary gold) ─────────────────────────────────────── */
 .btn-edit {

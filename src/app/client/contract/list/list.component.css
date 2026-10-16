@@ -20,7 +20,7 @@
   font-weight: var(--ds-weight-semibold);
   letter-spacing: var(--ds-tracking-widest);
   text-transform: uppercase;
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   margin: 0 0 var(--ds-space-1);
 }
 .cl-title {
@@ -68,36 +68,17 @@
 .cl-list--dim .ct { opacity: 0.82; }
 .cl-list--dim .ct:hover { opacity: 1; }
 
-/* ── Sección Finalizados ── */
-.cl-finished { display: flex; flex-direction: column; gap: var(--ds-space-4); }
-.cl-finished__head {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-2);
-  width: 100%;
-  padding: var(--ds-space-3) var(--ds-space-4);
-  background: var(--ds-bg-alt);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-md);
-  cursor: pointer;
-  color: var(--ds-ink-secondary);
-  font-family: var(--ds-font-body);
-  transition: background var(--ds-duration-fast) var(--ds-ease-out);
+/* ── Acordeón por expediente (app-expediente-panel, como Mis documentos) ── */
+.cl-accordion { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.cl-meta { display: inline-flex; align-items: center; gap: var(--ds-space-3); flex-wrap: wrap; }
+.cl-meta__item { display: inline-flex; align-items: center; gap: var(--ds-space-1); white-space: nowrap; }
+.cl-meta__value {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-base);
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
 }
-.cl-finished__head:hover { background: var(--ds-border-subtle); }
-.cl-finished__head:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
-.cl-finished__head > .bi { color: var(--ds-ink-muted); }
-.cl-finished__title { font-size: var(--ds-text-sm); font-weight: var(--ds-weight-semibold); }
-.cl-finished__count {
-  font-size: var(--ds-text-2xs);
-  font-weight: var(--ds-weight-bold);
-  color: var(--ds-ink-muted);
-  background: var(--ds-surface);
-  border: 1px solid var(--ds-border);
-  border-radius: var(--ds-radius-pill);
-  padding: 1px var(--ds-space-2);
-}
-.cl-finished__chev { margin-left: auto; color: var(--ds-ink-muted); }
+.cl-meta__obra { font-size: var(--ds-text-2xs); gap: 4px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CONTRACT CARD (value-led)
@@ -138,7 +119,7 @@
   height: 46px;
   border-radius: var(--ds-radius-circle);
   background: var(--ds-gold-soft);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-base);
   font-weight: var(--ds-weight-semibold);
@@ -170,11 +151,22 @@
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-bold);
   letter-spacing: var(--ds-tracking-wide);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
   border: 1px solid var(--ds-gold-soft);
   border-radius: var(--ds-radius-sm);
   padding: 0 0.45em;
+}
+.ct__status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--ds-space-1);
+}
+/* «Obra terminada al 100 %»: .tag/.tag-gold del sistema; aquí solo encaje. */
+.ct__obra {
+  font-size: var(--ds-text-2xs);
+  white-space: nowrap;
 }
 .ct__badge {
   display: inline-flex;
@@ -186,11 +178,11 @@
   border-radius: var(--ds-radius-pill);
   white-space: nowrap;
 }
-.ct__badge--generado     { background: var(--ds-warning-soft); color: var(--ds-warning); }
-.ct__badge--firmado      { background: var(--ds-success-soft); color: var(--ds-success); }
-.ct__badge--en_ejecucion { background: var(--ds-info-soft);    color: var(--ds-info); }
-.ct__badge--completado   { background: var(--ds-success-soft); color: var(--ds-success); }
-.ct__badge--cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-muted); border: 1px solid var(--ds-border); }
+.ct__badge--generado     { background: var(--ds-warning-soft); color: var(--ds-warning-ink); }
+.ct__badge--firmado      { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.ct__badge--en_ejecucion { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
+.ct__badge--completado   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.ct__badge--cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border: 1px solid var(--ds-border); }
 
 /* Body: cifras + contacto */
 .ct__body {
@@ -224,7 +216,7 @@
 .ct__fact--price .ct__fact-val {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-3xl);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   line-height: 1;
 }
 
@@ -238,8 +230,8 @@
 .ct__meta-item { display: inline-flex; align-items: center; gap: var(--ds-space-1); }
 .ct__meta-item .bi { color: var(--ds-ink-muted); }
 .ct__link { color: var(--ds-ink-secondary); text-decoration: none; transition: color var(--ds-duration-fast) var(--ds-ease-out); }
-.ct__link:hover { color: var(--ds-gold-active); }
-.ct__link:hover .bi { color: var(--ds-gold-active); }
+.ct__link:hover { color: var(--ds-gold-ink); }
+.ct__link:hover .bi { color: var(--ds-gold-ink); }
 
 .ct__desc {
   font-size: var(--ds-text-sm);
@@ -270,7 +262,7 @@
   color: var(--ds-ink-muted);
 }
 .ct__date strong { color: var(--ds-ink-secondary); font-weight: var(--ds-weight-semibold); }
-.ct__date--signed, .ct__date--signed strong, .ct__date--signed .bi { color: var(--ds-success); }
+.ct__date--signed, .ct__date--signed strong, .ct__date--signed .bi { color: var(--ds-success-ink); }
 .ct__actions { display: flex; align-items: center; gap: var(--ds-space-2); flex-wrap: wrap; }
 
 /* ── Skeleton ── */
@@ -311,7 +303,7 @@
   border-radius: var(--ds-radius-circle);
   background: var(--ds-bg-alt);
   border: 1px solid var(--ds-border);
-  color: var(--ds-gold);
+  color: var(--ds-gold-ink);
   display: grid;
   place-items: center;
   font-size: 1.7rem;
@@ -342,7 +334,7 @@
 .btn-dl:hover:not(:disabled) { background: var(--ds-bg-alt); color: var(--ds-ink); }
 .btn-dl:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.btn-pdf { background: var(--ds-gold-faint); border: 1.5px solid var(--ds-gold-soft); color: var(--ds-gold-active); font-weight: var(--ds-weight-semibold); }
+.btn-pdf { background: var(--ds-gold-faint); border: 1.5px solid var(--ds-gold-soft); color: var(--ds-gold-ink); font-weight: var(--ds-weight-semibold); }
 .btn-pdf:hover, .btn-pdf--open { background: var(--ds-gold-soft); border-color: var(--ds-gold); }
 
 .btn-sign { background: var(--ds-gold); border: none; color: var(--ds-ink); font-weight: var(--ds-weight-semibold); }
@@ -353,6 +345,14 @@
 .btn-cancel-action { background: transparent; border: 1px solid var(--ds-danger); color: var(--ds-danger); }
 .btn-cancel-action:hover:not(:disabled) { background: var(--ds-danger-soft); }
 .btn-cancel-action:disabled { opacity: 0.55; cursor: not-allowed; }
+/* Motivo del botón desactivado (obra terminada al 100 %). */
+.ct__cancel-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+}
 
 .btn-dl:focus-visible, .btn-pdf:focus-visible, .btn-cancel-action:focus-visible { outline: var(--ds-focus-ring); outline-offset: 2px; }
 
@@ -387,7 +387,7 @@
 /* ═══════════ SIGN PANEL ═══════════ */
 .sign-panel { background: var(--ds-gold-faint); border-top: 2px solid var(--ds-gold-soft); padding: var(--ds-space-5); animation: slideDown var(--ds-duration-base) var(--ds-ease-out); }
 .sign-panel-header { display: flex; align-items: flex-start; gap: var(--ds-space-3); margin-bottom: var(--ds-space-4); }
-.sign-panel-icon { width: 38px; height: 38px; background: var(--ds-gold-soft); color: var(--ds-gold-active); border-radius: var(--ds-radius-circle); display: grid; place-items: center; flex-shrink: 0; }
+.sign-panel-icon { width: 38px; height: 38px; background: var(--ds-gold-soft); color: var(--ds-gold-ink); border-radius: var(--ds-radius-circle); display: grid; place-items: center; flex-shrink: 0; }
 .sign-panel-title { font-family: var(--ds-font-display); font-size: var(--ds-text-base); font-weight: var(--ds-weight-medium); color: var(--ds-ink); margin: 0 0 var(--ds-space-1); }
 .sign-panel-sub { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); margin: 0; }
 .sign-summary { display: flex; flex-wrap: wrap; gap: var(--ds-space-3); background: var(--ds-surface); border: 1px solid var(--ds-gold-soft); border-radius: var(--ds-radius-md); padding: var(--ds-space-3) var(--ds-space-4); margin-bottom: var(--ds-space-3); }
@@ -459,5 +459,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sign-panel, .pdf-viewer-wrap, .cancel-panel { animation: none; }
-  .cl-finished__head, .ct, .btn-dl, .btn-pdf, .btn-sign, .btn-cancel-action { transition-duration: 1ms; }
+  .ct, .btn-dl, .btn-pdf, .btn-sign, .btn-cancel-action { transition-duration: 1ms; }
 }

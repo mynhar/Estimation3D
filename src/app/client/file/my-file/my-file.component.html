@@ -429,6 +429,12 @@
 
     </section>
 
+    <!-- ── Contratos del expediente: todos (uno por constructor), con el
+         avance de su obra y el costo total. Misma pieza que el dashboard. ── -->
+    @if (contratos().length > 0) {
+      <app-contratos-expediente class="mb-4" [contratos]="contratos()" />
+    }
+
     <!-- ── Propiedad escaneada (Matterport) ───────────────────────── -->
     @if (matterportModelos().length) {
       <div class="mb-4">
@@ -1056,7 +1062,7 @@
       <div class="col-lg-4">
         <div class="sidebar-sticky d-flex flex-column gap-4">
 
-          @if (ofertaAceptada()) {
+          @if (ofertasSeleccionadas().length > 0) {
             <div class="detail-card">
               <div class="detail-card__head">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -1066,89 +1072,131 @@
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span class="section-label">{{ 'offer.selected_builder' | translate }}</span>
+                <span class="section-label">
+                  @if (ofertasSeleccionadas().length === 1) {
+                    {{ 'offer.selected_builder' | translate }}
+                  } @else {
+                    {{ 'offer.selected_builders' | translate }}
+                  }
+                </span>
+                @if (ofertasSeleccionadas().length > 1) {
+                  <span class="archivo-count ms-auto">{{ ofertasSeleccionadas().length }}</span>
+                }
               </div>
               <div class="detail-card__body">
 
-                <div class="constructor-chip mb-3">
-                  <div class="constructor-avatar" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="constructor-nombre mb-0">{{ ofertaAceptada()!.constructor_nombre }}</p>
-                    @if (ofertaAceptada()!.constructor_telefono) {
-                      <a href="tel:{{ ofertaAceptada()!.constructor_telefono }}" class="contact-link">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                <!-- Una entrada por constructor seleccionado (oferta aceptada). Con
+                     varios, la propuesta y los archivos de cada uno van plegados para
+                     que la columna no se dispare de alto. -->
+                @for (o of ofertasSeleccionadas(); track o.id; let first = $first) {
+                  @if (!first) {
+                    <hr class="detail-divider offer-sep" />
+                  }
+                  <div class="offer-item">
+                    <div class="constructor-chip mb-3">
+                      <div class="constructor-avatar" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                              fill="none" stroke="currentColor" stroke-width="1.5"
-                             stroke-linecap="round" stroke-linejoin="round" class="me-1" aria-hidden="true">
-                          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                          <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        {{ ofertaAceptada()!.constructor_telefono }}
-                      </a>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="constructor-nombre mb-0">{{ o.constructor_nombre }}</p>
+                        @if (o.constructor_telefono) {
+                          <a href="tel:{{ o.constructor_telefono }}" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" class="me-1" aria-hidden="true">
+                              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                            {{ o.constructor_telefono }}
+                          </a>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="precio-block">
+                      <p class="info-label mb-1">{{ 'offer.agreed_price' | translate }}</p>
+                      <p class="precio-valor mb-0">{{ formatCosto(o.precio) }}</p>
+                    </div>
+
+                    <hr class="detail-divider my-4" />
+
+                    <div class="row g-3">
+                      <div class="col-6">
+                        <p class="info-label">{{ 'offer.deadline' | translate }}</p>
+                        <p class="info-value">
+                          @if (o.plazo_semanas_min !== null && o.plazo_semanas_max !== null) {
+                            {{ o.plazo_semanas_min }}–{{ o.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
+                          } @else if (o.plazo_semanas_min !== null) {
+                            {{ o.plazo_semanas_min }} {{ 'offer.weeks' | translate }}
+                          } @else { — }
+                        </p>
+                      </div>
+                      <div class="col-6">
+                        <p class="info-label">{{ 'offer.warranty' | translate }}</p>
+                        <p class="info-value">
+                          @if (o.garantia_anos !== null) {
+                            {{ o.garantia_anos }} {{ 'offer.years' | translate }}
+                          } @else { — }
+                        </p>
+                      </div>
+                      <div class="col-12">
+                        <p class="info-label">{{ 'offer.start_date' | translate }}</p>
+                        <p class="info-value">{{ formatFecha(o.fecha_inicio) }}</p>
+                      </div>
+                      @if (o.constructor_email) {
+                        <div class="col-12">
+                          <p class="info-label">{{ 'offer.email' | translate }}</p>
+                          <a href="mailto:{{ o.constructor_email }}" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" class="me-1" aria-hidden="true">
+                              <rect width="20" height="16" x="2" y="4" rx="2"/>
+                              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                            </svg>
+                            {{ o.constructor_email }}
+                          </a>
+                        </div>
+                      }
+                    </div>
+
+
+                    @if (o.descripcion || o.documentos.length > 0 || o.videos.length > 0) {
+                      @if (ofertasSeleccionadas().length === 1) {
+                        <hr class="detail-divider my-4" />
+                        <ng-container [ngTemplateOutlet]="ofertaExtra" [ngTemplateOutletContext]="{ $implicit: o }" />
+                      } @else {
+                        <details class="offer-more">
+                          <summary class="offer-more__summary">
+                            <i class="bi bi-chevron-right offer-more__chevron" aria-hidden="true"></i>
+                            {{ 'offer.proposal_and_files' | translate }}
+                          </summary>
+                          <div class="offer-more__body">
+                            <ng-container [ngTemplateOutlet]="ofertaExtra" [ngTemplateOutletContext]="{ $implicit: o }" />
+                          </div>
+                        </details>
+                      }
                     }
                   </div>
-                </div>
+                }
 
-                <div class="precio-block">
-                  <p class="info-label mb-1">{{ 'offer.agreed_price' | translate }}</p>
-                  <p class="precio-valor mb-0">{{ formatCosto(ofertaAceptada()!.precio) }}</p>
-                </div>
+              </div>
+            </div>
 
-                <hr class="detail-divider my-4" />
-
-                <div class="row g-3">
-                  <div class="col-6">
-                    <p class="info-label">{{ 'offer.deadline' | translate }}</p>
-                    <p class="info-value">
-                      @if (ofertaAceptada()!.plazo_semanas_min !== null && ofertaAceptada()!.plazo_semanas_max !== null) {
-                        {{ ofertaAceptada()!.plazo_semanas_min }}–{{ ofertaAceptada()!.plazo_semanas_max }} {{ 'offer.weeks' | translate }}
-                      } @else if (ofertaAceptada()!.plazo_semanas_min !== null) {
-                        {{ ofertaAceptada()!.plazo_semanas_min }} {{ 'offer.weeks' | translate }}
-                      } @else { — }
-                    </p>
-                  </div>
-                  <div class="col-6">
-                    <p class="info-label">{{ 'offer.warranty' | translate }}</p>
-                    <p class="info-value">
-                      @if (ofertaAceptada()!.garantia_anos !== null) {
-                        {{ ofertaAceptada()!.garantia_anos }} {{ 'offer.years' | translate }}
-                      } @else { — }
-                    </p>
-                  </div>
-                  <div class="col-12">
-                    <p class="info-label">{{ 'offer.start_date' | translate }}</p>
-                    <p class="info-value">{{ formatFecha(ofertaAceptada()!.fecha_inicio) }}</p>
-                  </div>
-                  @if (ofertaAceptada()!.descripcion) {
-                    <div class="col-12">
-                      <hr class="detail-divider" />
-                      <p class="info-label mt-3">{{ 'offer.approach' | translate }}</p>
-                      <p class="descripcion-block">{{ ofertaAceptada()!.descripcion }}</p>
-                    </div>
+            <!-- Propuesta y archivos de una oferta: visibles con un solo constructor,
+                 plegables (offer-more) con varios. -->
+            <ng-template #ofertaExtra let-o>
+                @if (o.descripcion) {
+                  <p class="info-label">{{ 'offer.approach' | translate }}</p>
+                  <p class="descripcion-block">{{ o.descripcion }}</p>
+                }
+                @if (o.documentos.length > 0) {
+                  @if (o.descripcion) {
+                    <hr class="detail-divider my-4" />
                   }
-                  @if (ofertaAceptada()!.constructor_email) {
-                    <div class="col-12">
-                      <p class="info-label">{{ 'offer.email' | translate }}</p>
-                      <a href="mailto:{{ ofertaAceptada()!.constructor_email }}" class="contact-link">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="1.5"
-                             stroke-linecap="round" stroke-linejoin="round" class="me-1" aria-hidden="true">
-                          <rect width="20" height="16" x="2" y="4" rx="2"/>
-                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                        </svg>
-                        {{ ofertaAceptada()!.constructor_email }}
-                      </a>
-                    </div>
-                  }
-                </div>
-
-                @if (ofertaAceptada()!.documentos.length > 0) {
-                  <hr class="detail-divider my-4" />
                   <div class="d-flex align-items-center gap-2 mb-3">
                     <p class="section-label mb-0">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -1161,10 +1209,10 @@
                       </svg>
                       {{ 'file.constructor_docs' | translate }}
                     </p>
-                    <span class="archivo-count">{{ ofertaAceptada()!.documentos.length }}</span>
+                    <span class="archivo-count">{{ o.documentos.length }}</span>
                   </div>
                   <div class="doc-list">
-                    @for (doc of ofertaAceptada()!.documentos; track doc.id) {
+                    @for (doc of o.documentos; track doc.id) {
                       <div class="file-row">
                         <div class="file-row__icon" aria-hidden="true">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -1196,8 +1244,10 @@
                   </div>
                 }
 
-                @if (ofertaAceptada()!.videos.length > 0) {
-                  <hr class="detail-divider my-4" />
+                @if (o.videos.length > 0) {
+                  @if (o.descripcion || o.documentos.length > 0) {
+                    <hr class="detail-divider my-4" />
+                  }
                   <div class="d-flex align-items-center gap-2 mb-3">
                     <p class="section-label mb-0">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -1209,10 +1259,10 @@
                       </svg>
                       {{ 'file.constructor_videos' | translate }}
                     </p>
-                    <span class="archivo-count">{{ ofertaAceptada()!.videos.length }}</span>
+                    <span class="archivo-count">{{ o.videos.length }}</span>
                   </div>
                   <div class="doc-list">
-                    @for (v of ofertaAceptada()!.videos; track v.id) {
+                    @for (v of o.videos; track v.id) {
                       <div class="file-row">
                         <div class="file-row__icon" aria-hidden="true">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -1243,8 +1293,7 @@
                   </div>
                 }
 
-              </div>
-            </div>
+            </ng-template>
 
           } @else if (detalle()!.estado === 'en_oferta') {
             <div class="pending-card">
@@ -1285,85 +1334,6 @@
               </div>
               <p class="pending-card__title">{{ 'file.no_builder' | translate }}</p>
               <p class="pending-card__text mb-0">{{ 'file.waiting_offers' | translate }}</p>
-            </div>
-          }
-
-          @if (contrato()) {
-            <div class="detail-card">
-              <div class="detail-card__head">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="1.5"
-                     stroke-linecap="round" stroke-linejoin="round"
-                     class="section-label__icon me-2" aria-hidden="true">
-                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                  <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                  <path d="m9 15 2 2 4-4"/>
-                </svg>
-                <span class="section-label">{{ 'file.contract' | translate }}</span>
-              </div>
-              <div class="detail-card__body">
-
-                <div class="mb-3">
-                  <p class="info-label mb-2">{{ 'dashboard_client.contract_status' | translate }}</p>
-                  <span class="badge rounded-pill px-3 py-1
-                    {{ contrato()!.estado === 'firmado' || contrato()!.estado === 'completado'
-                        ? 'bg-success-subtle text-success'
-                        : contrato()!.estado === 'cancelado'
-                          ? 'bg-secondary-subtle text-secondary'
-                          : 'bg-warning-subtle text-warning-emphasis' }}">
-                    {{ ('contrato_estado.' + contrato()!.estado) | translate }}
-                  </span>
-                </div>
-
-                <div class="precio-block mb-3">
-                  <p class="info-label mb-1">{{ 'dashboard_client.contract_price' | translate }}</p>
-                  <p class="precio-valor mb-0">{{ formatCosto(contrato()!.precio_final) }}</p>
-                </div>
-
-                @if (contrato()!.garantia_anos !== null) {
-                  <div class="mb-3">
-                    <p class="info-label">{{ 'offer.warranty' | translate }}</p>
-                    <p class="info-value">{{ contrato()!.garantia_anos }} {{ 'offer.years' | translate }}</p>
-                  </div>
-                }
-
-                <hr class="detail-divider" />
-
-                <div class="row g-3 mt-1">
-                  <div class="col-12">
-                    <p class="info-label">{{ 'admin_contract_detail.generado_en' | translate }}</p>
-                    <p class="info-value">{{ formatFecha(contrato()!.generado_en) }}</p>
-                  </div>
-                  @if (contrato()!.firmado_en) {
-                    <div class="col-12">
-                      <p class="info-label">{{ 'admin_contract_detail.firmado_en' | translate }}</p>
-                      <p class="info-value">{{ formatFecha(contrato()!.firmado_en) }}</p>
-                    </div>
-                  }
-                </div>
-
-                @if (contrato()!.descripcion_trabajo) {
-                  <hr class="detail-divider my-3" />
-                  <p class="info-label">{{ 'dashboard_client.work_description' | translate }}</p>
-                  <p class="descripcion-block mb-0">{{ contrato()!.descripcion_trabajo }}</p>
-                }
-
-                @if (contratoPdfUrl()) {
-                  <hr class="detail-divider my-3" />
-                  <a [href]="contratoPdfUrl()!" target="_blank" rel="noopener"
-                     class="btn-file-open w-100 justify-content-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" x2="12" y1="15" y2="3"/>
-                    </svg>
-                    {{ 'contract_list.view_pdf' | translate }}
-                  </a>
-                }
-
-              </div>
             </div>
           }
 

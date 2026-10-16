@@ -26,11 +26,21 @@ to it. Amend intentionally — the file is the rule.
   --ds-surface:       oklch(98.5% 0.005 95);  /* #FBFAF6 tarjetas, paneles   */
   --ds-ink:           oklch(21.8% 0.000 90);  /* #1A1A1A texto principal     */
   --ds-ink-secondary: oklch(40.9% 0.000 90);  /* #4A4A4A texto secundario    */
-  --ds-ink-muted:     oklch(57.0% 0.011 88);  /* #7A7770 captions, hints     */
+  --ds-ink-muted:     oklch(48.3% 0.010 85);  /* #615E58 captions, hints (AA) */
+  --ds-ink-faint:     oklch(57.0% 0.011 88);  /* #7A7770 solo adornos ≥3:1, nunca texto */
   --ds-gold:          oklch(79.3% 0.100 90);  /* #D4B96E acento dorado       */
   --ds-gold-hover:    oklch(73.8% 0.101 91);  /* #C2A85C hover botones       */
-  --ds-gold-active:   oklch(68.1% 0.101 91);  /* #B0964A activos, links      */
+  --ds-gold-active:   oklch(68.1% 0.101 91);  /* #B0964A rellenos activos — no texto */
   --ds-border:        oklch(92.2% 0.012 92);  /* #E8E5DC bordes estándar     */
+
+  /* Texto sobre fondos suaves (insignias, chips, alertas): ≥ 5:1 AA.
+     Regla: texto sobre -soft / -faint → -ink. El color base queda para
+     rellenos, barras, bordes e iconos.                                   */
+  --ds-success-ink:   oklch(48.9% 0.073 137); /* #4C6A40 sobre success-soft */
+  --ds-warning-ink:   oklch(50.2% 0.108 71);  /* #8A5700 sobre warning-soft */
+  --ds-danger-ink:    oklch(48.7% 0.123 23);  /* #993E3E sobre danger-soft  */
+  --ds-info-ink:      oklch(48.0% 0.045 228); /* #426372 sobre info-soft    */
+  --ds-gold-ink:      oklch(46.3% 0.090 85);  /* #70540C sobre gold-faint/-soft */
 
   --ds-font-display: "Fraunces", ui-serif, Georgia, serif;
   --ds-font-body:    "DM Sans", ui-sans-serif, system-ui, sans-serif;
@@ -69,6 +79,12 @@ referencian vía su capa local `--sb-*` / `--lg-*` (nunca hex crudo):
 - PROHIBIDO: `300ms ease` por reflejo — usar tokens de duración.
 
 ## Hard bans (gates adicionales heredados del proyecto)
+- Texto en color semántico base sobre su propio fondo suave (`--ds-success` sobre
+  `--ds-success-soft`, `--ds-gold-active` sobre `--ds-gold-faint`…): usar `-ink`
+- Tokens de borde (`--ds-border*`, `--ds-gold-soft`) como color de texto/icono:
+  texto → `--ds-ink-muted`, adorno → `--ds-ink-faint`
+- Dorado claro o mostaza como texto/icono sobre fondo claro (1.6–3.1:1): usar
+  `--ds-gold-ink` / `--ds-warning-ink`. Solo sobre superficies oscuras va el dorado claro
 - Fondos negros (#000) · Bootstrap defaults sin override (#0d6efd, #6c757d)
 - Gradientes morado-rosa · Inter/Roboto/Arial como principal
 - Iconos filled · emojis decorativos · sombras rgba(0,0,0,..)

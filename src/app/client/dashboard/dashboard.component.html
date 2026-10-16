@@ -443,7 +443,13 @@
                 }
               }
 
-              @if (contratoHistorial(); as c) {
+              <!-- Un bloque por contrato, en el orden en que se adjudicaron -->
+              @for (c of contratosCronologicos(); track c.id) {
+                <p class="dash-date-group">
+                  <i class="bi bi-building" aria-hidden="true"></i>
+                  {{ c.constructor_nombre }}
+                </p>
+
                 <div class="dash-date">
                   <span class="dash-date__key">
                     <i class="bi bi-handshake" aria-hidden="true"></i>
@@ -462,13 +468,13 @@
                   </div>
                 }
 
-                @if (c.oferta?.fecha_inicio) {
+                @if (c.fecha_inicio) {
                   <div class="dash-date">
                     <span class="dash-date__key">
                       <i class="bi bi-hammer" aria-hidden="true"></i>
                       {{ 'timeline.works_started' | translate }}
                     </span>
-                    <span class="dash-date__val">{{ formatFecha(c.oferta!.fecha_inicio) }}</span>
+                    <span class="dash-date__val">{{ formatFecha(c.fecha_inicio) }}</span>
                   </div>
                 }
 
@@ -562,96 +568,58 @@
           }
         </div>
 
-        <!-- Avance Contrato -->
-        @if (contratoCompleto(); as ct) {
-          <div class="dash-avance-card dash-avance-card--contrato">
-            <div class="dash-avance-head">
-              <div class="dash-avance-head__text">
-                <p class="page-eyebrow">{{ 'dashboard_client.avance_contrato' | translate }}</p>
-                @if (ct.estado !== 'cancelado') {
-                  <p class="dash-avance-desc">{{ ('contrato_estado_desc.' + ct.estado) | translate }}</p>
-                }
-              </div>
-              @if (ct.estado === 'cancelado') {
-                <span class="dash-avance-tag--cancelado">{{ 'state.cancelado' | translate }}</span>
-              } @else {
-                <span class="dash-avance-pct dash-avance-pct--contrato">{{ contratoAvancePct() }}<span class="dash-avance-pct__unit">%</span></span>
-              }
-            </div>
-
-            @if (ct.estado === 'cancelado') {
-              <div class="dash-avance-cancelled">
-                <i class="bi bi-x-circle" aria-hidden="true"></i>
-                <p>{{ 'dashboard_client.contrato_cancelado' | translate }}</p>
-              </div>
-            } @else {
-              <div class="dash-avance-stepper"
-                   role="list"
-                   [attr.aria-label]="'dashboard_client.avance_contrato' | translate">
-                @for (paso of CONTRATO_PASOS; track paso.key; let last = $last) {
-                  <div class="dash-avance-step"
-                       role="listitem"
-                       [class.dash-avance-step--done]="contratoPasoEstado(paso.key) === 'done'"
-                       [class.dash-avance-step--active]="contratoPasoEstado(paso.key) === 'active'">
-                    <div class="dash-avance-node">
-                      @if (contratoPasoEstado(paso.key) === 'done') {
-                        <i class="bi bi-check-lg" aria-hidden="true"></i>
-                      } @else {
-                        <i class="bi {{ paso.icon }}" aria-hidden="true"></i>
-                      }
-                    </div>
-                    <span class="dash-avance-label">{{ ('contrato_estado.' + paso.key) | translate }}</span>
-                  </div>
-                  @if (!last) {
-                    <div class="dash-avance-connector"
-                         [class.dash-avance-connector--done]="contratoPasoEstado(paso.key) === 'done'"
-                         aria-hidden="true"></div>
-                  }
-                }
-              </div>
-              <div class="dash-avance-bar">
-                <div class="dash-avance-bar__fill dash-avance-bar__fill--contrato" [style.width.%]="contratoAvancePct()"></div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="dash-avance-card dash-avance-card--empty">
-            <div class="dash-avance-head">
-              <p class="page-eyebrow">{{ 'dashboard_client.avance_contrato' | translate }}</p>
-            </div>
-            <div class="dash-avance-empty">
-              <i class="bi bi-file-earmark-clock" aria-hidden="true"></i>
-              <p>{{ 'dashboard_client.contrato_pendiente' | translate }}</p>
-            </div>
-          </div>
-        }
-
-        <!-- Avance de la obra (seguimiento físico de los trabajos) -->
-        @if (obra(); as ob) {
+        <!-- Avance de los contratos: media del avance de obra de los vigentes -->
+        @if (contratos().length > 0) {
           <div class="dash-avance-card dash-avance-card--obra">
             <div class="dash-avance-head">
               <div class="dash-avance-head__text">
-                <p class="page-eyebrow">{{ 'dashboard_client.avance_obra' | translate }}</p>
-                <p class="dash-avance-desc">
-                  {{ ('construction_monitoring.estado_' + ob.estado) | translate }}
-                </p>
+                <p class="page-eyebrow">{{ 'dashboard_client.avance_contratos' | translate }}</p>
+                @if (contratosVigentes().length > 0) {
+                  <p class="dash-avance-desc">{{ 'dashboard_client.avance_contratos_desc' | translate }}</p>
+                }
               </div>
-              <span class="dash-avance-pct dash-avance-pct--obra">{{ ob.avance }}<span class="dash-avance-pct__unit">%</span></span>
+              @if (contratosVigentes().length === 0) {
+                <span class="dash-avance-tag--cancelado">{{ 'state.cancelado' | translate }}</span>
+              } @else {
+                <span class="dash-avance-pct dash-avance-pct--obra">{{ avanceContratos() }}<span class="dash-avance-pct__unit">%</span></span>
+              }
             </div>
 
-            <div class="dash-avance-bar">
-              <div class="dash-avance-bar__fill dash-avance-bar__fill--obra" [style.width.%]="ob.avance"></div>
-            </div>
+            @if (contratosVigentes().length === 0) {
+              <div class="dash-avance-cancelled">
+                <i class="bi bi-x-circle" aria-hidden="true"></i>
+                <p>{{ 'dashboard_client.contratos_cancelados' | translate }}</p>
+              </div>
+            } @else {
+              <div class="dash-avance-bar"
+                   role="progressbar"
+                   aria-valuemin="0"
+                   aria-valuemax="100"
+                   [attr.aria-valuenow]="avanceContratos()"
+                   [attr.aria-label]="'dashboard_client.avance_contratos' | translate">
+                <div class="dash-avance-bar__fill dash-avance-bar__fill--obra" [style.width.%]="avanceContratos()"></div>
+              </div>
 
-            <div class="dash-obra-foot">
-              <span class="dash-obra-when">
-                <i class="bi bi-clock-history" aria-hidden="true"></i>
-                {{ formatFecha(ob.actualizadoEn) }}
-              </span>
-              <a routerLink="/client/construction-monitoring/list" class="dash-obra-cta">
-                {{ 'dashboard_client.view_monitoring' | translate }}
-                <i class="bi bi-arrow-right" aria-hidden="true"></i>
-              </a>
+              <div class="dash-obra-foot">
+                <span class="dash-obra-when">
+                  <i class="bi bi-house-check" aria-hidden="true"></i>
+                  {{ 'dashboard_client.obras_completadas' | translate: { done: obrasCompletadas(), total: contratosVigentes().length } }}
+                </span>
+                <a routerLink="/client/construction-monitoring/list" class="dash-obra-cta">
+                  {{ 'dashboard_client.view_monitoring' | translate }}
+                  <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+              </div>
+            }
+          </div>
+        } @else if (!cargandoDetalle()) {
+          <div class="dash-avance-card dash-avance-card--empty">
+            <div class="dash-avance-head">
+              <p class="page-eyebrow">{{ 'dashboard_client.avance_contratos' | translate }}</p>
+            </div>
+            <div class="dash-avance-empty">
+              <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+              <p>{{ 'dashboard_client.contrato_pendiente' | translate }}</p>
             </div>
           </div>
         }
@@ -735,112 +703,11 @@
     }
 
     <!-- ══════════════════════════════════════════════════════
-         CONSTRUCTOR + CONTRATO
+         CONTRATOS DEL EXPEDIENTE — uno por constructor, avance de
+         obra de cada uno y costo total
          ══════════════════════════════════════════════════════ -->
-    @if (contratoCompleto(); as ct) {
-      <section class="dash-info-card dash-info-card--success" aria-labelledby="sec-constructor">
-        <div class="dash-info-card__head">
-          <div class="dash-info-card__head-icon dash-info-card__head-icon--success" aria-hidden="true">
-            <i class="bi bi-building"></i>
-          </div>
-          <h2 id="sec-constructor" class="dash-info-card__title">
-            {{ 'dashboard_client.constructor_section' | translate }}
-          </h2>
-        </div>
-        <div class="dash-info-card__body">
-
-          <!-- Constructor -->
-          <div class="dash-person-col">
-            <div class="dash-person-avatar dash-person-avatar--success" aria-hidden="true">
-              <i class="bi bi-person-check"></i>
-            </div>
-            <div class="dash-person-details">
-              <p class="page-eyebrow">{{ 'dashboard_client.constructor_label' | translate }}</p>
-              <h3 class="dash-person-name">{{ ct.constructor_nombre }}</h3>
-              @if (ct.constructor_telefono) {
-                <a class="dash-person-contact" [attr.href]="'tel:' + ct.constructor_telefono">
-                  <i class="bi bi-telephone" aria-hidden="true"></i>
-                  {{ ct.constructor_telefono }}
-                </a>
-              }
-              @if (ct.constructor_email) {
-                <a class="dash-person-contact" [attr.href]="'mailto:' + ct.constructor_email">
-                  <i class="bi bi-envelope" aria-hidden="true"></i>
-                  {{ ct.constructor_email }}
-                </a>
-              }
-            </div>
-          </div>
-
-          <!-- Contrato -->
-          <div class="dash-estimation-col">
-
-            <!-- Cifra principal: precio del contrato + estado -->
-            <div class="dash-contract-hero">
-              <div class="dash-contract-hero__main">
-                <p class="page-eyebrow">
-                  <i class="bi bi-cash-coin" aria-hidden="true"></i>
-                  {{ 'dashboard_client.contract_price' | translate }}
-                </p>
-                <p class="dash-contract-hero__price">{{ formatPrecio(ct.precio_final) }}</p>
-              </div>
-              <span class="dash-contract-hero__status">
-                <span class="dash-contract-hero__status-label">{{ 'dashboard_client.contract_status' | translate }}</span>
-                <span [class]="'dash-contrato-badge dash-contrato-badge--' + ct.estado">
-                  {{ contratoEstadoTexto(ct.estado) }}
-                </span>
-              </span>
-            </div>
-
-            <!-- Metadatos del contrato -->
-            @if (ct.garantia_anos || contratoHistorial()?.oferta?.fecha_inicio) {
-              <div class="dash-contract-stats">
-                @if (ct.garantia_anos) {
-                  <div class="dash-contract-stat">
-                    <span class="dash-contract-stat__label">
-                      <i class="bi bi-shield-check" aria-hidden="true"></i>
-                      {{ 'dashboard_client.contract_warranty' | translate }}
-                    </span>
-                    <span class="dash-contract-stat__value">{{ formatGarantia(ct.garantia_anos) }}</span>
-                  </div>
-                }
-                @if (contratoHistorial(); as ch) {
-                  @if (ch.oferta?.fecha_inicio) {
-                    <div class="dash-contract-stat">
-                      <span class="dash-contract-stat__label">
-                        <i class="bi bi-calendar-event" aria-hidden="true"></i>
-                        {{ 'timeline.works_started' | translate }}
-                      </span>
-                      <span class="dash-contract-stat__value">{{ formatFecha(ch.oferta!.fecha_inicio) }}</span>
-                    </div>
-                  }
-                }
-              </div>
-            }
-
-            @if (ct.descripcion_trabajo) {
-              <div class="dash-report-block">
-                <p class="page-eyebrow">{{ 'dashboard_client.work_description' | translate }}</p>
-                <p class="dash-report-text">{{ ct.descripcion_trabajo }}</p>
-              </div>
-            }
-
-            @if (contratoPdfUrl()) {
-              <a [href]="contratoPdfUrl()!" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
-                <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
-                {{ 'dashboard_client.view_contract' | translate }}
-              </a>
-            } @else {
-              <a routerLink="/client/contracts" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
-                {{ 'dashboard_client.view_contract' | translate }}
-              </a>
-            }
-
-          </div>
-
-        </div>
-      </section>
+    @if (contratos().length > 0) {
+      <app-contratos-expediente [contratos]="contratos()" />
     }
 
     <!-- ══════════════════════════════════════════════════════

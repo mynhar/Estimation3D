@@ -1,0 +1,21 @@
+<section class="xp">
+  <button class="xp__head" type="button"
+          [attr.aria-expanded]="abierto()"
+          [attr.aria-controls]="abierto() ? cuerpoId : null"
+          (click)="alternar.emit()">
+    <span class="xp__title">
+      <span class="xp__tile" aria-hidden="true"><i class="bi bi-folder2"></i></span>
+      <span class="xp__num">{{ 'my_documents.dossier' | translate }} {{ numero() }}</span>
+    </span>
+    <span class="xp__meta"><ng-content select="[panelMeta]" /></span>
+    <i class="bi xp__chev"
+       [class.bi-chevron-down]="!abierto()"
+       [class.bi-chevron-up]="abierto()" aria-hidden="true"></i>
+  </button>
+
+  @if (abierto()) {
+    <div class="xp__body" [class.xp__body--bandeja]="bandeja()" [id]="cuerpoId">
+      <ng-content />
+    </div>
+  }
+</section>

@@ -270,7 +270,7 @@
         <div class="min-w-0">
           <p class="constructor-nombre mb-0">{{ ofertaSeleccionada()?.constructor_nombre }}</p>
           <span class="badge rounded-pill px-2 py-1
-            {{ ofertaSeleccionada()?.estado === 'aceptada' ? 'bg-success-subtle text-success'
+            {{ ofertaSeleccionada()?.estado === 'aceptada' ? 'bg-success-subtle text-success-emphasis'
               : ofertaSeleccionada()?.estado === 'rechazada' ? 'bg-secondary-subtle text-secondary'
               : 'bg-warning-subtle text-warning-emphasis' }}">
             {{ ('state.' + (ofertaSeleccionada()?.estado ?? '')) | translate }}

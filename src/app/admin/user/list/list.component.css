@@ -24,7 +24,7 @@
   border-radius: var(--ds-radius-pill);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .kpi-sep { opacity: 0.5; }
 
@@ -126,17 +126,17 @@
 .filter-chip--active {
   background: var(--ds-gold-soft);
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
 }
 .filter-chip--active-yes {
   background: var(--ds-success-soft);
   border-color: var(--ds-success);
-  color: var(--ds-success);
+  color: var(--ds-success-ink);
 }
 .filter-chip--active-no {
   background: var(--ds-danger-soft);
   border-color: var(--ds-danger);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
 }
 .filter-clear {
   background: none;
@@ -197,7 +197,7 @@
   width: 36px;
   height: 36px;
   background: var(--ds-gold-faint);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   border: 1px solid var(--ds-gold-soft);
   display: flex;
   align-items: center;
@@ -223,10 +223,10 @@
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-medium);
 }
-.role-badge--administrador { background: var(--ds-danger-soft);  color: var(--ds-danger); }
-.role-badge--estimador     { background: var(--ds-gold-soft);    color: var(--ds-gold-active); }
-.role-badge--constructor   { background: var(--ds-success-soft); color: var(--ds-success); }
-.role-badge--cliente       { background: var(--ds-info-soft);    color: var(--ds-info); }
+.role-badge--administrador { background: var(--ds-danger-soft);  color: var(--ds-danger-ink); }
+.role-badge--estimador     { background: var(--ds-gold-soft);    color: var(--ds-gold-ink); }
+.role-badge--constructor   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.role-badge--cliente       { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
 
 /* Provider badge */
 .provider-badge {
@@ -259,7 +259,7 @@
 }
 .btn-icon-edit:hover {
   border-color: var(--ds-gold);
-  color: var(--ds-gold-active);
+  color: var(--ds-gold-ink);
   background: var(--ds-gold-faint);
 }
 
@@ -329,7 +329,7 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.cm-meta i { font-size: 0.75rem; color: var(--ds-gold-active); flex-shrink: 0; }
+.cm-meta i { font-size: 0.75rem; color: var(--ds-gold-ink); flex-shrink: 0; }
 
 /* Empty state */
 .empty-state {
@@ -353,7 +353,7 @@
   gap: var(--ds-space-2);
   padding: var(--ds-space-3) var(--ds-space-4);
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border: 1px solid rgba(161, 69, 69, 0.2);
   border-radius: var(--ds-radius-md);
   font-size: var(--ds-text-sm);

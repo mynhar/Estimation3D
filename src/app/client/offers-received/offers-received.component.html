@@ -140,9 +140,20 @@
                 <span class="estado-badge badge" [class]="estadoClase(exp.estado)">{{ ('state.' + exp.estado) | translate }}</span>
               </td>
               <td>
-                @if (ofertaAceptada(exp); as acc) {
-                  <span class="or-table__accepted">
-                    <i class="bi bi-check-circle-fill" aria-hidden="true"></i>{{ formatPrecio(acc.precio) }}
+                @if (aceptadas(exp).length > 0) {
+                  <!-- Una línea por oferta aceptada (un contrato por oferta). -->
+                  <span class="or-table__accepted-list">
+                    @for (acc of aceptadas(exp); track acc.id) {
+                      <span class="or-table__accepted">
+                        <i class="bi bi-check-circle" aria-hidden="true"></i>{{ formatPrecio(acc.precio) }}
+                        <span class="or-table__who">· {{ acc.constructor_nombre }}</span>
+                        @if (obraTerminada(acc)) {
+                          <span class="tag tag-gold or-obra">
+                            <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                          </span>
+                        }
+                      </span>
+                    }
                   </span>
                 } @else {
                   <span class="or-table__muted">
@@ -169,7 +180,7 @@
 <ng-template #card let-exp>
   <article class="oc oc--{{ exp.estado }}"
            [class.oc--pending]="exp.estado === 'en_oferta'"
-           [class.oc--accepted]="ofertaAceptada(exp)">
+           [class.oc--accepted]="aceptadas(exp).length > 0">
     <button class="oc__btn" type="button" (click)="ver(exp.id)"
             [attr.aria-label]="servicioNombre(exp) + ' · ' + exp.numero">
 
@@ -198,10 +209,22 @@
 
       <!-- Resumen compacto de ofertas -->
       <div class="oc__offers">
-        @if (ofertaAceptada(exp); as acc) {
-          <span class="oc__accepted">
-            <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
-            {{ 'offers_received.accepted_for' | translate }} <strong>{{ formatPrecio(acc.precio) }}</strong>
+        @if (aceptadas(exp).length > 0) {
+          <!-- Una línea por oferta aceptada (un contrato por oferta). Spans y no
+               lista: todo esto vive dentro de un <button>. -->
+          <span class="oc__accepted-list">
+            @for (acc of aceptadas(exp); track acc.id) {
+              <span class="oc__accepted">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                {{ 'offers_received.accepted_for' | translate }} <strong>{{ formatPrecio(acc.precio) }}</strong>
+                <span class="oc__who">· {{ acc.constructor_nombre }}</span>
+                @if (obraTerminada(acc)) {
+                  <span class="tag tag-gold oc__obra">
+                    <i class="bi bi-flag" aria-hidden="true"></i>{{ 'monitoring.obra_terminada_badge' | translate }}
+                  </span>
+                }
+              </span>
+            }
           </span>
         } @else {
           <span class="oc__count">

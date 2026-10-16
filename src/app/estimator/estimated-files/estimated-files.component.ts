@@ -6,10 +6,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { EstimacionService } from '../../services/estimacion.service';
+import { ContratoService } from '../../services/contrato.service';
 import {
+  ContratoObraResumen,
   ExpedienteRow,
   ESTADOS_ESTIMADO,
   ESTADO_BADGE_ESTIMADOR,
+  nombreServicio,
 } from '../../models';
 import { PaginationComponent } from '../../shared/pagination/pagination.component';
 import { coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta } from '../../shared/util/busqueda';
@@ -28,11 +31,14 @@ export class EstimatedFilesComponent implements OnInit {
   private auth               = inject(AuthSupabaseService);
   private expedienteService  = inject(ExpedienteService);
   private estimacionService  = inject(EstimacionService);
+  private contratoService    = inject(ContratoService);
   private translate          = inject(TranslateService);
   private router             = inject(Router);
 
   user         = toSignal(this.auth.user$);
   expedientes  = signal<ExpedienteRow[]>([]);
+  /** Contratos con la obra al 100 % (y aún abiertos), agrupados por expediente. */
+  private obrasTerminadas = signal<ReadonlyMap<string, ContratoObraResumen[]>>(new Map());
   cargando     = signal(true);
   busqueda     = signal('');
   filtroEstado = signal<string | null>(null);
@@ -107,14 +113,42 @@ export class EstimatedFilesComponent implements OnInit {
     const userId = this.user()?.id;
     if (!userId) { this.cargando.set(false); return; }
     try {
-      this.expedientes.set(await this.expedienteService.getExpedienteRows({
+      const exps = await this.expedienteService.getExpedienteRows({
         estados:     ESTADOS_ESTIMADO,
         estimadorId: userId,
-      }));
+      });
+      this.expedientes.set(exps);
+      await this.cargarObrasTerminadas(exps.map(e => e.id));
     } catch (e: any) {
       console.error('[EstimatedFiles]', e.message);
     } finally {
       this.cargando.set(false);
+    }
+  }
+
+  // ── Obra terminada (por contrato) ───────────────────────────────────────────
+  /** Contratos del expediente con la obra al 100 % y el contrato aún abierto. */
+  obrasTerminadasDe(exp: ExpedienteRow): ContratoObraResumen[] {
+    return this.obrasTerminadas().get(exp.id) ?? [];
+  }
+
+  /** Servicios del contrato, que es lo que lo distingue de los demás del expediente. */
+  serviciosContrato(c: ContratoObraResumen): string {
+    const lang = this.translate.currentLang;
+    return c.servicios.map(s => nombreServicio(s, lang)).filter(Boolean).join(' · ');
+  }
+
+  /** Si falla, la lista se ve igual que antes: sin marcas. */
+  private async cargarObrasTerminadas(expedienteIds: string[]): Promise<void> {
+    try {
+      const contratos = await this.contratoService.getResumenObraExpedientes(expedienteIds);
+      const porExp = new Map<string, ContratoObraResumen[]>();
+      for (const c of contratos.filter(x => x.obra_terminada)) {
+        porExp.set(c.expediente_id, [...(porExp.get(c.expediente_id) ?? []), c]);
+      }
+      this.obrasTerminadas.set(porExp);
+    } catch (e: any) {
+      console.error('[EstimatedFiles] obra:', e?.message);
     }
   }
 

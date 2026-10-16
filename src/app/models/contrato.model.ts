@@ -15,6 +15,8 @@ export interface ContratoListItem {
   generado_en:        string;
   firmado_en:         string | null;
   url_pdf:            string | null;
+  /** La obra llegó al 100 % y el contrato sigue abierto (falta que administración lo complete). */
+  obra_terminada?:    boolean;
 
   // ── datos para regenerar el PDF en cualquier idioma ───────────────────────
   cliente_nombre:       string;
@@ -154,6 +156,53 @@ export interface ContratoConstructorListItem {
   canton:             string;
   distrito:           string;
   foto:               string | null;  // miniatura del tour 3D (Matterport) del expediente
+}
+
+/**
+ * Lo mínimo de cada contrato para marcar, en las listas del cliente
+ * (mis expedientes, ofertas recibidas), cuáles tienen la obra al 100 %.
+ */
+export interface ContratoObraResumen {
+  id:             string;
+  expediente_id:  string;
+  oferta_id:      string;
+  estado:         string;
+  /** Servicios del contrato; sin ellos, el principal del expediente. */
+  servicios:      ServicioContrato[];
+  /** Obra al 100 % con el contrato aún abierto (misma regla que administración). */
+  obra_terminada: boolean;
+}
+
+/** Estado de la obra de un contrato, tal como lo lee el cliente en su panel. */
+export type ObraEstadoPanel = 'por_iniciar' | 'en_curso' | 'pausada' | 'completada' | 'cancelada';
+
+/**
+ * Un contrato del expediente en el panel del cliente. Un expediente puede tener
+ * varios —uno por oferta adjudicada— y el panel los enseña todos, cada uno con
+ * el avance de su obra (`seguimiento_obra.porcentaje_avance`).
+ */
+export interface ContratoPanelCliente {
+  id:                   string;
+  estado:               string;
+  precio_final:         number;
+  garantia_anos:        number | null;
+  descripcion_trabajo:  string;
+  generado_en:          string;
+  firmado_en:           string | null;
+  actualizado_en:       string;
+  fecha_inicio:         string | null;
+  /** URL firmada del PDF (1 h). Null si el contrato no tiene PDF o no se pudo firmar. */
+  pdf_url:              string | null;
+  constructor_nombre:   string;
+  constructor_telefono: string | null;
+  constructor_email:    string | null;
+  /** Servicios del contrato; sin ellos, el principal del expediente. */
+  servicios:            ServicioContrato[];
+  /** Avance de la obra, 0–100 entero. 100 si el contrato está completado; 0 sin seguimiento. */
+  avance_obra:          number;
+  obra_estado:          ObraEstadoPanel;
+  /** Última actualización del seguimiento; null si la obra aún no tiene seguimiento. */
+  obra_actualizado_en:  string | null;
 }
 
 /** Un servicio tal como aparece en el PDF del contrato, ya traducido. */

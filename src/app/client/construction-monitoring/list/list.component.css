@@ -60,7 +60,7 @@
   border: 1px solid var(--ds-border);
   border-radius: var(--ds-radius-lg);
 }
-.cm-empty i { font-size: 2.5rem; color: var(--ds-gold); }
+.cm-empty i { font-size: 2.5rem; color: var(--ds-gold-ink); }
 .cm-empty__title {
   font-family: var(--ds-font-display);
   font-size: var(--ds-text-xl);
@@ -76,7 +76,43 @@
 }
 .cm-alert--error {
   background: var(--ds-danger-soft);
-  color: var(--ds-danger);
+  color: var(--ds-danger-ink);
   border: 1px solid color-mix(in srgb, var(--ds-danger) 25%, transparent);
 }
 .cm-alert p { margin: 0; }
+
+/* ── Franja de resumen (misma que Mis documentos) ── */
+.cm-stats { display: flex; flex-wrap: wrap; gap: var(--ds-space-3); }
+.cm-stat {
+  flex: 1 1 120px;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-xs);
+}
+.cm-stat--accent { background: var(--ds-gold-faint); border-color: var(--ds-gold); }
+.cm-stat__num {
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-3xl);
+  font-weight: var(--ds-weight-semibold);
+  line-height: 1;
+  color: var(--ds-ink);
+}
+.cm-stat__label {
+  font-size: var(--ds-text-2xs);
+  letter-spacing: var(--ds-tracking-wide);
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+
+/* ── Acordeón por expediente (app-expediente-panel) ── */
+.cm-accordion { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.cm-meta { display: inline-flex; align-items: center; gap: var(--ds-space-3); flex-wrap: wrap; }
+.cm-meta__item { display: inline-flex; align-items: center; gap: var(--ds-space-1); white-space: nowrap; }
+.cm-meta__avance { font-weight: var(--ds-weight-semibold); color: var(--ds-ink); }
+.cm-meta__obra { font-size: var(--ds-text-2xs); gap: 4px; }

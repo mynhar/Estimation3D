@@ -152,11 +152,13 @@ export class DocumentosClienteService {
     items: (Omit<ArchivoVM, 'subidoPorNombre'> & { subidoPorNombre?: string })[];
     autorIds: string[];
   }> {
-    const [archExp, estim, ofertas, contrato] = await Promise.all([
+    // Todos los contratos del expediente (uno por constructor adjudicado), no
+    // solo el último: cada uno aporta su PDF y la media de su obra.
+    const [archExp, estim, ofertas, contratos] = await Promise.all([
       this.archivoService.cargarTodos(expedienteId),
       this.estimacionRepo.findByExpedienteId(expedienteId),
       this.ofertaRepo.findByExpedienteId(expedienteId),
-      this.contratoRepo.findForClientByExpedienteId(expedienteId),
+      this.contratoRepo.findAllByExpedienteId(expedienteId).catch(() => []),
     ]);
 
     const items: (Omit<ArchivoVM, 'subidoPorNombre'> & { subidoPorNombre?: string })[] = [];
@@ -236,33 +238,39 @@ export class DocumentosClienteService {
       push(arch.videos, 'video');
     }
 
-    // D. Contrato (PDF firmado en bucket 'contratos').
-    if (contrato?.url_pdf) {
-      try {
-        const url = await this.contratoRepo.getSignedUrl(contrato.url_pdf);
-        items.push({
-          id:              `ctr:${contrato.id}`,
-          nombre:          `Contrato ${numero}.pdf`,
-          tipo:            'documento',
-          fuente:          'contrato',
-          url,
-          urlStorage:      '',
-          esExterno:       true,            // bucket distinto: sin borrado vía 'archivos'
-          mimeType:        'application/pdf',
-          tamanoBytes:     0,
-          subidoPor:       null,
-          subidoPorNombre: 'Estimation3D',
-          subidoPorRol:    'administrador',
-          esPropio:        false,
-        });
-      } catch { /* sin acceso al PDF firmado: se omite */ }
+    // D. Contratos (PDF firmado en bucket 'contratos'), uno por contrato. Con
+    //    varios, el nombre del constructor distingue un PDF de otro.
+    const conPdf = contratos.filter(c => !!c.url_pdf);
+    const urls = await this.contratoRepo
+      .getSignedUrls(conPdf.map(c => c.url_pdf as string))
+      .catch(() => new Map<string, string>());
+    for (const c of conPdf) {
+      const url = urls.get(c.url_pdf as string);
+      if (!url) continue;            // sin acceso al PDF firmado: se omite
+      items.push({
+        id:              `ctr:${c.id}`,
+        nombre:          contratos.length > 1
+                           ? `Contrato ${numero} — ${c.constructor_nombre}.pdf`
+                           : `Contrato ${numero}.pdf`,
+        tipo:            'documento',
+        fuente:          'contrato',
+        url,
+        urlStorage:      '',
+        esExterno:       true,            // bucket distinto: sin borrado vía 'archivos'
+        mimeType:        'application/pdf',
+        tamanoBytes:     0,
+        subidoPor:       null,
+        subidoPorNombre: 'Estimation3D',
+        subidoPorRol:    'administrador',
+        esPropio:        false,
+      });
     }
 
-    // E. Seguimiento de obra: media de los partes (constructor).
-    if (contrato?.id) {
-      const seg = await this.seguimientoService.getSeguimientoByContratoId(contrato.id);
-      if (seg) {
-        const reportes = await this.seguimientoService.getReportesBySeguimientoIds([seg.id]);
+    // E. Seguimiento de obra: media de los partes (constructor) de cada contrato.
+    if (contratos.length) {
+      const segs = await this.seguimientoService.getSeguimientosByContratoIds(contratos.map(c => c.id));
+      if (segs.length) {
+        const reportes = await this.seguimientoService.getReportesBySeguimientoIds(segs.map(sg => sg.id));
         if (reportes.length) {
           const media = await this.archivoService.cargarPorReportes(reportes.map(r => r.id));
           for (const bucket of media.values()) {

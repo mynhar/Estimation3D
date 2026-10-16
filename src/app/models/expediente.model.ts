@@ -323,8 +323,8 @@ export const ESTADO_BADGE_OFERTA_RECIBIDA: Record<string, string> = {
 
 /** Mapa estado → clase CSS de badge para la lista de expedientes estimados. */
 export const ESTADO_BADGE_ESTIMADOR: Record<string, string> = {
-  estimado:   'bg-success-subtle text-success',
-  en_oferta:  'bg-primary-subtle text-primary',
+  estimado:   'bg-success-subtle text-success-emphasis',
+  en_oferta:  'bg-primary-subtle text-primary-emphasis',
   adjudicado: 'bg-warning-subtle text-warning-emphasis',
   contratado: 'bg-info-subtle text-info-emphasis',
   cancelado:  'bg-secondary-subtle text-secondary',

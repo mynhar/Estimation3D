@@ -19,7 +19,7 @@
 }
 
 .app-footer__sep {
-  color: var(--ds-border-strong);
+  color: var(--ds-ink-faint);
 }
 
 .app-footer__rights {

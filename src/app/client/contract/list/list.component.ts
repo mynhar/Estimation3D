@@ -4,16 +4,17 @@ import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { ExpedientePanelComponent } from '../../../shared/ui/expediente-panel/expediente-panel.component';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoService } from '../../../services/contrato.service';
 import { ToastService } from '../../../services/toast.service';
-import { ContratoListItem } from '../../../models';
+import { ContratoListItem, nombreServicio, serviciosParaContrato } from '../../../models';
 
 @Component({
   selector: 'app-contract-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet],
+  imports: [TranslatePipe, NgTemplateOutlet, ExpedientePanelComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -40,11 +41,36 @@ export class ContractListComponent implements OnInit {
   pdfVistaId  = signal<string | null>(null);
   pdfBlobUrl  = signal<string | null>(null);
 
-  // ── Agrupación Activos / Finalizados ───────────────────────────────────────
-  finalizadosAbierto = signal(false);
+  // ── Agrupación por expediente (acordeón, como Mis documentos) ──────────────
+  /** Expedientes abiertos. Arranca abierto el primero. */
+  expandidos = signal<ReadonlySet<string>>(new Set());
 
-  activos     = computed(() => this.contratos().filter(c => !this.esCerrado(c.estado)));
-  finalizados = computed(() => this.contratos().filter(c =>  this.esCerrado(c.estado)));
+  /**
+   * Una entrada por expediente: los que tienen contratos activos primero. Dentro,
+   * los activos y después los cerrados (completados / cancelados), cada bloque
+   * en el orden en que llegan (el más reciente primero).
+   */
+  grupos = computed(() => {
+    const porExp = new Map<string, ContratoListItem[]>();
+    for (const c of this.contratos()) {
+      const key = c.expediente_id || c.expediente_numero;
+      porExp.set(key, [...(porExp.get(key) ?? []), c]);
+    }
+    const grupos = [...porExp.entries()].map(([key, cs]) => {
+      const activos  = cs.filter(c => !this.esCerrado(c.estado));
+      const cerrados = cs.filter(c =>  this.esCerrado(c.estado));
+      return {
+        key,
+        numero:          cs[0].expediente_numero,
+        activos,
+        cerrados,
+        total:           cs.length,
+        valor:           cs.filter(c => c.estado !== 'cancelado').reduce((s, c) => s + (c.precio_final ?? 0), 0),
+        obrasTerminadas: cs.filter(c => c.obra_terminada).length,
+      };
+    });
+    return [...grupos.filter(g => g.activos.length), ...grupos.filter(g => !g.activos.length)];
+  });
 
   resumen = computed(() => {
     const cs = this.contratos();
@@ -57,7 +83,15 @@ export class ContractListComponent implements OnInit {
   });
 
   esCerrado(estado: string): boolean { return estado === 'completado' || estado === 'cancelado'; }
-  toggleFinalizados(): void { this.finalizadosAbierto.update(v => !v); }
+  toggle(key: string): void {
+    this.expandidos.update(set => {
+      const next = new Set(set);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+
+  isExpandido(key: string): boolean { return this.expandidos().has(key); }
 
   iniciales(nombre: string): string {
     const parts = (nombre ?? '').trim().split(/\s+/).filter(Boolean);
@@ -81,6 +115,8 @@ export class ContractListComponent implements OnInit {
     if (!userId) { this.router.navigate(['/login']); return; }
     try {
       this.contratos.set(await this.contratoService.getMisContratos(userId));
+      const primero = this.grupos()[0];
+      if (primero) this.expandidos.set(new Set([primero.key]));
     } catch (e: any) {
       console.error('[ContractList]', e.message);
     } finally {
@@ -90,8 +126,10 @@ export class ContractListComponent implements OnInit {
 
   // ── Cancelación ───────────────────────────────────────────────────────────
 
-  abrirPanelCancelacion(id: string): void {
-    this.confirmCancelId.set(id);
+  /** Con la obra al 100 % el trabajo ya está hecho: no se abre la cancelación. */
+  abrirPanelCancelacion(c: ContratoListItem): void {
+    if (c.obra_terminada) return;
+    this.confirmCancelId.set(c.id);
     this.confirmandoId.set(null);
     this.aceptado.set(false);
   }
@@ -184,6 +222,10 @@ export class ContractListComponent implements OnInit {
       constructorNombre:   c.constructor_nombre,
       constructorTelefono: c.constructor_telefono,
       constructorEmail:    c.constructor_email,
+      // Los servicios de ESTE contrato (`contrato.servicio_ids`), no el principal
+      // del expediente: con varios contratos cada uno cubre lo suyo. Sin lista,
+      // la forma antigua.
+      servicios:           c.servicios?.length ? serviciosParaContrato(c.servicios, lang) : undefined,
       servicioNombre:      svcNombre,
       servicioDescripcion: svcDesc,
       direccion:           c.direccion,
@@ -247,8 +289,16 @@ export class ContractListComponent implements OnInit {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
+  /**
+   * Servicios de ESTE contrato (`contrato.servicio_ids`). Antes enseñaba el
+   * principal del expediente, el mismo en todos los contratos aunque cada uno
+   * cubriera un servicio distinto. Sin lista, el principal.
+   */
   servicioNombre(c: ContratoListItem): string {
     const lang = this.translate.currentLang;
+    if (c.servicios?.length) {
+      return c.servicios.map(s => nombreServicio(s, lang)).filter(Boolean).join(' · ');
+    }
     if (lang === 'en') return c.servicio_nombre_en || c.servicio_nombre;
     if (lang === 'fr') return c.servicio_nombre_fr || c.servicio_nombre;
     return c.servicio_nombre;

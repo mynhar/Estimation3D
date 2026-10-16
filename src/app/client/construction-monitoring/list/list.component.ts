@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -14,6 +15,7 @@ import { ContratoService } from '../../../services/contrato.service';
 import { ObraVmService } from '../../../services/obra-vm.service';
 import { ObraVM } from '../../../models';
 import { ObraCardComponent } from '../../../shared/construction-monitoring/obra-card.component';
+import { ExpedientePanelComponent } from '../../../shared/ui/expediente-panel/expediente-panel.component';
 
 // Estados de contrato que tienen seguimiento de obra visible para el cliente.
 const ESTADOS_OBRA = ['firmado', 'en_ejecucion', 'completado'];
@@ -22,7 +24,7 @@ const ESTADOS_OBRA = ['firmado', 'en_ejecucion', 'completado'];
   selector: 'app-client-construction-monitoring-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ObraCardComponent],
+  imports: [TranslatePipe, ObraCardComponent, ExpedientePanelComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -36,6 +38,44 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
   obras    = signal<ObraVM[]>([]);
   cargando = signal(true);
   error    = signal<string | null>(null);
+
+  // ── Agrupación por expediente (acordeón, como Mis documentos) ──────────────
+  /** Expedientes abiertos. En la primera carga, el primero; luego, lo que elija el usuario. */
+  expandidos = signal<ReadonlySet<string>>(new Set());
+  private expansionInicial = false;
+
+  /** Una entrada por expediente, en el orden de las obras (la más reciente primero). */
+  grupos = computed(() => {
+    const porExp = new Map<string, ObraVM[]>();
+    for (const o of this.obras()) porExp.set(o.expedienteNumero, [...(porExp.get(o.expedienteNumero) ?? []), o]);
+    return [...porExp.entries()].map(([numero, obras]) => ({
+      numero,
+      obras,
+      avanceMedio: Math.round(obras.reduce((s, o) => s + o.avanceGlobal, 0) / obras.length),
+      terminadas:  obras.filter(o => this.terminada(o)).length,
+    }));
+  });
+
+  resumen = computed(() => {
+    const os = this.obras();
+    const terminadas = os.filter(o => this.terminada(o)).length;
+    return { obras: os.length, enCurso: os.length - terminadas, terminadas, expedientes: this.grupos().length };
+  });
+
+  /** Obra al 100 % o contrato ya completado. */
+  terminada(o: ObraVM): boolean {
+    return o.avanceGlobal >= 100 || o.estadoContrato === 'completado';
+  }
+
+  toggle(numero: string): void {
+    this.expandidos.update(set => {
+      const next = new Set(set);
+      if (next.has(numero)) next.delete(numero); else next.add(numero);
+      return next;
+    });
+  }
+
+  isExpandido(numero: string): boolean { return this.expandidos().has(numero); }
 
   // Realtime: refresco en vivo al arrancar la obra o registrarse un parte.
   private channels: RealtimeChannel[] = [];
@@ -74,6 +114,10 @@ export class ClientConstructionMonitoringListComponent implements OnInit, OnDest
       this.obras.set(
         vms.sort((a, b) => b.ultimaActualizacion.localeCompare(a.ultimaActualizacion)),
       );
+      if (!this.expansionInicial && this.grupos().length) {
+        this.expansionInicial = true;
+        this.expandidos.set(new Set([this.grupos()[0].numero]));
+      }
       this.error.set(null);
     } catch (e: unknown) {
       this.error.set(e instanceof Error ? e.message : String(e));
