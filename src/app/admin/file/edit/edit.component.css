@@ -464,6 +464,22 @@
   margin-bottom: var(--ds-space-3);
 }
 
+/* Contrato archivado: el estado al que volverá al desarchivar. */
+.ct-anterior {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+}
+.ct-anterior__estado {
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+}
+.ct-anterior--item { margin: calc(-1 * var(--ds-space-2)) 0 var(--ds-space-3); }
+
 .contrato-item__builder {
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-semibold);

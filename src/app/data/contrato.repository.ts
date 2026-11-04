@@ -20,6 +20,8 @@ export type ContratoClienteView = {
 export type ContratoExpedienteView = ContratoClienteView & {
   oferta_id:          string;
   constructor_nombre: string;
+  /** Estado que tenía al archivarse su expediente. NULL si no está archivado. */
+  estado_anterior:    string | null;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -70,7 +72,7 @@ export class ContratoRepository {
   async findAllByExpedienteId(expedienteId: string): Promise<ContratoExpedienteView[]> {
     const { data, error } = await this.db
       .from('contrato')
-      .select('id, oferta_id, precio_final, garantia_anos, estado, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor:constructor_id ( nombre, apellido )')
+      .select('id, oferta_id, precio_final, garantia_anos, estado, estado_anterior, generado_en, firmado_en, url_pdf, descripcion_trabajo, constructor:constructor_id ( nombre, apellido )')
       .eq('expediente_id', expedienteId)
       .order('generado_en', { ascending: false });
     if (error) throw new Error(error.message);
@@ -84,6 +86,7 @@ export class ContratoRepository {
       return {
         ...r,
         constructor_nombre: c ? `${c.nombre} ${c.apellido}`.trim() || '—' : '—',
+        estado_anterior:    (row as { estado_anterior?: string | null }).estado_anterior ?? null,
       } as ContratoExpedienteView;
     });
   }

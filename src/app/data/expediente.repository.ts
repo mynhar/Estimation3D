@@ -37,6 +37,8 @@ export type ExpedienteArchivadoRaw = {
   cliente_id:      string;
   servicio_id:     number;
   total_contratos: number;
+  /** Estado de cada contrato al archivarse (el actual si no lo guardó). */
+  contratos_estados: string[];
 };
 
 /** Fila de la vista `expediente_busqueda`: expediente + su localizacion. */
@@ -171,19 +173,23 @@ export class ExpedienteRepository {
   async findArchivados(): Promise<ExpedienteArchivadoRaw[]> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado_anterior, archivado_en, cliente_id, servicio_id, contrato(count)')
+      .select('id, numero, estado_anterior, archivado_en, cliente_id, servicio_id, contrato(estado, estado_anterior)')
       .eq('estado', 'archivado')
       .order('archivado_en', { ascending: false, nullsFirst: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((e: any) => ({
-      id:              e.id,
-      numero:          e.numero,
-      estado_anterior: e.estado_anterior ?? null,
-      archivado_en:    e.archivado_en ?? null,
-      cliente_id:      e.cliente_id,
-      servicio_id:     e.servicio_id,
-      total_contratos: e.contrato?.[0]?.count ?? 0,
-    }));
+    return (data ?? []).map((e: any) => {
+      const contratos: { estado: string; estado_anterior: string | null }[] = e.contrato ?? [];
+      return {
+        id:                e.id,
+        numero:            e.numero,
+        estado_anterior:   e.estado_anterior ?? null,
+        archivado_en:      e.archivado_en ?? null,
+        cliente_id:        e.cliente_id,
+        servicio_id:       e.servicio_id,
+        total_contratos:   contratos.length,
+        contratos_estados: contratos.map(c => c.estado_anterior ?? c.estado),
+      };
+    });
   }
 
   async findByFiltro(options: {

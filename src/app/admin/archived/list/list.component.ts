@@ -7,6 +7,15 @@ import { ExpedienteArchivadoAdmin } from '../../../models';
 type VistaArchivados = 'tabla' | 'tarjetas';
 
 /** Insignia del estado que tenía el expediente al archivarse. */
+/** Estado del contrato al archivarse → clase de su insignia. */
+const BADGE_CONTRATO: Record<string, string> = {
+  generado:     'badge-ct-generado',
+  firmado:      'badge-ct-firmado',
+  en_ejecucion: 'badge-ct-en_ejecucion',
+  completado:   'badge-ct-completado',
+  cancelado:    'badge-ct-cancelado',
+};
+
 const BADGE_ESTADO: Record<string, string> = {
   nuevo:         'badge-nuevo',
   en_estimacion: 'badge-en_estimacion',
@@ -124,6 +133,10 @@ export class AdminArchivedListComponent implements OnInit {
 
   badgeEstado(estado: string | null): string {
     return BADGE_ESTADO[estado ?? ''] ?? 'badge-cancelado';
+  }
+
+  badgeContrato(estado: string): string {
+    return BADGE_CONTRATO[estado] ?? 'badge-cancelado';
   }
 
   /** `archivado_en` es un instante: se muestra en la fecha local. */

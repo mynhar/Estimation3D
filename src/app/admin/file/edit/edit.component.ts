@@ -251,6 +251,11 @@ export class AdminFileEditComponent implements OnInit {
     return c.estado === 'cancelado' || c.estado === 'archivado';
   }
 
+  /** Contrato archivado: el estado que tenía al archivarse (vuelve a él al desarchivar). */
+  contratoAlArchivar(c: ContratoExpedienteView): string | null {
+    return c.estado === 'archivado' ? c.estado_anterior : null;
+  }
+
   contratoProgreso(c: ContratoExpedienteView): number {
     return CONTRATO_PCT[c.estado] ?? 0;
   }

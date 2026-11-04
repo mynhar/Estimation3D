@@ -113,6 +113,11 @@ export interface ExpedienteArchivadoAdmin {
   /** Ofertas no eliminadas: las que se archivaron con él. */
   total_ofertas:      number;
   total_contratos:    number;
+  /**
+   * Estado de sus contratos al archivarse, agrupado (`n` contratos en ese
+   * estado), en el orden del ciclo. Vacío si no tiene contratos.
+   */
+  contratos_estados:  { estado: string; n: number }[];
   /** Miniatura del tour 3D (Matterport) de su estimación, si tiene. */
   foto:               string | null;
 }

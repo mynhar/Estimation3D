@@ -130,7 +130,7 @@
                 <th scope="col">{{ 'admin_archived.col_location' | translate }}</th>
                 <th scope="col">{{ 'admin_archived.col_prev_state' | translate }}</th>
                 <th scope="col" class="text-end">{{ 'admin_archived.col_offers' | translate }}</th>
-                <th scope="col" class="text-end">{{ 'admin_archived.col_contracts' | translate }}</th>
+                <th scope="col">{{ 'admin_archived.col_contract_state' | translate }}</th>
                 <th scope="col">{{ 'admin_archived.col_archived_on' | translate }}</th>
                 <th scope="col" class="col-actions"><span class="visually-hidden">{{ 'admin_archived.open' | translate }}</span></th>
               </tr>
@@ -161,7 +161,20 @@
                     }
                   </td>
                   <td class="text-end cell-num">{{ e.total_ofertas }}</td>
-                  <td class="text-end cell-num">{{ e.total_contratos }}</td>
+                  <td>
+                    @if (e.contratos_estados.length) {
+                      <span class="ct-estados">
+                        @for (ce of e.contratos_estados; track ce.estado) {
+                          <span class="estado-badge {{ badgeContrato(ce.estado) }}">
+                            {{ ('contrato_estado.' + ce.estado) | translate }}
+                            @if (ce.n > 1) { <span class="estado-badge__n">×{{ ce.n }}</span> }
+                          </span>
+                        }
+                      </span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
                   <td class="col-date">{{ formatFecha(e.archivado_en) }}</td>
                   <td class="col-actions" (click)="$event.stopPropagation()">
                     <a [routerLink]="['/admin/file/edit', e.id]" class="action-btn"
@@ -228,9 +241,22 @@
                     <dt>{{ 'admin_archived.col_offers' | translate }}</dt>
                     <dd>{{ e.total_ofertas }}</dd>
                   </div>
-                  <div class="arch-card__meta-item">
-                    <dt>{{ 'admin_archived.col_contracts' | translate }}</dt>
-                    <dd>{{ e.total_contratos }}</dd>
+                  <div class="arch-card__meta-item arch-card__meta-item--contratos">
+                    <dt>{{ 'admin_archived.col_contract_state' | translate }}</dt>
+                    <dd>
+                      @if (e.contratos_estados.length) {
+                        <span class="ct-estados">
+                          @for (ce of e.contratos_estados; track ce.estado) {
+                            <span class="estado-badge {{ badgeContrato(ce.estado) }}">
+                              {{ ('contrato_estado.' + ce.estado) | translate }}
+                              @if (ce.n > 1) { <span class="estado-badge__n">×{{ ce.n }}</span> }
+                            </span>
+                          }
+                        </span>
+                      } @else {
+                        <span class="cell-muted">—</span>
+                      }
+                    </dd>
                   </div>
                 </dl>
                 </div>

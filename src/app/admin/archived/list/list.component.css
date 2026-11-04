@@ -261,6 +261,24 @@
 .badge-contratado    { background: var(--ds-success-soft); color: var(--ds-success-ink);   }
 .badge-cancelado     { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); }
 
+/* Contratos al archivar: mismos colores que admin/contract. Varios en el mismo
+   estado van en una sola insignia con su número (×2). */
+.badge-ct-generado     { background: var(--ds-info-soft);    color: var(--ds-info-ink);    }
+.badge-ct-firmado      { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.badge-ct-en_ejecucion { background: var(--ds-success-soft); color: var(--ds-success-ink); }
+.badge-ct-completado   { background: var(--ds-info-soft);    color: var(--ds-info-ink);    }
+.badge-ct-cancelado    { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  }
+.estado-badge__n {
+  margin-left: 0.35em;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--ds-weight-bold);
+}
+.ct-estados {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-1);
+}
+
 /* ── Botón de fila ───────────────────────────────────────────────────────── */
 .action-btn {
   display: inline-flex;
@@ -449,8 +467,14 @@
   color: var(--ds-ink-muted);
   margin: 0;
 }
+/* Contratos: las insignias se alinean a la derecha y bajan de línea si no caben. */
+.arch-card__meta-item--contratos { align-items: flex-start; }
+.arch-card__meta-item--contratos dt { padding-top: 0.2em; flex-shrink: 0; }
+.arch-card__meta-item--contratos .ct-estados { justify-content: flex-end; }
+
 .arch-card__meta-item dd {
   margin: 0;
+  min-width: 0;
   font-size: var(--ds-text-sm);
   font-weight: var(--ds-weight-medium);
   color: var(--ds-ink);

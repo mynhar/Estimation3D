@@ -314,7 +314,9 @@ partes no se pudieron tocar. Si un contrato vuelve a `firmado`,
 **Listados.** Los archivados no aparecen en `admin/file`, `admin/to-estimate`,
 `admin/offer`, `admin/contract` ni `admin/construction-monitoring/list`. Tienen
 su propia lista, `admin/archived` (menú «Archivados»), con el estado que
-tenían al archivarse; cada fila abre `admin/file/edit`.
+tenían al archivarse el expediente y cada uno de sus contratos; cada fila abre
+`admin/file/edit`, que también muestra, en cada contrato archivado, el estado
+al que volverá («Al archivar: …»).
 
 **Avisos.** Cliente y constructores ven el aviso «Expediente archivado: los
 trabajos no se realizarán. Solo un administrador puede modificarlo» en el

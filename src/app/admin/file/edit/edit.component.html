@@ -186,6 +186,12 @@
                 <p class="exp-progress__builder">
                   <i class="bi bi-person-badge" aria-hidden="true"></i>{{ c.constructor_nombre }}
                 </p>
+                @if (contratoAlArchivar(c); as anterior) {
+                  <p class="ct-anterior">
+                    {{ 'admin_file_edit.contract_prev_state' | translate }}
+                    <span class="ct-anterior__estado">{{ ('contrato_estado.' + anterior) | translate }}</span>
+                  </p>
+                }
                 @if (!contratoCancelado(c)) {
                   <p class="exp-progress__desc">{{ ('contrato_estado_desc.' + c.estado) | translate }}</p>
                 }
@@ -655,12 +661,19 @@
                       <span class="badge rounded-pill px-3 py-1
                         {{ c.estado === 'firmado' || c.estado === 'completado'
                             ? 'bg-success-subtle text-success-emphasis'
-                            : c.estado === 'cancelado'
+                            : c.estado === 'cancelado' || c.estado === 'archivado'
                               ? 'bg-secondary-subtle text-secondary'
                               : 'bg-warning-subtle text-warning-emphasis' }}">
                         {{ ('contrato_estado.' + c.estado) | translate }}
                       </span>
                     </div>
+
+                    @if (contratoAlArchivar(c); as anterior) {
+                      <p class="ct-anterior ct-anterior--item">
+                        {{ 'admin_file_edit.contract_prev_state' | translate }}
+                        <span class="ct-anterior__estado">{{ ('contrato_estado.' + anterior) | translate }}</span>
+                      </p>
+                    }
 
                     <div class="precio-block">
                       <p class="info-label mb-1">{{ 'dashboard_client.contract_price' | translate }}</p>

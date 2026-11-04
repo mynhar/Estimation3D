@@ -1644,6 +1644,7 @@
     "select_offer": "Offre à modifier",
     "constructor_no_offers": "Aucune offre reçue pour ce dossier.",
     "contract_note": "Le contrat est en lecture seule. Gérez-le depuis la section Contrats.",
+    "contract_prev_state": "À l’archivage :",
     "more_services_one": "+{{n}} service",
     "more_services_other": "+{{n}} services"
   },
@@ -2842,6 +2843,7 @@
     "col_prev_state": "Statut à l’archivage",
     "col_offers": "Offres",
     "col_contracts": "Contrats",
+    "col_contract_state": "Contrat à l’archivage",
     "col_archived_on": "Archivé le",
     "open": "Ouvrir le dossier",
     "no_data": "Aucun dossier archivé",

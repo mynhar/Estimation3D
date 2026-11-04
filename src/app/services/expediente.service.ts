@@ -585,6 +585,7 @@ export class ExpedienteService {
         distrito:           loc?.distrito  ?? '',
         total_ofertas:      ofertas.filter(o => o.expediente_id === e.id).length,
         total_contratos:    e.total_contratos,
+        contratos_estados:  agruparEstadosContrato(e.contratos_estados),
         foto:               matterportThumbFromTour(estimaciones.find(x => x.expediente_id === e.id)?.url_tour),
       };
     });
@@ -797,4 +798,15 @@ export class ExpedienteService {
   getOfertasHistorial(expedienteId: string): Promise<OfertaHistorialItem[]> {
     return this.ofertaRepo.findHistorialByExpedienteId(expedienteId);
   }
+}
+
+/** Orden del ciclo del contrato, para listar sus estados siempre igual. */
+const ORDEN_CONTRATO = ['generado', 'firmado', 'en_ejecucion', 'completado', 'cancelado', 'archivado'];
+
+/** ['firmado', 'completado', 'firmado'] → [{firmado, 2}, {completado, 1}] */
+function agruparEstadosContrato(estados: string[]): { estado: string; n: number }[] {
+  const cuenta = new Map<string, number>();
+  for (const e of estados) cuenta.set(e, (cuenta.get(e) ?? 0) + 1);
+  const pos = (e: string) => { const i = ORDEN_CONTRATO.indexOf(e); return i < 0 ? ORDEN_CONTRATO.length : i; };
+  return [...cuenta].map(([estado, n]) => ({ estado, n })).sort((x, y) => pos(x.estado) - pos(y.estado));
 }

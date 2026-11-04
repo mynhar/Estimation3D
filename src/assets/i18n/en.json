@@ -1644,6 +1644,7 @@
     "select_offer": "Offer to edit",
     "constructor_no_offers": "No offers received for this file.",
     "contract_note": "The contract is read-only. Manage it from the Contracts section.",
+    "contract_prev_state": "When archived:",
     "more_services_one": "+{{n}} service",
     "more_services_other": "+{{n}} services"
   },
@@ -2842,6 +2843,7 @@
     "col_prev_state": "Status when archived",
     "col_offers": "Offers",
     "col_contracts": "Contracts",
+    "col_contract_state": "Contract when archived",
     "col_archived_on": "Archived on",
     "open": "Open file",
     "no_data": "No archived files",

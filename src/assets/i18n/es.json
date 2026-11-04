@@ -1644,6 +1644,7 @@
     "select_offer": "Oferta a editar",
     "constructor_no_offers": "No hay ofertas recibidas para este expediente.",
     "contract_note": "El contrato es de solo lectura. Gestiónalo desde la sección Contratos.",
+    "contract_prev_state": "Al archivar:",
     "more_services_one": "+{{n}} servicio",
     "more_services_other": "+{{n}} servicios"
   },
@@ -2842,6 +2843,7 @@
     "col_prev_state": "Estado al archivar",
     "col_offers": "Ofertas",
     "col_contracts": "Contratos",
+    "col_contract_state": "Contrato al archivar",
     "col_archived_on": "Archivado el",
     "open": "Abrir expediente",
     "no_data": "No hay expedientes archivados",
