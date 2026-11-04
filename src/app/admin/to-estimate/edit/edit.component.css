@@ -92,7 +92,10 @@
   display: flex;
   align-items: center;
   gap: var(--ds-space-3);
+  flex-wrap: wrap;
 }
+/* Archivar, arriba a la derecha. */
+.fued-header__acciones { margin-left: auto; flex-shrink: 0; }
 .fued-btn-back {
   display: inline-flex; align-items: center; justify-content: center;
   width: 36px; height: 36px;

@@ -14,6 +14,11 @@ const LOCALES: Record<string, string> = { es: 'es-CA', en: 'en-US', fr: 'fr-CA' 
  * Los cancelados se listan (al final y atenuados) pero no suman al total: el
  * cliente ya no los paga.
  */
+/** Cancelados y archivados: se listan al final, atenuados, y no suman al total. */
+function fueraDeObra(estado: string): boolean {
+  return estado === 'cancelado' || estado === 'archivado';
+}
+
 @Component({
   selector: 'app-contratos-expediente',
   standalone: true,
@@ -37,12 +42,12 @@ export class ContratosExpedienteComponent {
   ordenados = computed(() => {
     const cs = this.contratos();
     return [
-      ...cs.filter(c => c.estado !== 'cancelado'),
-      ...cs.filter(c => c.estado === 'cancelado'),
+      ...cs.filter(c => !fueraDeObra(c.estado)),
+      ...cs.filter(c =>  fueraDeObra(c.estado)),
     ];
   });
 
-  vigentes   = computed(() => this.contratos().filter(c => c.estado !== 'cancelado'));
+  vigentes   = computed(() => this.contratos().filter(c => !fueraDeObra(c.estado)));
   cancelados = computed(() => this.contratos().length - this.vigentes().length);
   costoTotal = computed(() => this.vigentes().reduce((s, c) => s + c.precio_final, 0));
 

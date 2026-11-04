@@ -269,6 +269,12 @@ export const routes: Routes = [
     canActivate: [adminGuard],
   },
   {
+    // Única lista donde aparecen los expedientes archivados.
+    path: 'admin/archived',
+    loadComponent: () => import('./admin/archived/list/list.component').then(m => m.AdminArchivedListComponent),
+    canActivate: [adminGuard],
+  },
+  {
     // Reutiliza el editor del constructor; el componente detecta el modo admin
     // por la URL y opera sobre el constructor real de la obra.
     path: 'admin/construction-monitoring/monitoring/:id',

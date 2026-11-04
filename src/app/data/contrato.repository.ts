@@ -248,7 +248,7 @@ export class ContratoRepository {
         seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .eq('constructor_id', constructorId)
-      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
+      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado', 'archivado'])
       .order('actualizado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -294,7 +294,7 @@ export class ContratoRepository {
         seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
       .in('expediente_id', expedienteIds)
-      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
+      .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado', 'archivado'])
       .order('actualizado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -317,6 +317,7 @@ export class ContratoRepository {
         oferta:oferta_id ( plazo_semanas_min, plazo_semanas_max, fecha_inicio ),
         seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
+      // Sin 'archivado': los archivados tienen su propia lista (admin/archived).
       .in('estado', ['firmado', 'en_ejecucion', 'completado', 'cancelado'])
       .order('actualizado_en', { ascending: false });
     if (error) throw new Error(error.message);
@@ -338,6 +339,8 @@ export class ContratoRepository {
         oferta:oferta_id ( fecha_inicio ),
         seguimiento:seguimiento_obra ( estado, porcentaje_avance )
       `)
+      // Los archivados tienen su propia lista (admin/archived).
+      .neq('estado', 'archivado')
       .order('generado_en', { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];

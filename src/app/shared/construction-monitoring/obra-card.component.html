@@ -13,6 +13,9 @@
         {{ ('construction_monitoring.estado_' + o.estadoContrato) | translate }}
       </span>
     </div>
+    @if (o.estadoContrato === 'archivado') {
+      <app-aviso-archivado class="cm-obra__aviso" ambito="obra" [compacto]="true" />
+    }
 
     <div class="cm-hero">
       <!-- Avance global como métrica hero -->

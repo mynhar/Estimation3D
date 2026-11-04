@@ -1,0 +1,60 @@
+/* Hallmark · component: banner · genre: editorial · theme: locked (design.md)
+ * states: default · compacto (no interactivo: sin hover/focus/active/disabled)
+ * contrast: --ds-info-ink sobre --ds-info-soft 5.0:1 (AA)
+ *
+ * Archivado = estado administrativo, no error: paleta info (pizarra), distinta
+ * del borgoña de cancelado y del verde de completado. Filete izquierdo en el
+ * color base; el texto siempre en -ink.
+ */
+:host { display: block; }
+
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-info-soft);
+  color: var(--ds-info-ink);
+  border-left: 3px solid var(--ds-info);
+  border-radius: var(--ds-radius-md);
+}
+
+.aviso__icon {
+  flex-shrink: 0;
+  font-size: var(--ds-text-lg);
+  line-height: 1.2;
+}
+
+.aviso__body { flex: 1; min-width: 0; }
+
+.aviso__title {
+  margin: 0;
+  font-family: var(--ds-font-body);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-info-ink);
+  overflow-wrap: anywhere;
+}
+
+.aviso__text {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-normal);
+  color: var(--ds-info-ink);
+}
+
+.aviso__meta {
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-info-ink);
+}
+
+/* Una línea, para tarjetas de listas. */
+.aviso--compacto {
+  align-items: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+}
+.aviso--compacto .aviso__icon  { font-size: var(--ds-text-sm); }
+.aviso--compacto .aviso__title { font-size: var(--ds-text-xs); }
+.aviso--compacto .aviso__text  { display: none; }

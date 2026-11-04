@@ -1,0 +1,69 @@
+/* Hallmark · component: confirm panel · genre: editorial · theme: locked (design.md)
+ * states: default · hover · focus · active · disabled · loading · error · success (lo pinta la pantalla: aviso)
+ * contrast: tinta sobre --ds-warning-soft ≥ 12:1 · --ds-warning-ink sobre --ds-warning-soft 5.0:1
+ *
+ * Archivar es reversible, no destructivo: sin el borgoña de cancelar. El «sí»
+ * es el primario dorado del sistema; «Cancelar», el secundario de tinta.
+ */
+
+/* Sin caja propia: cerrado no ocupa sitio ni suma un hueco en contenedores con gap. */
+:host { display: contents; }
+
+.archivar-confirm {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--ds-space-4); flex-wrap: wrap;
+  padding: var(--ds-space-4) var(--ds-space-5);
+  background: var(--ds-warning-soft);
+  border-left: 3px solid var(--ds-warning);
+  border-radius: var(--ds-radius-md);
+}
+:host(.archivar--separado) .archivar-confirm { margin-bottom: var(--ds-space-5); }
+
+.archivar-confirm__body { flex: 1 1 22rem; min-width: 0; }
+.archivar-confirm__title {
+  margin: 0 0 var(--ds-space-1);
+  font-family: var(--ds-font-display); font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-regular); color: var(--ds-ink);
+}
+.archivar-confirm__desc  { margin: 0; font-size: var(--ds-text-sm); color: var(--ds-warning-ink); max-width: 68ch; }
+.archivar-confirm__error {
+  margin: var(--ds-space-2) 0 0; font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium); color: var(--ds-danger-ink);
+}
+.archivar-confirm__actions { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); }
+
+.btn-archivar-no,
+.btn-archivar-si {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium);
+  white-space: nowrap; cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out),
+              transform  var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-archivar-no { background: transparent; color: var(--ds-ink); border: 1px solid var(--ds-ink); }
+.btn-archivar-no:hover:not(:disabled)  { background: var(--ds-surface); }
+.btn-archivar-no:active:not(:disabled) { background: var(--ds-bg-alt); }
+
+.btn-archivar-si { background: var(--ds-gold); color: var(--ds-ink); border: 1px solid var(--ds-gold); }
+.btn-archivar-si:hover:not(:disabled)  { background: var(--ds-gold-hover); border-color: var(--ds-gold-hover); transform: translateY(-1px); box-shadow: var(--ds-shadow-gold); }
+.btn-archivar-si:active:not(:disabled) { background: var(--ds-gold-active); border-color: var(--ds-gold-active); transform: translateY(0); box-shadow: none; }
+
+.btn-archivar-no:focus-visible,
+.btn-archivar-si:focus-visible { outline: 2px solid var(--ds-ink); outline-offset: 2px; }
+.btn-archivar-no:disabled,
+.btn-archivar-si:disabled      { opacity: 0.6; cursor: not-allowed; }
+.btn-archivar-si[aria-busy="true"] { opacity: 1; cursor: progress; }
+
+@media (max-width: 575.98px) {
+  .archivar-confirm__actions { width: 100%; }
+  .archivar-confirm__actions > button { flex: 1 1 auto; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-archivar-no,
+  .btn-archivar-si { transition: none; }
+  .btn-archivar-si:hover:not(:disabled) { transform: none; }
+}

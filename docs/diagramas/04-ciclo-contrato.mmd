@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> generado: adjudicar_ofertas (1 por oferta aceptada)
+    generado --> firmado: firmar_contrato (cliente) / firmar_contrato_admin
+    firmado --> en_ejecucion: 1er reporte diario (constructor o admin)
+    en_ejecucion --> completado: completar_contrato_admin (cierra la obra al 100%)
+    completado --> [*]
+
+    generado --> cancelado: Cliente o admin
+    firmado --> cancelado: Cliente o admin
+    en_ejecucion --> cancelado: Cliente (obra por debajo del 100%) o admin
+    cancelado --> [*]
+
+    generado --> [*]: Se borra (rechazo, re-adjudicación o eliminación de su oferta)
+
+    state "cualquier estado" as ct_cualquiera
+    ct_cualquiera --> archivado: Se archiva su expediente
+    archivado --> ct_cualquiera: Se desarchiva (vuelve al anterior)

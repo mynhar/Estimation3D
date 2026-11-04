@@ -1,42 +1,45 @@
 flowchart TD
     subgraph CLIENTE
-        A1["Crea expediente<br/>(servicio, visita, fotos, ubicacion)"]
-        A2["Revisa ofertas recibidas"]
-        A3["Acepta una oferta"]
-        A4["Firma el contrato"]
+        A1["Crea expediente<br/>(app o formulario de la landing)"]
+        A2["Revisa las ofertas recibidas"]
+        A3["Adjudica una o varias ofertas"]
+        A4["Firma cada contrato"]
     end
 
     subgraph ESTIMADOR
         B1["Toma expediente nuevo<br/>(se asigna estimador)"]
-        B2["Realiza estimacion<br/>(rango de costo + URL tour 3D)"]
+        B2["Publica la estimación<br/>(rango de costo + tours 3D)"]
     end
 
     subgraph CONSTRUCTOR
-        C1["Ve expedientes disponibles<br/>(estimado / en_oferta)"]
-        C2["Envia oferta<br/>(precio, plazo)"]
-        C3["Ejecuta la obra y<br/>sube reportes / % avance"]
+        C1["Ve expedientes disponibles<br/>(públicos o con invitación)"]
+        C2["Envía oferta<br/>(máx. 5 por expediente, 1 por constructor)"]
+        C3["Registra el primer reporte diario"]
+        C4["Sigue reportando avance<br/>por servicio"]
     end
 
     subgraph ADMINISTRADOR
-        D1["Inicia ejecucion del contrato"]
-        D2["Marca contrato completado"]
+        D0["Registra el primer reporte diario<br/>(modo admin)"]
+        D1["Marca el contrato completado"]
     end
 
     A1 -->|expediente: nuevo| B1
     B1 -->|expediente: en_estimacion| B2
     B2 -->|expediente: estimado| C1
     C1 --> C2
-    C2 -->|1a oferta to expediente: en_oferta<br/>oferta: pendiente| A2
+    C2 -->|"1ª oferta: expediente en_oferta<br/>oferta: pendiente"| A2
     A2 --> A3
-    A3 -->|RPC aceptar_oferta_contrato| ADJ
-    ADJ["expediente: adjudicado<br/>oferta elegida: aceptada · resto: rechazada<br/>+ contrato: generado"] --> A4
+    A3 -->|RPC adjudicar_ofertas| ADJ
+    ADJ["expediente: adjudicado<br/>seleccionadas: aceptada · resto: rechazada<br/>1 contrato generado por oferta aceptada"] --> A4
     A4 -->|RPC firmar_contrato| FIRM
-    FIRM["contrato: firmado<br/>expediente: contratado"] --> D1
-    D1 -->|RPC iniciar_ejecucion| EJEC
-    EJEC["contrato: en_ejecucion<br/>seguimiento: en_progreso"] --> C3
-    C3 --> D2
-    D2 -->|RPC completar_contrato| FIN
-    FIN["contrato: completado<br/>seguimiento: completado (100%)"]
+    FIRM["contrato: firmado · seguimiento: no_iniciado<br/>expediente: contratado al firmar el último"] --> C3
+    FIRM --> D0
+    C3 -->|RPC iniciar_ejecucion_contrato| EJEC
+    D0 -->|RPC iniciar_ejecucion_contrato_admin| EJEC
+    EJEC["contrato: en_ejecucion<br/>seguimiento: en_progreso"] --> C4
+    C4 -->|avance global al 100%| OBRA["seguimiento: completado"]
+    C4 --> D1
+    D1 -->|RPC completar_contrato_admin| FIN["contrato: completado<br/>seguimiento: completado al 100%"]
 
     classDef estado fill:#FBFAF6,stroke:#D4B96E,color:#1A1A1A;
-    class ADJ,FIRM,EJEC,FIN estado;
+    class ADJ,FIRM,EJEC,OBRA,FIN estado;

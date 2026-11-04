@@ -22,6 +22,7 @@ import {
 } from '../../models/seguimiento.model';
 import { ObraVM, ParteDia, nombreServicio } from '../../models';
 import { ObraInspeccionesComponent } from './obra-inspecciones.component';
+import { AvisoArchivadoComponent } from '../ui/aviso-archivado/aviso-archivado.component';
 
 /** Un día del historial: todos sus partes (uno por servicio trabajado). */
 interface DiaObra {
@@ -37,7 +38,7 @@ interface DiaObra {
   selector: 'app-obra-card',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ObraInspeccionesComponent],
+  imports: [TranslatePipe, ObraInspeccionesComponent, AvisoArchivadoComponent],
   templateUrl: './obra-card.component.html',
   styleUrl: './obra-card.component.css',
   host: { '(document:keydown.escape)': 'cerrarViewer()' },
@@ -287,6 +288,7 @@ export class ObraCardComponent implements OnDestroy {
       en_ejecucion: 'cm-badge--ejecucion',
       completado:   'cm-badge--completado',
       cancelado:    'cm-badge--cancelado',
+      archivado:    'badge-archivado',
     } as Record<string, string>)[estado] ?? '';
   }
 

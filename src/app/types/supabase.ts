@@ -366,6 +366,7 @@ export type Database = {
           constructor_id: string
           descripcion_trabajo: string
           estado: Database["public"]["Enums"]["estado_contrato"]
+          estado_anterior: Database["public"]["Enums"]["estado_contrato"] | null
           expediente_id: string
           firmado_en: string | null
           garantia_anos: number | null
@@ -381,6 +382,7 @@ export type Database = {
           constructor_id: string
           descripcion_trabajo: string
           estado?: Database["public"]["Enums"]["estado_contrato"]
+          estado_anterior?: Database["public"]["Enums"]["estado_contrato"] | null
           expediente_id: string
           firmado_en?: string | null
           garantia_anos?: number | null
@@ -396,6 +398,7 @@ export type Database = {
           constructor_id?: string
           descripcion_trabajo?: string
           estado?: Database["public"]["Enums"]["estado_contrato"]
+          estado_anterior?: Database["public"]["Enums"]["estado_contrato"] | null
           expediente_id?: string
           firmado_en?: string | null
           garantia_anos?: number | null
@@ -496,11 +499,13 @@ export type Database = {
       expediente: {
         Row: {
           actualizado_en: string
+          archivado_en: string | null
           cliente_id: string
           creado_en: string
           creado_por: string | null
           descripcion: string | null
           estado: Database["public"]["Enums"]["estado_expediente"]
+          estado_anterior: Database["public"]["Enums"]["estado_expediente"] | null
           estimador_id: string | null
           fecha_visita: string
           id: string
@@ -509,11 +514,13 @@ export type Database = {
         }
         Insert: {
           actualizado_en?: string
+          archivado_en?: string | null
           cliente_id: string
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_expediente"]
+          estado_anterior?: Database["public"]["Enums"]["estado_expediente"] | null
           estimador_id?: string | null
           fecha_visita: string
           id?: string
@@ -522,11 +529,13 @@ export type Database = {
         }
         Update: {
           actualizado_en?: string
+          archivado_en?: string | null
           cliente_id?: string
           creado_en?: string
           creado_por?: string | null
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_expediente"]
+          estado_anterior?: Database["public"]["Enums"]["estado_expediente"] | null
           estimador_id?: string | null
           fecha_visita?: string
           id?: string
@@ -950,6 +959,7 @@ export type Database = {
           eliminada_en: string | null
           eliminada_por: string | null
           estado: Database["public"]["Enums"]["estado_oferta"]
+          estado_anterior: Database["public"]["Enums"]["estado_oferta"] | null
           expediente_id: string
           fecha_inicio: string | null
           garantia_anos: number | null
@@ -967,6 +977,7 @@ export type Database = {
           eliminada_en?: string | null
           eliminada_por?: string | null
           estado?: Database["public"]["Enums"]["estado_oferta"]
+          estado_anterior?: Database["public"]["Enums"]["estado_oferta"] | null
           expediente_id: string
           fecha_inicio?: string | null
           garantia_anos?: number | null
@@ -984,6 +995,7 @@ export type Database = {
           eliminada_en?: string | null
           eliminada_por?: string | null
           estado?: Database["public"]["Enums"]["estado_oferta"]
+          estado_anterior?: Database["public"]["Enums"]["estado_oferta"] | null
           expediente_id?: string
           fecha_inicio?: string | null
           garantia_anos?: number | null
@@ -1295,6 +1307,7 @@ export type Database = {
           contrato_id: string
           creado_en: string
           estado: Database["public"]["Enums"]["estado_seguimiento"]
+          estado_anterior: Database["public"]["Enums"]["estado_seguimiento"] | null
           expediente_id: string
           fase_actual_id: string | null
           fecha_fin_real: string | null
@@ -1308,6 +1321,7 @@ export type Database = {
           contrato_id: string
           creado_en?: string
           estado?: Database["public"]["Enums"]["estado_seguimiento"]
+          estado_anterior?: Database["public"]["Enums"]["estado_seguimiento"] | null
           expediente_id: string
           fase_actual_id?: string | null
           fecha_fin_real?: string | null
@@ -1321,6 +1335,7 @@ export type Database = {
           contrato_id?: string
           creado_en?: string
           estado?: Database["public"]["Enums"]["estado_seguimiento"]
+          estado_anterior?: Database["public"]["Enums"]["estado_seguimiento"] | null
           expediente_id?: string
           fase_actual_id?: string | null
           fecha_fin_real?: string | null
@@ -1452,6 +1467,10 @@ export type Database = {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
       }
+      archivar_expediente_admin: {
+        Args: { p_expediente_id: string }
+        Returns: undefined
+      }
       cancelar_contrato: {
         Args: { p_expediente_id: string }
         Returns: undefined
@@ -1466,6 +1485,10 @@ export type Database = {
       }
       completar_contrato_admin: {
         Args: { p_contrato_id: string }
+        Returns: undefined
+      }
+      desarchivar_expediente_admin: {
+        Args: { p_expediente_id: string }
         Returns: undefined
       }
       contar_ofertas_expedientes: {
@@ -1538,6 +1561,7 @@ export type Database = {
         | "en_ejecucion"
         | "completado"
         | "cancelado"
+        | "archivado"
       estado_expediente:
         | "nuevo"
         | "en_estimacion"
@@ -1546,8 +1570,9 @@ export type Database = {
         | "adjudicado"
         | "contratado"
         | "cancelado"
+        | "archivado"
       estado_inspeccion: "programada" | "realizada" | "cancelada"
-      estado_oferta: "pendiente" | "aceptada" | "rechazada"
+      estado_oferta: "pendiente" | "aceptada" | "rechazada" | "archivado"
       estado_seguimiento:
         | "no_iniciado"
         | "en_progreso"
@@ -1715,6 +1740,7 @@ export const Constants = {
         "en_ejecucion",
         "completado",
         "cancelado",
+        "archivado",
       ],
       estado_expediente: [
         "nuevo",
@@ -1724,9 +1750,10 @@ export const Constants = {
         "adjudicado",
         "contratado",
         "cancelado",
+        "archivado",
       ],
       estado_inspeccion: ["programada", "realizada", "cancelada"],
-      estado_oferta: ["pendiente", "aceptada", "rechazada"],
+      estado_oferta: ["pendiente", "aceptada", "rechazada", "archivado"],
       estado_seguimiento: [
         "no_iniciado",
         "en_progreso",

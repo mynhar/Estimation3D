@@ -49,6 +49,14 @@
   padding-bottom: var(--ds-space-4); border-bottom: 1px solid var(--ds-border);
 }
 .exp-header__body { flex: 1; min-width: 0; }
+
+/* Archivar: el botón y la confirmación son <app-boton-archivar> y
+ * <app-archivar-expediente> (shared/ui/archivar-expediente). Aquí solo su sitio. */
+.exp-header__actions { flex-shrink: 0; align-self: flex-start; }
+
+@media (max-width: 575.98px) {
+  .exp-header__actions { width: 100%; }
+}
 .exp-title {
   font-family: var(--ds-font-display); font-size: var(--ds-text-3xl);
   font-weight: var(--ds-weight-regular); color: var(--ds-ink);

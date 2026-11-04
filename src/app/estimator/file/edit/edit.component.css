@@ -254,6 +254,7 @@
 }
 
 .canvas-alert { grid-column: 1 / -1; }
+.canvas-aviso { grid-column: 1 / -1; display: block; }
 
 /* ══ Tarjetas de sección ══════════════════════════════════════════════════ */
 .section-card {

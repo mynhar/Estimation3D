@@ -9,6 +9,7 @@ import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 import { TipoInmueble } from '../../../types/supabase';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
 
 interface ClienteRow {
   id: string;
@@ -36,7 +37,7 @@ interface ClienteRow {
   selector: 'app-estimator-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, AvisoArchivadoComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -59,6 +60,8 @@ export class EstimatorFileEditComponent implements OnInit {
   cargando = signal(true);
   numero   = signal('');
   estado   = signal<string>('');
+  /** Archivado: solo un administrador puede modificarlo (la base rechaza el resto). */
+  archivado = computed(() => this.estado() === 'archivado');
 
   // ── Clientes ───────────────────────────────────────────────────────────────
   clientes         = signal<ClienteRow[]>([]);
@@ -459,6 +462,7 @@ export class EstimatorFileEditComponent implements OnInit {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   async onSubmit() {
+    if (this.archivado()) return;
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
     this.clienteRequerido.set(!this.clienteId());

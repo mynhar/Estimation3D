@@ -41,6 +41,11 @@
   flex: 1;
 }
 
+/* Archivar: siempre el último, arriba a la derecha. */
+.header-archivar { flex-shrink: 0; }
+
+.aviso-archivado-bloque { display: block; margin-bottom: var(--ds-space-5); }
+
 .page-title {
   font-family: var(--ds-font-display);
   font-size: 1.5rem;
@@ -532,6 +537,7 @@
 .badge-contrato-en-ejecucion { background: var(--ds-success-soft);  color: var(--ds-success-ink);     border: 1px solid var(--ds-success); }
 .badge-contrato-completado   { background: var(--ds-info-soft);     color: var(--ds-info-ink);        border: 1px solid var(--ds-info); }
 .badge-contrato-cancelado    { background: var(--ds-danger-soft);   color: var(--ds-danger-ink);      border: 1px solid var(--ds-danger); }
+.badge-archivado             { background: var(--ds-bg-alt);        color: var(--ds-ink-muted);       border: 1px solid var(--ds-border-strong); }
 
 /* ── PDF section (full width) ───────────────────────────────────────────── */
 

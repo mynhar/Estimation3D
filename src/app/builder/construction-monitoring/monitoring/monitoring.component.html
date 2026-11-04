@@ -55,6 +55,9 @@
               </span>
             }
           </div>
+          @if (puedeArchivar()) {
+            <app-boton-archivar [control]="archivo" />
+          }
         </div>
       </div>
 
@@ -126,11 +129,25 @@
       </div>
     </header>
 
+    <!-- Confirmación de archivo (estado y llamada viven en el componente).
+         Fuera de cualquier @if: el botón del encabezado la referencia por #archivo.
+         Solo se abre desde ese botón, que solo ve el administrador. -->
+    <div class="mon-banner-aviso" [hidden]="!archivo.confirmando()">
+      <app-archivar-expediente #archivo [expedienteId]="c.expediente_id"
+                               [separado]="false"
+                               [despues]="recargarTrasArchivar" />
+    </div>
+
     <!-- Status banners (full-width, below header) -->
     @if (cancelado()) {
       <div class="mon-banner mon-banner--cancelled">
         <i class="bi bi-x-circle"></i>
         {{ 'monitoring.contrato_cancelado' | translate }}
+      </div>
+    }
+    @if (archivado()) {
+      <div class="mon-banner-aviso">
+        <app-aviso-archivado ambito="obra" />
       </div>
     }
     @if (completado()) {
@@ -569,15 +586,17 @@
                         <p class="mon-event__desc">{{ r.descripcion }}</p>
                       }
                     </div>
-                    <button class="mon-event__del" type="button"
-                            [disabled]="eliminandoReporteId() !== null"
-                            (click)="$event.stopPropagation(); eliminarEvento(r)">
-                      @if (eliminandoReporteId() === r.id) {
-                        <span class="mon-spinner mon-spinner--sm"></span>
-                      } @else {
-                        <i class="bi bi-trash3"></i>
-                      }
-                    </button>
+                    @if (puedeGuardar()) {
+                      <button class="mon-event__del" type="button"
+                              [disabled]="eliminandoReporteId() !== null"
+                              (click)="$event.stopPropagation(); eliminarEvento(r)">
+                        @if (eliminandoReporteId() === r.id) {
+                          <span class="mon-spinner mon-spinner--sm"></span>
+                        } @else {
+                          <i class="bi bi-trash3"></i>
+                        }
+                      </button>
+                    }
                   </div>
                 }
               </div>

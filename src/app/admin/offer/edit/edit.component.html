@@ -44,6 +44,12 @@
           <i class="bi bi-shield-check"></i>
           {{ 'role.administrateur' | translate }} · {{ 'admin_offer.title' | translate }}
         </span>
+        <!-- Archivar: arriba a la derecha. Desaparece una vez archivado. -->
+        @if (!archivado()) {
+          <div class="fued-header__acciones">
+            <app-boton-archivar [control]="archivo" />
+          </div>
+        }
       </div>
       <div class="fued-header__body">
         <div class="fued-header__info">
@@ -82,6 +88,14 @@
         </div>
       </div>
     </header>
+
+    <!-- Confirmación de archivo (estado y llamada viven en el componente). -->
+    <app-archivar-expediente #archivo [expedienteId]="expedienteId"
+                             [despues]="recargarTrasArchivar" />
+
+    @if (archivado()) {
+      <app-aviso-archivado class="mb-4" ambito="admin" />
+    }
 
     <!-- 3-COLUMN WORKSPACE -->
     <div class="fued-workspace">
@@ -318,7 +332,7 @@
           <button class="fued-btn-nueva" type="button"
                   (click)="nuevaOferta()"
                   [class.fued-btn-nueva--active]="!ofertaId()"
-                  [disabled]="ofertasActivas().length >= 5">
+                  [disabled]="ofertasActivas().length >= 5 || archivado()">
             <i class="bi bi-plus" aria-hidden="true"></i>
             {{ 'make_offer.new_badge' | translate }}
           </button>
@@ -528,7 +542,7 @@
                   <div class="fued-offer-card__actions" (click)="$event.stopPropagation()">
                     <button class="fued-btn-restore" type="button"
                             (click)="restaurarOferta(oferta)"
-                            [disabled]="!!restaurando()"
+                            [disabled]="!!restaurando() || archivado()"
                             [title]="'admin_offer.restaurar_btn' | translate">
                       @if (restaurando() === oferta.id) {
                         <span class="fued-spinner-sm"></span>
@@ -937,7 +951,7 @@
             <div class="fued-form-actions">
               <button class="fued-btn-submit" type="button"
                       (click)="enviarOferta()"
-                      [disabled]="enviando() || !formularioCompleto">
+                      [disabled]="enviando() || !formularioCompleto || (archivado() && !ofertaId())">
                 @if (enviando()) {
                   <span class="fued-spinner-sm"></span>
                   {{ ofertaId() ? ('make_offer.updating' | translate) : ('make_offer.sending' | translate) }}
@@ -959,7 +973,7 @@
             <div class="fued-danger-zone">
               @if (!puedeEliminar) {
                 <p class="fued-danger-zone__blocked">
-                  <i class="bi bi-lock"></i>{{ 'admin_offer.delete_blocked' | translate }}
+                  <i class="bi bi-lock"></i>{{ (archivado() ? 'admin_offer.delete_blocked_archivado' : 'admin_offer.delete_blocked') | translate }}
                 </p>
               } @else if (!confirmandoEliminar()) {
                 <button class="fued-btn-danger" type="button"

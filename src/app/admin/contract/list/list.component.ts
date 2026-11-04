@@ -151,6 +151,7 @@ export class AdminContractListComponent implements OnInit {
       en_ejecucion: 'badge-contrato-en-ejecucion',
       completado:   'badge-contrato-completado',
       cancelado:    'badge-contrato-cancelado',
+      archivado:    'badge-archivado',
     };
     return map[estado] ?? '';
   }

@@ -33,6 +33,12 @@
           <i class="bi bi-shield-check"></i>
           {{ 'role.administrateur' | translate }} · {{ 'to_estimate.title' | translate }}
         </span>
+        <!-- Archivar: arriba a la derecha. Desaparece una vez archivado. -->
+        @if (!archivado()) {
+          <div class="fued-header__acciones">
+            <app-boton-archivar [control]="archivo" />
+          </div>
+        }
       </div>
       <div class="fued-header__body">
         <div class="fued-header__info">
@@ -77,6 +83,14 @@
         </div>
       </div>
     </header>
+
+    <!-- Confirmación de archivo. Sin margen: .fued-root ya separa con gap. -->
+    <app-archivar-expediente #archivo [expedienteId]="expedienteId" [separado]="false"
+                             [despues]="recargarTrasArchivar" />
+
+    @if (archivado()) {
+      <app-aviso-archivado ambito="admin" />
+    }
 
     <!-- Layout principal -->
     <div class="fued-main">

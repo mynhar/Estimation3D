@@ -105,6 +105,7 @@ export class MyFilesComponent implements OnInit {
     adjudicado:    { clase: 'status-badge--adjudicado',    icono: 'bi-trophy',             pipelineIdx: 3 },
     contratado:    { clase: 'status-badge--contratado',    icono: 'bi-file-earmark-check', pipelineIdx: 4 },
     cancelado:     { clase: 'status-badge--cancelado',     icono: 'bi-x-circle',           pipelineIdx: -1 },
+    archivado:     { clase: 'status-badge--archivado',     icono: 'bi-archive',            pipelineIdx: -1 },
   };
 
   private readonly FALLBACK_CFG: EstadoCfg = {

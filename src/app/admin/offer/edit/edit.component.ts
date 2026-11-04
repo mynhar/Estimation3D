@@ -18,6 +18,9 @@ import {
 } from '../../../models';
 import { ServicioCompleto } from '../../../data/servicio.repository';
 import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
+import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
 import {
   ServicioOpcion, ServicioSelectorComponent, resumirServicios,
 } from '../../../shared/ui/servicio-selector/servicio-selector.component';
@@ -26,7 +29,7 @@ import {
   selector: 'app-admin-offer-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -56,6 +59,16 @@ export class AdminOfferEditComponent implements OnInit {
    * ofertas solo aparece con dos o más.
    */
   multiServicio = computed(() => this.servicios().length > 1);
+
+  /**
+   * Archivado: el administrador puede corregir los datos de una oferta, pero
+   * no crear, eliminar, restaurar, rechazar ni adjudicar (cambian estados, y la
+   * base los rechaza mientras siga archivado).
+   */
+  archivado = computed(() => this.detalle()?.estado === 'archivado');
+
+  /** Tras archivar: relee expediente y ofertas, y refresca el formulario. */
+  recargarTrasArchivar = (): Promise<void> => this.onRepartoAplicado();
 
   opcionesServicio = computed<ServicioOpcion[]>(() => {
     const lang = this.currentLang();
@@ -269,12 +282,12 @@ export class AdminOfferEditComponent implements OnInit {
   get puedeEliminar(): boolean {
     if (!this.ofertaId()) return false;
     const estado = this.detalle()?.estado ?? '';
-    return estado !== 'contratado';
+    return estado !== 'contratado' && estado !== 'archivado';
   }
 
   get puedeEliminarOfertas(): boolean {
     const estado = this.detalle()?.estado ?? '';
-    return estado !== 'contratado';
+    return estado !== 'contratado' && estado !== 'archivado';
   }
 
   get puedeAdjudicar(): boolean {
@@ -503,6 +516,8 @@ export class AdminOfferEditComponent implements OnInit {
   async enviarOferta() {
     this.errorEnvio.set('');
     this.exitoMsg.set('');
+    // En un archivado no se crean ofertas; sí se corrigen las existentes.
+    if (this.archivado() && !this.ofertaId()) return;
 
     const constructorId = this.constructorSeleccionadoId();
     this.intentado.set(true);
@@ -836,7 +851,7 @@ export class AdminOfferEditComponent implements OnInit {
    * mensaje se muestra tal cual, que es lo que el administrador necesita saber.
    */
   async restaurarOferta(oferta: OfertaConConstructor) {
-    if (this.restaurando()) return;
+    if (this.restaurando() || this.archivado()) return;
     this.restaurando.set(oferta.id);
     this.errorRestaurar.set('');
     try {
@@ -897,7 +912,8 @@ export class AdminOfferEditComponent implements OnInit {
     return nombre.split(' ').slice(0, 2).map(p => p[0] ?? '').join('').toUpperCase();
   }
 
+  // Un archivado no sale en admin/offer: se vuelve a su propia lista.
   volver() {
-    this.router.navigate(['/admin/offer']);
+    this.router.navigate([this.archivado() ? '/admin/archived' : '/admin/offer']);
   }
 }

@@ -22,12 +22,13 @@ import {
   serviciosParaContrato,
 } from '../../models';
 import { ServicioCompleto } from '../../data/servicio.repository';
+import { AvisoArchivadoComponent } from '../../shared/ui/aviso-archivado/aviso-archivado.component';
 
 @Component({
   selector: 'app-builder-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, AvisoArchivadoComponent],
   templateUrl: './builder-offer.component.html',
   styleUrl: './builder-offer.component.css',
 })
@@ -87,8 +88,10 @@ export class BuilderOfferComponent implements OnInit {
   /**
    * Con contratos firmados la selección ya no se puede cambiar (la base lo
    * impide: adjudicar_ofertas solo acepta 'en_oferta' / 'adjudicado').
+   * Archivado, tampoco: los trabajos no se realizarán.
    */
-  bloqueado = computed(() => this.expediente()?.estado === 'contratado');
+  archivado = computed(() => this.expediente()?.estado === 'archivado');
+  bloqueado = computed(() => this.expediente()?.estado === 'contratado' || this.archivado());
 
   /** El expediente tiene varios servicios: cada oferta dice cuáles cubre. */
   multiServicio = computed(() => this.servicios().length > 1);

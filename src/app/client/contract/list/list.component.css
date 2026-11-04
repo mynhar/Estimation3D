@@ -99,6 +99,7 @@
 .ct--en_ejecucion { border-left-color: var(--ds-info); }
 .ct--completado   { border-left-color: var(--ds-success); }
 .ct--cancelado    { border-left-color: var(--ds-border-strong); }
+.ct--archivado    { border-left-color: var(--ds-info); }
 .ct--busy         { box-shadow: var(--ds-shadow-md); }
 
 /* Head: identidad + estado */
@@ -183,6 +184,8 @@
 .ct__badge--en_ejecucion { background: var(--ds-info-soft);    color: var(--ds-info-ink); }
 .ct__badge--completado   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
 .ct__badge--cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border: 1px solid var(--ds-border); }
+.ct__badge--archivado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border: 1px solid var(--ds-border-strong); }
+.ct__aviso { display: block; margin-top: var(--ds-space-3); }
 
 /* Body: cifras + contacto */
 .ct__body {

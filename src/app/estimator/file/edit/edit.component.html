@@ -71,6 +71,10 @@
 
     <div class="form-canvas">
 
+      @if (archivado()) {
+        <app-aviso-archivado ambito="expediente" class="canvas-aviso" />
+      }
+
       @if (error()) {
         <div class="form-alert canvas-alert d-lg-none" role="alert">
           <i class="bi bi-exclamation-triangle flex-shrink-0" aria-hidden="true"></i>
@@ -579,7 +583,7 @@
             </div>
           }
           <button type="button" class="btn btn-primary w-100 fw-semibold mb-2"
-                  (click)="onSubmit()" [disabled]="enviando()">
+                  (click)="onSubmit()" [disabled]="enviando() || archivado()">
             @if (enviando()) {
               <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
               {{ 'admin_file_edit.sending' | translate }}
@@ -606,7 +610,7 @@
       {{ 'common.cancel' | translate }}
     </button>
     <button type="button" class="btn btn-primary fw-semibold flex-grow-1"
-            (click)="onSubmit()" [disabled]="enviando()">
+            (click)="onSubmit()" [disabled]="enviando() || archivado()">
       @if (enviando()) {
         <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
         {{ 'admin_file_edit.sending' | translate }}

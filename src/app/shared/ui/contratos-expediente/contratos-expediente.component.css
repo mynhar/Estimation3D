@@ -133,6 +133,7 @@
 .cx-badge--en_ejecucion { background: var(--ds-gold-faint);   color: var(--ds-ink);         border-color: var(--ds-gold-soft); }
 .cx-badge--completado   { background: var(--ds-success-soft); color: var(--ds-success-ink); }
 .cx-badge--cancelado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border-color: var(--ds-border); }
+.cx-badge--archivado    { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border-color: var(--ds-border-strong); }
 
 /* Avance de la obra */
 .cx-row__obra {

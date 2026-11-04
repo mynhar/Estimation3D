@@ -152,7 +152,8 @@
     "assistant_ia": "Assistant IA",
     "imprevistos": "Imprévus",
     "fiches_normatives": "Fiches normatives",
-    "evenements_ia": "Événements IA"
+    "evenements_ia": "Événements IA",
+    "archivados": "Archivés"
   },
   "ai_assistant": {
     "eyebrow": "Espace client",
@@ -386,7 +387,8 @@
     "cancelado": "Annulé",
     "pendiente": "En attente",
     "aceptada": "Acceptée",
-    "rechazada": "Refusée"
+    "rechazada": "Refusée",
+    "archivado": "Archivé"
   },
   "state_desc": {
     "nuevo": "Votre dossier est nouveau et sera bientôt assigné à un estimateur.",
@@ -395,7 +397,8 @@
     "en_oferta": "Des offres ont été reçues. Examinez et choisissez la meilleure.",
     "adjudicado": "Vous avez sélectionné un constructeur. Finalisez le contrat.",
     "contratado": "Le contrat est signé. Les travaux peuvent commencer.",
-    "cancelado": "Ce dossier a été annulé."
+    "cancelado": "Ce dossier a été annulé.",
+    "archivado": "Ce dossier a été archivé : les travaux ne seront pas réalisés."
   },
   "state_hint": {
     "nuevo": "En attente d'assignation",
@@ -404,7 +407,8 @@
     "en_oferta": "Examinez les offres",
     "adjudicado": "Contrat en cours",
     "contratado": "Travaux en cours",
-    "cancelado": "Annulé"
+    "cancelado": "Annulé",
+    "archivado": "Archivé"
   },
   "pipeline": {
     "received": "Reçu",
@@ -495,7 +499,8 @@
       "firmado": "Signé",
       "en_ejecucion": "En cours",
       "completado": "Terminé",
-      "cancelado": "Annulé"
+      "cancelado": "Annulé",
+      "archivado": "Archivé"
     },
     "obra_estado": {
       "por_iniciar": "Chantier à démarrer",
@@ -529,7 +534,8 @@
     "works_started": "Début des travaux",
     "execution_started": "Travaux commencés",
     "contract_completed": "Contrat complété",
-    "contract_cancelled": "Contrat annulé"
+    "contract_cancelled": "Contrat annulé",
+    "contract_archived": "Contrat archivé"
   },
   "dashboard_builder": {
     "title": "Tableau de bord",
@@ -1788,7 +1794,10 @@
     "adjudicar_confirm_n": "Générer {{n}} contrat(s) — un par offre adjugée, chacun avec son PDF :",
     "adjudicar_reemplaza": "Les contrats générés non signés de ce dossier seront remplacés. Les offres non sélectionnées passeront à « Rejetée ».",
     "adjudicar_ok": "{{n}} contrat(s) générés avec leur PDF.",
-    "adjudicar_pdf_parcial": "Contrats générés, mais seulement {{n}} PDF sur {{total}}. Relancez l'adjudication pour réessayer."
+    "adjudicar_pdf_parcial": "Contrats générés, mais seulement {{n}} PDF sur {{total}}. Relancez l'adjudication pour réessayer.",
+    "oferta_archivado": "Archivée",
+    "status_archivado": "Archivé",
+    "delete_blocked_archivado": "Impossible de supprimer une offre lorsque le dossier est archivé."
   },
   "admin_file": {
     "title": "Dossiers",
@@ -1821,7 +1830,8 @@
     "status_cancelado": "Annulé",
     "view_table": "Vue tableau",
     "view_cards": "Vue cartes",
-    "photo_none": "Sans photo 3D"
+    "photo_none": "Sans photo 3D",
+    "status_archivado": "Archivé"
   },
   "admin_contract": {
     "title": "Contrats",
@@ -1852,7 +1862,9 @@
     "contrato_en_ejecucion": "En cours d'exécution",
     "contrato_completado": "Terminé",
     "contrato_cancelado": "Annulé",
-    "years": "an(s)"
+    "years": "an(s)",
+    "contrato_archivado": "Archivé",
+    "status_archivado": "Archivé"
   },
   "admin_contract_detail": {
     "title": "Détail du contrat",
@@ -1904,7 +1916,7 @@
     "ejecutar_indicador": "Démarrer l'exécution",
     "completar_btn": "Marquer comme terminé",
     "completar_confirm_title": "Confirmer la finalisation du contrat ?",
-    "completar_confirm_desc": "Le contrat passera à l'état 'terminé'. Cela confirme que tous les travaux ont été achevés.",
+    "completar_confirm_desc": "Le contrat passera à l'état 'terminé' et le chantier sera marqué comme terminé à 100 %. Cela confirme que tous les travaux ont été achevés.",
     "completar_confirm_ok": "Oui, marquer comme terminé"
   },
   "contract_list": {
@@ -1956,7 +1968,8 @@
     "err_cancel": "Impossible d'annuler le contrat. Veuillez réessayer.",
     "cancel_disabled_obra": "Chantier terminé : le contrat ne peut plus être annulé.",
     "contracts_one": "1 contrat",
-    "contracts_n": "{{n}} contrats"
+    "contracts_n": "{{n}} contrats",
+    "status_archivado": "Archivé"
   },
   "footer": {
     "rights_fr": "Tous droits réservés",
@@ -1994,7 +2007,9 @@
     "ofe_rechazada": "Votre offre n'a pas été retenue. Le client a choisi une autre proposition.",
     "ofe_pendiente": "Votre offre est revenue au statut en attente.",
     "contrato_en_ejecucion": "Les travaux ont commencé ! Suivez l'avancement de votre chantier.",
-    "obra_arranca": "Les travaux de votre chantier {{numero}} ont commencé ! Suivez l'avancement."
+    "obra_arranca": "Les travaux de votre chantier {{numero}} ont commencé ! Suivez l'avancement.",
+    "exp_archivado": "Le dossier {{numero}} a été archivé. Les travaux ne seront pas réalisés.",
+    "ofe_archivado": "Un dossier sur lequel vous avez soumis une offre a été archivé. Les travaux ne seront pas réalisés."
   },
   "admin_service_types": {
     "title": "Types de service",
@@ -2156,7 +2171,8 @@
     "tl_event_ctr_signed": "Contrat signé",
     "view_toggle": "Vue",
     "view_table": "Tableau",
-    "view_cards": "Cartes"
+    "view_cards": "Cartes",
+    "contract_archivado": "Archivé"
   },
   "http": {
     "offline": "Pas de connexion internet. Vérifiez votre réseau et réessayez.",
@@ -2169,13 +2185,15 @@
     "firmado": "Contrat signé",
     "en_ejecucion": "En cours",
     "completado": "Travaux complétés",
-    "cancelado": "Annulé"
+    "cancelado": "Annulé",
+    "archivado": "Archivé"
   },
   "contrato_estado_desc": {
     "generado": "Votre contrat est prêt à être examiné.",
     "firmado": "Le contrat est signé. Les travaux vont commencer.",
     "en_ejecucion": "Les travaux sont en cours.",
-    "completado": "Les travaux sont terminés."
+    "completado": "Les travaux sont terminés.",
+    "archivado": "Le contrat a été archivé : les travaux ne seront pas réalisés."
   },
   "monitoring": {
     "title": "Suivi de chantier",
@@ -2204,7 +2222,7 @@
     "obra_terminada_admin": "Vérifiez les rapports et complétez le contrat.",
     "obra_terminada_constructor": "L'administrateur complétera le contrat.",
     "completar_contrato": "Compléter le contrat",
-    "completar_confirm": "Le contrat passera à « Complété » et les rapports ne pourront plus être enregistrés ni corrigés.",
+    "completar_confirm": "Le contrat passera à « Complété », le chantier passera à 100 % et les rapports ne pourront plus être enregistrés ni corrigés.",
     "completar_confirm_ok": "Oui, compléter",
     "cliente_lbl": "Client",
     "constructor_lbl": "Constructeur",
@@ -2312,7 +2330,8 @@
     "estado_adjudicado": "Adjugé",
     "view_table": "Vue tableau",
     "view_cards": "Vue cartes",
-    "photo_none": "Aucun tour 3D disponible"
+    "photo_none": "Aucun tour 3D disponible",
+    "estado_archivado": "Archivé"
   },
   "estimator_monitoring": {
     "no_access_title": "Chantier non disponible",
@@ -2789,5 +2808,46 @@
     "footer": {
       "sign": "ENTREPRENEURS"
     }
+  },
+  "archivo": {
+    "btn": "Archiver",
+    "btn_aria": "Archiver ce dossier",
+    "confirm_title": "Archiver ce dossier ?",
+    "confirm_desc": "Le dossier, ses offres et ses contrats passeront à « Archivé » et ses chantiers seront mis en pause. Le statut précédent de chacun est conservé pour pouvoir le rétablir plus tard. Le client et les entrepreneurs verront que les travaux ne seront pas réalisés.",
+    "confirm_ok": "Oui, archiver",
+    "archivando": "Archivage…",
+    "btn_desarchivar": "Désarchiver",
+    "btn_desarchivar_aria": "Désarchiver ce dossier",
+    "desarchivar_title": "Désarchiver ce dossier ?",
+    "desarchivar_desc": "Le dossier, ses offres, ses contrats et ses chantiers reprennent le statut que chacun avait avant l’archivage. Le client, l’estimateur et les entrepreneurs pourront de nouveau y travailler.",
+    "desarchivar_ok": "Oui, désarchiver",
+    "desarchivando": "Désarchivage…",
+    "titulo_expediente": "Dossier archivé",
+    "titulo_contrato": "Dossier et contrat archivés",
+    "titulo_obra": "Dossier et contrat archivés · chantier en pause",
+    "texto_expediente": "Les travaux de ce dossier ne seront pas réalisés. Seul un administrateur peut le modifier.",
+    "texto_oferta": "Votre offre est archivée : les travaux de ce dossier ne seront pas réalisés. Seul un administrateur peut la modifier.",
+    "texto_contrato": "Les travaux de ce contrat ne seront pas réalisés. Seul un administrateur peut le modifier.",
+    "texto_obra": "Le chantier est en pause et les travaux ne seront pas réalisés. Les rapports ne peuvent plus être enregistrés ; seul un administrateur peut le modifier.",
+    "texto_admin": "Ses offres et contrats sont archivés et ses chantiers en pause. Le statut précédent de chacun a été conservé. Seul un administrateur peut modifier ses données ; les statuts ne changent pas.",
+    "fecha": "Archivé le {{fecha}}"
+  },
+  "admin_archived": {
+    "title": "Dossiers archivés",
+    "subtitle": "Ils n’apparaissent dans aucune autre liste. Seul un administrateur peut les modifier ; leurs statuts restent tels quels jusqu’à leur désarchivage depuis leur fiche.",
+    "count": "archivés",
+    "search_placeholder": "Rechercher par numéro, client, service ou adresse…",
+    "col_client": "Client / Service",
+    "col_location": "Emplacement",
+    "col_prev_state": "Statut à l’archivage",
+    "col_offers": "Offres",
+    "col_contracts": "Contrats",
+    "col_archived_on": "Archivé le",
+    "open": "Ouvrir le dossier",
+    "no_data": "Aucun dossier archivé",
+    "no_data_hint": "Pour en archiver un, ouvrez-le depuis Dossiers et cliquez sur « Archiver ».",
+    "no_results": "Aucun dossier archivé ne correspond",
+    "no_results_hint": "Essayez un autre numéro, client ou adresse.",
+    "view_label": "Affichage"
   }
 }

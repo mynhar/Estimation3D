@@ -3,6 +3,7 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -10,6 +11,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContratoService } from '../../../services/contrato.service';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
+import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
 import {
   ContratoAdminDetalle, ContratoPdfData, nombreServicio, descripcionServicio, serviciosParaContrato,
 } from '../../../models';
@@ -20,7 +24,7 @@ type LangPdf = 'es' | 'en' | 'fr';
   selector: 'app-admin-contract-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -34,6 +38,25 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
   contrato      = signal<ContratoAdminDetalle | null>(null);
   cargando      = signal(true);
   error         = signal<string | null>(null);
+
+  /**
+   * Expediente archivado (y con él este contrato). Solo el administrador ve la
+   * pantalla, pero los estados ya no cambian: se ocultan cancelar/firmar/completar.
+   */
+  archivado = computed(() => {
+    const c = this.contrato();
+    return c?.expediente_estado === 'archivado' || c?.estado === 'archivado';
+  });
+
+  /** Tras archivar: cierra las otras confirmaciones y recarga el contrato. */
+  recargarTrasArchivar = async (): Promise<void> => {
+    const c = this.contrato();
+    if (!c) return;
+    this.confirmandoCancelar.set(false);
+    this.confirmandoFirmar.set(false);
+    this.confirmandoCompletar.set(false);
+    this.contrato.set(await this.contratoService.getContratoAdminById(c.id));
+  };
 
   cancelando          = signal(false);
   confirmandoCancelar = signal(false);
@@ -83,12 +106,13 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
   }
 
   volver() {
-    this.router.navigate(['/admin/contract']);
+    // Los contratos archivados ya no salen en admin/contract.
+    this.router.navigate([this.archivado() ? '/admin/archived' : '/admin/contract']);
   }
 
   get puedeCancel(): boolean {
     const estado = this.contrato()?.estado ?? '';
-    return estado !== 'cancelado';
+    return estado !== 'cancelado' && !this.archivado();
   }
 
   get puedeFirmar(): boolean {
@@ -258,6 +282,7 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
     const map: Record<string, string> = {
       adjudicado: 'badge-adjudicado',
       contratado: 'badge-contratado',
+      archivado:  'badge-archivado',
     };
     return map[estado] ?? 'badge-adjudicado';
   }
@@ -269,6 +294,7 @@ export class AdminContractEditComponent implements OnInit, OnDestroy {
       en_ejecucion: 'badge-contrato-en-ejecucion',
       completado:   'badge-contrato-completado',
       cancelado:    'badge-contrato-cancelado',
+      archivado:    'badge-archivado',
     };
     return map[estado] ?? '';
   }

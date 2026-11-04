@@ -109,7 +109,9 @@ export class AdminFileBuilderBidsComponent implements OnInit {
    * rechaza con un contrato vivo), pero re-adjudicar SÍ se permite, y sin
    * casillas no habría forma de elegir a quién.
    */
-  puedeSeleccionar = computed(() => this.estado() !== 'contratado');
+  // Archivado: rechazar, reactivar y adjudicar cambian estados, y la base los
+  // veta mientras el expediente siga archivado.
+  puedeSeleccionar = computed(() => this.estado() !== 'contratado' && this.estado() !== 'archivado');
 
   confirmandoAdjudicarSeleccion = signal(false);
 

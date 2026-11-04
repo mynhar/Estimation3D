@@ -1,0 +1,246 @@
+<div class="container-fluid py-4 px-3 px-xl-4">
+
+  <!-- ── Encabezado ─────────────────────────────────────────────────────────── -->
+  <header class="page-header p-4 mb-4">
+    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+      <div class="page-header__text">
+        <p class="page-eyebrow">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>{{ 'role.administrateur' | translate }}
+        </p>
+        <h1 class="page-title">{{ 'admin_archived.title' | translate }}</h1>
+        <p class="page-sub">{{ 'admin_archived.subtitle' | translate }}</p>
+      </div>
+      @if (!cargando() && !error()) {
+        <span class="kpi-pill">
+          <i class="bi bi-archive" aria-hidden="true"></i>
+          {{ total() }} {{ 'admin_archived.count' | translate }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <!-- ── Búsqueda + vista ───────────────────────────────────────────────────
+       Fuera del @if de carga: así el input no pierde el foco al recargar. -->
+  <div class="filter-bar mb-3">
+    <div class="input-group filter-bar__search">
+      <span class="input-group-text search-icon" aria-hidden="true">
+        <i class="bi bi-search"></i>
+      </span>
+      <input type="search" class="form-control search-input"
+             [placeholder]="'admin_archived.search_placeholder' | translate"
+             [attr.aria-label]="'admin_archived.search_placeholder' | translate"
+             [value]="busqueda()"
+             (input)="setBusqueda($event)">
+      @if (busqueda()) {
+        <button class="btn search-clear" type="button" (click)="limpiarBusqueda()"
+                [attr.aria-label]="'common.clear' | translate">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+
+    <!-- En móvil siempre tarjetas: el selector solo aparece desde md. -->
+    <div class="view-toggle d-none d-md-inline-flex" role="group"
+         [attr.aria-label]="'admin_archived.view_label' | translate">
+      <button type="button" class="view-toggle__btn"
+              [class.view-toggle__btn--active]="vista() === 'tarjetas'"
+              [attr.aria-pressed]="vista() === 'tarjetas'"
+              (click)="setVista('tarjetas')"
+              [title]="'admin_file.view_cards' | translate"
+              [attr.aria-label]="'admin_file.view_cards' | translate">
+        <i class="bi bi-grid-3x3-gap" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="view-toggle__btn"
+              [class.view-toggle__btn--active]="vista() === 'tabla'"
+              [attr.aria-pressed]="vista() === 'tabla'"
+              (click)="setVista('tabla')"
+              [title]="'admin_file.view_table' | translate"
+              [attr.aria-label]="'admin_file.view_table' | translate">
+        <i class="bi bi-table" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Cargando ────────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="skeleton-table" aria-busy="true" [attr.aria-label]="'common.loading' | translate">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="skeleton-row">
+          <div class="skel skel--xs"></div>
+          <div class="skel skel--lg"></div>
+          <div class="skel skel--md"></div>
+          <div class="skel skel--sm"></div>
+          <div class="skel skel--sm"></div>
+        </div>
+      }
+    </div>
+
+  <!-- ── Error ──────────────────────────────────────────────────────────── -->
+  } @else if (error()) {
+    <div class="table-card">
+      <div class="empty-state" role="alert">
+        <div class="empty-state__icon empty-state__icon--danger">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        </div>
+        <p class="empty-state__title">{{ 'common.error' | translate }}</p>
+        <p class="empty-state__desc">{{ error() }}</p>
+        <button class="btn btn-outline-primary btn-sm mt-3" type="button" (click)="cargar()">
+          <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>{{ 'common.retry' | translate }}
+        </button>
+      </div>
+    </div>
+
+  <!-- ── Contenido ──────────────────────────────────────────────────────── -->
+  } @else {
+    <div class="table-card">
+
+      @if (total() === 0) {
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <i class="bi bi-archive" aria-hidden="true"></i>
+          </div>
+          <p class="empty-state__title">{{ 'admin_archived.no_data' | translate }}</p>
+          <p class="empty-state__desc">{{ 'admin_archived.no_data_hint' | translate }}</p>
+          <a routerLink="/admin/file" class="btn btn-outline-primary btn-sm mt-3">
+            <i class="bi bi-folder2-open me-1" aria-hidden="true"></i>{{ 'nav.dossiers' | translate }}
+          </a>
+        </div>
+
+      } @else if (expedientes().length === 0) {
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <i class="bi bi-search" aria-hidden="true"></i>
+          </div>
+          <p class="empty-state__title">{{ 'admin_archived.no_results' | translate }}</p>
+          <p class="empty-state__desc">{{ 'admin_archived.no_results_hint' | translate }}</p>
+          <button class="btn btn-outline-primary btn-sm mt-3" type="button" (click)="limpiarBusqueda()">
+            <i class="bi bi-x-circle me-1" aria-hidden="true"></i>{{ 'common.clear' | translate }}
+          </button>
+        </div>
+
+      } @else {
+
+        <!-- ── Tabla (escritorio, vista tabla) ───────────────────────────── -->
+        <div class="table-responsive d-none" [class.d-md-block]="vista() === 'tabla'">
+          <table class="table table-admin align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col" class="col-num">#</th>
+                <th scope="col">{{ 'admin_archived.col_client' | translate }}</th>
+                <th scope="col">{{ 'admin_archived.col_location' | translate }}</th>
+                <th scope="col">{{ 'admin_archived.col_prev_state' | translate }}</th>
+                <th scope="col" class="text-end">{{ 'admin_archived.col_offers' | translate }}</th>
+                <th scope="col" class="text-end">{{ 'admin_archived.col_contracts' | translate }}</th>
+                <th scope="col">{{ 'admin_archived.col_archived_on' | translate }}</th>
+                <th scope="col" class="col-actions"><span class="visually-hidden">{{ 'admin_archived.open' | translate }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of expedientes(); track e.id) {
+                <tr class="table-row" (click)="abrir(e.id)">
+                  <td class="col-num"><span class="exp-num">{{ e.numero }}</span></td>
+                  <td class="col-identity">
+                    <span class="cell-primary">{{ e.cliente_nombre }}</span>
+                    <span class="cell-secondary">{{ servicioNombre(e) }}</span>
+                  </td>
+                  <td>
+                    @if (lugar(e)) {
+                      <span class="cell-primary">{{ e.canton || '—' }}</span>
+                      <span class="cell-secondary">{{ e.distrito }}</span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (e.estado_anterior) {
+                      <span class="estado-badge {{ badgeEstado(e.estado_anterior) }}">
+                        {{ ('admin_file.status_' + e.estado_anterior) | translate }}
+                      </span>
+                    } @else {
+                      <span class="cell-muted">—</span>
+                    }
+                  </td>
+                  <td class="text-end cell-num">{{ e.total_ofertas }}</td>
+                  <td class="text-end cell-num">{{ e.total_contratos }}</td>
+                  <td class="col-date">{{ formatFecha(e.archivado_en) }}</td>
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <a [routerLink]="['/admin/file/edit', e.id]" class="action-btn"
+                       [title]="'admin_archived.open' | translate"
+                       [attr.aria-label]="('admin_archived.open' | translate) + ' ' + e.numero">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── Tarjetas (móvil siempre · escritorio en vista tarjetas) ──── -->
+        <ul class="arch-cards list-unstyled mb-0" [class.d-md-none]="vista() === 'tabla'">
+          @for (e of expedientes(); track e.id) {
+            <li>
+              <a class="arch-card" [routerLink]="['/admin/file/edit', e.id]">
+                <!-- Miniatura del tour 3D; decorativa: el texto de la tarjeta ya
+                     identifica el expediente. -->
+                <div class="arch-card__photo">
+                  @if (fotoExpediente(e); as foto) {
+                    <img class="arch-card__photo-img" [src]="foto" alt="" loading="lazy"
+                         (error)="onFotoError(e.id)" />
+                  } @else {
+                    <div class="arch-card__photo-empty" [title]="'admin_file.photo_none' | translate">
+                      <i class="bi bi-badge-3d" aria-hidden="true"></i>
+                    </div>
+                  }
+                  <span class="arch-card__sello">
+                    <i class="bi bi-archive" aria-hidden="true"></i>
+                    {{ 'archivo.fecha' | translate: { fecha: formatFecha(e.archivado_en) } }}
+                  </span>
+                </div>
+
+                <div class="arch-card__body">
+                <div class="arch-card__top">
+                  <span class="exp-num">{{ e.numero }}</span>
+                </div>
+
+                <div class="arch-card__who">
+                  <span class="arch-card__name">{{ e.cliente_nombre }}</span>
+                  <span class="arch-card__service">{{ servicioNombre(e) }}</span>
+                  @if (lugar(e)) {
+                    <span class="arch-card__lugar">
+                      <i class="bi bi-geo-alt" aria-hidden="true"></i>{{ lugar(e) }}
+                    </span>
+                  }
+                </div>
+
+                <dl class="arch-card__meta">
+                  <div class="arch-card__meta-item">
+                    <dt>{{ 'admin_archived.col_prev_state' | translate }}</dt>
+                    <dd>
+                      @if (e.estado_anterior) {
+                        <span class="estado-badge {{ badgeEstado(e.estado_anterior) }}">
+                          {{ ('admin_file.status_' + e.estado_anterior) | translate }}
+                        </span>
+                      } @else { — }
+                    </dd>
+                  </div>
+                  <div class="arch-card__meta-item">
+                    <dt>{{ 'admin_archived.col_offers' | translate }}</dt>
+                    <dd>{{ e.total_ofertas }}</dd>
+                  </div>
+                  <div class="arch-card__meta-item">
+                    <dt>{{ 'admin_archived.col_contracts' | translate }}</dt>
+                    <dd>{{ e.total_contratos }}</dd>
+                  </div>
+                </dl>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+
+      }
+    </div>
+  }
+
+</div>

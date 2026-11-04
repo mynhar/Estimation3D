@@ -181,6 +181,11 @@
       </div>
     </header>
 
+    <!-- Expediente archivado: las ofertas quedan archivadas y no se adjudican. -->
+    @if (archivado()) {
+      <app-aviso-archivado class="mb-4" ambito="expediente" />
+    }
+
     <!-- ── Grid principal ──────────────────────────────────────── -->
     <div class="row g-4 align-items-start">
 
@@ -742,7 +747,9 @@
                 <span class="sel-total__value">{{ formatCosto(totalSeleccion()) }}</span>
               </div>
 
-              @if (bloqueado()) {
+              @if (archivado()) {
+                <app-aviso-archivado class="mt-3" ambito="expediente" [compacto]="true" />
+              } @else if (bloqueado()) {
                 <div class="status-msg status-msg--info mt-3">
                   <i class="bi bi-lock" aria-hidden="true"></i>
                   {{ 'builder_offer.locked' | translate }}

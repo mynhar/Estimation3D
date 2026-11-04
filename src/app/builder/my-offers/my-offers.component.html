@@ -287,7 +287,8 @@
                   <span class="offer-badge"
                         [class.offer-badge--pending]="oferta.estado === 'pendiente'"
                         [class.offer-badge--accepted]="oferta.estado === 'aceptada'"
-                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'">
+                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'"
+                        [class.badge-archivado]="oferta.estado === 'archivado'">
                     <i class="bi {{ estadoIcon(oferta.estado) }} me-1"></i>
                     {{ ('state.' + oferta.estado) | translate }}
                   </span>
@@ -347,7 +348,8 @@
                   <span class="offer-badge"
                         [class.offer-badge--pending]="oferta.estado === 'pendiente'"
                         [class.offer-badge--accepted]="oferta.estado === 'aceptada'"
-                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'">
+                        [class.offer-badge--rejected]="oferta.estado === 'rechazada'"
+                        [class.badge-archivado]="oferta.estado === 'archivado'">
                     <i class="bi {{ estadoIcon(oferta.estado) }} me-1"></i>
                     {{ ('state.' + oferta.estado) | translate }}
                   </span>

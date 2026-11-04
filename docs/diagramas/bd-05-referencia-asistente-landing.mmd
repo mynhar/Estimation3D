@@ -1,0 +1,79 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    servicio {
+        int id PK
+        text codigo UK
+    }
+    expediente {
+        uuid id PK
+    }
+    perfil {
+        uuid id PK
+    }
+    ficha_normativa {
+        int id PK
+        text codigo UK
+        text titulo_fr
+        text titulo_en
+        text titulo_es
+        text resumen_fr
+        text resumen_en
+        text resumen_es
+        text[] palabras_clave
+        bool activo
+        int orden
+        timestamptz creado_en
+    }
+    imprevisto_catalogo {
+        int id PK
+        int servicio_id FK "NULL = cualquier servicio"
+        text codigo UK
+        text titulo_fr
+        text titulo_en
+        text titulo_es
+        text perfil_fr
+        text perfil_en
+        text perfil_es
+        text protocolo_fr
+        text protocolo_en
+        text protocolo_es
+        bool requiere_aprobacion
+        text ficha_codigo FK
+        bool activo
+        int orden
+        timestamptz creado_en
+    }
+    asistente_conversacion {
+        uuid id PK
+        uuid expediente_id FK
+        uuid usuario_id FK
+        text role "user o assistant"
+        text content
+        timestamptz creado_en
+    }
+    asistente_evento {
+        uuid id PK
+        uuid expediente_id FK
+        uuid usuario_id FK
+        rol_usuario rol
+        text tipo "salud, escalada, caso externo, imprevisto..."
+        text resumen
+        jsonb payload
+        bool resuelto
+        timestamptz creado_en
+    }
+    landing_solicitud_intento {
+        bigint id PK
+        text email
+        text ip
+        timestamptz creado_en
+    }
+    servicio |o--o{ imprevisto_catalogo : servicio_id
+    ficha_normativa |o--o{ imprevisto_catalogo : ficha_codigo
+    expediente ||--o{ asistente_conversacion : expediente_id
+    perfil ||--o{ asistente_conversacion : usuario_id
+    expediente ||--o{ asistente_evento : expediente_id
+    perfil ||--o{ asistente_evento : usuario_id

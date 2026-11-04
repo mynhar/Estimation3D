@@ -36,6 +36,7 @@ const FASE_MAP: Record<string, number> = {
   adjudicado:    5,
   contratado:    5,
   cancelado:     0,
+  archivado:     0,
 };
 
 // Token-based CSS class per estado
@@ -47,6 +48,7 @@ const ESTADO_CLASE: Record<string, string> = {
   adjudicado:    'estado-badge--adjudicado',
   contratado:    'estado-badge--contratado',
   cancelado:     'estado-badge--cancelado',
+  archivado:     'badge-archivado',
 };
 
 // Último hito de un contrato según su estado. Fechado con `actualizado_en`:
@@ -55,6 +57,7 @@ const CONTRATO_EVENTO_FIN: Record<string, { tipo: string; icon: string; titulo: 
   en_ejecucion: { tipo: 'ejecucion_iniciada',  icon: 'bi-play-circle', titulo: 'timeline.execution_started'  },
   completado:   { tipo: 'contrato_completado', icon: 'bi-check2-all',  titulo: 'timeline.contract_completed' },
   cancelado:    { tipo: 'contrato_cancelado',  icon: 'bi-x-circle',    titulo: 'timeline.contract_cancelled' },
+  archivado:    { tipo: 'contrato_archivado',  icon: 'bi-archive',     titulo: 'timeline.contract_archived' },
 };
 
 export interface TimelineEvento {

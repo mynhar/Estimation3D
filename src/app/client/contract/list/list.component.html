@@ -139,6 +139,11 @@
       </div>
     </div>
 
+    <!-- Expediente archivado: el cliente sabe que los trabajos no se harán. -->
+    @if (c.estado === 'archivado') {
+      <app-aviso-archivado class="ct__aviso" ambito="contrato" />
+    }
+
     <!-- Cuerpo: cifras clave + contacto -->
     <div class="ct__body">
       <div class="ct__facts">
@@ -224,7 +229,7 @@
           </button>
         }
 
-        @if (c.estado !== 'cancelado' && c.estado !== 'completado' && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
+        @if (!esCerrado(c.estado) && confirmCancelId() !== c.id && confirmandoId() !== c.id) {
           <!-- Obra al 100 %: el trabajo ya está hecho y el contrato no se cancela.
                El motivo va en texto visible (un title en un botón desactivado no
                siempre se muestra) y se enlaza con aria-describedby. -->

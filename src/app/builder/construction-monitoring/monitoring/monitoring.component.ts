@@ -19,6 +19,9 @@ import { SeguimientoService } from '../../../services/seguimiento.service';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ArchivoService, ReporteArchivoRow, ReporteMediaTipo } from '../../../services/archivo.service';
 import { ContratoAdminDetalle, ContratoPdfData, nombreServicio, serviciosParaContrato } from '../../../models';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
+import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
 import {
   ActividadServicio,
   FaseServicio,
@@ -36,7 +39,7 @@ interface CalDia { num: number; tipo: 'vacio' | 'normal' | 'trabajado' | 'hoy' |
   selector: 'app-construction-monitoring',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
   templateUrl: './monitoring.component.html',
   styleUrl: './monitoring.component.css',
   host: { '(document:keydown.escape)': 'cerrarViewer()' },
@@ -176,9 +179,9 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   // sus propios contratos y opera sobre el constructor real de la obra.
   esAdmin = false;
   private listaRuta(): string {
-    return this.esAdmin
-      ? '/admin/construction-monitoring/list'
-      : '/builder/construction-monitoring/list';
+    if (!this.esAdmin) return '/builder/construction-monitoring/list';
+    // Las obras archivadas ya no salen en el listado de seguimiento.
+    return this.archivado() ? '/admin/archived' : '/admin/construction-monitoring/list';
   }
 
   readonly PASOS = [
@@ -281,6 +284,20 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   });
   cancelado  = computed(() => this.contrato()?.estado === 'cancelado');
   completado = computed(() => this.contrato()?.estado === 'completado');
+  /** Expediente archivado: contrato archivado y obra en pausa; no admite partes. */
+  archivado  = computed(() => this.contrato()?.estado === 'archivado');
+
+  /** Administrador: puede archivar el expediente mientras no lo esté. */
+  puedeArchivar = computed(() => {
+    const c = this.contrato();
+    return this.esAdmin && !!c && c.estado !== 'archivado' && c.expediente_estado !== 'archivado';
+  });
+
+  /** Tras archivar: cierra la confirmación de completar y relee contrato y avance. */
+  recargarTrasArchivar = async (): Promise<void> => {
+    this.confirmandoCompletar.set(false);
+    await this.refrescarEstadoExterno();
+  };
 
   /**
    * La obra llegó al 100 % (lo marca la base al recalcular el avance) pero el
@@ -288,7 +305,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
    * declara quien registra los partes, y el administrador lo confirma.
    */
   obraTerminada = computed(() =>
-    !this.completado() && !this.cancelado() && this.seguimiento()?.estado === 'completado');
+    !this.completado() && !this.cancelado() && !this.archivado() && this.seguimiento()?.estado === 'completado');
 
   confirmandoCompletar = signal(false);
   completando          = signal(false);
@@ -983,7 +1000,9 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   async eliminarEvento(r: ReporteDiario): Promise<void> {
     const seg    = this.seguimiento();
     const userId = this.user()?.id;
-    if (!seg || !userId) return;
+    // Mismo criterio que guardar: con el contrato completado o cancelado los
+    // partes quedan cerrados (la plantilla ya oculta el botón).
+    if (!seg || !userId || !this.puedeGuardar()) return;
 
     this.eliminandoReporteId.set(r.id);
     try {
@@ -1066,6 +1085,7 @@ export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
       en_ejecucion: 'badge-en-ejecucion',
       completado:   'badge-completado',
       cancelado:    'badge-cancelado',
+      archivado:    'badge-archivado',
     } as Record<string, string>)[estado] ?? '';
   }
 

@@ -468,3 +468,6 @@
   .cm-timeline__label { display: none; }
   .cm-timeline__line { margin-bottom: 0; }
 }
+
+/* Expediente archivado: aviso de una línea bajo la cabecera. */
+.cm-obra__aviso { display: block; margin-top: var(--ds-space-3); }

@@ -1,0 +1,10 @@
+<div class="aviso" [class.aviso--compacto]="compacto()" role="status">
+  <i class="bi bi-archive aviso__icon" aria-hidden="true"></i>
+  <div class="aviso__body">
+    <p class="aviso__title">{{ titulo() | translate }}</p>
+    <p class="aviso__text">{{ texto() | translate }}</p>
+    @if (fecha() && !compacto()) {
+      <p class="aviso__meta">{{ 'archivo.fecha' | translate: { fecha: (fecha() | date: 'dd/MM/yyyy') } }}</p>
+    }
+  </div>
+</div>

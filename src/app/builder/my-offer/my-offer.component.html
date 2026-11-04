@@ -73,7 +73,8 @@
                 <span class="estado-badge"
                       [class.estado-badge--pending]="detalle()!.estado === 'pendiente'"
                       [class.estado-badge--accepted]="detalle()!.estado === 'aceptada'"
-                      [class.estado-badge--rejected]="detalle()!.estado === 'rechazada'">
+                      [class.estado-badge--rejected]="detalle()!.estado === 'rechazada'"
+                      [class.estado-badge--archived]="detalle()!.estado === 'archivado'">
                   <i class="bi {{ estadoIcon(detalle()!.estado) }} me-1"></i>
                   {{ ('state.' + detalle()!.estado) | translate }}
                 </span>
@@ -98,6 +99,11 @@
         </div>
       </div>
     </header>
+
+    <!-- Expediente archivado: la oferta queda archivada y los trabajos no se harán. -->
+    @if (detalle()!.estado === 'archivado') {
+      <app-aviso-archivado class="mb-4" ambito="oferta" />
+    }
 
     <!-- â”€â”€ Main grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <div class="row g-4 align-items-start">
@@ -422,7 +428,8 @@
                 <span class="estado-badge"
                       [class.estado-badge--pending]="detalle()!.estado === 'pendiente'"
                       [class.estado-badge--accepted]="detalle()!.estado === 'aceptada'"
-                      [class.estado-badge--rejected]="detalle()!.estado === 'rechazada'">
+                      [class.estado-badge--rejected]="detalle()!.estado === 'rechazada'"
+                      [class.estado-badge--archived]="detalle()!.estado === 'archivado'">
                   <i class="bi {{ estadoIcon(detalle()!.estado) }} me-1"></i>
                   {{ ('state.' + detalle()!.estado) | translate }}
                 </span>
@@ -484,6 +491,8 @@
                     <p class="estado-banner__sub">{{ 'my_offer.accepted_sub' | translate }}</p>
                   </div>
                 </div>
+              } @else if (detalle()!.estado === 'archivado') {
+                <app-aviso-archivado ambito="oferta" [compacto]="true" />
               } @else if (detalle()!.estado === 'rechazada') {
                 <div class="estado-banner estado-banner--rejected">
                   <i class="bi bi-x-circle flex-shrink-0"></i>

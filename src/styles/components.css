@@ -80,6 +80,20 @@
 .status-badge--completado    { background: var(--ds-success-soft); color: var(--ds-success-ink); border-color: var(--ds-success-soft); }
 .status-badge--activo        { background: var(--ds-success-soft); color: var(--ds-success-ink); border-color: var(--ds-success-soft); }
 .status-badge--inactivo      { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);  border-color: var(--ds-danger-soft); }
+.status-badge--pausado       { background: var(--ds-warning-soft); color: var(--ds-warning-ink); border-color: var(--ds-warning-soft); }
+
+/* Archivado (expediente, oferta o contrato): estado administrativo, neutro.
+   Tinta secundaria sobre fondo alterno con filete — no se confunde con
+   cancelado (borgoña) ni con completado (verde). `.badge-archivado` es la
+   misma insignia para los mapas locales de cada pantalla (badge-*, cm-badge-*,
+   estado-badge-*), que no comparten prefijo.                                 */
+.status-badge--archivado,
+.badge.badge-archivado,
+.badge-archivado {
+  background: var(--ds-bg-alt);
+  color: var(--ds-ink-secondary);
+  border: 1px solid var(--ds-border-strong);
+}
 
 /* ============================================================
    KPI PILL — Métrica compacta en headers

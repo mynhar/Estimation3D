@@ -60,6 +60,7 @@
 .estado-badge--pending  { background: var(--ds-warning-soft); color: var(--ds-warning-ink);  border-color: rgba(184, 134, 46, 0.3); }
 .estado-badge--accepted { background: var(--ds-success-soft); color: var(--ds-success-ink);  border-color: rgba(91, 122, 79, 0.3); }
 .estado-badge--rejected { background: var(--ds-danger-soft);  color: var(--ds-danger-ink);   border-color: rgba(161, 69, 69, 0.3); }
+.estado-badge--archived { background: var(--ds-bg-alt);       color: var(--ds-ink-secondary); border-color: var(--ds-border-strong); }
 
 /* ── Header state variants ──────────────────────────────────────────── */
 .header--accepted { border-left: 3px solid var(--ds-success) !important; }

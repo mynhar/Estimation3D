@@ -25,6 +25,7 @@ const ESTADO_CFG: Record<string, EstadoCfg> = {
   adjudicado:    { icon: 'bi-award',           pct: 85,  cls: 'is-gold-strong' },
   contratado:    { icon: 'bi-check-circle',    pct: 100, cls: 'is-success'     },
   cancelado:     { icon: 'bi-x-circle',        pct: 0,   cls: 'is-muted'       },
+  archivado:     { icon: 'bi-archive',         pct: 0,   cls: 'is-muted'       },
 };
 
 const PIPELINE_STEPS: string[] = [

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   ExpedienteAdmin,
+  ExpedienteArchivadoAdmin,
   ExpedienteCliente,
   ExpedienteConOfertas,
   OfertaResumen,
@@ -140,7 +141,8 @@ export class ExpedienteService {
   }
 
   async getExpedientesConOfertas(clienteId: string): Promise<ExpedienteConOfertas[]> {
-    const estados: EstadoExpediente[] = ['en_oferta', 'adjudicado', 'contratado'];
+    // Archivado también: el cliente ve sus ofertas archivadas y el aviso.
+    const estados: EstadoExpediente[] = ['en_oferta', 'adjudicado', 'contratado', 'archivado'];
     const exps = await this.expedienteRepo.findByClienteIdInEstados(clienteId, estados);
     if (!exps.length) return [];
 
@@ -550,6 +552,44 @@ export class ExpedienteService {
     return { items, total: count };
   }
 
+  /** Expedientes archivados (admin/archived), el último archivado primero. */
+  async getExpedientesArchivadosAdmin(): Promise<ExpedienteArchivadoAdmin[]> {
+    const exps = await this.expedienteRepo.findArchivados();
+    if (!exps.length) return [];
+
+    const expedienteIds = exps.map(e => e.id);
+    const [servicios, perfiles, localizaciones, ofertas, estimaciones] = await Promise.all([
+      this.servicioRepo.findByIds([...new Set(exps.map(e => e.servicio_id))]),
+      this.perfilRepo.findByIds([...new Set(exps.map(e => e.cliente_id))]),
+      this.localizacionRepo.findByExpedienteIds(expedienteIds),
+      this.ofertaRepo.findByExpedienteIds(expedienteIds),
+      this.estimacionRepo.findFechasByExpedienteIds(expedienteIds),
+    ]);
+
+    return exps.map(e => {
+      const svc     = servicios.find(s => s.id === e.servicio_id);
+      const cliente = perfiles.find(p => p.id === e.cliente_id);
+      const loc     = localizaciones.find(l => l.expediente_id === e.id) ?? null;
+      return {
+        id:                 e.id,
+        numero:             e.numero,
+        estado_anterior:    e.estado_anterior,
+        archivado_en:       e.archivado_en,
+        cliente_nombre:     cliente ? `${cliente.nombre} ${cliente.apellido}`.trim() : '—',
+        servicio_nombre:    svc?.nombre_es ?? '—',
+        servicio_nombre_en: svc?.nombre_en ?? svc?.nombre_es ?? '—',
+        servicio_nombre_fr: svc?.nombre_fr ?? svc?.nombre_es ?? '—',
+        direccion:          loc?.direccion ?? '',
+        provincia:          loc?.provincia ?? '',
+        canton:             loc?.canton    ?? '',
+        distrito:           loc?.distrito  ?? '',
+        total_ofertas:      ofertas.filter(o => o.expediente_id === e.id).length,
+        total_contratos:    e.total_contratos,
+        foto:               matterportThumbFromTour(estimaciones.find(x => x.expediente_id === e.id)?.url_tour),
+      };
+    });
+  }
+
   async getExpedientesConOfertasAdmin(): Promise<ExpedienteConOfertaAdmin[]> {
     const estados: EstadoExpediente[] = ['estimado', 'en_oferta', 'adjudicado'];
     const exps = await this.expedienteRepo.findByFiltro({ estados });
@@ -636,6 +676,7 @@ export class ExpedienteService {
       id:            exp.id,
       numero:        exp.numero,
       estado:        exp.estado,
+      archivado_en:  exp.archivado_en ?? null,
       servicio_id:   exp.servicio_id,
       cliente_id:    exp.cliente_id,
       fecha_visita:  exp.fecha_visita,
@@ -733,6 +774,14 @@ export class ExpedienteService {
 
   async marcarContratado(expedienteId: string): Promise<void> {
     return this.expedienteRepo.marcarContratado(expedienteId);
+  }
+
+  async archivarAdmin(expedienteId: string): Promise<void> {
+    return this.expedienteRepo.archivarAdmin(expedienteId);
+  }
+
+  async desarchivarAdmin(expedienteId: string): Promise<void> {
+    return this.expedienteRepo.desarchivarAdmin(expedienteId);
   }
 
   async liberar(expedienteId: string): Promise<void> {

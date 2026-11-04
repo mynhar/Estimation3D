@@ -746,16 +746,19 @@
 .bld-offer--pendiente .bld-ring__fill { stroke: var(--ds-warning); }
 .bld-offer--aceptada  .bld-ring__fill { stroke: var(--ds-success); }
 .bld-offer--rechazada .bld-ring__fill { stroke: var(--ds-danger);  }
+.bld-offer--archivado .bld-ring__fill { stroke: var(--ds-ink-faint); }
 
 /* Donut */
 .bld-donut-seg.is-warning { stroke: var(--ds-warning); }
 .bld-donut-seg.is-success { stroke: var(--ds-success); }
 .bld-donut-seg.is-danger  { stroke: var(--ds-danger);  }
+.bld-donut-seg.is-muted   { stroke: var(--ds-ink-faint); }
 
 /* Leyenda (punto + barra) */
 .bld-legend-dot.is-warning, .bld-legend-bar__fill.is-warning { background: var(--ds-warning); }
 .bld-legend-dot.is-success, .bld-legend-bar__fill.is-success { background: var(--ds-success); }
 .bld-legend-dot.is-danger,  .bld-legend-bar__fill.is-danger  { background: var(--ds-danger);  }
+.bld-legend-dot.is-muted,   .bld-legend-bar__fill.is-muted   { background: var(--ds-ink-faint); }
 
 /* Referencia de progreso */
 .bld-progress-ref__bar.is-warning { background: var(--ds-warning); }

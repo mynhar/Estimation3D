@@ -12,6 +12,7 @@ const ESTADO_ICON: Record<string, string> = {
   pendiente: 'bi-hourglass',
   aceptada:  'bi-check-circle',
   rechazada: 'bi-x-circle',
+  archivado: 'bi-archive',
 };
 
 type VistaOfertas = 'tabla' | 'tarjetas';

@@ -147,6 +147,7 @@ export class AdminOfferListComponent implements OnInit {
       pendiente: 'badge-oferta-pendiente',
       aceptada:  'badge-oferta-aceptada',
       rechazada: 'badge-oferta-rechazada',
+      archivado: 'badge-archivado',
     };
     return map[estado] ?? '';
   }

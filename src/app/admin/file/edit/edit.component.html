@@ -109,22 +109,36 @@
           </span>
         </div>
       </div>
+
+      <!-- Archivar / Desarchivar: arriba a la derecha. La acción sale del estado. -->
+      <div class="exp-header__actions">
+        <app-boton-archivar [control]="archivo" />
+      </div>
     </header>
+
+    <!-- Confirmación de archivo o desarchivo (estado y llamada viven en el componente). -->
+    <app-archivar-expediente #archivo [expedienteId]="id"
+                             [accion]="expArchivado() ? 'desarchivar' : 'archivar'"
+                             [despues]="recargarTrasArchivar" />
+
+    @if (expArchivado()) {
+      <app-aviso-archivado class="mb-4" ambito="admin" [fecha]="archivadoEn()" />
+    }
 
     <!-- ── Avance · expediente + contrato ──────────────────────────── -->
     <section class="avance-grid mb-4" [class.avance-grid--dual]="contratos().length > 0">
 
       <!-- Avance del expediente -->
       <article class="exp-progress"
-               [class.exp-progress--cancelado]="expCancelado()">
+               [class.exp-progress--cancelado]="expCerrado()">
         <div class="exp-progress__top">
           <div class="exp-progress__meta">
             <div class="exp-progress__text">
               <span class="exp-progress__heading">{{ 'dashboard_client.avance_expediente' | translate }}</span>
               <p class="exp-progress__desc">{{ ('state_desc.' + estadoActual()) | translate }}</p>
             </div>
-            @if (expCancelado()) {
-              <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'state.cancelado' | translate }}</span>
+            @if (expCerrado()) {
+              <span class="exp-progress__pct exp-progress__pct--cancelado">{{ ('state.' + estadoActual()) | translate }}</span>
             } @else {
               <span class="exp-progress__pct">{{ progreso(estadoActual()) }}<span class="exp-progress__unit">%</span></span>
             }
@@ -132,7 +146,7 @@
           <div class="exp-progress__track">
             <div class="exp-progress__fill"
                  [style.width.%]="progreso(estadoActual())"
-                 [class.exp-progress__fill--cancelado]="expCancelado()"></div>
+                 [class.exp-progress__fill--cancelado]="expCerrado()"></div>
           </div>
         </div>
         <div class="exp-steps" role="list">
@@ -164,7 +178,7 @@
            lleva su propia barra y su cabecera con el constructor. -->
       @for (c of contratos(); track c.id) {
         <article class="exp-progress exp-progress--contrato"
-                 [class.exp-progress--cancelado]="contratoCancelado(c)">
+                 [class.exp-progress--cancelado]="contratoCerrado(c)">
           <div class="exp-progress__top">
             <div class="exp-progress__meta">
               <div class="exp-progress__text">
@@ -176,8 +190,8 @@
                   <p class="exp-progress__desc">{{ ('contrato_estado_desc.' + c.estado) | translate }}</p>
                 }
               </div>
-              @if (contratoCancelado(c)) {
-                <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'contrato_estado.cancelado' | translate }}</span>
+              @if (contratoCerrado(c)) {
+                <span class="exp-progress__pct exp-progress__pct--cancelado">{{ ('contrato_estado.' + c.estado) | translate }}</span>
               } @else {
                 <span class="exp-progress__pct">{{ contratoProgreso(c) }}<span class="exp-progress__unit">%</span></span>
               }
@@ -185,7 +199,7 @@
             <div class="exp-progress__track">
               <div class="exp-progress__fill"
                    [style.width.%]="contratoProgreso(c)"
-                   [class.exp-progress__fill--cancelado]="contratoCancelado(c)"></div>
+                   [class.exp-progress__fill--cancelado]="contratoCerrado(c)"></div>
             </div>
           </div>
           <div class="exp-steps" role="list">
@@ -597,11 +611,13 @@
           <!-- ─────────────────────────────────────────────────────────
                TAB · OFERTAS DE CONSTRUCTORES (componente propio)
           ────────────────────────────────────────────────────────── -->
-          <app-admin-file-builder-bids
-            [expedienteId]="id"
-            [estado]="estadoActual()"
-            (estadoChange)="onEstadoDesdeInforme($event)"
-            (adjudicada)="onOfertaAdjudicada()" />
+          @for (k of [recargaOfertas()]; track k) {
+            <app-admin-file-builder-bids
+              [expedienteId]="id"
+              [estado]="estadoActual()"
+              (estadoChange)="onEstadoDesdeInforme($event)"
+              (adjudicada)="onOfertaAdjudicada()" />
+          }
 
         }
 
@@ -631,7 +647,7 @@
               </div>
               <div class="detail-card__body">
                 @for (c of contratos(); track c.id; let last = $last) {
-                  <div class="contrato-item" [class.contrato-item--cancelado]="contratoCancelado(c)">
+                  <div class="contrato-item" [class.contrato-item--cancelado]="contratoCerrado(c)">
                     <div class="contrato-item__head">
                       <p class="contrato-item__builder mb-0">
                         <i class="bi bi-person-badge me-1" aria-hidden="true"></i>{{ c.constructor_nombre }}

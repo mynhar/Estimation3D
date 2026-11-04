@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ExpedientePanelComponent } from '../../../shared/ui/expediente-panel/expediente-panel.component';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ContratoService } from '../../../services/contrato.service';
 import { ToastService } from '../../../services/toast.service';
@@ -14,7 +15,7 @@ import { ContratoListItem, nombreServicio, serviciosParaContrato } from '../../.
   selector: 'app-contract-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet, ExpedientePanelComponent],
+  imports: [TranslatePipe, NgTemplateOutlet, ExpedientePanelComponent, AvisoArchivadoComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -82,7 +83,8 @@ export class ContractListComponent implements OnInit {
     };
   });
 
-  esCerrado(estado: string): boolean { return estado === 'completado' || estado === 'cancelado'; }
+  /** Cerrados: completados, cancelados y archivados (expediente archivado). */
+  esCerrado(estado: string): boolean { return estado === 'completado' || estado === 'cancelado' || estado === 'archivado'; }
   toggle(key: string): void {
     this.expandidos.update(set => {
       const next = new Set(set);
@@ -106,6 +108,7 @@ export class ContractListComponent implements OnInit {
       case 'en_ejecucion': return 'bi-hammer';
       case 'completado':   return 'bi-check-circle';
       case 'cancelado':    return 'bi-x-circle';
+      case 'archivado':    return 'bi-archive';
       default:             return 'bi-clock-history';  // generado
     }
   }
@@ -311,6 +314,7 @@ export class ContractListComponent implements OnInit {
       en_ejecucion: 'badge-en-ejecucion',
       completado:   'badge-completado',
       cancelado:    'badge-cancelado',
+      archivado:    'badge-archivado',
     };
     return map[estado] ?? 'badge-generado';
   }

@@ -1,0 +1,117 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    contrato {
+        uuid id PK
+        estado_contrato estado
+        int[] servicio_ids
+    }
+    expediente {
+        uuid id PK
+    }
+    perfil {
+        uuid id PK
+    }
+    servicio {
+        int id PK
+        text codigo UK
+    }
+    seguimiento_obra {
+        uuid id PK
+        uuid contrato_id FK, UK
+        uuid expediente_id FK
+        uuid constructor_id FK
+        estado_seguimiento estado
+        estado_seguimiento estado_anterior "al archivar"
+        numeric porcentaje_avance "media del avance por servicio"
+        uuid fase_actual_id FK
+        timestamptz fecha_inicio_real
+        timestamptz fecha_fin_real
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    reporte_diario {
+        uuid id PK
+        uuid seguimiento_id FK "UK(seguimiento_id, fecha, servicio_id)"
+        uuid constructor_id FK
+        int servicio_id FK "del contrato"
+        uuid fase_id FK "del mismo servicio"
+        date fecha
+        time hora_inicio
+        time hora_fin
+        numeric horas_trabajadas "0 a 24"
+        numeric porcentaje_avance_dia "0 a 100"
+        numeric porcentaje_acumulado "lo calcula la base"
+        text descripcion
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    reporte_actividad {
+        uuid id PK
+        uuid reporte_id FK "UK(reporte_id, actividad_id)"
+        uuid actividad_id FK
+        timestamptz creado_en
+    }
+    reporte_zona {
+        uuid id PK
+        uuid reporte_id FK
+        text zona
+        text descripcion
+        numeric porcentaje_avance
+        timestamptz creado_en
+    }
+    inspeccion {
+        uuid id PK
+        uuid seguimiento_id FK
+        tipo_visitante tipo_visitante
+        date fecha
+        time hora
+        text motivo
+        estado_inspeccion estado
+        uuid creado_por FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    fase_servicio {
+        uuid id PK
+        int servicio_id FK "UK(servicio_id, orden) y UK(servicio_id, codigo)"
+        text codigo
+        int orden
+        text nombre_fr
+        text nombre_en
+        text nombre_es
+        text descripcion_fr
+        text descripcion_en
+        text descripcion_es
+        bool activo
+        timestamptz creado_en
+    }
+    actividad_servicio {
+        uuid id PK
+        int servicio_id FK "UK(servicio_id, codigo)"
+        uuid fase_id FK
+        text codigo
+        text nombre_fr
+        text nombre_en
+        text nombre_es
+        bool activo
+        timestamptz creado_en
+    }
+    contrato ||--o| seguimiento_obra : contrato_id
+    expediente ||--o{ seguimiento_obra : expediente_id
+    perfil ||--o{ seguimiento_obra : constructor_id
+    fase_servicio |o--o{ seguimiento_obra : fase_actual_id
+    seguimiento_obra ||--o{ reporte_diario : seguimiento_id
+    perfil ||--o{ reporte_diario : constructor_id
+    servicio ||--o{ reporte_diario : servicio_id
+    fase_servicio |o--o{ reporte_diario : fase_id
+    reporte_diario ||--o{ reporte_actividad : reporte_id
+    actividad_servicio ||--o{ reporte_actividad : actividad_id
+    reporte_diario ||--o{ reporte_zona : reporte_id
+    seguimiento_obra ||--o{ inspeccion : seguimiento_id
+    perfil ||--o{ inspeccion : creado_por
+    servicio ||--o{ fase_servicio : servicio_id
+    servicio ||--o{ actividad_servicio : servicio_id
+    fase_servicio |o--o{ actividad_servicio : fase_id

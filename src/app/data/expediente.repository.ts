@@ -14,6 +14,8 @@ export type ExpedienteRaw = {
   /** Autor del alta. Inmutable, a diferencia de `estimador_id`. Null en los expedientes anteriores a la columna. */
   creado_por:   string | null;
   servicio_id:  number;
+  /** Solo lo traen las consultas que lo piden (edición, detalle). */
+  archivado_en?: string | null;
 };
 
 export type ExpedienteIdCount = { id: string }[];
@@ -25,6 +27,17 @@ export type OfertaAceptadaRaw = {
 };
 
 export type OfertaConteoRaw = { expediente_id: string; total: number };
+
+/** Expediente archivado, para admin/archived. */
+export type ExpedienteArchivadoRaw = {
+  id:              string;
+  numero:          string;
+  estado_anterior: string | null;
+  archivado_en:    string | null;
+  cliente_id:      string;
+  servicio_id:     number;
+  total_contratos: number;
+};
 
 /** Fila de la vista `expediente_busqueda`: expediente + su localizacion. */
 export type ExpedienteConDireccionRaw = ExpedienteRaw & {
@@ -131,7 +144,9 @@ export class ExpedienteRepository {
         { count: 'exact' },
       )
       .order('creado_en', { ascending: false })
-      .range(offset, offset + options.pageSize - 1);
+      .range(offset, offset + options.pageSize - 1)
+      // Los archivados tienen su propia lista (admin/archived).
+      .neq('estado', 'archivado');
 
     if (options.estado && options.estado !== 'todos') {
       query = query.eq('estado', options.estado as EstadoExpediente);
@@ -147,6 +162,28 @@ export class ExpedienteRepository {
     const { data, error, count } = await query;
     if (error) throw new Error(error.message);
     return { data: (data ?? []) as ExpedienteConDireccionRaw[], count: count ?? 0 };
+  }
+
+  /**
+   * Expedientes archivados, el último archivado primero. Solo los lee el
+   * administrador (admin/archived): en el resto de listas no aparecen.
+   */
+  async findArchivados(): Promise<ExpedienteArchivadoRaw[]> {
+    const { data, error } = await this.db
+      .from('expediente')
+      .select('id, numero, estado_anterior, archivado_en, cliente_id, servicio_id, contrato(count)')
+      .eq('estado', 'archivado')
+      .order('archivado_en', { ascending: false, nullsFirst: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((e: any) => ({
+      id:              e.id,
+      numero:          e.numero,
+      estado_anterior: e.estado_anterior ?? null,
+      archivado_en:    e.archivado_en ?? null,
+      cliente_id:      e.cliente_id,
+      servicio_id:     e.servicio_id,
+      total_contratos: e.contrato?.[0]?.count ?? 0,
+    }));
   }
 
   async findByFiltro(options: {
@@ -211,7 +248,7 @@ export class ExpedienteRepository {
   async findForEdicion(id: string): Promise<ExpedienteRaw & { tipo_inmueble?: string } | null> {
     const { data, error } = await this.db
       .from('expediente')
-      .select('id, numero, estado, servicio_id, cliente_id, fecha_visita, descripcion, estimador_id, creado_por, creado_en')
+      .select('id, numero, estado, archivado_en, servicio_id, cliente_id, fecha_visita, descripcion, estimador_id, creado_por, creado_en')
       .eq('id', id)
       .single();
     if (error) throw new Error(error.message);
@@ -293,6 +330,24 @@ export class ExpedienteRepository {
 
   async marcarContratado(expedienteId: string): Promise<void> {
     const { error } = await this.db.rpc('marcar_contratado', { p_expediente_id: expedienteId });
+    if (error) throw new Error(error.message);
+  }
+
+  /**
+   * Administrador: archiva el expediente, sus ofertas y sus contratos, y pausa
+   * sus obras, guardando el estado anterior de cada uno (una transacción).
+   */
+  async archivarAdmin(expedienteId: string): Promise<void> {
+    const { error } = await this.db.rpc('archivar_expediente_admin', { p_expediente_id: expedienteId });
+    if (error) throw new Error(error.message);
+  }
+
+  /**
+   * Administrador: deshace el archivo. Expediente, ofertas, contratos y obras
+   * vuelven al estado que guardaron al archivarse (una transacción).
+   */
+  async desarchivarAdmin(expedienteId: string): Promise<void> {
+    const { error } = await this.db.rpc('desarchivar_expediente_admin', { p_expediente_id: expedienteId });
     if (error) throw new Error(error.message);
   }
 

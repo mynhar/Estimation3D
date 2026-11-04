@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> no_iniciado: El contrato pasa a firmado (trigger)
+    no_iniciado --> en_progreso: 1er reporte diario (trigger)
+    en_progreso --> completado: Avance al 100% o el admin completa el contrato
+    completado --> en_progreso: El avance baja del 100% (contrato sin completar)
+
+    state "cualquier estado" as seg_cualquiera
+    seg_cualquiera --> pausado: Se archiva su expediente
+    pausado --> seg_cualquiera: Se desarchiva (vuelve al anterior)

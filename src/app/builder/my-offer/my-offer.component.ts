@@ -7,18 +7,20 @@ import { OfertaService } from '../../services/oferta.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoRow, OfertaDetalle, nombreServicio, serviciosDeOferta } from '../../models';
 import { ServicioCompleto } from '../../data/servicio.repository';
+import { AvisoArchivadoComponent } from '../../shared/ui/aviso-archivado/aviso-archivado.component';
 
 const ESTADO_ICON: Record<string, string> = {
   pendiente: 'bi-hourglass',
   aceptada:  'bi-check-circle',
   rechazada: 'bi-x-circle',
+  archivado: 'bi-archive',
 };
 
 @Component({
   selector: 'app-my-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, AvisoArchivadoComponent],
   templateUrl: './my-offer.component.html',
   styleUrl: './my-offer.component.css',
 })

@@ -16,7 +16,7 @@
 
   <ol class="cx__list">
     @for (c of ordenados(); track c.id) {
-      <li class="cx-row" [class.cx-row--cancelado]="c.estado === 'cancelado'">
+      <li class="cx-row" [class.cx-row--cancelado]="c.estado === 'cancelado' || c.estado === 'archivado'">
 
         <!-- Quién y qué -->
         <div class="cx-row__who">
@@ -35,6 +35,11 @@
             <p class="cx-row__obra-off">
               <i class="bi bi-x-circle" aria-hidden="true"></i>
               {{ 'dashboard_client.obra_estado.cancelada' | translate }}
+            </p>
+          } @else if (c.estado === 'archivado') {
+            <p class="cx-row__obra-off">
+              <i class="bi bi-pause-circle" aria-hidden="true"></i>
+              {{ 'dashboard_client.obra_estado.pausada' | translate }}
             </p>
           } @else {
             <div class="cx-row__obra-head">

@@ -15,6 +15,9 @@ import { TipoInmueble } from '../../../types/supabase';
 import { AdminFileEstimatorReportComponent } from '../estimator-report/estimator-report.component';
 import { AdminFileBuilderBidsComponent } from '../builder-bids/builder-bids.component';
 import { ServicioOpcion, ServicioSelectorComponent } from '../../../shared/ui/servicio-selector/servicio-selector.component';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
+import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
 
 interface ClienteRow {
   id: string;
@@ -40,14 +43,14 @@ const CONTRATO_PASOS = [
 ] as const;
 
 const CONTRATO_PCT: Record<string, number> = {
-  generado: 25, firmado: 50, en_ejecucion: 75, completado: 100, cancelado: 0,
+  generado: 25, firmado: 50, en_ejecucion: 75, completado: 100, cancelado: 0, archivado: 0,
 };
 
 @Component({
   selector: 'app-admin-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent],
+  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -77,6 +80,8 @@ export class AdminFileEditComponent implements OnInit {
   loadError      = signal('');
   numero         = signal('');
   estadoActual   = signal('');
+  /** `expediente.archivado_en`: lo muestra el aviso de archivado. */
+  archivadoEn    = signal<string | null>(null);
   creadoEn       = signal<string | null>(null);
   estimadorActual = signal<string | null>(null);
 
@@ -177,7 +182,7 @@ export class AdminFileEditComponent implements OnInit {
   // ── Pipeline (paridad visual con my-file) ──────────────────────────────────
   readonly ESTADO_PROGRESO: Record<string, number> = {
     nuevo: 15, en_estimacion: 30, estimado: 50, en_oferta: 65,
-    adjudicado: 80, contratado: 100, cancelado: 0,
+    adjudicado: 80, contratado: 100, cancelado: 0, archivado: 0,
   };
   readonly PASOS: { key: string; tkey: string }[] = [
     { key: 'nuevo',         tkey: 'pipeline.received' },
@@ -196,6 +201,7 @@ export class AdminFileEditComponent implements OnInit {
     adjudicado:    'bg-warning-subtle text-warning-emphasis',
     contratado:    'bg-success-subtle text-success-emphasis',
     cancelado:     'bg-secondary-subtle text-secondary',
+    archivado:     'badge-archivado',
   };
   estadoClase(estado: string): string {
     return this.ESTADO_CLASE[estado] ?? 'bg-secondary-subtle text-secondary';
@@ -204,7 +210,7 @@ export class AdminFileEditComponent implements OnInit {
   progreso(estado: string): number { return this.ESTADO_PROGRESO[estado] ?? 0; }
 
   pasoActivo(pasoKey: string, estadoActual: string): 'done' | 'active' | 'pending' {
-    if (estadoActual === 'cancelado') return 'pending';
+    if (estadoActual === 'cancelado' || estadoActual === 'archivado') return 'pending';
     const keys    = ['nuevo', 'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado'];
     const iActual = keys.indexOf(estadoActual);
     const iPaso   = keys.indexOf(pasoKey);
@@ -214,6 +220,22 @@ export class AdminFileEditComponent implements OnInit {
   }
 
   expCancelado = computed(() => this.estadoActual() === 'cancelado');
+  expArchivado = computed(() => this.estadoActual() === 'archivado');
+  /** Fuera del flujo (cancelado o archivado): sin porcentaje, con su etiqueta. */
+  expCerrado   = computed(() => this.expCancelado() || this.expArchivado());
+
+  // ── Archivar (<app-archivar-expediente>) ──────────────────────────────────
+  /** Se incrementa para recrear la pestaña de ofertas y que recargue. */
+  recargaOfertas = signal(0);
+
+  /**
+   * Tras archivar o desarchivar (expediente, ofertas, contratos y obras), recarga
+   * lo que la pantalla tiene en memoria: cabecera, contratos y ofertas.
+   */
+  recargarTrasArchivar = async (): Promise<void> => {
+    await Promise.all([this.cargarExpediente(), this.cargarContrato()]);
+    this.recargaOfertas.update(n => n + 1);
+  };
 
   // ── Avance del contrato ────────────────────────────────────────────────────
   readonly CONTRATO_PASOS = CONTRATO_PASOS;
@@ -224,12 +246,17 @@ export class AdminFileEditComponent implements OnInit {
     return c.estado === 'cancelado';
   }
 
+  /** Fuera del flujo (cancelado o archivado): sin pasos ni porcentaje. */
+  contratoCerrado(c: ContratoExpedienteView): boolean {
+    return c.estado === 'cancelado' || c.estado === 'archivado';
+  }
+
   contratoProgreso(c: ContratoExpedienteView): number {
     return CONTRATO_PCT[c.estado] ?? 0;
   }
 
   contratoPasoActivo(c: ContratoExpedienteView, pasoKey: string): 'done' | 'active' | 'pending' {
-    if (this.contratoCancelado(c)) return 'pending';
+    if (this.contratoCerrado(c)) return 'pending';
     const pct     = this.contratoProgreso(c);
     const pasoPct = CONTRATO_PCT[pasoKey] ?? 0;
     if (pct > pasoPct)               return 'done';
@@ -467,6 +494,7 @@ export class AdminFileEditComponent implements OnInit {
 
       this.numero.set(datos.numero);
       this.estadoActual.set(datos.estado);
+      this.archivadoEn.set(datos.archivado_en);
       const servicioIds = await this.cargarServiciosExpediente(datos.servicio_id);
       this.servicioIds.set(servicioIds);
       this.serviciosGuardados.set(new Set(servicioIds));
@@ -590,5 +618,6 @@ export class AdminFileEditComponent implements OnInit {
     this.estimadorActual.set(nombre);
   }
 
-  volver() { this.router.navigate(['/admin/file']); }
+  // Un archivado no sale en admin/file: se vuelve a su propia lista.
+  volver() { this.router.navigate([this.expArchivado() ? '/admin/archived' : '/admin/file']); }
 }

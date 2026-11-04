@@ -1,15 +1,26 @@
 stateDiagram-v2
-    [*] --> nuevo: Cliente crea expediente
-    nuevo --> en_estimacion: Estimador lo toma (asignarEstimador)
-    en_estimacion --> nuevo: Estimador libera (liberar)
-    en_estimacion --> estimado: Estimador publica estimacion
-    estimado --> en_oferta: 1a oferta del constructor
-    en_oferta --> adjudicado: Cliente/Admin acepta oferta
-    adjudicado --> contratado: Cliente firma contrato
-    contratado --> [*]: Obra en marcha
+    [*] --> nuevo: Creación
+    nuevo --> en_estimacion: Tomar / asignar
+    en_estimacion --> nuevo: Liberar
+    en_estimacion --> estimado: Publicar estimación
+    estimado --> nuevo: Eliminar estimación
+    en_oferta --> nuevo: Eliminar estimación
+    estimado --> en_oferta: 1ª oferta / restaurar oferta
+    en_oferta --> estimado: Sin ofertas
+    en_oferta --> adjudicado: adjudicar_ofertas
+    adjudicado --> estimado: Rechazar última aceptada
+    adjudicado --> en_oferta: Eliminar oferta aceptada
+    adjudicado --> contratado: Firmar último contrato
+    contratado --> [*]
 
-    nuevo --> cancelado
-    en_estimacion --> cancelado
-    estimado --> cancelado
-    en_oferta --> cancelado
-    cancelado --> [*]
+    state tras_cancelar <<choice>>
+    adjudicado --> tras_cancelar: Cancelar último contrato
+    contratado --> tras_cancelar: Cancelar último contrato
+    tras_cancelar --> en_oferta: Con ofertas vivas
+    tras_cancelar --> estimado: Sin ofertas vivas
+
+    state "cualquier estado" as exp_cualquiera
+    exp_cualquiera --> archivado: Admin archiva (guarda el anterior)
+    archivado --> exp_cualquiera: Admin desarchiva (vuelve al anterior)
+
+    cancelado: cancelado (sin uso)

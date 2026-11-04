@@ -1,0 +1,45 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    perfil ||--o{ expediente : cliente_id
+    perfil |o--o{ expediente : estimador_id
+    servicio ||--o{ expediente : servicio_id
+    expediente ||--o{ expediente_servicio : expediente_id
+    servicio ||--o{ expediente_servicio : servicio_id
+    expediente ||--o| localizacion : expediente_id
+    expediente ||--o| estimacion : expediente_id
+    perfil ||--o{ estimacion : estimador_id
+    expediente ||--o{ expediente_invitacion : expediente_id
+    perfil ||--o{ expediente_invitacion : constructor_id
+    expediente ||--o{ matterport_modelo : expediente_id
+    expediente ||--o{ oferta : expediente_id
+    perfil ||--o{ oferta : constructor_id
+    oferta ||--o| contrato : oferta_id
+    expediente ||--o{ contrato : expediente_id
+    perfil ||--o{ contrato : cliente_id
+    perfil ||--o{ contrato : constructor_id
+    contrato ||--o| seguimiento_obra : contrato_id
+    perfil ||--o{ seguimiento_obra : constructor_id
+    seguimiento_obra ||--o{ reporte_diario : seguimiento_id
+    seguimiento_obra ||--o{ inspeccion : seguimiento_id
+    servicio ||--o{ reporte_diario : servicio_id
+    reporte_diario ||--o{ reporte_actividad : reporte_id
+    reporte_diario ||--o{ reporte_zona : reporte_id
+    actividad_servicio ||--o{ reporte_actividad : actividad_id
+    servicio ||--o{ fase_servicio : servicio_id
+    servicio ||--o{ actividad_servicio : servicio_id
+    fase_servicio |o--o{ actividad_servicio : fase_id
+    perfil ||--o{ perfil_especialidad : perfil_id
+    servicio ||--o{ perfil_especialidad : servicio_id
+    servicio |o--o{ imprevisto_catalogo : servicio_id
+    ficha_normativa |o--o{ imprevisto_catalogo : ficha_codigo
+    expediente ||--o{ asistente_conversacion : expediente_id
+    expediente ||--o{ asistente_evento : expediente_id
+    expediente |o--o{ archivo : expediente_id
+    estimacion |o--o{ archivo : estimacion_id
+    oferta |o--o{ archivo : oferta_id
+    reporte_diario |o--o{ archivo : reporte_id
+    oferta_auditoria
+    landing_solicitud_intento

@@ -175,8 +175,11 @@
   display: flex;
   align-items: center;
   gap: var(--ds-space-3);
+  flex-wrap: wrap;
   margin-bottom: var(--ds-space-4);
 }
+/* Archivar, arriba a la derecha. */
+.fued-header__acciones { margin-left: auto; flex-shrink: 0; }
 
 .fued-btn-back {
   width: 36px;

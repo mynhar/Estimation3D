@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -14,6 +14,9 @@ import { EdgeErrorService } from '../../../services/edge-error.service';
 import { MatterportService } from '../../../services/matterport.service';
 import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
+import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
 import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado, nombreServicio } from '../../../models';
 import { ServicioCompleto } from '../../../data/servicio.repository';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
@@ -22,7 +25,7 @@ import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.valid
   selector: 'app-admin-to-estimate-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
   templateUrl: './edit.component.html',
   styleUrl:    './edit.component.css',
 })
@@ -42,6 +45,13 @@ export class AdminToEstimateEditComponent implements OnInit {
 
   user     = toSignal(this.auth.user$);
   detalle  = signal<ExpedienteDetalle | null>(null);
+  /** Archivado: solo se editan datos; los estados no cambian. */
+  archivado = computed(() => this.detalle()?.estado === 'archivado');
+
+  /** Tras archivar: relee el expediente (estado) para ocultar el botón y avisar. */
+  recargarTrasArchivar = async (): Promise<void> => {
+    this.detalle.set(await this.expedienteService.getDetalle(this.expedienteId));
+  };
   /** Todos los servicios del expediente, el principal primero. */
   servicios = signal<ServicioCompleto[]>([]);
   cargando = signal(true);
@@ -108,7 +118,7 @@ export class AdminToEstimateEditComponent implements OnInit {
   errorMpClave      = signal('');
   exitoMpClave      = signal('');
 
-  private expedienteId = '';
+  expedienteId = '';
 
   get formularioCompleto(): boolean {
     return !!(
@@ -759,9 +769,11 @@ export class AdminToEstimateEditComponent implements OnInit {
     return lista.length ? lista : [{ id: -1, nombre: this.servicioNombre }];
   }
 
+  // Archivado: eliminar la estimación devuelve el expediente a 'nuevo', y la
+  // base no deja cambiar el estado de un archivado.
   get puedeEliminar(): boolean {
     const estado = this.detalle()?.estado;
-    return this.hasDraft() && estado !== 'adjudicado' && estado !== 'contratado';
+    return this.hasDraft() && estado !== 'adjudicado' && estado !== 'contratado' && estado !== 'archivado';
   }
 
   async eliminarEstimacion() {
@@ -781,5 +793,6 @@ export class AdminToEstimateEditComponent implements OnInit {
     }
   }
 
-  volver() { this.router.navigate(['/admin/to-estimate']); }
+  // Un archivado no sale en admin/to-estimate: se vuelve a su propia lista.
+  volver() { this.router.navigate([this.archivado() ? '/admin/archived' : '/admin/to-estimate']); }
 }

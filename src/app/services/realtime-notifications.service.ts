@@ -114,7 +114,7 @@ export class RealtimeNotificationsService implements OnDestroy {
       ? this.translate.instant('realtime.exp_cambio', { numero, estado: nuevo.estado })
       : raw;
 
-    const type = nuevo.estado === 'cancelado' ? 'warning' : 'info';
+    const type = nuevo.estado === 'cancelado' || nuevo.estado === 'archivado' ? 'warning' : 'info';
     this.toast.show(msg, type, 9000);
   }
 
@@ -163,7 +163,7 @@ export class RealtimeNotificationsService implements OnDestroy {
 
     const key  = `realtime.ofe_${nuevo.estado}`;
     const msg  = this.translate.instant(key);
-    const type = nuevo.estado === 'rechazada' ? 'warning' : 'success';
+    const type = nuevo.estado === 'rechazada' || nuevo.estado === 'archivado' ? 'warning' : 'success';
     this.toast.show(msg, type, 9000);
   }
 }

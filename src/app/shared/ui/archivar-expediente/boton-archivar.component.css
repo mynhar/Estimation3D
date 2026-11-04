@@ -1,0 +1,29 @@
+/* Hallmark · component: button · genre: editorial · theme: locked (design.md)
+ * states: default · hover · focus · active · disabled (mientras confirma o archiva)
+ * Mismo estilo para Archivar y Desarchivar: las dos acciones son reversibles.
+ * contrast: tinta sobre crema ≥ 12:1
+ *
+ * Secundario del sistema (borde tinta, fondo transparente): archivar es
+ * reversible, no destructivo.
+ */
+:host { display: inline-flex; }
+
+.btn-archivar {
+  display: inline-flex; align-items: center; gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-4);
+  background: transparent; color: var(--ds-ink);
+  border: 1px solid var(--ds-ink); border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body); font-size: var(--ds-text-sm); font-weight: var(--ds-weight-medium);
+  white-space: nowrap; cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-out),
+              transform  var(--ds-duration-fast) var(--ds-ease-out);
+}
+.btn-archivar:hover:not(:disabled)  { background: var(--ds-bg-alt); transform: translateY(-1px); }
+.btn-archivar:active:not(:disabled) { background: var(--ds-border); transform: translateY(0); }
+.btn-archivar:focus-visible         { outline: 2px solid var(--ds-ink); outline-offset: 2px; }
+.btn-archivar:disabled              { opacity: 0.5; cursor: not-allowed; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-archivar { transition: none; }
+  .btn-archivar:hover:not(:disabled) { transform: none; }
+}

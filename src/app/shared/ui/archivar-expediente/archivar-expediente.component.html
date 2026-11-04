@@ -1,0 +1,32 @@
+<!-- Confirmación de archivo o desarchivo: explica qué cambia antes de hacerlo. -->
+@if (confirmando()) {
+  <section class="archivar-confirm" role="alertdialog"
+           [id]="panelId"
+           [attr.aria-labelledby]="panelId + '-title'"
+           [attr.aria-describedby]="panelId + '-desc'"
+           (keydown.escape)="cancelar()">
+    <div class="archivar-confirm__body">
+      <h2 class="archivar-confirm__title" [id]="panelId + '-title'">{{ textos().titulo | translate }}</h2>
+      <p class="archivar-confirm__desc" [id]="panelId + '-desc'">{{ textos().desc | translate }}</p>
+      @if (error()) {
+        <p class="archivar-confirm__error" role="alert">{{ error() }}</p>
+      }
+    </div>
+    <div class="archivar-confirm__actions">
+      <button #botonNo type="button" class="btn-archivar-no"
+              [disabled]="archivando()" (click)="cancelar()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="button" class="btn-archivar-si"
+              [disabled]="archivando()" [attr.aria-busy]="archivando()"
+              (click)="confirmar()">
+        @if (archivando()) {
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          {{ textos().enCurso | translate }}
+        } @else {
+          {{ textos().ok | translate }}
+        }
+      </button>
+    </div>
+  </section>
+}

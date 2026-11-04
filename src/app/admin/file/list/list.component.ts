@@ -149,6 +149,7 @@ export class AdminFileListComponent {
       adjudicado:    'badge-adjudicado',
       contratado:    'badge-contratado',
       cancelado:     'badge-cancelado',
+      archivado:     'badge-archivado',
     };
     return map[estado] ?? 'badge-nuevo';
   }

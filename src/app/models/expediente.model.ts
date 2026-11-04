@@ -5,6 +5,8 @@ export interface ExpedienteParaEdicion {
   id:            string;
   numero:        string;
   estado:        string;
+  /** Momento en que se archivó; null si no está archivado. */
+  archivado_en:  string | null;
   servicio_id:   number;
   cliente_id:    string;
   fecha_visita:  string;
@@ -91,6 +93,28 @@ export interface ExpedienteAdmin {
   provincia:            string;
   canton:               string;
   distrito:             string;
+}
+
+/** Fila de admin/archived: un expediente archivado. */
+export interface ExpedienteArchivadoAdmin {
+  id:                 string;
+  numero:             string;
+  /** Estado que tenía al archivarse (se restaurará al desarchivar). */
+  estado_anterior:    string | null;
+  archivado_en:       string | null;
+  cliente_nombre:     string;
+  servicio_nombre:    string;
+  servicio_nombre_en: string;
+  servicio_nombre_fr: string;
+  direccion:          string;
+  provincia:          string;
+  canton:             string;
+  distrito:           string;
+  /** Ofertas no eliminadas: las que se archivaron con él. */
+  total_ofertas:      number;
+  total_contratos:    number;
+  /** Miniatura del tour 3D (Matterport) de su estimación, si tiene. */
+  foto:               string | null;
 }
 
 /** Forma aplanada usada en las listas del módulo estimador. */
@@ -244,7 +268,7 @@ export interface ExpedienteCliente {
 
 /** Estados post-estimación que maneja el módulo estimador. */
 export const ESTADOS_ESTIMADO: EstadoExpediente[] = [
-  'estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado',
+  'estimado', 'en_oferta', 'adjudicado', 'contratado', 'cancelado', 'archivado',
 ];
 
 /**
@@ -319,6 +343,7 @@ export const ESTADO_BADGE_OFERTA_RECIBIDA: Record<string, string> = {
   adjudicado: 'bg-warning text-dark',
   contratado: 'bg-success',
   cancelado:  'bg-secondary',
+  archivado:  'badge-archivado',
 };
 
 /** Mapa estado → clase CSS de badge para la lista de expedientes estimados. */
@@ -328,6 +353,7 @@ export const ESTADO_BADGE_ESTIMADOR: Record<string, string> = {
   adjudicado: 'bg-warning-subtle text-warning-emphasis',
   contratado: 'bg-info-subtle text-info-emphasis',
   cancelado:  'bg-secondary-subtle text-secondary',
+  archivado:  'badge-archivado',
 };
 
 /** Mapa estado → etiqueta legible para la lista de expedientes estimados. */
@@ -337,4 +363,5 @@ export const ESTADO_LABEL_ESTIMADOR: Record<string, string> = {
   adjudicado: 'Adjudicado',
   contratado: 'Contratado',
   cancelado:  'Cancelado',
+  archivado:  'Archivado',
 };

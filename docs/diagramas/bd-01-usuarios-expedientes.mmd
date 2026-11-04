@@ -1,0 +1,118 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    perfil {
+        uuid id PK "= auth.users.id"
+        text nombre
+        text apellido
+        text email "copiado de auth.users"
+        text telefono
+        text avatar_url
+        rol_usuario rol
+        proveedor_auth proveedor
+        bool activo
+        bool perfil_completo
+        text idioma "fr, en o es"
+        text direccion_unidad
+        text direccion_calle
+        text direccion_ciudad
+        text direccion_provincia
+        text direccion_codigo_postal
+        text compania_nombre "solo constructor"
+        text compania_telefono "solo constructor"
+        text compania_email "solo constructor"
+        text compania_direccion "solo constructor"
+        text rbq "licencia RBQ 0000-0000-00"
+        int especialidad_id FK "resumen heredado"
+        bool especialidad_todas
+        smallint anios_experiencia "0 a 80"
+        text zona_servicio
+        text mensaje
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    perfil_especialidad {
+        uuid perfil_id PK, FK
+        int servicio_id PK, FK
+        timestamptz creado_en
+    }
+    servicio {
+        int id PK
+        text codigo UK
+        text nombre_fr
+        text nombre_en
+        text nombre_es
+        text descripcion_fr
+        text descripcion_en
+        text descripcion_es
+        bool activo
+    }
+    expediente {
+        uuid id PK
+        text numero UK "EXP-fecha-NNNN"
+        uuid cliente_id FK
+        uuid estimador_id FK
+        uuid creado_por FK "inmutable"
+        int servicio_id FK "servicio principal"
+        estado_expediente estado
+        estado_expediente estado_anterior "al archivar"
+        timestamptz archivado_en
+        text descripcion
+        timestamptz fecha_visita
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    expediente_servicio {
+        uuid expediente_id PK, FK
+        int servicio_id PK, FK
+        timestamptz creado_en
+    }
+    localizacion {
+        uuid id PK
+        uuid expediente_id FK, UK
+        tipo_inmueble tipo_inmueble
+        text direccion
+        text provincia
+        text canton "ciudad"
+        text distrito "codigo postal"
+        text referencia
+        float8 latitud
+        float8 longitud
+    }
+    estimacion {
+        uuid id PK
+        uuid expediente_id FK, UK
+        uuid estimador_id FK
+        text descripcion_problemas
+        numeric costo_estimado "minimo del rango"
+        numeric costo_estimado_max "maximo del rango"
+        text url_tour "URL o lista JSON de URLs"
+        text notas_internas
+        timestamptz fecha_visita_real
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    expediente_invitacion {
+        uuid id PK
+        uuid expediente_id FK "UK(expediente_id, constructor_id)"
+        uuid constructor_id FK
+        uuid invitado_por FK
+        timestamptz enviado_en
+    }
+    perfil ||--o{ expediente : cliente_id
+    perfil |o--o{ expediente : estimador_id
+    perfil |o--o{ expediente : creado_por
+    servicio ||--o{ expediente : servicio_id
+    servicio |o--o{ perfil : especialidad_id
+    perfil ||--o{ perfil_especialidad : perfil_id
+    servicio ||--o{ perfil_especialidad : servicio_id
+    expediente ||--o{ expediente_servicio : expediente_id
+    servicio ||--o{ expediente_servicio : servicio_id
+    expediente ||--o| localizacion : expediente_id
+    expediente ||--o| estimacion : expediente_id
+    perfil ||--o{ estimacion : estimador_id
+    expediente ||--o{ expediente_invitacion : expediente_id
+    perfil ||--o{ expediente_invitacion : constructor_id
+    perfil |o--o{ expediente_invitacion : invitado_por

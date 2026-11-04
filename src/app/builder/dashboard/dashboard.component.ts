@@ -15,6 +15,7 @@ const OFERTA_META: Record<string, { icon: string; cls: string }> = {
   pendiente: { icon: 'bi-hourglass-split', cls: 'is-warning' },
   aceptada:  { icon: 'bi-check-circle',    cls: 'is-success' },
   rechazada: { icon: 'bi-x-circle',        cls: 'is-danger'  },
+  archivado: { icon: 'bi-archive',         cls: 'is-muted'   },
 };
 
 // Donut (sidebar)
@@ -26,7 +27,7 @@ const RING_R    = 23;
 const RING_CIRC = 2 * Math.PI * RING_R;
 
 function calcProgress(ofertaEstado: string, expEstado: string): number {
-  if (ofertaEstado === 'rechazada') return 0;
+  if (ofertaEstado === 'rechazada' || ofertaEstado === 'archivado') return 0;
   if (ofertaEstado === 'pendiente') return 35;
   if (expEstado    === 'contratado') return 100;
   if (expEstado    === 'adjudicado') return 80;

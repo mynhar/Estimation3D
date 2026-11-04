@@ -153,6 +153,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
       en_ejecucion: 'badge-en-ejecucion',
       completado:   'badge-completado',
       cancelado:    'badge-cancelado',
+      archivado:    'badge-archivado',
     };
     return map[estado] ?? '';
   }
@@ -163,6 +164,7 @@ export class AdminConstructionMonitoringListComponent implements OnInit {
       en_ejecucion: 'bi-tools',
       completado:   'bi-check2-circle',
       cancelado:    'bi-x-circle',
+      archivado:    'bi-archive',
     };
     return map[estado] ?? 'bi-circle';
   }

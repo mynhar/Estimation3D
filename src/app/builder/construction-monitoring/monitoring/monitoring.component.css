@@ -307,6 +307,8 @@
 .mon-banner__text    { flex: 1 1 18rem; min-width: 0; }
 .mon-banner__actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--ds-space-2); }
 .mon-banner__confirm { font-weight: var(--ds-weight-regular); color: var(--ds-ink-secondary); }
+/* Expediente archivado: el aviso compartido, alineado con el cuerpo. */
+.mon-banner-aviso    { padding: var(--ds-space-3) var(--ds-space-5) 0; }
 
 /* ── 8. 3-column body ────────────────────────────────────────── */
 

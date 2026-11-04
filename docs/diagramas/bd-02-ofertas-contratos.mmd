@@ -1,0 +1,65 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    expediente {
+        uuid id PK
+        estado_expediente estado
+    }
+    perfil {
+        uuid id PK
+        rol_usuario rol
+    }
+    oferta {
+        uuid id PK
+        uuid expediente_id FK "UK(expediente_id, constructor_id) entre las vivas"
+        uuid constructor_id FK
+        numeric precio "mayor que 0"
+        text descripcion
+        int plazo_semanas_min
+        int plazo_semanas_max
+        int garantia_anos
+        date fecha_inicio
+        int[] servicio_ids "sin FK"
+        estado_oferta estado
+        estado_oferta estado_anterior "al archivar"
+        timestamptz eliminada_en "borrado logico"
+        uuid eliminada_por FK
+        timestamptz creado_en
+        timestamptz actualizado_en
+    }
+    oferta_auditoria {
+        uuid id PK
+        uuid oferta_id "sin FK"
+        uuid expediente_id "sin FK"
+        text accion "aceptada, rechazada, reactivada, eliminada, restaurada"
+        uuid actor_id FK
+        jsonb snapshot "fila de la oferta antes del cambio"
+        timestamptz creado_en
+    }
+    contrato {
+        uuid id PK
+        uuid expediente_id FK
+        uuid oferta_id FK, UK
+        uuid cliente_id FK
+        uuid constructor_id FK
+        numeric precio_final
+        int garantia_anos
+        text descripcion_trabajo
+        int[] servicio_ids "sin FK"
+        estado_contrato estado
+        estado_contrato estado_anterior "al archivar"
+        text url_pdf
+        timestamptz generado_en
+        timestamptz firmado_en
+        timestamptz actualizado_en
+    }
+    expediente ||--o{ oferta : expediente_id
+    perfil ||--o{ oferta : constructor_id
+    perfil |o--o{ oferta : eliminada_por
+    oferta ||--o| contrato : oferta_id
+    expediente ||--o{ contrato : expediente_id
+    perfil ||--o{ contrato : cliente_id
+    perfil ||--o{ contrato : constructor_id
+    perfil |o--o{ oferta_auditoria : actor_id

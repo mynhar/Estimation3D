@@ -1,0 +1,12 @@
+stateDiagram-v2
+    [*] --> pendiente: El constructor la envía
+    pendiente --> aceptada: adjudicar_ofertas (seleccionada)
+    pendiente --> rechazada: adjudicar_ofertas (no seleccionada) / rechazar_ofertas
+    aceptada --> rechazada: rechazar_oferta / se cancela su contrato / re-adjudicación
+    rechazada --> pendiente: reactivar_ofertas
+    rechazada --> aceptada: Re-adjudicación que la selecciona
+    aceptada --> pendiente: Se elimina otra oferta aceptada del expediente
+
+    state "cualquier estado" as of_cualquiera
+    of_cualquiera --> archivado: Se archiva su expediente (no eliminadas)
+    archivado --> of_cualquiera: Se desarchiva (vuelve al anterior)

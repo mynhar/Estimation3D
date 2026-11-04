@@ -1,0 +1,83 @@
+---
+config:
+  layout: elk
+---
+erDiagram
+    perfil {
+        uuid id PK
+    }
+    expediente {
+        uuid id PK
+    }
+    estimacion {
+        uuid id PK
+    }
+    oferta {
+        uuid id PK
+    }
+    reporte_diario {
+        uuid id PK
+    }
+    archivo {
+        uuid id PK
+        tipo_archivo tipo
+        text nombre_archivo
+        text url_storage "ruta en Storage"
+        text mime_type
+        bigint tamano_bytes
+        uuid subido_por FK
+        uuid expediente_id FK
+        uuid estimacion_id FK
+        uuid oferta_id FK
+        uuid reporte_id FK
+        timestamptz creado_en
+    }
+    matterport_modelo {
+        uuid id PK
+        uuid expediente_id FK "UK(expediente_id, model_id)"
+        text model_id
+        text url_tour
+        text nombre
+        text descripcion
+        text estado
+        text visibilidad
+        bool publicado
+        text resumen_publico
+        text imagen_url
+        text share_url
+        text direccion
+        text calle
+        text ciudad
+        text region
+        text codigo_postal
+        text pais
+        numeric latitud
+        numeric longitud
+        numeric area_piso_m2
+        numeric area_piso_interior_m2
+        numeric area_pared_m2
+        numeric area_techo_m2
+        numeric area_piso_ft2
+        numeric area_piso_interior_ft2
+        numeric volumen_m3
+        numeric alto_m
+        numeric ancho_m
+        numeric profundidad_m
+        int total_pisos
+        int total_habitaciones
+        jsonb pisos
+        jsonb habitaciones
+        jsonb datos_crudos "respuesta completa de la API"
+        timestamptz creado_matterport
+        timestamptz modificado_matterport
+        timestamptz sincronizado_en
+        uuid sincronizado_por FK
+        timestamptz creado_en
+    }
+    perfil ||--o{ archivo : subido_por
+    expediente |o--o{ archivo : expediente_id
+    estimacion |o--o{ archivo : estimacion_id
+    oferta |o--o{ archivo : oferta_id
+    reporte_diario |o--o{ archivo : reporte_id
+    expediente ||--o{ matterport_modelo : expediente_id
+    perfil |o--o{ matterport_modelo : sincronizado_por

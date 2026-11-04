@@ -265,9 +265,14 @@
       </div>
     </header>
 
+    <!-- Expediente archivado: los trabajos no se realizarán. -->
+    @if (detalle()!.estado === 'archivado') {
+      <app-aviso-archivado class="mb-4" ambito="expediente" />
+    }
+
     <!-- ── Progreso del expediente ────────────────────────────────── -->
     <section class="exp-progress mb-4"
-             [class.exp-progress--cancelado]="detalle()!.estado === 'cancelado'">
+             [class.exp-progress--cancelado]="cerrado()">
 
       <div class="exp-progress__top">
         <div class="exp-progress__meta">
@@ -280,8 +285,8 @@
             </svg>
             {{ 'file.progress' | translate }}
           </span>
-          @if (detalle()!.estado === 'cancelado') {
-            <span class="exp-progress__pct exp-progress__pct--cancelado">{{ 'state.cancelado' | translate }}</span>
+          @if (cerrado()) {
+            <span class="exp-progress__pct exp-progress__pct--cancelado">{{ ('state.' + detalle()!.estado) | translate }}</span>
           } @else {
             <span class="exp-progress__pct">{{ progreso(detalle()!.estado) }}%</span>
           }
@@ -289,7 +294,7 @@
         <div class="exp-progress__track">
           <div class="exp-progress__fill"
                [style.width.%]="progreso(detalle()!.estado)"
-               [class.exp-progress__fill--cancelado]="detalle()!.estado === 'cancelado'">
+               [class.exp-progress__fill--cancelado]="cerrado()">
           </div>
         </div>
       </div>
@@ -335,7 +340,7 @@
       }
 
       <!-- Stepper de fases -->
-      <div class="exp-steps" [class.exp-steps--cancelado]="detalle()!.estado === 'cancelado'"
+      <div class="exp-steps" [class.exp-steps--cancelado]="cerrado()"
            role="list" [attr.aria-label]="'file.pipeline_label' | translate">
         @for (paso of PASOS; track paso.key; let last = $last) {
           <div class="exp-step" role="listitem"
@@ -616,6 +621,7 @@
                            class="photo-thumb__img"
                            (click)="abrirFotoVM(foto)" />
                       @if (foto.esPropio) {
+                        @if (!archivado()) {
                         <button type="button" class="thumb-delete"
                                 [disabled]="eliminando() !== null"
                                 (click)="eliminarArchivoVM(foto)"
@@ -633,6 +639,7 @@
                             </svg>
                           }
                         </button>
+                        }
                       }
                     </div>
                   }
@@ -686,6 +693,7 @@
                           {{ 'common.open' | translate }}
                         </a>
                         @if (doc.esPropio) {
+                          @if (!archivado()) {
                           <button type="button" class="btn-file-delete"
                                   [disabled]="eliminando() !== null"
                                   (click)="eliminarArchivoVM(doc)"
@@ -703,6 +711,7 @@
                               </svg>
                             }
                           </button>
+                          }
                         }
                       </div>
                     </div>
@@ -816,6 +825,7 @@
               </div>
             }
 
+            @if (!archivado()) {
             <div class="upload-actions">
               <!-- Fotos -->
               <label class="upload-btn" [class.upload-btn--busy]="subiendo() !== null">
@@ -876,6 +886,7 @@
                        (change)="subirArchivo('documento', $event)">
               </label>
             </div>
+            }
 
             <!-- ── Mis fotos (las que agregó el cliente) ─── -->
             @if (misFotos().length > 0) {
@@ -899,6 +910,7 @@
                   <div class="photo-thumb photo-thumb--client">
                     <img [src]="publicUrl(foto.url_storage)" [alt]="foto.nombre_archivo"
                          class="photo-thumb__img" (click)="abrirFoto(foto)" />
+                    @if (!archivado()) {
                     <button type="button" class="thumb-delete"
                             [disabled]="eliminando() !== null"
                             (click)="eliminarArchivo(foto)"
@@ -916,6 +928,7 @@
                         </svg>
                       }
                     </button>
+                    }
                   </div>
                 }
               </div>
@@ -963,6 +976,7 @@
                         </svg>
                         {{ 'common.open' | translate }}
                       </a>
+                      @if (!archivado()) {
                       <button type="button" class="btn-file-delete"
                               [disabled]="eliminando() !== null"
                               (click)="eliminarArchivo(v)"
@@ -980,6 +994,7 @@
                           </svg>
                         }
                       </button>
+                      }
                     </div>
                   </div>
                 }
@@ -1030,6 +1045,7 @@
                         </svg>
                         {{ 'common.open' | translate }}
                       </a>
+                      @if (!archivado()) {
                       <button type="button" class="btn-file-delete"
                               [disabled]="eliminando() !== null"
                               (click)="eliminarArchivo(doc)"
@@ -1047,6 +1063,7 @@
                           </svg>
                         }
                       </button>
+                      }
                     </div>
                   </div>
                 }
@@ -1319,7 +1336,7 @@
               </a>
             </div>
 
-          } @else if (detalle()!.estado !== 'cancelado') {
+          } @else if (!cerrado()) {
             <div class="pending-card">
               <div class="pending-icon" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24"

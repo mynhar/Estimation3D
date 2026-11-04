@@ -57,7 +57,19 @@
         {{ 'admin_contract_detail.cancelar_btn' | translate }}
       </button>
     }
+
+    @if (!cargando() && !error() && contrato() && !archivado()) {
+      <app-boton-archivar class="header-archivar" [control]="archivo" />
+    }
   </div>
+
+  <!-- ── CONFIRMACIÓN ARCHIVAR (estado y llamada viven en el componente) ── -->
+  <app-archivar-expediente #archivo [expedienteId]="contrato()?.expediente_id ?? ''"
+                           [despues]="recargarTrasArchivar" />
+
+  @if (!cargando() && !error() && archivado()) {
+    <app-aviso-archivado class="aviso-archivado-bloque" ambito="admin" />
+  }
 
   <!-- ── CONFIRMACIÓN CANCELAR ──────────────────────────────────────────── -->
   @if (confirmandoCancelar()) {

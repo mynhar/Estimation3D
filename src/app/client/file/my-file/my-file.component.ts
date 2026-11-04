@@ -14,13 +14,14 @@ import { MatterportService } from '../../../services/matterport.service';
 import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
 import { ContratosExpedienteComponent } from '../../../shared/ui/contratos-expediente/contratos-expediente.component';
+import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
 
 
 @Component({
   selector: 'app-my-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, MatterportInfoComponent, ContratosExpedienteComponent],
+  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, MatterportInfoComponent, ContratosExpedienteComponent, AvisoArchivadoComponent],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',
 })
@@ -40,6 +41,10 @@ export class MyFileComponent implements OnInit {
   private expedienteId = '';
 
   detalle        = signal<ExpedienteVistaCliente | null>(null);
+  /** Fuera del flujo (cancelado o archivado): sin porcentaje ni pasos activos. */
+  cerrado        = computed(() => ['cancelado', 'archivado'].includes(this.detalle()?.estado ?? ''));
+  /** Archivado: solo un administrador puede modificarlo (la base rechaza el resto). */
+  archivado      = computed(() => this.detalle()?.estado === 'archivado');
   // Ficha de la propiedad escaneada (Matterport), solo lectura.
   matterportModelos = signal<MatterportModelo[]>([]);
   // Ofertas aceptadas: una por constructor seleccionado. Administración puede
@@ -79,6 +84,7 @@ export class MyFileComponent implements OnInit {
     adjudicado:    { clase: 'bg-warning-subtle text-warning-emphasis',   icono: 'bi-trophy' },
     contratado:    { clase: 'bg-success-subtle text-success-emphasis',            icono: 'bi-file-earmark-check' },
     cancelado:     { clase: 'bg-secondary-subtle text-secondary',        icono: 'bi-x-circle' },
+    archivado:     { clase: 'badge-archivado',                           icono: 'bi-archive' },
   };
 
   readonly ESTADO_PROGRESO: Record<string, number> = {
@@ -89,6 +95,7 @@ export class MyFileComponent implements OnInit {
     adjudicado:    80,
     contratado:    100,
     cancelado:     0,
+    archivado:     0,
   };
 
   readonly PASOS: { key: string; icon: string; tkey: string }[] = [
@@ -105,7 +112,7 @@ export class MyFileComponent implements OnInit {
   }
 
   pasoActivo(pasoKey: string, estadoActual: string): 'done' | 'active' | 'pending' {
-    if (estadoActual === 'cancelado') return 'pending';
+    if (estadoActual === 'cancelado' || estadoActual === 'archivado') return 'pending';
     const keys    = ['nuevo', 'en_estimacion', 'estimado', 'en_oferta', 'adjudicado', 'contratado'];
     const iActual = keys.indexOf(estadoActual);
     const iPaso   = keys.indexOf(pasoKey);
@@ -175,7 +182,7 @@ export class MyFileComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file  = input.files?.[0];
     const uid   = this.currentUserId();
-    if (!file || !this.expedienteId || !uid) return;
+    if (!file || !this.expedienteId || !uid || this.archivado()) return;
 
     this.subiendo.set(tipo);
     this.errorSubida.set('');
@@ -195,6 +202,7 @@ export class MyFileComponent implements OnInit {
   }
 
   async eliminarArchivo(archivo: ArchivoRow): Promise<void> {
+    if (this.archivado()) return;
     this.eliminando.set(archivo.id);
     this.errorSubida.set('');
     try {
@@ -243,7 +251,7 @@ export class MyFileComponent implements OnInit {
 
   /** Borra una foto/documento propio del expediente y recarga las galerías. */
   async eliminarArchivoVM(item: ArchivoVM): Promise<void> {
-    if (!item.esPropio || !item.archivoId || this.eliminando() !== null) return;
+    if (!item.esPropio || !item.archivoId || this.eliminando() !== null || this.archivado()) return;
     this.eliminando.set(item.id);
     this.errorSubida.set('');
     try {
