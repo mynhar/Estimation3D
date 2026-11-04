@@ -20,12 +20,13 @@ import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/b
 import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado, nombreServicio } from '../../../models';
 import { ServicioCompleto } from '../../../data/servicio.repository';
 import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.validator';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-admin-to-estimate-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
   templateUrl: './edit.component.html',
   styleUrl:    './edit.component.css',
 })
@@ -354,9 +355,53 @@ export class AdminToEstimateEditComponent implements OnInit {
   }
 
   /** Devuelve si la estimación quedó guardada: «Enviar invitación» lo encadena. */
+  /** Intentos de guardar la estimación con campos sin completar. */
+  intentosEst = signal(0);
+  private faltantesEstables = listaEstable();
+  private faltantesBorradorEstables = listaEstable();
+  /** Qué botón se pulsó: el borrador exige menos que la estimación. */
+  modoEst = signal<'borrador' | 'final'>('final');
+
+  /** Lo que falta para guardar el borrador de la visita (reglas de `guardarVisita()`). */
+  get faltantesBorrador(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    if (!this.estimadorSeleccionadoId()) l.push({ etiqueta: 'admin_estimate.estimador_label', destino: 'est-estimador' });
+    if (!this.fechaVisita) l.push({ etiqueta: 'estimator_file.real_date', destino: 'est-fecha' });
+    if (!this.horaVisita) l.push({ etiqueta: 'file.hour', destino: 'est-hora' });
+    return this.faltantesBorradorEstables(l);
+  }
+
+  /**
+   * Lo que falta para guardar la estimación, con las reglas de
+   * `guardarEstimacion()`. Los campos son `ngModel`: el resumen recibe la lista.
+   */
+  get faltantesEst(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    if (!this.estimadorSeleccionadoId()) l.push({ etiqueta: 'admin_estimate.estimador_label', destino: 'est-estimador' });
+    if (!this.fechaVisita) l.push({ etiqueta: 'estimator_file.real_date', destino: 'est-fecha' });
+    if (!this.horaVisita) l.push({ etiqueta: 'file.hour', destino: 'est-hora' });
+    if (!this.descripcionProblema.trim()) l.push({ etiqueta: 'estimator_file.problems_observed', destino: 'est-problemas' });
+    if (!this.costoValido) {
+      // Si se da un coste, van los dos y el máximo no baja del mínimo.
+      const min = this.costoMin, max = this.costoMax;
+      if (min === null) l.push({ destino: 'est-costo-min' });
+      else if (min < 0) l.push({ destino: 'est-costo-min', motivo: 'missing_fields.reason_range' });
+      if (max === null) l.push({ destino: 'est-costo-max' });
+      else if (min !== null && max < min) l.push({ destino: 'est-costo-max', motivo: 'missing_fields.reason_below_min' });
+    }
+    return this.faltantesEstables(l);
+  }
+
   async guardarEstimacion(): Promise<boolean> {
     this.errorGuardado.set('');
     this.exitoMsg.set('');
+
+    // Todo lo que falta, de una vez, en el resumen bajo los botones.
+    this.modoEst.set('final');
+    if (this.faltantesEst.length) {
+      this.intentosEst.update(n => n + 1);
+      return false;
+    }
 
     if (!this.fechaVisita || !this.horaVisita) {
       this.errorGuardado.set('estimator_form.err_visit');
@@ -409,6 +454,12 @@ export class AdminToEstimateEditComponent implements OnInit {
   async guardarVisita() {
     this.errorVisitaMsg.set('');
     this.exitoVisitaMsg.set('');
+
+    this.modoEst.set('borrador');
+    if (this.faltantesBorrador.length) {
+      this.intentosEst.update(n => n + 1);
+      return;
+    }
 
     if (!this.fechaVisita || !this.horaVisita) {
       this.errorVisitaMsg.set('estimator_form.err_visit');

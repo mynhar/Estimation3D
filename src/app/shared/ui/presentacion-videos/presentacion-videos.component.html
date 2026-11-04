@@ -1,0 +1,206 @@
+<section class="pv" aria-labelledby="pvTitulo">
+
+  <!-- ── Cabecera + acciones ────────────────────────────────────────────── -->
+  <div class="pv__head">
+    <div class="pv__intro">
+      <h2 id="pvTitulo" class="pv__title">{{ 'presentation_videos.title' | translate }}</h2>
+      <p class="pv__hint">
+        {{ (nombre() ? 'presentation_videos.hint_named' : 'presentation_videos.hint') | translate:{ nombre: nombre(), max: maxTamano } }}
+      </p>
+    </div>
+    <div class="pv__actions">
+      <button type="button" class="btn btn-outline-primary pv-btn" (click)="nuevaGrabacion()">
+        <span class="pv-dot" aria-hidden="true"></span>
+        {{ 'presentation_videos.actions.new_recording' | translate }}
+      </button>
+      <button type="button" class="btn btn-outline-secondary pv-btn" (click)="elegirArchivos()">
+        <i class="bi bi-upload" aria-hidden="true"></i>
+        {{ 'presentation_videos.actions.upload' | translate }}
+      </button>
+      <input #archivoInput type="file" class="d-none" multiple
+             accept="video/mp4,video/webm,video/quicktime"
+             (change)="alElegirArchivos($event)">
+    </div>
+  </div>
+
+  <!-- ── Biblioteca ─────────────────────────────────────────────────────── -->
+  @if (cargando()) {
+    <ul class="pv-grid" aria-hidden="true">
+      @for (_ of [1, 2, 3]; track $index) {
+        <li class="pv-card">
+          <div class="pv-thumb pv-skel"></div>
+          <div class="pv-card__body">
+            <div class="pv-card__text">
+              <div class="pv-skel pv-skel--line"></div>
+              <div class="pv-skel pv-skel--line pv-skel--short"></div>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+
+  } @else if (errorCarga()) {
+    <div class="pv-state pv-state--error" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ 'presentation_videos.errors.load_list' | translate }}</p>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cargar()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+  } @else if (!videos().length && !pendientes().length) {
+    <div class="pv-state">
+      <i class="bi bi-camera-reels" aria-hidden="true"></i>
+      <p class="pv-state__title">{{ 'presentation_videos.empty_title' | translate }}</p>
+      <p class="pv-state__text">{{ 'presentation_videos.empty_text' | translate }}</p>
+    </div>
+
+  } @else {
+    @if (videos().length) {
+      <div class="pv-toolbar">
+        <label class="pv-search">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <span class="visually-hidden">{{ 'presentation_videos.search' | translate }}</span>
+          <input type="search" class="pv-search__input"
+                 [value]="consulta()" (input)="consulta.set($any($event.target).value)"
+                 [placeholder]="'presentation_videos.search' | translate">
+        </label>
+        <p class="pv-count" aria-live="polite">{{ resumen() }}</p>
+        <label class="pv-sort">
+          <span class="pv-sort__label">{{ 'presentation_videos.sort.label' | translate }}</span>
+          <select class="form-select form-select-sm" (change)="cambiarOrden($any($event.target).value)">
+            @for (o of ordenes; track o.valor) {
+              <option [value]="o.valor" [selected]="orden() === o.valor">{{ o.clave | translate }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    }
+
+    @if (visibles().length || pendientes().length) {
+      <ul class="pv-grid">
+        @for (p of pendientes(); track p.clave) {
+          <li class="pv-card pv-card--pending" aria-busy="true">
+            <div class="pv-thumb">
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            </div>
+            <div class="pv-card__body">
+              <div class="pv-card__text">
+                <p class="pv-card__title">{{ p.titulo }}</p>
+                <p class="pv-card__meta">{{ 'presentation_videos.uploading' | translate }}</p>
+              </div>
+            </div>
+          </li>
+        }
+
+        @for (v of visibles(); track v.id) {
+          <li class="pv-card">
+            <button type="button" class="pv-thumb" (click)="ver(v)"
+                    [attr.aria-label]="'presentation_videos.actions.watch' | translate:{ titulo: v.titulo }">
+              @if (miniaturas()[v.id]; as src) {
+                <img [src]="src" alt="" loading="lazy">
+              } @else {
+                <i class="bi bi-camera-video pv-thumb__fallback" aria-hidden="true"></i>
+              }
+              <span class="pv-thumb__play" aria-hidden="true"><i class="bi bi-play"></i></span>
+              <span class="pv-thumb__dur">{{ duracion(v) }}</span>
+            </button>
+
+            <div class="pv-card__body">
+              <div class="pv-card__text">
+                <button type="button" class="pv-card__title pv-card__title--link" (click)="ver(v)">{{ v.titulo }}</button>
+                <p class="pv-card__meta">
+                  {{ relativo(v) }}<span class="pv-card__sep" aria-hidden="true">·</span>{{ vistas(v.vistas) }}
+                </p>
+              </div>
+
+              <div ngbDropdown placement="bottom-end" container="body" class="pv-menu">
+                <button type="button" class="pv-more" ngbDropdownToggle
+                        [attr.aria-label]="'presentation_videos.actions.options' | translate:{ titulo: v.titulo }">
+                  <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+                </button>
+                <div ngbDropdownMenu class="pv-menu__list">
+                  <button type="button" ngbDropdownItem (click)="pedirRenombrar(v)">
+                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                    {{ 'presentation_videos.actions.rename' | translate }}
+                  </button>
+                  <button type="button" ngbDropdownItem (click)="descargar(v)">
+                    <i class="bi bi-download" aria-hidden="true"></i>
+                    {{ 'presentation_videos.actions.download' | translate }}
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button type="button" ngbDropdownItem class="pv-menu__danger" (click)="pedirEliminar(v)">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                    {{ 'presentation_videos.actions.delete' | translate }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="pv-state pv-state--compact">
+        <p class="pv-state__title">{{ 'common.no_results' | translate }}</p>
+        <p class="pv-state__text">{{ 'presentation_videos.no_match' | translate:{ q: consulta().trim() } }}</p>
+      </div>
+    }
+  }
+</section>
+
+<app-grabador-video (grabado)="alGrabar($event)" />
+
+<app-reproductor-video
+  [video]="abierto()"
+  (cerrado)="abierto.set(null)"
+  (cambiado)="alCambiar($event)"
+  (descargar)="descargar($event)"
+  (eliminar)="pedirEliminar($event)" />
+
+<!-- ── Renombrar ────────────────────────────────────────────────────────── -->
+<dialog #dlgRenombrar class="pv-dialog" aria-labelledby="pvRenTitulo"
+        (cancel)="ocupado() && $event.preventDefault()" (close)="renombrar.set(null)">
+  <form (submit)="confirmarRenombrar($event, renInput)">
+    <div class="pv-dialog__body">
+      <h2 id="pvRenTitulo" class="pv-dialog__title">{{ 'presentation_videos.rename_title' | translate }}</h2>
+      <label class="form-label" for="pvRenInput">{{ 'presentation_videos.player.title_label' | translate }}</label>
+      <input #renInput id="pvRenInput" class="form-control" type="text" maxlength="120" required
+             [value]="renombrar()?.titulo ?? ''" [disabled]="ocupado()">
+    </div>
+    <div class="pv-dialog__foot">
+      <button type="button" class="btn btn-outline-secondary" (click)="cerrarDialogo(dlgRenombrar)" [disabled]="ocupado()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="ocupado()">
+        @if (ocupado()) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        }
+        {{ 'common.save' | translate }}
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ── Eliminar ─────────────────────────────────────────────────────────── -->
+<dialog #dlgEliminar class="pv-dialog" role="alertdialog" aria-labelledby="pvElimTitulo" aria-describedby="pvElimTexto"
+        (cancel)="ocupado() && $event.preventDefault()" (close)="eliminar.set(null)">
+  <div class="pv-dialog__body">
+    <h2 id="pvElimTitulo" class="pv-dialog__title">{{ 'presentation_videos.delete_title' | translate }}</h2>
+    <p id="pvElimTexto" class="pv-dialog__text">
+      {{ 'presentation_videos.delete_body' | translate:{ titulo: eliminar()?.titulo ?? '' } }}
+    </p>
+  </div>
+  <div class="pv-dialog__foot">
+    <button type="button" class="btn btn-outline-secondary" (click)="cerrarDialogo(dlgEliminar)" [disabled]="ocupado()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button type="button" class="btn pv-btn-danger" (click)="confirmarEliminar()" [disabled]="ocupado()">
+      @if (ocupado()) {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+      } @else {
+        <i class="bi bi-trash3 me-1" aria-hidden="true"></i>
+      }
+      {{ 'presentation_videos.actions.delete' | translate }}
+    </button>
+  </div>
+</dialog>

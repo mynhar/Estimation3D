@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
+import { CampoExtra, CamposFaltantesComponent } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface PerfilRow {
   nombre:    string;
@@ -28,7 +29,7 @@ const BUCKET   = 'archivos';
   selector: 'app-perfil',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
 })
@@ -49,6 +50,14 @@ export class PerfilComponent implements OnInit {
   nombre   = signal('');
   apellido = signal('');
   telefono = signal('');
+
+  /** Nombre y apellido son obligatorios (llevan *): sin ellos no se guarda. */
+  faltantes = computed<CampoExtra[]>(() => [
+    ...(this.nombre().trim()   ? [] : [{ destino: 'nombre-input' }]),
+    ...(this.apellido().trim() ? [] : [{ destino: 'apellido-input' }]),
+  ]);
+  /** Intentos de guardar con campos sin completar: cada uno trae el resumen. */
+  intentos = signal(0);
 
   hasCambios = computed(() => {
     const p = this.perfil();
@@ -151,6 +160,10 @@ export class PerfilComponent implements OnInit {
   async guardar() {
     const userId = this.user()?.id;
     if (!userId || !this.hasCambios()) return;
+    if (this.faltantes().length) {
+      this.intentos.update(n => n + 1);
+      return;
+    }
 
     this.guardando.set(true);
     this.exitoMsg.set('');

@@ -9,6 +9,7 @@ import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 import { TipoInmueble } from '../../../types/supabase';
 import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
+import { CAMPOS_FALTANTES, CampoExtra } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface ClienteRow {
   id: string;
@@ -29,7 +30,7 @@ interface ClienteRow {
   selector: 'app-admin-file-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -47,6 +48,8 @@ export class AdminFileCreateComponent implements OnInit {
 
   // ── Clientes ───────────────────────────────────────────────────────────────
   clientes         = signal<ClienteRow[]>([]);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos          = signal(0);
   cargandoClientes = signal(true);
   clienteId        = signal<string | null>(null);
   clienteRequerido = signal(false);
@@ -189,6 +192,12 @@ export class AdminFileCreateComponent implements OnInit {
   step2Complete = computed(() => this.servicioIds().length > 0);
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
+
+  /** Cliente y servicios no son controles del formulario: el resumen los recibe aparte. */
+  extraFaltantes = computed<CampoExtra[]>(() => [
+    ...(this.step1Complete() ? [] : [{ etiqueta: 'admin_file_create.client_label', destino: 'client-search-input' }]),
+    ...(this.step2Complete() ? [] : [{ etiqueta: 'service_selector.name', destino: 'srv-title' }]),
+  ]);
 
   allComplete = computed(() =>
     this.step1Complete() && this.step2Complete() && this.step3Complete() && this.step4Complete()
@@ -365,7 +374,10 @@ export class AdminFileCreateComponent implements OnInit {
     this.clienteRequerido.set(!this.clienteId());
     this.intentado.set(true);
 
-    if (!this.allComplete()) return;
+    if (!this.allComplete()) {
+      this.intentos.update(n => n + 1);
+      return;
+    }
 
     this.enviando.set(true);
     this.error.set('');

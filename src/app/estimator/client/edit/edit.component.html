@@ -171,6 +171,7 @@
                             {{ 'admin_users.invite_send' | translate }}
                           </button>
                         </div>
+                        <app-campos-faltantes class="mt-3" [formulario]="form" [intento]="intentosInvitar()" />
 
                         @if (confirmarInvitacion()) {
                           <div class="invite-confirm" role="alertdialog" aria-live="polite">
@@ -467,7 +468,7 @@
                          son excluyentes. Al marcarlo, las de abajo quedan inertes en
                          vez de desaparecer, para que se siga viendo qué cubre. -->
                     <div class="col-12">
-                      <fieldset class="spec-field">
+                      <fieldset class="spec-field" data-campo="especialidad_ids">
                         <legend class="form-label spec-field__legend">
                           {{ 'admin_users.specialties' | translate }}
                         </legend>
@@ -567,6 +568,7 @@
                 </div>
               }
 
+              <app-campos-faltantes class="mt-4" [formulario]="form" [intento]="intentos()" />
             </div>
 
             <!-- ── Footer acciones ─────────────────────────────────────── -->

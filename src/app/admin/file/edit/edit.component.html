@@ -576,6 +576,10 @@
                 </div>
               </div>
             </form>
+            <app-campos-faltantes class="mt-4"
+              [formulario]="[expedienteForm, localizacionForm]"
+              [extra]="extraFaltantesExp()"
+              [intento]="intentosExp()" />
           </div>
 
           <!-- Footer guardar expediente -->

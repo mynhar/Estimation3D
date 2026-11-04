@@ -8,6 +8,7 @@ import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ExpedienteService } from '../../../services/expediente.service';
 import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models';
 import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
+import { CAMPOS_FALTANTES, CampoExtra } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 /**
  * Dirección del PERFIL del cliente. Solo se lee: es el punto de partida de la
@@ -25,7 +26,7 @@ interface PerfilDireccion {
   selector: 'app-file-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ServicioSelectorComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -80,6 +81,8 @@ export class FileCreateComponent implements OnInit {
 
   /** Se intentó enviar: los campos sin tocar empiezan a mostrar su error. */
   intentado         = signal(false);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos          = signal(0);
   enviando          = signal(false);
   error             = signal('');
   ubicacionCargando = signal(false);
@@ -220,6 +223,11 @@ export class FileCreateComponent implements OnInit {
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
 
+  /** El servicio no es un control del formulario: el resumen lo recibe aparte. */
+  extraFaltantes = computed<CampoExtra[]>(() =>
+    this.step1Complete() ? [] : [{ etiqueta: 'service_selector.name', destino: 'srv-title' }]
+  );
+
   allComplete = computed(() =>
     this.step1Complete() && this.step2Complete() && this.step3Complete() && this.step4Complete()
   );
@@ -350,7 +358,10 @@ export class FileCreateComponent implements OnInit {
     this.localizacionForm.markAllAsTouched();
     this.intentado.set(true);
 
-    if (!this.allComplete()) return;
+    if (!this.allComplete()) {
+      this.intentos.update(n => n + 1);
+      return;
+    }
 
     const userId = this.user()?.id;
     if (!userId) {

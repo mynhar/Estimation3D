@@ -17,12 +17,13 @@ import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterp
 import { ExpedienteParaOferta, ArchivoRow, OfertaForm, nombreServicio } from '../../models';
 import { ServicioCompleto } from '../../data/servicio.repository';
 import { ServicioOpcion, ServicioSelectorComponent } from '../../shared/ui/servicio-selector/servicio-selector.component';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-make-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent, CamposFaltantesComponent],
   templateUrl: './make-offer.component.html',
   styleUrl: './make-offer.component.css',
 })
@@ -64,6 +65,9 @@ export class MakeOfferComponent implements OnInit {
   servicioIdsOferta = signal<number[]>([]);
   /** Se intentó enviar: el selector de servicios muestra su error. */
   intentado = signal(false);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos  = signal(0);
+  private faltantesEstables = listaEstable();
   cargando = signal(true);
   errorMsg = signal('');
 
@@ -127,6 +131,25 @@ export class MakeOfferComponent implements OnInit {
     if (this.descripcion.trim()) n++;
     if (this.documentosActuales().length || this.documentosOferta().length) n++;
     return n;
+  }
+
+  /**
+   * Lo que falta para enviar, con las mismas reglas que `formularioCompleto`.
+   * Los campos son `ngModel`, no un FormGroup: el resumen recibe la lista hecha.
+   */
+  get faltantes(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    if (this.serviciosOfertaInvalidos) l.push({ etiqueta: 'offer_services.label', destino: 'mo-oferta-servicios-label' });
+    if (!this.precio) l.push({ etiqueta: 'make_offer.total_price', destino: 'mo-precio' });
+    else if (this.precio < 0) l.push({ etiqueta: 'make_offer.total_price', destino: 'mo-precio', motivo: 'missing_fields.reason_range' });
+    if (!this.plazoMin) l.push({ etiqueta: 'make_offer.min_deadline', destino: 'mo-plazo-min' });
+    else if (this.plazoMin < 0) l.push({ etiqueta: 'make_offer.min_deadline', destino: 'mo-plazo-min', motivo: 'missing_fields.reason_range' });
+    if (!this.plazoMax) l.push({ etiqueta: 'make_offer.max_deadline', destino: 'mo-plazo-max' });
+    else if (this.plazoMin && this.plazoMax < this.plazoMin) l.push({ etiqueta: 'make_offer.max_deadline', destino: 'mo-plazo-max', motivo: 'missing_fields.reason_below_min' });
+    if (!this.fechaInicio) l.push({ etiqueta: 'make_offer.start_date', destino: 'mo-fecha-inicio' });
+    if (!this.descripcion.trim()) l.push({ etiqueta: 'make_offer.approach_desc', destino: 'mo-descripcion' });
+    if (!this.ofertaId() && !this.documentosOferta().length) l.push({ etiqueta: 'make_offer.pdf_doc', destino: 'mo-docs' });
+    return this.faltantesEstables(l);
   }
 
   get formularioCompleto(): boolean {
@@ -266,6 +289,12 @@ export class MakeOfferComponent implements OnInit {
     this.errorEnvio.set('');
     this.exitoMsg.set('');
     this.intentado.set(true);
+
+    // Todo lo que falta, de una vez, en el resumen bajo el botón.
+    if (this.faltantes.length) {
+      this.intentos.update(n => n + 1);
+      return;
+    }
 
     if (this.serviciosOfertaInvalidos) {
       this.errorEnvio.set('service_selector.required');

@@ -12,6 +12,7 @@ import { LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
 import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | null {
   const v = ctrl.value as string;
@@ -23,7 +24,7 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
   selector: 'app-estimator-client-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -38,6 +39,9 @@ export class EstimatorClientEditComponent implements OnInit {
   private edgeErr   = inject(EdgeErrorService);
 
   cargando        = signal(true);
+  /** Intentos de envío con campos sin completar, por botón: el resumen sale junto al que se pulsó. */
+  intentos           = signal(0);
+  intentosInvitar    = signal(0);
   guardando       = signal(false);
   mostrarPassword = signal(false);
   subiendoAvatar  = signal(false);
@@ -372,7 +376,12 @@ export class EstimatorClientEditComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.intentos.update(n => n + 1);
+      this.intentosInvitar.set(0);
+      return;
+    }
     if (!this.usuario())   return;
 
     this.guardando.set(true);
@@ -421,12 +430,13 @@ export class EstimatorClientEditComponent implements OnInit {
 
   abrirInvitacion(): void {
     // El botón también guarda, así que exige un formulario válido completo.
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.faltaParaInvitar(); return; }
     // Y una contraseña escrita: en esta pantalla es opcional para guardar, pero
     // obligatoria para invitar — es la que va en el correo.
     if (!this.passwordEscrita) {
       this.f['password'].setErrors({ required: true });
       this.f['password'].markAsTouched();
+      this.faltaParaInvitar();
       return;
     }
     this.envio.set(null);
@@ -442,6 +452,11 @@ export class EstimatorClientEditComponent implements OnInit {
    * Se vuelve a la lista salvo que el envío haya caído en el remitente de
    * pruebas, aviso que se queda en pantalla para no perderlo.
    */
+  private faltaParaInvitar(): void {
+    this.intentosInvitar.update(n => n + 1);
+    this.intentos.set(0);
+  }
+
   async enviarInvitacion(): Promise<void> {
     const u = this.usuario();
     if (!u) return;

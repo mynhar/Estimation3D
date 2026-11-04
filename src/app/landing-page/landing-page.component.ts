@@ -19,6 +19,7 @@ import {
   COMPARE_ROWS, HERO_PINS, IMMERSION_WORDS, MEDIA, PLAN_PINS, PROBLEM_CELLS,
   PROPERTY_TYPES, SPECIALTIES, TICKER_KEYS,
 } from './landing.data';
+import { CAMPOS_FALTANTES } from '../shared/ui/campos-faltantes/campos-faltantes.component';
 
 /** Código postal canadiense: A1A 1A1 (con espacio, guion o nada). */
 const CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
@@ -32,8 +33,7 @@ const CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
   encapsulation: ViewEncapsulation.Emulated,
   imports: [
     RouterLink, TranslatePipe, ReactiveFormsModule,
-    RevealDirective, SweepDirective, ScanSliderDirective,
-  ],
+    RevealDirective, SweepDirective, ScanSliderDirective, ...CAMPOS_FALTANTES],
   templateUrl: './landing-page.component.html',
   styleUrls: [
     './styles/landing-base.css',
@@ -76,6 +76,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
 
   // ── Estado de interfaz ────────────────────────────────────────────────────
   readonly menuOpen = signal(false);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  readonly intentos = signal(0);
   readonly scrolled = signal(false);
   readonly sent = signal(false);
   readonly sending = signal(false);
@@ -241,10 +243,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     this.submitted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      // El grupo de radios no lleva `.is-invalid` (la marca va en el contenedor),
-      // así que se busca también su primer botón para poder enfocarlo.
-      const firstInvalid = this.host.querySelector<HTMLElement>('.field .is-invalid, .checks--err input');
-      firstInvalid?.focus();
+      // El resumen junto al botón dice qué falta y lleva a cada campo.
+      this.intentos.update(n => n + 1);
       return;
     }
     if (this.sending()) return;

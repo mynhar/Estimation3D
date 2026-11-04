@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ToastService } from '../../../services/toast.service';
 import { ImprevistoCatalogoRepository, FichaNormativaRepository, FichaNormativa } from '../../../data';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface ServicioOpcion { id: number; nombre: string; }
 
@@ -12,7 +13,7 @@ interface ServicioOpcion { id: number; nombre: string; }
   selector: 'app-admin-imprevistos-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrls: ['../../_shared/crud-form.css'],
 })
@@ -26,6 +27,8 @@ export class AdminImprevistosCreateComponent implements OnInit {
   private fichaRepo = inject(FichaNormativaRepository);
 
   guardando = signal(false);
+  /** Intentos de envío con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos  = signal(0);
   servicios = signal<ServicioOpcion[]>([]);
   fichas    = signal<FichaNormativa[]>([]);
 
@@ -78,7 +81,7 @@ export class AdminImprevistosCreateComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.intentos.update(n => n + 1); return; }
     this.guardando.set(true);
     try {
       const v = this.form.getRawValue();

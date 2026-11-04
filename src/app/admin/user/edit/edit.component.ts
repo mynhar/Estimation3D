@@ -12,6 +12,8 @@ import { LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { DbPerfil, RolUsuario } from '../../../types/supabase';
 import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
+import { PresentacionVideosComponent } from '../../../shared/ui/presentacion-videos/presentacion-videos.component';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | null {
   const v = ctrl.value as string;
@@ -23,7 +25,7 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
   selector: 'app-admin-user-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, PresentacionVideosComponent, ...CAMPOS_FALTANTES],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -38,6 +40,9 @@ export class AdminUserEditComponent implements OnInit {
   private edgeErr   = inject(EdgeErrorService);
 
   cargando        = signal(true);
+  /** Intentos de envío con campos sin completar, por botón: el resumen sale junto al que se pulsó. */
+  intentos           = signal(0);
+  intentosInvitar    = signal(0);
   guardando       = signal(false);
   mostrarPassword = signal(false);
   subiendoAvatar  = signal(false);
@@ -128,6 +133,16 @@ export class AdminUserEditComponent implements OnInit {
     initialValue: this.form.controls.rol.value,
   });
   esConstructor = computed(() => this.rolSeleccionado() === 'constructor');
+
+  /**
+   * Videos de presentación: sólo para estimadores y constructores. Se mira el
+   * rol guardado, no el del select: los videos se guardan al momento y la base
+   * rechaza los de un perfil que todavía no tiene ese rol.
+   */
+  tieneVideosPresentacion = computed(() => {
+    const rol = this.usuario()?.rol;
+    return rol === 'estimador' || rol === 'constructor';
+  });
 
   /** Campos de Perfil profesional obligatorios para el constructor. */
   private readonly CAMPOS_CONSTRUCTOR = [
@@ -320,7 +335,12 @@ export class AdminUserEditComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.intentos.update(n => n + 1);
+      this.intentosInvitar.set(0);
+      return;
+    }
     if (!this.usuario())   return;
 
     this.guardando.set(true);
@@ -401,16 +421,22 @@ export class AdminUserEditComponent implements OnInit {
   }
 
   abrirInvitacion(): void {
-    if (this.f['password'].invalid) { this.f['password'].markAsTouched(); return; }
+    if (this.f['password'].invalid) { this.f['password'].markAsTouched(); this.faltaParaInvitar(); return; }
     // En esta pantalla la contraseña es opcional para guardar, pero obligatoria
     // para invitar: es la que va en el correo.
     if (!this.passwordEscrita) {
       this.f['password'].setErrors({ required: true });
       this.f['password'].markAsTouched();
+      this.faltaParaInvitar();
       return;
     }
     this.envio.set(null);
     this.confirmarInvitacion.set(true);
+  }
+
+  private faltaParaInvitar(): void {
+    this.intentosInvitar.update(n => n + 1);
+    this.intentos.set(0);
   }
 
   async enviarInvitacion(): Promise<void> {

@@ -7,6 +7,7 @@ import { ToastService } from '../../../services/toast.service';
 import { FaseServicioRepository } from '../../../data/fase-servicio.repository';
 import { ActividadServicioRepository } from '../../../data/actividad-servicio.repository';
 import { FaseServicio, ActividadServicio } from '../../../models/seguimiento.model';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface Servicio {
   id:             number;
@@ -24,7 +25,7 @@ interface Servicio {
   selector: 'app-admin-service-type-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './edit.component.html',
   styleUrl:    './edit.component.css',
 })
@@ -39,6 +40,10 @@ export class AdminServiceTypeEditComponent implements OnInit {
   private actiRepo  = inject(ActividadServicioRepository);
 
   cargando  = signal(true);
+  /** Intentos de guardar con campos sin completar, por formulario: cada uno trae su resumen. */
+  intentos          = signal(0);
+  intentosFase      = signal(0);
+  intentosActividad = signal(0);
   guardando = signal(false);
   error     = signal<string | null>(null);
   servicio  = signal<Servicio | null>(null);
@@ -133,7 +138,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
   }
 
   async onSubmit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.intentos.update(n => n + 1); return; }
     const s = this.servicio();
     if (!s) return;
 
@@ -200,6 +205,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
 
   /** Abre el formulario en blanco para crear una fase (orden = siguiente). */
   nuevaFase() {
+    this.intentosFase.set(0);
     const siguienteOrden = this.fases().reduce((max, x) => Math.max(max, x.orden), 0) + 1;
     this.faseEditandoId.set(null);
     this.confirmandoEliminarId.set(null);
@@ -214,6 +220,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
 
   /** Abre el formulario con los datos de una fase existente. */
   editarFase(fase: FaseServicio) {
+    this.intentosFase.set(0);
     this.faseEditandoId.set(fase.id);
     this.confirmandoEliminarId.set(null);
     this.faseForm.reset({
@@ -231,12 +238,13 @@ export class AdminServiceTypeEditComponent implements OnInit {
   }
 
   cancelarFase() {
+    this.intentosFase.set(0);
     this.faseFormAbierto.set(false);
     this.faseEditandoId.set(null);
   }
 
   async guardarFase() {
-    if (this.faseForm.invalid) { this.faseForm.markAllAsTouched(); return; }
+    if (this.faseForm.invalid) { this.faseForm.markAllAsTouched(); this.intentosFase.update(n => n + 1); return; }
     const s = this.servicio();
     if (!s) return;
 
@@ -333,6 +341,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
   }
 
   nuevaActividad() {
+    this.intentosActividad.set(0);
     this.actividadEditandoId.set(null);
     this.confirmandoEliminarActiId.set(null);
     this.actividadForm.reset({
@@ -344,6 +353,7 @@ export class AdminServiceTypeEditComponent implements OnInit {
   }
 
   editarActividad(acti: ActividadServicio) {
+    this.intentosActividad.set(0);
     this.actividadEditandoId.set(acti.id);
     this.confirmandoEliminarActiId.set(null);
     this.actividadForm.reset({
@@ -358,12 +368,13 @@ export class AdminServiceTypeEditComponent implements OnInit {
   }
 
   cancelarActividad() {
+    this.intentosActividad.set(0);
     this.actividadFormAbierto.set(false);
     this.actividadEditandoId.set(null);
   }
 
   async guardarActividad() {
-    if (this.actividadForm.invalid) { this.actividadForm.markAllAsTouched(); return; }
+    if (this.actividadForm.invalid) { this.actividadForm.markAllAsTouched(); this.intentosActividad.update(n => n + 1); return; }
     const s = this.servicio();
     if (!s) return;
 

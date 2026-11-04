@@ -1,0 +1,72 @@
+<dialog #dialogo class="pl-dialog" aria-labelledby="plTitulo" (close)="alCerrar()">
+  @if (actual(); as v) {
+    <header class="pl-head">
+      <div class="pl-head__text">
+        <label class="visually-hidden" for="plTitulo">{{ 'presentation_videos.player.title_label' | translate }}</label>
+        <input #tituloInput id="plTitulo" class="pl-title" type="text" maxlength="120"
+               [value]="v.titulo" [disabled]="guardandoTitulo()"
+               [title]="'presentation_videos.player.title_hint' | translate"
+               (keydown.enter)="tituloInput.blur()"
+               (keydown.escape)="revertirTitulo($event, tituloInput)"
+               (blur)="guardarTitulo(tituloInput)">
+        <p class="pl-meta">
+          <span>{{ fecha() }}</span>
+          <span class="pl-meta__sep" aria-hidden="true">·</span>
+          <span>{{ vistasTexto(v.vistas) }}</span>
+        </p>
+      </div>
+      <button type="button" class="pl-icon-btn" (click)="cerrar()"
+              [attr.aria-label]="'common.close' | translate" [title]="'common.close' | translate">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div class="pl-stage">
+      @if (url(); as src) {
+        <video #reproductor class="pl-video" controls playsinline preload="metadata"
+               [src]="src"
+               (loadedmetadata)="alCargarMetadatos()"
+               (play)="alReproducir()"></video>
+      } @else if (errorCarga()) {
+        <div class="pl-stage__msg" role="alert">
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <p>{{ 'presentation_videos.errors.load_video' | translate }}</p>
+        </div>
+      } @else {
+        <div class="pl-stage__msg" aria-busy="true">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          <p>{{ 'common.loading' | translate }}</p>
+        </div>
+      }
+    </div>
+
+    <div class="pl-row">
+      <div class="pl-speed" role="group" [attr.aria-label]="'presentation_videos.player.speed' | translate">
+        <span class="pl-speed__label" aria-hidden="true">{{ 'presentation_videos.player.speed' | translate }}</span>
+        @for (r of velocidades; track r) {
+          <button type="button" class="pl-speed__btn"
+                  [class.is-active]="velocidad() === r"
+                  [attr.aria-pressed]="velocidad() === r"
+                  (click)="cambiarVelocidad(r)">{{ r }}×</button>
+        }
+      </div>
+      <div class="pl-actions">
+        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="pedirDescarga()">
+          <i class="bi bi-download me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.download' | translate }}
+        </button>
+        <button type="button" class="btn btn-sm pl-btn-danger" (click)="pedirEliminar()">
+          <i class="bi bi-trash3 me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.delete' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <dl class="pl-specs">
+      @for (d of detalles(); track d.clave) {
+        <div class="pl-specs__item">
+          <dt>{{ d.clave | translate }}</dt>
+          <dd>{{ d.traducir ? (d.valor | translate) : d.valor }}</dd>
+        </div>
+      }
+    </dl>
+  }
+</dialog>

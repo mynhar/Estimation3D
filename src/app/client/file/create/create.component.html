@@ -74,6 +74,13 @@
         </div>
       }
 
+      <!-- Qué falta · en móvil, arriba del lienzo (el botón es la barra fija);
+           en escritorio la copia va en el raíl, junto al botón. -->
+      <app-campos-faltantes class="canvas-alert d-lg-none"
+        [formulario]="[perfilForm, expedienteForm, localizacionForm]"
+        [extra]="extraFaltantes()"
+        [intento]="intentos()" />
+
       <!-- ═══ PASO 1 · Servicio ══════════════════════════════════════════════ -->
       <section class="section-card area-servicio" [class.section-card--done]="step1Complete()"
                [attr.aria-label]="'file_create.step1_title' | translate">
@@ -579,6 +586,11 @@
                   (click)="onCancel()" [disabled]="enviando()">
             {{ 'common.cancel' | translate }}
           </button>
+          <!-- Debajo de los botones: el que se acaba de pulsar no se mueve. -->
+          <app-campos-faltantes class="mt-3"
+            [formulario]="[perfilForm, expedienteForm, localizacionForm]"
+            [extra]="extraFaltantes()"
+            [intento]="intentos()" />
           <p class="rail-privacy">
             <i class="bi bi-shield-check" aria-hidden="true"></i>
             {{ 'file_create.privacy_note' | translate }}

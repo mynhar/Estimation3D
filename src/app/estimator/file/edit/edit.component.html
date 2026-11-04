@@ -82,6 +82,13 @@
         </div>
       }
 
+      <!-- Qué falta · en móvil, arriba del lienzo (el botón es la barra fija);
+           en escritorio la copia va en el raíl, bajo los botones. -->
+      <app-campos-faltantes class="canvas-alert d-lg-none"
+        [formulario]="[expedienteForm, localizacionForm]"
+        [extra]="extraFaltantes()"
+        [intento]="intentos()" />
+
       <!-- ═══ PASO 1 · Cliente ═══════════════════════════════════════════════ -->
       <section class="section-card section-card--pop area-cliente"
                [class.section-card--done]="step1Complete()"
@@ -596,6 +603,11 @@
                   (click)="onCancel()" [disabled]="enviando()">
             {{ 'common.cancel' | translate }}
           </button>
+          <!-- Debajo de los botones: el que se acaba de pulsar no se mueve. -->
+          <app-campos-faltantes class="mt-3"
+            [formulario]="[expedienteForm, localizacionForm]"
+            [extra]="extraFaltantes()"
+            [intento]="intentos()" />
         </div>
 
       </div>

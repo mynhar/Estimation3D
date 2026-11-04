@@ -1156,6 +1156,78 @@ export type Database = {
           },
         ]
       }
+      perfil_video: {
+        Row: {
+          actualizado_en: string
+          alto: number | null
+          ancho: number | null
+          creado_en: string
+          creado_por: string | null
+          duracion_ms: number
+          id: string
+          mime_type: string
+          miniatura_path: string | null
+          modo: "pantalla_camara" | "pantalla" | "camara" | null
+          origen: "grabacion" | "subida"
+          perfil_id: string
+          tamano_bytes: number
+          titulo: string
+          video_path: string
+          vistas: number
+        }
+        Insert: {
+          actualizado_en?: string
+          alto?: number | null
+          ancho?: number | null
+          creado_en?: string
+          creado_por?: string | null
+          duracion_ms?: number
+          id?: string
+          mime_type: string
+          miniatura_path?: string | null
+          modo?: "pantalla_camara" | "pantalla" | "camara" | null
+          origen: "grabacion" | "subida"
+          perfil_id: string
+          tamano_bytes: number
+          titulo: string
+          video_path: string
+          vistas?: number
+        }
+        Update: {
+          actualizado_en?: string
+          alto?: number | null
+          ancho?: number | null
+          creado_en?: string
+          creado_por?: string | null
+          duracion_ms?: number
+          id?: string
+          mime_type?: string
+          miniatura_path?: string | null
+          modo?: "pantalla_camara" | "pantalla" | "camara" | null
+          origen?: "grabacion" | "subida"
+          perfil_id?: string
+          tamano_bytes?: number
+          titulo?: string
+          video_path?: string
+          vistas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfil_video_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perfil_video_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reporte_actividad: {
         Row: {
           actividad_id: string
@@ -1463,6 +1535,10 @@ export type Database = {
       }
     }
     Functions: {
+      registrar_vista_perfil_video: {
+        Args: { p_video_id: string }
+        Returns: number | null
+      }
       aceptar_oferta: {
         Args: { p_expediente_id: string; p_oferta_id: string }
         Returns: undefined
@@ -1721,6 +1797,7 @@ export type CompositeTypes<
 
 // ── Aliases de conveniencia usados en todo el proyecto ────────────────────────
 export type DbPerfil        = Database["public"]["Tables"]["perfil"]["Row"]
+export type DbPerfilVideo   = Database["public"]["Tables"]["perfil_video"]["Row"]
 export type RolUsuario      = Database["public"]["Enums"]["rol_usuario"]
 export type ProveedorAuth   = Database["public"]["Enums"]["proveedor_auth"]
 export type EstadoExpediente= Database["public"]["Enums"]["estado_expediente"]

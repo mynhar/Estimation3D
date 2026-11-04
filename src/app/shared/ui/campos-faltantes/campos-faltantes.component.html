@@ -1,0 +1,25 @@
+@if (visible()) {
+  <section #panel class="cf" tabindex="-1" [attr.aria-labelledby]="tituloId">
+    <p class="cf__title" [id]="tituloId">
+      <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+      {{ titulo() | translate: { n: faltantes().length } }}
+    </p>
+
+    <ul class="cf__list">
+      @for (f of faltantes(); track f.id) {
+        <li class="cf__item">
+          @if (f.el) {
+            <button type="button" class="cf__link" (click)="irA(f)">{{ f.etiqueta }}</button>
+          } @else {
+            <span class="cf__name">{{ f.etiqueta }}</span>
+          }
+          <!-- Si todos faltan, el título ya lo dice: el motivo sólo aparece
+               cuando hay campos mal escritos en la lista. -->
+          @if (!todosRequeridos()) {
+            <span class="cf__reason">{{ f.motivo | translate: f.params }}</span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

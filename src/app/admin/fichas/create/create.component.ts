@@ -5,12 +5,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ToastService } from '../../../services/toast.service';
 import { FichaNormativaRepository } from '../../../data';
 import { parseKeywords } from '../keywords.util';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-admin-fichas-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrls: ['../../_shared/crud-form.css'],
 })
@@ -22,6 +23,8 @@ export class AdminFichasCreateComponent {
   private repo      = inject(FichaNormativaRepository);
 
   guardando = signal(false);
+  /** Intentos de envío con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos  = signal(0);
 
   readonly langs = [
     { c: 'fr', b: 'FR' },
@@ -47,7 +50,7 @@ export class AdminFichasCreateComponent {
   ctrl(name: string) { return this.form.get(name); }
 
   async onSubmit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.intentos.update(n => n + 1); return; }
     this.guardando.set(true);
     try {
       const v = this.form.getRawValue();

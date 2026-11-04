@@ -6,12 +6,13 @@ import { AuthSupabaseService } from '../services/auth-supabase.service';
 import { LangService, Lang } from '../services/lang.service';
 import { RolUsuario } from '../types/supabase';
 import { passwordComplexityValidator } from '../shared/validators/password.validator';
+import { CAMPOS_FALTANTES } from '../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, RouterLink],
+  imports: [ReactiveFormsModule, TranslatePipe, RouterLink, ...CAMPOS_FALTANTES],
   templateUrl: './login.component.html',
   styleUrl:    './login.component.css',
 })
@@ -23,6 +24,9 @@ export class LoginComponent implements OnInit {
   lang           = inject(LangService);
 
   vista            = signal<'login' | 'registro'>('login');
+  /** Envíos con campos sin completar, por formulario: cada uno trae el resumen de lo que falta. */
+  intentosLogin    = signal(0);
+  intentosRegistro = signal(0);
   loading          = signal(false);
   errorLogin       = signal('');
   errorRegistro    = signal('');
@@ -69,7 +73,7 @@ export class LoginComponent implements OnInit {
   }
 
   async onLogin() {
-    if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); return; }
+    if (this.loginForm.invalid) { this.loginForm.markAllAsTouched(); this.intentosLogin.update(n => n + 1); return; }
     this.loading.set(true);
     this.errorLogin.set('');
     try {
@@ -90,7 +94,7 @@ export class LoginComponent implements OnInit {
   }
 
   async onRegistro() {
-    if (this.registroForm.invalid) { this.registroForm.markAllAsTouched(); return; }
+    if (this.registroForm.invalid) { this.registroForm.markAllAsTouched(); this.intentosRegistro.update(n => n + 1); return; }
     this.loading.set(true);
     this.errorRegistro.set('');
     try {

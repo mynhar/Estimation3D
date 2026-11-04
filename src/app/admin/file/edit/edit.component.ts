@@ -18,6 +18,7 @@ import { ServicioOpcion, ServicioSelectorComponent } from '../../../shared/ui/se
 import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
 import { ArchivarExpedienteComponent } from '../../../shared/ui/archivar-expediente/archivar-expediente.component';
 import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/boton-archivar.component';
+import { CAMPOS_FALTANTES, CampoExtra } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface ClienteRow {
   id: string;
@@ -50,7 +51,7 @@ const CONTRATO_PCT: Record<string, number> = {
   selector: 'app-admin-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
+  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, ...CAMPOS_FALTANTES],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -69,6 +70,8 @@ export class AdminFileEditComponent implements OnInit {
 
   /** Pestaña activa del panel izquierdo. */
   tabActiva = signal<'expediente' | 'informe' | 'ofertas'>('expediente');
+  /** Intentos de guardar el expediente con campos sin completar. */
+  intentosExp      = signal(0);
 
   private currentLang = toSignal(
     this.translate.onLangChange.pipe(map(e => e.lang)),
@@ -562,6 +565,12 @@ export class AdminFileEditComponent implements OnInit {
   }
 
   // ── Guardar: EXPEDIENTE ────────────────────────────────────────────────────
+  /** Cliente y servicios no son controles del formulario: el resumen los recibe aparte. */
+  extraFaltantesExp = computed<CampoExtra[]>(() => [
+    ...(this.clienteId() ? [] : [{ etiqueta: 'admin_file_create.client_label', destino: 'client-search-input' }]),
+    ...(this.servicioIds().length ? [] : [{ etiqueta: 'service_selector.name', destino: 'edit-srv-label' }]),
+  ]);
+
   async guardarExpediente() {
     this.expedienteForm.markAllAsTouched();
     this.localizacionForm.markAllAsTouched();
@@ -575,6 +584,7 @@ export class AdminFileEditComponent implements OnInit {
       !this.clienteId() || !this.servicioIds().length
     ) {
       this.errorExp.set('admin_file_edit.form_incomplete');
+      this.intentosExp.update(n => n + 1);
       return;
     }
 

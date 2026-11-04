@@ -16,12 +16,13 @@ import { EdgeErrorService } from '../../services/edge-error.service';
 import { MatterportService } from '../../services/matterport.service';
 import { MatterportModelo } from '../../models/matterport.model';
 import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-file-under-estimation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent],
   templateUrl: './file-under-estimation.component.html',
   styleUrl:    './file-under-estimation.component.css',
 })
@@ -177,9 +178,39 @@ export class FileUnderEstimationComponent implements OnInit {
     this.cargarMatterport();
   }
 
+  /** Intentos de guardar la estimación con campos sin completar. */
+  intentosEst = signal(0);
+  private faltantesEstables = listaEstable();
+
+  /**
+   * Lo que falta para guardar la estimación, con las reglas de
+   * `guardarEstimacion()`. Los campos son `ngModel`: el resumen recibe la lista.
+   */
+  get faltantesEst(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    if (!this.fechaVisita) l.push({ etiqueta: 'estimator_file.real_date', destino: 'est-fecha' });
+    if (!this.horaVisita) l.push({ etiqueta: 'file.hour', destino: 'est-hora' });
+    if (!this.descripcionProblema.trim()) l.push({ etiqueta: 'estimator_file.problems_observed', destino: 'est-problemas' });
+    if (!this.costoValido) {
+      // Si se da un coste, van los dos y el máximo no baja del mínimo.
+      const min = this.costoMin, max = this.costoMax;
+      if (min === null) l.push({ destino: 'est-costo-min' });
+      else if (min < 0) l.push({ destino: 'est-costo-min', motivo: 'missing_fields.reason_range' });
+      if (max === null) l.push({ destino: 'est-costo-max' });
+      else if (min !== null && max < min) l.push({ destino: 'est-costo-max', motivo: 'missing_fields.reason_below_min' });
+    }
+    return this.faltantesEstables(l);
+  }
+
   async guardarEstimacion(): Promise<boolean> {
     this.errorGuardado.set('');
     this.exitoMsg.set('');
+
+    // Todo lo que falta, de una vez, en el resumen bajo los botones.
+    if (this.faltantesEst.length) {
+      this.intentosEst.update(n => n + 1);
+      return false;
+    }
 
     if (!this.fechaVisita || !this.horaVisita) {
       this.errorGuardado.set('estimator_form.err_visit');

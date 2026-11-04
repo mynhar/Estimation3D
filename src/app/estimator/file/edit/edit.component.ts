@@ -10,6 +10,7 @@ import { Servicio, PROVINCIAS_CANADA, SERVICIOS_FALLBACK } from '../../../models
 import { ServicioOpcion, ServicioSelectorComponent, resumirServicios } from '../../../shared/ui/servicio-selector/servicio-selector.component';
 import { TipoInmueble } from '../../../types/supabase';
 import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { CAMPOS_FALTANTES, CampoExtra } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 interface ClienteRow {
   id: string;
@@ -37,7 +38,7 @@ interface ClienteRow {
   selector: 'app-estimator-file-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, AvisoArchivadoComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, AvisoArchivadoComponent, ...CAMPOS_FALTANTES],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -58,6 +59,8 @@ export class EstimatorFileEditComponent implements OnInit {
 
   // ── Expediente ─────────────────────────────────────────────────────────────
   cargando = signal(true);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos          = signal(0);
   numero   = signal('');
   estado   = signal<string>('');
   /** Archivado: solo un administrador puede modificarlo (la base rechaza el resto). */
@@ -213,6 +216,12 @@ export class EstimatorFileEditComponent implements OnInit {
   step2Complete = computed(() => this.servicioIds().length > 0);
   step3Complete = computed(() => this.expedienteStatus()   === 'VALID');
   step4Complete = computed(() => this.localizacionStatus() === 'VALID');
+
+  /** Cliente y servicios no son controles del formulario: el resumen los recibe aparte. */
+  extraFaltantes = computed<CampoExtra[]>(() => [
+    ...(this.step1Complete() ? [] : [{ etiqueta: 'admin_file_create.client_label', destino: 'client-search-input' }]),
+    ...(this.step2Complete() ? [] : [{ etiqueta: 'service_selector.name', destino: 'srv-title' }]),
+  ]);
 
   allComplete = computed(() =>
     this.step1Complete() && this.step2Complete() && this.step3Complete() && this.step4Complete()
@@ -468,7 +477,10 @@ export class EstimatorFileEditComponent implements OnInit {
     this.clienteRequerido.set(!this.clienteId());
     this.intentado.set(true);
 
-    if (!this.allComplete()) return;
+    if (!this.allComplete()) {
+      this.intentos.update(n => n + 1);
+      return;
+    }
 
     this.enviando.set(true);
     this.error.set('');

@@ -18,6 +18,7 @@ import { SitePageBase } from '../site-page.base';
 import {
   BENEFITS, FAQ_IDS, PROBLEM_CELLS, REQUIREMENTS, SPECIALTY_SLOTS, STEPS,
 } from './entrepreneurs.data';
+import { CAMPOS_FALTANTES } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 /** Licencia RBQ de Quebec: diez dígitos en tres bloques, «0000-0000-00». */
 const RBQ_RE = /^\d{4}-\d{4}-\d{2}$/;
@@ -49,7 +50,7 @@ function especialidadRequerida(ctrl: AbstractControl): ValidationErrors | null {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
-  imports: [RouterLink, TranslatePipe, ReactiveFormsModule, RevealDirective, SweepDirective],
+  imports: [RouterLink, TranslatePipe, ReactiveFormsModule, RevealDirective, SweepDirective, ...CAMPOS_FALTANTES],
   templateUrl: './entrepreneurs.component.html',
   styleUrls: ['../styles/site-chrome.css', './entrepreneurs.component.css'],
   host: {
@@ -74,6 +75,8 @@ export class EntrepreneursComponent extends SitePageBase implements OnInit {
 
   /** Id de la pregunta abierta; `null` cuando todas están cerradas. */
   readonly openFaq = signal<string | null>(null);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  readonly intentos = signal(0);
 
   // Las casillas de especialidad ya no salen de una constante local: lo que el
   // candidato puede declarar tiene que ser exactamente lo que la aplicación
@@ -198,7 +201,8 @@ export class EntrepreneursComponent extends SitePageBase implements OnInit {
     this.submitted.set(true);
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.host.querySelector<HTMLElement>('.field .is-invalid')?.focus();
+      // El resumen junto al botón dice qué falta y lleva a cada campo.
+      this.intentos.update(n => n + 1);
       return;
     }
     if (this.sending()) return;

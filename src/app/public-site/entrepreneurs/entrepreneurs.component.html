@@ -395,7 +395,7 @@
             }
           </div>
 
-          <fieldset class="field full">
+          <fieldset class="field full" data-campo="specialites">
             <legend>
               {{ 'entrepreneurs.form.specialties' | translate }}<span class="req" aria-hidden="true">*</span>
             </legend>
@@ -451,6 +451,7 @@
             </button>
           }
         </div>
+        <app-campos-faltantes class="mt-3" [formulario]="form" [intento]="intentos()" />
       </form>
     </div>
   </section>

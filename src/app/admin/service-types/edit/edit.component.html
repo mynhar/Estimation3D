@@ -227,6 +227,7 @@
                 </div>
               </div>
 
+              <app-campos-faltantes class="mt-4" [formulario]="form" [intento]="intentos()" />
             </div>
 
             <!-- ── Footer acciones ─────────────────────────────────────── -->
@@ -407,6 +408,8 @@
                       {{ 'admin_service_types.fases.active_label' | translate }}
                     </label>
                   </div>
+
+                  <app-campos-faltantes class="mb-3" [formulario]="faseForm" [intento]="intentosFase()" />
 
                   <!-- Acciones del formulario -->
                   <div class="fase-form__actions">
@@ -628,6 +631,8 @@
                       {{ 'admin_service_types.actividades.active_label' | translate }}
                     </label>
                   </div>
+
+                  <app-campos-faltantes class="mb-3" [formulario]="actividadForm" [intento]="intentosActividad()" />
 
                   <!-- Acciones del formulario -->
                   <div class="fase-form__actions">

@@ -24,12 +24,13 @@ import { BotonArchivarComponent } from '../../../shared/ui/archivar-expediente/b
 import {
   ServicioOpcion, ServicioSelectorComponent, resumirServicios,
 } from '../../../shared/ui/servicio-selector/servicio-selector.component';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-admin-offer-edit',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
   templateUrl: './edit.component.html',
   styleUrl: './edit.component.css',
 })
@@ -84,6 +85,9 @@ export class AdminOfferEditComponent implements OnInit {
   servicioIdsOferta = signal<number[]>([]);
   /** Se intentó guardar: el selector de servicios muestra su error. */
   intentado = signal(false);
+  /** Envíos con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos  = signal(0);
+  private faltantesEstables = listaEstable();
   cargando = signal(true);
   errorMsg = signal('');
 
@@ -263,6 +267,21 @@ export class AdminOfferEditComponent implements OnInit {
   /** Con varios servicios, la oferta tiene que decir a cuáles se presenta. */
   get serviciosOfertaInvalidos(): boolean {
     return this.multiServicio() && this.servicioIdsOferta().length === 0;
+  }
+
+  /** Lo que falta para guardar, con los mismos criterios: el resumen bajo el botón lo lista. */
+  get faltantes(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    const rango = 'missing_fields.reason_range';
+    if (this.constructorInvalido) l.push({ etiqueta: 'admin_offer.constructor_label', destino: 'constructor-select' });
+    if (this.serviciosOfertaInvalidos) l.push({ etiqueta: 'offer_services.label', destino: 'oferta-servicios-label' });
+    if (this.precioInvalido) l.push({ etiqueta: 'make_offer.total_price', destino: 'ao-precio', ...(this.precio ? { motivo: rango } : {}) });
+    if (this.plazoMinInvalido) l.push({ etiqueta: 'make_offer.min_deadline', destino: 'ao-plazo-min', ...(this.plazoMin ? { motivo: rango } : {}) });
+    if (this.plazoMaxInvalido) l.push({ etiqueta: 'make_offer.max_deadline', destino: 'ao-plazo-max', ...(this.plazoMax ? { motivo: 'missing_fields.reason_below_min' } : {}) });
+    if (this.fechaInicioInvalida) l.push({ etiqueta: 'make_offer.start_date', destino: 'ao-fecha-inicio' });
+    if (this.descripcionInvalida) l.push({ etiqueta: 'make_offer.approach_desc', destino: 'ao-descripcion' });
+    if (this.documentoInvalido) l.push({ etiqueta: 'make_offer.pdf_doc', destino: 'ao-docs' });
+    return this.faltantesEstables(l);
   }
 
   get formularioCompleto(): boolean {
@@ -521,6 +540,8 @@ export class AdminOfferEditComponent implements OnInit {
 
     const constructorId = this.constructorSeleccionadoId();
     this.intentado.set(true);
+    // Todo lo que falta, de una vez, en el resumen bajo el botón.
+    if (this.faltantes.length) { this.intentos.update(n => n + 1); return; }
     if (!constructorId) { this.errorEnvio.set('admin_offer.err_constructor'); return; }
     if (this.serviciosOfertaInvalidos) { this.errorEnvio.set('service_selector.required'); return; }
     if (!this.precio || this.precio <= 0) { this.errorEnvio.set('make_offer.err_price'); return; }

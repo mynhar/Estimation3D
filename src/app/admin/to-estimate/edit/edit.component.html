@@ -621,7 +621,7 @@
                   <button type="button" class="fued-btn-submit fued-btn-invite" (click)="enviarInvitacionYEstimacion()"
                           [disabled]="bloqueadoPorOferta || enviandoInvitacion() || guardando() || abriendoATodos()
                                       || confirmarAbrirATodos()
-                                      || seleccionInvitados().size === 0 || !formularioCompleto">
+                                      || seleccionInvitados().size === 0">
                     @if (enviandoInvitacion() || guardando()) {
                       <span class="fued-spinner-sm"></span>{{ 'admin_invite.sending' | translate }}
                     } @else {
@@ -655,7 +655,7 @@
               @if (estimadores().length === 0) {
                 <p class="fued-field-hint">{{ 'admin_estimate.no_estimadores' | translate }}</p>
               } @else {
-                <select class="fued-input fued-select"
+                <select id="est-estimador" class="fued-input fued-select"
                         [ngModel]="estimadorSeleccionadoId()"
                         (ngModelChange)="estimadorSeleccionadoId.set($event)">
                   <option value="">— {{ 'admin_estimate.select_estimador' | translate }} —</option>
@@ -673,14 +673,14 @@
                   <i class="bi bi-calendar3"></i>{{ 'estimator_file.real_date' | translate }}
                   <span class="fued-req">*</span>
                 </label>
-                <input type="date" class="fued-input" [(ngModel)]="fechaVisita" />
+                <input id="est-fecha" type="date" class="fued-input" [(ngModel)]="fechaVisita" />
               </div>
               <div class="fued-field">
                 <label class="fued-label">
                   <i class="bi bi-clock"></i>{{ 'file.hour' | translate }}
                   <span class="fued-req">*</span>
                 </label>
-                <input type="time" class="fued-input" [(ngModel)]="horaVisita" />
+                <input id="est-hora" type="time" class="fued-input" [(ngModel)]="horaVisita" />
               </div>
             </div>
 
@@ -690,7 +690,7 @@
                 <i class="bi bi-card-text"></i>{{ 'estimator_file.problems_observed' | translate }}
                 <span class="fued-req">*</span>
               </label>
-              <textarea class="fued-input fued-textarea" rows="4"
+              <textarea id="est-problemas" class="fued-input fued-textarea" rows="4"
                         [placeholder]="'estimator_file.problems_placeholder' | translate"
                         [(ngModel)]="descripcionProblema"></textarea>
             </div>
@@ -707,6 +707,7 @@
                   <div class="fued-input-group">
                     <span class="fued-input-prefix">CA$</span>
                     <input type="number" class="fued-input" placeholder="0" min="0" step="1000"
+                           id="est-costo-min" [attr.aria-label]="('estimator_file.approx_cost' | translate) + ' · ' + ('file.min' | translate)"
                            [(ngModel)]="costoMin" />
                   </div>
                 </div>
@@ -716,6 +717,7 @@
                   <div class="fued-input-group">
                     <span class="fued-input-prefix">CA$</span>
                     <input type="number" class="fued-input" placeholder="0" min="0" step="1000"
+                           id="est-costo-max" [attr.aria-label]="('estimator_file.approx_cost' | translate) + ' · ' + ('file.max' | translate)"
                            [(ngModel)]="costoMax" />
                   </div>
                 </div>
@@ -784,7 +786,7 @@
 
             <!-- Acciones -->
             <div class="fued-form-actions">
-              <button class="fued-btn-draft" (click)="guardarVisita()" [disabled]="guardandoVisita() || !borradorValido">
+              <button class="fued-btn-draft" (click)="guardarVisita()" [disabled]="guardandoVisita()">
                 @if (guardandoVisita()) {
                   <span class="fued-spinner-sm"></span>{{ 'estimator_file.saving' | translate }}
                 } @else {
@@ -792,7 +794,7 @@
                 }
               </button>
               <button class="fued-btn-submit" (click)="guardarEstimacion()"
-                      [disabled]="guardando() || !formularioCompleto">
+                      [disabled]="guardando()">
                 @if (guardando()) {
                   <span class="fued-spinner-sm"></span>{{ 'estimator_file.sending' | translate }}
                 } @else {
@@ -800,6 +802,9 @@
                 }
               </button>
             </div>
+            <!-- Los botones ya no se bloquean con el formulario incompleto: al
+                 pulsarlos, este resumen dice qué falta. -->
+            <app-campos-faltantes class="mt-3" [extra]="modoEst() === 'borrador' ? faltantesBorrador : faltantesEst" [intento]="intentosEst()" />
 
             @if (errorGuardado()) {
               <div class="fued-alert fued-alert--danger">{{ errorGuardado() | translate }}</div>

@@ -15,6 +15,7 @@ import { matterportThumb } from '../../../shared/util/matterport';
 import { MatterportService } from '../../../services/matterport.service';
 import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 /**
  * Informe del estimador de un expediente (admin).
@@ -25,7 +26,7 @@ import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matt
   selector: 'app-admin-file-estimator-report',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent],
   templateUrl: './estimator-report.component.html',
   styleUrl: './estimator-report.component.css',
 })
@@ -351,9 +352,40 @@ export class AdminFileEstimatorReportComponent implements OnInit {
   // ── Guardar informe ────────────────────────────────────────────────────────
 
   /** Devuelve si la estimación quedó guardada: «Enviar invitación» lo encadena. */
+  /** Intentos de guardar la estimación con campos sin completar. */
+  intentosEst = signal(0);
+  private faltantesEstables = listaEstable();
+
+  /**
+   * Lo que falta para guardar la estimación, con las reglas de
+   * `guardarEstimacion()`. Los campos son `ngModel`: el resumen recibe la lista.
+   */
+  get faltantesEst(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    if (!this.estimadorSeleccionadoId()) l.push({ destino: 'estimador-sel' });
+    if (!this.fechaVisitaReal) l.push({ destino: 'fecha-real' });
+    if (!this.horaVisitaReal) l.push({ destino: 'hora-real' });
+    if (!this.descripcionProblema.trim()) l.push({ destino: 'descripcion-problema' });
+    if (!this.costoValido) {
+      // Si se da un coste, van los dos y el máximo no baja del mínimo.
+      const min = this.costoMin, max = this.costoMax;
+      if (min === null) l.push({ destino: 'costo-min' });
+      else if (min < 0) l.push({ destino: 'costo-min', motivo: 'missing_fields.reason_range' });
+      if (max === null) l.push({ destino: 'costo-max' });
+      else if (min !== null && max < min) l.push({ destino: 'costo-max', motivo: 'missing_fields.reason_below_min' });
+    }
+    return this.faltantesEstables(l);
+  }
+
   async guardarEstimacion(): Promise<boolean> {
     this.exitoEst.set(false);
     this.errorEst.set('');
+
+    // Todo lo que falta, de una vez, en el resumen bajo los botones.
+    if (this.faltantesEst.length) {
+      this.intentosEst.update(n => n + 1);
+      return false;
+    }
 
     if (!this.fechaVisitaReal || !this.horaVisitaReal) {
       this.errorEst.set('estimator_form.err_visit');

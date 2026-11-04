@@ -11,12 +11,13 @@ import { Lang, LangService } from '../../../services/lang.service';
 import { ToastService } from '../../../services/toast.service';
 import { RolUsuario } from '../../../types/supabase';
 import { especialidadesRequeridas } from '../../../shared/validators/especialidades.validator';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-admin-user-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })
@@ -30,6 +31,9 @@ export class AdminUserCreateComponent implements OnInit {
   private edgeErr   = inject(EdgeErrorService);
 
   guardando          = signal(false);
+  /** Intentos de envío con campos sin completar, por botón: el resumen sale junto al que se pulsó. */
+  intentos           = signal(0);
+  intentosInvitar    = signal(0);
   enviandoInvitacion = signal(false);
   mostrarPassword    = signal(false);
   subiendoAvatar     = signal(false);
@@ -256,6 +260,8 @@ export class AdminUserCreateComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.intentos.update(n => n + 1);
+      this.intentosInvitar.set(0);
       return;
     }
 
@@ -289,6 +295,8 @@ export class AdminUserCreateComponent implements OnInit {
   async crearEInvitar(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.intentosInvitar.update(n => n + 1);
+      this.intentos.set(0);
       return;
     }
 

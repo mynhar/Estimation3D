@@ -302,6 +302,7 @@
     </div>
   </div>
 
+  <app-campos-faltantes class="mx-4 mb-3" [extra]="faltantesEst" [intento]="intentosEst()" />
   <div class="detail-card__foot">
     @if (errorEst()) {
       <span class="save-msg save-msg--err">
@@ -496,7 +497,7 @@
         <button type="button" class="btn-invite btn-invite--primary" (click)="enviarInvitacionYEstimacion()"
                 [disabled]="bloqueadoPorOferta || enviandoInvitacion() || guardandoEst() || abriendoATodos()
                             || confirmarAbrirATodos()
-                            || seleccionInvitados().size === 0 || !formularioCompleto">
+                            || seleccionInvitados().size === 0">
           @if (enviandoInvitacion() || guardandoEst()) {
             <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
             {{ 'admin_invite.sending' | translate }}

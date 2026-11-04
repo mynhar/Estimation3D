@@ -1,0 +1,126 @@
+/* Hallmark · component: error-summary · genre: editorial · theme: locked (design.md)
+ * states: default · hover · focus · active · disabled (sin destino: texto, no enlace)
+ *         · loading (n/a: se calcula al momento) · error (= default)
+ *         · success (lista vacía: el resumen desaparece)
+ * contrast: --ds-danger-ink sobre --ds-danger-soft 5.0:1 · --ds-ink-secondary
+ *           sobre --ds-danger-soft ≈ 7.4:1 (AA)
+ *
+ * Misma familia que los avisos del sistema (filete izquierdo + fondo -soft,
+ * como aviso-archivado), en borgoña de error. Los campos son enlaces de
+ * texto subrayados: se leen como lista y se pulsan como navegación.
+ */
+:host { display: block; }
+/* Sin nada que decir no ocupa sitio: ni el margen que le dé el padre ni un
+   hueco de rejilla (sólo queda el comentario ancla del @if, que :empty ignora). */
+:host:empty { display: none; }
+
+.cf {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  background: var(--ds-danger-soft);
+  color: var(--ds-danger-ink);
+  border-left: 3px solid var(--ds-danger);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  line-height: 1.45;
+  text-align: left;
+}
+.cf:focus { outline: none; }
+.cf:focus-visible { box-shadow: var(--ds-focus-ring); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf { animation: cf-entra var(--ds-duration-base) var(--ds-ease-out); }
+}
+@keyframes cf-entra {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cf__title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-2);
+  font-weight: var(--ds-weight-semibold);
+}
+.cf__title .bi { line-height: 1.45; }
+
+.cf__list {
+  display: grid;
+  gap: var(--ds-space-1);
+  margin: 0;
+  /* Alineado con el texto del título, no con su icono. */
+  padding: 0 0 0 calc(1em + var(--ds-space-2));
+  list-style: none;
+}
+
+.cf__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--ds-space-2);
+  min-width: 0;
+}
+
+.cf__link,
+.cf__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--ds-weight-medium);
+}
+
+.cf__link {
+  padding: 0;
+  border: 0;
+  border-radius: var(--ds-radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--ds-weight-medium);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.cf__link:hover  { color: var(--ds-ink); text-decoration-thickness: 2px; }
+.cf__link:focus  { outline: none; }
+.cf__link:focus-visible { box-shadow: var(--ds-focus-ring); }
+.cf__link:active { color: var(--ds-ink); text-decoration-thickness: 2px; text-underline-offset: 2px; }
+
+.cf__reason {
+  color: var(--ds-ink-secondary);
+  font-size: var(--ds-text-xs);
+}
+.cf__reason::before { content: '· '; }
+
+/* ── Web pública (landing, emprendedores) ──────────────────────────────────
+ * Ese sitio tiene su propia piel (tema oscuro por defecto, monoespaciada,
+ * esquinas vivas) y expone sus variables en el host de la página; en tema
+ * claro apuntan a los tokens --ds-*. La caja rosa de la aplicación chocaría
+ * sobre el fondo oscuro: aquí el resumen es un panel del sitio con filete y
+ * texto de error. --danger-text ≥ 4.5:1 en ambos temas (ver site-chrome.css). */
+:host-context(.e3-landing) .cf,
+:host-context(.e3-public-page) .cf {
+  background: var(--panel);
+  color: var(--danger-text);
+  border-left-color: var(--burgundy-bright);
+  border-radius: 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+}
+:host-context(.e3-landing) .cf__reason,
+:host-context(.e3-public-page) .cf__reason { color: var(--white-dim); font-size: inherit; }
+:host-context(.e3-landing) .cf__link:hover,
+:host-context(.e3-public-page) .cf__link:hover,
+:host-context(.e3-landing) .cf__link:active,
+:host-context(.e3-public-page) .cf__link:active { color: var(--white); }
+:host-context(.e3-landing) .cf:focus-visible,
+:host-context(.e3-public-page) .cf:focus-visible,
+:host-context(.e3-landing) .cf__link:focus-visible,
+:host-context(.e3-public-page) .cf__link:focus-visible {
+  box-shadow: none;
+  outline: 1px solid var(--gold-text);
+  outline-offset: 3px;
+}

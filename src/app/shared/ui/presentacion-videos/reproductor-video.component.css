@@ -1,0 +1,193 @@
+/* Hallmark · component: video player dialog · genre: editorial
+ * theme: locked (design.md · warm editorial) · ficha técnica como hoja de especificaciones
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass
+ * pre-emit critique: P4 H5 E4 S4 R5 V4
+ */
+:host { display: contents; }
+
+.pl-dialog {
+  width: min(100% - 2rem, 60rem);
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-surface-elevated);
+  color: var(--ds-ink);
+  box-shadow: var(--ds-shadow-xl);
+  overflow: auto;
+}
+.pl-dialog::backdrop { background: var(--ds-overlay); }
+
+/* ── Cabecera: título editable en Fraunces ───────────────────────────────── */
+.pl-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-4);
+}
+.pl-head__text { flex: 1 1 auto; min-width: 0; }
+.pl-title {
+  display: block;
+  width: 100%;
+  margin: 0 0 0 calc(-1 * var(--ds-space-2));
+  padding: var(--ds-space-1) var(--ds-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  background: transparent;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-2xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-snug);
+  color: var(--ds-ink);
+  text-overflow: ellipsis;
+  transition: var(--ds-transition-color),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.pl-title:hover { border-color: var(--ds-border); }
+.pl-title:focus { outline: none; border-color: var(--ds-gold); background: var(--ds-surface); box-shadow: var(--ds-focus-ring); }
+.pl-title:disabled { color: var(--ds-ink-muted); }
+.pl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin: var(--ds-space-1) 0 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+}
+.pl-meta__sep { color: var(--ds-ink-faint); }
+
+.pl-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface);
+  color: var(--ds-ink-muted);
+  transition: var(--ds-transition-color);
+}
+.pl-icon-btn:hover { color: var(--ds-ink); border-color: var(--ds-border-strong); }
+.pl-icon-btn:focus-visible { outline: none; border-color: var(--ds-gold); box-shadow: var(--ds-focus-ring); }
+.pl-icon-btn:active { background: var(--ds-bg-alt); }
+
+/* ── Escenario ───────────────────────────────────────────────────────────── */
+.pl-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 0 var(--ds-space-5);
+  overflow: hidden;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-dark-surface);
+}
+.pl-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--ds-dark-surface);
+}
+.pl-video:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: -2px; }
+.pl-stage__msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  color: var(--ds-ink-inverse);
+  font-size: var(--ds-text-sm);
+}
+.pl-stage__msg p { margin: 0; }
+.pl-stage__msg .bi { font-size: 1.5rem; color: var(--ds-danger-on-dark); }
+
+/* ── Velocidad + acciones ────────────────────────────────────────────────── */
+.pl-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4) var(--ds-space-5);
+}
+.pl-speed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-1);
+}
+.pl-speed__label {
+  margin-right: var(--ds-space-2);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+}
+.pl-speed__btn {
+  min-width: 3rem;
+  height: 32px;
+  padding: 0 var(--ds-space-2);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface);
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-secondary);
+  font-variant-numeric: tabular-nums;
+  transition: var(--ds-transition-color);
+}
+.pl-speed__btn:hover { color: var(--ds-ink); border-color: var(--ds-border-strong); }
+.pl-speed__btn:focus-visible { outline: none; border-color: var(--ds-gold); box-shadow: var(--ds-focus-ring); }
+.pl-speed__btn:active { background: var(--ds-bg-alt); }
+.pl-speed__btn.is-active {
+  border-color: var(--ds-gold-soft);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-ink);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.pl-actions { display: flex; flex-wrap: wrap; gap: var(--ds-space-2); }
+.pl-actions .btn { white-space: nowrap; }
+.pl-btn-danger {
+  border: 1px solid var(--ds-danger);
+  background: transparent;
+  color: var(--ds-danger-ink);
+}
+.pl-btn-danger:hover { background: var(--ds-danger-soft); color: var(--ds-danger-ink); border-color: var(--ds-danger); }
+.pl-btn-danger:focus-visible { box-shadow: var(--ds-focus-ring); }
+.pl-btn-danger:active { background: var(--ds-danger-soft); border-color: var(--ds-danger-ink); }
+
+/* ── Ficha técnica ───────────────────────────────────────────────────────── */
+.pl-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  margin: 0;
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+}
+.pl-specs__item {
+  min-width: 0;
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-right: 1px solid var(--ds-border-subtle);
+}
+.pl-specs__item:last-child { border-right: 0; }
+.pl-specs dt {
+  margin-bottom: var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-tracking-widest);
+  color: var(--ds-ink-muted);
+}
+.pl-specs dd {
+  margin: 0;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}

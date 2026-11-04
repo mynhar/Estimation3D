@@ -726,7 +726,7 @@
 
             <!-- Precio -->
             <div class="fued-field">
-              <label class="fued-label">
+              <label class="fued-label" for="ao-precio">
                 <i class="bi bi-coin"></i>{{ 'make_offer.total_price' | translate }}
                 <span class="fued-req">*</span>
               </label>
@@ -735,7 +735,7 @@
               }
               <div class="fued-input-group">
                 <span class="fued-input-prefix">CA$</span>
-                <input type="number" class="fued-input" placeholder="0" min="1" step="1000"
+                <input id="ao-precio" type="number" class="fued-input" placeholder="0" min="1" step="1000"
                        [class.fued-input--invalid]="precioInvalido"
                        [(ngModel)]="precio" />
               </div>
@@ -744,22 +744,22 @@
             <!-- Plazos -->
             <div class="fued-field-row">
               <div class="fued-field">
-                <label class="fued-label">
+                <label class="fued-label" for="ao-plazo-min">
                   {{ 'make_offer.min_deadline' | translate }}
                   <small class="fued-opt">({{ 'offer.weeks' | translate }})</small>
                   <span class="fued-req">*</span>
                 </label>
-                <input type="number" class="fued-input" placeholder="1" min="1" step="1"
+                <input id="ao-plazo-min" type="number" class="fued-input" placeholder="1" min="1" step="1"
                        [class.fued-input--invalid]="plazoMinInvalido"
                        [(ngModel)]="plazoMin" />
               </div>
               <div class="fued-field">
-                <label class="fued-label">
+                <label class="fued-label" for="ao-plazo-max">
                   {{ 'make_offer.max_deadline' | translate }}
                   <small class="fued-opt">({{ 'offer.weeks' | translate }})</small>
                   <span class="fued-req">*</span>
                 </label>
-                <input type="number" class="fued-input" placeholder="4" min="1" step="1"
+                <input id="ao-plazo-max" type="number" class="fued-input" placeholder="4" min="1" step="1"
                        [class.fued-input--invalid]="plazoMaxInvalido"
                        [(ngModel)]="plazoMax" />
               </div>
@@ -776,11 +776,11 @@
                        [(ngModel)]="garantiaAnos" />
               </div>
               <div class="fued-field">
-                <label class="fued-label">
+                <label class="fued-label" for="ao-fecha-inicio">
                   <i class="bi bi-calendar-event"></i>{{ 'make_offer.start_date' | translate }}
                   <span class="fued-req">*</span>
                 </label>
-                <input type="date" class="fued-input"
+                <input id="ao-fecha-inicio" type="date" class="fued-input"
                        [class.fued-input--invalid]="fechaInicioInvalida"
                        [(ngModel)]="fechaInicio" />
               </div>
@@ -788,11 +788,11 @@
 
             <!-- Descripcion -->
             <div class="fued-field">
-              <label class="fued-label">
+              <label class="fued-label" for="ao-descripcion">
                 <i class="bi bi-text-paragraph"></i>{{ 'make_offer.approach_desc' | translate }}
                 <span class="fued-req">*</span>
               </label>
-              <textarea class="fued-input fued-textarea" rows="3"
+              <textarea id="ao-descripcion" class="fued-input fued-textarea" rows="3"
                         [class.fued-input--invalid]="descripcionInvalida"
                         [placeholder]="'make_offer.approach_placeholder' | translate"
                         [(ngModel)]="descripcion"></textarea>
@@ -804,7 +804,7 @@
                 <i class="bi bi-paperclip"></i>{{ 'make_offer.attachments' | translate }}
               </label>
 
-              <div class="fued-attach-row fued-attach-row--docs"
+              <div id="ao-docs" class="fued-attach-row fued-attach-row--docs"
                    [class.fued-attach-row--invalid]="documentoInvalido"
                    [class.fued-attach-row--drag]="dragDocs()"
                    (dragover)="onDragOverDocs($event)"
@@ -951,7 +951,7 @@
             <div class="fued-form-actions">
               <button class="fued-btn-submit" type="button"
                       (click)="enviarOferta()"
-                      [disabled]="enviando() || !formularioCompleto || (archivado() && !ofertaId())">
+                      [disabled]="enviando() || (archivado() && !ofertaId())">
                 @if (enviando()) {
                   <span class="fued-spinner-sm"></span>
                   {{ ofertaId() ? ('make_offer.updating' | translate) : ('make_offer.sending' | translate) }}
@@ -965,6 +965,9 @@
                 <i class="bi bi-arrow-left"></i>{{ 'admin_offer.back_btn' | translate }}
               </button>
             </div>
+            <!-- El botón ya no se bloquea con el formulario incompleto: al pulsarlo,
+                 este resumen dice qué falta. -->
+            <app-campos-faltantes class="mt-3" [extra]="faltantes" [intento]="intentos()" />
 
           </div><!-- /fued-form-panel__body -->
 

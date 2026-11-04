@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../../services/auth-supabase.service';
 import { ToastService } from '../../../services/toast.service';
+import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
   selector: 'app-admin-service-type-create',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
   templateUrl: './create.component.html',
   styleUrl:    './create.component.css',
 })
@@ -21,6 +22,8 @@ export class AdminServiceTypeCreateComponent {
   private translate = inject(TranslateService);
 
   guardando = signal(false);
+  /** Intentos de envío con campos sin completar: cada uno trae el resumen de lo que falta. */
+  intentos  = signal(0);
 
   form = this.fb.group({
     codigo:         ['', [Validators.required, Validators.pattern(/^[a-z_]+$/)]],
@@ -36,7 +39,7 @@ export class AdminServiceTypeCreateComponent {
   get f() { return this.form.controls; }
 
   async onSubmit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) { this.form.markAllAsTouched(); this.intentos.update(n => n + 1); return; }
 
     this.guardando.set(true);
     try {

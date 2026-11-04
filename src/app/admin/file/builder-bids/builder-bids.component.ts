@@ -11,6 +11,7 @@ import {
   serviciosParaContrato, serviciosDeOferta,
 } from '../../../models';
 import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/oferta-reparto/oferta-reparto.component';
+import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 /**
  * Ofertas de constructores de un expediente (admin).
@@ -22,7 +23,7 @@ import { OfertaRepartoComponent, alternarEnSeleccion } from '../../../shared/ui/
   selector: 'app-admin-file-builder-bids',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, OfertaRepartoComponent],
+  imports: [FormsModule, TranslatePipe, OfertaRepartoComponent, CamposFaltantesComponent],
   templateUrl: './builder-bids.component.html',
   styleUrl: './builder-bids.component.css',
 })
@@ -323,11 +324,29 @@ export class AdminFileBuilderBidsComponent implements OnInit {
     this.errorAdj.set('');
   }
 
+  /** Intentos de guardar la oferta con campos sin completar. */
+  intentosOf = signal(0);
+  private faltantesEstables = listaEstable();
+
+  /** Lo que falta para guardar la oferta, con las reglas de `guardarOferta()`. */
+  get faltantesOferta(): CampoExtra[] {
+    const l: CampoExtra[] = [];
+    const rango = 'missing_fields.reason_range';
+    if (!this.precio || this.precio <= 0) l.push({ etiqueta: 'offer.price', destino: 'of-precio', ...(this.precio ? { motivo: rango } : {}) });
+    if (!this.plazoMin || this.plazoMin <= 0) l.push({ etiqueta: 'make_offer.min_deadline', destino: 'of-pmin', ...(this.plazoMin ? { motivo: rango } : {}) });
+    if (!this.plazoMax || this.plazoMax < (this.plazoMin ?? 0)) l.push({ etiqueta: 'make_offer.max_deadline', destino: 'of-pmax', ...(this.plazoMax ? { motivo: 'missing_fields.reason_below_min' } : {}) });
+    if (!this.fechaInicio) l.push({ etiqueta: 'offer.start_date', destino: 'of-inicio' });
+    if (!this.descripcionOferta.trim()) l.push({ etiqueta: 'offer.approach', destino: 'of-desc' });
+    return this.faltantesEstables(l);
+  }
+
   async guardarOferta() {
     this.exitoOf.set(false);
     this.errorOf.set('');
 
     if (!this.ofertaId()) { this.errorOf.set('admin_file_edit.constructor_no_offers'); return; }
+    // Todo lo que falta, de una vez, en el resumen sobre el pie.
+    if (this.faltantesOferta.length) { this.intentosOf.update(n => n + 1); return; }
     if (!this.precio || this.precio <= 0)       { this.errorOf.set('make_offer.err_price'); return; }
     if (!this.plazoMin || this.plazoMin <= 0)   { this.errorOf.set('make_offer.err_plazo_min'); return; }
     if (!this.plazoMax || this.plazoMax < this.plazoMin) { this.errorOf.set('make_offer.err_plazo_max'); return; }

@@ -1,0 +1,561 @@
+/* Hallmark · component: recorder (dialog + recording overlay) · genre: editorial
+ * theme: locked (design.md · warm editorial · beige paper · gold accent)
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass — texto claro sólo sobre --ds-dark-surface (chrome espresso, como la sidebar)
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ */
+:host { display: contents; }
+
+/* ── Diálogos ─────────────────────────────────────────────────────────────── */
+.rec-dialog {
+  width: min(100% - 2rem, 40rem);
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-surface-elevated);
+  color: var(--ds-ink);
+  box-shadow: var(--ds-shadow-xl);
+  overflow: auto;
+}
+.rec-dialog::backdrop { background: var(--ds-overlay); }
+.rec-dialog--sm { width: min(100% - 2rem, 26rem); }
+
+.rec-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-5) var(--ds-space-5) 0;
+}
+.rec-dialog__title {
+  margin: 0;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  line-height: var(--ds-leading-snug);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+.rec-dialog__text {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-secondary);
+  line-height: var(--ds-leading-relaxed);
+}
+.rec-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-5);
+}
+.rec-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+}
+.rec-dialog__foot--end { justify-content: flex-end; }
+.rec-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+  margin-left: auto;
+}
+.rec-dialog__actions .btn,
+.rec-dialog__foot .btn { white-space: nowrap; }
+
+.rec-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface);
+  color: var(--ds-ink-muted);
+  transition: var(--ds-transition-color);
+}
+.rec-icon-btn:hover { color: var(--ds-ink); border-color: var(--ds-border-strong); }
+.rec-icon-btn:focus-visible { outline: none; box-shadow: var(--ds-focus-ring); border-color: var(--ds-gold); }
+.rec-icon-btn:active { background: var(--ds-bg-alt); }
+
+/* ── Modo: control segmentado ─────────────────────────────────────────────── */
+.rec-modes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ds-space-1);
+  margin: 0;
+  padding: var(--ds-space-1);
+  min-width: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-alt);
+}
+@media (min-width: 576px) {
+  .rec-modes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.rec-mode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  min-height: 44px;
+  margin: 0;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-ink-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--ds-transition-color),
+              box-shadow var(--ds-duration-fast) var(--ds-ease-out);
+}
+.rec-mode .bi { font-size: 1.05rem; }
+.rec-mode:hover { color: var(--ds-ink); background: var(--ds-surface); }
+.rec-mode.is-active {
+  background: var(--ds-surface-elevated);
+  border-color: var(--ds-border);
+  color: var(--ds-ink);
+  box-shadow: var(--ds-shadow-xs);
+}
+.rec-mode.is-active .bi { color: var(--ds-gold-ink); }
+.rec-mode:has(input:focus-visible) { box-shadow: var(--ds-focus-ring); border-color: var(--ds-gold); }
+.rec-mode:active { background: var(--ds-gold-faint); }
+.rec-mode.is-disabled { color: var(--ds-ink-muted); cursor: not-allowed; opacity: 0.6; }
+.rec-mode.is-disabled:hover { background: transparent; }
+
+/* ── Vista previa ─────────────────────────────────────────────────────────── */
+.rec-preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-alt);
+}
+.rec-preview__screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-5) var(--ds-space-6);
+  text-align: center;
+}
+.rec-preview__screen .bi { font-size: 2rem; color: var(--ds-ink-faint); }
+.rec-preview__screen p {
+  max-width: 30rem;
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  color: var(--ds-ink-muted);
+  line-height: var(--ds-leading-normal);
+}
+.rec-preview__cam {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+  background: var(--ds-dark-surface);
+}
+/* En los modos de pantalla la cámara es la futura burbuja: un círculo abajo a la izquierda. */
+.rec-preview[data-modo='pantalla_camara'] .rec-preview__cam {
+  inset: auto auto var(--ds-space-4) var(--ds-space-4);
+  width: 26%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--ds-radius-circle);
+  box-shadow: 0 0 0 3px var(--ds-gold), var(--ds-shadow-md);
+}
+.rec-preview[data-modo='pantalla_camara'].has-cam .rec-preview__screen { padding-left: 32%; }
+
+/* ── Dispositivos ─────────────────────────────────────────────────────────── */
+.rec-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+}
+.rec-label .bi { color: var(--ds-ink-muted); }
+.form-select:focus { border-color: var(--ds-gold); box-shadow: var(--ds-focus-ring); }
+
+/* Medidor del micro: escala en X escrita a 60 fps desde el componente. */
+.rec-meter {
+  display: block;
+  height: 4px;
+  margin-top: var(--ds-space-2);
+  overflow: hidden;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-bg-alt);
+}
+.rec-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--ds-success);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.rec-switch .form-check-label { font-size: var(--ds-text-sm); color: var(--ds-ink); }
+.rec-switch small { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
+.rec-switch .form-check-input:checked { background-color: var(--ds-gold-active); border-color: var(--ds-gold-active); }
+.rec-switch .form-check-input:focus { border-color: var(--ds-gold); box-shadow: var(--ds-focus-ring); }
+
+.rec-hints:empty { display: none; }
+.rec-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ds-space-2);
+  margin: 0;
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-warning-soft);
+  color: var(--ds-warning-ink);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading-normal);
+}
+.rec-hint + .rec-hint { margin-top: var(--ds-space-2); }
+.rec-hint .bi { margin-top: 1px; }
+
+.rec-limit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  white-space: nowrap;
+}
+
+/* Punto de grabación dentro del CTA dorado. */
+.rec-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: var(--ds-space-1);
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-danger);
+  vertical-align: 1px;
+}
+.btn:disabled .rec-dot { background: var(--ds-ink-faint); }
+
+.rec-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  border: 1px solid var(--ds-danger);
+  background: transparent;
+  color: var(--ds-danger-ink);
+}
+.rec-btn-danger:hover { background: var(--ds-danger-soft); color: var(--ds-danger-ink); border-color: var(--ds-danger); }
+.rec-btn-danger:focus-visible { box-shadow: var(--ds-focus-ring); }
+.rec-btn-danger:active { background: var(--ds-danger-soft); border-color: var(--ds-danger-ink); }
+
+/* ── Capa de grabación (vive en <body>) ───────────────────────────────────── */
+.rec-layer { position: relative; }
+
+/* Cuenta atrás */
+.rec-count {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ds-z-modal);
+  display: grid;
+  place-items: center;
+  background: var(--ds-overlay);
+  pointer-events: none;
+}
+.rec-count__num {
+  display: grid;
+  place-items: center;
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-surface-elevated);
+  box-shadow: 0 0 0 6px var(--ds-gold), var(--ds-shadow-xl);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-5xl);
+  font-weight: var(--ds-weight-regular);
+  line-height: 1;
+  color: var(--ds-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sólo cámara: escenario centrado; el resto de la página se atenúa. */
+.rec-stage {
+  position: fixed;
+  z-index: var(--ds-z-overlay);
+  left: 50%;
+  top: calc(50% - 2.5rem);
+  width: min(92vw, 64rem, (100dvh - 10rem) * 16 / 9);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-dark-surface);
+  box-shadow: 0 0 0 100vmax var(--ds-overlay), var(--ds-shadow-xl);
+  transform: translate(-50%, -50%);
+}
+.rec-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+/* Burbuja de cámara: posición con transform (se arrastra sin tocar el layout). */
+.rec-bubble {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: var(--ds-z-overlay);
+  width: var(--bs, 200px);
+  height: var(--bs, 200px);
+  border-radius: var(--ds-radius-circle);
+  transform: translate3d(var(--bx, 24px), var(--by, 24px), 0);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.rec-bubble.is-dragging { cursor: grabbing; }
+.rec-bubble video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--ds-radius-circle);
+  transform: scaleX(-1);
+  background: var(--ds-dark-surface);
+  box-shadow: 0 0 0 3px var(--ds-gold), var(--ds-shadow-lg);
+  pointer-events: none;
+}
+.rec-bubble:focus-visible { outline: none; }
+.rec-bubble:focus-visible video { box-shadow: 0 0 0 3px var(--ds-gold), 0 0 0 7px var(--ds-ink), var(--ds-shadow-lg); }
+.rec-bubble__tools {
+  position: absolute;
+  top: calc(-1 * var(--ds-space-4));
+  left: 50%;
+  display: flex;
+  gap: var(--ds-space-1);
+  padding: var(--ds-space-1);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-dark-surface);
+  box-shadow: var(--ds-shadow-md);
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity var(--ds-duration-fast) var(--ds-ease-out);
+}
+.rec-bubble:hover .rec-bubble__tools,
+.rec-bubble:focus-within .rec-bubble__tools { opacity: 1; }
+.rec-bubble__tools button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: color-mix(in oklch, var(--ds-ink-inverse) 12%, transparent);
+  color: var(--ds-ink-inverse);
+  transition: var(--ds-transition-color);
+}
+.rec-bubble__tools button:hover { background: color-mix(in oklch, var(--ds-ink-inverse) 24%, transparent); }
+.rec-bubble__tools button:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 1px; }
+.rec-bubble__tools button:active { background: color-mix(in oklch, var(--ds-ink-inverse) 32%, transparent); }
+
+/* ── Barra de control: chrome oscuro cálido, como la sidebar ──────────────── */
+.rec-bar {
+  position: fixed;
+  left: 50%;
+  bottom: var(--ds-space-5);
+  z-index: var(--ds-z-overlay);
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  max-width: calc(100vw - 2rem);
+  padding: 6px 6px 6px var(--ds-space-4);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-dark-surface);
+  color: var(--ds-ink-inverse);
+  box-shadow: var(--ds-shadow-xl);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+@keyframes rec-pulse { 50% { opacity: 0.35; } }
+.rec-bar__dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-danger-on-dark);
+  animation: rec-pulse 1.4s var(--ds-ease-in-out) infinite;
+}
+.is-paused .rec-bar__dot,
+.is-saving .rec-bar__dot { animation: none; background: var(--ds-gold); }
+.rec-bar__time {
+  min-width: 4ch;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-text-sm);
+  font-variant-numeric: tabular-nums;
+}
+.rec-bar__max { color: color-mix(in oklch, var(--ds-ink-inverse) 62%, transparent); }
+/* Últimos 15 s: el contador pasa a dorado (sobre oscuro sí contrasta). */
+.rec-bar__time.is-near-limit { color: var(--ds-gold); }
+.rec-bar__sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 var(--ds-space-1);
+  background: color-mix(in oklch, var(--ds-ink-inverse) 20%, transparent);
+}
+.rec-bar__btn {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: color-mix(in oklch, var(--ds-ink-inverse) 10%, transparent);
+  color: var(--ds-ink-inverse);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.rec-bar__btn:hover { background: color-mix(in oklch, var(--ds-ink-inverse) 22%, transparent); }
+.rec-bar__btn:focus-visible,
+.rec-bar__stop:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 2px; }
+.rec-bar__btn:active { background: color-mix(in oklch, var(--ds-ink-inverse) 30%, transparent); }
+.rec-bar__btn:disabled,
+.rec-bar__stop:disabled { opacity: 0.45; cursor: default; }
+.rec-bar__btn--stop { background: var(--ds-gold); color: var(--ds-ink-on-accent); }
+.rec-bar__btn--stop:hover { background: var(--ds-gold-hover); }
+
+.rec-bar__stop {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  height: 34px;
+  padding: 0 var(--ds-space-4) 0 var(--ds-space-3);
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-gold);
+  color: var(--ds-ink-on-accent);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.rec-bar__stop:hover { background: var(--ds-gold-hover); }
+.rec-bar__stop:active { background: var(--ds-gold-active); }
+
+@media (max-width: 479.98px) {
+  .rec-bar { gap: var(--ds-space-1); padding-left: var(--ds-space-3); }
+  .rec-bar__max { display: none; }
+  .rec-bar__stop { padding: 0 var(--ds-space-3); }
+}
+
+/* ── Ventana flotante (Document PiP) ──────────────────────────────────────── */
+/* Oculta en la página; dentro de la ventana flotante ocupa todo el documento. */
+.rec-float { display: none; }
+.rec-float.is-open {
+  position: fixed;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background: var(--ds-dark-surface);
+  color: var(--ds-ink-inverse);
+  font-family: var(--ds-font-body);
+  user-select: none;
+}
+.rec-float__cam { position: absolute; inset: 0; display: none; place-items: center; }
+.rec-float.has-cam .rec-float__cam { display: grid; }
+.rec-float__cam video {
+  width: calc(min(100vw, 100vh) - 12px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--ds-radius-circle);
+  transform: scaleX(-1);
+  background: var(--ds-dark-surface-deep);
+  box-shadow: 0 0 0 3px var(--ds-gold);
+}
+.rec-float__size {
+  position: absolute;
+  top: var(--ds-space-2);
+  right: var(--ds-space-2);
+  display: none;
+  gap: var(--ds-space-1);
+}
+.rec-float.has-cam .rec-float__size { display: flex; }
+.rec-float__size button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: var(--ds-radius-md);
+  background: color-mix(in oklch, var(--ds-dark-surface-deep) 88%, transparent);
+  color: var(--ds-ink-inverse);
+}
+.rec-float__size button:hover { background: var(--ds-dark-surface-deep); }
+.rec-float__size button:focus-visible { outline: 2px solid var(--ds-gold); outline-offset: 1px; }
+.rec-float__bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  height: 100%;
+  padding: 0 var(--ds-space-3);
+  white-space: nowrap;
+}
+/* Con cámara, la barra flota abajo y aparece al pasar el ratón. */
+.rec-float.has-cam .rec-float__bar {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  height: auto;
+  padding: 5px 5px 5px var(--ds-space-3);
+  border-radius: var(--ds-radius-xl);
+  background: color-mix(in oklch, var(--ds-dark-surface-deep) 92%, transparent);
+  box-shadow: var(--ds-shadow-lg);
+  transform: translateX(-50%);
+}
+.rec-float.has-cam .rec-float__bar,
+.rec-float.has-cam .rec-float__size {
+  opacity: 0;
+  transition: opacity var(--ds-duration-fast) var(--ds-ease-out);
+}
+.rec-float.has-cam:hover .rec-float__bar,
+.rec-float.has-cam:hover .rec-float__size,
+.rec-float.has-cam:focus-within .rec-float__bar,
+.rec-float.has-cam:focus-within .rec-float__size { opacity: 1; }
+.rec-float__count {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklch, var(--ds-dark-surface) 86%, transparent);
+  color: var(--ds-gold);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-5xl);
+  line-height: 1;
+}
+
+/* Fuente del PiP de video: presente en el DOM, invisible. */
+.rec-pip-source {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+}

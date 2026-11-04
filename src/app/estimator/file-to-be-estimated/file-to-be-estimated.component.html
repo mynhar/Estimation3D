@@ -628,8 +628,7 @@
               <button type="button" class="fte-btn-submit fte-btn-invite" (click)="enviarInvitacionYEstimacion()"
                       [disabled]="bloqueadoPorOferta || enviandoInvitacion() || guardando() || abriendoATodos()
                                   || confirmarAbrirATodos()
-                                  || seleccionInvitados().size === 0
-                                  || !formularioCompleto || !costoValido">
+                                  || seleccionInvitados().size === 0">
                 @if (enviandoInvitacion() || guardando()) {
                   <span class="fte-spinner-sm"></span>{{ 'admin_invite.sending' | translate }}
                 } @else {
@@ -659,14 +658,14 @@
                   <i class="bi bi-calendar3"></i>{{ 'estimator_file.real_date' | translate }}
                   <span class="fte-req">*</span>
                 </label>
-                <input type="date" class="fte-input" [(ngModel)]="fechaVisita" />
+                <input id="est-fecha" type="date" class="fte-input" [(ngModel)]="fechaVisita" />
               </div>
               <div class="fte-field">
                 <label class="fte-label">
                   <i class="bi bi-clock"></i>{{ 'file.hour' | translate }}
                   <span class="fte-req">*</span>
                 </label>
-                <input type="time" class="fte-input" [(ngModel)]="horaVisita" />
+                <input id="est-hora" type="time" class="fte-input" [(ngModel)]="horaVisita" />
               </div>
             </div>
 
@@ -676,7 +675,7 @@
                 <i class="bi bi-card-text"></i>{{ 'estimator_file.problems_observed' | translate }}
                 <span class="fte-req">*</span>
               </label>
-              <textarea class="fte-input fte-input--textarea" rows="4"
+              <textarea id="est-problemas" class="fte-input fte-input--textarea" rows="4"
                         [placeholder]="'estimator_file.problems_placeholder' | translate"
                         [(ngModel)]="descripcionProblemas"></textarea>
             </div>
@@ -694,6 +693,7 @@
                     <span class="fte-input-prefix">CA$</span>
                     <input type="number" class="fte-input fte-input--num"
                            placeholder="0" min="0" step="1000"
+                           id="est-costo-min" [attr.aria-label]="('estimator_file.approx_cost' | translate) + ' · ' + ('file.min' | translate)"
                            [(ngModel)]="costoMin" />
                   </div>
                 </div>
@@ -704,6 +704,7 @@
                     <span class="fte-input-prefix">CA$</span>
                     <input type="number" class="fte-input fte-input--num"
                            placeholder="0" min="0" step="1000"
+                           id="est-costo-max" [attr.aria-label]="('estimator_file.approx_cost' | translate) + ' · ' + ('file.max' | translate)"
                            [(ngModel)]="costoMax" />
                   </div>
                 </div>
@@ -782,7 +783,7 @@
               </button>
               <button class="fte-btn-submit"
                       (click)="guardarEstimacion()"
-                      [disabled]="guardando() || !formularioCompleto">
+                      [disabled]="guardando()">
                 @if (guardando()) {
                   <span class="fte-spinner-sm"></span>{{ 'estimator_file.sending' | translate }}
                 } @else {
@@ -790,6 +791,9 @@
                 }
               </button>
             </div>
+            <!-- Los botones ya no se bloquean con el formulario incompleto: al
+                 pulsarlos, este resumen dice qué falta. -->
+            <app-campos-faltantes class="mt-3" [extra]="faltantesEst" [intento]="intentosEst()" />
 
             <!-- Mensajes de envío -->
             @if (errorGuardado()) {

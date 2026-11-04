@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Estimation3D · burbuja de cámara",
+  "version": "1.0.0",
+  "description": "Muestra la burbuja redonda de la cámara y los controles de grabación de Estimation3D encima de cualquier pestaña.",
+  "permissions": ["storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": {
+    "default_title": "Mostrar u ocultar la cámara de Estimation3D"
+  },
+  "content_scripts": [
+    { "matches": ["<all_urls>"], "js": ["bubble.js"] },
+    {
+      "matches": [
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://estimation3d.com/*",
+        "https://*.estimation3d.com/*"
+      ],
+      "js": ["bridge.js"]
+    }
+  ],
+  "web_accessible_resources": [{ "resources": ["camera.html"], "matches": ["<all_urls>"] }]
+}
