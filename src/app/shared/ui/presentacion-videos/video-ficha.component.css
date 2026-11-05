@@ -1,0 +1,93 @@
+/* Hallmark · component: presentation video card, read-only (full slot | compact row) · genre: editorial
+ * theme: locked (design.md · warm editorial · beige paper · gold accent)
+ * states: default · hover · focus-visible · active (ranura y fila compacta); sin disabled,
+ *         loading ni error propios: los lleva quien la usa (la lista o la página)
+ * contrast: título en --ds-ink, rótulo y meta en --ds-ink-muted sobre --ds-bg (AA);
+ *           duración en crema sobre espresso (ver video-slot.css)
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ *
+ * La ranura grande es la de video-slot.css. La compacta es una fila de
+ * miniatura pequeña + título, para tarjetas de ~300 px como las de oferta.
+ */
+:host {
+  display: block;
+  /* La ranura se apila según su propio ancho (ver video-slot.css). */
+  container-type: inline-size;
+}
+
+/* ── Ranura grande ────────────────────────────────────────────────────────── */
+.vf-eyebrow {
+  margin: 0 0 var(--ds-space-1);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+
+/* ── Fila compacta ────────────────────────────────────────────────────────── */
+.vf-compacta {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ds-space-3);
+  width: 100%;
+  padding: var(--ds-space-2);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-bg);
+  color: var(--ds-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--ds-transition-color),
+              border-color var(--ds-duration-fast) var(--ds-ease-out),
+              box-shadow var(--ds-duration-base) var(--ds-ease-out);
+}
+.vf-compacta:hover { border-color: var(--ds-border-strong); background: var(--ds-surface); }
+.vf-compacta:focus { outline: none; }
+.vf-compacta:focus-visible { border-color: var(--ds-gold); box-shadow: var(--ds-focus-ring); }
+.vf-compacta:active { background: var(--ds-bg-alt); }
+
+/* La miniatura no es un botón aparte: la fila entera lo es. */
+.vf-compacta__thumb { border-radius: var(--ds-radius-sm); cursor: inherit; }
+.vf-compacta__thumb:hover { border-color: var(--ds-border); box-shadow: none; }
+/* Sin miniatura basta el «play»: el icono de cámara quedaría debajo. */
+.vf-compacta .ve-thumb__fallback { display: none; }
+/* En la fila el «play» siempre se ve: es la señal de que es un video. */
+.vf-compacta .ve-thumb__play {
+  width: 24px;
+  height: 24px;
+  font-size: 0.8rem;
+  opacity: 0.92;
+  transform: none;
+  box-shadow: var(--ds-shadow-sm);
+}
+.vf-compacta:hover .ve-thumb__play,
+.vf-compacta:focus-visible .ve-thumb__play { opacity: 1; }
+.vf-compacta .ve-thumb__dur { right: 3px; bottom: 3px; padding: 0 3px; }
+
+.vf-compacta__text { display: grid; gap: 2px; min-width: 0; }
+.vf-compacta__eyebrow {
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ds-ink-muted);
+}
+.vf-compacta__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading-snug);
+  overflow-wrap: anywhere;
+}
+.vf-compacta__autor {
+  overflow: hidden;
+  font-size: var(--ds-text-xs);
+  color: var(--ds-ink-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

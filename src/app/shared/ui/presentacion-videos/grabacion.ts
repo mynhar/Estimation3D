@@ -13,6 +13,8 @@ export type EstadoSesion  = 'inactiva' | 'grabando' | 'pausada' | 'detenida';
 export const DURACION_MAX_MS = 3 * 60_000;
 /** Límite del bucket `presentaciones` (y del plan de Supabase). */
 export const TAMANO_MAX_BYTES = 50 * 1024 * 1024;
+/** Formatos que admite el bucket (y que se pueden subir). */
+export const TIPOS_VIDEO: readonly string[] = ['video/webm', 'video/mp4', 'video/quicktime'];
 /** ~2 Mb/s de video + 128 kb/s de audio: 3 min caben de sobra en 50 MB. */
 const BITS_VIDEO = 2_000_000;
 const BITS_AUDIO = 128_000;

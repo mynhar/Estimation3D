@@ -652,6 +652,55 @@ export type Database = {
           },
         ]
       }
+      expediente_video: {
+        Row: {
+          actualizado_en: string
+          creado_en: string
+          perfil_id: string
+          expediente_id: string
+          id: string
+          perfil_video_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          creado_en?: string
+          perfil_id: string
+          expediente_id: string
+          id?: string
+          perfil_video_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          creado_en?: string
+          perfil_id?: string
+          expediente_id?: string
+          id?: string
+          perfil_video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expediente_video_expediente_id_fkey"
+            columns: ["expediente_id"]
+            isOneToOne: false
+            referencedRelation: "expediente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_video_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expediente_video_video_fkey"
+            columns: ["perfil_video_id", "perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfil_video"
+            referencedColumns: ["id", "perfil_id"]
+          },
+        ]
+      }
       fase_servicio: {
         Row: {
           activo: boolean
@@ -1798,6 +1847,7 @@ export type CompositeTypes<
 // ── Aliases de conveniencia usados en todo el proyecto ────────────────────────
 export type DbPerfil        = Database["public"]["Tables"]["perfil"]["Row"]
 export type DbPerfilVideo   = Database["public"]["Tables"]["perfil_video"]["Row"]
+export type DbExpedienteVideo = Database["public"]["Tables"]["expediente_video"]["Row"]
 export type RolUsuario      = Database["public"]["Enums"]["rol_usuario"]
 export type ProveedorAuth   = Database["public"]["Enums"]["proveedor_auth"]
 export type EstadoExpediente= Database["public"]["Enums"]["estado_expediente"]

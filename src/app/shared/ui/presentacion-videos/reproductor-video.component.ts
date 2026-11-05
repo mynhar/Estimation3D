@@ -16,7 +16,8 @@ import { extensionDeMime, formatoDuracion, formatoTamano } from './grabacion';
  * Se abre al recibir un `video` y avisa con `cerrado` al cerrarse. El título y
  * las vistas los guarda él mismo y los devuelve con `cambiado`; descargar y
  * eliminar los resuelve el padre (son las mismas acciones del menú de la
- * biblioteca).
+ * biblioteca). Con `soloLectura` (el video de otra persona) sólo se ve: ni
+ * título editable, ni acciones, ni vistas.
  */
 @Component({
   selector: 'app-reproductor-video',
@@ -33,6 +34,10 @@ export class ReproductorVideoComponent {
   private readonly lang      = inject(LangService);
 
   readonly video     = input<DbPerfilVideo | null>(null);
+  /** Descargar y eliminar: sólo desde la biblioteca, no donde el video sólo se usa. */
+  readonly acciones  = input(true);
+  /** El video es de otra persona: se ve, pero no se cambia ni cuenta vistas. */
+  readonly soloLectura = input(false);
   readonly cerrado   = output<void>();
   readonly cambiado  = output<DbPerfilVideo>();
   readonly descargar = output<DbPerfilVideo>();
@@ -136,7 +141,7 @@ export class ReproductorVideoComponent {
 
   async alReproducir(): Promise<void> {
     const v = this.actual();
-    if (!v || this.vistaContada) return;
+    if (!v || this.vistaContada || this.soloLectura()) return;
     this.vistaContada = true;
     const total = await this.service.registrarVista(v.id);
     if (total == null || this.idAbierto !== v.id) return;

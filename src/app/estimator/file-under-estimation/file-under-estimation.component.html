@@ -485,6 +485,25 @@
           </div>
         </section>
 
+        <!-- Video de presentación del estimador (opcional). Cada acción se
+             guarda al momento: no depende de los botones de la estimación. -->
+        <section class="fued-card">
+          <div class="fued-card__header">
+            <div class="fued-card__header-left">
+              <i class="bi bi-person-video3"></i>
+              {{ 'expediente_video.title' | translate }}
+              <span class="fued-opt">({{ 'common.optional' | translate }})</span>
+            </div>
+          </div>
+          <div class="fued-card__body">
+            @if (user()?.id; as estimadorId) {
+              <app-video-expediente [expedienteId]="expedienteId"
+                                    [perfilId]="estimadorId"
+                                    [numero]="detalle()!.numero" />
+            }
+          </div>
+        </section>
+
         <!-- ── Invitación a constructores ─────────────────────────────── -->
         <section class="fued-card">
           <div class="fued-card__header">

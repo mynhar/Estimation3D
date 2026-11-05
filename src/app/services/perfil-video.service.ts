@@ -32,7 +32,10 @@ export class VideoError extends Error {
 
 /**
  * Videos de presentación de un estimador o constructor (`perfil_video` +
- * bucket `presentaciones`). Escribe sólo el administrador; lo garantiza RLS.
+ * bucket `presentaciones`). Escriben el administrador y el estimador o
+ * constructor dueño (desde su perfil, sólo los suyos); lo garantiza RLS.
+ * Leen, además, quienes pueden ver un expediente donde el video está
+ * enlazado (el constructor, el del estimador).
  */
 @Injectable({ providedIn: 'root' })
 export class PerfilVideoService {
@@ -144,6 +147,81 @@ export class PerfilVideoService {
     const rutas = [video.video_path, ...(video.miniatura_path ? [video.miniatura_path] : [])];
     const { error: errStorage } = await this.db.storage.from(BUCKET).remove(rutas);
     if (errStorage) console.warn('[PerfilVideo] storage remove:', errStorage.message);
+  }
+
+  // ── En un expediente ─────────────────────────────────────────────────────
+  // El estimador o el constructor se presenta en un expediente con uno de sus
+  // videos. El video vive en su biblioteca; `expediente_video` sólo lo enlaza.
+
+  /** El video con el que esa persona se presenta en el expediente, si hay. */
+  async deExpediente(expedienteId: string, perfilId: string): Promise<DbPerfilVideo | null> {
+    const { data, error } = await this.db
+      .from('expediente_video')
+      .select('video:perfil_video(*)')
+      .eq('expediente_id', expedienteId)
+      .eq('perfil_id', perfilId)
+      .maybeSingle();
+    if (error) throw error;
+    const video = (data as { video: DbPerfilVideo | DbPerfilVideo[] | null } | null)?.video;
+    return (Array.isArray(video) ? video[0] : video) ?? null;
+  }
+
+  /**
+   * Los videos con los que otras personas (no `perfilId`) se presentan en el
+   * expediente y que quien llama puede ver, del más antiguo al más reciente.
+   * RLS decide cuáles: al constructor sólo le deja los del estimador, nunca
+   * los de otros constructores.
+   */
+  async ajenosDeExpediente(expedienteId: string, perfilId: string): Promise<DbPerfilVideo[]> {
+    const { data, error } = await this.db
+      .from('expediente_video')
+      .select('video:perfil_video(*)')
+      .eq('expediente_id', expedienteId)
+      .neq('perfil_id', perfilId)
+      .order('creado_en', { ascending: true });
+    if (error) throw error;
+    return ((data ?? []) as { video: DbPerfilVideo | DbPerfilVideo[] | null }[])
+      .map(r => (Array.isArray(r.video) ? r.video[0] : r.video) ?? null)
+      .filter((v): v is DbPerfilVideo => v !== null);
+  }
+
+  /**
+   * Los videos de presentación enlazados a esos expedientes que quien llama
+   * puede ver, en una sola consulta. Al cliente, RLS le deja los del
+   * estimador y los de los constructores con oferta viva en sus expedientes.
+   */
+  async enExpedientes(expedienteIds: string[]): Promise<{ expedienteId: string; video: DbPerfilVideo }[]> {
+    if (!expedienteIds.length) return [];
+    const { data, error } = await this.db
+      .from('expediente_video')
+      .select('expediente_id, video:perfil_video(*)')
+      .in('expediente_id', expedienteIds)
+      .order('creado_en', { ascending: true });
+    if (error) throw error;
+    return ((data ?? []) as { expediente_id: string; video: DbPerfilVideo | DbPerfilVideo[] | null }[])
+      .map(r => ({ expedienteId: r.expediente_id, video: (Array.isArray(r.video) ? r.video[0] : r.video) ?? null }))
+      .filter((r): r is { expedienteId: string; video: DbPerfilVideo } => r.video !== null);
+  }
+
+  /** Enlaza el video al expediente; si ya había uno, lo cambia. */
+  async usarEnExpediente(expedienteId: string, perfilId: string, videoId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente_video')
+      .upsert(
+        { expediente_id: expedienteId, perfil_id: perfilId, perfil_video_id: videoId },
+        { onConflict: 'expediente_id,perfil_id' },
+      );
+    if (error) throw error;
+  }
+
+  /** Quita el video del expediente. Sigue en la biblioteca de su dueño. */
+  async quitarDeExpediente(expedienteId: string, perfilId: string): Promise<void> {
+    const { error } = await this.db
+      .from('expediente_video')
+      .delete()
+      .eq('expediente_id', expedienteId)
+      .eq('perfil_id', perfilId);
+    if (error) throw error;
   }
 
   /** Suma una vista y devuelve el total (null si no se pudo). */

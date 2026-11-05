@@ -514,6 +514,24 @@
           </div>
         </section>
 
+        <!-- Video de presentación del estimador (opcional). Cada acción se
+             guarda al momento. -->
+        <section class="ef-card">
+          <div class="ef-card__head">
+            <p class="ef-section-label">
+              {{ 'expediente_video.title' | translate }}
+              <span class="ef-opt">({{ 'common.optional' | translate }})</span>
+            </p>
+          </div>
+          <div class="ef-card__body">
+            @if (userId) {
+              <app-video-expediente [expedienteId]="expedienteId"
+                                    [perfilId]="userId"
+                                    [numero]="detalle()!.numero" />
+            }
+          </div>
+        </section>
+
       </div><!-- /ef-col-main -->
 
       <!-- RIGHT: sidebar ──────────────────────────────────────────────────── -->

@@ -1,0 +1,37 @@
+<div class="ve">
+  @if (cargando()) {
+    <div class="ve-slot" aria-hidden="true">
+      <div class="ve-thumb ve-skel"></div>
+      <div class="ve-slot__text">
+        <div class="ve-skel ve-skel--line"></div>
+        <div class="ve-skel ve-skel--line ve-skel--short"></div>
+      </div>
+    </div>
+
+  } @else if (errorCarga()) {
+    <div class="ve-error" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ 'expediente_video.errors.load_others' | translate }}</p>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cargar()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+  } @else if (videos().length) {
+    <!-- La ayuda habla del video: sólo tiene sentido si hay alguno. -->
+    @if (ayuda()) {
+      <p class="ve__hint">{{ ayuda() | translate }}</p>
+    }
+    <ul class="vl-list">
+      @for (v of videos(); track v.id) {
+        <li><app-video-ficha [video]="v" [miniatura]="miniaturas()[v.id]" /></li>
+      }
+    </ul>
+
+  } @else {
+    <div class="ve-empty">
+      <i class="bi bi-person-video3" aria-hidden="true"></i>
+      <p>{{ vacio() | translate }}</p>
+    </div>
+  }
+</div>

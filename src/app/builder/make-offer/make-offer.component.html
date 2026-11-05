@@ -323,6 +323,24 @@
 
         </div>
 
+        <!-- Video de presentación del constructor (opcional). Va aparte de la
+             oferta: se enlaza al expediente y cada acción se guarda al momento. -->
+        <div class="info-card">
+          <div class="info-card__header d-flex align-items-center">
+            <span class="section-heading">
+              <i class="bi bi-person-video3 me-2"></i>{{ 'expediente_video.title' | translate }}
+            </span>
+            <span class="opt-badge ms-2">{{ 'common.optional' | translate }}</span>
+          </div>
+          <div class="info-card__body">
+            @if (user()?.id; as constructorId) {
+              <app-video-expediente [expedienteId]="expedienteId"
+                                    [perfilId]="constructorId"
+                                    [numero]="detalle()!.numero" />
+            }
+          </div>
+        </div>
+
       </div><!-- /col izquierda -->
 
       <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -523,44 +541,6 @@
                       <i class="bi bi-upload me-1"></i>
                       {{ 'make_offer.attach' | translate }}
                       <input type="file" accept=".pdf" multiple class="d-none" (change)="onDocumentos($event)" />
-                    </label>
-                  </div>
-
-                  <div class="attach-divider"></div>
-
-                  <!-- Video -->
-                  <div class="attach-item">
-                    <div class="attach-item__icon attach-item__icon--video">
-                      <i class="bi bi-camera-video"></i>
-                    </div>
-                    <div class="attach-item__info">
-                      <p class="attach-item__label">
-                        {{ 'make_offer.video_opt' | translate }}
-                        <span class="opt-badge">{{ 'common.optional' | translate }}</span>
-                      </p>
-                      @if (videoOferta()) {
-                        <p class="attach-item__name attach-item__name--new">
-                          <i class="bi bi-check-circle" aria-hidden="true"></i>
-                          <span class="attach-item__fname" [title]="videoOferta()!.name">{{ videoOferta()!.name }}</span>
-                          <span class="attach-item__size">{{ formatTamano(videoOferta()!.size) }}</span>
-                        </p>
-                      } @else if (videoActual()) {
-                        <p class="attach-item__name attach-item__name--saved">
-                          <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
-                          <span class="attach-item__fname" [title]="videoActual()!.nombre_archivo">{{ videoActual()!.nombre_archivo }}</span>
-                          <button class="attach-view-btn" type="button"
-                                  (click)="verArchivo(videoActual()!)">
-                            {{ 'make_offer.view' | translate }}
-                          </button>
-                        </p>
-                      } @else {
-                        <p class="attach-item__empty">{{ 'make_offer.no_video' | translate }}</p>
-                      }
-                    </div>
-                    <label class="btn btn-outline-secondary btn-sm mb-0 flex-shrink-0">
-                      <i class="bi bi-upload me-1"></i>
-                      {{ (videoActual() && !videoOferta()) ? ('make_offer.replace' | translate) : ('make_offer.attach' | translate) }}
-                      <input type="file" accept="video/*" class="d-none" (change)="onVideo($event)" />
                     </label>
                   </div>
 

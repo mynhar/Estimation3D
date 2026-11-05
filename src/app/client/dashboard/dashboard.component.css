@@ -1647,6 +1647,16 @@
 .dash-foto-thumb:hover { border-color: var(--ds-gold); transform: scale(1.04); }
 .dash-foto-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+/* Videos de presentación, encima de los documentos. */
+.dash-pres-list {
+  display: grid;
+  gap: var(--ds-space-2);
+  margin: 0 0 var(--ds-space-3);
+  padding: 0;
+  list-style: none;
+}
+.dash-pres-list--solo { margin-bottom: 0; }
+
 .dash-doc-list {
   list-style: none;
   margin: 0;

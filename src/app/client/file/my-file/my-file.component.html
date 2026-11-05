@@ -529,6 +529,14 @@
                 </div>
               </div>
 
+              <!-- Su video de presentación en este expediente, sólo para verlo. -->
+              @if (videoEstimador(); as pe) {
+                <div class="mb-4">
+                  <app-video-ficha [video]="pe.video" [miniatura]="pe.miniatura"
+                                   etiqueta="my_documents.presentation_video" />
+                </div>
+              }
+
               @if (detalle()!.fecha_visita_real) {
                 <div class="row g-3 mb-3">
                   <div class="col-sm-6">
@@ -1133,6 +1141,14 @@
                         }
                       </div>
                     </div>
+
+                    <!-- Su video de presentación en este expediente, sólo para verlo. -->
+                    @if (videoDeConstructor().get(o.constructor_id); as pc) {
+                      <div class="mb-3">
+                        <app-video-ficha [video]="pc.video" [miniatura]="pc.miniatura" [compacta]="true"
+                                         etiqueta="my_documents.presentation_video" />
+                      </div>
+                    }
 
                     <div class="precio-block">
                       <p class="info-label mb-1">{{ 'offer.agreed_price' | translate }}</p>

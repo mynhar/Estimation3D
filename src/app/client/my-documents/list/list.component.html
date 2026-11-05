@@ -176,16 +176,23 @@
                           <div class="md-card">
                             <button class="md-card__media" type="button" [attr.data-tipo]="a.tipo"
                                     [title]="'my_documents.action_view' | translate" (click)="ver(a)">
-                              @if (tieneThumb(a)) {
-                                <img class="md-card__img" [src]="a.url" alt="" loading="lazy"
+                              @if (thumbUrl(a); as src) {
+                                <img class="md-card__img" [src]="src" alt="" loading="lazy"
                                      (error)="onThumbError(a.id)" />
-                              } @else {
+                              } @else if (a.fuente !== 'presentacion') {
                                 <i class="bi {{ iconoTipo(a.tipo) }}" aria-hidden="true"></i>
+                              }
+                              @if (a.fuente === 'presentacion') {
+                                <span class="md-play" aria-hidden="true"><i class="bi bi-play"></i></span>
                               }
                             </button>
                             <div class="md-card__body">
                               <div class="md-file__name" [title]="a.nombre">{{ a.nombre }}</div>
                               <div class="md-file__meta">
+                                @if (a.fuente === 'presentacion') {
+                                  <span class="md-file__kind">{{ 'my_documents.presentation_video' | translate }}</span>&ngsp;
+                                  <span class="md-file__sep md-file__sep--kind" aria-hidden="true">·</span>
+                                }
                                 {{ formatTamano(a.tamanoBytes) }}
                                 <span class="md-file__sep" aria-hidden="true">·</span>
                                 {{ a.subidoPorNombre }}
@@ -207,17 +214,24 @@
                           <div class="md-file">
                             <button class="md-file-tile" type="button" [attr.data-tipo]="a.tipo"
                                     [title]="'my_documents.action_view' | translate" (click)="ver(a)">
-                              @if (tieneThumb(a)) {
-                                <img class="md-thumb" [src]="a.url" alt="" loading="lazy"
+                              @if (thumbUrl(a); as src) {
+                                <img class="md-thumb" [src]="src" alt="" loading="lazy"
                                      (error)="onThumbError(a.id)" />
-                              } @else {
+                              } @else if (a.fuente !== 'presentacion') {
                                 <i class="bi {{ iconoTipo(a.tipo) }}" aria-hidden="true"></i>
+                              }
+                              @if (a.fuente === 'presentacion') {
+                                <span class="md-play" aria-hidden="true"><i class="bi bi-play"></i></span>
                               }
                             </button>
 
                             <div class="md-file__info">
                               <div class="md-file__name" [title]="a.nombre">{{ a.nombre }}</div>
                               <div class="md-file__meta">
+                                @if (a.fuente === 'presentacion') {
+                                  <span class="md-file__kind">{{ 'my_documents.presentation_video' | translate }}</span>&ngsp;
+                                  <span class="md-file__sep md-file__sep--kind" aria-hidden="true">·</span>
+                                }
                                 {{ formatTamano(a.tamanoBytes) }}
                                 <span class="md-file__sep" aria-hidden="true">·</span>
                                 {{ 'my_documents.added_by' | translate }} {{ a.subidoPorNombre }}
@@ -264,7 +278,8 @@
               [attr.aria-label]="'my_documents.action_view' | translate" (click)="ver(a)">
         <i class="bi bi-eye" aria-hidden="true"></i>
       </button>
-      @if (a.fuente !== 'estimacion') {
+      <!-- Tour 3D (enlace) y video de presentación: sólo se ven, no se descargan. -->
+      @if (a.fuente !== 'estimacion' && a.fuente !== 'presentacion') {
         <button class="md-icon-btn" type="button"
                 [title]="'my_documents.action_download' | translate"
                 [attr.aria-label]="'my_documents.action_download' | translate" (click)="descargar(a)">
@@ -281,6 +296,13 @@
     </div>
   }
 </ng-template>
+
+<!-- Video de presentación del estimador o de un constructor: sólo para ver -->
+<app-reproductor-video
+  [video]="presentacionAbierta()"
+  [acciones]="false"
+  [soloLectura]="true"
+  (cerrado)="presentacionAbierta.set(null)" />
 
 <!-- Lightbox de foto -->
 @if (fotoAmpliada()) {

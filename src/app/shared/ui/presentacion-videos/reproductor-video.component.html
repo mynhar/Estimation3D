@@ -2,17 +2,23 @@
   @if (actual(); as v) {
     <header class="pl-head">
       <div class="pl-head__text">
-        <label class="visually-hidden" for="plTitulo">{{ 'presentation_videos.player.title_label' | translate }}</label>
-        <input #tituloInput id="plTitulo" class="pl-title" type="text" maxlength="120"
-               [value]="v.titulo" [disabled]="guardandoTitulo()"
-               [title]="'presentation_videos.player.title_hint' | translate"
-               (keydown.enter)="tituloInput.blur()"
-               (keydown.escape)="revertirTitulo($event, tituloInput)"
-               (blur)="guardarTitulo(tituloInput)">
+        @if (soloLectura()) {
+          <h2 id="plTitulo" class="pl-title pl-title--fijo">{{ v.titulo }}</h2>
+        } @else {
+          <label class="visually-hidden" for="plTitulo">{{ 'presentation_videos.player.title_label' | translate }}</label>
+          <input #tituloInput id="plTitulo" class="pl-title" type="text" maxlength="120"
+                 [value]="v.titulo" [disabled]="guardandoTitulo()"
+                 [title]="'presentation_videos.player.title_hint' | translate"
+                 (keydown.enter)="tituloInput.blur()"
+                 (keydown.escape)="revertirTitulo($event, tituloInput)"
+                 (blur)="guardarTitulo(tituloInput)">
+        }
         <p class="pl-meta">
           <span>{{ fecha() }}</span>
-          <span class="pl-meta__sep" aria-hidden="true">·</span>
-          <span>{{ vistasTexto(v.vistas) }}</span>
+          @if (!soloLectura()) {
+            <span class="pl-meta__sep" aria-hidden="true">·</span>
+            <span>{{ vistasTexto(v.vistas) }}</span>
+          }
         </p>
       </div>
       <button type="button" class="pl-icon-btn" (click)="cerrar()"
@@ -50,14 +56,16 @@
                   (click)="cambiarVelocidad(r)">{{ r }}×</button>
         }
       </div>
-      <div class="pl-actions">
-        <button type="button" class="btn btn-sm btn-outline-secondary" (click)="pedirDescarga()">
-          <i class="bi bi-download me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.download' | translate }}
-        </button>
-        <button type="button" class="btn btn-sm pl-btn-danger" (click)="pedirEliminar()">
-          <i class="bi bi-trash3 me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.delete' | translate }}
-        </button>
-      </div>
+      @if (acciones() && !soloLectura()) {
+        <div class="pl-actions">
+          <button type="button" class="btn btn-sm btn-outline-secondary" (click)="pedirDescarga()">
+            <i class="bi bi-download me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.download' | translate }}
+          </button>
+          <button type="button" class="btn btn-sm pl-btn-danger" (click)="pedirEliminar()">
+            <i class="bi bi-trash3 me-1" aria-hidden="true"></i>{{ 'presentation_videos.actions.delete' | translate }}
+          </button>
+        </div>
+      }
     </div>
 
     <dl class="pl-specs">

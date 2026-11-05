@@ -48,6 +48,9 @@
 .pl-title:hover { border-color: var(--ds-border); }
 .pl-title:focus { outline: none; border-color: var(--ds-gold); background: var(--ds-surface); box-shadow: var(--ds-focus-ring); }
 .pl-title:disabled { color: var(--ds-ink-muted); }
+/* Sólo lectura: el mismo título, sin el marco de campo editable. */
+.pl-title--fijo { margin-left: 0; padding-inline: 0; overflow-wrap: anywhere; }
+.pl-title--fijo:hover { border-color: transparent; }
 .pl-meta {
   display: flex;
   flex-wrap: wrap;

@@ -15,6 +15,7 @@ import { EstimacionService } from '../../services/estimacion.service';
 import { ContratoService } from '../../services/contrato.service';
 import { ArchivoRow, ContratoPanelCliente, ExpedienteCliente, ExpedienteVistaCliente } from '../../models';
 import { ContratosExpedienteComponent } from '../../shared/ui/contratos-expediente/contratos-expediente.component';
+import { VideoFichaComponent } from '../../shared/ui/presentacion-videos/video-ficha.component';
 import { OfertaHistorialItem } from '../../services/expediente.service';
 
 // ── 5 visual phases for the progress bar ─────────────────────────────────────
@@ -81,7 +82,7 @@ function estadoPriority(e: ExpedienteCliente): number {
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, ContratosExpedienteComponent],
+  imports: [RouterLink, TranslatePipe, ContratosExpedienteComponent, VideoFichaComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -124,6 +125,10 @@ export class DashboardComponent implements OnInit {
   // "Mis documentos": documentos del expediente de TODAS las fuentes (expediente,
   // estimación, oferta, contrato, obra) y roles — paridad con my-documents/list.
   documentosVM     = signal<ArchivoVM[]>([]);
+  // …y, arriba, los videos de presentación del estimador y de los
+  // constructores del expediente (sólo para ver).
+  presentacionesVM = signal<ArchivoVM[]>([]);
+  totalDocumentos  = computed(() => this.documentosVM().length + this.presentacionesVM().length);
   // Contratos del expediente (uno por constructor adjudicado), con el avance
   // de la obra de cada uno (seguimiento_obra).
   contratos        = signal<ContratoPanelCliente[]>([]);
@@ -569,6 +574,7 @@ export class DashboardComponent implements OnInit {
     this.fotosExp.set([]);
     this.documentosExp.set([]);
     this.documentosVM.set([]);
+    this.presentacionesVM.set([]);
     this.contratos.set([]);
     this.eliminando.set(null);
     this.ofertasHistorial.set([]);
@@ -596,16 +602,21 @@ export class DashboardComponent implements OnInit {
   /**
    * Carga en "Mis documentos" los documentos del expediente de todas las fuentes
    * (expediente, estimación, oferta, contrato, obra) y roles, vía el mismo
-   * servicio que usa client/my-documents/list. Solo tipo 'documento'.
+   * servicio que usa client/my-documents/list: los de tipo 'documento' y los
+   * videos de presentación. Si entretanto se eligió otro expediente, descarta.
    */
   private async cargarDocumentosVM(id: string): Promise<void> {
     const clienteId = this.user()?.id ?? '';
     const numero = this.expedientes().find(e => this.expId(e) === id)?.numero ?? '';
     try {
-      const archivos = await this.documentosService.getArchivosDeExpediente(id, numero, clienteId);
+      const archivos = await this.documentosService.getArchivosDeExpediente(id, numero, clienteId, { presentaciones: true });
+      if (this.idSeleccionado() !== id) return;
       this.documentosVM.set(archivos.filter(a => a.tipo === 'documento'));
+      this.presentacionesVM.set(archivos.filter(a => a.fuente === 'presentacion'));
     } catch {
+      if (this.idSeleccionado() !== id) return;
       this.documentosVM.set([]);
+      this.presentacionesVM.set([]);
     }
   }
 

@@ -102,6 +102,17 @@
   border-bottom: 1px solid var(--ds-border);
   padding: var(--ds-space-3) var(--ds-space-4);
 }
+.info-card__body { padding: var(--ds-space-4); }
+
+.opt-badge {
+  display: inline-flex; align-items: center;
+  font-size: var(--ds-text-2xs); font-weight: var(--ds-weight-semibold);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-bg);
+  color: var(--ds-ink-muted);
+  border: 1px solid var(--ds-border);
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    CONTEXT ROWS

@@ -291,6 +291,14 @@
           <p class="mb-0">{{ 'profile.info_note' | translate }}</p>
         </div>
 
+        <!-- Videos de presentación (estimador y constructor). Cada video se
+             guarda al momento: no depende de «Guardar cambios». -->
+        @if (tieneVideos() && user()?.id) {
+          <app-presentacion-videos class="d-block mt-4"
+                                   [perfilId]="user()!.id"
+                                   [propio]="true" />
+        }
+
       </div>
 
     </div>

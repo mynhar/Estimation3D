@@ -275,6 +275,7 @@
     "add_browse": "or click to browse",
     "uploading": "Uploading…",
     "added_by": "Added by",
+    "presentation_video": "Introduction video",
     "action_download": "Download",
     "role_cliente": "Client",
     "role_estimador": "Estimator",
@@ -852,7 +853,11 @@
     "reject_all_btn": "Reject the accepted offers",
     "reject_all_title": "Reject the accepted offers?",
     "reject_all_text": "Unsigned contracts will be deleted. The file will return to the estimated status.",
-    "success_rejected_n": "Offers rejected. The file has returned to the estimated status."
+    "success_rejected_n": "Offers rejected. The file has returned to the estimated status.",
+    "presentation_video": "Introduction video",
+    "estimator_video": "Estimator's video",
+    "estimator_video_hint": "The estimator who prepared your estimate introduces themselves in this video.",
+    "videos_error": "Couldn't load the introduction videos."
   },
   "make_offer": {
     "editing_badge": "Editing offer",
@@ -922,6 +927,9 @@
     "estimator_visit": "Estimator visit",
     "problems_noted": "Observed problems",
     "section_exp_files": "File attachments",
+    "section_estimator_video": "Estimator's video",
+    "estimator_video_hint": "The estimator who prepared the estimate introduces themselves in this video. You can watch it, but not change it.",
+    "estimator_video_empty": "The estimator hasn't added a video to this file.",
     "tab_tour": "3D Tour",
     "tab_photos": "Photos",
     "tab_docs": "Docs",
@@ -2856,6 +2864,7 @@
     "title": "Introduction videos",
     "hint": "A short video in which the professional introduces themselves: who they are, what they do and how they work. Record it here (screen, camera or both) or upload a file of up to {{max}}.",
     "hint_named": "A short video in which {{nombre}} introduces themselves: who they are, what they do and how they work. Record it here (screen, camera or both) or upload a file of up to {{max}}.",
+    "hint_self": "A short video in which you introduce yourself: who you are, what you do and how you work. Record it here (screen, camera or both) or upload a file of up to {{max}}. Only the administration team can see it.",
     "actions": {
       "new_recording": "New recording",
       "upload": "Upload video",
@@ -2885,7 +2894,7 @@
     "default_title": "Recording of {{fecha}}",
     "rename_title": "Rename video",
     "delete_title": "Delete this video?",
-    "delete_body": "“{{titulo}}” and its file will be permanently deleted. This can't be undone.",
+    "delete_body": "“{{titulo}}” and its file will be permanently deleted and removed from any files where it's used. This can't be undone.",
     "toast": {
       "saved": "Video saved",
       "uploaded": "“{{nombre}}” uploaded",
@@ -2975,6 +2984,37 @@
       "resume": "Resume",
       "finish": "Finish",
       "float": "Open floating controls"
+    }
+  },
+  "expediente_video": {
+    "title": "Introduction video",
+    "hint": "Introduce yourself on this file with a short video: record it here (screen, camera or both), upload a file of up to {{max}} or pick one of your videos. Anything you record or upload is also kept in your profile.",
+    "hint_locked": "You can no longer add or change your introduction video on this file.",
+    "empty": "This file doesn't have your video yet.",
+    "empty_locked": "You didn't add a video to this file.",
+    "others_empty": "No one else has added a video to this file.",
+    "current": "On this file",
+    "record": "Record video",
+    "record_other": "Record another",
+    "upload": "Upload video",
+    "upload_other": "Upload another",
+    "choose": "Choose from my videos",
+    "actions_label": "Add or change the video",
+    "remove": "Remove from file",
+    "default_title": "Introduction · {{numero}}",
+    "choose_title": "Choose from my videos",
+    "choose_text": "The video is linked to this file and stays in your profile.",
+    "use": "Use this video",
+    "toast": {
+      "attached": "Video added to the file",
+      "removed": "Video removed from the file. It stays in your profile."
+    },
+    "errors": {
+      "load": "Couldn't load the file's video.",
+      "load_others": "Couldn't load the videos on this file.",
+      "attach": "Couldn't add the video to the file.",
+      "attach_saved": "The video was saved to your profile but couldn't be added to the file. Pick it from “Choose from my videos”.",
+      "remove": "Couldn't remove the video from the file."
     }
   },
   "missing_fields": {

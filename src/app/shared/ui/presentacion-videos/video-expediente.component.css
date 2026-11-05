@@ -1,0 +1,190 @@
+/* Hallmark · component: file presentation video (slot + actions + picker dialog) · genre: editorial
+ * theme: locked (design.md · warm editorial · beige paper · gold accent)
+ * states: default · hover · focus · active · disabled (mientras guarda) · loading (esqueleto,
+ *         subiendo) · error (carga) · success (video en el expediente) · empty (sin video)
+ * contrast: textos en --ds-ink / --ds-ink-secondary / --ds-ink-muted sobre papel (AA);
+ *           duración en crema sobre espresso; error en --ds-danger-ink sobre -soft
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ *
+ * La ranura, la miniatura y los estados vacío · error · esqueleto están en
+ * video-slot.css (compartida con app-videos-expediente-lectura).
+ *
+ * Misma familia que la biblioteca de videos del perfil (miniatura 16:9 con
+ * duración, punto rojo de grabar), en formato de una sola ranura: aquí sólo
+ * hay un video por expediente.
+ */
+:host { display: block; }
+
+/* Quitar: acción secundaria en texto, roja sólo al pasar. */
+.ve-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  margin-top: var(--ds-space-3);
+  padding: 2px var(--ds-space-1);
+  border: 0;
+  border-radius: var(--ds-radius-sm);
+  background: none;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  transition: var(--ds-transition-color);
+}
+.ve-remove:hover { color: var(--ds-danger-ink); background: var(--ds-danger-soft); }
+.ve-remove:focus { outline: none; }
+.ve-remove:focus-visible { box-shadow: var(--ds-focus-ring); }
+.ve-remove:active { color: var(--ds-danger-ink); }
+.ve-remove:disabled { opacity: 0.6; cursor: not-allowed; background: none; color: var(--ds-ink-secondary); }
+
+/* ── Acciones ─────────────────────────────────────────────────────────────── */
+.ve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ds-space-2);
+}
+.ve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  white-space: nowrap;
+}
+.ve-btn:focus-visible { box-shadow: var(--ds-focus-ring); }
+.ve-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-danger);
+}
+.ve-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-gold-faint);
+  color: var(--ds-gold-ink);
+  font-size: var(--ds-text-2xs);
+  font-weight: var(--ds-weight-bold);
+}
+
+/* ── Diálogo: elegir de mis videos ────────────────────────────────────────── */
+.ve-dialog {
+  width: min(100% - 2rem, 34rem);
+  padding: 0;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-surface-elevated);
+  color: var(--ds-ink);
+  box-shadow: var(--ds-shadow-xl);
+}
+.ve-dialog::backdrop { background: var(--ds-overlay); }
+.ve-dialog__head { padding: var(--ds-space-5) var(--ds-space-5) var(--ds-space-3); }
+.ve-dialog__title {
+  margin: 0 0 var(--ds-space-2);
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-text-xl);
+  font-weight: var(--ds-weight-regular);
+  letter-spacing: var(--ds-tracking-tight);
+  color: var(--ds-ink);
+}
+.ve-dialog__text {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-relaxed);
+  color: var(--ds-ink-secondary);
+}
+.ve-dialog__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-4) var(--ds-space-5);
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface);
+  border-radius: 0 0 var(--ds-radius-xl) var(--ds-radius-xl);
+}
+.ve-dialog__foot .btn { white-space: nowrap; }
+
+.ve-pick {
+  display: grid;
+  gap: var(--ds-space-2);
+  min-width: 0;
+  max-height: min(55vh, 26rem);
+  margin: 0;
+  padding: 0 var(--ds-space-5) var(--ds-space-4);
+  overflow-y: auto;
+  border: 0;
+}
+.ve-pick:disabled { opacity: 0.7; }
+
+.ve-opt {
+  display: grid;
+  grid-template-columns: auto 6.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-elevated);
+  cursor: pointer;
+  transition: var(--ds-transition-color),
+              border-color var(--ds-duration-fast) var(--ds-ease-out);
+}
+.ve-opt:hover { border-color: var(--ds-border-strong); background: var(--ds-surface); }
+.ve-opt:active { background: var(--ds-bg-alt); }
+.ve-opt.is-selected { border-color: var(--ds-gold); background: var(--ds-gold-faint); }
+.ve-opt:has(.ve-opt__radio:focus-visible) { box-shadow: var(--ds-focus-ring); }
+.ve-pick:disabled .ve-opt { cursor: not-allowed; }
+
+.ve-opt__radio {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--ds-gold-ink);
+}
+.ve-opt__radio:focus { outline: none; }
+.ve-opt__thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-bg-alt);
+  color: var(--ds-ink-faint);
+}
+.ve-opt__thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ve-opt__text { display: grid; gap: 2px; min-width: 0; }
+.ve-opt__title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-ink);
+  overflow-wrap: anywhere;
+}
+.ve-opt__meta { font-size: var(--ds-text-xs); color: var(--ds-ink-muted); }
+
+/* ── Columna estrecha · móvil ─────────────────────────────────────────────── */
+@container (max-width: 30rem) {
+  .ve-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (max-width: 575.98px) {
+  .ve-opt { grid-template-columns: auto 5rem minmax(0, 1fr); gap: var(--ds-space-2); }
+  .ve-pick { padding-inline: var(--ds-space-4); }
+  .ve-dialog__head { padding-inline: var(--ds-space-4); }
+  .ve-dialog__foot { padding-inline: var(--ds-space-4); }
+  .ve-dialog__foot .btn { flex: 1 1 auto; }
+}

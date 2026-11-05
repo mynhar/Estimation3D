@@ -1,0 +1,19 @@
+/* Hallmark · component: presentation videos of others on a file (read-only list) · genre: editorial
+ * theme: locked (design.md · warm editorial · beige paper · gold accent)
+ * states: default · hover · focus · active (miniatura y título) · loading (esqueleto)
+ *         · error (carga, con reintento) · empty (nadie más agregó video)
+ * contrast: ver video-slot.css (misma ranura que app-video-expediente)
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ *
+ * Misma ranura que el video propio, sin acciones: aquí sólo se mira. Cada
+ * video lo pinta app-video-ficha; aquí, la lista y los estados.
+ */
+:host { display: block; }
+
+.vl-list {
+  display: grid;
+  gap: var(--ds-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

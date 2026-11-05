@@ -184,6 +184,8 @@
   color: var(--ds-ink-muted);
   margin: 0;
 }
+/* «(Opcional)» dentro de la etiqueta: misma línea, menos peso. */
+.ef-opt { font-weight: var(--ds-weight-regular); }
 
 /* ── Info grid ───────────────────────────────────────────────────────────── */
 .ef-info-grid {

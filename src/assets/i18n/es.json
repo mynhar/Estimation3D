@@ -275,6 +275,7 @@
     "add_browse": "o haz clic para explorar",
     "uploading": "Subiendo…",
     "added_by": "Agregado por",
+    "presentation_video": "Video de presentación",
     "action_download": "Descargar",
     "role_cliente": "Cliente",
     "role_estimador": "Estimador",
@@ -852,7 +853,11 @@
     "reject_all_btn": "Rechazar las ofertas aceptadas",
     "reject_all_title": "¿Rechazar las ofertas aceptadas?",
     "reject_all_text": "Se eliminarán los contratos sin firmar. El expediente volverá al estado estimado.",
-    "success_rejected_n": "Ofertas rechazadas. El expediente ha vuelto al estado estimado."
+    "success_rejected_n": "Ofertas rechazadas. El expediente ha vuelto al estado estimado.",
+    "presentation_video": "Video de presentación",
+    "estimator_video": "Video del estimador",
+    "estimator_video_hint": "El estimador que preparó tu estimación se presenta en este video.",
+    "videos_error": "No se pudieron cargar los videos de presentación."
   },
   "make_offer": {
     "editing_badge": "Modificación de oferta",
@@ -922,6 +927,9 @@
     "estimator_visit": "Visita del estimador",
     "problems_noted": "Problemas observados",
     "section_exp_files": "Archivos del expediente",
+    "section_estimator_video": "Video del estimador",
+    "estimator_video_hint": "Con este video se presenta el estimador que preparó la estimación. Solo puedes verlo.",
+    "estimator_video_empty": "El estimador no agregó un video a este expediente.",
     "tab_tour": "Tour 3D",
     "tab_photos": "Fotos",
     "tab_docs": "Docs",
@@ -2856,6 +2864,7 @@
     "title": "Videos de presentación",
     "hint": "Un video corto en el que el profesional se presenta: quién es, qué hace y cómo trabaja. Grábalo aquí (pantalla, cámara o ambas) o sube un archivo de hasta {{max}}.",
     "hint_named": "Un video corto en el que {{nombre}} se presenta: quién es, qué hace y cómo trabaja. Grábalo aquí (pantalla, cámara o ambas) o sube un archivo de hasta {{max}}.",
+    "hint_self": "Un video corto en el que te presentas: quién eres, qué haces y cómo trabajas. Grábalo aquí (pantalla, cámara o ambas) o sube un archivo de hasta {{max}}. Solo lo ve el equipo de administración.",
     "actions": {
       "new_recording": "Nueva grabación",
       "upload": "Subir video",
@@ -2885,7 +2894,7 @@
     "default_title": "Grabación del {{fecha}}",
     "rename_title": "Cambiar título",
     "delete_title": "¿Eliminar este video?",
-    "delete_body": "«{{titulo}}» se borrará para siempre, con su archivo. Esta acción no se puede deshacer.",
+    "delete_body": "«{{titulo}}» se borrará para siempre, con su archivo, y se quitará de los expedientes donde esté. Esta acción no se puede deshacer.",
     "toast": {
       "saved": "Video guardado",
       "uploaded": "«{{nombre}}» subido",
@@ -2975,6 +2984,37 @@
       "resume": "Reanudar",
       "finish": "Terminar",
       "float": "Abrir controles flotantes"
+    }
+  },
+  "expediente_video": {
+    "title": "Video de presentación",
+    "hint": "Preséntate en este expediente con un video corto: grábalo aquí (pantalla, cámara o ambas), sube un archivo de hasta {{max}} o elige uno de tus videos. Lo que grabes o subas también queda en tu perfil.",
+    "hint_locked": "Ya no se puede agregar ni cambiar tu video de presentación en este expediente.",
+    "empty": "Este expediente todavía no tiene tu video.",
+    "empty_locked": "No agregaste un video a este expediente.",
+    "others_empty": "Nadie más agregó un video a este expediente.",
+    "current": "En este expediente",
+    "record": "Grabar video",
+    "record_other": "Grabar otro",
+    "upload": "Subir video",
+    "upload_other": "Subir otro",
+    "choose": "Elegir de mis videos",
+    "actions_label": "Agregar o cambiar el video",
+    "remove": "Quitar del expediente",
+    "default_title": "Presentación · {{numero}}",
+    "choose_title": "Elegir de mis videos",
+    "choose_text": "El video se enlaza a este expediente y sigue en tu perfil.",
+    "use": "Usar este video",
+    "toast": {
+      "attached": "Video agregado al expediente",
+      "removed": "Video quitado del expediente. Sigue en tu perfil."
+    },
+    "errors": {
+      "load": "No se pudo cargar el video del expediente.",
+      "load_others": "No se pudieron cargar los videos de este expediente.",
+      "attach": "No se pudo agregar el video al expediente.",
+      "attach_saved": "El video quedó guardado en tu perfil, pero no se pudo agregar al expediente. Elígelo en «Elegir de mis videos».",
+      "remove": "No se pudo quitar el video del expediente."
     }
   },
   "missing_fields": {

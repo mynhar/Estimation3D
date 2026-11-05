@@ -275,6 +275,7 @@
     "add_browse": "ou cliquez pour parcourir",
     "uploading": "Téléversement…",
     "added_by": "Ajouté par",
+    "presentation_video": "Vidéo de présentation",
     "action_download": "Télécharger",
     "role_cliente": "Client",
     "role_estimador": "Estimateur",
@@ -852,7 +853,11 @@
     "reject_all_btn": "Refuser les offres acceptées",
     "reject_all_title": "Refuser les offres acceptées ?",
     "reject_all_text": "Les contrats non signés seront supprimés. Le dossier reviendra à l’état estimé.",
-    "success_rejected_n": "Offres refusées. Le dossier est revenu à l’état estimé."
+    "success_rejected_n": "Offres refusées. Le dossier est revenu à l’état estimé.",
+    "presentation_video": "Vidéo de présentation",
+    "estimator_video": "Vidéo de l'estimateur",
+    "estimator_video_hint": "L'estimateur qui a préparé votre estimation se présente dans cette vidéo.",
+    "videos_error": "Impossible de charger les vidéos de présentation."
   },
   "make_offer": {
     "editing_badge": "Modification de l'offre",
@@ -922,6 +927,9 @@
     "estimator_visit": "Visite de l'estimateur",
     "problems_noted": "Problèmes observés",
     "section_exp_files": "Fichiers du dossier",
+    "section_estimator_video": "Vidéo de l'estimateur",
+    "estimator_video_hint": "L'estimateur qui a préparé l'estimation se présente dans cette vidéo. Vous pouvez seulement la regarder.",
+    "estimator_video_empty": "L'estimateur n'a pas ajouté de vidéo à ce dossier.",
     "tab_tour": "Tour 3D",
     "tab_photos": "Photos",
     "tab_docs": "Docs",
@@ -2856,6 +2864,7 @@
     "title": "Vidéos de présentation",
     "hint": "Une courte vidéo de présentation : parcours, services et façon de travailler. Enregistrez-la ici (écran, caméra ou les deux) ou téléversez un fichier de {{max}} maximum.",
     "hint_named": "Une courte vidéo dans laquelle {{nombre}} se présente : son parcours, ses services et sa façon de travailler. Enregistrez-la ici (écran, caméra ou les deux) ou téléversez un fichier de {{max}} maximum.",
+    "hint_self": "Une courte vidéo dans laquelle vous vous présentez : votre parcours, vos services et votre façon de travailler. Enregistrez-la ici (écran, caméra ou les deux) ou téléversez un fichier de {{max}} maximum. Seule l'équipe d'administration peut la voir.",
     "actions": {
       "new_recording": "Nouvel enregistrement",
       "upload": "Téléverser une vidéo",
@@ -2885,7 +2894,7 @@
     "default_title": "Enregistrement du {{fecha}}",
     "rename_title": "Modifier le titre",
     "delete_title": "Supprimer cette vidéo ?",
-    "delete_body": "« {{titulo}} » sera supprimée définitivement, avec son fichier. Cette action est irréversible.",
+    "delete_body": "« {{titulo}} » sera supprimée définitivement, avec son fichier, et retirée des dossiers où elle figure. Cette action est irréversible.",
     "toast": {
       "saved": "Vidéo enregistrée",
       "uploaded": "« {{nombre}} » téléversée",
@@ -2975,6 +2984,37 @@
       "resume": "Reprendre",
       "finish": "Terminer",
       "float": "Ouvrir les commandes flottantes"
+    }
+  },
+  "expediente_video": {
+    "title": "Vidéo de présentation",
+    "hint": "Présentez-vous dans ce dossier avec une courte vidéo : enregistrez-la ici (écran, caméra ou les deux), téléversez un fichier de {{max}} maximum ou choisissez une de vos vidéos. Ce que vous enregistrez ou téléversez reste aussi dans votre profil.",
+    "hint_locked": "Vous ne pouvez plus ajouter ni modifier votre vidéo de présentation dans ce dossier.",
+    "empty": "Ce dossier n'a pas encore votre vidéo.",
+    "empty_locked": "Vous n'avez pas ajouté de vidéo à ce dossier.",
+    "others_empty": "Personne d'autre n'a ajouté de vidéo à ce dossier.",
+    "current": "Dans ce dossier",
+    "record": "Enregistrer une vidéo",
+    "record_other": "En enregistrer une autre",
+    "upload": "Téléverser une vidéo",
+    "upload_other": "En téléverser une autre",
+    "choose": "Choisir parmi mes vidéos",
+    "actions_label": "Ajouter ou changer la vidéo",
+    "remove": "Retirer du dossier",
+    "default_title": "Présentation · {{numero}}",
+    "choose_title": "Choisir parmi mes vidéos",
+    "choose_text": "La vidéo est liée à ce dossier et reste dans votre profil.",
+    "use": "Utiliser cette vidéo",
+    "toast": {
+      "attached": "Vidéo ajoutée au dossier",
+      "removed": "Vidéo retirée du dossier. Elle reste dans votre profil."
+    },
+    "errors": {
+      "load": "Impossible de charger la vidéo du dossier.",
+      "load_others": "Impossible de charger les vidéos de ce dossier.",
+      "attach": "Impossible d'ajouter la vidéo au dossier.",
+      "attach_saved": "La vidéo est enregistrée dans votre profil, mais n'a pas pu être ajoutée au dossier. Choisissez-la dans « Choisir parmi mes vidéos ».",
+      "remove": "Impossible de retirer la vidéo du dossier."
     }
   },
   "missing_fields": {

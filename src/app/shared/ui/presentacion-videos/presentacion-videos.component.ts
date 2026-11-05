@@ -10,13 +10,12 @@ import { DbPerfilVideo } from '../../../types/supabase';
 import { GrabacionTerminada, GrabadorVideoComponent } from './grabador-video.component';
 import { ReproductorVideoComponent } from './reproductor-video.component';
 import {
-  TAMANO_MAX_BYTES, formatoDuracion, formatoRelativo, formatoTamano, leerMetadatos, nombreDescarga,
+  TAMANO_MAX_BYTES, TIPOS_VIDEO, formatoDuracion, formatoRelativo, formatoTamano, leerMetadatos, nombreDescarga,
 } from './grabacion';
 
 type Orden = 'recientes' | 'antiguos' | 'titulo' | 'largos';
 
 const ORDEN_KEY = 'e3d.videos.orden';
-const TIPOS_ACEPTADOS = ['video/webm', 'video/mp4', 'video/quicktime'];
 
 function leerOrden(): Orden {
   try {
@@ -56,6 +55,12 @@ export class PresentacionVideosComponent implements OnInit {
   readonly perfilId = input.required<string>();
   /** Nombre del usuario, para el texto de ayuda. */
   readonly nombre   = input('');
+  /** El dueño gestiona sus propios videos (su perfil): la ayuda le habla a él. */
+  readonly propio   = input(false);
+
+  readonly claveAyuda = computed(() =>
+    this.propio() ? 'presentation_videos.hint_self'
+      : this.nombre() ? 'presentation_videos.hint_named' : 'presentation_videos.hint');
 
   private readonly grabador     = viewChild.required(GrabadorVideoComponent);
   private readonly archivoInput = viewChild.required<ElementRef<HTMLInputElement>>('archivoInput');
@@ -201,7 +206,7 @@ export class PresentacionVideosComponent implements OnInit {
 
   private async subir(archivo: File): Promise<void> {
     const titulo = archivo.name.replace(/\.[^.]+$/, '').trim() || archivo.name;
-    if (!TIPOS_ACEPTADOS.includes(archivo.type)) {
+    if (!TIPOS_VIDEO.includes(archivo.type)) {
       this.toast.show(this.translate.instant('presentation_videos.errors.formato_file', { nombre: archivo.name }), 'danger');
       return;
     }

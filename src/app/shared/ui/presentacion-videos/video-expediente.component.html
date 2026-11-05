@@ -1,0 +1,162 @@
+<div class="ve">
+  @if (editable()) {
+    <p class="ve__hint">{{ 'expediente_video.hint' | translate:{ max: maxTamano } }}</p>
+  } @else {
+    <p class="ve__hint">{{ 'expediente_video.hint_locked' | translate }}</p>
+  }
+
+  @if (cargando()) {
+    <div class="ve-slot" aria-hidden="true">
+      <div class="ve-thumb ve-skel"></div>
+      <div class="ve-slot__text">
+        <div class="ve-skel ve-skel--line"></div>
+        <div class="ve-skel ve-skel--line ve-skel--short"></div>
+      </div>
+    </div>
+
+  } @else if (errorCarga()) {
+    <div class="ve-error" role="alert">
+      <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      <p>{{ 'expediente_video.errors.load' | translate }}</p>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cargar()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+
+  } @else {
+    <!-- ── Lo que hay ahora en el expediente ─────────────────────────────── -->
+    @if (subiendo(); as titulo) {
+      <div class="ve-slot" aria-busy="true">
+        <div class="ve-thumb ve-thumb--busy">
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        </div>
+        <div class="ve-slot__text">
+          <p class="ve-slot__eyebrow" role="status">{{ 'presentation_videos.uploading' | translate }}</p>
+          <p class="ve-slot__title">{{ titulo }}</p>
+        </div>
+      </div>
+
+    } @else {
+      @if (actual(); as v) {
+        <div class="ve-slot">
+          <button type="button" class="ve-thumb" (click)="abierto.set(v)"
+                  [attr.aria-label]="'presentation_videos.actions.watch' | translate:{ titulo: v.titulo }">
+            @if (miniaturas()[v.id]; as src) {
+              <img [src]="src" alt="">
+            } @else {
+              <i class="bi bi-camera-video ve-thumb__fallback" aria-hidden="true"></i>
+            }
+            <span class="ve-thumb__play" aria-hidden="true"><i class="bi bi-play"></i></span>
+            <span class="ve-thumb__dur">{{ duracion(v) }}</span>
+          </button>
+
+          <div class="ve-slot__text">
+            <p class="ve-slot__eyebrow">
+              <i class="bi bi-check-circle" aria-hidden="true"></i>{{ 'expediente_video.current' | translate }}
+            </p>
+            <button type="button" class="ve-slot__title ve-slot__title--link" (click)="abierto.set(v)">{{ v.titulo }}</button>
+            <p class="ve-slot__meta">
+              {{ origen(v) | translate }}<span class="ve-sep" aria-hidden="true">·</span>{{ relativo(v) }}
+            </p>
+            @if (editable()) {
+              <button type="button" class="ve-remove" (click)="quitar()" [disabled]="ocupado()">
+                @if (tarea()?.tipo === 'quitando') {
+                  <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                } @else {
+                  <i class="bi bi-x-circle" aria-hidden="true"></i>
+                }
+                {{ 'expediente_video.remove' | translate }}
+              </button>
+            }
+          </div>
+        </div>
+
+      } @else {
+        <div class="ve-empty">
+          <i class="bi bi-person-video3" aria-hidden="true"></i>
+          <p>{{ (editable() ? 'expediente_video.empty' : 'expediente_video.empty_locked') | translate }}</p>
+        </div>
+      }
+    }
+
+    <!-- ── Agregar o cambiar ──────────────────────────────────────────────── -->
+    @if (editable()) {
+      <div class="ve-actions" role="group" [attr.aria-label]="'expediente_video.actions_label' | translate">
+        <button type="button" class="btn btn-sm btn-outline-primary ve-btn" (click)="grabar()" [disabled]="ocupado()">
+          <span class="ve-dot" aria-hidden="true"></span>
+          {{ (actual() ? 'expediente_video.record_other' : 'expediente_video.record') | translate }}
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary ve-btn" (click)="subir()" [disabled]="ocupado()">
+          <i class="bi bi-upload" aria-hidden="true"></i>
+          {{ (actual() ? 'expediente_video.upload_other' : 'expediente_video.upload') | translate }}
+        </button>
+        @if (otros().length) {
+          <button type="button" class="btn btn-sm btn-outline-secondary ve-btn" (click)="abrirBiblioteca()" [disabled]="ocupado()">
+            <i class="bi bi-collection-play" aria-hidden="true"></i>
+            {{ 'expediente_video.choose' | translate }}
+            <span class="ve-count">{{ otros().length }}</span>
+          </button>
+        }
+        <input #archivoInput type="file" class="d-none"
+               accept="video/mp4,video/webm,video/quicktime"
+               (change)="alElegirArchivo($event)">
+      </div>
+    }
+  }
+</div>
+
+<!-- ── Elegir de la biblioteca ──────────────────────────────────────────── -->
+<dialog #dlgElegir class="ve-dialog" aria-labelledby="veElegirTitulo" aria-describedby="veElegirTexto"
+        (cancel)="ocupado() && $event.preventDefault()">
+  <form (submit)="confirmarEleccion($event)">
+    <div class="ve-dialog__head">
+      <h2 id="veElegirTitulo" class="ve-dialog__title">{{ 'expediente_video.choose_title' | translate }}</h2>
+      <p id="veElegirTexto" class="ve-dialog__text">{{ 'expediente_video.choose_text' | translate }}</p>
+    </div>
+
+    <fieldset class="ve-pick" [disabled]="ocupado()">
+      <legend class="visually-hidden">{{ 'expediente_video.choose_title' | translate }}</legend>
+      @for (v of otros(); track v.id) {
+        <label class="ve-opt" [class.is-selected]="elegido() === v.id">
+          <input type="radio" name="veVideo" class="ve-opt__radio"
+                 [value]="v.id" [checked]="elegido() === v.id" (change)="elegido.set(v.id)">
+          <span class="ve-opt__thumb" aria-hidden="true">
+            @if (miniaturas()[v.id]; as src) {
+              <img [src]="src" alt="" loading="lazy">
+            } @else {
+              <i class="bi bi-camera-video"></i>
+            }
+            <span class="ve-thumb__dur">{{ duracion(v) }}</span>
+          </span>
+          <span class="ve-opt__text">
+            <span class="ve-opt__title">{{ v.titulo }}</span>
+            <span class="ve-opt__meta">
+              {{ origen(v) | translate }}<span class="ve-sep" aria-hidden="true">·</span>{{ relativo(v) }}
+            </span>
+          </span>
+        </label>
+      }
+    </fieldset>
+
+    <div class="ve-dialog__foot">
+      <button type="button" class="btn btn-outline-secondary" (click)="cerrarBiblioteca()" [disabled]="ocupado()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="ocupado() || !elegido()">
+        @if (tarea()?.tipo === 'guardando') {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        }
+        {{ 'expediente_video.use' | translate }}
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<app-grabador-video (grabado)="alGrabar($event)" />
+
+<app-reproductor-video
+  [video]="abierto()"
+  [acciones]="false"
+  [soloLectura]="!editable()"
+  (cerrado)="abierto.set(null)"
+  (cambiado)="alCambiar($event)" />

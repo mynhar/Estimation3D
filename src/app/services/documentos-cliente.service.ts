@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ArchivoService } from './archivo.service';
 import { ExpedienteService } from './expediente.service';
 import { SeguimientoService } from './seguimiento.service';
+import { PerfilVideoService } from './perfil-video.service';
 import {
   PerfilRepository,
   EstimacionRepository,
@@ -9,10 +10,11 @@ import {
   ContratoRepository,
 } from '../data';
 import { ArchivoRow } from '../models';
+import { DbPerfilVideo } from '../types/supabase';
 
 export type TipoArchivo = 'foto' | 'video' | 'documento';
 export type RolSubida   = 'cliente' | 'estimador' | 'constructor' | 'administrador' | 'desconocido';
-export type FuenteArchivo = 'expediente' | 'estimacion' | 'oferta' | 'contrato' | 'reporte';
+export type FuenteArchivo = 'expediente' | 'estimacion' | 'oferta' | 'contrato' | 'reporte' | 'presentacion';
 
 const ORDEN_ROLES: RolSubida[] = ['cliente', 'estimador', 'constructor', 'administrador', 'desconocido'];
 
@@ -33,6 +35,10 @@ export interface ArchivoVM {
   subidoPorNombre: string;
   subidoPorRol:    RolSubida;
   esPropio:        boolean;         // archivo propio en storage → borrable por RLS
+  // Sólo en fuente 'presentacion': el video de presentación (se abre en el
+  // reproductor, no por URL) y la URL firmada de su miniatura.
+  presentacion?:   DbPerfilVideo;
+  miniatura?:      string | null;
 }
 
 export interface GrupoRolVM {
@@ -58,17 +64,22 @@ export class DocumentosClienteService {
   private estimacionRepo     = inject(EstimacionRepository);
   private ofertaRepo         = inject(OfertaRepository);
   private contratoRepo       = inject(ContratoRepository);
+  private perfilVideoService = inject(PerfilVideoService);
 
   async getExpedientesConArchivos(clienteId: string): Promise<ExpedienteArchivosVM[]> {
     const expedientes = await this.expedienteService.getMisExpedientes(clienteId);
     if (!expedientes.length) return [];
 
-    const crudos = await Promise.all(
-      expedientes.map(e => this.recolectar(e.id, e.numero)),
-    );
+    const [crudos, presentaciones] = await Promise.all([
+      Promise.all(expedientes.map(e => this.recolectar(e.id, e.numero))),
+      this.presentaciones(expedientes.map(e => e.id)),
+    ]);
 
     // Resolver nombre + rol de todos los autores en una sola consulta.
-    const autorIds = [...new Set(crudos.flatMap(c => c.autorIds))];
+    const autorIds = [...new Set([
+      ...crudos.flatMap(c => c.autorIds),
+      ...[...presentaciones.values()].flat().map(p => p.subidoPor as string),
+    ])];
     const perfiles = await this.perfilRepo.findNombreRolByIds(autorIds);
     const perfilPorId = new Map(perfiles.map(p => [p.id, p]));
     const nombreDe = (id: string | null): string => {
@@ -87,7 +98,8 @@ export class DocumentosClienteService {
     };
 
     return expedientes.map((e, i) => {
-      const { items } = crudos[i];
+      // Las presentaciones van primero: cada persona abre su grupo con su video.
+      const items = [...(presentaciones.get(e.id) ?? []), ...crudos[i].items];
       const vms: ArchivoVM[] = items.map(it => ({
         ...it,
         subidoPorNombre: it.subidoPorNombre ?? nombreDe(it.subidoPor),
@@ -118,13 +130,23 @@ export class DocumentosClienteService {
    * Archivos de UN expediente (todas las fuentes y roles), con autor/rol
    * resueltos. Misma data que `getExpedientesConArchivos` pero acotada a un
    * expediente — para el módulo "Mis documentos" del dashboard del cliente.
+   * Con `presentaciones`, también los videos de presentación del estimador y
+   * de los constructores (fuente 'presentacion'), al principio.
    */
   async getArchivosDeExpediente(
     expedienteId: string,
     numero: string,
     clienteId: string,
+    opciones: { presentaciones?: boolean } = {},
   ): Promise<ArchivoVM[]> {
-    const { items, autorIds } = await this.recolectar(expedienteId, numero);
+    const [crudo, presentaciones] = await Promise.all([
+      this.recolectar(expedienteId, numero),
+      opciones.presentaciones
+        ? this.presentaciones([expedienteId]).then(m => m.get(expedienteId) ?? [])
+        : Promise.resolve([]),
+    ]);
+    const items    = [...presentaciones, ...crudo.items];
+    const autorIds = [...new Set([...crudo.autorIds, ...presentaciones.map(p => p.subidoPor as string)])];
     const perfiles    = await this.perfilRepo.findNombreRolByIds(autorIds);
     const perfilPorId = new Map(perfiles.map(p => [p.id, p]));
     const nombreDe = (id: string | null): string => {
@@ -144,6 +166,48 @@ export class DocumentosClienteService {
       subidoPorRol:    rolDe(it),
       esPropio:        it.fuente === 'expediente' && !!it.subidoPor && it.subidoPor === clienteId,
     }));
+  }
+
+  // ── Videos de presentación (estimador y constructores) ─────────────────────
+  // No son filas de `archivo`: viven en `perfil_video` (bucket privado) y se
+  // enlazan al expediente con `expediente_video`. Sólo para ver: ni descarga
+  // ni borrado. Una consulta para todos los expedientes; si falla, la pantalla
+  // sigue con el resto de archivos.
+  private async presentaciones(expedienteIds: string[]): Promise<Map<string,
+    (Omit<ArchivoVM, 'subidoPorNombre'> & { subidoPorNombre?: string })[]>> {
+    const porExpediente = new Map<string, (Omit<ArchivoVM, 'subidoPorNombre'> & { subidoPorNombre?: string })[]>();
+    try {
+      const enlaces = await this.perfilVideoService.enExpedientes(expedienteIds);
+      if (!enlaces.length) return porExpediente;
+      const unicos = [...new Map(enlaces.map(l => [l.video.id, l.video])).values()];
+      const miniaturas = await this.perfilVideoService.urlsMiniaturas(unicos).catch(() => ({} as Record<string, string>));
+      for (const { expedienteId, video: v } of enlaces) {
+        const lista = porExpediente.get(expedienteId) ?? [];
+        lista.push({
+          id:           `pre:${expedienteId}:${v.id}`,
+          nombre:       v.titulo,
+          tipo:         'video',
+          fuente:       'presentacion',
+          url:          '',
+          urlStorage:   '',
+          esExterno:    false,
+          mimeType:     v.mime_type,
+          tamanoBytes:  v.tamano_bytes,
+          subidoPor:    v.perfil_id,
+          // Provisional, se ajusta con el perfil. El cliente ve el perfil de
+          // los constructores con oferta en su expediente (los únicos cuyos
+          // videos ve); el único que puede no ver es el de un estimador.
+          subidoPorRol: 'estimador',
+          esPropio:     false,
+          presentacion: v,
+          miniatura:    miniaturas[v.id] ?? null,
+        });
+        porExpediente.set(expedienteId, lista);
+      }
+    } catch (e) {
+      console.warn('[DocumentosCliente] videos de presentación:', e);
+    }
+    return porExpediente;
   }
 
   // ── Recolección por expediente (todas las fuentes) ──────────────────────────

@@ -1,0 +1,54 @@
+@if (compacta()) {
+  <!-- Una sola fila pulsable: miniatura pequeña + rótulo + título. -->
+  <button type="button" class="vf-compacta" (click)="abrir()"
+          [attr.aria-label]="'presentation_videos.actions.watch' | translate:{ titulo: video().titulo }">
+    <span class="ve-thumb vf-compacta__thumb" aria-hidden="true">
+      @if (miniatura(); as src) {
+        <img [src]="src" alt="">
+      } @else {
+        <i class="bi bi-camera-video ve-thumb__fallback"></i>
+      }
+      <span class="ve-thumb__play"><i class="bi bi-play"></i></span>
+      <span class="ve-thumb__dur">{{ duracion() }}</span>
+    </span>
+    <span class="vf-compacta__text">
+      @if (etiqueta()) {
+        <span class="vf-compacta__eyebrow">{{ etiqueta() | translate }}</span>
+      }
+      <span class="vf-compacta__title">{{ video().titulo }}</span>
+      @if (autor()) {
+        <span class="vf-compacta__autor">{{ autor() }}</span>
+      }
+    </span>
+  </button>
+
+} @else {
+  <div class="ve-slot">
+    <button type="button" class="ve-thumb" (click)="abrir()"
+            [attr.aria-label]="'presentation_videos.actions.watch' | translate:{ titulo: video().titulo }">
+      @if (miniatura(); as src) {
+        <img [src]="src" alt="">
+      } @else {
+        <i class="bi bi-camera-video ve-thumb__fallback" aria-hidden="true"></i>
+      }
+      <span class="ve-thumb__play" aria-hidden="true"><i class="bi bi-play"></i></span>
+      <span class="ve-thumb__dur">{{ duracion() }}</span>
+    </button>
+
+    <div class="ve-slot__text">
+      @if (etiqueta()) {
+        <p class="vf-eyebrow">{{ etiqueta() | translate }}</p>
+      }
+      <button type="button" class="ve-slot__title ve-slot__title--link" (click)="abrir()">{{ video().titulo }}</button>
+      <p class="ve-slot__meta">
+        {{ origen() | translate }}<span class="ve-sep" aria-hidden="true">·</span>{{ relativo() }}
+      </p>
+    </div>
+  </div>
+}
+
+<app-reproductor-video
+  [video]="abierto()"
+  [acciones]="false"
+  [soloLectura]="true"
+  (cerrado)="abierto.set(null)" />

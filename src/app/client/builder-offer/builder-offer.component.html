@@ -353,6 +353,36 @@
           </div>
         }
 
+        <!-- Video del estimador: sólo para ver ──────────────────── -->
+        @if (errorVideos()) {
+          <div class="status-msg status-msg--danger" role="alert">
+            <span class="flex-grow-1">{{ 'builder_offer.videos_error' | translate }}</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                    (click)="cargarVideosPresentacion()">
+              {{ 'common.retry' | translate }}
+            </button>
+          </div>
+        } @else if (videosEstimador().length) {
+          <div class="detail-card">
+            <div class="detail-card__head">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   class="icon-gold me-2" aria-hidden="true">
+                <path d="m22 8-6 4 6 4V8z"/>
+                <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+              </svg>
+              <span class="detail-card__head-title">{{ 'builder_offer.estimator_video' | translate }}</span>
+            </div>
+            <div class="detail-card__body presentacion-body">
+              <p class="presentacion-hint">{{ 'builder_offer.estimator_video_hint' | translate }}</p>
+              @for (v of videosEstimador(); track v.id) {
+                <app-video-ficha [video]="v" [miniatura]="miniaturasPresentacion()[v.id]" />
+              }
+            </div>
+          </div>
+        }
+
         <!-- ── Sección de ofertas ──────────────────────────────── -->
         <div>
           <div class="offers-section-header mb-3">
@@ -464,6 +494,20 @@
                         </a>
                       }
                     </div>
+
+                    <!-- Video de presentación del constructor: sólo para ver. El
+                         clic y las teclas no llegan a la tarjeta (no la marcan). -->
+                    @if (videoDePerfil().get(oferta.constructor_id); as video) {
+                      <div class="offer-card__presentacion"
+                           (click)="$event.stopPropagation()"
+                           (keydown.enter)="$event.stopPropagation()"
+                           (keydown.space)="$event.stopPropagation()">
+                        <app-video-ficha [video]="video"
+                                         [miniatura]="miniaturasPresentacion()[video.id]"
+                                         [compacta]="true"
+                                         etiqueta="builder_offer.presentation_video" />
+                      </div>
+                    }
 
                     <!-- Plazos y fechas — 2 columnas -->
                     <div class="offer-card__meta-grid">

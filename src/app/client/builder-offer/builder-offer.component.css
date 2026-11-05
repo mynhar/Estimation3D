@@ -196,6 +196,15 @@
 }
 .detail-card__body { padding: var(--ds-space-5); }
 
+/* ── Video del estimador ─────────────────────────────────────────────────── */
+.presentacion-body { display: grid; gap: var(--ds-space-3); }
+.presentacion-hint {
+  margin: 0;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading-relaxed);
+  color: var(--ds-ink-muted);
+}
+
 /* ── Info fields ─────────────────────────────────────────────────────────── */
 .info-label {
   font-size: var(--ds-text-2xs);
@@ -556,6 +565,8 @@
   padding-top: var(--ds-space-3);
   margin-top: var(--ds-space-3);
 }
+/* Video de presentación del constructor: va pegado a su nombre, sin raya. */
+.offer-card__presentacion { margin-top: var(--ds-space-3); }
 .offer-meta-label {
   font-size: var(--ds-text-2xs);
   font-weight: var(--ds-weight-semibold);

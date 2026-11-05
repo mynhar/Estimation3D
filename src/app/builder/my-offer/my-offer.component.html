@@ -312,6 +312,24 @@
 
         </div>
 
+        <!-- Video del estimador: con él se presenta en el expediente. El
+             constructor sólo lo ve; no lo cambia ni lo quita. -->
+        @if (user()?.id; as constructorId) {
+          <div class="info-card">
+            <div class="info-card__header">
+              <span class="section-heading">
+                <i class="bi bi-person-video3 me-2"></i>{{ 'my_offer.section_estimator_video' | translate }}
+              </span>
+            </div>
+            <div class="info-card__body">
+              <app-videos-expediente-lectura [expedienteId]="detalle()!.expediente_id"
+                                             [perfilId]="constructorId"
+                                             ayuda="my_offer.estimator_video_hint"
+                                             vacio="my_offer.estimator_video_empty" />
+            </div>
+          </div>
+        }
+
         <!-- â”€â”€ DescripciÃ³n del enfoque â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="info-card">
           <div class="info-card__header">
@@ -359,14 +377,12 @@
             }
           </div>
 
-          <div class="attach-divider"></div>
-
-          <!-- Videos -->
-          <div class="attach-section">
-            <p class="attach-section__label">{{ 'my_offer.offer_video' | translate }}</p>
-            @if (videos().length === 0) {
-              <p class="attach-section__empty">{{ 'my_offer.no_videos' | translate }}</p>
-            } @else {
+          <!-- Videos de la oferta: el formulario ya no los pide; sólo se
+               muestran los que ya había o los que agregó el administrador. -->
+          @if (videos().length) {
+            <div class="attach-divider"></div>
+            <div class="attach-section">
+              <p class="attach-section__label">{{ 'my_offer.offer_video' | translate }}</p>
               <div class="file-list">
                 @for (v of videos(); track v.id) {
                   <div class="file-row" [class.file-row--playing]="videoActivo()?.id === v.id">
@@ -401,10 +417,30 @@
                   }
                 }
               </div>
-            }
-          </div>
+            </div>
+          }
 
         </div>
+
+        <!-- Video de presentación del constructor (opcional), como en la
+             oferta: se enlaza al expediente y cada acción se guarda al
+             momento. Sólo se cambia mientras la oferta está pendiente. -->
+        @if (user()?.id; as constructorId) {
+          <div class="info-card">
+            <div class="info-card__header d-flex align-items-center">
+              <span class="section-heading">
+                <i class="bi bi-person-video3 me-2"></i>{{ 'expediente_video.title' | translate }}
+              </span>
+              <span class="opt-badge ms-2">{{ 'common.optional' | translate }}</span>
+            </div>
+            <div class="info-card__body">
+              <app-video-expediente [expedienteId]="detalle()!.expediente_id"
+                                    [perfilId]="constructorId"
+                                    [numero]="detalle()!.expediente_numero"
+                                    [editable]="detalle()!.estado === 'pendiente'" />
+            </div>
+          </div>
+        }
 
       </div><!-- /col izquierda -->
 

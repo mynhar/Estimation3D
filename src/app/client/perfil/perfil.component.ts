@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 import { CampoExtra, CamposFaltantesComponent } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
+import { PresentacionVideosComponent } from '../../shared/ui/presentacion-videos/presentacion-videos.component';
 
 interface PerfilRow {
   nombre:    string;
@@ -29,7 +30,7 @@ const BUCKET   = 'archivos';
   selector: 'app-perfil',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent],
+  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, PresentacionVideosComponent],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css',
 })
@@ -58,6 +59,12 @@ export class PerfilComponent implements OnInit {
   ]);
   /** Intentos de guardar con campos sin completar: cada uno trae el resumen. */
   intentos = signal(0);
+
+  /** Estimador y constructor se presentan con videos: los graban o suben aquí mismo. */
+  tieneVideos = computed(() => {
+    const rol = this.perfil()?.rol;
+    return rol === 'estimador' || rol === 'constructor';
+  });
 
   hasCambios = computed(() => {
     const p = this.perfil();

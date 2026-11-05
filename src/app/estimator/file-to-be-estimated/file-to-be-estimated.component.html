@@ -470,6 +470,23 @@
           }
         </section>
 
+        <!-- ── Video de presentación (opcional) ──────────────────────── -->
+        <!-- Cada acción se guarda al momento: no depende de los botones de
+             la estimación. -->
+        <section class="fte-card">
+          <div class="fte-card__header">
+            <h2 class="fte-card__title">
+              <i class="bi bi-person-video3"></i>{{ 'expediente_video.title' | translate }}
+              <span class="fte-opt">({{ 'common.optional' | translate }})</span>
+            </h2>
+          </div>
+          @if (user()?.id; as estimadorId) {
+            <app-video-expediente [expedienteId]="expedienteId"
+                                  [perfilId]="estimadorId"
+                                  [numero]="detalle()!.numero" />
+          }
+        </section>
+
         <!-- ── Invitación a constructores ─────────────────────────────── -->
         <section class="fte-card">
           <div class="fte-card__header">

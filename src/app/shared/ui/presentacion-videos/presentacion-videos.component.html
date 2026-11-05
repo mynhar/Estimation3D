@@ -5,7 +5,7 @@
     <div class="pv__intro">
       <h2 id="pvTitulo" class="pv__title">{{ 'presentation_videos.title' | translate }}</h2>
       <p class="pv__hint">
-        {{ (nombre() ? 'presentation_videos.hint_named' : 'presentation_videos.hint') | translate:{ nombre: nombre(), max: maxTamano } }}
+        {{ claveAyuda() | translate:{ nombre: nombre(), max: maxTamano } }}
       </p>
     </div>
     <div class="pv__actions">

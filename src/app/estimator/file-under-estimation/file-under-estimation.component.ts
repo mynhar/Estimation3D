@@ -17,12 +17,13 @@ import { MatterportService } from '../../services/matterport.service';
 import { MatterportModelo } from '../../models/matterport.model';
 import { MatterportInfoComponent } from '../../shared/ui/matterport-info/matterport-info.component';
 import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
+import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
   selector: 'app-file-under-estimation',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent],
+  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent, VideoExpedienteComponent],
   templateUrl: './file-under-estimation.component.html',
   styleUrl:    './file-under-estimation.component.css',
 })
@@ -126,7 +127,7 @@ export class FileUnderEstimationComponent implements OnInit {
   errorMpClave      = signal('');
   exitoMpClave      = signal('');
 
-  private expedienteId = '';
+  protected expedienteId = '';
 
   get formularioCompleto(): boolean {
     return !!(

@@ -297,6 +297,29 @@
 .md-file-tile:focus-visible { outline: 2px solid var(--ds-gold-active); outline-offset: 2px; }
 .md-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+/* Video de presentación: «play» sobre la miniatura y su tipo en la meta. */
+.md-file-tile { position: relative; }
+.md-play {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--ds-radius-circle);
+  background: var(--ds-surface-overlay);
+  color: var(--ds-ink);
+  font-size: 0.75rem;
+  box-shadow: var(--ds-shadow-sm);
+  pointer-events: none;
+}
+.md-play .bi { margin-left: 1px; }
+.md-card__media .md-play { width: 40px; height: 40px; font-size: 1.15rem; }
+.md-file__kind { color: var(--ds-gold-ink); font-weight: var(--ds-weight-semibold); }
+/* Donde la meta se parte en dos líneas (galería, móvil), el tipo va en la
+   suya: así ninguna línea empieza ni acaba en «·». */
+.md-card .md-file__kind { display: block; }
+.md-card .md-file__sep--kind { display: none; }
+
 .md-file__info { flex: 1 1 auto; min-width: 0; }
 .md-file__name {
   margin: 0 0 2px;
@@ -487,6 +510,8 @@
   .md-exp__counts { display: none; }
   .md-file { flex-wrap: wrap; }
   .md-file__actions, .md-confirm { width: 100%; justify-content: flex-end; }
+  .md-file__kind { display: block; }
+  .md-file__sep--kind { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

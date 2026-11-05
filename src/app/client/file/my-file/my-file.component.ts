@@ -15,13 +15,15 @@ import { MatterportModelo } from '../../../models/matterport.model';
 import { MatterportInfoComponent } from '../../../shared/ui/matterport-info/matterport-info.component';
 import { ContratosExpedienteComponent } from '../../../shared/ui/contratos-expediente/contratos-expediente.component';
 import { AvisoArchivadoComponent } from '../../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { VideoFichaComponent } from '../../../shared/ui/presentacion-videos/video-ficha.component';
+import { DbPerfilVideo } from '../../../types/supabase';
 
 
 @Component({
   selector: 'app-my-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, MatterportInfoComponent, ContratosExpedienteComponent, AvisoArchivadoComponent],
+  imports: [RouterLink, TranslatePipe, NgTemplateOutlet, MatterportInfoComponent, ContratosExpedienteComponent, AvisoArchivadoComponent, VideoFichaComponent],
   templateUrl: './my-file.component.html',
   styleUrl:    './my-file.component.css',
 })
@@ -59,6 +61,16 @@ export class MyFileComponent implements OnInit {
   documentosVM   = signal<ArchivoVM[]>([]);
   videos         = signal<ArchivoRow[]>([]);
   documentos     = signal<ArchivoRow[]>([]);
+  // Videos de presentación (sólo para ver): el del estimador va en su informe;
+  // el de cada constructor seleccionado, junto a su nombre.
+  presentaciones = signal<ArchivoVM[]>([]);
+  private presentacionesPorRol = computed(() => this.presentaciones()
+    .filter((p): p is ArchivoVM & { presentacion: DbPerfilVideo } => !!p.presentacion && !!p.subidoPor)
+    .map(p => ({ rol: p.subidoPorRol, perfilId: p.subidoPor!, video: p.presentacion, miniatura: p.miniatura ?? null })));
+  videoEstimador = computed(() => this.presentacionesPorRol().find(p => p.rol === 'estimador') ?? null);
+  videoDeConstructor = computed(() => new Map(this.presentacionesPorRol()
+    .filter(p => p.rol === 'constructor')
+    .map(p => [p.perfilId, p])));
   // Todos los contratos del expediente, cancelados incluidos.
   contratos      = signal<ContratoPanelCliente[]>([]);
   fotoAmpliada   = signal<string | null>(null);
@@ -160,7 +172,7 @@ export class MyFileComponent implements OnInit {
       this.videos.set(archivos.videos);
       this.documentos.set(archivos.documentos);
       this.contratos.set(contratos);
-      await this.cargarArchivosVM();
+      await this.cargarArchivosVM(true);
     } catch (e: any) {
       console.error('[MyFile]', e.message);
       this.errorMsg.set(e.message);
@@ -222,12 +234,16 @@ export class MyFileComponent implements OnInit {
    * Carga "Fotos del sitio" y "Documentos técnicos": fotos y documentos del
    * expediente de todas las fuentes (expediente, oferta, contrato, obra) y
    * roles, vía el mismo servicio que client/my-documents/list. Una sola consulta.
+   * Con `conPresentaciones` (sólo al abrir la ficha: subir o borrar no las
+   * cambia), también los videos de presentación.
    */
-  private async cargarArchivosVM(): Promise<void> {
+  private async cargarArchivosVM(conPresentaciones = false): Promise<void> {
     const clienteId = this.currentUserId() ?? '';
     const numero    = this.detalle()?.numero ?? '';
     try {
-      const archivos = await this.documentosService.getArchivosDeExpediente(this.expedienteId, numero, clienteId);
+      const archivos = await this.documentosService.getArchivosDeExpediente(
+        this.expedienteId, numero, clienteId, { presentaciones: conPresentaciones });
+      if (conPresentaciones) this.presentaciones.set(archivos.filter(a => a.fuente === 'presentacion'));
       // Excluir explícitamente lo que aportó el cliente: estas secciones muestran
       // solo archivos de estimador / constructor / administrador (todas las fuentes).
       const deOtros = archivos.filter(a => a.subidoPorRol !== 'cliente');

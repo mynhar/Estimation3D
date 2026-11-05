@@ -1,13 +1,17 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ArchivoService } from '../../services/archivo.service';
+import { AuthSupabaseService } from '../../services/auth-supabase.service';
 import { OfertaService } from '../../services/oferta.service';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoRow, OfertaDetalle, nombreServicio, serviciosDeOferta } from '../../models';
 import { ServicioCompleto } from '../../data/servicio.repository';
 import { AvisoArchivadoComponent } from '../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
+import { VideosExpedienteLecturaComponent } from '../../shared/ui/presentacion-videos/videos-expediente-lectura.component';
 
 const ESTADO_ICON: Record<string, string> = {
   pendiente: 'bi-hourglass',
@@ -20,7 +24,7 @@ const ESTADO_ICON: Record<string, string> = {
   selector: 'app-my-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent],
+  imports: [TranslatePipe, AvisoArchivadoComponent, VideoExpedienteComponent, VideosExpedienteLecturaComponent],
   templateUrl: './my-offer.component.html',
   styleUrl: './my-offer.component.css',
 })
@@ -28,11 +32,14 @@ export class MyOfferComponent implements OnInit {
   private ofertaService     = inject(OfertaService);
   private expedienteService = inject(ExpedienteService);
   private archivoService    = inject(ArchivoService);
+  private auth              = inject(AuthSupabaseService);
   private sanitizer      = inject(DomSanitizer);
   private translate      = inject(TranslateService);
   private route          = inject(ActivatedRoute);
   private router         = inject(Router);
 
+  /** El constructor: dueño de la oferta y de su video de presentación. */
+  user       = toSignal(this.auth.user$);
   detalle    = signal<OfertaDetalle | null>(null);
   /** Servicios a los que se presentó la oferta, en el orden del expediente. */
   serviciosOferta = signal<ServicioCompleto[]>([]);

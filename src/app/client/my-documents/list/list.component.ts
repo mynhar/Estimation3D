@@ -20,6 +20,8 @@ import {
   RolSubida,
   TipoArchivo,
 } from '../../../services/documentos-cliente.service';
+import { DbPerfilVideo } from '../../../types/supabase';
+import { ReproductorVideoComponent } from '../../../shared/ui/presentacion-videos/reproductor-video.component';
 
 type FiltroTipo = 'todos' | TipoArchivo;
 
@@ -27,7 +29,7 @@ type FiltroTipo = 'todos' | TipoArchivo;
   selector: 'app-client-my-documents-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet],
+  imports: [TranslatePipe, NgTemplateOutlet, ReproductorVideoComponent],
   templateUrl: './list.component.html',
   styleUrl: './list.component.css',
 })
@@ -54,6 +56,8 @@ export class MyDocumentsListComponent implements OnInit {
   eliminandoId      = signal<string | null>(null);
   confirmEliminarId = signal<string | null>(null);
   fotoAmpliada      = signal<string | null>(null);
+  /** Video de presentación abierto en el reproductor (sólo para ver). */
+  presentacionAbierta = signal<DbPerfilVideo | null>(null);
 
   private pendingExpId: string | null = null;
 
@@ -111,9 +115,12 @@ export class MyDocumentsListComponent implements OnInit {
   setFiltro(t: FiltroTipo): void { this.filtroTipo.set(t); }
   setVista(v: 'lista' | 'galeria'): void { this.vista.set(v); }
 
-  // ¿Tiene miniatura real? (solo fotos en storage, no enlaces externos ni rotas)
-  tieneThumb(a: ArchivoVM): boolean {
-    return a.tipo === 'foto' && !a.esExterno && !this.thumbRoto().has(a.id);
+  // Miniatura real, si hay: la propia foto (en storage, no enlaces externos) o
+  // la del video de presentación. Nunca una que ya falló al cargar.
+  thumbUrl(a: ArchivoVM): string | null {
+    if (this.thumbRoto().has(a.id)) return null;
+    if (a.fuente === 'presentacion') return a.miniatura ?? null;
+    return a.tipo === 'foto' && !a.esExterno ? a.url : null;
   }
   onThumbError(id: string): void {
     this.thumbRoto.update(s => { const n = new Set(s); n.add(id); return n; });
@@ -217,6 +224,10 @@ export class MyDocumentsListComponent implements OnInit {
   // ── Ver / descargar ─────────────────────────────────────────────────────────
 
   ver(a: ArchivoVM): void {
+    if (a.fuente === 'presentacion') {
+      if (a.presentacion) this.presentacionAbierta.set(a.presentacion);
+      return;
+    }
     if (a.tipo === 'foto' && !a.esExterno) {
       this.fotoAmpliada.set(a.url);
     } else {

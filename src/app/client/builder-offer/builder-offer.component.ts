@@ -10,6 +10,8 @@ import { ArchivoService } from '../../services/archivo.service';
 import { DocumentosClienteService, ArchivoVM } from '../../services/documentos-cliente.service';
 import { OfertaService } from '../../services/oferta.service';
 import { ContratoService } from '../../services/contrato.service';
+import { PerfilVideoService } from '../../services/perfil-video.service';
+import { DbPerfilVideo } from '../../types/supabase';
 import {
   ArchivoRow,
   EstimacionDetalle,
@@ -23,12 +25,13 @@ import {
 } from '../../models';
 import { ServicioCompleto } from '../../data/servicio.repository';
 import { AvisoArchivadoComponent } from '../../shared/ui/aviso-archivado/aviso-archivado.component';
+import { VideoFichaComponent } from '../../shared/ui/presentacion-videos/video-ficha.component';
 
 @Component({
   selector: 'app-builder-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent],
+  imports: [TranslatePipe, AvisoArchivadoComponent, VideoFichaComponent],
   templateUrl: './builder-offer.component.html',
   styleUrl: './builder-offer.component.css',
 })
@@ -42,6 +45,7 @@ export class BuilderOfferComponent implements OnInit {
   private documentosService = inject(DocumentosClienteService);
   private ofertaService     = inject(OfertaService);
   private contratoService   = inject(ContratoService);
+  private perfilVideoService = inject(PerfilVideoService);
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
 
@@ -78,6 +82,23 @@ export class BuilderOfferComponent implements OnInit {
 
   // ── Video inline — sección oferta (almacena { ofertaId, url }) ───────────
   videoOfertaActiva = signal<{ ofertaId: string; url: string } | null>(null);
+
+  // ── Videos de presentación (sólo para ver) ────────────────────────────────
+  // RLS deja al cliente, en su expediente, los del estimador y los de los
+  // constructores con oferta viva; nada más. Se cargan aparte: la página no
+  // los espera.
+  videosPresentacion     = signal<DbPerfilVideo[]>([]);
+  miniaturasPresentacion = signal<Record<string, string>>({});
+  errorVideos            = signal(false);
+
+  /** Video de cada persona por su id: uno por persona y expediente. */
+  videoDePerfil = computed(() => new Map(this.videosPresentacion().map(v => [v.perfil_id, v])));
+
+  /** Los que no son de un constructor con oferta aquí: los del estimador. */
+  videosEstimador = computed(() => {
+    const constructores = new Set(this.ofertas().map(o => o.constructor_id));
+    return this.videosPresentacion().filter(v => !constructores.has(v.perfil_id));
+  });
 
   // ── Computed ──────────────────────────────────────────────────────────────
   yaContratado = computed(() => {
@@ -157,6 +178,8 @@ export class BuilderOfferComponent implements OnInit {
 
       // "Fotos del sitio" / "Documentos técnicos": solo lo del estimador.
       await this.cargarArchivosEstimador();
+
+      void this.cargarVideosPresentacion();
 
     } catch (e: any) {
       console.error('[BuilderOffer]', e.message);
@@ -370,6 +393,23 @@ export class BuilderOfferComponent implements OnInit {
     } catch {
       this.fotosEstimador.set([]);
       this.documentosEstimador.set([]);
+    }
+  }
+
+  // ── Videos de presentación ────────────────────────────────────────────────
+
+  /** Los del estimador y los de los constructores, con sus miniaturas. */
+  async cargarVideosPresentacion(): Promise<void> {
+    const clienteId = this.user()?.id;
+    if (!clienteId) return;
+    this.errorVideos.set(false);
+    try {
+      const videos = await this.perfilVideoService.ajenosDeExpediente(this.expedienteId, clienteId);
+      this.videosPresentacion.set(videos);
+      this.miniaturasPresentacion.set(await this.perfilVideoService.urlsMiniaturas(videos).catch(() => ({})));
+    } catch (e: any) {
+      console.error('[BuilderOffer] videos de presentación:', e?.message ?? e);
+      this.errorVideos.set(true);
     }
   }
 

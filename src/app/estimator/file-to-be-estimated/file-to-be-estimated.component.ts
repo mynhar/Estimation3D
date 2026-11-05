@@ -14,12 +14,13 @@ import { EdgeErrorService } from '../../services/edge-error.service';
 import { ExpedienteDetalle, ArchivoRow, debeAvanzarEstado } from '../../models';
 import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
 import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
+import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
   selector: 'app-file-to-be-estimated',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent],
+  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, VideoExpedienteComponent],
   templateUrl: './file-to-be-estimated.component.html',
   styleUrl:    './file-to-be-estimated.component.css',
 })
@@ -118,7 +119,7 @@ export class FileToBeEstimatedComponent implements OnInit {
   guardandoTour    = signal(false);
   errorTour        = signal('');
 
-  private expedienteId = '';
+  protected expedienteId = '';
 
   get formularioCompleto(): boolean {
     return !!(

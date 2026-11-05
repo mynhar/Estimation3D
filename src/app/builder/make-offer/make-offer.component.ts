@@ -7,7 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthSupabaseService } from '../../services/auth-supabase.service';
-import { FILE_LIMITS, validateFile } from '../../shared/validators/file.validator';
+import { FILE_LIMITS } from '../../shared/validators/file.validator';
 import { ExpedienteService } from '../../services/expediente.service';
 import { ArchivoService } from '../../services/archivo.service';
 import { OfertaService } from '../../services/oferta.service';
@@ -18,12 +18,13 @@ import { ExpedienteParaOferta, ArchivoRow, OfertaForm, nombreServicio } from '..
 import { ServicioCompleto } from '../../data/servicio.repository';
 import { ServicioOpcion, ServicioSelectorComponent } from '../../shared/ui/servicio-selector/servicio-selector.component';
 import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared/ui/campos-faltantes/campos-faltantes.component';
+import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
   selector: 'app-make-offer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent, CamposFaltantesComponent],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent, CamposFaltantesComponent, VideoExpedienteComponent],
   templateUrl: './make-offer.component.html',
   styleUrl: './make-offer.component.css',
 })
@@ -86,13 +87,11 @@ export class MakeOfferComponent implements OnInit {
   fechaInicio                    = '';
   descripcion                    = '';
 
-  // Archivos de la oferta. Los documentos son varios; el vídeo, único.
+  // Documentos PDF de la oferta (varios).
   documentosOferta = signal<File[]>([]);
-  videoOferta      = signal<File | null>(null);
 
   // Archivos ya guardados (modo edición)
   documentosActuales = signal<ArchivoRow[]>([]);
-  videoActual        = signal<ArchivoRow | null>(null);
 
   dragDocs      = signal(false);
   eliminandoDoc = signal<string | null>(null);
@@ -107,7 +106,7 @@ export class MakeOfferComponent implements OnInit {
   fotoAmpliada = signal<string | null>(null);
   tabMedia     = signal<'fotos' | 'tour' | 'docs'>('tour');
 
-  private expedienteId = '';
+  protected expedienteId = '';
 
   /** 5 pasos; 6 si el expediente tiene varios servicios y hay que elegirlos. */
   get totalSteps(): number {
@@ -201,7 +200,6 @@ export class MakeOfferComponent implements OnInit {
 
         const ofertaArchivos = await this.archivoService.cargarPorOferta(ofertaExistente.id);
         this.documentosActuales.set(ofertaArchivos.documentos);
-        this.videoActual.set(ofertaArchivos.videos[0] ?? null);
       }
     } catch (e: any) {
       console.error('[MakeOffer]', e.message);
@@ -275,16 +273,6 @@ export class MakeOfferComponent implements OnInit {
     }
   }
 
-  onVideo(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file  = input.files?.[0] ?? null;
-    input.value = '';
-    if (!file) { this.videoOferta.set(null); return; }
-    const err = validateFile(file, FILE_LIMITS.VIDEO.maxBytes, FILE_LIMITS.VIDEO.types);
-    if (err) { this.errorEnvio.set(err); return; }
-    this.videoOferta.set(file);
-  }
-
   async enviarOferta() {
     this.errorEnvio.set('');
     this.exitoMsg.set('');
@@ -350,7 +338,7 @@ export class MakeOfferComponent implements OnInit {
           userId,
           form,
           docs,
-          this.videoOferta(),
+          null,
         );
         this.enviada.set(true);
         this.exitoMsg.set('make_offer.success_sent');
@@ -359,17 +347,15 @@ export class MakeOfferComponent implements OnInit {
           this.ofertaId()!,
           userId,
           form,
-          this.videoOferta(),
+          null,
         );
         if (docs.length) {
           await this.ofertaService.agregarDocumentos(this.ofertaId()!, userId, docs);
         }
-        if (docs.length || this.videoOferta()) {
+        if (docs.length) {
           const ofertaArchivos = await this.archivoService.cargarPorOferta(this.ofertaId()!);
           this.documentosActuales.set(ofertaArchivos.documentos);
-          this.videoActual.set(ofertaArchivos.videos[0] ?? null);
           this.documentosOferta.set([]);
-          this.videoOferta.set(null);
         }
         this.exitoMsg.set('make_offer.success_updated');
       }
