@@ -1,7 +1,7 @@
 import { ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     // en navegaciones que llevan fragmento; el resto de la app no lo usa.
     provideRouter(routes, withViewTransitions(), withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideAnimations(),
-    provideHttpClient(withInterceptors([httpErrorInterceptor])),
+    provideHttpClient(withXhr(), withInterceptors([httpErrorInterceptor])),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     importProvidersFrom(
       TranslateModule.forRoot({
