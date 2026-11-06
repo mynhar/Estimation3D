@@ -22,12 +22,11 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
 }
 
 @Component({
-  selector: 'app-admin-user-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, PresentacionVideosComponent, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-admin-user-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [DatePipe, ReactiveFormsModule, TranslatePipe, PresentacionVideosComponent, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminUserEditComponent implements OnInit {
   private fb        = inject(FormBuilder);

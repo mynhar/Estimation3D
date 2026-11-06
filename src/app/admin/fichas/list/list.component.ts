@@ -7,12 +7,11 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 
 @Component({
-  selector: 'app-admin-fichas-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrls: ['../../_shared/crud-list.css'],
+    selector: 'app-admin-fichas-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrls: ['../../_shared/crud-list.css']
 })
 export class AdminFichasListComponent implements OnInit {
   private repo      = inject(FichaNormativaRepository);

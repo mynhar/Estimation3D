@@ -25,25 +25,25 @@ import { CAMPOS_FALTANTES } from '../shared/ui/campos-faltantes/campos-faltantes
 const CA_POSTAL_RE = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
 
 @Component({
-  selector: 'app-landing-page',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  // Encapsulación emulada (la de por defecto): Angular prefija cada selector, lo que
-  // aísla los ~1000 selectores de la landing de Bootstrap y del design system de la app.
-  encapsulation: ViewEncapsulation.Emulated,
-  imports: [
-    RouterLink, TranslatePipe, ReactiveFormsModule,
-    RevealDirective, SweepDirective, ScanSliderDirective, ...CAMPOS_FALTANTES],
-  templateUrl: './landing-page.component.html',
-  styleUrls: [
-    './styles/landing-base.css',
-    './styles/landing-sections.css',
-    './styles/landing-signature.css',
-  ],
-  host: {
-    'class': 'e3-landing',
-    '[attr.data-theme]': 'theme()',
-  },
+    selector: 'app-landing-page',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    // Encapsulación emulada (la de por defecto): Angular prefija cada selector, lo que
+    // aísla los ~1000 selectores de la landing de Bootstrap y del design system de la app.
+    encapsulation: ViewEncapsulation.Emulated,
+    imports: [
+        RouterLink, TranslatePipe, ReactiveFormsModule,
+        RevealDirective, SweepDirective, ScanSliderDirective, ...CAMPOS_FALTANTES
+    ],
+    templateUrl: './landing-page.component.html',
+    styleUrls: [
+        './styles/landing-base.css',
+        './styles/landing-sections.css',
+        './styles/landing-signature.css',
+    ],
+    host: {
+        'class': 'e3-landing',
+        '[attr.data-theme]': 'theme()',
+    }
 })
 export class LandingPageComponent implements OnInit, OnDestroy {
   private zone = inject(NgZone);

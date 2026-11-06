@@ -36,13 +36,12 @@ type LangPdf = 'es' | 'en' | 'fr';
 interface CalDia { num: number; tipo: 'vacio' | 'normal' | 'trabajado' | 'hoy' | 'inspeccion'; }
 
 @Component({
-  selector: 'app-construction-monitoring',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
-  templateUrl: './monitoring.component.html',
-  styleUrl: './monitoring.component.css',
-  host: { '(document:keydown.escape)': 'cerrarViewer()' },
+    selector: 'app-construction-monitoring',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
+    templateUrl: './monitoring.component.html',
+    styleUrl: './monitoring.component.css',
+    host: { '(document:keydown.escape)': 'cerrarViewer()' }
 })
 export class ConstructionMonitoringComponent implements OnInit, OnDestroy {
   private route               = inject(ActivatedRoute);

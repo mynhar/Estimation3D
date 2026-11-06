@@ -46,17 +46,16 @@ function especialidadRequerida(ctrl: AbstractControl): ValidationErrors | null {
  *  · el formulario es reactivo y valida en el cliente antes de enviar.
  */
 @Component({
-  selector: 'app-entrepreneurs',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.Emulated,
-  imports: [RouterLink, TranslatePipe, ReactiveFormsModule, RevealDirective, SweepDirective, ...CAMPOS_FALTANTES],
-  templateUrl: './entrepreneurs.component.html',
-  styleUrls: ['../styles/site-chrome.css', './entrepreneurs.component.css'],
-  host: {
-    'class': 'e3-public-page',
-    '[attr.data-theme]': 'theme()',
-  },
+    selector: 'app-entrepreneurs',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.Emulated,
+    imports: [RouterLink, TranslatePipe, ReactiveFormsModule, RevealDirective, SweepDirective, ...CAMPOS_FALTANTES],
+    templateUrl: './entrepreneurs.component.html',
+    styleUrls: ['../styles/site-chrome.css', './entrepreneurs.component.css'],
+    host: {
+        'class': 'e3-public-page',
+        '[attr.data-theme]': 'theme()',
+    }
 })
 export class EntrepreneursComponent extends SitePageBase implements OnInit {
   private fb = inject(FormBuilder);

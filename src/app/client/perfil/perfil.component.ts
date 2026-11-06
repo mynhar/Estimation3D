@@ -27,12 +27,11 @@ const FALLBACK = 'assets/avatar-fallback.jpg';
 const BUCKET   = 'archivos';
 
 @Component({
-  selector: 'app-perfil',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, PresentacionVideosComponent],
-  templateUrl: './perfil.component.html',
-  styleUrl: './perfil.component.css',
+    selector: 'app-perfil',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, PresentacionVideosComponent],
+    templateUrl: './perfil.component.html',
+    styleUrl: './perfil.component.css'
 })
 export class PerfilComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);

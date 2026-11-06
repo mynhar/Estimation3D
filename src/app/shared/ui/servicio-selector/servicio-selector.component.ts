@@ -47,13 +47,12 @@ let secuencia = 0;
  * (`expediente.servicio_id`), el que leen estimación, seguimiento y listados.
  */
 @Component({
-  selector: 'app-servicio-selector',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './servicio-selector.component.html',
-  styleUrl: './servicio-selector.component.css',
-  host: { '[class.srv-compacto]': 'compacto()' },
+    selector: 'app-servicio-selector',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './servicio-selector.component.html',
+    styleUrl: './servicio-selector.component.css',
+    host: { '[class.srv-compacto]': 'compacto()' }
 })
 export class ServicioSelectorComponent {
   opciones    = input.required<ServicioOpcion[]>();

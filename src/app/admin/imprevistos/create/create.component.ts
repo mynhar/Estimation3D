@@ -10,12 +10,11 @@ import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-fal
 interface ServicioOpcion { id: number; nombre: string; }
 
 @Component({
-  selector: 'app-admin-imprevistos-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrls: ['../../_shared/crud-form.css'],
+    selector: 'app-admin-imprevistos-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrls: ['../../_shared/crud-form.css']
 })
 export class AdminImprevistosCreateComponent implements OnInit {
   private fb        = inject(FormBuilder);

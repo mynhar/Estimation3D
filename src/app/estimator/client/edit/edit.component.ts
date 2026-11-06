@@ -21,12 +21,11 @@ function passwordOpcionalValidator(ctrl: AbstractControl): ValidationErrors | nu
 }
 
 @Component({
-  selector: 'app-estimator-client-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-estimator-client-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [DatePipe, ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class EstimatorClientEditComponent implements OnInit {
   private fb        = inject(FormBuilder);

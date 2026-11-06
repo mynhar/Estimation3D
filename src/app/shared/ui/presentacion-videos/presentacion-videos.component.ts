@@ -36,15 +36,14 @@ interface Pendiente { clave: string; titulo: string; }
  * Cada acción se guarda al momento, fuera del formulario del perfil.
  */
 @Component({
-  selector: 'app-presentacion-videos',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    TranslatePipe, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    GrabadorVideoComponent, ReproductorVideoComponent,
-  ],
-  templateUrl: './presentacion-videos.component.html',
-  styleUrl: './presentacion-videos.component.css',
+    selector: 'app-presentacion-videos',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        TranslatePipe, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
+        GrabadorVideoComponent, ReproductorVideoComponent,
+    ],
+    templateUrl: './presentacion-videos.component.html',
+    styleUrl: './presentacion-videos.component.css'
 })
 export class PresentacionVideosComponent implements OnInit {
   private readonly service   = inject(PerfilVideoService);

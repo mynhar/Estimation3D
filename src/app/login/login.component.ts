@@ -9,12 +9,11 @@ import { passwordComplexityValidator } from '../shared/validators/password.valid
 import { CAMPOS_FALTANTES } from '../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, RouterLink, ...CAMPOS_FALTANTES],
-  templateUrl: './login.component.html',
-  styleUrl:    './login.component.css',
+    selector: 'app-login',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, RouterLink, ...CAMPOS_FALTANTES],
+    templateUrl: './login.component.html',
+    styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
   private auth   = inject(AuthSupabaseService);

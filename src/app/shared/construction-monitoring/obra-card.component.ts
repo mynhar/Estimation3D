@@ -35,13 +35,12 @@ interface DiaObra {
 }
 
 @Component({
-  selector: 'app-obra-card',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ObraInspeccionesComponent, AvisoArchivadoComponent],
-  templateUrl: './obra-card.component.html',
-  styleUrl: './obra-card.component.css',
-  host: { '(document:keydown.escape)': 'cerrarViewer()' },
+    selector: 'app-obra-card',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, ObraInspeccionesComponent, AvisoArchivadoComponent],
+    templateUrl: './obra-card.component.html',
+    styleUrl: './obra-card.component.css',
+    host: { '(document:keydown.escape)': 'cerrarViewer()' }
 })
 export class ObraCardComponent implements OnDestroy {
   obra = input.required<ObraVM>();

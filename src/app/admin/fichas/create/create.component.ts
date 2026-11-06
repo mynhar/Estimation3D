@@ -8,12 +8,11 @@ import { parseKeywords } from '../keywords.util';
 import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-admin-fichas-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrls: ['../../_shared/crud-form.css'],
+    selector: 'app-admin-fichas-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrls: ['../../_shared/crud-form.css']
 })
 export class AdminFichasCreateComponent {
   private fb        = inject(FormBuilder);

@@ -22,12 +22,11 @@ interface Servicio {
 }
 
 @Component({
-  selector: 'app-admin-service-type-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrl:    './edit.component.css',
+    selector: 'app-admin-service-type-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminServiceTypeEditComponent implements OnInit {
   private fb        = inject(FormBuilder);

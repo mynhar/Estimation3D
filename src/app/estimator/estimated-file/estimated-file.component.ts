@@ -20,12 +20,11 @@ import {
 } from '../../models';
 
 @Component({
-  selector: 'app-estimated-file',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, VideoExpedienteComponent],
-  templateUrl: './estimated-file.component.html',
-  styleUrl:    './estimated-file.component.css',
+    selector: 'app-estimated-file',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, MatterportInfoComponent, VideoExpedienteComponent],
+    templateUrl: './estimated-file.component.html',
+    styleUrl: './estimated-file.component.css'
 })
 export class EstimatedFileComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

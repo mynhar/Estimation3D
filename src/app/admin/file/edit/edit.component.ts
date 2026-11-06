@@ -48,12 +48,11 @@ const CONTRATO_PCT: Record<string, number> = {
 };
 
 @Component({
-  selector: 'app-admin-file-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-admin-file-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, FormsModule, TranslatePipe, AdminFileEstimatorReportComponent, AdminFileBuilderBidsComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminFileEditComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

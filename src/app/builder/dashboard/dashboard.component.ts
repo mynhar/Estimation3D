@@ -47,12 +47,11 @@ interface ObraResumen {
 }
 
 @Component({
-  selector: 'app-builder-dashboard',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, NgbTooltipModule, TranslatePipe],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+    selector: 'app-builder-dashboard',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, NgbTooltipModule, TranslatePipe],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.css'
 })
 export class BuilderDashboardComponent implements OnInit {
   private auth               = inject(AuthSupabaseService);

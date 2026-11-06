@@ -20,12 +20,11 @@ import {
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-admin-to-estimate-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-to-estimate-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminToEstimateListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);

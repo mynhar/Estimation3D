@@ -54,12 +54,11 @@ let siguienteId = 0;
  * DOM no resuelve.
  */
 @Component({
-  selector: 'app-campos-faltantes',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './campos-faltantes.component.html',
-  styleUrl: './campos-faltantes.component.css',
+    selector: 'app-campos-faltantes',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './campos-faltantes.component.html',
+    styleUrl: './campos-faltantes.component.css'
 })
 export class CamposFaltantesComponent {
   /** Formulario(s) a revisar. Los formularios con `ngModel` sólo pasan `extra`. */

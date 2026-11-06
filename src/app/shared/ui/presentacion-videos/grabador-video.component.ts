@@ -90,17 +90,16 @@ function copiarEstilos(origen: Document, destino: Document): void {
  * Basado en «Capas» (mynhar.github.io/app-grabar-video-com).
  */
 @Component({
-  selector: 'app-grabador-video',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './grabador-video.component.html',
-  styleUrl: './grabador-video.component.css',
-  host: {
-    '(window:message)':      'alMensaje($event)',
-    '(window:beforeunload)': 'alSalir($event)',
-    '(window:resize)':       'colocarBurbuja()',
-  },
+    selector: 'app-grabador-video',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './grabador-video.component.html',
+    styleUrl: './grabador-video.component.css',
+    host: {
+        '(window:message)': 'alMensaje($event)',
+        '(window:beforeunload)': 'alSalir($event)',
+        '(window:resize)': 'colocarBurbuja()',
+    }
 })
 export class GrabadorVideoComponent {
   private readonly zone      = inject(NgZone);

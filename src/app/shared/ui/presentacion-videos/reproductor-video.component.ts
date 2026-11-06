@@ -20,12 +20,11 @@ import { extensionDeMime, formatoDuracion, formatoTamano } from './grabacion';
  * título editable, ni acciones, ni vistas.
  */
 @Component({
-  selector: 'app-reproductor-video',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './reproductor-video.component.html',
-  styleUrl: './reproductor-video.component.css',
+    selector: 'app-reproductor-video',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './reproductor-video.component.html',
+    styleUrl: './reproductor-video.component.css'
 })
 export class ReproductorVideoComponent {
   private readonly service   = inject(PerfilVideoService);

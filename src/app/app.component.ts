@@ -17,12 +17,11 @@ import { AppFooterComponent } from './components/app-footer/app-footer.component
 import { ClaudeIconComponent } from './shared/ui/claude-icon/claude-icon.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe, LangToggleComponent, AppFooterComponent, ClaudeIconComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+    selector: 'app-root',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe, LangToggleComponent, AppFooterComponent, ClaudeIconComponent],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent {
   private authService            = inject(AuthSupabaseService);

@@ -8,12 +8,11 @@ type FiltroTipo    = 'todos' | TipoEvento;
 type FiltroResuelto = 'todos' | 'pendiente' | 'resuelto';
 
 @Component({
-  selector: 'app-admin-ai-events-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrls: ['../../_shared/crud-list.css'],
+    selector: 'app-admin-ai-events-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrls: ['../../_shared/crud-list.css']
 })
 export class AdminAiEventsListComponent implements OnInit {
   private repo      = inject(AsistenteEventoRepository);

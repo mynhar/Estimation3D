@@ -21,12 +21,11 @@ export type AmbitoArchivado = 'expediente' | 'oferta' | 'contrato' | 'obra' | 'a
  * tarjetas de listas.
  */
 @Component({
-  selector: 'app-aviso-archivado',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, DatePipe],
-  templateUrl: './aviso-archivado.component.html',
-  styleUrl: './aviso-archivado.component.css',
+    selector: 'app-aviso-archivado',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, DatePipe],
+    templateUrl: './aviso-archivado.component.html',
+    styleUrl: './aviso-archivado.component.css'
 })
 export class AvisoArchivadoComponent {
   ambito   = input.required<AmbitoArchivado>();

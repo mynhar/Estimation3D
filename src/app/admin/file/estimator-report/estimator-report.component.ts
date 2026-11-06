@@ -23,12 +23,11 @@ import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../sha
  * los tours 3D, las fotos del sitio y los documentos técnicos.
  */
 @Component({
-  selector: 'app-admin-file-estimator-report',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent],
-  templateUrl: './estimator-report.component.html',
-  styleUrl: './estimator-report.component.css',
+    selector: 'app-admin-file-estimator-report',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent],
+    templateUrl: './estimator-report.component.html',
+    styleUrl: './estimator-report.component.css'
 })
 export class AdminFileEstimatorReportComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

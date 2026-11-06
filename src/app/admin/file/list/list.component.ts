@@ -9,12 +9,11 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-admin-file-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-file-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminFileListComponent {
   private expedienteService = inject(ExpedienteService);

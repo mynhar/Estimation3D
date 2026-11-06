@@ -24,12 +24,11 @@ interface GrupoFecha {
 const FASES = ['creado', 'estimado', 'adjudicado', 'contratado', 'obra', 'completado'] as const;
 
 @Component({
-  selector: 'app-client-history',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './history.component.html',
-  styleUrl: './history.component.css',
+    selector: 'app-client-history',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './history.component.html',
+    styleUrl: './history.component.css'
 })
 export class HistoryComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);

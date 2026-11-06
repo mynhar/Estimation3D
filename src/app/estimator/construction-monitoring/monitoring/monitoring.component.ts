@@ -17,12 +17,11 @@ import { ObraVM } from '../../../models';
 import { ObraCardComponent } from '../../../shared/construction-monitoring/obra-card.component';
 
 @Component({
-  selector: 'app-estimator-construction-monitoring',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, RouterLink, ObraCardComponent],
-  templateUrl: './monitoring.component.html',
-  styleUrl: './monitoring.component.css',
+    selector: 'app-estimator-construction-monitoring',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, RouterLink, ObraCardComponent],
+    templateUrl: './monitoring.component.html',
+    styleUrl: './monitoring.component.css'
 })
 export class EstimatorConstructionMonitoringComponent implements OnInit, OnDestroy {
   private auth            = inject(AuthSupabaseService);

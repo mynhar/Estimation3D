@@ -7,12 +7,11 @@ import { ToastService } from '../../../services/toast.service';
 import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-admin-service-type-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrl:    './create.component.css',
+    selector: 'app-admin-service-type-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrl: './create.component.css'
 })
 export class AdminServiceTypeCreateComponent {
   private fb        = inject(FormBuilder);

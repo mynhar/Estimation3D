@@ -12,12 +12,11 @@ import { ToastService } from '../../../services/toast.service';
 import { ContratoListItem, nombreServicio, serviciosParaContrato } from '../../../models';
 
 @Component({
-  selector: 'app-contract-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet, ExpedientePanelComponent, AvisoArchivadoComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-contract-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, NgTemplateOutlet, ExpedientePanelComponent, AvisoArchivadoComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class ContractListComponent implements OnInit {
   private auth            = inject(AuthSupabaseService);

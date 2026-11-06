@@ -15,12 +15,11 @@ const OBRA_ESTADOS = ['no_iniciado','en_progreso','pausado','completado'] as con
 interface FunnelItem { estado: string; count: number }
 
 @Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, PaginationComponent, RouterLink],
-  templateUrl: './dashboard.component.html',
-  styleUrl:    './dashboard.component.css',
+    selector: 'app-admin-dashboard',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, PaginationComponent, RouterLink],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
   private svc       = inject(AdminDashboardService);

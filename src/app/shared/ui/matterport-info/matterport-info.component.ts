@@ -28,12 +28,11 @@ interface ModeloVM {
  * la ficha en modo lectura.
  */
 @Component({
-  selector: 'app-matterport-info',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './matterport-info.component.html',
-  styleUrl:    './matterport-info.component.css',
+    selector: 'app-matterport-info',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './matterport-info.component.html',
+    styleUrl: './matterport-info.component.css'
 })
 export class MatterportInfoComponent {
   /** Fichas del expediente, una por tour. */

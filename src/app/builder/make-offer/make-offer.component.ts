@@ -21,12 +21,11 @@ import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared
 import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
-  selector: 'app-make-offer',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent, CamposFaltantesComponent, VideoExpedienteComponent],
-  templateUrl: './make-offer.component.html',
-  styleUrl: './make-offer.component.css',
+    selector: 'app-make-offer',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, DecimalPipe, MatterportInfoComponent, ServicioSelectorComponent, CamposFaltantesComponent, VideoExpedienteComponent],
+    templateUrl: './make-offer.component.html',
+    styleUrl: './make-offer.component.css'
 })
 export class MakeOfferComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

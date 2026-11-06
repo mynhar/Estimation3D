@@ -17,12 +17,11 @@ import {
 } from '../../../shared/util/busqueda';
 
 @Component({
-  selector: 'app-admin-offer-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-offer-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminOfferListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);

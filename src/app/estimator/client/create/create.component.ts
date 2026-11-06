@@ -14,12 +14,11 @@ import { especialidadesRequeridas } from '../../../shared/validators/especialida
 import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-estimator-client-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrl: './create.component.css',
+    selector: 'app-estimator-client-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrl: './create.component.css'
 })
 export class EstimatorClientCreateComponent implements OnInit {
   private fb        = inject(FormBuilder);

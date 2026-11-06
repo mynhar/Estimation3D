@@ -42,12 +42,11 @@ function normalizar(texto: string): string {
  * móvil siempre tarjetas), como en admin/file.
  */
 @Component({
-  selector: 'app-admin-archived-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-archived-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminArchivedListComponent implements OnInit {
   private expedienteService = inject(ExpedienteService);

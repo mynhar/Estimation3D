@@ -24,12 +24,11 @@ type Filtro = 'todos' | 'activos' | 'finalizados';
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-my-files',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent, ClaudeIconComponent],
-  templateUrl: './my-files.component.html',
-  styleUrl: './my-files.component.css',
+    selector: 'app-my-files',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent, ClaudeIconComponent],
+    templateUrl: './my-files.component.html',
+    styleUrl: './my-files.component.css'
 })
 export class MyFilesComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

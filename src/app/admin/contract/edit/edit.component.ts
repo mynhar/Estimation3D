@@ -21,12 +21,11 @@ import {
 type LangPdf = 'es' | 'en' | 'fr';
 
 @Component({
-  selector: 'app-admin-contract-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-admin-contract-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminContractEditComponent implements OnInit, OnDestroy {
   private route           = inject(ActivatedRoute);

@@ -23,12 +23,11 @@ interface PerfilDireccion {
 }
 
 @Component({
-  selector: 'app-file-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrl: './create.component.css',
+    selector: 'app-file-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrl: './create.component.css'
 })
 export class FileCreateComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

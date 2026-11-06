@@ -24,12 +24,11 @@ export type AccionReparto = 'rechazar' | 'reactivar';
  * en cada pantalla porque el PDF se arma con datos que sólo ella tiene.
  */
 @Component({
-  selector: 'app-oferta-reparto',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './oferta-reparto.component.html',
-  styleUrl: './oferta-reparto.component.css',
+    selector: 'app-oferta-reparto',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './oferta-reparto.component.html',
+    styleUrl: './oferta-reparto.component.css'
 })
 export class OfertaRepartoComponent {
   private ofertaService = inject(OfertaService);

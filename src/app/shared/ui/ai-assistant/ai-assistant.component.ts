@@ -44,12 +44,11 @@ type Burbuja = ChatMensaje | BurbujaError;
  * tagline, intro).
  */
 @Component({
-  selector: 'app-ai-assistant',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, FormsModule],
-  templateUrl: './ai-assistant.component.html',
-  styleUrl: './ai-assistant.component.css',
+    selector: 'app-ai-assistant',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, FormsModule],
+    templateUrl: './ai-assistant.component.html',
+    styleUrl: './ai-assistant.component.css'
 })
 export class AiAssistantComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);

@@ -13,12 +13,11 @@ import { PaginationComponent } from '../../shared/pagination/pagination.componen
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-available-files',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, PaginationComponent],
-  templateUrl: './available-files.component.html',
-  styleUrl: './available-files.component.css',
+    selector: 'app-available-files',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, PaginationComponent],
+    templateUrl: './available-files.component.html',
+    styleUrl: './available-files.component.css'
 })
 export class AvailableFilesComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

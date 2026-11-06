@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-pagination',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './pagination.component.html',
-  styleUrl: './pagination.component.css',
+    selector: 'app-pagination',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './pagination.component.html',
+    styleUrl: './pagination.component.css'
 })
 export class PaginationComponent {
   total    = input(0);

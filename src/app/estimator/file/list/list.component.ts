@@ -12,12 +12,11 @@ type Vista = 'tabla' | 'tarjetas';
 type Grupo = 'todos' | 'creados' | 'en_estimacion' | 'estimados';
 
 @Component({
-  selector: 'app-estimator-file-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, TranslatePipe],
-  templateUrl: './list.component.html',
-  styleUrl:    './list.component.css',
+    selector: 'app-estimator-file-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, RouterLink, TranslatePipe],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class EstimatorFileListComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

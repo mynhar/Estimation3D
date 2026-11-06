@@ -8,12 +8,11 @@ import { parseKeywords, joinKeywords } from '../keywords.util';
 import { CAMPOS_FALTANTES } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-admin-fichas-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrls: ['../../_shared/crud-form.css'],
+    selector: 'app-admin-fichas-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, TranslatePipe, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrls: ['../../_shared/crud-form.css']
 })
 export class AdminFichasEditComponent implements OnInit {
   private fb        = inject(FormBuilder);

@@ -79,12 +79,11 @@ function estadoPriority(e: ExpedienteCliente): number {
 }
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, ContratosExpedienteComponent, VideoFichaComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+    selector: 'app-dashboard',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, ContratosExpedienteComponent, VideoFichaComponent],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
   private matterportIframe = viewChild<ElementRef<HTMLIFrameElement>>('matterportIframe');

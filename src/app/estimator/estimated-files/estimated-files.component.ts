@@ -20,12 +20,11 @@ import { coincideBusqueda, direccionLinea1, direccionLinea2, direccionCompleta }
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-estimated-files',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, PaginationComponent],
-  templateUrl: './estimated-files.component.html',
-  styleUrl:    './estimated-files.component.css',
+    selector: 'app-estimated-files',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, PaginationComponent],
+    templateUrl: './estimated-files.component.html',
+    styleUrl: './estimated-files.component.css'
 })
 export class EstimatedFilesComponent implements OnInit {
   private auth               = inject(AuthSupabaseService);

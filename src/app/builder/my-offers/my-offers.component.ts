@@ -18,12 +18,11 @@ const ESTADO_ICON: Record<string, string> = {
 type VistaOfertas = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-my-offers',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, FormsModule, TranslatePipe, PaginationComponent],
-  templateUrl: './my-offers.component.html',
-  styleUrl: './my-offers.component.css',
+    selector: 'app-my-offers',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, FormsModule, TranslatePipe, PaginationComponent],
+    templateUrl: './my-offers.component.html',
+    styleUrl: './my-offers.component.css'
 })
 export class MyOffersComponent implements OnInit {
   private auth          = inject(AuthSupabaseService);

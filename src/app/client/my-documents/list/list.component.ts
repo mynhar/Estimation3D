@@ -26,12 +26,11 @@ import { ReproductorVideoComponent } from '../../../shared/ui/presentacion-video
 type FiltroTipo = 'todos' | TipoArchivo;
 
 @Component({
-  selector: 'app-client-my-documents-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet, ReproductorVideoComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-client-my-documents-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, NgTemplateOutlet, ReproductorVideoComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class MyDocumentsListComponent implements OnInit {
   private auth        = inject(AuthSupabaseService);

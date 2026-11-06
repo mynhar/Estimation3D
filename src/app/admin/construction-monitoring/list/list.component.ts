@@ -17,12 +17,11 @@ import {
 } from '../../../shared/util/busqueda';
 
 @Component({
-  selector: 'app-admin-construction-monitoring-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-construction-monitoring-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminConstructionMonitoringListComponent implements OnInit {
   private contratoService = inject(ContratoService);

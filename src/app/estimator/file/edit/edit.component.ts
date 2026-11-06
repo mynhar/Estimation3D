@@ -35,12 +35,11 @@ interface ClienteRow {
  * del perfil del cliente jamás se modifica aquí.
  */
 @Component({
-  selector: 'app-estimator-file-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, AvisoArchivadoComponent, ...CAMPOS_FALTANTES],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-estimator-file-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, AvisoArchivadoComponent, ...CAMPOS_FALTANTES],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class EstimatorFileEditComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

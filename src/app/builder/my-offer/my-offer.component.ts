@@ -21,12 +21,11 @@ const ESTADO_ICON: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-my-offer',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent, VideoExpedienteComponent, VideosExpedienteLecturaComponent],
-  templateUrl: './my-offer.component.html',
-  styleUrl: './my-offer.component.css',
+    selector: 'app-my-offer',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, AvisoArchivadoComponent, VideoExpedienteComponent, VideosExpedienteLecturaComponent],
+    templateUrl: './my-offer.component.html',
+    styleUrl: './my-offer.component.css'
 })
 export class MyOfferComponent implements OnInit {
   private ofertaService     = inject(OfertaService);

@@ -13,12 +13,11 @@ import { formatoDuracion, formatoRelativo } from './grabacion';
  * estrechas, como las de cada oferta.
  */
 @Component({
-  selector: 'app-video-ficha',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ReproductorVideoComponent],
-  templateUrl: './video-ficha.component.html',
-  styleUrls: ['./video-slot.css', './video-ficha.component.css'],
+    selector: 'app-video-ficha',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, ReproductorVideoComponent],
+    templateUrl: './video-ficha.component.html',
+    styleUrls: ['./video-slot.css', './video-ficha.component.css']
 })
 export class VideoFichaComponent {
   private readonly lang = inject(LangService);

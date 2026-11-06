@@ -46,13 +46,12 @@ const TEXTOS: Record<AccionArchivo, {
  * sitio ni suma un hueco más en contenedores con `gap`.
  */
 @Component({
-  selector: 'app-archivar-expediente',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './archivar-expediente.component.html',
-  styleUrl: './archivar-expediente.component.css',
-  host: { '[class.archivar--separado]': 'separado()' },
+    selector: 'app-archivar-expediente',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './archivar-expediente.component.html',
+    styleUrl: './archivar-expediente.component.css',
+    host: { '[class.archivar--separado]': 'separado()' }
 })
 export class ArchivarExpedienteComponent {
   private expedienteService = inject(ExpedienteService);

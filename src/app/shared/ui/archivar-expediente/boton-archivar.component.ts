@@ -9,12 +9,11 @@ import { ArchivarExpedienteComponent } from './archivar-expediente.component';
  * cuando el expediente ya está archivado.
  */
 @Component({
-  selector: 'app-boton-archivar',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './boton-archivar.component.html',
-  styleUrl: './boton-archivar.component.css',
+    selector: 'app-boton-archivar',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './boton-archivar.component.html',
+    styleUrl: './boton-archivar.component.css'
 })
 export class BotonArchivarComponent {
   control = input.required<ArchivarExpedienteComponent>();

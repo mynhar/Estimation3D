@@ -27,12 +27,11 @@ import {
 import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-admin-offer-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css',
+    selector: 'app-admin-offer-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, DecimalPipe, OfertaRepartoComponent, ServicioSelectorComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminOfferEditComponent implements OnInit {
   private sanitizer         = inject(DomSanitizer);

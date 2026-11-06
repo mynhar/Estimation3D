@@ -8,12 +8,11 @@ import { PaginationComponent } from '../../../shared/pagination/pagination.compo
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 
 @Component({
-  selector: 'app-admin-imprevistos-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrls: ['../../_shared/crud-list.css'],
+    selector: 'app-admin-imprevistos-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrls: ['../../_shared/crud-list.css']
 })
 export class AdminImprevistosListComponent implements OnInit {
   private repo      = inject(ImprevistoCatalogoRepository);

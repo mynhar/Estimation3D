@@ -16,12 +16,11 @@ import {
 type VistaExpedientes = 'tabla' | 'tarjetas';
 
 @Component({
-  selector: 'app-offers-received',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, NgTemplateOutlet],
-  templateUrl: './offers-received.component.html',
-  styleUrl: './offers-received.component.css',
+    selector: 'app-offers-received',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, NgTemplateOutlet],
+    templateUrl: './offers-received.component.html',
+    styleUrl: './offers-received.component.css'
 })
 export class OffersReceivedComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

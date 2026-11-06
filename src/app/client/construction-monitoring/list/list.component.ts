@@ -21,12 +21,11 @@ import { ExpedientePanelComponent } from '../../../shared/ui/expediente-panel/ex
 const ESTADOS_OBRA = ['firmado', 'en_ejecucion', 'completado'];
 
 @Component({
-  selector: 'app-client-construction-monitoring-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ObraCardComponent, ExpedientePanelComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-client-construction-monitoring-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, ObraCardComponent, ExpedientePanelComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class ClientConstructionMonitoringListComponent implements OnInit, OnDestroy {
   private auth            = inject(AuthSupabaseService);

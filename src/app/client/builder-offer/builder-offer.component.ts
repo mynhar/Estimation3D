@@ -28,12 +28,11 @@ import { AvisoArchivadoComponent } from '../../shared/ui/aviso-archivado/aviso-a
 import { VideoFichaComponent } from '../../shared/ui/presentacion-videos/video-ficha.component';
 
 @Component({
-  selector: 'app-builder-offer',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, AvisoArchivadoComponent, VideoFichaComponent],
-  templateUrl: './builder-offer.component.html',
-  styleUrl: './builder-offer.component.css',
+    selector: 'app-builder-offer',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, AvisoArchivadoComponent, VideoFichaComponent],
+    templateUrl: './builder-offer.component.html',
+    styleUrl: './builder-offer.component.css'
 })
 export class BuilderOfferComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

@@ -29,12 +29,11 @@ type Tarea = { tipo: 'subiendo'; titulo: string } | { tipo: 'guardando' } | { ti
  * se ve el video que hay, sin acciones.
  */
 @Component({
-  selector: 'app-video-expediente',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, GrabadorVideoComponent, ReproductorVideoComponent],
-  templateUrl: './video-expediente.component.html',
-  styleUrls: ['./video-slot.css', './video-expediente.component.css'],
+    selector: 'app-video-expediente',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, GrabadorVideoComponent, ReproductorVideoComponent],
+    templateUrl: './video-expediente.component.html',
+    styleUrls: ['./video-slot.css', './video-expediente.component.css']
 })
 export class VideoExpedienteComponent implements OnInit {
   private readonly service   = inject(PerfilVideoService);

@@ -15,12 +15,11 @@ const ROL_BADGE_CLASS: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-admin-user-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-user-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminUserListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);

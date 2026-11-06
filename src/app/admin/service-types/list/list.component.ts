@@ -19,12 +19,11 @@ interface Servicio {
 type FiltroActivo = 'todos' | 'activo' | 'inactivo';
 
 @Component({
-  selector: 'app-admin-service-type-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl:    './list.component.css',
+    selector: 'app-admin-service-type-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminServiceTypeListComponent implements OnInit {
   private auth      = inject(AuthSupabaseService);

@@ -20,12 +20,11 @@ import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../sha
  * seleccionada.
  */
 @Component({
-  selector: 'app-admin-file-builder-bids',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, OfertaRepartoComponent, CamposFaltantesComponent],
-  templateUrl: './builder-bids.component.html',
-  styleUrl: './builder-bids.component.css',
+    selector: 'app-admin-file-builder-bids',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, OfertaRepartoComponent, CamposFaltantesComponent],
+    templateUrl: './builder-bids.component.html',
+    styleUrl: './builder-bids.component.css'
 })
 export class AdminFileBuilderBidsComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

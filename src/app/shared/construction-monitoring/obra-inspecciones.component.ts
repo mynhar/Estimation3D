@@ -20,12 +20,11 @@ import { Inspeccion, InspeccionInput } from '../../models/seguimiento.model';
 interface CalDia { num: number; tipo: 'vacio' | 'normal' | 'trabajado' | 'hoy' | 'inspeccion'; }
 
 @Component({
-  selector: 'app-obra-inspecciones',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './obra-inspecciones.component.html',
-  styleUrl: './obra-inspecciones.component.css',
+    selector: 'app-obra-inspecciones',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './obra-inspecciones.component.html',
+    styleUrl: './obra-inspecciones.component.css'
 })
 export class ObraInspeccionesComponent implements OnInit, OnDestroy {
   // Id del seguimiento (obra) cuyas inspecciones gestiona este panel.

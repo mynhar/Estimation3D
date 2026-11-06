@@ -23,12 +23,11 @@ import { FILE_LIMITS, validateFile } from '../../../shared/validators/file.valid
 import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../../shared/ui/campos-faltantes/campos-faltantes.component';
 
 @Component({
-  selector: 'app-admin-to-estimate-edit',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
-  templateUrl: './edit.component.html',
-  styleUrl:    './edit.component.css',
+    selector: 'app-admin-to-estimate-edit',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, MatterportInfoComponent, AvisoArchivadoComponent, ArchivarExpedienteComponent, BotonArchivarComponent, CamposFaltantesComponent],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class AdminToEstimateEditComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

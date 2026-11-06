@@ -20,12 +20,11 @@ import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared
 import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
-  selector: 'app-file-under-estimation',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent, VideoExpedienteComponent],
-  templateUrl: './file-under-estimation.component.html',
-  styleUrl:    './file-under-estimation.component.css',
+    selector: 'app-file-under-estimation',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, MatterportInfoComponent, CamposFaltantesComponent, VideoExpedienteComponent],
+    templateUrl: './file-under-estimation.component.html',
+    styleUrl: './file-under-estimation.component.css'
 })
 export class FileUnderEstimationComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

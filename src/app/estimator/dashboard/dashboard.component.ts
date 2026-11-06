@@ -51,12 +51,11 @@ interface ObraResumen {
 }
 
 @Component({
-  selector: 'app-estimator-dashboard',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+    selector: 'app-estimator-dashboard',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.css'
 })
 export class EstimatorDashboardComponent implements OnInit {
   private auth               = inject(AuthSupabaseService);

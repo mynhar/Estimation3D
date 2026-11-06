@@ -27,12 +27,11 @@ interface ClienteRow {
 }
 
 @Component({
-  selector: 'app-estimator-file-create',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
-  templateUrl: './create.component.html',
-  styleUrl: './create.component.css',
+    selector: 'app-estimator-file-create',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, RouterLink, TranslatePipe, ServicioSelectorComponent, ...CAMPOS_FALTANTES],
+    templateUrl: './create.component.html',
+    styleUrl: './create.component.css'
 })
 export class EstimatorFileCreateComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

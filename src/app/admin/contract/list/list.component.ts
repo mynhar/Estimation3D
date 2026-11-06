@@ -17,12 +17,11 @@ import {
 } from '../../../shared/util/busqueda';
 
 @Component({
-  selector: 'app-admin-contract-list',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslatePipe, PaginationComponent],
-  templateUrl: './list.component.html',
-  styleUrl: './list.component.css',
+    selector: 'app-admin-contract-list',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [RouterLink, TranslatePipe, PaginationComponent],
+    templateUrl: './list.component.html',
+    styleUrl: './list.component.css'
 })
 export class AdminContractListComponent implements OnInit {
   private contratoService = inject(ContratoService);

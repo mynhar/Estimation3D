@@ -14,12 +14,11 @@ import { VideoFichaComponent } from './video-ficha.component';
  * ésos van en `app-video-expediente`.
  */
 @Component({
-  selector: 'app-videos-expediente-lectura',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, VideoFichaComponent],
-  templateUrl: './videos-expediente-lectura.component.html',
-  styleUrls: ['./video-slot.css', './videos-expediente-lectura.component.css'],
+    selector: 'app-videos-expediente-lectura',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe, VideoFichaComponent],
+    templateUrl: './videos-expediente-lectura.component.html',
+    styleUrls: ['./video-slot.css', './videos-expediente-lectura.component.css']
 })
 export class VideosExpedienteLecturaComponent implements OnInit {
   private readonly service = inject(PerfilVideoService);

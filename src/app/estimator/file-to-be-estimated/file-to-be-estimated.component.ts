@@ -17,12 +17,11 @@ import { CampoExtra, CamposFaltantesComponent, listaEstable } from '../../shared
 import { VideoExpedienteComponent } from '../../shared/ui/presentacion-videos/video-expediente.component';
 
 @Component({
-  selector: 'app-file-to-be-estimated',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, VideoExpedienteComponent],
-  templateUrl: './file-to-be-estimated.component.html',
-  styleUrl:    './file-to-be-estimated.component.css',
+    selector: 'app-file-to-be-estimated',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, TranslatePipe, CamposFaltantesComponent, VideoExpedienteComponent],
+    templateUrl: './file-to-be-estimated.component.html',
+    styleUrl: './file-to-be-estimated.component.css'
 })
 export class FileToBeEstimatedComponent implements OnInit {
   private auth              = inject(AuthSupabaseService);

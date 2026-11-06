@@ -14,12 +14,11 @@ let siguienteId = 0;
  * así decide qué expediente arranca abierto y lo conserva al recargar datos.
  */
 @Component({
-  selector: 'app-expediente-panel',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
-  templateUrl: './expediente-panel.component.html',
-  styleUrl: './expediente-panel.component.css',
+    selector: 'app-expediente-panel',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [TranslatePipe],
+    templateUrl: './expediente-panel.component.html',
+    styleUrl: './expediente-panel.component.css'
 })
 export class ExpedientePanelComponent {
   numero  = input.required<string>();

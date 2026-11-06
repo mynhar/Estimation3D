@@ -18,17 +18,16 @@ import { JOURNAL_CARDS, JOURNAL_CATS, JournalCat } from './journal.data';
  * visibles y el lector de pantalla no anuncia las ocultas.
  */
 @Component({
-  selector: 'app-journal',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.Emulated,
-  imports: [RouterLink, TranslatePipe, RevealDirective, SweepDirective],
-  templateUrl: './journal.component.html',
-  styleUrls: ['../styles/site-chrome.css', './journal.component.css'],
-  host: {
-    'class': 'e3-public-page',
-    '[attr.data-theme]': 'theme()',
-  },
+    selector: 'app-journal',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.Emulated,
+    imports: [RouterLink, TranslatePipe, RevealDirective, SweepDirective],
+    templateUrl: './journal.component.html',
+    styleUrls: ['../styles/site-chrome.css', './journal.component.css'],
+    host: {
+        'class': 'e3-public-page',
+        '[attr.data-theme]': 'theme()',
+    }
 })
 export class JournalComponent extends SitePageBase {
   readonly year = new Date().getFullYear();
