@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { createClient, SupabaseClient, User, RealtimeChannel } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { Subject, firstValueFrom, filter, take, timeout, catchError, of } from 'rxjs';
+import { Subject, firstValueFrom, filter, map, take, timeout, catchError, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Database, RolUsuario, TablesUpdate } from '../types/supabase';
+
+const AUTH_TIMEOUT_MS = 8_000;
 
 export type PerfilCache = {
   nombre:     string;
@@ -35,7 +37,11 @@ export class AuthSupabaseService {
   private perfilEditadoSubject     = new Subject<{ nombre: string; apellido: string }>();
   private avatarActualizadoSubject = new Subject<string>();
 
-  // Observables públicos derivados de signals (compatibilidad con guards y componentes)
+  // Observables públicos derivados de signals (para componentes con toSignal).
+  // OJO: toObservable() emite desde un effect, que corre en la siguiente
+  // detección de cambios. Justo después de un cambio (signOut, signIn) estos
+  // observables todavía repiten el valor anterior. Para decidir algo en el
+  // momento (guards, redirecciones) usar esperarUsuario() / esperarRol().
   user$        = toObservable(this.userSig);
   initialized$ = toObservable(this.initializedSig);
   rol$         = toObservable(this.rolSig);
@@ -265,17 +271,43 @@ export class AuthSupabaseService {
   }
 
   // ----------------------------------------------------------
-  // Ruta de inicio según rol del usuario
+  // Estado actual de auth, leído de los signals (no de user$/rol$, que
+  // pueden ir un ciclo por detrás). Los observables solo sirven de aviso
+  // de cambio mientras se espera; el valor siempre sale del signal.
+  // Si no se resuelve en AUTH_TIMEOUT_MS se asume sin sesión / sin rol.
   // ----------------------------------------------------------
-  async getHomeRoute(): Promise<string> {
-    const rol = await firstValueFrom(
-      this.rol$.pipe(
-        filter((r): r is RolUsuario | null => r !== undefined),
+  async esperarUsuario(): Promise<User | null> {
+    if (this.initializedSig()) return this.userSig();
+    return firstValueFrom(
+      this.initialized$.pipe(
+        filter(() => this.initializedSig()),
         take(1),
-        timeout(8_000),
+        map(() => this.userSig()),
+        timeout(AUTH_TIMEOUT_MS),
         catchError(() => of(null)),
       )
     );
+  }
+
+  async esperarRol(): Promise<RolUsuario | null> {
+    const actual = this.rolSig();
+    if (actual !== undefined) return actual;
+    return firstValueFrom(
+      this.rol$.pipe(
+        map(() => this.rolSig()),
+        filter((r): r is RolUsuario | null => r !== undefined),
+        take(1),
+        timeout(AUTH_TIMEOUT_MS),
+        catchError(() => of(null)),
+      )
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Ruta de inicio según rol del usuario
+  // ----------------------------------------------------------
+  async getHomeRoute(): Promise<string> {
+    const rol = await this.esperarRol();
     if (rol === 'administrador') return '/admin/dashboard';
     if (rol === 'constructor')   return '/builder/dashboard';
     if (rol === 'estimador')     return '/estimator/dashboard';
@@ -318,7 +350,10 @@ export class AuthSupabaseService {
   // Cerrar sesión
   // ----------------------------------------------------------
   async signOut(): Promise<void> {
-    await this.supabase.auth.signOut();
+    // signOut() no lanza: si el servidor responde con error (red, 5xx) la
+    // sesión local NO se borra y guestGuard devolverá al usuario a su home.
+    const { error } = await this.supabase.auth.signOut();
+    if (error) console.error('[Auth] signOut error:', error.message);
     this.router.navigate(['/login']);
   }
 
